@@ -5,6 +5,7 @@ import org.folio.fqm.lib.FQM;
 import org.folio.fqm.lib.service.FqlValidationService;
 import org.folio.fqm.lib.service.FqmMetaDataService;
 import org.folio.fqm.lib.service.QueryProcessorService;
+import org.folio.fqm.lib.service.QueryResultsSorterService;
 import org.folio.fqm.lib.service.ResultSetService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -26,13 +27,18 @@ public class BeanConfigurations {
   }
 
   @Bean
+  public QueryResultsSorterService queryResultsSorterService(@Qualifier("readerDataSource") DataSource dataSource) {
+    return FQM.queryResultsSorterService(dataSource);
+  }
+
+  @Bean
   public ResultSetService getResultSetService(@Qualifier("readerDataSource") DataSource dataSource) {
     return FQM.resultSetService(dataSource);
   }
 
   @Bean
-  public FqlValidationService fqlValidationService(@Qualifier("readerDataSource") DataSource dataSource) {
-    return FQM.fqlValidationService(dataSource);
+  public FqlValidationService fqlValidationService() {
+    return FQM.fqlValidationService();
   }
 
   @Bean

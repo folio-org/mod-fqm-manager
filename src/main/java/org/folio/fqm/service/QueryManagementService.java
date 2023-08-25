@@ -10,8 +10,11 @@ import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
+import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
 import org.folio.fqm.lib.service.FqlValidationService;
+import org.folio.fqm.lib.service.FqmMetaDataService;
 import org.folio.fqm.lib.service.QueryProcessorService;
+import org.folio.fqm.lib.service.QueryResultsSorterService;
 import org.folio.fqm.lib.service.ResultSetService;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
@@ -19,6 +22,7 @@ import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,10 +46,12 @@ import java.util.UUID;
 public class QueryManagementService {
 
   private final FolioExecutionContext executionContext;
+  private final FqmMetaDataService fqmMetaDataService;
   private final QueryRepository queryRepository;
   private final QueryResultsRepository queryResultsRepository;
   private final QueryExecutionService queryExecutionService;
   private final QueryProcessorService queryProcessorService;
+  private final QueryResultsSorterService queryResultsSorterService;
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
   private final FqlService fqlService;
@@ -79,11 +85,10 @@ public class QueryManagementService {
    * @param afterId      ID of the element to begin retrieving results after (e.g. if the id of 100th element
    *                     is provided, the first element retrieved in the result set will be the 101st element)
    * @param limit        Maximum number of results to retrieves
-   *
-   * @return             Page containing the results of the query
+   * @return Page containing the results of the query
    */
   public ResultsetPage runFqlQuery(String query, UUID entityTypeId, List<String> fields,
-                                                   UUID afterId, Integer limit) {
+                                   UUID afterId, Integer limit) {
     validateQuery(entityTypeId, query);
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
@@ -151,10 +156,26 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    Map<String, String> errorMap =  fqlValidationService.validateFql(executionContext.getTenantId(), entityTypeId, fqlQuery);
+    EntityType entityType = fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    Map<String, String> errorMap = fqlValidationService.validateFql(entityType ,fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);
     }
+  }
+
+  public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
+    Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
+    UUID entityTypeId = query.entityTypeId();
+    EntityType entityType = fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    String derivedTable = fqmMetaDataService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
+    return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId,
+      derivedTable, entityType, offset, limit);
+  }
+
+  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<UUID> ids) {
+    return resultSetService.getResultSet(executionContext.getTenantId(), entityTypeId, fields, ids);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {

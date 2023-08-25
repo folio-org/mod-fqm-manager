@@ -57,6 +57,16 @@
           "permissionsRequired": ["fqm.query.async.results.get"]
         },
         {
+          "methods": ["GET"],
+          "pathPattern": "/query/{query-id}/sortedIds",
+          "permissionsRequired": ["fqm.query.async.results.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/query/contents",
+          "permissionsRequired": ["fqm.query.async.results.get"]
+        },
+        {
           "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"]

@@ -1,0 +1,210 @@
+{
+  "id": "@artifactId@-@version@",
+  "name": "The module descriptor for mod-fqm-manager.",
+  "provides": [
+    {
+      "id": "mod-fqm-manager",
+      "version": "1.0",
+      "handlers": []
+    },
+    {
+      "id": "_tenant",
+      "version": "1.2",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/_/tenant"
+        }, {
+          "methods": ["DELETE"],
+          "pathPattern": "/_/tenant"
+        }
+      ]
+    },
+    {
+      "id": "entity_types",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/entity-types/{entity-type-id}",
+          "permissionsRequired": ["fqm.entityTypes.item.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/entity-types",
+          "permissionsRequired": ["fqm.entityTypes.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
+          "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"]
+        }
+      ]
+    },
+    {
+      "id": "query",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/query",
+          "permissionsRequired": ["fqm.query.sync.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/query/{query-id}",
+          "permissionsRequired": ["fqm.query.async.results.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/query",
+          "permissionsRequired": ["fqm.query.async.post"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/query/purge",
+          "permissionsRequired": ["fqm.query.purge"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/query/{query-id}",
+          "permissionsRequired": ["fqm.query.async.delete"]
+        }
+      ]
+    },
+    {
+      "id": "_timer",
+      "version": "1.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [ "POST" ],
+          "pathPattern": "/query/purge",
+          "unit": "hour",
+          "delay": "1"
+        }
+      ]
+    }
+  ],
+  "permissionSets" : [
+    {
+      "permissionName": "fqm.query.purge",
+      "displayName": "FQM - purge old queries",
+      "description": "Purge old queries",
+      "visible": true
+    },
+    {
+      "permissionName": "fqm.entityTypes.collection.get",
+      "displayName": "FQM - Get entity types collection",
+      "description": "Get entity types collection",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.item.get",
+      "displayName": "FQM - Get details of a single entity type",
+      "description": "Get details of a single entity type",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.item.columnValues.get",
+      "displayName": "FQM - Get possible values of a column",
+      "description": "Get possible values of an entity type column",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.post",
+      "displayName": "FQM - Submit query asynchronously",
+      "description": "Submit a query asynchronously",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.results.get",
+      "displayName": "FQM - Retrieve results of a submitted query",
+      "description": "Retrieve results of a submitted query",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.delete",
+      "displayName": "FQM - Delete a submitted query",
+      "description": "Delete an asynchronously submitted query",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.sync.get",
+      "displayName": "FQM - Run query synchronously",
+      "description": "Run a query synchronously and get results",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.all",
+      "displayName": "FQM - All permissions",
+      "description": "All permissions required for executing queries in the FQM system.",
+      "subPermissions": [
+        "fqm.entityTypes.collection.get",
+        "fqm.entityTypes.item.get",
+        "fqm.entityTypes.item.columnValues.get",
+        "fqm.query.async.post",
+        "fqm.query.async.results.get",
+        "fqm.query.async.delete",
+        "fqm.query.sync.get"
+      ],
+      "visible": true
+    }
+  ],
+  "requires": [],
+  "launchDescriptor": {
+    "dockerImage": "@artifactId@:@version@",
+    "dockerPull": false,
+    "dockerArgs": {
+      "HostConfig": {
+        "Memory": 357913941,
+        "PortBindings": { "8081/tcp": [ { "HostPort": "%p" } ] }
+      }
+    },
+    "env": [
+      { "name": "JAVA_OPTIONS",
+        "value": "-XX:MaxRAMPercentage=66.0"
+      },
+      { "name": "server.port",
+        "value": "8081"
+      },
+      { "name": "DB_HOST",
+        "value": "postgres"
+      },
+      { "name": "DB_PORT",
+        "value": "5432"
+      },
+      { "name": "DB_HOST_READER",
+        "value": "postgres"
+      },
+      { "name": "DB_PORT_READER",
+        "value": "5432"
+      },
+      { "name": "DB_USERNAME",
+        "value": "folio_admin"
+      },
+      { "name": "DB_PASSWORD",
+        "value": "folio_admin"
+      },
+      { "name": "DB_DATABASE",
+        "value": "okapi_modules"
+      },
+      { "name": "DB_QUERYTIMEOUT",
+        "value": "60000"
+      },
+      { "name": "DB_CHARSET",
+        "value": "UTF-8"
+      },
+      { "name": "DB_MAXPOOLSIZE",
+        "value": "5"
+      },
+      { "name": "QUERY_RETENTION_DURATION",
+        "value": "3h"
+      },
+      { "name": "task.execution.pool.max-size",
+        "value": "10"
+      }
+    ]
+  }
+}

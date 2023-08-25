@@ -1,0 +1,88 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <changeSet id="create-view-circulation-loan-status" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "loan" schemaName="${tenant_id}_mod_circulation_storage"/>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-circulation-loan-status.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="create-view-inventory-item-status" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "item" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-inventory-item-status.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="create-view-loan-details" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+      <viewExists viewName="src_inventory_material_type"/>
+      <viewExists viewName="src_inventory_location"/>
+      <viewExists viewName="src_inventory_service_point"/>
+      <viewExists viewName="src_inventory_loclibrary"/>
+      <viewExists viewName="src_inventory_call_number_type"/>
+      <viewExists viewName="src_circulation_loan"/>
+      <viewExists viewName="src_circulation_loan_policy"/>
+      <viewExists viewName="src_users_groups"/>
+      <viewExists viewName="src_users_users"/>
+      <sqlCheck expectedResult="2">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname IN ('drv_circulation_loan_status', 'drv_inventory_item_status');
+      </sqlCheck>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-loan-details.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="create-view-item-details" author="bsharp@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+      <viewExists viewName="src_inventory_material_type"/>
+      <viewExists viewName="src_inventory_location"/>
+      <viewExists viewName="src_inventory_service_point"/>
+      <viewExists viewName="src_inventory_loclibrary"/>
+      <viewExists viewName="src_inventory_call_number_type"/>
+      <viewExists viewName="src_users_groups"/>
+      <viewExists viewName="src_users_users"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
+      </sqlCheck>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-item-details.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="create-view-item-callnumber_location" author="pkjacob@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+      <viewExists viewName="src_inventory_material_type"/>
+      <viewExists viewName="src_inventory_location"/>
+      <viewExists viewName="src_inventory_service_point"/>
+      <viewExists viewName="src_inventory_loclibrary"/>
+      <viewExists viewName="src_inventory_call_number_type"/>
+      <viewExists viewName="src_users_groups"/>
+      <viewExists viewName="src_users_users"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
+      </sqlCheck>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-item-callnumber-location.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="create-view-user-details" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_users_groups"/>
+      <viewExists viewName="src_users_users"/>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-user-details.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+</databaseChangeLog>

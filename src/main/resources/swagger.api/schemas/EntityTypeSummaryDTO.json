@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Entity Type Summary DTO",
+  "type": "object",
+  "properties": {
+    "id" : {
+      "description": "Entity type id",
+      "type": "string",
+      "format": "UUID"
+    },
+    "label" : {
+      "description": "Entity type label",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "label"
+  ]
+}

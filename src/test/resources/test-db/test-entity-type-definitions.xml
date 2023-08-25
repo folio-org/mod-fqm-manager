@@ -1,0 +1,16 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <changeSet id="entity_type-01-definition.sql" author="pkjacob@ebsco.com">
+    <sqlFile path="test-db/scripts/entity_type-01-definition.sql" relativeToChangelogFile="false"/>
+  </changeSet>
+  <changeSet id="entity_type-02-definition.sql" author="pkjacob@ebsco.com">
+    <sqlFile path="test-db/scripts/entity_type-02-definition.sql" relativeToChangelogFile="false"/>
+  </changeSet>
+  <changeSet id="private-entity_type-03-definition.sql.sql" author="pkjacob@ebsco.com">
+    <sqlFile path="test-db/scripts/private-entity_type-03-definition.sql.sql" relativeToChangelogFile="false"/>
+  </changeSet>
+</databaseChangeLog>

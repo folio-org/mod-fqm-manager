@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: mod-fqm-manager API
+  version: v1
+  description: mod-fqm-manager API
+
+servers:
+  - url: https://falcon.ci.folio.org/fqm/
+
+paths:
+  /entity-types:
+    get:
+      operationId: getEntityTypeSummary
+      tags:
+        - entityTypes
+      description: Get names for a list of entity type ids.
+      parameters:
+        - $ref: '#/components/parameters/entity-type-ids'
+      responses:
+        '200':
+          description: 'Entity type summaries'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entityTypeSummaries'
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
+  /query/purge:
+    post:
+      operationId: deleteOldQueries
+      tags:
+        - purgeQuery
+      description: Deletes all queries that are older than the configured duration.
+      responses:
+        '200':
+          description: 'IDs of deleted queries.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/purgedQueries'
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
+
+
+components:
+  parameters:
+    entity-type-id:
+      name: entity-type-id
+      in: path
+      required: true
+      description: Name of the derived table
+      schema:
+        type: string
+        format: UUID
+    entity-type-ids:
+      name: ids
+      in: query
+      required: false
+      description: List of entity type ids
+      schema:
+        type: array
+        items:
+          type: string
+          format: UUID
+  schemas:
+    errorResponse:
+      $ref: schemas/errors.json
+    contents:
+      type: array
+      items:
+        $ref: '#/components/schemas/contentItem'
+    contentItem:
+      type: object
+      additionalProperties:
+        type: object
+    entityTypeSummaries:
+      type: array
+      items:
+        $ref: '#/components/schemas/entityTypeSummary'
+    entityTypeSummary:
+      $ref: schemas/EntityTypeSummaryDTO.json
+    purgedQueries:
+      $ref: schemas/PurgedQueries.json
+
+  responses:
+    badRequestResponse:
+      description: Validation errors
+      content:
+        application/json:
+          example: examples/validationErrorResponse.sample
+          schema:
+            $ref: "#/components/schemas/errorResponse"
+    internalServerErrorResponse:
+      description: When unhandled exception occurred during code execution, e.g. NullPointerException
+      content:
+        application/json:
+          example: examples/unknownError.sample
+          schema:
+            $ref: "#/components/schemas/errorResponse"

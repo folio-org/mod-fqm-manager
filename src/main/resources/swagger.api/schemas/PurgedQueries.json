@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IDs of deleted queries",
+  "description": "IDs of deleted queries",
+  "type": "object",
+  "properties": {
+    "deletedQueryIds": {
+      "description": "Ids of the deleted queries",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "UUID"
+      }
+    }
+  },
+  "required": [
+    "deletedQueryIds"
+  ]
+}

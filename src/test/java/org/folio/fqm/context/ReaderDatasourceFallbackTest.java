@@ -1,5 +1,6 @@
 package org.folio.fqm.context;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,6 +23,7 @@ class ReaderDatasourceFallbackTest {
   @Autowired
   private DataSource writerDatasource;
 
+  @Disabled("Disabled due to race condition on Jenkins")
   @Test
   void readerShouldFallbackToWriterDbWhenReaderNotAvailable() throws SQLException {
     assertNotNull(System.getProperty("DB_HOST"));

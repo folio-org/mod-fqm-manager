@@ -12,8 +12,7 @@
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
   <version>1.0.0-SNAPSHOT</version>
-  <description>FOLIO Query Machine manager.
-  </description>
+  <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
   <licenses>

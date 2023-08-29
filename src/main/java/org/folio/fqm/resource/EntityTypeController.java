@@ -25,8 +25,8 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   private final FolioExecutionContext folioExecutionContext;
 
   @Override
-  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId) {
-    return fqmMetaDataService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), entityTypeId)
+  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId, String search) {
+    return fqmMetaDataService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), entityTypeId, search)
       .map(ResponseEntity::ok)
       .orElseGet(() -> ResponseEntity.notFound().build());
   }

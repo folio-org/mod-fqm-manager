@@ -141,7 +141,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"stringType"
                      },
-                     "labelAlias": "Item location name",
+                     "labelAlias": "Item effective location name",
                      "visibleByDefault": true,
                      "idColumnName": "item_effective_location_id",
                      "source": {
@@ -162,7 +162,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item holdings record ID",
+                     "labelAlias": "Holdings record ID",
                      "visibleByDefault": false
                 },
                 {
@@ -199,7 +199,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item call number typeId",
+                     "labelAlias": "Item call number typeID",
                      "visibleByDefault": false
                 },
                 {
@@ -255,6 +255,27 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "entityTypeId": "a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d",
                         "columnName": "item_status"
                      }
+                },
+                {
+                     "name": "item_temporary_location_id",
+                     "dataType":{
+                       "dataType":"rangedUUIDType"
+                     },
+                     "labelAlias": "Item temporary ID",
+                     "visibleByDefault": false
+                },
+                {
+                     "name": "item_temporary_location_name",
+                     "dataType":{
+                       "dataType":"stringType"
+                     },
+                     "labelAlias": "Item temporary location name",
+                     "visibleByDefault": false,
+                     "idColumnName": "item_temporary_location_id",
+                      "source": {
+                        "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b",
+                        "columnName": "location_name"
+                      }
                 },
                 {
                      "name": "item_updated_date",

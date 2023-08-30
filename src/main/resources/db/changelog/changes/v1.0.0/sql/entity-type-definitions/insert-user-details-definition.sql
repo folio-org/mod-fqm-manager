@@ -46,6 +46,14 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                 {
+                      "name": "enrollmentDate",
+                       "dataType":{
+                         "dataType":"dateType"
+                       },
+                       "labelAlias": "User enrollment date",
+                       "visibleByDefault": false
+                },
+                {
                       "name": "expiration_date",
                       "dataType":{
                         "dataType":"dateType"

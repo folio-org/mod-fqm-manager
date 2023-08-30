@@ -50,7 +50,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item holdings record ID",
+                     "labelAlias": "Holdings record ID",
                      "visibleByDefault": false
                  },
                  {
@@ -165,7 +165,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Loan policy id",
+                     "labelAlias": "Loan policy ID",
                      "visibleByDefault": false
                  },
                  {

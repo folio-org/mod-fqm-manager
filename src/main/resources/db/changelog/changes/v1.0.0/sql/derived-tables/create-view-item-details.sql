@@ -9,7 +9,7 @@ CREATE OR REPLACE VIEW drv_item_details
     src_inventory_item.jsonb ->> 'barcode'::text AS item_barcode,
     src_inventory_item.jsonb ->> 'copyNumber'::text AS item_copy_number,
     (src_inventory_item.jsonb -> 'metadata'::text) ->> 'createdDate'::text AS item_created_date,
-    (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text AS item_effective_call_number,
+    concat((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text ,', ', (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text ,', ',src_inventory_item.jsonb ->> 'copyNumber'::text) AS item_effective_call_number,
     call_number_type_ref_data.jsonb ->> 'name'::text AS item_effective_call_number_type_name,
     (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text AS item_effective_call_number_typeid,
     loclib_ref_data.jsonb ->> 'code'::text AS item_effective_library_code,
@@ -26,6 +26,8 @@ CREATE OR REPLACE VIEW drv_item_details
     src_inventory_item.materialtypeid AS item_material_type_id,
     src_inventory_item.permanentlocationid AS item_permanent_location_id,
     permanent_location_ref_data.jsonb ->> 'name'::text AS item_permanent_location_name,
+    src_inventory_item.temporarylocationid AS item_temporary_location_id,
+    temporary_location_ref_data.jsonb ->> 'name'::text AS item_temporary_location_name,
     "left"(lower(f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600) AS item_status,
     (src_inventory_item.jsonb -> 'metadata'::text) ->> 'updatedDate'::text AS item_updated_date
    FROM src_inventory_item
@@ -35,5 +37,6 @@ CREATE OR REPLACE VIEW drv_item_details
      LEFT JOIN src_inventory_loclibrary loclib_ref_data ON loclib_ref_data.id = effective_location_ref_data.libraryid
      LEFT JOIN src_inventory_location permanent_location_ref_data ON permanent_location_ref_data.id = src_inventory_item.permanentlocationid
      LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = src_inventory_item.materialtypeid
+     LEFT JOIN src_inventory_location temporary_location_ref_data ON temporary_location_ref_data.id = src_inventory_item.temporarylocationid
      JOIN src_inventory_holdings_record hrim ON src_inventory_item.holdingsrecordid = hrim.id
      JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id;

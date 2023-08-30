@@ -92,9 +92,8 @@ class QueryRepositoryTest {
     Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null);
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
-    TimeUnit.SECONDS.sleep(1);
     List<UUID> expectedIds = List.of(queryId);
-    List<UUID> actualIds = repo.getQueryIdsCompletedBefore(Duration.ofMillis(100));
+    List<UUID> actualIds = repo.getQueryIdsCompletedBefore(Duration.ofMillis(0));
     assertEquals(expectedIds, actualIds);
   }
 

@@ -5,7 +5,6 @@ import org.folio.fqm.service.QueryManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.folio.fqm.resource.PurgeQueryApi;
 import org.folio.fqm.domain.dto.PurgedQueries;
 
 @RestController

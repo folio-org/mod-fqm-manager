@@ -3,9 +3,11 @@ package org.folio.fqm.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
+import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
 import org.folio.fqm.resource.FqlQueryController;
 import org.folio.fqm.service.QueryManagementService;
 import org.folio.fqm.lib.service.QueryProcessorService;
+import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
@@ -267,4 +269,100 @@ class FqlQueryControllerTest {
     mockMvc.perform(builder)
       .andExpect(status().isNotFound());
   }
+
+  @Test
+  void shouldGetSortedIds() throws Exception {
+    UUID queryId = UUID.randomUUID();
+    Integer offset = 0;
+    Integer limit = 100;
+    List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    when(queryManagementService.getSortedIds(queryId, offset, limit)).thenReturn(expectedIds);
+    RequestBuilder builder = get("/query/" + queryId + "/sortedIds").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .queryParam("offset", offset.toString())
+      .queryParam("limit", limit.toString());
+    mockMvc.perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.[0]", is(expectedIds.get(0).toString())))
+      .andExpect(jsonPath("$.[1]", is(expectedIds.get(1).toString())));
+  }
+
+  @Test
+  void getSortedIdsShouldReturn404WhenQueryNotFound() throws Exception {
+    UUID queryId = UUID.randomUUID();
+    Integer offset = 0;
+    Integer limit = 100;
+    when(queryManagementService.getSortedIds(queryId, offset, limit)).thenThrow(new QueryNotFoundException(queryId));
+    RequestBuilder builder = get("/query/" + queryId + "/sortedIds").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .queryParam("offset", offset.toString())
+      .queryParam("limit", limit.toString());
+    mockMvc.perform(builder)
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldGetContents() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    List<String> fields = List.of("id", "field1", "field2");
+    List<UUID> ids = List.of(id1, id2);
+    ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
+      .fields(fields)
+      .ids(ids);
+    List<Map<String, Object>> expectedContent = List.of(
+      Map.of("id", id1, "field1", "value1", "field2", "value2"),
+      Map.of("id", id2, "field1", "value3", "field2", "value4")
+    );
+    when(queryManagementService.getContents(entityTypeId, fields, ids)).thenReturn(expectedContent);
+    RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(new ObjectMapper().writeValueAsString(contentsRequest));
+    mockMvc.perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.[0].id", is(expectedContent.get(0).get("id").toString())))
+      .andExpect(jsonPath("$.[0].field1", is(expectedContent.get(0).get("field1"))))
+      .andExpect(jsonPath("$.[0].field2", is(expectedContent.get(0).get("field2"))))
+      .andExpect(jsonPath("$.[1].id", is(expectedContent.get(1).get("id").toString())))
+      .andExpect(jsonPath("$.[1].field1", is(expectedContent.get(1).get("field1"))))
+      .andExpect(jsonPath("$.[1].field2", is(expectedContent.get(1).get("field2"))));
+  }
+
+  @Test
+  void getContentsShouldReturn404WhenEntityTypeNotFound() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    List<String> fields = List.of("id", "field1", "field2");
+    List<UUID> ids = List.of(id1, id2);
+    ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
+      .fields(fields)
+      .ids(ids);
+    when(queryManagementService.getContents(entityTypeId, fields, ids)).thenThrow(new EntityTypeNotFoundException(entityTypeId));
+    RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(new ObjectMapper().writeValueAsString(contentsRequest));
+    mockMvc.perform(builder)
+      .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getContentsShouldReturn400WhenParametersNotProvided() throws Exception {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    List<String> fields = List.of("id", "field1", "field2");
+    List<UUID> ids = List.of(id1, id2);
+    ContentsRequest contentsRequest = new ContentsRequest().fields(fields)
+      .ids(ids);
+    RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(new ObjectMapper().writeValueAsString(contentsRequest));
+    mockMvc.perform(builder)
+      .andExpect(status().isBadRequest());
+  }
+
 }

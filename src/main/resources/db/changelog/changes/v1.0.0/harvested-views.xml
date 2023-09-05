@@ -111,4 +111,13 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_users_departments" author="bsharp@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "departments" schemaName="${tenant_id}_mod_users"/>
+    </preConditions>
+    <createView viewName="src_users_departments">
+      SELECT * FROM ${tenant_id}_mod_users.departments
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

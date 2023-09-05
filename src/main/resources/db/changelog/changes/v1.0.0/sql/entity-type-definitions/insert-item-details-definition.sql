@@ -301,7 +301,11 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                  },
                  {
                     "columnName": "instance_primary_contributor",
-                   "direction": "ASC"
+                    "direction": "ASC"
+                 },
+                 {
+                    "columnName": "id",
+                    "direction": "ASC"
                  }
                ]
          }');

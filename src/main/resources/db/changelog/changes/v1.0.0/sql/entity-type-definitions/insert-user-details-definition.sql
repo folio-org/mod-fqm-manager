@@ -8,7 +8,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                 {
                       "name": "active",
                       "dataType":{
-                        "dataType":"stringType"
+                        "dataType":"booleanType"
                       },
                       "labelAlias": "User active",
                       "visibleByDefault": false
@@ -22,7 +22,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": true
                 },
                 {
-                      "name": "createddate",
+                      "name": "created_date",
                       "dataType":{
                         "dataType":"dateType"
                       },
@@ -30,7 +30,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                 {
-                      "name": "dateofbirth",
+                      "name": "date_of_birth",
                       "dataType":{
                         "dataType":"dateType"
                       },
@@ -46,7 +46,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                 {
-                      "name": "enrollmentDate",
+                      "name": "enrollment_date",
                        "dataType":{
                          "dataType":"dateType"
                        },
@@ -62,7 +62,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                 {
-                      "name": "externalsystemid",
+                      "name": "external_system_id",
                       "dataType":{
                         "dataType":"stringType"
                       },
@@ -70,7 +70,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                  {
-                     "name": "firstname",
+                     "name": "first_name",
                      "dataType":{
                        "dataType":"stringType"
                      },
@@ -78,7 +78,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": true
                  },
                  {
-                      "name": "lastname",
+                      "name": "last_name",
                       "dataType":{
                         "dataType":"stringType"
                       },
@@ -86,7 +86,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": true
                  },
                 {
-                      "name": "middlename",
+                      "name": "middle_name",
                       "dataType":{
                         "dataType":"stringType"
                       },
@@ -94,7 +94,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                  {
-                       "name": "mobilephone",
+                       "name": "mobile_phone",
                        "dataType":{
                          "dataType":"stringType"
                        },
@@ -131,7 +131,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": true
                 },
                  {
-                       "name": "preferredcontacttype",
+                       "name": "preferred_contact_type",
                        "dataType":{
                          "dataType":"stringType"
                        },
@@ -139,7 +139,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "visibleByDefault": false
                 },
                 {
-                       "name": "preferredcontacttypeid",
+                       "name": "preferred_contact_type_id",
                        "dataType":{
                          "dataType":"stringType"
                        },
@@ -147,7 +147,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "visibleByDefault": false
                  },
                 {
-                      "name": "preferredfirstname",
+                      "name": "preferred_first_name",
                       "dataType":{
                         "dataType":"stringType"
                       },
@@ -163,7 +163,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": true
                  },
                 {
-                      "name": "updateddate",
+                      "name": "updated_date",
                       "dataType":{
                         "dataType":"dateType"
                       },

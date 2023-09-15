@@ -143,7 +143,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "dataType":{
                          "dataType":"stringType"
                        },
-                       "labelAlias": "User preferred contact type id ",
+                       "labelAlias": "User preferred contact type id",
                        "visibleByDefault": false
                  },
                 {
@@ -177,6 +177,39 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       },
                       "labelAlias": "Username",
                       "visibleByDefault": true
+                },
+                {
+                      "name": "department_ids",
+                      "dataType": {
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "rangedUUIDType"
+                        }
+                      },
+                      "labelAlias": "Department Ids",
+                      "visibleByDefault": false
+                },
+                {
+                      "name": "department_names",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "idColumnName": "department_ids",
+                       "source": {
+                              "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
+                              "columnName": "department"
+                       },
+                      "labelAlias": "Department Names",
+                      "visibleByDefault": true
                 }
+             ],
+             "defaultSort": [
+               {
+                   "columnName": "id",
+                   "direction": "ASC"
+               }
              ]
          }');

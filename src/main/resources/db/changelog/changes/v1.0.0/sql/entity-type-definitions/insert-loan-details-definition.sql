@@ -297,6 +297,10 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                 {
                     "columnName": "loan_due_date",
                     "direction": "ASC"
+                },
+                {
+                    "columnName": "id",
+                    "direction": "ASC"
                 }
               ]
          }');

@@ -11,7 +11,17 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "dataType":"booleanType"
                       },
                       "labelAlias": "User active",
-                      "visibleByDefault": false
+                      "visibleByDefault": false,
+                      "values": [
+                        {
+                          "value": "true",
+                          "label": "True"
+                        },
+                        {
+                          "value": "false",
+                          "label": "False"
+                        }
+                    ]
                 },
                 {
                       "name": "barcode",
@@ -159,7 +169,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType":{
                         "dataType":"rangedUUIDType"
                       },
-                      "labelAlias": "User id",
+                      "labelAlias": "User ID",
                       "visibleByDefault": true
                  },
                 {

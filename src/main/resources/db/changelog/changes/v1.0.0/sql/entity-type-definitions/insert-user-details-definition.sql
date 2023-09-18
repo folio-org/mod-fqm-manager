@@ -143,7 +143,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "dataType":{
                          "dataType":"stringType"
                        },
-                       "labelAlias": "User preferred contact type id",
+                       "labelAlias": "User preferred contact type ID",
                        "visibleByDefault": false
                  },
                 {

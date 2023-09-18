@@ -8,7 +8,7 @@ SELECT hrim.instanceid                                                          
        instance_details.jsonb ->> 'title'::text                                             AS instance_title,
        item_details.jsonb ->> 'barcode'::text                                               AS item_barcode,
        (item_details.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text AS item_call_number,
-       item_details.holdingsrecordid                                                        AS item_holdingsrecord_id,
+       item_details.holdingsrecordid                                                        AS holdings_id,
        item_details.id                                                                      AS item_id,
        material_type_ref_data.jsonb ->> 'name'::text                                        AS item_material_type,
        item_details.materialtypeid                                                          AS item_material_type_id,

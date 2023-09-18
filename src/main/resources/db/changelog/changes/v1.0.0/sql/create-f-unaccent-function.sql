@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
 CREATE OR REPLACE FUNCTION f_unaccent(
 	text)
     RETURNS text

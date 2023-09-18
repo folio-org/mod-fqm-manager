@@ -18,7 +18,7 @@ CREATE OR REPLACE VIEW drv_item_details
     src_inventory_item.effectivelocationid AS item_effective_location_id,
     effective_location_ref_data.jsonb ->> 'name'::text AS item_effective_location_name,
     src_inventory_item.jsonb ->> 'hrid'::text AS item_hrid,
-    src_inventory_item.holdingsrecordid AS item_holdings_record_id,
+    src_inventory_item.holdingsrecordid AS holdings_id,
     src_inventory_item.jsonb ->> 'itemLevelCallNumber'::text AS item_level_call_number,
     call_item_number_type_ref_data.jsonb ->> 'name'::text AS item_level_call_number_type_name,
     src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text AS item_level_call_number_typeid,

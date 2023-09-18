@@ -6,6 +6,14 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              "private" : false,
              "columns": [
                  {
+                     "name": "holdings_id",
+                     "dataType":{
+                       "dataType":"rangedUUIDType"
+                     },
+                     "labelAlias": "Holdings ID",
+                     "visibleByDefault": false
+                 },
+                 {
                      "name": "instance_id",
                      "dataType":{
                        "dataType":"rangedUUIDType"
@@ -43,14 +51,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "dataType":"stringType"
                      },
                      "labelAlias": "Item call number",
-                     "visibleByDefault": false
-                 },
-                 {
-                     "name": "item_holdingsrecord_id",
-                     "dataType":{
-                       "dataType":"rangedUUIDType"
-                     },
-                     "labelAlias": "Holdings record ID",
                      "visibleByDefault": false
                  },
                  {

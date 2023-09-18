@@ -6,6 +6,14 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              "subEntityTypeIds": ["097a6f96-edd0-11ed-a05b-0242ac120003"],
              "private" : false,
              "columns": [
+                {
+                     "name": "holdings_id",
+                     "dataType":{
+                       "dataType":"rangedUUIDType"
+                     },
+                     "labelAlias": "Holdings ID",
+                     "visibleByDefault": false
+                },
                  {
                      "name": "instance_created_date",
                      "dataType":{
@@ -157,14 +165,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "labelAlias": "Item hrid",
                       "visibleByDefault": false
                  },
-                {
-                     "name": "item_holdings_record_id",
-                     "dataType":{
-                       "dataType":"rangedUUIDType"
-                     },
-                     "labelAlias": "Holdings record ID",
-                     "visibleByDefault": false
-                },
                 {
                      "name": "id",
                      "dataType":{

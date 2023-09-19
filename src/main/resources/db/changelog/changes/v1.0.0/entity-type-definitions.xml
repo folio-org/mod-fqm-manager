@@ -48,6 +48,10 @@
     <sqlFile path="sql/entity-type-definitions/insert-users-departments-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+  <changeSet id="insert-users-addresstype-definition" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-users-addresstype-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
   <changeSet id="insert-loan-status-definition" author="kjain@ebsco.com">
     <sqlFile path="sql/entity-type-definitions/insert-loan-status-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>

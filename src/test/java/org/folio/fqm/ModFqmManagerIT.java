@@ -3,7 +3,7 @@ package org.folio.fqm;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import io.restassured.RestAssured;
 
@@ -121,7 +121,9 @@ class ModFqmManagerIT {
       .get("/entity-types")
       .then()
       .statusCode(200)
-      .body("$.size()", is(3));
+      .body("$.size()", greaterThanOrEqualTo(3));
+    // greaterThanOrEqualTo requested in code review:
+    // https://github.com/folio-org/mod-fqm-manager/pull/15#discussion_r1329170917
   }
   
 }

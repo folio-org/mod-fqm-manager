@@ -8,6 +8,8 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 
 import java.nio.file.Path;
+import java.time.Duration;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +58,7 @@ class ModFqmManagerIT {
       .withEnv("DB_USERNAME", "myusername")
       .withEnv("DB_PASSWORD", "mypassword")
       .withEnv("DB_DATABASE", "mypostgres")
+      .withStartupTimeout(Duration.ofMinutes(2))
       .dependsOn(postgres);
 
   @BeforeAll
@@ -123,5 +126,4 @@ class ModFqmManagerIT {
       .statusCode(200)
       .body("$.size()", is(3));
   }
-  
 }

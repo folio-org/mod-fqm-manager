@@ -23,6 +23,107 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                     ]
                 },
+   {
+                       "name": "address_ids",
+                       "dataType": {
+                         "dataType":"arrayType",
+                         "itemDataType": {
+                           "dataType": "rangedUUIDType"
+                         }
+                       },
+                       "labelAlias": "Address Ids",
+                       "visibleByDefault": false
+                 },
+                 {
+                       "name": "address_type_names",
+                       "dataType":{
+                         "dataType":"arrayType",
+                         "itemDataType": {
+                           "dataType": "stringType"
+                         }
+                       },
+                       "labelAlias": "Address type names",
+                       "visibleByDefault": true,
+                       "idColumnName": "address_ids",
+                        "source": {
+                               "entityTypeId": "e627a89b-682b-41fe-b532-f4262020a451",
+                               "columnName": "addressType"
+                        }
+                 },
+                {
+                      "name": "cities",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "City",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": "regions",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Region",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": "country_ids",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Country ID",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": " postal_codes",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Postal code",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": " address_line1",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Address line1",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": " address_line2",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Address line2",
+                      "visibleByDefault": true
+                },
+                {
+                      "name": " primary_address",
+                      "dataType":{
+                        "dataType":"stringType"
+                      },
+                      "labelAlias": "Primary address",
+                      "visibleByDefault": true
+                },
                 {
                       "name": "barcode",
                       "dataType":{

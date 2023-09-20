@@ -120,4 +120,13 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_users_addresstype" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "addresstype" schemaName="${tenant_id}_mod_users"/>
+    </preConditions>
+    <createView viewName="src_users_addresstype">
+      SELECT * FROM ${tenant_id}_mod_users.addresstype
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

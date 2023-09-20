@@ -57,7 +57,7 @@ SELECT
                                FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
                       WHERE subquery.row_num = 1), ','::text)
                     ELSE NULL::text
-                END AS primaryaddress,
+                END AS primary_address,
             ( SELECT array_agg(add_id.value ->> 'city'::text) FILTER (WHERE (add_id.value ->> 'city'::text) IS NOT NULL) AS array_agg
                    FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS cities,
             ( SELECT array_agg(add_id.value ->> 'region'::text) FILTER (WHERE (add_id.value ->> 'region'::text) IS NOT NULL) AS array_agg

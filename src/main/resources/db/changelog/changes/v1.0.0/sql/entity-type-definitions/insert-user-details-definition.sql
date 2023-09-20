@@ -5,25 +5,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              "labelAlias" : "Users",
              "private" : false,
              "columns": [
-                {
-                      "name": "active",
-                      "dataType":{
-                        "dataType":"booleanType"
-                      },
-                      "labelAlias": "User active",
-                      "visibleByDefault": false,
-                      "values": [
-                        {
-                          "value": "true",
-                          "label": "True"
-                        },
-                        {
-                          "value": "false",
-                          "label": "False"
-                        }
-                    ]
-                },
-   {
+                 {
                        "name": "address_ids",
                        "dataType": {
                          "dataType":"arrayType",
@@ -31,10 +13,32 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "dataType": "rangedUUIDType"
                          }
                        },
-                       "labelAlias": "Address Ids",
+                       "labelAlias": "Address IDs",
                        "visibleByDefault": false
                  },
                  {
+                       "name": "address_line1",
+                       "dataType":{
+                         "dataType":"arrayType",
+                         "itemDataType": {
+                           "dataType": "stringType"
+                         }
+                       },
+                       "labelAlias": "Address line1",
+                       "visibleByDefault": false
+                 },
+                 {
+                       "name": "address_line2",
+                       "dataType":{
+                         "dataType":"arrayType",
+                         "itemDataType": {
+                           "dataType": "stringType"
+                         }
+                       },
+                       "labelAlias": "Address line2",
+                       "visibleByDefault": false
+                 },
+                {
                        "name": "address_type_names",
                        "dataType":{
                          "dataType":"arrayType",
@@ -43,7 +47,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                          }
                        },
                        "labelAlias": "Address type names",
-                       "visibleByDefault": true,
+                       "visibleByDefault": false,
                        "idColumnName": "address_ids",
                         "source": {
                                "entityTypeId": "e627a89b-682b-41fe-b532-f4262020a451",
@@ -59,18 +63,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                       },
                       "labelAlias": "City",
-                      "visibleByDefault": true
-                },
-                {
-                      "name": "regions",
-                      "dataType":{
-                        "dataType":"arrayType",
-                        "itemDataType": {
-                          "dataType": "stringType"
-                        }
-                      },
-                      "labelAlias": "Region",
-                      "visibleByDefault": true
+                      "visibleByDefault": false
                 },
                 {
                       "name": "country_ids",
@@ -81,9 +74,36 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                       },
                       "labelAlias": "Country ID",
-                      "visibleByDefault": true
+                      "visibleByDefault": false
                 },
                 {
+                      "name": "department_ids",
+                      "dataType": {
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "rangedUUIDType"
+                        }
+                      },
+                      "labelAlias": "Department IDs",
+                      "visibleByDefault": false
+                },
+                {
+                      "name": "department_names",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "idColumnName": "department_ids",
+                       "source": {
+                              "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
+                              "columnName": "department"
+                       },
+                      "labelAlias": "Department names",
+                      "visibleByDefault": false
+                },
+               {
                       "name": " postal_codes",
                       "dataType":{
                         "dataType":"arrayType",
@@ -92,29 +112,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                       },
                       "labelAlias": "Postal code",
-                      "visibleByDefault": true
-                },
-                {
-                      "name": " address_line1",
-                      "dataType":{
-                        "dataType":"arrayType",
-                        "itemDataType": {
-                          "dataType": "stringType"
-                        }
-                      },
-                      "labelAlias": "Address line1",
-                      "visibleByDefault": true
-                },
-                {
-                      "name": " address_line2",
-                      "dataType":{
-                        "dataType":"arrayType",
-                        "itemDataType": {
-                          "dataType": "stringType"
-                        }
-                      },
-                      "labelAlias": "Address line2",
-                      "visibleByDefault": true
+                      "visibleByDefault": false
                 },
                 {
                       "name": " primary_address",
@@ -122,7 +120,36 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "dataType":"stringType"
                       },
                       "labelAlias": "Primary address",
-                      "visibleByDefault": true
+                      "visibleByDefault": false
+                },
+                {
+                      "name": "regions",
+                      "dataType":{
+                        "dataType":"arrayType",
+                        "itemDataType": {
+                          "dataType": "stringType"
+                        }
+                      },
+                      "labelAlias": "Region",
+                      "visibleByDefault": false
+                },
+              {
+                      "name": "active",
+                      "dataType":{
+                        "dataType":"booleanType"
+                      },
+                      "labelAlias": "User active",
+                      "visibleByDefault": true,
+                      "values": [
+                        {
+                          "value": "true",
+                          "label": "True"
+                        },
+                        {
+                          "value": "false",
+                          "label": "False"
+                        }
+                    ]
                 },
                 {
                       "name": "barcode",
@@ -177,7 +204,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType":{
                         "dataType":"stringType"
                       },
-                      "labelAlias": "User external system id",
+                      "labelAlias": "User external system ID",
                       "visibleByDefault": false
                 },
                  {
@@ -230,7 +257,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "dataType":{
                          "dataType":"rangedUUIDType"
                        },
-                       "labelAlias": "User patron group id ",
+                       "labelAlias": "User patron group ID",
                        "visibleByDefault": false
                  },
                 {
@@ -263,7 +290,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "dataType":"stringType"
                       },
                       "labelAlias": "User preferred first name",
-                      "visibleByDefault": false
+                      "visibleByDefault": true
                 },
                 {
                       "name": "id",
@@ -287,33 +314,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "dataType":"stringType"
                       },
                       "labelAlias": "Username",
-                      "visibleByDefault": true
-                },
-                {
-                      "name": "department_ids",
-                      "dataType": {
-                        "dataType":"arrayType",
-                        "itemDataType": {
-                          "dataType": "rangedUUIDType"
-                        }
-                      },
-                      "labelAlias": "Department Ids",
-                      "visibleByDefault": false
-                },
-                {
-                      "name": "department_names",
-                      "dataType":{
-                        "dataType":"arrayType",
-                        "itemDataType": {
-                          "dataType": "stringType"
-                        }
-                      },
-                      "idColumnName": "department_ids",
-                       "source": {
-                              "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
-                              "columnName": "department"
-                       },
-                      "labelAlias": "Department Names",
                       "visibleByDefault": true
                 }
              ],

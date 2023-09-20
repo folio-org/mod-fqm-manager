@@ -74,7 +74,7 @@ class ModFqmManagerIT {
   }
 
   @Test
-  public void health() {
+  void health() {
     // request without X-Okapi-Tenant
     when()
       .get("/admin/health")
@@ -84,7 +84,7 @@ class ModFqmManagerIT {
   }
 
   @Test
-  public void installAndUpgrade() {
+  void installAndUpgrade() {
     String body = """
                   {"module_to": "999999.0.0",
                    "parameters": [{"key": "loadReference", "value": "true"},

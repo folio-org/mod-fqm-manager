@@ -104,7 +104,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                {
-                      "name": " postal_codes",
+                      "name": "postal_codes",
                       "dataType":{
                         "dataType":"arrayType",
                         "itemDataType": {
@@ -115,7 +115,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "visibleByDefault": false
                 },
                 {
-                      "name": " primary_address",
+                      "name": "primary_address",
                       "dataType":{
                         "dataType":"stringType"
                       },
@@ -215,6 +215,14 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "labelAlias": "User first name",
                      "visibleByDefault": true
                  },
+                {
+                      "name": "id",
+                      "dataType":{
+                        "dataType":"rangedUUIDType"
+                      },
+                      "labelAlias": "User ID",
+                      "visibleByDefault": true
+                 },
                  {
                       "name": "last_name",
                       "dataType":{
@@ -277,14 +285,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "visibleByDefault": false
                 },
                 {
-                       "name": "preferred_contact_type_id",
-                       "dataType":{
-                         "dataType":"stringType"
-                       },
-                       "labelAlias": "User preferred contact type ID",
-                       "visibleByDefault": false
-                 },
-                {
                       "name": "preferred_first_name",
                       "dataType":{
                         "dataType":"stringType"
@@ -292,14 +292,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "labelAlias": "User preferred first name",
                       "visibleByDefault": true
                 },
-                {
-                      "name": "id",
-                      "dataType":{
-                        "dataType":"rangedUUIDType"
-                      },
-                      "labelAlias": "User ID",
-                      "visibleByDefault": true
-                 },
                 {
                       "name": "updated_date",
                       "dataType":{

@@ -13,7 +13,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "dataType": "rangedUUIDType"
                          }
                        },
-                       "labelAlias": "Address IDs",
+                       "labelAlias": "User address IDs",
                        "visibleByDefault": false
                  },
                  {
@@ -24,18 +24,18 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "dataType": "stringType"
                          }
                        },
-                       "labelAlias": "Address line1",
+                       "labelAlias": "User address line1",
                        "visibleByDefault": false
                  },
                  {
-                       "name": "address_line2",
+                       "name": "User address_line2",
                        "dataType":{
                          "dataType":"arrayType",
                          "itemDataType": {
                            "dataType": "stringType"
                          }
                        },
-                       "labelAlias": "Address line2",
+                       "labelAlias": "User address line2",
                        "visibleByDefault": false
                  },
                 {
@@ -46,7 +46,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "dataType": "stringType"
                          }
                        },
-                       "labelAlias": "Address type names",
+                       "labelAlias": "User address type names",
                        "visibleByDefault": false,
                        "idColumnName": "address_ids",
                         "source": {
@@ -62,7 +62,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "stringType"
                         }
                       },
-                      "labelAlias": "City",
+                      "labelAlias": "User City",
                       "visibleByDefault": false
                 },
                 {
@@ -73,7 +73,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "stringType"
                         }
                       },
-                      "labelAlias": "Country ID",
+                      "labelAlias": "User Country ID",
                       "visibleByDefault": false
                 },
                 {
@@ -84,7 +84,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "rangedUUIDType"
                         }
                       },
-                      "labelAlias": "Department IDs",
+                      "labelAlias": "User department IDs",
                       "visibleByDefault": false
                 },
                 {
@@ -100,7 +100,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                               "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
                               "columnName": "department"
                        },
-                      "labelAlias": "Department names",
+                      "labelAlias": "User departments",
                       "visibleByDefault": false
                 },
                {
@@ -111,7 +111,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "stringType"
                         }
                       },
-                      "labelAlias": "Postal code",
+                      "labelAlias": "User postal code",
                       "visibleByDefault": false
                 },
                 {
@@ -119,7 +119,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType":{
                         "dataType":"stringType"
                       },
-                      "labelAlias": "Primary address",
+                      "labelAlias": "User primary address",
                       "visibleByDefault": false
                 },
                 {
@@ -130,7 +130,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "stringType"
                         }
                       },
-                      "labelAlias": "Region",
+                      "labelAlias": "User region",
                       "visibleByDefault": false
                 },
               {

@@ -17,7 +17,7 @@
       ]
     },
     {
-      "id": "entity_types",
+      "id": "entity-types",
       "version": "1.0",
       "handlers": [
         {

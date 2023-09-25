@@ -3,11 +3,6 @@
   "name": "The module descriptor for mod-fqm-manager.",
   "provides": [
     {
-      "id": "mod-fqm-manager",
-      "version": "1.0",
-      "handlers": []
-    },
-    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -43,7 +38,7 @@
       ]
     },
     {
-      "id": "query",
+      "id": "fqm-query",
       "version": "1.0",
       "handlers": [
         {

@@ -29,52 +29,61 @@ SELECT
           WHEN '005' THEN 'mobile'
           ELSE 'unknown'
         END AS preferred_contact_type,
-               CASE
-                    WHEN (( SELECT array_agg(add_id.value ->> 'primaryAddress'::text) FILTER (WHERE (add_id.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg
-                       FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))) @> ARRAY['true'::text] THEN (((((((((array_to_string(( SELECT array_agg(subquery.city) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'city'::text AS city,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text) || ', '::text) || array_to_string(( SELECT array_agg(subquery.region) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'region'::text AS region,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text)) || ', '::text) || array_to_string(( SELECT array_agg(subquery.countryid) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'countryId'::text AS countryid,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text)) || ', '::text) || array_to_string(( SELECT array_agg(subquery.postalcode) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'postalCode'::text AS postalcode,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text)) || ', '::text) || array_to_string(( SELECT array_agg(subquery.addressline1) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'addressLine1'::text AS addressline1,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text)) || ' '::text) || array_to_string(( SELECT array_agg(subquery.addressline2) AS array_agg
-                       FROM ( SELECT add_id.value ->> 'addressLine2'::text AS addressline2,
-                                row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
-                               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
-                      WHERE subquery.row_num = 1), ','::text)
-                    ELSE NULL::text
-                END AS primary_address,
-            ( SELECT array_agg(add_id.value ->> 'city'::text) FILTER (WHERE (add_id.value ->> 'city'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS cities,
-            ( SELECT array_agg(add_id.value ->> 'region'::text) FILTER (WHERE (add_id.value ->> 'region'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS regions,
-            ( SELECT array_agg(add_id.value ->> 'countryId'::text) FILTER (WHERE (add_id.value ->> 'countryId'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS country_ids,
-            ( SELECT array_agg(add_id.value ->> 'postalCode'::text) FILTER (WHERE (add_id.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS postal_codes,
-            ( SELECT array_agg(add_id.value ->> 'addressLine1'::text) FILTER (WHERE (add_id.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_line1,
-            ( SELECT array_agg(add_id.value ->> 'addressLine2'::text) FILTER (WHERE (add_id.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_line2,
-            ( SELECT array_agg(add_id.value ->> 'addressTypeId'::text) FILTER (WHERE (add_id.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_ids,
-            ( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg
-                   FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)
-                     JOIN src_users_addresstype a ON (add_id.value ->> 'addressTypeId'::text) = a.id::text) AS address_type_names,
+        concat_ws(', ',
+        		  NULLIF((SELECT subquery.city
+        				  FROM (
+        						SELECT add_id.value ->> 'city'::text AS city,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), ''),
+        		  NULLIF((SELECT subquery.region
+        				  FROM (
+        						SELECT add_id.value ->> 'region'::text AS region,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), ''),
+        		  NULLIF((SELECT subquery.countryId
+        				  FROM (
+        						SELECT add_id.value ->> 'countryId'::text AS countryId,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), ''),
+        		  NULLIF((SELECT subquery.postalCode
+        				  FROM (
+        						SELECT add_id.value ->> 'postalCode'::text AS postalCode,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), ''),
+        		  NULLIF((SELECT subquery.addressLine1
+        				  FROM (
+        						SELECT add_id.value ->> 'addressLine1'::text AS addressLine1,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), ''),
+        		  NULLIF((SELECT subquery.addressLine2
+        				  FROM (
+        						SELECT add_id.value ->> 'addressLine2'::text AS addressLine2,
+        						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
+        						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
+        				  WHERE subquery.row_num = 1), '')
+        ) AS primary_address,
+        ( SELECT array_agg(add_id.value ->> 'city'::text) FILTER (WHERE (add_id.value ->> 'city'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS cities,
+        ( SELECT array_agg(add_id.value ->> 'region'::text) FILTER (WHERE (add_id.value ->> 'region'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS regions,
+        ( SELECT array_agg(add_id.value ->> 'countryId'::text) FILTER (WHERE (add_id.value ->> 'countryId'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS country_ids,
+        ( SELECT array_agg(add_id.value ->> 'postalCode'::text) FILTER (WHERE (add_id.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS postal_codes,
+        ( SELECT array_agg(add_id.value ->> 'addressLine1'::text) FILTER (WHERE (add_id.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_line1,
+        ( SELECT array_agg(add_id.value ->> 'addressLine2'::text) FILTER (WHERE (add_id.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_line2,
+        ( SELECT array_agg(add_id.value ->> 'addressTypeId'::text) FILTER (WHERE (add_id.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS address_ids,
+        ( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg
+               FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)
+                 JOIN src_users_addresstype a ON (add_id.value ->> 'addressTypeId'::text) = a.id::text) AS address_type_names,
         array_agg(temp_departments.id::text) FILTER (where temp_departments.id is not null) as department_ids,
         array_agg(temp_departments.jsonb ->> 'name') FILTER (where temp_departments.jsonb ->> 'name' is not null) as department_names
 FROM src_users_users userdetails

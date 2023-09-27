@@ -9,7 +9,11 @@ CREATE OR REPLACE VIEW drv_item_details
     src_inventory_item.jsonb ->> 'barcode'::text AS item_barcode,
     src_inventory_item.jsonb ->> 'copyNumber'::text AS item_copy_number,
     (src_inventory_item.jsonb -> 'metadata'::text) ->> 'createdDate'::text AS item_created_date,
-    concat((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text ,', ', (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text ,', ',src_inventory_item.jsonb ->> 'copyNumber'::text) AS item_effective_call_number,
+    concat_ws(', ',
+    		NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''),
+    		NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''),
+    		NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, '')
+    ) AS item_effective_call_number,
     call_number_type_ref_data.jsonb ->> 'name'::text AS item_effective_call_number_type_name,
     (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text AS item_effective_call_number_typeid,
     loclib_ref_data.jsonb ->> 'code'::text AS item_effective_library_code,

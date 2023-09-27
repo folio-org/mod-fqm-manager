@@ -4,7 +4,7 @@ CREATE OR REPLACE VIEW drv_item_details
     (instance_details.jsonb -> 'metadata'::text) ->> 'createdDate'::text AS instance_created_date,
     hrim.instanceid AS instance_id,
     jsonb_path_query_first(instance_details.jsonb, '$."contributors"[*]?(@."primary" == true)."name"'::jsonpath) #>> '{}'::text[] AS instance_primary_contributor,
-    instance_details.jsonb ->> 'indexTitle'::text AS instance_title,
+    instance_details.jsonb ->> 'title'::text AS instance_title,
     (instance_details.jsonb -> 'metadata'::text) ->> 'updatedDate'::text AS instance_updated_date,
     src_inventory_item.jsonb ->> 'barcode'::text AS item_barcode,
     src_inventory_item.jsonb ->> 'copyNumber'::text AS item_copy_number,
@@ -12,6 +12,7 @@ CREATE OR REPLACE VIEW drv_item_details
     concat_ws(', ',
     		NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''),
     		NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''),
+    		NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''),
     		NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, '')
     ) AS item_effective_call_number,
     call_number_type_ref_data.jsonb ->> 'name'::text AS item_effective_call_number_type_name,

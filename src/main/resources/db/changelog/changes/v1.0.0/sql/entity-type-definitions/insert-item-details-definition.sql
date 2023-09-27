@@ -63,6 +63,35 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": true
                 },
                 {
+                     "name": "item_level_call_number",
+                     "dataType":{
+                       "dataType":"stringType"
+                     },
+                     "labelAlias": "Item call number",
+                     "visibleByDefault": false
+                },
+                {
+                     "name": "item_level_call_number_type_name",
+                     "dataType":{
+                       "dataType":"stringType"
+                     },
+                     "labelAlias": "Item call number type name",
+                     "visibleByDefault": false,
+                     "idColumnName": "item_level_call_number_typeid",
+                     "source": {
+                        "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d",
+                        "columnName": "call_number_type_name"
+                      }
+                },
+                {
+                     "name": "item_level_call_number_typeid",
+                     "dataType":{
+                       "dataType":"rangedUUIDType"
+                     },
+                     "labelAlias": "Item call number typeID",
+                     "visibleByDefault": false
+                },
+                {
                      "name": "item_copy_number",
                      "dataType":{
                        "dataType":"stringType"
@@ -173,35 +202,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "labelAlias": "Item ID",
                      "visibleByDefault": false
                  },
-                {
-                     "name": "item_level_call_number",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item call number",
-                     "visibleByDefault": false
-                },
-                {
-                     "name": "item_level_call_number_type_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item call number type name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_level_call_number_typeid",
-                     "source": {
-                        "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d",
-                        "columnName": "call_number_type_name"
-                      }
-                },
-                {
-                     "name": "item_level_call_number_typeid",
-                     "dataType":{
-                       "dataType":"rangedUUIDType"
-                     },
-                     "labelAlias": "Item call number typeID",
-                     "visibleByDefault": false
-                },
                 {
                      "name": "item_material_type",
                      "dataType":{

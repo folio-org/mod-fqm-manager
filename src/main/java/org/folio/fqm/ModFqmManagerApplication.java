@@ -14,5 +14,4 @@ public class ModFqmManagerApplication {
     SpringApplication.run(ModFqmManagerApplication.class, args);
   }
 
-
 }

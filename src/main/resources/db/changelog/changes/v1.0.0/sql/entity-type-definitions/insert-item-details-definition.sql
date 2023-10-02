@@ -88,7 +88,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item call number typeID",
+                     "labelAlias": "Item call number type ID",
                      "visibleByDefault": false
                 },
                 {
@@ -133,7 +133,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item effective call number typeId",
+                     "labelAlias": "Item effective call number type ID",
                      "visibleByDefault": false
                 },
                 {
@@ -149,7 +149,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
-                     "labelAlias": "Item effective library id",
+                     "labelAlias": "Item effective library ID",
                      "visibleByDefault": false
                  },
                 {

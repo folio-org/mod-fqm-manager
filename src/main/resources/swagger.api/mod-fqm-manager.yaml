@@ -91,14 +91,20 @@ components:
       description: Validation errors
       content:
         application/json:
-          example: examples/validationErrorResponse.sample
+          example:
+            errors:
+              - message: Request is invalid
+                code: invalid.request
           schema:
             $ref: "#/components/schemas/errorResponse"
     internalServerErrorResponse:
       description: When unhandled exception occurred during code execution, e.g. NullPointerException
       content:
         application/json:
-          example: examples/unknownError.sample
+          example:
+            errors:
+              - message: Unexpected error
+                code: unexpected.error
           schema:
             $ref: "#/components/schemas/errorResponse"
 

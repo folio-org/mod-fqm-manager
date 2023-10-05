@@ -1,5 +1,5 @@
 -- Create the parent partitioned table
-CREATE TABLE query_results
+CREATE TABLE IF NOT EXISTS query_results
 (
     result_id        UUID NOT NULL,
     query_id         UUID NOT NULL,

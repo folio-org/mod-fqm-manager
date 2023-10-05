@@ -1,4 +1,4 @@
-CREATE TABLE query_details
+CREATE TABLE IF NOT EXISTS query_details
 (
     query_id               UUID NOT NULL PRIMARY KEY,
     entity_type_id         UUID NOT NULL,

@@ -288,7 +288,19 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              ],
               "defaultSort": [
                  {
-                   "columnName": "item_effective_call_number",
+                   "columnName": "item_effective_call_number_prefix",
+                   "direction": "ASC"
+                 },
+                 {
+                   "columnName": "item_effective_call_number_callNumber",
+                   "direction": "ASC"
+                 },
+                 {
+                   "columnName": "item_effective_call_number_suffix",
+                   "direction": "ASC"
+                 },
+                 {
+                   "columnName": "item_effective_call_number_copyNumber",
                    "direction": "ASC"
                  },
                  {

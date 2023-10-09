@@ -7,7 +7,9 @@
     <preConditions onFail="CONTINUE">
         <tableExists tableName = "item" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_item">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_item">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.item
     </createView>
   </changeSet>
@@ -16,7 +18,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "holdings_record" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_holdings_record">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_holdings_record">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.holdings_record
     </createView>
   </changeSet>
@@ -25,7 +29,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "instance" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_instance">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.instance
     </createView>
   </changeSet>
@@ -34,7 +40,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "material_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_material_type">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_material_type">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.material_type
     </createView>
   </changeSet>
@@ -43,7 +51,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "location" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_location">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_location">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.location
     </createView>
   </changeSet>
@@ -52,7 +62,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "service_point" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_service_point">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_service_point">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.service_point
     </createView>
   </changeSet>
@@ -61,7 +73,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loclibrary" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_loclibrary">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_loclibrary">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.loclibrary
     </createView>
   </changeSet>
@@ -70,7 +84,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "call_number_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <createView viewName="src_inventory_call_number_type">
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_call_number_type">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.call_number_type
     </createView>
   </changeSet>
@@ -79,7 +95,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loan" schemaName="${tenant_id}_mod_circulation_storage"/>
     </preConditions>
-    <createView viewName="src_circulation_loan">
+    <createView
+      replaceIfExists="true"
+      viewName="src_circulation_loan">
       SELECT * FROM ${tenant_id}_mod_circulation_storage.loan
     </createView>
   </changeSet>
@@ -88,7 +106,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loan_policy" schemaName="${tenant_id}_mod_circulation_storage"/>
     </preConditions>
-    <createView viewName="src_circulation_loan_policy">
+    <createView
+      replaceIfExists="true"
+      viewName="src_circulation_loan_policy">
       SELECT * FROM ${tenant_id}_mod_circulation_storage.loan_policy
     </createView>
   </changeSet>
@@ -97,7 +117,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "groups" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
-    <createView viewName="src_users_groups">
+    <createView
+      replaceIfExists="true"
+      viewName="src_users_groups">
       SELECT * FROM ${tenant_id}_mod_users.groups
     </createView>
   </changeSet>
@@ -106,7 +128,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "users" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
-    <createView viewName="src_users_users">
+    <createView
+      replaceIfExists="true"
+      viewName="src_users_users">
       SELECT * FROM ${tenant_id}_mod_users.users
     </createView>
   </changeSet>
@@ -115,7 +139,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "departments" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
-    <createView viewName="src_users_departments">
+    <createView
+      replaceIfExists="true"
+      viewName="src_users_departments">
       SELECT * FROM ${tenant_id}_mod_users.departments
     </createView>
   </changeSet>
@@ -124,7 +150,9 @@
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "addresstype" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
-    <createView viewName="src_users_addresstype">
+    <createView
+      replaceIfExists="true"
+      viewName="src_users_addresstype">
       SELECT * FROM ${tenant_id}_mod_users.addresstype
     </createView>
   </changeSet>

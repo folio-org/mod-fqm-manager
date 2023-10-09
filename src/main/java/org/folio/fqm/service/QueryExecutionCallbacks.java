@@ -21,21 +21,6 @@ import java.util.UUID;
 public class QueryExecutionCallbacks {
 
   private final QueryRepository queryRepository;
-  private final QueryResultsRepository queryResultsRepository;
-
-  @Transactional
-  public void handleDataBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback) {
-    Query query = queryRepository.getQuery(queryId, true)
-      .orElseThrow(() -> new QueryNotFoundException(queryId));
-    if (query.status() == QueryStatus.CANCELLED) {
-      log.info("Query {} has been cancelled, closing id stream", queryId);
-      idsWithCancelCallback.cancel();
-      return;
-    }
-    List<UUID> resultIds = idsWithCancelCallback.ids();
-    log.info("Saving query results for queryId: {}. Count: {}", queryId, resultIds.size());
-    queryResultsRepository.saveQueryResults(queryId, resultIds);
-  }
 
   @Transactional
   public void handleSuccess(Query query, int totalCount) {

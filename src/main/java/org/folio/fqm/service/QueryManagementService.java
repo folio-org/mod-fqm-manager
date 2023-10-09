@@ -72,7 +72,7 @@ public class QueryManagementService {
       executionContext.getUserId());
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
-    queryExecutionService.executeQueryAsync(query);
+    queryExecutionService.executeQueryAsync(query, Boolean.TRUE.equals(submitQuery.getSortResults()));
     return queryIdentifier;
   }
 
@@ -165,13 +165,9 @@ public class QueryManagementService {
   }
 
   public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
+    // We don't actually need the query here, but this provides a nice error if the query isn't present
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
-    UUID entityTypeId = query.entityTypeId();
-    EntityType entityType = fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-    String derivedTable = fqmMetaDataService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
-    return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId,
-      offset, limit);
+    return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId, offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<UUID> ids) {

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS query_results
 (
     result_id        UUID NOT NULL,
     query_id         UUID NOT NULL,
+    sort_seq         NUMERIC NOT NULL,
     PRIMARY KEY (result_id, query_id),
     CONSTRAINT fk_query_id FOREIGN KEY (query_id)
                     REFERENCES query_details (query_id) MATCH SIMPLE

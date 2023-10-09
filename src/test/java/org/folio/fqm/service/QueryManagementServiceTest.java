@@ -97,7 +97,7 @@ class QueryManagementServiceTest {
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(any());
+    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(false));
   }
 
   @Test
@@ -115,7 +115,7 @@ class QueryManagementServiceTest {
     when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
-    verify(queryExecutionService, times(0)).executeQueryAsync(any());
+    verify(queryExecutionService, times(0)).executeQueryAsync(any(), eq(false));
   }
 
   @Test
@@ -415,32 +415,15 @@ class QueryManagementServiceTest {
   @Test
   void shouldGetSortedIds() {
     String tenantId = "tenant_01";
-    String derivedTableName = "table_01";
-    EntityType entityType = new EntityType().name("test-entity");
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenReturn(Optional.of(entityType));
-    when(fqmMetaDataService.getDerivedTableName(tenantId, query.entityTypeId())).thenReturn(derivedTableName);
     when(queryResultsSorterService.getSortedIds(tenantId, query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
-  }
-
-  @Test
-  void getSortedIdsShouldThrowErrorIfEntityTypeNotFound() {
-    String tenantId = "tenant_01";
-    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
-    UUID queryId = query.queryId();
-    int offset = 0;
-    int limit = 0;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
-    assertThrows(EntityTypeNotFoundException.class, () -> queryManagementService.getSortedIds(queryId, offset, limit));
   }
 
   @Test

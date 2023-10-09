@@ -31,11 +31,12 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
+    int sortSequence = 0;
     List<UUID> expectedResultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(query);
-    queryResultsRepository.saveQueryResults(queryId, expectedResultIds);
+    queryResultsRepository.saveQueryResults(queryId, expectedResultIds, sortSequence);
     List<UUID> actualResultIds = queryResultsRepository.getQueryResultIds(queryId, 0, 100);
     assertThat(expectedResultIds).containsExactlyInAnyOrderElementsOf(actualResultIds);
   }
@@ -47,11 +48,12 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
+    int sortSequence = 0;
     List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);
-    queryResultsRepository.saveQueryResults(queryId, resultIds);
+    queryResultsRepository.saveQueryResults(queryId, resultIds, sortSequence);
     int actualCount = queryResultsRepository.getQueryResultsCount(queryId);
     assertEquals(resultIds.size(), actualCount);
   }
@@ -63,11 +65,12 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
+    int sortSequence = 0;
     List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);
-    queryResultsRepository.saveQueryResults(queryId, resultIds);
+    queryResultsRepository.saveQueryResults(queryId, resultIds, sortSequence);
     assertFalse(queryResultsRepository.getQueryResultIds(queryId, 0, 100).isEmpty());
     queryResultsRepository.deleteQueryResults(List.of(queryId));
     assertTrue(queryResultsRepository.getQueryResultIds(queryId, 0, 100).isEmpty());

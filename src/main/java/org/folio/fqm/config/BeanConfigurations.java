@@ -7,11 +7,15 @@ import org.folio.fqm.lib.service.FqmMetaDataService;
 import org.folio.fqm.lib.service.QueryProcessorService;
 import org.folio.fqm.lib.service.QueryResultsSorterService;
 import org.folio.fqm.lib.service.ResultSetService;
+import org.folio.fqm.repository.QueryRepository;
+import org.folio.fqm.repository.QueryResultsRepository;
+import org.folio.fqm.service.DataBatchCallback;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.function.Supplier;
 
 @Configuration
 public class BeanConfigurations {
@@ -44,5 +48,11 @@ public class BeanConfigurations {
   @Bean
   public FqlService fqlService() {
     return FQM.fqlService();
+  }
+
+  @Bean
+  public Supplier<DataBatchCallback> dataBatchCallbackSupplier(QueryRepository queryRepository,
+                                                               QueryResultsRepository queryResultsRepository) {
+    return () -> new DataBatchCallback(queryRepository, queryResultsRepository);
   }
 }

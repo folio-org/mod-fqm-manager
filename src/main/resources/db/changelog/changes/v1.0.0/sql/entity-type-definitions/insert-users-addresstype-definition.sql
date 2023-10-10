@@ -27,4 +27,4 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                  "visibleByDefault": true
              }
          ]
- }');
+ }') ON CONFLICT (id) DO UPDATE SET derived_table_name = EXCLUDED.derived_table_name, definition = EXCLUDED.definition;

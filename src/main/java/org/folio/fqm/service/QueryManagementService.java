@@ -171,7 +171,7 @@ public class QueryManagementService {
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     String derivedTable = fqmMetaDataService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
     return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId,
-      derivedTable, entityType, offset, limit);
+      offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<UUID> ids) {

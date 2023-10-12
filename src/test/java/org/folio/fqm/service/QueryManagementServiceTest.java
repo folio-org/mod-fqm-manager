@@ -425,7 +425,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenReturn(Optional.of(entityType));
     when(fqmMetaDataService.getDerivedTableName(tenantId, query.entityTypeId())).thenReturn(derivedTableName);
-    when(queryResultsSorterService.getSortedIds(tenantId, query.queryId(), derivedTableName, entityType, offset, limit)).thenReturn(expectedIds);
+    when(queryResultsSorterService.getSortedIds(tenantId, query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
   }

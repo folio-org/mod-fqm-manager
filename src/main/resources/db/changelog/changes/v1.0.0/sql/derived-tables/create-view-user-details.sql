@@ -1,26 +1,26 @@
 CREATE OR REPLACE VIEW drv_user_details
 AS
 SELECT
-        userDetails.jsonb -> 'personal' ->> 'firstName' as first_name,
-        userDetails.jsonb -> 'personal' ->> 'lastName' as last_name,
-        userDetails.jsonb ->>'barcode' as barcode,
+        userDetails.jsonb -> 'personal' ->> 'firstName' as user_first_name,
+        userDetails.jsonb -> 'personal' ->> 'lastName' as user_last_name,
+        userDetails.jsonb ->>'barcode' as user_barcode,
         userDetails.jsonb ->>'username' as username,
         userDetails.id as id,
-        userDetails.jsonb ->> 'externalSystemId' as external_system_id,
-        userDetails.jsonb ->> 'active' as active,
-        userDetails.jsonb -> 'personal' ->> 'email' as email,
-        userDetails.jsonb ->> 'createdDate' as created_date,
-        userDetails.jsonb ->> 'updatedDate' as updated_date,
-        userDetails.jsonb -> 'personal' ->> 'preferredFirstName' as preferred_first_name,
-        userDetails.jsonb -> 'personal' ->> 'middleName' as middle_name,
-        userDetails.jsonb -> 'personal' ->> 'phone' as phone,
-        userDetails.jsonb -> 'personal' ->> 'mobilePhone' as mobile_phone,
-        userDetails.jsonb -> 'personal' ->> 'dateOfBirth' as date_of_birth,
-        userDetails.jsonb ->> 'expirationDate'::text AS expiration_date,
-        userDetails.jsonb ->> 'enrollmentDate'::text AS enrollment_date,
+        userDetails.jsonb ->> 'externalSystemId' as user_external_system_id,
+        userDetails.jsonb ->> 'active' as user_active,
+        userDetails.jsonb -> 'personal' ->> 'email' as user_email,
+        userDetails.jsonb ->> 'createdDate' as user_created_date,
+        userDetails.jsonb ->> 'updatedDate' as user_updated_date,
+        userDetails.jsonb -> 'personal' ->> 'preferredFirstName' as user_preferred_first_name,
+        userDetails.jsonb -> 'personal' ->> 'middleName' as user_middle_name,
+        userDetails.jsonb -> 'personal' ->> 'phone' as user_phone,
+        userDetails.jsonb -> 'personal' ->> 'mobilePhone' as user_mobile_phone,
+        userDetails.jsonb -> 'personal' ->> 'dateOfBirth' as user_date_of_birth,
+        userDetails.jsonb ->> 'expirationDate'::text AS user_expiration_date,
+        userDetails.jsonb ->> 'enrollmentDate'::text AS user_enrollment_date,
         patron_id_ref_data.jsonb ->> 'group'::text AS user_patron_group,
         patron_id_ref_data.id::text AS user_patron_group_id,
-        UserDetails.jsonb -> 'personal' ->> 'preferredContactTypeId' as preferred_contact_type_id,
+        UserDetails.jsonb -> 'personal' ->> 'preferredContactTypeId' as user_preferred_contact_type_id,
         CASE UserDetails.jsonb -> 'personal' ->> 'preferredContactTypeId'
           WHEN '001' THEN 'mail'
           WHEN '002' THEN 'email'
@@ -28,7 +28,7 @@ SELECT
           WHEN '004' THEN 'phone'
           WHEN '005' THEN 'mobile'
           ELSE 'unknown'
-        END AS preferred_contact_type,
+        END AS user_preferred_contact_type,
         concat_ws(', ',
         		  NULLIF((SELECT subquery.city
         				  FROM (
@@ -66,7 +66,7 @@ SELECT
         						row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num
         						FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery
         				  WHERE subquery.row_num = 1), '')
-        ) AS primary_address,
+        ) AS user_primary_address,
         ( SELECT array_agg(add_id.value ->> 'city'::text) FILTER (WHERE (add_id.value ->> 'city'::text) IS NOT NULL) AS array_agg
                FROM jsonb_array_elements((userdetails.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) AS cities,
         ( SELECT array_agg(add_id.value ->> 'region'::text) FILTER (WHERE (add_id.value ->> 'region'::text) IS NOT NULL) AS array_agg

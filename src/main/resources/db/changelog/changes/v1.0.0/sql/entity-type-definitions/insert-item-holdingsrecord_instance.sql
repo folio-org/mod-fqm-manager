@@ -1,10 +1,9 @@
 INSERT INTO entity_type_definition (id, derived_table_name, definition)
-    VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0292','drv_item_details', '{
-             "id": "0cb79a4c-f7eb-4941-a104-745224ae0292",
-             "name":"drv_item_details",
-             "labelAlias" : "Items",
-             "subEntityTypeIds": ["097a6f96-edd0-11ed-a05b-0242ac120003", "0cb79a4c-f7eb-4941-a104-745224ae0293"],
-             "private" : false,
+    VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0293','drv_item_holdingsrecord_instance', '{
+             "id": "0cb79a4c-f7eb-4941-a104-745224ae0293",
+             "name":"drv_item_holdingsrecord_instance",
+             "labelAlias" : "Items, Holdings records, Instance",
+             "private" : true,
              "columns": [
                 {
                      "name": "holdings_id",
@@ -71,19 +70,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": false
                 },
                 {
-                     "name": "item_level_call_number_type_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item call number type name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_level_call_number_typeid",
-                     "source": {
-                        "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d",
-                        "columnName": "call_number_type_name"
-                      }
-                },
-                {
                      "name": "item_level_call_number_typeid",
                      "dataType":{
                        "dataType":"rangedUUIDType"
@@ -116,54 +102,12 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": true
                 },
                 {
-                     "name": "item_effective_call_number_type_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item effective call number type name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_effective_call_number_typeid",
-                     "source": {
-                        "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d",
-                        "columnName": "call_number_type_name"
-                      }
-                },
-                {
                      "name": "item_effective_call_number_typeid",
                      "dataType":{
                        "dataType":"rangedUUIDType"
                      },
                      "labelAlias": "Item effective call number type ID",
                      "visibleByDefault": false
-                },
-                {
-                     "name": "item_effective_library_code",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item effective library code",
-                     "visibleByDefault": false
-                },
-                {
-                     "name": "item_effective_library_id",
-                     "dataType":{
-                       "dataType":"rangedUUIDType"
-                     },
-                     "labelAlias": "Item effective library ID",
-                     "visibleByDefault": false
-                 },
-                {
-                     "name": "item_effective_library_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item effective library name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_effective_library_id",
-                     "source": {
-                        "entityTypeId": "cf9f5c11-e943-483c-913b-81d1e338accc",
-                        "columnName": "loclibrary_name"
-                     }
                 },
                  {
                      "name": "item_effective_location_id",
@@ -172,19 +116,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      },
                      "labelAlias": "Item location ID",
                      "visibleByDefault": false
-                 },
-                 {
-                     "name": "item_effective_location_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item effective location name",
-                     "visibleByDefault": true,
-                     "idColumnName": "item_effective_location_id",
-                     "source": {
-                        "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b",
-                        "columnName": "location_name"
-                      }
                  },
                 {
                       "name": "item_hrid",
@@ -203,19 +134,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": false
                  },
                 {
-                     "name": "item_material_type",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item material type",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_material_type_id",
-                     "source": {
-                       "entityTypeId": "917ea5c8-cafe-4fa6-a942-e2388a88c6f6",
-                       "columnName": "material_type_name"
-                     }
-                },
-                {
                      "name": "item_material_type_id",
                      "dataType":{
                        "dataType":"rangedUUIDType"
@@ -230,19 +148,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      },
                      "labelAlias": "Item permanent ID",
                      "visibleByDefault": false
-                },
-                {
-                     "name": "item_permanent_location_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item permanent location name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_permanent_location_id",
-                      "source": {
-                        "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b",
-                        "columnName": "location_name"
-                       }
                 },
                 {
                      "name": "item_status",
@@ -265,19 +170,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": false
                 },
                 {
-                     "name": "item_temporary_location_name",
-                     "dataType":{
-                       "dataType":"stringType"
-                     },
-                     "labelAlias": "Item temporary location name",
-                     "visibleByDefault": false,
-                     "idColumnName": "item_temporary_location_id",
-                      "source": {
-                        "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b",
-                        "columnName": "location_name"
-                      }
-                },
-                {
                      "name": "item_updated_date",
                      "dataType":{
                        "dataType":"dateType"
@@ -285,23 +177,5 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "labelAlias": "Item updated date",
                      "visibleByDefault": false
                  }
-             ],
-              "defaultSort": [
-                 {
-                   "columnName": "item_effective_location_name",
-                   "direction": "ASC"
-                 },
-                 {
-                    "columnName": "instance_title",
-                    "direction": "ASC"
-                 },
-                 {
-                    "columnName": "instance_primary_contributor",
-                    "direction": "ASC"
-                 },
-                 {
-                    "columnName": "id",
-                    "direction": "ASC"
-                 }
-               ]
+             ]
        }') ON CONFLICT (id) DO UPDATE SET derived_table_name = EXCLUDED.derived_table_name, definition = EXCLUDED.definition;

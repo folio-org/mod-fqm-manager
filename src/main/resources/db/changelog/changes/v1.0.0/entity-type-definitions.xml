@@ -64,4 +64,8 @@
     <sqlFile path="sql/entity-type-definitions/insert-loan-policy-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+  <changeSet id="insert-item-holdingsrecord-instance-definition" author="pkjacob@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-item-holdingsrecord_instance.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
 </databaseChangeLog>

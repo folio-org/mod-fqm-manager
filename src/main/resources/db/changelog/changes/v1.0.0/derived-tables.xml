@@ -85,4 +85,13 @@
     <sqlFile path="sql/derived-tables/create-view-user-details.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+  <changeSet id="create-view-item-holdingrecord-instance" author="pkjacob@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+    </preConditions>
+    <sqlFile path="sql/derived-tables/create-view-item-holdingsrecord-instance.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
 </databaseChangeLog>

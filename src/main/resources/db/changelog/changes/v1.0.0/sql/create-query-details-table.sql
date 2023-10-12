@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS query_details
 (
     query_id               UUID NOT NULL PRIMARY KEY,
     entity_type_id         UUID NOT NULL,
-    fql_query              VARCHAR(1024)  NOT NULL,
+    fql_query              TEXT  NOT NULL,
     fields                 VARCHAR[],
     created_by             UUID NOT NULL,
     start_date             TIMESTAMP NOT NULL,

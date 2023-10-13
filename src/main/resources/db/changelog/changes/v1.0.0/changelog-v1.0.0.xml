@@ -12,6 +12,6 @@
   <include file="harvested-views.xml" relativeToChangelogFile="true"/>
   <include file="derived-tables.xml" relativeToChangelogFile="true"/>
   <include file="drv_item_details_create.xml" relativeToChangelogFile="true"/>
+  <include file="drv_item_holdingrecords_instance_create.xml" relativeToChangelogFile="true"/>
   <include file="entity-type-definitions.xml" relativeToChangelogFile="true"/>
-
 </databaseChangeLog>

@@ -39,25 +39,6 @@
     <sqlFile path="sql/derived-tables/create-view-loan-details.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
-  <changeSet id="create-view-item-details" author="bsharp@ebsco.com">
-    <preConditions onFail="CONTINUE">
-      <viewExists viewName="src_inventory_item"/>
-      <viewExists viewName="src_inventory_holdings_record"/>
-      <viewExists viewName="src_inventory_instance"/>
-      <viewExists viewName="src_inventory_material_type"/>
-      <viewExists viewName="src_inventory_location"/>
-      <viewExists viewName="src_inventory_service_point"/>
-      <viewExists viewName="src_inventory_loclibrary"/>
-      <viewExists viewName="src_inventory_call_number_type"/>
-      <viewExists viewName="src_users_groups"/>
-      <viewExists viewName="src_users_users"/>
-      <sqlCheck expectedResult="1">
-        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
-      </sqlCheck>
-    </preConditions>
-    <sqlFile path="sql/derived-tables/create-view-item-details.sql" relativeToChangelogFile="true"/>
-  </changeSet>
-
   <changeSet id="create-view-item-callnumber_location" author="pkjacob@ebsco.com">
     <preConditions onFail="CONTINUE">
       <viewExists viewName="src_inventory_item"/>
@@ -83,15 +64,6 @@
       <viewExists viewName="src_users_users"/>
     </preConditions>
     <sqlFile path="sql/derived-tables/create-view-user-details.sql" relativeToChangelogFile="true"/>
-  </changeSet>
-
-  <changeSet id="create-view-item-holdingrecord-instance" author="pkjacob@ebsco.com">
-    <preConditions onFail="CONTINUE">
-      <viewExists viewName="src_inventory_item"/>
-      <viewExists viewName="src_inventory_holdings_record"/>
-      <viewExists viewName="src_inventory_instance"/>
-    </preConditions>
-    <sqlFile path="sql/derived-tables/create-view-item-holdingsrecord-instance.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
 </databaseChangeLog>

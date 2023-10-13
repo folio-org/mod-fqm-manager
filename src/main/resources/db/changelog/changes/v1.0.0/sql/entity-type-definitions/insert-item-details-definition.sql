@@ -3,7 +3,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              "id": "0cb79a4c-f7eb-4941-a104-745224ae0292",
              "name":"drv_item_details",
              "labelAlias" : "Items",
-             "subEntityTypeIds": ["097a6f96-edd0-11ed-a05b-0242ac120003", "0cb79a4c-f7eb-4941-a104-745224ae0293"],
+             "subEntityTypeIds": ["097a6f96-edd0-11ed-a05b-0242ac120003"],
              "private" : false,
              "columns": [
                 {
@@ -44,6 +44,14 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "dataType":"stringType"
                      },
                      "labelAlias": "Instance title",
+                     "visibleByDefault": true
+                },
+                {
+                     "name": "instance_title_searchable",
+                    "dataType":{
+                     "dataType":"stringType"
+                     },
+                     "labelAlias": "Instance title (Searchable)",
                      "visibleByDefault": true
                 },
                 {

@@ -3,11 +3,13 @@ CREATE TABLE IF NOT EXISTS query_results
 (
     result_id        UUID NOT NULL,
     query_id         UUID NOT NULL,
-    sort_seq         INTEGER NOT NULL,
+    sort_seq         INTEGER,
     PRIMARY KEY (result_id, query_id),
     CONSTRAINT fk_query_id FOREIGN KEY (query_id)
                     REFERENCES query_details (query_id) MATCH SIMPLE
 ) PARTITION BY HASH(query_id);
+
+ALTER TABLE query_results ADD COLUMN IF NOT EXISTS sort_seq INTEGER;
 
 -- Script to create the child tables for each partition
 CREATE TABLE IF NOT EXISTS query_results_00 PARTITION OF query_results FOR VALUES WITH (MODULUS 12, REMAINDER 0);

@@ -6,7 +6,12 @@ CREATE OR REPLACE VIEW drv_item_callnumber_location
     src_inventory_item.jsonb ->> 'itemLevelCallNumber'::text AS item_level_call_number,
     src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text AS item_level_call_number_typeid,
     call_item_number_type_ref_data.item_level_call_number_type_name,
-    (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text AS item_effective_call_number,
+        concat_ws(', ',
+            NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''),
+            NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''),
+            NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''),
+            NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, '')
+            ) AS item_effective_call_number,
     (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text AS item_effective_call_number_typeId,
     call_number_type_ref_data.item_effective_call_number_type_name,
     loclib_ref_data.id AS item_effective_library_id,

@@ -5,5 +5,7 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="drv_item_callnumber_location_create.xml" relativeToChangelogFile="true"/>
+  <include file="drv_item_holdingsrecord_instance_create.xml" relativeToChangelogFile="true"/>
+  <include file="drv_item_details_create.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

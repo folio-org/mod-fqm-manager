@@ -157,24 +157,16 @@ UPDATE entity_type_definition SET definition =
                          "visibleByDefault": false,
                          "values": [
                            {
-                             "value": "mail",
-                             "label": "Mail"
-                           },
-                           {
                              "value": "email",
                              "label": "Email"
                            },
                            {
+                             "value": "mail",
+                             "label": "Mail (Primary Address)"
+                           },
+                           {
                              "value": "text",
-                             "label": "Text"
-                           },
-                           {
-                             "value": "phone",
-                             "label": "Phone"
-                           },
-                           {
-                             "value": "mobile",
-                             "label": "Mobile"
+                             "label": "Text Message"
                            }
                        ]
                   },

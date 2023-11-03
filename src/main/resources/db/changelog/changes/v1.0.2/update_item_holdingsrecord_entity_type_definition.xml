@@ -52,14 +52,6 @@
               "visibleByDefault": true
             },
             {
-              "name": "instance_title_searchable",
-              "dataType": {
-                "dataType": "stringType"
-              },
-              "labelAlias": "Instance title (Searchable)",
-              "visibleByDefault": true
-            },
-            {
               "name": "instance_updated_date",
               "dataType": {
                 "dataType": "dateType"

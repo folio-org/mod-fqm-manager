@@ -1,0 +1,48 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="remove-items-holdingsrecord-instance-title-searchable" author="novercash@ebsco.com">
+    <!-- ensure other schemas/tables exist (primarily to prevent invalid references in integration tests) -->
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
+      </sqlCheck>
+    </preConditions>
+    <dropView viewName="drv_item_details" />
+    <createView viewName="drv_item_holdingsrecord_instance">
+      SELECT src_inventory_item.id,
+        "left"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'createdDate'::text), 600) AS instance_created_date,
+        hrim.instanceid AS instance_id,
+        jsonb_path_query_first(instance_details.jsonb, '$."contributors"[*]?(@."primary" == true)."name"'::jsonpath) #>> '{}'::text[] AS instance_primary_contributor,
+        instance_details.jsonb ->> 'title'::text AS instance_title,
+        "left"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600) AS instance_updated_date,
+        src_inventory_item.jsonb ->> 'barcode'::text AS item_barcode,
+        src_inventory_item.jsonb ->> 'copyNumber'::text AS item_copy_number,
+        (src_inventory_item.jsonb -> 'metadata'::text) ->> 'createdDate'::text AS item_created_date,
+        (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text AS item_effective_call_number_prefix,
+        (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text AS item_effective_call_number_callnumber,
+        (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text AS item_effective_call_number_suffix,
+        src_inventory_item.jsonb ->> 'copyNumber'::text AS item_effective_call_number_copynumber,
+        concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text)) AS item_effective_call_number,
+        (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text AS item_effective_call_number_typeid,
+        src_inventory_item.effectivelocationid AS item_effective_location_id,
+        src_inventory_item.jsonb ->> 'hrid'::text AS item_hrid,
+        src_inventory_item.holdingsrecordid AS holdings_id,
+        src_inventory_item.jsonb ->> 'itemLevelCallNumber'::text AS item_level_call_number,
+        src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text AS item_level_call_number_typeid,
+        src_inventory_item.materialtypeid AS item_material_type_id,
+        src_inventory_item.permanentlocationid AS item_permanent_location_id,
+        src_inventory_item.temporarylocationid AS item_temporary_location_id,
+        "left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600) AS item_status,
+        (src_inventory_item.jsonb -> 'metadata'::text) ->> 'updatedDate'::text AS item_updated_date
+      FROM src_inventory_item
+        JOIN src_inventory_holdings_record hrim ON src_inventory_item.holdingsrecordid = hrim.id
+        JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id;
+    </createView>
+  </changeSet>
+
+</databaseChangeLog>

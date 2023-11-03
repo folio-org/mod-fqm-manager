@@ -12,7 +12,7 @@
         SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
       </sqlCheck>
     </preConditions>
-    <dropView viewName="drv_item_details" />
+    <dropView viewName="drv_item_holdingsrecord_instance" />
     <createView viewName="drv_item_holdingsrecord_instance">
       SELECT src_inventory_item.id,
         "left"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'createdDate'::text), 600) AS instance_created_date,

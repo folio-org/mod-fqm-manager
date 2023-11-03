@@ -73,10 +73,10 @@ public class QueryRepository {
       .fetchOneInto(Query.class));
   }
 
-  public List<UUID> getQueryIdsCompletedBefore(Duration duration) {
+  public List<UUID> getQueryIdsStartedBefore(Duration duration) {
     return jooqContext.select(field(QUERY_ID))
       .from(table(QUERY_DETAILS_TABLE))
-      .where(field("end_date").
+      .where(field("start_date").
         lessOrEqual(OffsetDateTime.now().minus(duration)))
       .fetchInto(UUID.class);
   }

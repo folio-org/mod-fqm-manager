@@ -12,9 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.util.StringUtils.hasText;
@@ -86,15 +86,26 @@ class QueryRepositoryTest {
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
     List<String> fields = List.of("id", "field1");
-    Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
+    Query queryToDelete = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
-    repo.saveQuery(query);
+    repo.saveQuery(queryToDelete);
     Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null);
+
+    UUID queryId2 = UUID.randomUUID();
+    Query queryToNotDelete = new Query(queryId2, UUID.randomUUID(), fqlQuery, fields,
+      UUID.randomUUID(), OffsetDateTime.now().plusHours(1), null, QueryStatus.IN_PROGRESS, null);
+    repo.saveQuery(queryToNotDelete);
+
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
-    List<UUID> expectedIds = List.of(queryId);
-    List<UUID> actualIds = repo.getQueryIdsCompletedBefore(Duration.ofMillis(0));
-    assertEquals(expectedIds, actualIds);
+    UUID expectedId = queryId;
+    List<UUID> actualIds = repo.getQueryIdsStartedBefore(Duration.ofMillis(0));
+
+    assertTrue(actualIds.contains(expectedId));
+    assertFalse(actualIds.contains(queryId2));
+
+    // Clean up
+    repo.deleteQueries(List.of(queryId2));
   }
 
   @Test

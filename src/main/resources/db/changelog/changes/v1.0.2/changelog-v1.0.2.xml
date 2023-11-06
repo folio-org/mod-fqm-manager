@@ -10,4 +10,7 @@
   <include file="remove_items_holdingsrecord_instance_title_searchable.xml" relativeToChangelogFile="true"/>
   <include file="update_item_holdingsrecord_entity_type_definition.xml" relativeToChangelogFile="true"/>
 
+  <include file="fix_user_details_preferred_contact_type.xml" relativeToChangelogFile="true"/>
+  <include file="update_user_details_entity_type_definition.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

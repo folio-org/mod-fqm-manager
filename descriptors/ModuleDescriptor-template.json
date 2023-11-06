@@ -4,15 +4,18 @@
   "provides": [
     {
       "id": "_tenant",
-      "version": "1.2",
+      "version": "2.0",
       "interfaceType": "system",
       "handlers": [
         {
           "methods": ["POST"],
-          "pathPattern": "/_/tenant"
-        }, {
-          "methods": ["DELETE"],
-          "pathPattern": "/_/tenant"
+          "pathPattern": "/_/tenant",
+          "permissionsRequired": []
+        },
+        {
+          "methods": ["GET", "DELETE"],
+          "pathPattern": "/_/tenant/{id}",
+          "permissionsRequired": []
         }
       ]
     },

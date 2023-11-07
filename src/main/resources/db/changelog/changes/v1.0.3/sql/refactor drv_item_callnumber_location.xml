@@ -1,0 +1,53 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="create-view-item-callnumber-location" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_material_type"/>
+      <viewExists viewName="src_inventory_location"/>
+      <viewExists viewName="src_inventory_loclibrary"/>
+      <viewExists viewName="src_inventory_call_number_type"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
+      </sqlCheck>
+    </preConditions>
+    <dropView viewName="drv_item_callnumber_location" />
+    <createView
+      viewName="drv_item_callnumber_location">
+      SELECT
+      src_inventory_item.id,
+      src_inventory_item.holdingsrecordid AS item_holdings_record_id,
+      src_inventory_item.jsonb ->> 'hrid'::text AS item_hrid,
+      src_inventory_item.jsonb ->> 'itemLevelCallNumber'::text AS item_level_call_number,
+      src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text AS item_level_call_number_typeid,
+      call_item_number_type_ref_data.jsonb ->> 'name'::text AS item_level_call_number_type_name,
+      concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text)) AS item_effective_call_number,
+      (src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text AS item_effective_call_number_typeid,
+      call_number_type_ref_data.jsonb ->> 'name'::text AS item_effective_call_number_type_name,
+      loclib_ref_data.id AS item_effective_library_id,
+      loclib_ref_data.jsonb ->> 'name'::text AS item_effective_library_name,
+      loclib_ref_data.jsonb ->> 'code'::text AS item_effective_library_code,
+      "left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600) AS item_status,
+      src_inventory_item.jsonb ->> 'copyNumber'::text AS item_copy_number,
+      src_inventory_item.jsonb ->> 'barcode'::text AS item_barcode,
+      (src_inventory_item.jsonb -> 'metadata'::text) ->> 'createdDate'::text AS item_created_date,
+      (src_inventory_item.jsonb -> 'metadata'::text) ->> 'updatedDate'::text AS item_updated_date,
+      effective_location_ref_data.id AS item_effective_location_id,
+      effective_location_ref_data.jsonb ->> 'name'::text AS item_effective_location_name,
+      permanent_location_ref_data.id AS item_permanent_location_id,
+      permanent_location_ref_data.jsonb ->> 'name'::text AS item_permanent_location_name,
+      material_type_ref_data.id AS item_material_type_id,
+      material_type_ref_data.jsonb ->> 'name'::text AS item_material_type
+      FROM src_inventory_item
+      LEFT JOIN src_inventory_location effective_location_ref_data ON effective_location_ref_data.id = src_inventory_item.effectivelocationid
+      LEFT JOIN src_inventory_call_number_type call_number_type_ref_data ON call_number_type_ref_data.id::text = ((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text)
+      LEFT JOIN src_inventory_call_number_type call_item_number_type_ref_data ON call_item_number_type_ref_data.id::text = (src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text)
+      LEFT JOIN src_inventory_loclibrary loclib_ref_data ON loclib_ref_data.id = effective_location_ref_data.libraryid
+      LEFT JOIN src_inventory_location permanent_location_ref_data ON permanent_location_ref_data.id = src_inventory_item.permanentlocationid
+      LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = src_inventory_item.materialtypeid;
+    </createView>
+  </changeSet>
+
+</databaseChangeLog>

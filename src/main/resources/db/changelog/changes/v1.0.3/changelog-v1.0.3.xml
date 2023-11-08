@@ -4,5 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <include file="sql/refactor drv_item_callnumber_location.xml" relativeToChangelogFile="true"/>
+  <include file="refactor_drv_item_callnumber_location.xml" relativeToChangelogFile="true"/>
+  <include file="add_materialized_view_indexes.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

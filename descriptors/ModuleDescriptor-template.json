@@ -1,6 +1,6 @@
 {
   "id": "@artifactId@-@version@",
-  "name": "The module descriptor for mod-fqm-manager.",
+  "name": "FQM Manager Module",
   "provides": [
     {
       "id": "_tenant",
@@ -78,6 +78,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/materialized-views/refresh",
+          "permissionsRequired": ["fqm.materializedViews.post"]
         }
       ]
     },
@@ -87,10 +92,16 @@
       "interfaceType": "system",
       "handlers": [
         {
-          "methods": [ "POST" ],
+          "methods": ["POST"],
           "pathPattern": "/query/purge",
           "unit": "hour",
           "delay": "1"
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/materialized-views/refresh",
+          "unit": "hour",
+          "delay": "24"
         }
       ]
     }
@@ -142,6 +153,12 @@
       "permissionName": "fqm.query.sync.get",
       "displayName": "FQM - Run query synchronously",
       "description": "Run a query synchronously and get results",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.materializedViews.post",
+      "displayName": "FQM - Refresh materialized views",
+      "description": "Refresh FQM materialized views",
       "visible":  true
     },
     {

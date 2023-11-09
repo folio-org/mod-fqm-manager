@@ -1,7 +1,11 @@
 # 1.0.x
 
+## 1.0.3
+- [MODFQMMGR-58](https://issues.folio.org/browse/MODFQMMGR-58) Refactor drv_item_callnumber_location view
+- [MODFQMMGR-76](https://issues.folio.org/browse/MODFQMMGR-76) Periodically refresh materialized views
+
 ## 1.0.2
-- Remove the instance_titel_searchable field from the Items entity type
+- Remove the instance_title_searchable field from the Items entity type
 - Purge old query results based on query start date/time instead of the end date/time
 - Fix bug in user preferred contact type
 - Update the provided `_tenant` interface in the module descriptor to 2.0

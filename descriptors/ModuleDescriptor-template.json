@@ -37,6 +37,11 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/entity-types/materialized-views/refresh",
+          "permissionsRequired": ["fqm.materializedViews.post"]
         }
       ]
     },
@@ -78,11 +83,6 @@
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/materialized-views/refresh",
-          "permissionsRequired": ["fqm.materializedViews.post"]
         }
       ]
     },
@@ -95,13 +95,19 @@
           "methods": ["POST"],
           "pathPattern": "/query/purge",
           "unit": "hour",
-          "delay": "1"
+          "delay": "1",
+          "modulePermissions": [
+            "fqm.query.purge"
+          ]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/materialized-views/refresh",
+          "pathPattern": "/entity-types/materialized-views/refresh",
           "unit": "hour",
-          "delay": "24"
+          "delay": "24",
+          "modulePermissions": [
+            "fqm.materializedViews.post"
+          ]
         }
       ]
     }

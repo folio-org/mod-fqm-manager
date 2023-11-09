@@ -44,7 +44,7 @@ paths:
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
-  /materialized-views/refresh:
+  /entity-types/materialized-views/refresh:
     post:
       operationId: refreshMaterializedViews
       tags:

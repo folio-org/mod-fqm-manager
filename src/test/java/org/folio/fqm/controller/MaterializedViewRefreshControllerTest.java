@@ -31,7 +31,7 @@ class MaterializedViewRefreshControllerTest {
   @Test
   void refreshMaterializedViewsTest() throws Exception {
     String tenantId = "tenant_01";
-    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/materialized-views/refresh")
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/materialized-views/refresh")
       .header(XOkapiHeaders.TENANT, tenantId)
       .contentType(APPLICATION_JSON);
     when(executionContext.getTenantId()).thenReturn(tenantId);

@@ -133,7 +133,7 @@ public class QueryManagementService {
    */
   @Transactional
   public PurgedQueries deleteOldQueries() {
-    List<UUID> queryIds = queryRepository.getQueryIdsCompletedBefore(queryRetentionDuration);
+    List<UUID> queryIds = queryRepository.getQueryIdsStartedBefore(queryRetentionDuration);
     log.info("Deleting the queries with queryIds {}", queryIds);
     deleteQueryAndResults(queryIds);
     return new PurgedQueries().deletedQueryIds(queryIds);

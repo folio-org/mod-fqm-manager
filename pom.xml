@@ -373,9 +373,9 @@
   </distributionManagement>
 
   <scm>
-    <url>https://github.com/EBSCOIS/${project.artifactId}</url>
-    <connection>scm:git:git://github.com/EBSCOIS/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:git@github.com:EBSCOIS/${project.artifactId}.git</developerConnection>
+    <url>https://github.com/folio-org/${artifactId}</url>
+    <connection>scm:git:git://github.com/folio-org/${artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/${artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 

@@ -1,5 +1,14 @@
-# 1.0.0
-- Initial release
+# 1.0.x
+
+## 1.0.3
+- [MODFQMMGR-58](https://issues.folio.org/browse/MODFQMMGR-58) Refactor drv_item_callnumber_location view
+- [MODFQMMGR-76](https://issues.folio.org/browse/MODFQMMGR-76) Periodically refresh materialized views
+
+## 1.0.2
+- Remove the instance_title_searchable field from the Items entity type
+- Purge old query results based on query start date/time instead of the end date/time
+- Fix bug in user preferred contact type
+- Update the provided `_tenant` interface in the module descriptor to 2.0
 
 ## 1.0.1
 - [MODFQMMGR-57](https://issues.folio.org/browse/MODFQMMGR-57) Use a different version of f_unaccent(), to allow us to make use of an index
@@ -8,3 +17,6 @@
 - [MODFQMMGR-67](https://issues.folio.org/browse/MODFQMMGR-67) Enable batched inserts
 - [MODFQMMGR-71](https://issues.folio.org/browse/MODFQMMGR-71) Update item and user entity types
 - [MODFQMMGR-31](https://issues.folio.org/browse/MODFQMMGR-31) Fix Users dropdown
+
+## 1.0.0
+- Initial release

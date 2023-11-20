@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fqm.repository.ResultSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
+@Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResultSetService {
 

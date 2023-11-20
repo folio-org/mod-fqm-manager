@@ -2,14 +2,13 @@ package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.service.EntityTypeService;
-import org.folio.fqm.lib.service.FqmMetaDataService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.rest.resource.EntityTypesApi;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import java.util.List;
@@ -21,12 +20,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EntityTypeController implements org.folio.fqm.resource.EntityTypesApi, org.folio.querytool.rest.resource.EntityTypesApi {
   private final EntityTypeService entityTypeService;
-  private final FqmMetaDataService fqmMetaDataService;
   private final FolioExecutionContext folioExecutionContext;
 
   @Override
   public ResponseEntity<EntityType> getEntityType(UUID entityTypeId) {
-    return fqmMetaDataService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), entityTypeId)
+    return entityTypeService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), entityTypeId)
       .map(ResponseEntity::ok)
       .orElseGet(() -> ResponseEntity.notFound().build());
   }

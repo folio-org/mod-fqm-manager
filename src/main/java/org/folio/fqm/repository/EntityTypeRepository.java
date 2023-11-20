@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
 import org.jooq.DSLContext;
@@ -9,9 +10,13 @@ import org.jooq.Field;
 
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.querytool.domain.dto.EntityType;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,11 +30,41 @@ import static org.jooq.impl.DSL.trueCondition;
 @RequiredArgsConstructor
 @Log4j2
 public class EntityTypeRepository {
+  public static final String ID_FIELD_NAME = "id";
+
   private final DSLContext jooqContext;
+  private final ObjectMapper objectMapper;
+
+  public Optional<String> getDerivedTableName(String tenantId, UUID entityTypeId) {
+    log.info("Getting derived table name for tenant {}, entity type ID: {}", tenantId, entityTypeId);
+    String schemaName = getFqmSchemaName(tenantId);
+
+    Field<String> derivedTableNameField = field("derived_table_name", String.class);
+
+    return jooqContext
+      .select(derivedTableNameField)
+      .from(schemaName + ".entity_type_definition")
+      .where(field(ID_FIELD_NAME).eq(entityTypeId))
+      .fetchOptional(derivedTableNameField)
+      .map(tableName -> schemaName + "." + tableName);
+  }
+
+  public Optional<EntityType> getEntityTypeDefinition(String tenantId, UUID entityTypeId) {
+    log.info("Getting definition name for tenant {}, entity type ID: {}", tenantId, entityTypeId);
+
+    Field<String> definitionField = field("definition", String.class);
+
+    return jooqContext
+      .select(definitionField)
+      .from(getFqmSchemaName(tenantId) + ".entity_type_definition")
+      .where(field(ID_FIELD_NAME).eq(entityTypeId))
+      .fetchOptional(definitionField)
+      .map(this::unmarshallEntityType);
+  }
 
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
     log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
-    Field<UUID> idField = field("id", UUID.class);
+    Field<UUID> idField = field(ID_FIELD_NAME, UUID.class);
     Field<String> labelAliasField = field("definition ->> 'labelAlias'", String.class);
     Field<Boolean> privateEntityField = field("(definition ->> 'private')::boolean", Boolean.class);
 
@@ -44,5 +79,14 @@ public class EntityTypeRepository {
           .id(row.get(idField))
           .label(row.get(labelAliasField))
       );
+  }
+
+  String getFqmSchemaName(String tenantId) {
+    return tenantId + "_mod_fqm_manager";
+  }
+
+  @SneakyThrows
+  private EntityType unmarshallEntityType(String str) {
+    return objectMapper.readValue(str, EntityType.class);
   }
 }

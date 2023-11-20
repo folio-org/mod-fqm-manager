@@ -4,18 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.FqlService;
+import org.folio.fql.FqlValidationService;
 import org.folio.fql.model.Fql;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
-import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
-import org.folio.fqm.lib.service.FqlValidationService;
-import org.folio.fqm.lib.service.FqmMetaDataService;
-import org.folio.fqm.lib.service.QueryProcessorService;
-import org.folio.fqm.lib.service.QueryResultsSorterService;
-import org.folio.fqm.lib.service.ResultSetService;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.querytool.domain.dto.QueryDetails;
@@ -45,8 +41,8 @@ import java.util.UUID;
 @Log4j2
 public class QueryManagementService {
 
+  private final EntityTypeService entityTypeService;
   private final FolioExecutionContext executionContext;
-  private final FqmMetaDataService fqmMetaDataService;
   private final QueryRepository queryRepository;
   private final QueryResultsRepository queryResultsRepository;
   private final QueryExecutionService queryExecutionService;
@@ -156,7 +152,7 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    EntityType entityType = fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType ,fqlQuery);
     if (!errorMap.isEmpty()) {
@@ -167,9 +163,9 @@ public class QueryManagementService {
   public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
     UUID entityTypeId = query.entityTypeId();
-    EntityType entityType = fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-    String derivedTable = fqmMetaDataService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
+    String derivedTable = entityTypeService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
     return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId,
       offset, limit);
   }

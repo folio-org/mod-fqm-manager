@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.exception.QueryNotFoundException;
-import org.folio.fqm.lib.model.IdsWithCancelCallback;
+import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.springframework.stereotype.Service;

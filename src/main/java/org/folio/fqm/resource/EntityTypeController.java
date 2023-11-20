@@ -9,7 +9,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.rest.resource.EntityTypesApi;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
 import java.util.List;

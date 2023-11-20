@@ -1,0 +1,19 @@
+{
+  "entityType.src_inventory_call_number_type": "Call number type",
+  "entityType.src_inventory_location": "Location",
+  "entityType.src_inventory_loclibrary": "Loclibrary",
+  "entityType.src_inventory_material_type": "Material type",
+  "entityType.src_inventory_service_point": "Service point",
+  "entityType.src_loan_policy_name": "Policy name",
+  "entityType.src_users_addresstype": "Address type",
+  "entityType.src_users_departments": "Departments",
+  "entityType.src_users_groups": "Groups",
+
+  "entityType.drv_item_callnumber_location": "Item, Call number and location",
+  "entityType.drv_item_details": "Items",
+  "entityType.drv_item_holdingsrecord_instance": "Items, Holdings records, Instance",
+  "entityType.drv_item_status": "Item status",
+  "entityType.drv_loan_details": "Loans",
+  "entityType.drv_loan_status": "Loan status",
+  "entityType.drv_user_details": "Users"
+}

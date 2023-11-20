@@ -59,6 +59,11 @@
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
+      <artifactId>folio-spring-i18n</artifactId>
+      <version>7.3.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
       <artifactId>folio-query-tool-metadata</artifactId>
       <version>${folio-query-tool-metadata.version}</version>
     </dependency>
@@ -190,8 +195,17 @@
   </dependencyManagement>
 
   <build>
-    <plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/translations</directory>
+        <targetPath>translations</targetPath>
+      </resource>
+    </resources>
 
+    <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>

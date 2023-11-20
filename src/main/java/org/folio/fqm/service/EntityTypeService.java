@@ -11,9 +11,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
 import static org.folio.fqm.lib.repository.MetaDataRepository.ID_FIELD_NAME;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class EntityTypeService {
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private final FolioExecutionContext executionContext;
   private final EntityTypeRepository entityTypeRepository;
+  private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
 
   /**
@@ -31,7 +36,15 @@ public class EntityTypeService {
    */
   @Transactional(readOnly = true)
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
-    return entityTypeRepository.getEntityTypeSummary(entityTypeIds);
+    return entityTypeRepository
+      .getEntityTypeSummary(entityTypeIds)
+      .stream()
+      .map(rawEntityTypeSummary ->
+        new EntityTypeSummary()
+          .id(rawEntityTypeSummary.id())
+          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()))
+      )
+      .toList();
   }
 
   /**
@@ -68,7 +81,7 @@ public class EntityTypeService {
       valueWithLabel.value(valueWithLabel.getLabel()); // value = label for entity types that do not have "id" column
   }
 
-  private String getColumnValue(Map<String, Object> allValues, String columnName) {
+  private static String getColumnValue(Map<String, Object> allValues, String columnName) {
     return allValues.get(columnName).toString();
   }
 }

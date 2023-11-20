@@ -1,12 +1,8 @@
 package org.folio.fqm.service;
 
-import org.folio.fql.FqlService;
-import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
-import org.folio.fqm.lib.service.FqlValidationService;
-import org.folio.fqm.lib.service.FqmMetaDataService;
-import org.folio.fqm.lib.service.QueryProcessorService;
-import org.folio.fqm.lib.service.QueryResultsSorterService;
-import org.folio.fqm.lib.service.ResultSetService;
+import org.folio.fql.service.FqlService;
+import org.folio.fql.service.FqlValidationService;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.util.TestDataFixture;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
@@ -68,7 +64,7 @@ class QueryManagementServiceTest {
   private QueryResultsSorterService queryResultsSorterService;
 
   @Mock
-  private FqmMetaDataService fqmMetaDataService;
+  private EntityTypeService entityTypeService;
 
   @Mock
   private ResultSetService resultSetService;
@@ -92,7 +88,7 @@ class QueryManagementServiceTest {
     QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
     when(executionContext.getUserId()).thenReturn(createdById);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
@@ -112,7 +108,7 @@ class QueryManagementServiceTest {
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(executionContext.getUserId()).thenReturn(createdById);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
     verify(queryExecutionService, times(0)).executeQueryAsync(any());
@@ -275,7 +271,7 @@ class QueryManagementServiceTest {
     List<String> fields = List.of("id", "field1", "field2");
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, fields, null, defaultLimit)).thenReturn(expectedContent);
     ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
@@ -299,7 +295,7 @@ class QueryManagementServiceTest {
     List<String> fields = new ArrayList<>(List.of("field1", "field2"));
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, List.of("field1", "field2", "id"), null, defaultLimit))
       .thenReturn(expectedContent);
@@ -323,7 +319,7 @@ class QueryManagementServiceTest {
     );
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, List.of("id"), null, defaultLimit))
       .thenReturn(expectedContent);
@@ -340,7 +336,7 @@ class QueryManagementServiceTest {
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
     assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
@@ -356,7 +352,7 @@ class QueryManagementServiceTest {
                       """;
     when(executionContext.getTenantId()).thenReturn(tenantId);
     doThrow(new EntityTypeNotFoundException(entityTypeId))
-      .when(fqmMetaDataService).getEntityTypeDefinition(tenantId, entityTypeId);
+      .when(entityTypeService).getEntityTypeDefinition(tenantId, entityTypeId);
     assertThrows(EntityTypeNotFoundException.class,
       () -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
   }
@@ -370,7 +366,7 @@ class QueryManagementServiceTest {
                       {"field1": {"$nn": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of("field1", "field is invalid"));
     assertThrows(InvalidFqlException.class,
@@ -423,8 +419,8 @@ class QueryManagementServiceTest {
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenReturn(Optional.of(entityType));
-    when(fqmMetaDataService.getDerivedTableName(tenantId, query.entityTypeId())).thenReturn(derivedTableName);
+    when(entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getDerivedTableName(tenantId, query.entityTypeId())).thenReturn(derivedTableName);
     when(queryResultsSorterService.getSortedIds(tenantId, query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
@@ -439,7 +435,7 @@ class QueryManagementServiceTest {
     int limit = 0;
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
+    when(entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
     assertThrows(EntityTypeNotFoundException.class, () -> queryManagementService.getSortedIds(queryId, offset, limit));
   }
 

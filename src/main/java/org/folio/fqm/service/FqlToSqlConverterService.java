@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
-import org.folio.fql.FqlService;
 import org.folio.fql.model.*;
+import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;

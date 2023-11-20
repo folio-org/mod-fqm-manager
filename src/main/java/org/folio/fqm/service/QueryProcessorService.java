@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
-import org.folio.fql.FqlService;
 import org.folio.fql.model.Fql;
+import org.folio.fql.service.FqlService;
 import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;

@@ -1,6 +1,5 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.lib.service.QueryProcessorService;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.*;

@@ -26,9 +26,10 @@
     <folio-spring-base.version>7.1.2</folio-spring-base.version>
     <folio-query-tool-metadata.version>1.0.0</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
-    <lib-fqm-query-processor.version>1.0.0</lib-fqm-query-processor.version>
+    <lib-fqm-query-processor.version>modfqmmgr-87-SNAPSHOT</lib-fqm-query-processor.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <snakeyaml.version>2.0</snakeyaml.version>
+    <org.postgresql.version>42.5.4</org.postgresql.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
@@ -63,7 +64,7 @@
       <version>${folio-query-tool-metadata.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.folio</groupId>
+      <groupId>com.github.folio-org</groupId>
       <artifactId>lib-fqm-query-processor</artifactId>
       <version>${lib-fqm-query-processor.version}</version>
     </dependency>
@@ -104,7 +105,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
+      <version>${org.postgresql.version}</version>
     </dependency>
 
     <dependency>
@@ -352,6 +353,11 @@
       <id>folio-nexus</id>
       <name>FOLIO Maven repository</name>
       <url>https://repository.folio.org/repository/maven-folio</url>
+    </repository>
+
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://www.jitpack.io</url>
     </repository>
   </repositories>
 

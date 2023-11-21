@@ -1,29 +1,28 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.repository.EntityTypeRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.*;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceTest {
-  @InjectMocks
-  private EntityTypeService entityTypeService;
+
   @Mock
   private EntityTypeRepository repo;
 
@@ -33,6 +32,9 @@ class EntityTypeServiceTest {
   @Mock
   private FolioExecutionContext folioExecutionContext;
 
+  @InjectMocks
+  private EntityTypeService entityTypeService;
+
   @Test
   void shouldGetEntityTypeSummaryForValidIds() {
     UUID id1 = UUID.randomUUID();
@@ -40,11 +42,18 @@ class EntityTypeServiceTest {
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01"),
-      new EntityTypeSummary().id(id2).label("label_02"));
+      new EntityTypeSummary().id(id2).label("label_02")
+    );
     when(repo.getEntityTypeSummary(ids)).thenReturn(expectedSummary);
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(
+      ids
+    );
 
-    assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+    assertEquals(
+      expectedSummary,
+      actualSummary,
+      "Expected Summary should equal Actual Summary"
+    );
   }
 
   @Test
@@ -61,10 +70,20 @@ class EntityTypeServiceTest {
           new ValueWithLabel().value("value_02").label("label_02")
         )
       );
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
+    String expectedFql =
+      "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    when(queryProcessorService.processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000))
+    when(
+      queryProcessorService.processQuery(
+        tenantId,
+        entityTypeId,
+        expectedFql,
+        fields,
+        null,
+        1000
+      )
+    )
       .thenReturn(
         List.of(
           Map.of("id", "value_01", valueColumnName, "label_01"),
@@ -72,7 +91,11 @@ class EntityTypeServiceTest {
         )
       );
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(
+      entityTypeId,
+      valueColumnName,
+      ""
+    );
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
   }
 
@@ -90,10 +113,20 @@ class EntityTypeServiceTest {
           new ValueWithLabel().value("value_02").label("value_02")
         )
       );
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
+    String expectedFql =
+      "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    when(queryProcessorService.processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000))
+    when(
+      queryProcessorService.processQuery(
+        tenantId,
+        entityTypeId,
+        expectedFql,
+        fields,
+        null,
+        1000
+      )
+    )
       .thenReturn(
         List.of(
           Map.of(valueColumnName, "value_01"),
@@ -101,7 +134,11 @@ class EntityTypeServiceTest {
         )
       );
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(
+      entityTypeId,
+      valueColumnName,
+      ""
+    );
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
   }
 
@@ -112,11 +149,22 @@ class EntityTypeServiceTest {
     String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
     String searchText = "search text";
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
+    String expectedFql =
+      "{\"" +
+      valueColumnName +
+      "\": {\"$regex\": " +
+      "\"" +
+      searchText +
+      "\"}}";
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-    entityTypeService.getColumnValues(entityTypeId, valueColumnName, searchText);
-    verify(queryProcessorService).processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
+    entityTypeService.getColumnValues(
+      entityTypeId,
+      valueColumnName,
+      searchText
+    );
+    verify(queryProcessorService)
+      .processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
   }
 
   @Test
@@ -125,11 +173,43 @@ class EntityTypeServiceTest {
     String valueColumnName = "column_name";
     String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
+    String expectedFql =
+      "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     entityTypeService.getColumnValues(entityTypeId, valueColumnName, null);
-    verify(queryProcessorService).processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
+    verify(queryProcessorService)
+      .processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
   }
 
+  @Test
+  void shouldReturnEntityTypeDefinition() {
+    UUID entityTypeId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+    EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
+
+    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+      .thenReturn(Optional.of(expectedEntityType));
+    EntityType actualDefinition = entityTypeService
+      .getEntityTypeDefinition(tenantId, entityTypeId)
+      .get();
+
+    assertEquals(expectedEntityType, actualDefinition);
+  }
+
+  @Test
+  void shouldReturnDerivedTableName() {
+    UUID entityTypeId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+    String derivedTableName = "derived_table_01";
+
+    when(entityTypeService.getDerivedTableName(tenantId, entityTypeId))
+      .thenReturn(derivedTableName);
+
+    String actualDerivedTableName = entityTypeService.getDerivedTableName(
+      tenantId,
+      entityTypeId
+    );
+    assertEquals(derivedTableName, actualDerivedTableName);
+  }
 }

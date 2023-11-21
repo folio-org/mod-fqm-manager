@@ -188,7 +188,7 @@ class EntityTypeServiceTest {
     String tenantId = "tenant_01";
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(repo.getEntityTypeDefinition(tenantId, entityTypeId))
       .thenReturn(Optional.of(expectedEntityType));
     EntityType actualDefinition = entityTypeService
       .getEntityTypeDefinition(tenantId, entityTypeId)
@@ -203,8 +203,8 @@ class EntityTypeServiceTest {
     String tenantId = "tenant_01";
     String derivedTableName = "derived_table_01";
 
-    when(entityTypeService.getDerivedTableName(tenantId, entityTypeId))
-      .thenReturn(derivedTableName);
+    when(repo.getDerivedTableName(tenantId, entityTypeId))
+      .thenReturn(Optional.of(derivedTableName));
 
     String actualDerivedTableName = entityTypeService.getDerivedTableName(
       tenantId,

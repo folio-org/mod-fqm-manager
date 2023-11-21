@@ -45,6 +45,7 @@ public class EntityTypeService {
   @Transactional(readOnly = true)
   public ColumnValues getColumnValues(UUID entityTypeId, String columnName, @Nullable String searchText) {
     String fql = String.format(COLUMN_VALUE_SEARCH_FQL, columnName, searchText == null ? "" : searchText);
+    System.out.println("printing fql" +fql);
     List<Map<String, Object>> results = queryService.processQuery(
       executionContext.getTenantId(),
       entityTypeId,

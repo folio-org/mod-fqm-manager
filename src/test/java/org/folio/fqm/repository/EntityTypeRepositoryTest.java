@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,5 +44,20 @@ class EntityTypeRepositoryTest {
       new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL));
     List<EntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+  }
+
+  @Test
+  void shouldReturnValidDerivedTableName() {
+    String tenant = "tenant_01";
+    UUID entityTypeId = UUID.randomUUID();
+    String actualTableName = repo.getDerivedTableName(tenant, entityTypeId).get();
+    assertEquals(tenant + "_mod_fqm_manager." + EntityTypeRepositoryTestDataProvider.TEST_DERIVED_TABLE_NAME, actualTableName);
+  }
+
+  @Test
+  void shouldReturnValidEntityTypeDefinition() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType actualEntityTypeDefinition = repo.getEntityTypeDefinition("tenant_01", entityTypeId).get();
+    assertEquals(EntityTypeRepositoryTestDataProvider.TEST_ENTITY_DEFINITION, actualEntityTypeDefinition);
   }
 }

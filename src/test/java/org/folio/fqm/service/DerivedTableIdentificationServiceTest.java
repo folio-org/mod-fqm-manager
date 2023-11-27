@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 class DerivedTableIdentificationServiceTest {
 
-  private static final String TENANT_ID = "tenant-01";
   private static final String DERIVED_TABLE_NAME = "derived-table-01";
 
   private EntityTypeRepository entityTypeRepository;
@@ -41,14 +40,12 @@ class DerivedTableIdentificationServiceTest {
     EntityType entityWithoutSubTypes = TestDataFixture.getEntityDefinition();
     when(
       entityTypeRepository.getDerivedTableName(
-        TENANT_ID,
         UUID.fromString(entityWithoutSubTypes.getId())
       )
     )
       .thenReturn(Optional.of(DERIVED_TABLE_NAME));
 
     String actual = derivedTableIdentifier.getDerivedTable(
-      TENANT_ID,
       entityWithoutSubTypes,
       new Fql(new EqualsCondition("field", 1)),
       false
@@ -81,14 +78,12 @@ class DerivedTableIdentificationServiceTest {
 
     when(
       entityTypeRepository.getEntityTypeDefinition(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
       .thenReturn(Optional.of(sub));
     when(
       entityTypeRepository.getDerivedTableName(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
@@ -103,7 +98,6 @@ class DerivedTableIdentificationServiceTest {
       )
     );
     String actual = derivedTableIdentifier.getDerivedTable(
-      TENANT_ID,
       main,
       fql,
       false
@@ -135,14 +129,12 @@ class DerivedTableIdentificationServiceTest {
 
     when(
       entityTypeRepository.getEntityTypeDefinition(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
       .thenReturn(Optional.of(sub));
     when(
       entityTypeRepository.getDerivedTableName(
-        TENANT_ID,
         UUID.fromString(main.getId())
       )
     )
@@ -157,7 +149,6 @@ class DerivedTableIdentificationServiceTest {
       )
     );
     String actual = derivedTableIdentifier.getDerivedTable(
-      TENANT_ID,
       main,
       fql,
       false
@@ -192,14 +183,12 @@ class DerivedTableIdentificationServiceTest {
 
     when(
       entityTypeRepository.getEntityTypeDefinition(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
       .thenReturn(Optional.of(sub));
     when(
       entityTypeRepository.getDerivedTableName(
-        TENANT_ID,
         UUID.fromString(main.getId())
       )
     )
@@ -209,7 +198,6 @@ class DerivedTableIdentificationServiceTest {
       new EqualsCondition(TestDataFixture.column1().getName(), 1)
     );
     String actual = derivedTableIdentifier.getDerivedTable(
-      TENANT_ID,
       main,
       fql,
       true
@@ -244,14 +232,12 @@ class DerivedTableIdentificationServiceTest {
 
     when(
       entityTypeRepository.getEntityTypeDefinition(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
       .thenReturn(Optional.of(sub));
     when(
       entityTypeRepository.getDerivedTableName(
-        TENANT_ID,
         UUID.fromString(sub.getId())
       )
     )
@@ -261,7 +247,6 @@ class DerivedTableIdentificationServiceTest {
       new EqualsCondition(TestDataFixture.column1().getName(), 1)
     );
     String actual = derivedTableIdentifier.getDerivedTable(
-      TENANT_ID,
       main,
       fql,
       false

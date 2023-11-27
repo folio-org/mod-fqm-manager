@@ -55,7 +55,6 @@ class QueryProcessorServiceTest {
 
     verify(idStreamer, times(1))
       .streamIdsInBatch(
-        fqlQueryWithContext.tenantId(),
         fqlQueryWithContext.entityTypeId(),
         fqlQueryWithContext.sortResults(),
         fql,
@@ -81,7 +80,7 @@ class QueryProcessorServiceTest {
 
     doThrow(new RuntimeException("something went wrong"))
       .when(idStreamer)
-      .streamIdsInBatch(fqlQueryWithContext.tenantId(),
+      .streamIdsInBatch(
         fqlQueryWithContext.entityTypeId(),
         fqlQueryWithContext.sortResults(),
         fql,
@@ -99,7 +98,6 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldRunSynchronousQueryAndReturnPaginatedResults() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
@@ -113,8 +111,8 @@ class QueryProcessorServiceTest {
       Map.of("field1", "value1", "field2", "value4")
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
-    when(resultSetRepository.getResultSet(tenantId, entityTypeId, expectedFql, fields, afterId, limit)).thenReturn(expectedContent);
-    List<Map<String, Object>> actualContent = service.processQuery(tenantId, entityTypeId, fqlQuery, fields, afterId, limit);
+    when(resultSetRepository.getResultSet(entityTypeId, expectedFql, fields, afterId, limit)).thenReturn(expectedContent);
+    List<Map<String, Object>> actualContent = service.processQuery(entityTypeId, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
   }
 }

@@ -33,7 +33,6 @@ class QueryResultsSorterServiceTest {
 
   @Test
   void shouldStreamSortedIds() {
-    String tenantId = "tenant_01";
     UUID queryId = UUID.randomUUID();
     int batchSize = 100;
     var sqlSelectionClause = select(field("result_id"))
@@ -45,7 +44,6 @@ class QueryResultsSorterServiceTest {
     Consumer<Throwable> errorConsumer = mock(Consumer.class);
 
     queryResultsSorterService.streamSortedIds(
-      tenantId,
       queryId,
       batchSize,
       idsConsumer,
@@ -53,12 +51,11 @@ class QueryResultsSorterServiceTest {
       errorConsumer
     );
     verify(idStreamer, times(1))
-      .streamIdsInBatch(tenantId, queryId, true, batchSize, idsConsumer);
+      .streamIdsInBatch(queryId, true, batchSize, idsConsumer);
   }
 
   @Test
   void shouldGetSortedIds() {
-    String tenantId = "tenant_01";
     UUID queryId = UUID.randomUUID();
     int offset = 0;
     int limit = 0;
@@ -67,7 +64,6 @@ class QueryResultsSorterServiceTest {
     when(idStreamer.getSortedIds(derivedTableName, offset, limit, queryId))
       .thenReturn(expectedIds);
     List<UUID> actualIds = queryResultsSorterService.getSortedIds(
-      tenantId,
       queryId,
       offset,
       limit

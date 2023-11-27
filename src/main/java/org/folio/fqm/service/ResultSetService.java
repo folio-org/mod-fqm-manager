@@ -20,11 +20,10 @@ public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
 
-  public List<Map<String, Object>> getResultSet(String tenantId,
-                                                UUID entityTypeId,
+  public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
                                                 List<UUID> ids) {
-    List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(tenantId, entityTypeId, fields, ids);
+    List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(entityTypeId, fields, ids);
     // Sort the contents in Java code as sorting in DB views run very slow intermittently
     return getSortedContents(ids, unsortedResults);
   }

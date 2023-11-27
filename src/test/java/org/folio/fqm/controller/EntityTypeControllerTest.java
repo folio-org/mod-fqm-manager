@@ -43,7 +43,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), id)).thenReturn(Optional.of(mockDefinition));
+    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(Optional.of(mockDefinition));
     RequestBuilder builder = MockMvcRequestBuilders.get(GET_DEFINITION_URL, id).accept(MediaType.APPLICATION_JSON).
       header(XOkapiHeaders.TENANT, "tenant_01");
     mockMvc.perform(builder)
@@ -60,7 +60,7 @@ class EntityTypeControllerTest {
   void shouldReturnNotFoundErrorWhenEntityNotFound() throws Exception {
     UUID id = UUID.randomUUID();
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), UUID.randomUUID())).thenReturn(Optional.empty());
+    when(entityTypeService.getEntityTypeDefinition(UUID.randomUUID())).thenReturn(Optional.empty());
     RequestBuilder builder = MockMvcRequestBuilders.get(GET_DEFINITION_URL, id).accept(MediaType.APPLICATION_JSON).header(XOkapiHeaders.TENANT, "tenant_01");
     mockMvc.perform(builder).andExpect(status().isNotFound());
   }

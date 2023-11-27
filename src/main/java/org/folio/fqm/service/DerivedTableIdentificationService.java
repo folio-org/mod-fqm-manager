@@ -37,7 +37,7 @@ public class DerivedTableIdentificationService {
   /**
    * Returns the most optimal derived table for running the given FQL query.
    */
-  public String getDerivedTable(String tenantId, EntityType mainEntity, Fql fql, boolean shouldSortResults) {
+  public String getDerivedTable(EntityType mainEntity, Fql fql, boolean shouldSortResults) {
     log.debug("Identifying derived table for running query {}. Entity Type: {}. Sort results? {}",
       fql, mainEntity.getId(), shouldSortResults);
     List<UUID> subEntityTypeIds = isEmpty(mainEntity.getSubEntityTypeIds()) ? List.of() : mainEntity.getSubEntityTypeIds();
@@ -46,14 +46,14 @@ public class DerivedTableIdentificationService {
     log.debug("Required columns for executing query: {}.", requiredColumns);
 
     String candidateEntityTypeId = subEntityTypeIds.stream()
-      .map(subEntityTypeId -> entityTypeRepository.getEntityTypeDefinition(tenantId, subEntityTypeId))
+      .map(subEntityTypeId -> entityTypeRepository.getEntityTypeDefinition(subEntityTypeId))
       .filter(Optional::isPresent)
       .map(Optional::get)
       .filter(subEntityType -> this.hasAllRequiredColumns(subEntityType, requiredColumns))
       .findFirst()
       .orElse(mainEntity)
       .getId();
-    String derivedTableName = entityTypeRepository.getDerivedTableName(tenantId, UUID.fromString(candidateEntityTypeId))
+    String derivedTableName = entityTypeRepository.getDerivedTableName(UUID.fromString(candidateEntityTypeId))
       .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(mainEntity.getId())));
     log.info("Identified the derived table for running query {}. Requested entity type: {}. Sort? {} " +
         "Candidate entity Type: {}. Derived table: {}", fql, mainEntity.getId(), shouldSortResults, candidateEntityTypeId,

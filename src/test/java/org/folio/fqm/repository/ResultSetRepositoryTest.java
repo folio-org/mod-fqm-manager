@@ -39,7 +39,7 @@ class ResultSetRepositoryTest {
   void getResultSetWithNullFieldsShouldReturnEmptyList() {
     List<UUID> listIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSet("tenant_01", UUID.randomUUID(), null, listIds);
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), null, listIds);
     assertEquals(expectedList, actualList);
   }
 
@@ -48,7 +48,7 @@ class ResultSetRepositoryTest {
     List<UUID> listIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSet("tenant_01", UUID.randomUUID(), fields, listIds);
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
     assertEquals(expectedList, actualList);
   }
 
@@ -63,7 +63,7 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    List<Map<String, Object>> actualList = repo.getResultSet("tenant_01", UUID.randomUUID(), fields, listIds);
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
     assertEquals(expectedList, actualList);
   }
 
@@ -75,14 +75,13 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
-    List<Map<String, Object>> actualList = repo.getResultSet("tenant_02", UUID.randomUUID(), fields, listIds);
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
     assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
     assertEquals(expectedList.get(0).get("arrayField"), actualList.get(0).get("arrayField"));
   }
 
   @Test
   void shouldRunSynchronousQueryAndReturnContents() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     UUID afterId = UUID.randomUUID();
     int limit = 100;
@@ -95,43 +94,40 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    List<Map<String, Object>> actualList = repo.getResultSet(tenantId, entityTypeId, fql, fields, afterId, limit);
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
     assertEquals(expectedList, actualList);
   }
 
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithEmptyFields() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     UUID afterId = UUID.randomUUID();
     int limit = 100;
     Fql fql = new Fql(new EqualsCondition("key1", "value1"));
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSet(tenantId, entityTypeId, fql, fields, afterId, limit);
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
     assertEquals(expectedList, actualList);
   }
 
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithNullFields() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     UUID afterId = UUID.randomUUID();
     int limit = 100;
     Fql fql = new Fql(new EqualsCondition("key1", "value1"));
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSet(tenantId, entityTypeId, fql, null, afterId, limit);
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, null, afterId, limit);
     assertEquals(expectedList, actualList);
   }
 
   @Test
   void shouldRunSynchronousQueryAndHandleNullAfterIdParameter() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     int limit = 100;
     Fql fql = new Fql(new EqualsCondition("key1", "value1"));
     List<String> fields = List.of("id", "key1", "key2");
-    List<Map<String, Object>> actualList = repo.getResultSet(tenantId, entityTypeId, fql, fields, null, limit);
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, null, limit);
     assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);
   }
 }

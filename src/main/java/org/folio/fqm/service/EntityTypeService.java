@@ -8,7 +8,6 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ import java.util.UUID;
 public class EntityTypeService {
   private static final String COLUMN_VALUE_SEARCH_FQL = "{\"%s\": {\"$regex\": \"%s\"}}";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private final FolioExecutionContext executionContext;
   private final EntityTypeRepository entityTypeRepository;
   private final QueryProcessorService queryService;
 
@@ -53,7 +51,6 @@ public class EntityTypeService {
   public ColumnValues getColumnValues(UUID entityTypeId, String columnName, @Nullable String searchText) {
     String fql = String.format(COLUMN_VALUE_SEARCH_FQL, columnName, searchText == null ? "" : searchText);
     List<Map<String, Object>> results = queryService.processQuery(
-      executionContext.getTenantId(),
       entityTypeId,
       fql,
       List.of(ID_FIELD_NAME, columnName),
@@ -67,12 +64,12 @@ public class EntityTypeService {
     return new ColumnValues().content(valueWithLabels);
   }
 
-  public Optional<EntityType> getEntityTypeDefinition(String tenantId, UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(tenantId, entityTypeId);
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId);
   }
 
-  public String getDerivedTableName(String tenantId, UUID entityTypeId) {
-    return entityTypeRepository.getDerivedTableName(tenantId, entityTypeId)
+  public String getDerivedTableName(UUID entityTypeId) {
+    return entityTypeRepository.getDerivedTableName(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 

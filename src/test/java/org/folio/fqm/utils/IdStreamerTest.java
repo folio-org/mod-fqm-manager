@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
  */
 class IdStreamerTest {
 
-  private static final String TENANT_ID = "Tenant_01";
   private static final UUID ENTITY_TYPE_ID = UUID.randomUUID();
 
   private IdStreamer idStreamer;
@@ -56,7 +55,7 @@ class IdStreamerTest {
         entityTypeRepository,
         new DerivedTableIdentificationService(entityTypeRepository),
         new FqlToSqlConverterService(new FqlService()),
-        new QueryDetailsRepository(context, entityTypeRepository)
+        new QueryDetailsRepository(context)
       );
   }
 
@@ -67,7 +66,6 @@ class IdStreamerTest {
     Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback ->
       actualList.addAll(idsWithCancelCallback.ids());
     int idsCount = idStreamer.streamIdsInBatch(
-      TENANT_ID,
       queryId,
       true,
       2,
@@ -88,7 +86,6 @@ class IdStreamerTest {
     Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback ->
       actualList.addAll(idsWithCancelCallback.ids());
     int idsCount = idStreamer.streamIdsInBatch(
-      TENANT_ID,
       ENTITY_TYPE_ID,
       true,
       fql,
@@ -129,14 +126,13 @@ class IdStreamerTest {
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
     IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null, null, null);
 
-    when(mockRepository.getEntityTypeDefinition(TENANT_ID, ENTITY_TYPE_ID))
+    when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());
 
     assertThrows(
       EntityTypeNotFoundException.class,
       () ->
         idStreamerWithMockRepo.streamIdsInBatch(
-          TENANT_ID,
           ENTITY_TYPE_ID,
           true,
           fql,

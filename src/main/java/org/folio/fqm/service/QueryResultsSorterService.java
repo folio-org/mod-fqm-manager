@@ -26,7 +26,6 @@ public class QueryResultsSorterService {
   /**
    * Streams the result IDs of provided queryId, after sorting the results based on default sort criteria of entity type.
    *
-   * @param tenantId       Tenant ID
    * @param queryId        Query ID
    * @param batchSize      Count of IDs to be returned in a single batch
    * @param idsConsumer    This consumer will receive the IDs in batches, and each batch will also include a
@@ -37,16 +36,14 @@ public class QueryResultsSorterService {
    * @param errorHandler   If an error occurs during query execution, this consumer will be called and given the
    *                       exception responsible for the failure
    */
-  public void streamSortedIds(String tenantId,
-                              UUID queryId,
+  public void streamSortedIds(UUID queryId,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer,
                               IntConsumer successHandler,
                               Consumer<Throwable> errorHandler) {
     try {
-      log.info("Streaming sorted result ids for tenant {}, queryId: {}", tenantId, queryId);
+      log.info("Streaming sorted result ids for queryId: {}", queryId);
       int idsCount = idStreamer.streamIdsInBatch(
-        tenantId,
         queryId,
         true,
         batchSize,
@@ -58,15 +55,11 @@ public class QueryResultsSorterService {
     }
   }
 
-  public List<UUID> getSortedIds(String tenantId, UUID queryId,
+  public List<UUID> getSortedIds(UUID queryId,
                                  int offset, int limit) {
     log.debug("Getting sorted ids for query {}, offset {}, limit {}", queryId, offset, limit);
     // Sort ids based on the sort criteria defined in the entity type definition
     // Note: This does not sort right now, due to performance concerns. Instead, it just pulls straight from query_results
-    return idStreamer.getSortedIds(getFqmSchemaName(tenantId) + ".query_results", offset, limit, queryId);
-  }
-
-  private String getFqmSchemaName(String tenantId) {
-    return tenantId + "_mod_fqm_manager";
+    return idStreamer.getSortedIds("query_results", offset, limit, queryId);
   }
 }

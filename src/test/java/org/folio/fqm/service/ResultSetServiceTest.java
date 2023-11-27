@@ -28,7 +28,6 @@ class ResultSetServiceTest {
 
   @Test
   void shouldGetResultSet() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     List<Map<String, Object>> expectedResult = TestDataFixture.getEntityContents();
     List<Map<String, Object>> reversedContent = Lists.reverse(expectedResult);
@@ -38,11 +37,10 @@ class ResultSetServiceTest {
       listIds.add((UUID) content.get(ID_FIELD_NAME))
     );
     when(
-      resultSetRepository.getResultSet(tenantId, entityTypeId, fields, listIds)
+      resultSetRepository.getResultSet(entityTypeId, fields, listIds)
     )
       .thenReturn(reversedContent);
     List<Map<String, Object>> actualResult = service.getResultSet(
-      tenantId,
       entityTypeId,
       fields,
       listIds

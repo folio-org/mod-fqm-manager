@@ -92,8 +92,7 @@ public class QueryManagementService {
     if (!fields.contains("id")) {
       fields.add("id");
     }
-    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(executionContext.getTenantId(),
-      entityTypeId, query, fields, afterId, limit);
+    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityTypeId, query, fields, afterId, limit);
     return new ResultsetPage().content(queryResults);
   }
 
@@ -152,7 +151,7 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType ,fqlQuery);
     if (!errorMap.isEmpty()) {
@@ -163,15 +162,14 @@ public class QueryManagementService {
   public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
     UUID entityTypeId = query.entityTypeId();
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-    String derivedTable = entityTypeService.getDerivedTableName(executionContext.getTenantId(), entityTypeId);
-    return queryResultsSorterService.getSortedIds(executionContext.getTenantId(), queryId,
-      offset, limit);
+    String derivedTable = entityTypeService.getDerivedTableName(entityTypeId);
+    return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<UUID> ids) {
-    return resultSetService.getResultSet(executionContext.getTenantId(), entityTypeId, fields, ids);
+    return resultSetService.getResultSet(entityTypeId, fields, ids);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
@@ -186,7 +184,7 @@ public class QueryManagementService {
         fields.add("id");
       }
       List<UUID> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
-      return resultSetService.getResultSet(executionContext.getTenantId(), entityTypeId, fields, resultIds);
+      return resultSetService.getResultSet(entityTypeId, fields, resultIds);
     }
     return List.of();
   }

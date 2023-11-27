@@ -20,11 +20,10 @@ public class QueryDetailsRepository {
   private static final Field<UUID> QUERY_ID = field("query_id", UUID.class);
 
   private final DSLContext jooqContext;
-  private final EntityTypeRepository entityTypeRepository;
 
-  public UUID getEntityTypeId(String tenantId, UUID queryId) {
+  public UUID getEntityTypeId(UUID queryId) {
     return jooqContext.select(ENTITY_TYPE_ID)
-      .from(table(entityTypeRepository.getFqmSchemaName(tenantId) + ".query_details"))
+      .from(table("query_details"))
       .where(QUERY_ID.eq(val(queryId)))
       .fetchOne(ENTITY_TYPE_ID);
   }

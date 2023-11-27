@@ -77,7 +77,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldSaveValidFqlQuery() {
-    String tenantId = "tenant_01";
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
@@ -91,8 +90,7 @@ class QueryManagementServiceTest {
     QueryIdentifier expectedIdentifier = new QueryIdentifier()
       .queryId(UUID.randomUUID());
     when(executionContext.getUserId()).thenReturn(createdById);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
@@ -106,7 +104,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldNotSaveInvalidFqlQuery() {
-    String tenantId = "tenant_01";
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
@@ -117,9 +114,8 @@ class QueryManagementServiceTest {
     SubmitQuery submitQuery = new SubmitQuery()
       .entityTypeId(entityTypeId)
       .fqlQuery(fqlQuery);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(executionContext.getUserId()).thenReturn(createdById);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of("field1", "Field is invalid"));
@@ -200,7 +196,6 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        any(),
         eq(expectedQuery.entityTypeId()),
         eq(expectedQuery.fields()),
         eq(resultIds)
@@ -256,7 +251,6 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        any(),
         eq(expectedQuery.entityTypeId()),
         eq(List.of("id")),
         eq(resultIds)
@@ -312,7 +306,6 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        any(),
         eq(expectedQuery.entityTypeId()),
         eq(List.of("id")),
         eq(resultIds)
@@ -371,7 +364,6 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        any(),
         eq(expectedQuery.entityTypeId()),
         eq(expectedFields),
         eq(resultIds)
@@ -389,7 +381,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultSet() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery =
@@ -419,14 +410,12 @@ class QueryManagementServiceTest {
     List<String> fields = List.of("id", "field1", "field2");
     ResultsetPage expectedResults = new ResultsetPage()
       .content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
     when(
       queryProcessorService.processQuery(
-        tenantId,
         entityTypeId,
         fqlQuery,
         fields,
@@ -447,7 +436,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithFieldAndIdsIfIdsNotProvided() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery =
@@ -477,14 +465,12 @@ class QueryManagementServiceTest {
     List<String> fields = new ArrayList<>(List.of("field1", "field2"));
     ResultsetPage expectedResults = new ResultsetPage()
       .content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
     when(
       queryProcessorService.processQuery(
-        tenantId,
         entityTypeId,
         fqlQuery,
         List.of("field1", "field2", "id"),
@@ -505,7 +491,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithOnlyIdsIfFieldsNotProvided() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery =
@@ -520,14 +505,12 @@ class QueryManagementServiceTest {
     );
     ResultsetPage expectedResults = new ResultsetPage()
       .content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
     when(
       queryProcessorService.processQuery(
-        tenantId,
         entityTypeId,
         fqlQuery,
         List.of("id"),
@@ -548,15 +531,13 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldValidateQuery() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery =
       """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
@@ -567,16 +548,14 @@ class QueryManagementServiceTest {
 
   @Test
   void validateQueryShouldThrowErrorIfEntityTypeNotFound() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     String fqlQuery =
       """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     doThrow(new EntityTypeNotFoundException(entityTypeId))
       .when(entityTypeService)
-      .getEntityTypeDefinition(tenantId, entityTypeId);
+      .getEntityTypeDefinition(entityTypeId);
     assertThrows(
       EntityTypeNotFoundException.class,
       () -> queryManagementService.validateQuery(entityTypeId, fqlQuery)
@@ -585,15 +564,13 @@ class QueryManagementServiceTest {
 
   @Test
   void validateQueryShouldThrowErrorForInvalidFql() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery =
       """
                       {"field1": {"$nn": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(entityTypeService.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of("field1", "field is invalid"));
@@ -653,28 +630,24 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetSortedIds() {
-    String tenantId = "tenant_01";
     String derivedTableName = "table_01";
     EntityType entityType = new EntityType().name("test-entity");
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false))
       .thenReturn(Optional.of(query));
     when(
       entityTypeService.getEntityTypeDefinition(
-        executionContext.getTenantId(),
         query.entityTypeId()
       )
     )
       .thenReturn(Optional.of(entityType));
-    when(entityTypeService.getDerivedTableName(tenantId, query.entityTypeId()))
+    when(entityTypeService.getDerivedTableName(query.entityTypeId()))
       .thenReturn(derivedTableName);
     when(
       queryResultsSorterService.getSortedIds(
-        tenantId,
         query.queryId(),
         offset,
         limit
@@ -691,17 +664,14 @@ class QueryManagementServiceTest {
 
   @Test
   void getSortedIdsShouldThrowErrorIfEntityTypeNotFound() {
-    String tenantId = "tenant_01";
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     UUID queryId = query.queryId();
     int offset = 0;
     int limit = 0;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false))
       .thenReturn(Optional.of(query));
     when(
       entityTypeService.getEntityTypeDefinition(
-        executionContext.getTenantId(),
         query.entityTypeId()
       )
     )
@@ -728,7 +698,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetContents() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<String> fields = List.of("id", "field1", "field2");
@@ -736,8 +705,7 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(resultSetService.getResultSet(tenantId, entityTypeId, fields, ids))
+    when(resultSetService.getResultSet(entityTypeId, fields, ids))
       .thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(
       entityTypeId,

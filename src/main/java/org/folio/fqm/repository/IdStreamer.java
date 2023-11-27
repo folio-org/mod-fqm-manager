@@ -44,14 +44,13 @@ public class IdStreamer {
   /**
    * Executes the given Fql Query and stream the result Ids back.
    */
-  public int streamIdsInBatch(String tenantId,
-                              UUID entityTypeId,
+  public int streamIdsInBatch(UUID entityTypeId,
                               boolean sortResults,
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    EntityType entityType = getEntityType(tenantId, entityTypeId);
-    String derivedTable = derivedTableIdentifier.getDerivedTable(tenantId, entityType, fql, sortResults);
+    EntityType entityType = getEntityType(entityTypeId);
+    String derivedTable = derivedTableIdentifier.getDerivedTable(entityType, fql, sortResults);
     Condition sqlWhereClause = this.fqlToSqlConverter.getSqlCondition(fql.fqlCondition(), entityType);
     return this.streamIdsInBatch(entityType, derivedTable, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
@@ -59,18 +58,17 @@ public class IdStreamer {
   /**
    * Streams the result Ids of the given queryId
    */
-  public int streamIdsInBatch(String tenantId,
-                              UUID queryId,
+  public int streamIdsInBatch(UUID queryId,
                               boolean sortResults,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    UUID entityTypeId = queryDetailsRepository.getEntityTypeId(tenantId, queryId);
-    EntityType entityType = getEntityType(tenantId, entityTypeId);
-    String derivedTable = entityTypeRepository.getDerivedTableName(tenantId, entityTypeId)
+    UUID entityTypeId = queryDetailsRepository.getEntityTypeId(queryId);
+    EntityType entityType = getEntityType(entityTypeId);
+    String derivedTable = entityTypeRepository.getDerivedTableName(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     Condition condition = field(ID_FIELD_NAME).in(
       select(field(RESULT_ID))
-        .from(table(entityTypeRepository.getFqmSchemaName(tenantId) + ".query_results"))
+        .from(table("query_results"))
         .where(field("query_id").eq(queryId))
     );
     return streamIdsInBatch(entityType, derivedTable, sortResults, condition, batchSize, idsConsumer);
@@ -138,8 +136,8 @@ public class IdStreamer {
     return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
   }
 
-  private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(tenantId, entityTypeId)
+  private EntityType getEntityType(UUID entityTypeId) {
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 }

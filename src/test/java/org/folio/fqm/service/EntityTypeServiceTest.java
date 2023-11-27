@@ -29,9 +29,6 @@ class EntityTypeServiceTest {
   @Mock
   private QueryProcessorService queryProcessorService;
 
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-
   @InjectMocks
   private EntityTypeService entityTypeService;
 
@@ -60,7 +57,6 @@ class EntityTypeServiceTest {
   void shouldGetValueWithLabel() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
@@ -73,10 +69,8 @@ class EntityTypeServiceTest {
     String expectedFql =
       "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
-    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(
       queryProcessorService.processQuery(
-        tenantId,
         entityTypeId,
         expectedFql,
         fields,
@@ -103,7 +97,6 @@ class EntityTypeServiceTest {
   void shouldReturnValueAsLabelIfIdColumnDoNotExist() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
@@ -116,10 +109,8 @@ class EntityTypeServiceTest {
     String expectedFql =
       "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
-    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(
       queryProcessorService.processQuery(
-        tenantId,
         entityTypeId,
         expectedFql,
         fields,
@@ -146,7 +137,6 @@ class EntityTypeServiceTest {
   void shouldFilterBySearchText() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
     String searchText = "search text";
     String expectedFql =
@@ -157,41 +147,37 @@ class EntityTypeServiceTest {
       searchText +
       "\"}}";
 
-    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     entityTypeService.getColumnValues(
       entityTypeId,
       valueColumnName,
       searchText
     );
     verify(queryProcessorService)
-      .processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
+      .processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
 
   @Test
   void shouldHandleNullSearchText() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    String tenantId = "tenant_01";
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql =
       "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
-    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     entityTypeService.getColumnValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService)
-      .processQuery(tenantId, entityTypeId, expectedFql, fields, null, 1000);
+      .processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
 
   @Test
   void shouldReturnEntityTypeDefinition() {
     UUID entityTypeId = UUID.randomUUID();
-    String tenantId = "tenant_01";
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(repo.getEntityTypeDefinition(tenantId, entityTypeId))
+    when(repo.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(expectedEntityType));
     EntityType actualDefinition = entityTypeService
-      .getEntityTypeDefinition(tenantId, entityTypeId)
+      .getEntityTypeDefinition(entityTypeId)
       .get();
 
     assertEquals(expectedEntityType, actualDefinition);
@@ -200,14 +186,12 @@ class EntityTypeServiceTest {
   @Test
   void shouldReturnDerivedTableName() {
     UUID entityTypeId = UUID.randomUUID();
-    String tenantId = "tenant_01";
     String derivedTableName = "derived_table_01";
 
-    when(repo.getDerivedTableName(tenantId, entityTypeId))
+    when(repo.getDerivedTableName(entityTypeId))
       .thenReturn(Optional.of(derivedTableName));
 
     String actualDerivedTableName = entityTypeService.getDerivedTableName(
-      tenantId,
       entityTypeId
     );
     assertEquals(derivedTableName, actualDerivedTableName);

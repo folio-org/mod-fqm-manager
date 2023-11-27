@@ -47,7 +47,7 @@ public class QueryProcessorService {
                             Consumer<Throwable> errorHandler) {
     try {
       Fql fql = fqlService.getFql(fqlQueryWithContext.fqlQuery());
-      int idsCount = idStreamer.streamIdsInBatch(fqlQueryWithContext.tenantId(),
+      int idsCount = idStreamer.streamIdsInBatch(
         fqlQueryWithContext.entityTypeId(),
         fqlQueryWithContext.sortResults(),
         fql,
@@ -72,8 +72,8 @@ public class QueryProcessorService {
    * @param limit        Count of records to be returned.
    * @return Results matching the query
    */
-  public List<Map<String, Object>> processQuery(String tenantId, UUID entityTypeId, String fqlQuery, List<String> fields, UUID afterId, Integer limit) {
+  public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, UUID afterId, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
-    return resultSetRepository.getResultSet(tenantId, entityTypeId, fql, fields, afterId, limit);
+    return resultSetRepository.getResultSet(entityTypeId, fql, fields, afterId, limit);
   }
 }

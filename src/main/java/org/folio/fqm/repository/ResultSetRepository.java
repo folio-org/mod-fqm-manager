@@ -40,35 +40,34 @@ public class ResultSetRepository {
   private final EntityTypeRepository entityTypeRepository;
   private final FqlToSqlConverterService fqlToSqlConverter;
 
-  public List<Map<String, Object>> getResultSet(String tenantId,
-                                                UUID entityTypeId,
+  public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
                                                 List<UUID> ids) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
-    var fieldsToSelect = getSqlFields(getEntityType(tenantId, entityTypeId), fields);
+    var fieldsToSelect = getSqlFields(getEntityType(entityTypeId), fields);
     var result = jooqContext.select(fieldsToSelect)
-      .from(entityTypeRepository.getDerivedTableName(tenantId, entityTypeId)
+      .from(entityTypeRepository.getDerivedTableName(entityTypeId)
         .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId)))
       .where(field(ID_FIELD_NAME).in(ids))
       .fetch();
     return recordToMap(result);
   }
 
-  public List<Map<String, Object>> getResultSet(String tenantId, UUID entityTypeId, Fql fql, List<String> fields, UUID afterId, int limit) {
+  public List<Map<String, Object>> getResultSet(UUID entityTypeId, Fql fql, List<String> fields, UUID afterId, int limit) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
     Condition afterIdCondition = afterId != null ? field(ID_FIELD_NAME).greaterThan(afterId) : DSL.noCondition();
-    EntityType entityType = getEntityType(tenantId, entityTypeId);
+    EntityType entityType = getEntityType(entityTypeId);
     Condition condition = fqlToSqlConverter.getSqlCondition(fql.fqlCondition(), entityType);
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
     var result = jooqContext.select(fieldsToSelect)
-      .from(entityTypeRepository.getDerivedTableName(tenantId, entityTypeId)
+      .from(entityTypeRepository.getDerivedTableName(entityTypeId)
         .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId)))
       .where(condition)
       .and(afterIdCondition)
@@ -87,8 +86,8 @@ public class ResultSetRepository {
       .toList();
   }
 
-  private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(tenantId, entityTypeId)
+  private EntityType getEntityType(UUID entityTypeId) {
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 

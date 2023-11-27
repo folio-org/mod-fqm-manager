@@ -139,9 +139,13 @@ public class FqlToSqlConverterService {
   private Condition handleIn(InCondition inCondition, EntityType entityType) {
     List<Condition> conditionList = inCondition
       .value().stream()
-      .map(val -> val instanceof String ?
-        field(inCondition, entityType).equalIgnoreCase((String) val) :
-        field(inCondition, entityType).eq(val))
+      .map((Object val) -> {
+        if (val instanceof String string) {
+          return field(inCondition, entityType).equalIgnoreCase(string);
+        } else {
+          return field(inCondition, entityType).eq(val);
+        }
+      })
       .toList();
 
     return or(conditionList);
@@ -150,9 +154,13 @@ public class FqlToSqlConverterService {
   private Condition handleNotIn(NotInCondition notInCondition, EntityType entityType) {
     List<Condition> conditionList = notInCondition
       .value().stream()
-      .map(val -> val instanceof String ?
-        field(notInCondition, entityType).notEqualIgnoreCase((String) val) :
-        field(notInCondition, entityType).notEqual(val))
+      .map(val -> {
+        if (val instanceof String string) {
+          return field(notInCondition, entityType).notEqualIgnoreCase(string);
+        } else {
+          return field(notInCondition, entityType).notEqual(val);
+        }
+      })
       .toList();
     return and(conditionList);
   }

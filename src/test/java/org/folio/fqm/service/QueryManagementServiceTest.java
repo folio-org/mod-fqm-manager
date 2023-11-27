@@ -196,9 +196,9 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        eq(expectedQuery.entityTypeId()),
-        eq(expectedQuery.fields()),
-        eq(resultIds)
+        expectedQuery.entityTypeId(),
+        expectedQuery.fields(),
+        resultIds
       )
     )
       .thenReturn(contents);
@@ -251,9 +251,9 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        eq(expectedQuery.entityTypeId()),
-        eq(List.of("id")),
-        eq(resultIds)
+        expectedQuery.entityTypeId(),
+        List.of("id"),
+        resultIds
       )
     )
       .thenReturn(contents);
@@ -306,9 +306,9 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        eq(expectedQuery.entityTypeId()),
-        eq(List.of("id")),
-        eq(resultIds)
+        expectedQuery.entityTypeId(),
+        List.of("id"),
+        resultIds
       )
     )
       .thenReturn(contents);
@@ -364,9 +364,9 @@ class QueryManagementServiceTest {
       .thenReturn(resultIds);
     when(
       resultSetService.getResultSet(
-        eq(expectedQuery.entityTypeId()),
-        eq(expectedFields),
-        eq(resultIds)
+        expectedQuery.entityTypeId(),
+        expectedFields,
+        resultIds
       )
     )
       .thenReturn(contents);

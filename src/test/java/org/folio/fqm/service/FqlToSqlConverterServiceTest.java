@@ -10,7 +10,11 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.jooq.impl.DSL.condition;
@@ -40,310 +44,248 @@ class FqlToSqlConverterServiceTest {
       );
   }
 
-  @Test
-  void shouldGetJooqConditionForFqlEqualsStringCondition() {
-    String fqlCondition = """
-      {"field1": {"$eq": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").equalIgnoreCase("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+  static List<Arguments> jooqConditionsSource() {
+    // list of fqlCondition, expectedCondition
+    return Arrays.asList(
+      Arguments.of(
+        "equals string",
+        """
+          {"field1": {"$eq": "some value"}}""",
+        field("field1").equalIgnoreCase("some value")
+      ),
+      Arguments.of(
+        "equals numeric",
+        """
+          {"field1": {"$eq": 10}}""",
+        field("field1").equal(10)
+      ),
+      Arguments.of(
+        "equals boolean",
+        """
+          {"field1": {"$eq": true}}""",
+        field("field1").equal(true)
+      ),
+      Arguments.of(
+        "equals date and time",
+        """
+          {"field4": {"$eq": "2023-06-02T16:11:08.766+00:00"}}""",
+        field("field4").equalIgnoreCase("2023-06-02T16:11:08.766+00:00")
+      ),
+      Arguments.of(
+        "equals date",
+        """
+          {"field4": {"$eq": "2023-06-02"}}""",
+        field("field4").greaterOrEqual("2023-06-02")
+          .and(field("field4").lessThan("2023-06-03"))
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlEqualsNumericCondition() {
-    String fqlCondition = """
-      {"field1": {"$eq": 10}}
-      """;
-    Condition expectedCondition = field("field1").equal(10);
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+      Arguments.of(
+        "not equals string",
+        """
+          {"field1": {"$ne": "some value"}}""",
+        field("field1").notEqualIgnoreCase("some value")
+      ),
+      Arguments.of(
+        "not equals numeric",
+        """
+          {"field1": {"$ne": 10}}""",
+        field("field1").notEqual(10)
+      ),
+      Arguments.of(
+        "not equals boolean",
+        """
+          {"field1": {"$ne": true}}""",
+        field("field1").notEqual(true)
+      ),
+      Arguments.of(
+        "not equals date and time",
+        """
+          {"field4": {"$ne": "2023-06-02T16:11:08.766+00:00"}}""",
+        field("field4").notEqualIgnoreCase("2023-06-02T16:11:08.766+00:00")
+      ),
+      Arguments.of(
+        "not equals date",
+        """
+          {"field4": {"$ne": "2023-06-02"}}""",
+        field("field4").greaterOrEqual("2023-06-03")
+          .or(field("field4").lessThan("2023-06-02"))
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlEqualsBooleanCondition() {
-    String fqlCondition = """
-      {"field1": {"$eq": true}}
-      """;
-    Condition expectedCondition = field("field1").equal(true);
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+      Arguments.of(
+        "greater than string",
+        """
+          {"field1": {"$gt": "some value"}}""",
+        field("field1").greaterThan("some value")
+      ),
+      Arguments.of(
+        "greater than numeric",
+        """
+          {"field1": {"$gt": 10}}""",
+        field("field1").greaterThan(10)
+      ),
+      Arguments.of(
+        "greater than date",
+        """
+          {"field4": {"$gt": "2023-06-02"}}""",
+        field("field4").greaterOrEqual("2023-06-03")
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlEqualsDateAndTimeCondition() {
-    String fqlCondition = """
-      {"field4": {"$eq": "2023-06-02T16:11:08.766+00:00"}}
-      """;
-    Condition expectedCondition = field("field4").equalIgnoreCase("2023-06-02T16:11:08.766+00:00");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+      Arguments.of(
+        "greater than or equal to string",
+        """
+          {"field1": {"$gte": "some value"}}""",
+        field("field1").greaterOrEqual("some value")
+      ),
+      Arguments.of(
+        "greater than or equal to numeric",
+        """
+          {"field1": {"$gte": 10}}""",
+        field("field1").greaterOrEqual(10)
+      ),
+      Arguments.of(
+        "greater than or equal to date",
+        """
+          {"field4": {"$gte": "2023-06-02"}}""",
+        field("field4").greaterOrEqual("2023-06-02")
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlEqualsDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$eq": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").greaterOrEqual("2023-06-02")
-      .and(field("field4").lessThan("2023-06-03"));
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+      Arguments.of(
+        "less than string",
+        """
+          {"field1": {"$lt": "some value"}}""",
+        field("field1").lessThan("some value")
+      ),
+      Arguments.of(
+        "less than numeric",
+        """
+          {"field1": {"$lt": 10}}""",
+        field("field1").lessThan(10)
+      ),
+      Arguments.of(
+        "less than date",
+        """
+          {"field4": {"$lt": "2023-06-02"}}""",
+        field("field4").lessThan("2023-06-02")
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlNotEqualsStringCondition() {
-    String fqlCondition = """
-      {"field1": {"$ne": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").notEqualIgnoreCase("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
+      Arguments.of(
+        "less than or equal to string",
+        """
+          {"field1": {"$lte": "some value"}}""",
+        field("field1").lessOrEqual("some value")
+      ),
+      Arguments.of(
+        "less than or equal to numeric",
+        """
+          {"field1": {"$lte": 10}}""",
+        field("field1").lessOrEqual(10)
+      ),
+      Arguments.of(
+        "less than or equal to date",
+        """
+          {"field4": {"$lte": "2023-06-02"}}""",
+        field("field4").lessThan("2023-06-03")
+      ),
 
-  @Test
-  void shouldGetJooqConditionForFqlNotEqualsNumericCondition() {
-    String fqlCondition = """
-      {"field1": {"$ne": 10}}
-      """;
-    Condition expectedCondition = field("field1").notEqual(10);
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotEqualsBooleanCondition() {
-    String fqlCondition = """
-      {"field1": {"$ne": true}}
-      """;
-    Condition expectedCondition = field("field1").notEqual(true);
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotEqualsDateAndTimeCondition() {
-    String fqlCondition = """
-      {"field4": {"$ne": "2023-06-02T16:11:08.766+00:00"}}
-      """;
-    Condition expectedCondition = field("field4").notEqualIgnoreCase("2023-06-02T16:11:08.766+00:00");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotEqualsDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$ne": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").greaterOrEqual("2023-06-03")
-      .or(field("field4").lessThan("2023-06-02"));
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlGtCondition() {
-    String fqlCondition = """
-      {"field1": {"$gt": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").greaterThan("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlGtDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$gt": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").greaterOrEqual("2023-06-03");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlGteCondition() {
-    String fqlCondition = """
-      {"field1": {"$gte": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").greaterOrEqual("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlGteDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$gte": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").greaterOrEqual("2023-06-02");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlLtCondition() {
-    String fqlCondition = """
-      {"field1": {"$lt": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").lessThan("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlLtDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$lt": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").lessThan("2023-06-02");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlLteCondition() {
-    String fqlCondition = """
-      {"field1": {"$lte": "some value"}}
-      """;
-    Condition expectedCondition = field("field1").lessOrEqual("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlLteDateCondition() {
-    String fqlCondition = """
-      {"field4": {"$lte": "2023-06-02"}}
-      """;
-    Condition expectedCondition = field("field4").lessThan("2023-06-03");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlRegExCondition() {
-    String fqlCondition = """
-      {"field1": {"$regex": "some_text"}}
-      """;
-    Condition expectedCondition = condition("{0} ~* {1}", field("field1"), val("some_text"));
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlInCondition() {
-    Condition expectedCondition = or(
-      field("field1").equalIgnoreCase("value1"),
-      field("field1").eq(2),
-      field("field1").eq(true)
-    );
-    String fqlCondition = """
-      {"field1": {"$in": ["value1", 2, true]}}
-      """;
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotInCondition() {
-    Condition expectedCondition = and(
-      field("field1").notEqualIgnoreCase("value1"),
-      field("field1").notEqual(2),
-      field("field1").notEqual(true)
-    );
-    String fqlCondition = """
-      {"field1": {"$nin": ["value1", 2, true]}}
-      """;
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlContainsStringCondition() {
-    String fqlCondition = """
-      {"arrayField": {"$contains": "some value"}}
-      """;
-    Condition expectedCondition = field("arrayField").containsIgnoreCase("some value");
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlContainsNumericCondition() {
-    String fqlCondition = """
-      {"arrayField": {"$contains": 10}}
-      """;
-    Condition expectedCondition = field("arrayField").contains(10);
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotContainsStringCondition() {
-    String fqlCondition = """
-      {"arrayField": {"$not_contains": "some value"}}
-      """;
-    Condition expectedCondition = field("arrayField").notContainsIgnoreCase("some value").or(field("arrayField").isNull());
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForFqlNotContainsNumericCondition() {
-    String fqlCondition = """
-      {"arrayField": {"$not_contains": 10}}
-      """;
-    Condition expectedCondition = field("arrayField").notContains(10).or(field("arrayField").isNull());
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
-    assertEquals(expectedCondition, actualCondition);
-  }
-
-  @Test
-  void shouldGetJooqConditionForComplexFql() {
-    String complexFql = """
-      {
-         "$and":[
-            { "field1": { "$eq":"some value" } },
-            { "field2": { "$eq":true } },
-            {
-              "$and":[
-                  { "field3": { "$lte":3 } },
-                  { "field1": { "$eq":false } }
-              ]},
-            { "field2":{ "$in":[ "value1", 2, true ] }},
-            { "field3":{ "$ne": 5 }},
-            { "field1":{ "$gt": 9 }},
-            { "field2":{ "$lt": 11 }},
-            { "field3":{ "$nin":[ "value1", 2, true ] }}
-         ]
-      }
-      """;
-    Condition expectedCondition = field("field1").equalIgnoreCase("some value")
-      .and(field("field2").eq(true))
-      .and(field("field3").lessOrEqual(3))
-      .and(field("field1").eq(false))
-      .and(
+      Arguments.of(
+        "regex",
+        """
+          {"field1": {"$regex": "some_text"}}""",
+        condition("{0} ~* {1}", field("field1"), val("some_text"))
+      ),
+      Arguments.of(
+        "in list",
+        """
+          {"field1": {"$in": ["value1", 2, true]}}""",
         or(
-          field("field2").equalIgnoreCase("value1"),
-          field("field2").eq(2),
-          field("field2").eq(true)
+          field("field1").equalIgnoreCase("value1"),
+          field("field1").eq(2),
+          field("field1").eq(true)
         )
-      )
-      .and(field("field3").notEqual(5))
-      .and(field("field1").greaterThan(9))
-      .and(field("field2").lessThan(11))
-      .and(
+      ),
+      Arguments.of(
+        "not in list",
+        """
+          {"field1": {"$nin": ["value1", 2, true]}}""",
         and(
-          field("field3").notEqualIgnoreCase("value1"),
-          field("field3").notEqual(2),
-          field("field3").notEqual(true)
+          field("field1").notEqualIgnoreCase("value1"),
+          field("field1").notEqual(2),
+          field("field1").notEqual(true)
         )
-      );
+      ),
 
-    Condition actualCondition = fqlToSqlConverter.getSqlCondition(complexFql, entityType);
-    assertEquals(expectedCondition.toString(), actualCondition.toString());
+      Arguments.of(
+        "contains string",
+        """
+          {"arrayField": {"$contains": "some value"}}""",
+        field("arrayField").containsIgnoreCase("some value")
+      ),
+      Arguments.of(
+        "contains numeric",
+        """
+          {"arrayField": {"$contains": 10}}""",
+        field("arrayField").contains(10)
+      ),
+
+      Arguments.of(
+        "not contains string",
+        """
+          {"arrayField": {"$not_contains": "some value"}}""",
+        field("arrayField").notContainsIgnoreCase("some value").or(field("arrayField").isNull())
+      ),
+      Arguments.of(
+        "not contains numeric",
+        """
+          {"arrayField": {"$not_contains": 10}}""",
+        field("arrayField").notContains(10).or(field("arrayField").isNull())
+      ),
+
+      Arguments.of(
+        "complex condition",
+        """
+          {
+            "$and": [
+              {"field1": {"$eq": "some value"}},
+              {"field2": {"$eq": true}},
+              {"field3": {"$lte": 3}},
+              {"field1": {"$eq": false}},
+              {"field2": {"$in": ["value1", 2, true]}},
+              {"field3": {"$ne": 5}},
+              {"field1": {"$gt": 9}},
+              {"field2": {"$lt": 11}},
+              {"field3": {"$nin": ["value1", 2, true]}}
+            ]
+          }""",
+        field("field1").equalIgnoreCase("some value")
+          .and(field("field2").eq(true))
+          .and(field("field3").lessOrEqual(3))
+          .and(field("field1").eq(false))
+          .and(
+            or(
+              field("field2").equalIgnoreCase("value1"),
+              field("field2").eq(2),
+              field("field2").eq(true)
+            )
+          )
+          .and(field("field3").notEqual(5))
+          .and(field("field1").greaterThan(9))
+          .and(field("field2").lessThan(11))
+          .and(
+            and(
+              field("field3").notEqualIgnoreCase("value1"),
+              field("field3").notEqual(2),
+              field("field3").notEqual(true)
+            )
+          )
+      )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("jooqConditionsSource")
+  void shouldGetJooqConditionForFqlEqualsStringCondition(String label, String fqlCondition, Condition expectedCondition) {
+    Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
+    assertEquals(expectedCondition, actualCondition, "Jooq Condition equals FQL Condition for " + label);
   }
 
   @Test

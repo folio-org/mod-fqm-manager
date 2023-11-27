@@ -46,7 +46,7 @@ public class DerivedTableIdentificationService {
     log.debug("Required columns for executing query: {}.", requiredColumns);
 
     String candidateEntityTypeId = subEntityTypeIds.stream()
-      .map(subEntityTypeId -> entityTypeRepository.getEntityTypeDefinition(subEntityTypeId))
+      .map(entityTypeRepository::getEntityTypeDefinition)
       .filter(Optional::isPresent)
       .map(Optional::get)
       .filter(subEntityType -> this.hasAllRequiredColumns(subEntityType, requiredColumns))

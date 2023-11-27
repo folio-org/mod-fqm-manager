@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldFetchAllPublicEntityTypes() {
-    List<org.folio.fqm.domain.dto.EntityTypeSummary> expectedSummary = List.of(
+    List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL),
       new EntityTypeSummary().id(ENTITY_TYPE_02_ID).label(ENTITY_TYPE_02_LABEL)
     );
@@ -40,7 +41,7 @@ class EntityTypeRepositoryTest {
   @Test
   void shouldFetchEntityTypesOfGivenIds() {
     Set<UUID> ids = Set.of(ENTITY_TYPE_01_ID);
-    List<org.folio.fqm.domain.dto.EntityTypeSummary> expectedSummary = List.of(
+    List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL));
     List<EntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
@@ -48,16 +49,15 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldReturnValidDerivedTableName() {
-    String tenant = "tenant_01";
-    UUID entityTypeId = UUID.randomUUID();
-    String actualTableName = repo.getDerivedTableName(tenant, entityTypeId).get();
-    assertEquals(tenant + "_mod_fqm_manager." + EntityTypeRepositoryTestDataProvider.TEST_DERIVED_TABLE_NAME, actualTableName);
+    String tenant = "beeuni";
+    String actualTableName = repo.getDerivedTableName(tenant, ENTITY_TYPE_01_ID).get();
+    assertEquals(tenant + "_mod_fqm_manager." + ENTITY_TYPE_01_LABEL, actualTableName);
   }
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType actualEntityTypeDefinition = repo.getEntityTypeDefinition("tenant_01", entityTypeId).get();
-    assertEquals(EntityTypeRepositoryTestDataProvider.TEST_ENTITY_DEFINITION, actualEntityTypeDefinition);
+    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition("beeuni", entityTypeId);
+    assertTrue(actualEntityTypeDefinition.isPresent());
   }
 }

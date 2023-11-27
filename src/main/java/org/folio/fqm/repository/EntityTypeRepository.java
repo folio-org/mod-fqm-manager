@@ -31,22 +31,22 @@ import static org.jooq.impl.DSL.trueCondition;
 @Log4j2
 public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
-  public static final String TABLE_NAME = "entity_type_definition";
 
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
   public Optional<String> getDerivedTableName(String tenantId, UUID entityTypeId) {
     log.info("Getting derived table name for tenant {}, entity type ID: {}", tenantId, entityTypeId);
+    String schemaName = getFqmSchemaName(tenantId);
 
     Field<String> derivedTableNameField = field("derived_table_name", String.class);
 
     return jooqContext
       .select(derivedTableNameField)
-      .from(table(TABLE_NAME))
+      .from(schemaName + ".entity_type_definition")
       .where(field(ID_FIELD_NAME).eq(entityTypeId))
       .fetchOptional(derivedTableNameField)
-      .map(tableName -> getFqmSchemaName(tenantId) + "." + tableName);
+      .map(tableName -> schemaName + "." + tableName);
   }
 
   public Optional<EntityType> getEntityTypeDefinition(String tenantId, UUID entityTypeId) {
@@ -56,7 +56,7 @@ public class EntityTypeRepository {
 
     return jooqContext
       .select(definitionField)
-      .from(table(TABLE_NAME))
+      .from(getFqmSchemaName(tenantId) + ".entity_type_definition")
       .where(field(ID_FIELD_NAME).eq(entityTypeId))
       .fetchOptional(definitionField)
       .map(this::unmarshallEntityType);
@@ -71,7 +71,7 @@ public class EntityTypeRepository {
     Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
     Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
     return jooqContext.select(idField, labelAliasField)
-      .from(table(TABLE_NAME))
+      .from(table("entity_type_definition"))
       .where(entityTypeIdCondition.and(publicEntityCondition))
       .fetch()
       .map(

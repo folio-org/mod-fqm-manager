@@ -160,6 +160,11 @@ public class QueryManagementService {
   }
 
   public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
+    Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
+
+    // ensures it exists
+    entityTypeService.getDerivedTableName(query.entityTypeId());
+
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 

@@ -638,12 +638,6 @@ class QueryManagementServiceTest {
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     when(queryRepository.getQuery(query.queryId(), false))
       .thenReturn(Optional.of(query));
-    when(
-      entityTypeService.getEntityTypeDefinition(
-        query.entityTypeId()
-      )
-    )
-      .thenReturn(Optional.of(entityType));
     when(entityTypeService.getDerivedTableName(query.entityTypeId()))
       .thenReturn(derivedTableName);
     when(
@@ -671,7 +665,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(query.queryId(), false))
       .thenReturn(Optional.of(query));
     when(
-      entityTypeService.getEntityTypeDefinition(
+      entityTypeService.getDerivedTableName(
         query.entityTypeId()
       )
     )

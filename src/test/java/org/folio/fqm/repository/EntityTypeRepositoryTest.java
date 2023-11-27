@@ -49,15 +49,13 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldReturnValidDerivedTableName() {
-    String tenant = "beeuni";
-    String actualTableName = repo.getDerivedTableName(tenant, ENTITY_TYPE_01_ID).get();
-    assertEquals(tenant + "_mod_fqm_manager." + ENTITY_TYPE_01_LABEL, actualTableName);
+    String actualTableName = repo.getDerivedTableName(ENTITY_TYPE_01_ID).get();
+    assertEquals(ENTITY_TYPE_01_LABEL, actualTableName);
   }
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {
-    UUID entityTypeId = UUID.randomUUID();
-    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition("beeuni", entityTypeId);
+    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID);
     assertTrue(actualEntityTypeDefinition.isPresent());
   }
 }

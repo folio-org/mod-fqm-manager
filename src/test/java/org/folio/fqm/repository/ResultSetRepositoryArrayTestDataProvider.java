@@ -2,6 +2,7 @@ package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
 /**
  * Mock data provider that returns query results for Repository tests.
  */
-public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
+public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvider {
   public static final List<Map<String, Object>> TEST_ENTITY_CONTENTS = List.of(
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value1", "key2", "value2"),
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value3", "key2", "value4"),
@@ -41,17 +42,9 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
       new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
     ));
 
-  private static final EntityType ENTITY_TYPE = new EntityType()
-    .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME),
-      new EntityTypeColumn().name("key1").dataType(new EntityDataType().dataType("stringType")),
-      new EntityTypeColumn().name("key2").dataType(new EntityDataType().dataType("stringType"))
-    ));
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
-  private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE ID IN .*";
-  private static final String GET_RESULT_SET_SYNC_REGEX = "SELECT .* FROM .* WHERE .* ORDER BY ID FETCH NEXT .*";
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX = "SELECT .* FROM .* WHERE ID IN .*";
+  private static final String ENTITY_TYPE_DEFINITION_WITH_ARRAY_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
@@ -66,23 +59,24 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
       Result<Record1<Object>> result = create.newResult(derivedTableNameField);
       result.add(create.newRecord(derivedTableNameField).values("derived_table_01"));
       mockResult = new MockResult(1, result);
-    } else if (sql.matches(LIST_CONTENTS_BY_ID_SELECTOR_REGEX) || sql.matches(LIST_CONTENTS_BY_IDS_REGEX) ||
-      sql.matches(GET_RESULT_SET_SYNC_REGEX)) {
-      var fields = TEST_ENTITY_CONTENTS.get(0).keySet().stream().sorted().map(DSL::field).toList();
+    } else if (sql.matches(LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX)) {
+      var fields = TEST_ENTITY_WITH_ARRAY_CONTENTS.get(0).keySet().stream().sorted().map(DSL::field).toList();
       Result<Record> result = create.newResult(fields.toArray(Field[]::new));
       result.addAll(
-        TEST_ENTITY_CONTENTS.stream().map(row -> {
+        TEST_ENTITY_WITH_ARRAY_CONTENTS.stream().map(row -> {
             Record record = create.newRecord(fields);
-            row.keySet().stream().sorted().forEach(k -> record.set(field(k), row.get(k)));
+            row.keySet().stream().sorted().forEach(k -> {
+              record.set(field(k), row.get(k));
+            });
             return record;
           })
           .toList()
       );
       mockResult = new MockResult(1, result);
-    } else if (sql.matches(ENTITY_TYPE_DEFINITION_REGEX)) {
+    } else if (sql.matches(ENTITY_TYPE_DEFINITION_WITH_ARRAY_REGEX)) {
       var definitionField = field("definition");
       Result<Record1<Object>> result = create.newResult(definitionField);
-      result.add(create.newRecord(definitionField).values(writeValueAsString(ENTITY_TYPE)));
+      result.add(create.newRecord(definitionField).values(writeValueAsString(ARRAY_ENTITY_TYPE)));
       mockResult = new MockResult(1, result);
     }
     return new MockResult[]{mockResult};

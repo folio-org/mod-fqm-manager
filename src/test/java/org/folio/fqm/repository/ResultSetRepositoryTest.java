@@ -68,19 +68,6 @@ class ResultSetRepositoryTest {
   }
 
   @Test
-  void getResultSetShouldHandleArray() {
-    List<UUID> listIds = List.of(UUID.randomUUID());
-    List<String> fields = List.of("id", "testField");
-    List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_WITH_ARRAY_CONTENTS;
-    List<Map<String, Object>> expectedList = List.of(
-      Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
-    );
-    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
-    assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
-    assertEquals(expectedList.get(0).get("arrayField"), actualList.get(0).get("arrayField"));
-  }
-
-  @Test
   void shouldRunSynchronousQueryAndReturnContents() {
     UUID entityTypeId = UUID.randomUUID();
     UUID afterId = UUID.randomUUID();

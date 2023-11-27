@@ -59,7 +59,7 @@ class QueryResultsSorterServiceTest {
     UUID queryId = UUID.randomUUID();
     int offset = 0;
     int limit = 0;
-    String derivedTableName = "tenant_01_mod_fqm_manager.query_results";
+    String derivedTableName = "query_results";
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     when(idStreamer.getSortedIds(derivedTableName, offset, limit, queryId))
       .thenReturn(expectedIds);

@@ -33,11 +33,11 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
     )
     .defaultSort(List.of(new EntityTypeDefaultSort().columnName(EntityTypeRepository.ID_FIELD_NAME)));
 
-  private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String GET_IDS_QUERY_REGEX = "SELECT ID FROM .*_MOD_FQM_MANAGER\\..* WHERE .* ORDER BY ID ASC";
+  private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String GET_IDS_QUERY_REGEX = "SELECT ID FROM .* WHERE .* ORDER BY ID ASC";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT ID FROM .* WHERE ID IN \\(SELECT RESULT_ID FROM .*_MOD_FQM_MANAGER.QUERY_RESULTS WHERE QUERY_ID = .*";
-  private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM .*.QUERY_DETAILS WHERE QUERY_ID = .*";
+  private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";
   private static final String GET_IDS_REGEX = ".*QUERY_RESULTS.*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

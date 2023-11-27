@@ -47,13 +47,13 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
       new EntityTypeColumn().name("key1").dataType(new EntityDataType().dataType("stringType")),
       new EntityTypeColumn().name("key2").dataType(new EntityDataType().dataType("stringType"))
     ));
-  private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .*_MOD_FQM_MANAGER\\..* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
-  private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .*_MOD_FQM_MANAGER\\..* WHERE ID IN .*";
-  private static final String GET_RESULT_SET_SYNC_REGEX = "SELECT .* FROM .*_MOD_FQM_MANAGER\\..* WHERE .* ORDER BY ID FETCH NEXT .*";
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String ARRAY_ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM TENANT_02_MOD_FQM_MANAGER.ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX = "SELECT .* FROM TENANT_02_MOD_FQM_MANAGER\\..* WHERE ID IN .*";
+  private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
+  private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE ID IN .*";
+  private static final String GET_RESULT_SET_SYNC_REGEX = "SELECT .* FROM .* WHERE .* ORDER BY ID FETCH NEXT .*";
+  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String ARRAY_ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX = "SELECT .* FROM .* WHERE ID IN .*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override

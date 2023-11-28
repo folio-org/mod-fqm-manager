@@ -396,13 +396,11 @@ class QueryManagementServiceTest {
   @Test
   void shouldGetSortedIds() {
     String derivedTableName = "table_01";
-    EntityType entityType = new EntityType().name("test-entity");
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(entityTypeService.getEntityTypeDefinition(query.entityTypeId())).thenReturn(Optional.of(entityType));
     when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenReturn(derivedTableName);
     when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);

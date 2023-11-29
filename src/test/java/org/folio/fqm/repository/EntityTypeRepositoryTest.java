@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldFetchAllPublicEntityTypes() {
-    List<org.folio.fqm.domain.dto.EntityTypeSummary> expectedSummary = List.of(
+    List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL),
       new EntityTypeSummary().id(ENTITY_TYPE_02_ID).label(ENTITY_TYPE_02_LABEL)
     );
@@ -39,9 +41,21 @@ class EntityTypeRepositoryTest {
   @Test
   void shouldFetchEntityTypesOfGivenIds() {
     Set<UUID> ids = Set.of(ENTITY_TYPE_01_ID);
-    List<org.folio.fqm.domain.dto.EntityTypeSummary> expectedSummary = List.of(
+    List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL));
     List<EntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+  }
+
+  @Test
+  void shouldReturnValidDerivedTableName() {
+    String actualTableName = repo.getDerivedTableName(ENTITY_TYPE_01_ID).get();
+    assertEquals(ENTITY_TYPE_01_LABEL, actualTableName);
+  }
+
+  @Test
+  void shouldReturnValidEntityTypeDefinition() {
+    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID);
+    assertTrue(actualEntityTypeDefinition.isPresent());
   }
 }

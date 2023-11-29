@@ -5,11 +5,10 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
-import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
-import org.folio.fqm.lib.service.FqmMetaDataService;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.service.EntityTypeService;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.QueryIdentifier;
-import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
@@ -30,15 +29,10 @@ public class QueryRepository {
 
   private final DSLContext jooqContext;
 
-  // This FqmMetaDataService is needed for a temporary workaround to maintain compatibility
+  // This EntityTypeService is needed for a temporary workaround to maintain compatibility
   // with the UI. Once the UI has been updated to include the fields parameter in a query request,
   // this repository can be removed
-  private final FqmMetaDataService metaDataService;
-
-  // This FolioExecutionContext is needed for a temporary workaround to maintain compatibility
-  // with the UI. Once the UI has been updated to include the fields parameter in a query request,
-  // this can be removed
-  private final FolioExecutionContext executionContext;
+  private final EntityTypeService entityTypeService;
 
   public QueryIdentifier saveQuery(Query query) {
     jooqContext.insertInto(table(QUERY_DETAILS_TABLE))
@@ -91,7 +85,7 @@ public class QueryRepository {
   // temporary workaround to supply fields in the query request. This maintains compatibility
   // until the UI has been updated to pass the fields parameter in a query request.
   private List<String> getFieldsFromEntityType(UUID entityTypeId) {
-    EntityType entityType = metaDataService.getEntityTypeDefinition(executionContext.getTenantId(), entityTypeId)
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     List<String> fields = new ArrayList<>();
     entityType

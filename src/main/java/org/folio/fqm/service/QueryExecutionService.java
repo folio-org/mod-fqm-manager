@@ -1,12 +1,11 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.lib.service.QueryProcessorService;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
-import org.folio.fqm.lib.model.FqlQueryWithContext;
+import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

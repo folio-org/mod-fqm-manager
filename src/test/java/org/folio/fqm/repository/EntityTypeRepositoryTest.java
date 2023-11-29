@@ -1,6 +1,6 @@
 package org.folio.fqm.repository;
 
-import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,20 +30,22 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldFetchAllPublicEntityTypes() {
-    List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL),
-      new EntityTypeSummary().id(ENTITY_TYPE_02_ID).label(ENTITY_TYPE_02_LABEL)
+    List<RawEntityTypeSummary> expectedSummary = List.of(
+      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL),
+      new RawEntityTypeSummary(ENTITY_TYPE_02_ID, ENTITY_TYPE_02_LABEL)
     );
-    List<EntityTypeSummary> actualSummary = repo.getEntityTypeSummary(Set.of());
+
+    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(Set.of());
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
   }
 
   @Test
   void shouldFetchEntityTypesOfGivenIds() {
     Set<UUID> ids = Set.of(ENTITY_TYPE_01_ID);
-    List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(ENTITY_TYPE_01_ID).label(ENTITY_TYPE_01_LABEL));
-    List<EntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
+    List<RawEntityTypeSummary> expectedSummary = List.of(
+      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL));
+
+    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
   }
 

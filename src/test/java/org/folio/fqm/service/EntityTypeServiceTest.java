@@ -18,7 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -55,6 +57,13 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+
+    verify(repo, times(1)).getEntityTypeSummary(ids);
+
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+
+    verifyNoMoreInteractions(repo, localizationService);
   }
 
   @Test

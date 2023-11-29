@@ -49,6 +49,26 @@ public class EntityTypeService {
   }
 
   /**
+   * Returns the definition of a given entity type.
+   *
+   * @param entityTypeId the ID to search for
+   * @return the entity type definition if found, empty otherwise
+   */
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
+    return entityTypeRepository
+      .getEntityTypeDefinition(entityTypeId)
+      .map((EntityType entityType) -> {
+        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
+
+        entityType.getColumns().forEach(column -> 
+          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
+        );
+
+        return entityType;
+      });
+  }
+
+  /**
    * Return top 1000 values of an entity type column, matching the given search text
    *
    * @param entityTypeId ID of the entity type
@@ -71,10 +91,6 @@ public class EntityTypeService {
       .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(valueWithLabels);
-  }
-
-  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId);
   }
 
   public String getDerivedTableName(UUID entityTypeId) {

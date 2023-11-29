@@ -13,6 +13,8 @@ public class LocalizationService {
 
   private static final String ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s";
+  private static final String ENTITY_TYPE_COLUMN_LABEL_TRANSLATION_TEMPLATE =
+    "mod-fqm-manager.entityType.%s.%s";
 
   private TranslationService translationService;
 
@@ -24,6 +26,15 @@ public class LocalizationService {
   public String getEntityTypeLabel(String tableName) {
     return translationService.format(
       ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE.formatted(tableName)
+    );
+  }
+
+  public String getEntityTypeColumnLabel(String tableName, String columnName) {
+    return translationService.format(
+      ENTITY_TYPE_COLUMN_LABEL_TRANSLATION_TEMPLATE.formatted(
+        tableName,
+        columnName
+      )
     );
   }
 }

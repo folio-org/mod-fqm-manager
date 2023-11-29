@@ -127,7 +127,7 @@
 
   "entityType.src_users_addresstype": "Address type",
   "entityType.src_users_addresstype.id": "Id",
-  "entityType.src_users_addresstype.addressType": "Addresstype",
+  "entityType.src_users_addresstype.addressType": "Address type",
 
   "entityType.src_loan_policy_name": "Policy name",
   "entityType.src_loan_policy_name.id": "Id",

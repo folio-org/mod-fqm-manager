@@ -1,12 +1,10 @@
 package org.folio.fqm.controller;
 
 
-import org.folio.fqm.lib.exception.ColumnNotFoundException;
-import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.ColumnNotFoundException;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeService;
-
-import org.folio.fqm.lib.service.FqmMetaDataService;
 import org.folio.querytool.domain.dto.*;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.spring.FolioExecutionContext;
@@ -36,8 +34,6 @@ class EntityTypeControllerTest {
   @MockBean
   private EntityTypeService entityTypeService;
   @MockBean
-  private FqmMetaDataService fqmMetaDataService;
-  @MockBean
   private FolioExecutionContext folioExecutionContext;
 
   @Test
@@ -47,7 +43,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(fqmMetaDataService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), id)).thenReturn(Optional.of(mockDefinition));
+    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(Optional.of(mockDefinition));
     RequestBuilder builder = MockMvcRequestBuilders.get(GET_DEFINITION_URL, id).accept(MediaType.APPLICATION_JSON).
       header(XOkapiHeaders.TENANT, "tenant_01");
     mockMvc.perform(builder)
@@ -64,7 +60,7 @@ class EntityTypeControllerTest {
   void shouldReturnNotFoundErrorWhenEntityNotFound() throws Exception {
     UUID id = UUID.randomUUID();
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(fqmMetaDataService.getEntityTypeDefinition(folioExecutionContext.getTenantId(), UUID.randomUUID())).thenReturn(Optional.empty());
+    when(entityTypeService.getEntityTypeDefinition(UUID.randomUUID())).thenReturn(Optional.empty());
     RequestBuilder builder = MockMvcRequestBuilders.get(GET_DEFINITION_URL, id).accept(MediaType.APPLICATION_JSON).header(XOkapiHeaders.TENANT, "tenant_01");
     mockMvc.perform(builder).andExpect(status().isNotFound());
   }

@@ -1,26 +1,31 @@
 package org.folio.fqm.service;
 
 import lombok.RequiredArgsConstructor;
-import org.folio.fqm.lib.service.QueryProcessorService;
+
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
-import static org.folio.fqm.lib.repository.MetaDataRepository.ID_FIELD_NAME;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class EntityTypeService {
   private static final String COLUMN_VALUE_SEARCH_FQL = "{\"%s\": {\"$regex\": \"%s\"}}";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private final FolioExecutionContext executionContext;
   private final EntityTypeRepository entityTypeRepository;
   private final QueryProcessorService queryService;
 
@@ -46,7 +51,6 @@ public class EntityTypeService {
   public ColumnValues getColumnValues(UUID entityTypeId, String columnName, @Nullable String searchText) {
     String fql = String.format(COLUMN_VALUE_SEARCH_FQL, columnName, searchText == null ? "" : searchText);
     List<Map<String, Object>> results = queryService.processQuery(
-      executionContext.getTenantId(),
       entityTypeId,
       fql,
       List.of(ID_FIELD_NAME, columnName),
@@ -58,6 +62,15 @@ public class EntityTypeService {
       .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(valueWithLabels);
+  }
+
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId);
+  }
+
+  public String getDerivedTableName(UUID entityTypeId) {
+    return entityTypeRepository.getDerivedTableName(entityTypeId)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 
   private ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String columnName) {

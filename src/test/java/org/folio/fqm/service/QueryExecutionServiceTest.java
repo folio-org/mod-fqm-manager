@@ -1,8 +1,7 @@
 package org.folio.fqm.service;
 
 import org.folio.fqm.domain.Query;
-import org.folio.fqm.lib.model.FqlQueryWithContext;
-import org.folio.fqm.lib.service.QueryProcessorService;
+import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

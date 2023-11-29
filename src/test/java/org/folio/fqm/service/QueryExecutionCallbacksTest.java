@@ -1,12 +1,12 @@
 package org.folio.fqm.service;
 
 import org.folio.fql.deserializer.FqlParsingException;
-import org.folio.fqm.util.TestDataFixture;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
-import org.folio.fqm.lib.model.IdsWithCancelCallback;
+import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
+import org.folio.fqm.testutil.TestDataFixture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,13 +1,9 @@
 package org.folio.fqm.service;
 
-import org.folio.fql.FqlService;
-import org.folio.fqm.lib.exception.EntityTypeNotFoundException;
-import org.folio.fqm.lib.service.FqlValidationService;
-import org.folio.fqm.lib.service.FqmMetaDataService;
-import org.folio.fqm.lib.service.QueryProcessorService;
-import org.folio.fqm.lib.service.QueryResultsSorterService;
-import org.folio.fqm.lib.service.ResultSetService;
-import org.folio.fqm.util.TestDataFixture;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.testutil.TestDataFixture;
+import org.folio.fql.service.FqlService;
+import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
@@ -46,8 +42,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QueryManagementServiceTest {
-  @InjectMocks
-  private QueryManagementService queryManagementService;
 
   @Mock
   private QueryRepository queryRepository;
@@ -68,7 +62,7 @@ class QueryManagementServiceTest {
   private QueryResultsSorterService queryResultsSorterService;
 
   @Mock
-  private FqmMetaDataService fqmMetaDataService;
+  private EntityTypeService entityTypeService;
 
   @Mock
   private ResultSetService resultSetService;
@@ -79,9 +73,11 @@ class QueryManagementServiceTest {
   @Mock
   private FqlService fqlService;
 
+  @InjectMocks
+  private QueryManagementService queryManagementService;
+
   @Test
   void shouldSaveValidFqlQuery() {
-    String tenantId = "tenant_01";
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
@@ -91,8 +87,7 @@ class QueryManagementServiceTest {
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
     QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
     when(executionContext.getUserId()).thenReturn(createdById);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
@@ -102,7 +97,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldNotSaveInvalidFqlQuery() {
-    String tenantId = "tenant_01";
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
@@ -110,9 +104,8 @@ class QueryManagementServiceTest {
       {"field1": {"$xy": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(executionContext.getUserId()).thenReturn(createdById);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
     verify(queryExecutionService, times(0)).executeQueryAsync(any());
@@ -162,7 +155,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(any(), eq(expectedQuery.entityTypeId()), eq(expectedQuery.fields()), eq(resultIds))).thenReturn(contents);
+    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedQuery.fields(), resultIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
@@ -192,7 +185,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(any(), eq(expectedQuery.entityTypeId()), eq(List.of("id")), eq(resultIds))).thenReturn(contents);
+    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), List.of("id"), resultIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
@@ -222,7 +215,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(any(), eq(expectedQuery.entityTypeId()), eq(List.of("id")), eq(resultIds))).thenReturn(contents);
+    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), List.of("id"), resultIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
@@ -253,14 +246,13 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(any(), eq(expectedQuery.entityTypeId()), eq(expectedFields), eq(resultIds))).thenReturn(contents);
+    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedFields, resultIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultSet() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
@@ -274,17 +266,15 @@ class QueryManagementServiceTest {
     );
     List<String> fields = List.of("id", "field1", "field2");
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, fields, null, defaultLimit)).thenReturn(expectedContent);
+    when(queryProcessorService.processQuery(entityTypeId, fqlQuery, fields, null, defaultLimit)).thenReturn(expectedContent);
     ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
     assertEquals(expectedResults, actualResults);
   }
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithFieldAndIdsIfIdsNotProvided() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
@@ -298,10 +288,9 @@ class QueryManagementServiceTest {
     );
     List<String> fields = new ArrayList<>(List.of("field1", "field2"));
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, List.of("field1", "field2", "id"), null, defaultLimit))
+    when(queryProcessorService.processQuery(entityTypeId, fqlQuery, List.of("field1", "field2", "id"), null, defaultLimit))
       .thenReturn(expectedContent);
     ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
     assertEquals(expectedResults, actualResults);
@@ -309,7 +298,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithOnlyIdsIfFieldsNotProvided() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
@@ -322,10 +310,9 @@ class QueryManagementServiceTest {
       Map.of("id", resultIds.get(1).toString())
     );
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(tenantId, entityTypeId, fqlQuery, List.of("id"), null, defaultLimit))
+    when(queryProcessorService.processQuery(entityTypeId, fqlQuery, List.of("id"), null, defaultLimit))
       .thenReturn(expectedContent);
     ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, null, null, defaultLimit);
     assertEquals(expectedResults, actualResults);
@@ -333,14 +320,12 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldValidateQuery() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
     assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
@@ -349,28 +334,24 @@ class QueryManagementServiceTest {
 
   @Test
   void validateQueryShouldThrowErrorIfEntityTypeNotFound() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     doThrow(new EntityTypeNotFoundException(entityTypeId))
-      .when(fqmMetaDataService).getEntityTypeDefinition(tenantId, entityTypeId);
+      .when(entityTypeService).getEntityTypeDefinition(entityTypeId);
     assertThrows(EntityTypeNotFoundException.class,
       () -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
   }
 
   @Test
   void validateQueryShouldThrowErrorForInvalidFql() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
                       {"field1": {"$nn": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(fqmMetaDataService.getEntityTypeDefinition(tenantId, entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of("field1", "field is invalid"));
     assertThrows(InvalidFqlException.class,
@@ -414,32 +395,26 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetSortedIds() {
-    String tenantId = "tenant_01";
     String derivedTableName = "table_01";
-    EntityType entityType = new EntityType().name("test-entity");
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
     List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenReturn(Optional.of(entityType));
-    when(fqmMetaDataService.getDerivedTableName(tenantId, query.entityTypeId())).thenReturn(derivedTableName);
-    when(queryResultsSorterService.getSortedIds(tenantId, query.queryId(), offset, limit)).thenReturn(expectedIds);
+    when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenReturn(derivedTableName);
+    when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
   }
 
   @Test
   void getSortedIdsShouldThrowErrorIfEntityTypeNotFound() {
-    String tenantId = "tenant_01";
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     UUID queryId = query.queryId();
     int offset = 0;
     int limit = 0;
-    when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(fqmMetaDataService.getEntityTypeDefinition(executionContext.getTenantId(), query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
+    when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
     assertThrows(EntityTypeNotFoundException.class, () -> queryManagementService.getSortedIds(queryId, offset, limit));
   }
 
@@ -455,7 +430,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetContents() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
     List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<String> fields = List.of("id", "field1", "field2");
@@ -463,8 +437,7 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(resultSetService.getResultSet(tenantId, entityTypeId, fields, ids)).thenReturn(expectedContents);
+    when(resultSetService.getResultSet(entityTypeId, fields, ids)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids);
     assertEquals(expectedContents, actualContents);
   }

@@ -283,7 +283,7 @@ class FqlToSqlConverterServiceTest {
 
   @ParameterizedTest
   @MethodSource("jooqConditionsSource")
-  void shouldGetJooqConditionForFqlEqualsStringCondition(String label, String fqlCondition, Condition expectedCondition) {
+  void shouldGetJooqConditionForFqlCondition(String label, String fqlCondition, Condition expectedCondition) {
     Condition actualCondition = fqlToSqlConverter.getSqlCondition(fqlCondition, entityType);
     assertEquals(expectedCondition, actualCondition, "Jooq Condition equals FQL Condition for " + label);
   }

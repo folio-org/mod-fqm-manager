@@ -27,6 +27,7 @@ public class EntityTypeService {
   private static final String COLUMN_VALUE_SEARCH_FQL = "{\"%s\": {\"$regex\": \"%s\"}}";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private final EntityTypeRepository entityTypeRepository;
+  private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
 
   /**
@@ -36,7 +37,35 @@ public class EntityTypeService {
    */
   @Transactional(readOnly = true)
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
-    return entityTypeRepository.getEntityTypeSummary(entityTypeIds);
+    return entityTypeRepository
+      .getEntityTypeSummary(entityTypeIds)
+      .stream()
+      .map(rawEntityTypeSummary ->
+        new EntityTypeSummary()
+          .id(rawEntityTypeSummary.id())
+          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()))
+      )
+      .toList();
+  }
+
+  /**
+   * Returns the definition of a given entity type.
+   *
+   * @param entityTypeId the ID to search for
+   * @return the entity type definition if found, empty otherwise
+   */
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
+    return entityTypeRepository
+      .getEntityTypeDefinition(entityTypeId)
+      .map((EntityType entityType) -> {
+        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
+
+        entityType.getColumns().forEach(column -> 
+          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
+        );
+
+        return entityType;
+      });
   }
 
   /**
@@ -64,16 +93,12 @@ public class EntityTypeService {
     return new ColumnValues().content(valueWithLabels);
   }
 
-  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId);
-  }
-
   public String getDerivedTableName(UUID entityTypeId) {
     return entityTypeRepository.getDerivedTableName(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 
-  private ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String columnName) {
+  private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String columnName) {
     var valueWithLabel = new ValueWithLabel()
       .label(getColumnValue(allValues, columnName));
     return allValues.containsKey(ID_FIELD_NAME) ?
@@ -81,7 +106,7 @@ public class EntityTypeService {
       valueWithLabel.value(valueWithLabel.getLabel()); // value = label for entity types that do not have "id" column
   }
 
-  private String getColumnValue(Map<String, Object> allValues, String columnName) {
+  private static String getColumnValue(Map<String, Object> allValues, String columnName) {
     return allValues.get(columnName).toString();
   }
 }

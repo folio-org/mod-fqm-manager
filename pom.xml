@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.0.4-SNAPSHOT</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
@@ -59,6 +59,11 @@
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-base</artifactId>
       <version>${folio-spring-base.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-i18n</artifactId>
+      <version>7.3.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
@@ -205,8 +210,17 @@
   </dependencyManagement>
 
   <build>
-    <plugins>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/translations</directory>
+        <targetPath>translations</targetPath>
+      </resource>
+    </resources>
 
+    <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>

@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.*;
@@ -17,7 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,6 +29,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private EntityTypeRepository repo;
+
+  @Mock
+  private LocalizationService localizationService;
 
   @Mock
   private QueryProcessorService queryProcessorService;
@@ -41,10 +47,23 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
-    when(repo.getEntityTypeSummary(ids)).thenReturn(expectedSummary);
+
+    when(repo.getEntityTypeSummary(ids)).thenReturn(List.of(
+      new RawEntityTypeSummary(id1, "translation_label_01"),
+      new RawEntityTypeSummary(id2, "translation_label_02")));
+    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+
+    verify(repo, times(1)).getEntityTypeSummary(ids);
+
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+
+    verifyNoMoreInteractions(repo, localizationService);
   }
 
   @Test

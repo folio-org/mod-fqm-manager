@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.EntityType;
 
 import java.util.List;
@@ -61,22 +60,20 @@ public class EntityTypeRepository {
       .map(this::unmarshallEntityType);
   }
 
-  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
+  public List<RawEntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
     log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
     Field<UUID> idField = field(ID_FIELD_NAME, UUID.class);
-    Field<String> labelAliasField = field("definition ->> 'labelAlias'", String.class);
+    Field<String> nameField = field("definition ->> 'name'", String.class);
     Field<Boolean> privateEntityField = field("(definition ->> 'private')::boolean", Boolean.class);
 
     Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
     Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
-    return jooqContext.select(idField, labelAliasField)
+    return jooqContext.select(idField, nameField)
       .from(table(TABLE_NAME))
       .where(entityTypeIdCondition.and(publicEntityCondition))
       .fetch()
       .map(
-        row -> new EntityTypeSummary()
-          .id(row.get(idField))
-          .label(row.get(labelAliasField))
+        row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField))
       );
   }
 
@@ -84,4 +81,6 @@ public class EntityTypeRepository {
   private EntityType unmarshallEntityType(String str) {
     return objectMapper.readValue(str, EntityType.class);
   }
+
+  public record RawEntityTypeSummary(UUID id, String name) {}
 }

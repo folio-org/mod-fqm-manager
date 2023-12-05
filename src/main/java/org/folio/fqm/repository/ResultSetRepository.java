@@ -82,7 +82,7 @@ public class ResultSetRepository {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldSet.contains(col.getName()))
-      .map(col -> SqlFieldIdentificationUtils.getSqlField(col).as(col.getName()))
+      .map(col -> SqlFieldIdentificationUtils.getSqlResultsField(col).as(col.getName()))
       .toList();
   }
 

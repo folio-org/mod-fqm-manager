@@ -215,7 +215,7 @@ public class FqlToSqlConverterService {
       .stream()
       .filter(col -> columnName.equals(col.getName()))
       .findFirst()
-      .map(SqlFieldIdentificationUtils::getSqlField)
+      .map(SqlFieldIdentificationUtils::getSqlFilterField)
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), columnName));
   }
 }

@@ -39,7 +39,10 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("field2").dataType(new EntityDataType().dataType("stringType")),
           new EntityTypeColumn().name("field3").dataType(new EntityDataType().dataType("stringType")),
           new EntityTypeColumn().name("field4").dataType(new DateType()),
-          new EntityTypeColumn().name("arrayField").dataType(new ArrayType())
+          new EntityTypeColumn().name("arrayField").dataType(new ArrayType()),
+          new EntityTypeColumn().name("fieldWithFilterValueGetter")
+            .dataType(new EntityDataType().dataType("stringType"))
+            .filterValueGetter("thisIsAFilterValueGetter")
         )
       );
   }
@@ -277,6 +280,13 @@ class FqlToSqlConverterServiceTest {
               field("field3").notEqual(true)
             )
           )
+      ),
+
+      Arguments.of(
+        "condition on a field with a filter value getter",
+        """
+           {"fieldWithFilterValueGetter": {"$eq": "Test value"}}""",
+        field("thisIsAFilterValueGetter").equalIgnoreCase("Test value")
       )
     );
   }

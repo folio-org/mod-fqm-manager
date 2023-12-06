@@ -1,0 +1,51 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="create_view_purchase_order_line" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_purchase_order_line">
+      SELECT * FROM ${tenant_id}_mod_orders_storage.po_line
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_purchase_order" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "purchase_order" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_purchase_order">
+      SELECT * FROM ${tenant_id}_mod_orders_storage.purchase_order
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_acquisitions_unit" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "acquisitions_unit" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_acquisitions_unit">
+      SELECT * FROM ${tenant_id}_mod_orders_storage.acquisitions_unit
+    </createView>
+  </changeSet>
+
+
+  <changeSet id="create_view_organizations" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "organizations" schemaName="${tenant_id}_mod_organizations_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_organizations">
+      SELECT * FROM ${tenant_id}_mod_organizations_storage.organizations
+    </createView>
+  </changeSet>
+
+</databaseChangeLog>

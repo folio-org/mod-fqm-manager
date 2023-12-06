@@ -4,4 +4,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="remove_entity_type_label_aliases.sql" relativeToChangelogFile="true" />
+  <include file="harvested-views.xml" relativeToChangelogFile="true"/>
+  <include file="derived-tables.xml" relativeToChangelogFile="true"/>
+  <include file="entity-type-definitions.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

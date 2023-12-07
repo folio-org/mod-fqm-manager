@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-drv-inventory-item-status-definition" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d",
+          "name": "drv_item_status",
+          "root": false,
+          "fromClause": "drv_inventory_item_status",
+          "columns": [
+            {
+              "name": "item_status",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "drv_inventory_item_status.item_status",
+              "visibleByDefault": true
+            }
+          ],
+          "private": true
+        }
+      </column>
+      <where>id = 'a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

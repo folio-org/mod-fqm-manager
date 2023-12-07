@@ -40,7 +40,9 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
     .columns(List.of(
       new EntityTypeColumn().name(ID_FIELD_NAME),
       new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
-    ));
+    ))
+    .name("TEST_ARRAY_ENTITY_TYPE")
+    .fromClause("TEST_ARRAY_ENTITY_TYPE");
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX = "SELECT .* FROM .* WHERE ID IN .*";

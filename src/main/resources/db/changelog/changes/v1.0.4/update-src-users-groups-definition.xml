@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-src-users-groups-definition" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "e611264d-377e-4d87-a93f-f1ca327d3db0",
+          "name": "src_users_groups",
+          "root": true,
+          "fromClause": "src_users_groups",
+          "columns": [
+            {
+              "name": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "valueGetter": "src_users_groups.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "group",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_users_groups.jsonb ->> 'group'",
+              "visibleByDefault": true
+            }
+          ],
+          "private": true
+        }
+      </column>
+      <where>id = 'e611264d-377e-4d87-a93f-f1ca327d3db0'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

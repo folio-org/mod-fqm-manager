@@ -1,7 +1,5 @@
 package org.folio.fqm.repository;
 
-import org.folio.fql.service.FqlService;
-import org.folio.fqm.service.FqlToSqlConverterService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -30,7 +28,7 @@ class ResultSetRepositoryArrayTest {
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
 
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(context, new ObjectMapper());
-    this.repo = new ResultSetRepository(context, entityTypeRepository, new FqlToSqlConverterService(new FqlService()));
+    this.repo = new ResultSetRepository(context, entityTypeRepository);
   }
 
   @Test

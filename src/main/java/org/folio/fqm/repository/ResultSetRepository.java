@@ -39,7 +39,6 @@ public class ResultSetRepository {
 
   private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
-  private final FqlToSqlConverterService fqlToSqlConverter;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -72,7 +71,7 @@ public class ResultSetRepository {
     }
     Condition afterIdCondition = afterId != null ? field(ID_FIELD_NAME).greaterThan(afterId) : DSL.noCondition();
     EntityType entityType = getEntityType(entityTypeId);
-    Condition condition = fqlToSqlConverter.getSqlCondition(fql.fqlCondition(), entityType);
+    Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
     var result = jooqContext.select(fieldsToSelect)

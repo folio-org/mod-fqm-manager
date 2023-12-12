@@ -10,7 +10,6 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +33,7 @@ import static org.jooq.impl.DSL.val;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FqlToSqlConverterService {
-  private final Map<Class<? extends FqlCondition<?>>, BiFunction<FqlCondition<?>, EntityType, Condition>> sqlConverters = Map.of(
+  private static final Map<Class<? extends FqlCondition<?>>, BiFunction<FqlCondition<?>, EntityType, Condition>> sqlConverters = Map.of(
     EqualsCondition.class, (cnd, ent) -> handleEquals((EqualsCondition) cnd, ent),
     NotEqualsCondition.class, (cnd, ent) -> handleNotEquals((NotEqualsCondition) cnd, ent),
     InCondition.class, (cnd, ent) -> handleIn((InCondition) cnd, ent),
@@ -68,11 +67,11 @@ public class FqlToSqlConverterService {
   /**
    * Converts the given FQL condition to the corresponding SQL query
    */
-  public Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
+  public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     return sqlConverters.getOrDefault(fqlCondition.getClass(), (c, e) -> falseCondition()).apply(fqlCondition, entityType);
   }
 
-  private Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType) {
+  private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType) {
     if (isDateCondition(equalsCondition, entityType)) {
       return handleDate(equalsCondition, entityType);
     }
@@ -82,7 +81,7 @@ public class FqlToSqlConverterService {
     return field(equalsCondition, entityType).eq(equalsCondition.value());
   }
 
-  private Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType) {
+  private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType) {
     if (isDateCondition(notEqualsCondition, entityType)) {
       return handleDate(notEqualsCondition, entityType);
     }
@@ -92,8 +91,8 @@ public class FqlToSqlConverterService {
     return field(notEqualsCondition, entityType).ne(notEqualsCondition.value());
   }
 
-  private Condition handleDate(FieldCondition<?> fieldCondition, EntityType entityType) {
-    Condition condition = DSL.falseCondition();
+  private static Condition handleDate(FieldCondition<?> fieldCondition, EntityType entityType) {
+    Condition condition = falseCondition();
     var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
     LocalDate nextDay = date.plusDays(1);
@@ -125,7 +124,7 @@ public class FqlToSqlConverterService {
     return condition;
   }
 
-  private boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
+  private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
     EntityDataType dataType = entityType.getColumns()
       .stream()
       .filter(col -> col.getName().equals(fieldCondition.fieldName()))
@@ -136,7 +135,7 @@ public class FqlToSqlConverterService {
       && ((String) fieldCondition.value()).matches(DATE_REGEX);
   }
 
-  private Condition handleIn(InCondition inCondition, EntityType entityType) {
+  private static Condition handleIn(InCondition inCondition, EntityType entityType) {
     List<Condition> conditionList = inCondition
       .value().stream()
       .map((Object val) -> {
@@ -151,7 +150,7 @@ public class FqlToSqlConverterService {
     return or(conditionList);
   }
 
-  private Condition handleNotIn(NotInCondition notInCondition, EntityType entityType) {
+  private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType) {
     List<Condition> conditionList = notInCondition
       .value().stream()
       .map(val -> {
@@ -165,7 +164,7 @@ public class FqlToSqlConverterService {
     return and(conditionList);
   }
 
-  private Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType) {
+  private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType) {
     if (isDateCondition(greaterThanCondition, entityType)) {
       return handleDate(greaterThanCondition, entityType);
     }
@@ -175,7 +174,7 @@ public class FqlToSqlConverterService {
     return field(greaterThanCondition, entityType).greaterThan(greaterThanCondition.value());
   }
 
-  private Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType) {
+  private static Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType) {
     if (isDateCondition(lessThanCondition, entityType)) {
       return handleDate(lessThanCondition, entityType);
     }
@@ -185,23 +184,23 @@ public class FqlToSqlConverterService {
     return field(lessThanCondition, entityType).lessThan(lessThanCondition.value());
   }
 
-  private Condition handleAnd(AndCondition andCondition, EntityType entityType) {
+  private static Condition handleAnd(AndCondition andCondition, EntityType entityType) {
     return and(andCondition.value().stream().map(c -> getSqlCondition(c, entityType)).toList());
   }
 
-  private Condition handleRegEx(RegexCondition regExCondition, EntityType entityType) {
+  private static Condition handleRegEx(RegexCondition regExCondition, EntityType entityType) {
     // perform case-insensitive regex search
     return condition("{0} ~* {1}", field(regExCondition, entityType), val(regExCondition.value()));
   }
 
-  private Condition handleContains(ContainsCondition containsCondition, EntityType entityType) {
+  private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType) {
     if (containsCondition.value() instanceof String s) {
       return field(containsCondition, entityType).containsIgnoreCase(s);
     }
     return field(containsCondition, entityType).contains(containsCondition.value());
   }
 
-  private Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType) {
+  private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType) {
     Field<Object> field = field(notContainsCondition, entityType);
     if (notContainsCondition.value() instanceof String s) {
       return field.notContainsIgnoreCase(s).or(field(notContainsCondition, entityType).isNull());

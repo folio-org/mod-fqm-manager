@@ -54,7 +54,6 @@ class IdStreamerTest {
         context,
         entityTypeRepository,
         new DerivedTableIdentificationService(entityTypeRepository),
-        new FqlToSqlConverterService(new FqlService()),
         new QueryDetailsRepository(context)
       );
   }
@@ -124,7 +123,7 @@ class IdStreamerTest {
     Fql fql = new Fql(new EqualsCondition("field", "value"));
     Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {};
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
-    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null, null, null);
+    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null, null);
 
     when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());

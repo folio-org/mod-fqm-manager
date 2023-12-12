@@ -39,7 +39,6 @@ public class IdStreamer {
   private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
   private final DerivedTableIdentificationService derivedTableIdentifier;
-  private final FqlToSqlConverterService fqlToSqlConverter;
   private final QueryDetailsRepository queryDetailsRepository;
 
   /**
@@ -51,7 +50,7 @@ public class IdStreamer {
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     EntityType entityType = getEntityType(entityTypeId);
-    Condition sqlWhereClause = this.fqlToSqlConverter.getSqlCondition(fql.fqlCondition(), entityType);
+    Condition sqlWhereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
 

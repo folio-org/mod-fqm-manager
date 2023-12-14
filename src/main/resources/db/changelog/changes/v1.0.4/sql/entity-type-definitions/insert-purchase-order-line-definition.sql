@@ -65,6 +65,13 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                      "visibleByDefault": false
                  },
                  {
+                     "name": "id",
+                     "dataType":{
+                       "dataType":"rangedUUIDType"
+                     },
+                     "visibleByDefault": true
+                 },
+                 {
                      "name": "po_number",
                      "dataType":{
                         "dataType":"stringType"
@@ -161,13 +168,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                        "dataType": "stringType"
                      },
                      "visibleByDefault": false
-                 },
-                 {
-                     "name": "id",
-                     "dataType":{
-                       "dataType":"rangedUUIDType"
-                     },
-                     "visibleByDefault": true
                  },
                  {
                      "name": "purchase_order_line_number",

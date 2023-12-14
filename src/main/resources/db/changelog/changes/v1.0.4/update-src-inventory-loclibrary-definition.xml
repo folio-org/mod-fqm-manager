@@ -1,0 +1,45 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-src-inventory-loclibrary-definition" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "cf9f5c11-e943-483c-913b-81d1e338accc",
+          "name": "src_inventory_loclibrary",
+          "root": true,
+          "fromClause": "src_inventory_loclibrary",
+          "columns": [
+            {
+              "name": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "valueGetter": "src_inventory_loclibrary.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "loclibrary_name",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_inventory_loclibrary.jsonb ->> 'name'",
+              "visibleByDefault": true
+            },
+            {
+              "name": "loclibrary_code",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_inventory_loclibrary.jsonb ->> 'code'",
+              "visibleByDefault": true
+            }
+          ],
+          "private": true
+        }
+      </column>
+      <where>id = 'cf9f5c11-e943-483c-913b-81d1e338accc'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

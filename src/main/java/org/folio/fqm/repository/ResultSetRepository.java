@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.folio.fql.model.Fql;
+import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
@@ -47,11 +48,19 @@ public class ResultSetRepository {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
-    var fieldsToSelect = getSqlFields(getEntityType(entityTypeId), fields);
+    EntityType entityType = getEntityType(entityTypeId);
+    var fieldsToSelect = getSqlFields(entityType, fields);
+    String idValueGetter = entityType
+      .getColumns()
+      .stream()
+      .filter(col -> ID_FIELD_NAME.equals(col.getName()))
+      .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
+      .findFirst()
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
+
     var result = jooqContext.select(fieldsToSelect)
-      .from(entityTypeRepository.getDerivedTableName(entityTypeId)
-        .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId)))
-      .where(field(ID_FIELD_NAME).in(ids))
+      .from(entityType.getFromClause())
+      .where(field(idValueGetter).in(ids))
       .fetch();
     return recordToMap(result);
   }
@@ -67,8 +76,7 @@ public class ResultSetRepository {
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
     var result = jooqContext.select(fieldsToSelect)
-      .from(entityTypeRepository.getDerivedTableName(entityTypeId)
-        .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId)))
+      .from(entityType.getFromClause())
       .where(condition)
       .and(afterIdCondition)
       .orderBy(sortCriteria)

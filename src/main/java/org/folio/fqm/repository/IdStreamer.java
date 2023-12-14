@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.DerivedTableIdentificationService;
@@ -50,9 +51,8 @@ public class IdStreamer {
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     EntityType entityType = getEntityType(entityTypeId);
-    String derivedTable = derivedTableIdentifier.getDerivedTable(entityType, fql, sortResults);
     Condition sqlWhereClause = this.fqlToSqlConverter.getSqlCondition(fql.fqlCondition(), entityType);
-    return this.streamIdsInBatch(entityType, derivedTable, sortResults, sqlWhereClause, batchSize, idsConsumer);
+    return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
 
   /**
@@ -64,14 +64,12 @@ public class IdStreamer {
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     UUID entityTypeId = queryDetailsRepository.getEntityTypeId(queryId);
     EntityType entityType = getEntityType(entityTypeId);
-    String derivedTable = entityTypeRepository.getDerivedTableName(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     Condition condition = field(ID_FIELD_NAME).in(
       select(field(RESULT_ID))
         .from(table("query_results"))
         .where(field("query_id").eq(queryId))
     );
-    return streamIdsInBatch(entityType, derivedTable, sortResults, condition, batchSize, idsConsumer);
+    return streamIdsInBatch(entityType, sortResults, condition, batchSize, idsConsumer);
   }
 
   public List<UUID> getSortedIds(String derivedTableName,
@@ -90,23 +88,29 @@ public class IdStreamer {
     }
 
   private int streamIdsInBatch(EntityType entityType,
-                               String derivedTableName,
                                boolean sortResults,
                                Condition sqlWhereClause,
                                int batchSize,
                                Consumer<IdsWithCancelCallback> idsConsumer) {
     return jooqContext.transactionResult(ctx -> {
+      String idValueGetter = entityType
+        .getColumns()
+        .stream()
+        .filter(col -> ID_FIELD_NAME.equals(col.getName()))
+        .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
+        .findFirst()
+        .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
       try (
         Cursor<Record1<Object>> idsCursor = ctx.dsl()
-          .select(field(ID_FIELD_NAME))
-          .from(derivedTableName)
+          .select(field(idValueGetter))
+          .from(entityType.getFromClause())
           .where(sqlWhereClause)
           .orderBy(getSortFields(entityType, sortResults))
           .fetchSize(batchSize)
           .fetchLazy();
         Stream<UUID> uuidStream = idsCursor
           .stream()
-          .map(row -> (UUID) row.getValue(ID_FIELD_NAME));
+          .map(row -> (UUID) row.getValue(idValueGetter));
         Stream<List<UUID>> idsStream = StreamHelper.chunk(uuidStream, batchSize)
       ) {
         var total = new AtomicInteger();

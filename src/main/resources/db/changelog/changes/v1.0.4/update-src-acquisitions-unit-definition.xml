@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-src-acquisitions-unit-definition" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "cc51f042-03e2-43d1-b1d6-11aa6a39bc78",
+          "name": "src_acquisitions_unit",
+          "root": true,
+          "fromClause": "src_acquisitions_unit",
+          "columns": [
+            {
+              "name": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "valueGetter": "src_acquisitions_unit.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "acquisitions_name",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_acquisitions_unit.jsonb ->> 'name'",
+              "visibleByDefault": true
+            }
+          ],
+          "private": true
+        }
+      </column>
+      <where>id = 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

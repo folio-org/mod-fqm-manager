@@ -27,11 +27,13 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
     .id(UUID.randomUUID().toString())
     .columns(
       List.of(
-        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME),
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).valueGetter(EntityTypeRepository.ID_FIELD_NAME),
         new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType"))
       )
     )
-    .defaultSort(List.of(new EntityTypeDefaultSort().columnName(EntityTypeRepository.ID_FIELD_NAME)));
+    .defaultSort(List.of(new EntityTypeDefaultSort().columnName(EntityTypeRepository.ID_FIELD_NAME)))
+    .name("TEST_ENTITY_TYPE")
+    .fromClause("TEST_ENTITY_TYPE");
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";

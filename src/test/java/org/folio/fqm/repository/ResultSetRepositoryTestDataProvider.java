@@ -43,10 +43,12 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
 
   private static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME),
-      new EntityTypeColumn().name("key1").dataType(new EntityDataType().dataType("stringType")),
-      new EntityTypeColumn().name("key2").dataType(new EntityDataType().dataType("stringType"))
-    ));
+      new EntityTypeColumn().name(ID_FIELD_NAME).valueGetter(ID_FIELD_NAME),
+      new EntityTypeColumn().name("key1").dataType(new EntityDataType().dataType("stringType")).valueGetter("key1"),
+      new EntityTypeColumn().name("key2").dataType(new EntityDataType().dataType("stringType")).valueGetter("key2")
+    ))
+    .name("TEST_ENTITY_TYPE")
+    .fromClause("TEST_ENTITY_TYPE");
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
   private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE ID IN .*";

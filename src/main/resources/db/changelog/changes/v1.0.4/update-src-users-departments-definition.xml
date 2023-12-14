@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-src-users-departments-definition" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "c8364551-7e51-475d-8473-88951181452d",
+          "name": "src_users_departments",
+          "root": true,
+          "fromClause": "src_users_departments",
+          "columns": [
+            {
+              "name": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "valueGetter": "src_users_departments.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "department",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_users_departments.jsonb ->> 'name'",
+              "visibleByDefault": true
+            }
+          ],
+          "private": true
+        }
+      </column>
+      <where>id = 'c8364551-7e51-475d-8473-88951181452d'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

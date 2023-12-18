@@ -286,7 +286,7 @@ class FqlToSqlConverterServiceTest {
         "condition on a field with a filter value getter",
         """
            {"fieldWithFilterValueGetter": {"$eq": "Test value"}}""",
-        field("thisIsAFilterValueGetter").equalIgnoreCase("Test value")
+        field("thisIsAFilterValueGetter").eq("Test value".toLowerCase())
       )
     );
   }

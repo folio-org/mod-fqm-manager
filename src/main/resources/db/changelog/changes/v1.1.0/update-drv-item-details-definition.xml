@@ -203,6 +203,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_item.jsonb ->> 'hrid'::text))",
               "valueGetter": "src_inventory_item.jsonb ->> 'hrid'",
               "visibleByDefault": false
             },

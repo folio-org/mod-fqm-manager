@@ -67,6 +67,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "lower(src_inventory_item.jsonb ->> 'barcode'::text)",
               "valueGetter": "src_inventory_item.jsonb ->> 'barcode'",
               "visibleByDefault": true
             },

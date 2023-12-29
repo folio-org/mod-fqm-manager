@@ -320,10 +320,6 @@
               "direction": "ASC",
               "columnName": "id"
             }
-          ],
-          "subEntityTypeIds": [
-            "097a6f96-edd0-11ed-a05b-0242ac120003",
-            "0cb79a4c-f7eb-4941-a104-745224ae0293"
           ]
         }
       </column>

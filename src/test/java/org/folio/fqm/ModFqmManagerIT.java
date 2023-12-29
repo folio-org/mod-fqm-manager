@@ -58,7 +58,7 @@ class ModFqmManagerIT {
       .withEnv("DB_USERNAME", "myusername")
       .withEnv("DB_PASSWORD", "mypassword")
       .withEnv("DB_DATABASE", "mypostgres")
-      .withStartupTimeout(Duration.ofMinutes(2))
+      .withStartupTimeout(Duration.ofMinutes(3))
       .dependsOn(postgres);
 
   @BeforeAll

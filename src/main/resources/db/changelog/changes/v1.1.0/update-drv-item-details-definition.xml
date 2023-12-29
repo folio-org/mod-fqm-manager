@@ -3,6 +3,21 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
   <changeSet id="add-filter-value-getters-for-item-details" author="mweaver@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_item"/>
+      <viewExists viewName="src_inventory_holdings_record"/>
+      <viewExists viewName="src_inventory_instance"/>
+      <viewExists viewName="src_inventory_material_type"/>
+      <viewExists viewName="src_inventory_location"/>
+      <viewExists viewName="src_inventory_service_point"/>
+      <viewExists viewName="src_inventory_loclibrary"/>
+      <viewExists viewName="src_inventory_call_number_type"/>
+      <viewExists viewName="src_users_groups"/>
+      <viewExists viewName="src_users_users"/>
+      <sqlCheck expectedResult="1">
+        SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
+      </sqlCheck>
+    </preConditions>
     <comment>Add filterValueGetters to various columns</comment>
     <update tableName="entity_type_definition">
       <column name="definition">

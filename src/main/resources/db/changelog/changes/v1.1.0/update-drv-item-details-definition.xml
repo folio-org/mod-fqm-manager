@@ -194,6 +194,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "item_effective_location_id",
+              "filterValueGetter": " lower(${tenant_id}_mod_inventory_storage.f_unaccent(effective_location_ref_data.jsonb ->> 'name'::text))",
               "valueGetter": "effective_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": true
             },

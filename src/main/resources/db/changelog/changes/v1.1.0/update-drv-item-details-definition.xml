@@ -135,6 +135,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "item_effective_call_number_typeid",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_number_type_ref_data.jsonb ->> 'name'::text))",
               "valueGetter": "call_number_type_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },

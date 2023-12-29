@@ -58,6 +58,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "filterValueGetter": "\"left\"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
               "valueGetter": "instance_details.jsonb -> 'metadata' ->> 'updatedDate'",
               "visibleByDefault": false
             },

@@ -290,6 +290,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "item_temporary_location_id",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(temporary_location_ref_data.jsonb ->> 'name'::text))",
               "valueGetter": "temporary_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },

@@ -39,44 +39,15 @@
                 }
             },
             {
-              "name": "fund_distribution_code",
-              "dataType": {
-                "dataType": "stringType"
-              },
-              "valueGetter": "COALESCE(json_array_elements.value ->> 'code', NULL::text)",
-              "visibleByDefault": false
-            },
-            {
-              "name": "fund_distribution_encumbrance",
-              "dataType": {
-                "dataType": "rangedUUIDType"
-              },
-              "valueGetter": "COALESCE(json_array_elements.value ->> 'encumbrance', NULL::text)",
-              "visibleByDefault": true
-            },
-            {
-              "name": "fund_distribution_type",
-              "dataType": {
-                "dataType": "stringType"
-              },
-              "valueGetter": "COALESCE(json_array_elements.value ->> 'distributionType', NULL::text)",
-              "visibleByDefault": false
-            },
-            {
-              "name": "fund_distribution_value",
-              "dataType": {
-                "dataType": "stringType"
-              },
-              "valueGetter": "COALESCE(json_array_elements.value ->> 'value', NULL::text)",
-              "visibleByDefault": false
-            },
-            {
-              "name": "fund_id",
-              "dataType": {
-                "dataType": "rangedUUIDType"
-              },
-              "valueGetter": "COALESCE(json_array_elements.value ->> 'fundId', NULL::text)",
-              "visibleByDefault": false
+                "name": "fund_distribution",
+                "dataType": {
+                  "dataType": "arrayType",
+                  "itemDataType": {
+                   "dataType": "objectType"
+                  }
+                },
+                "valueGetter": "src_purchase_order_line.jsonb ->> 'fund_distribution'",
+                "visibleByDefault": false
             },
             {
               "name": "po_number",

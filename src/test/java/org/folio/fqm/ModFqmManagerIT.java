@@ -124,7 +124,6 @@ class ModFqmManagerIT {
       .get("/entity-types")
       .then()
       .statusCode(200)
-      // TODO: below value should be updated to 4 once POL entity type is fixed
-      .body("$.size()", is(3));
+      .body("$.size()", is(4));
   }
 }

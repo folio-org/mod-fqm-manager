@@ -14,14 +14,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
-import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.QueryDetailsRepository;
-import org.folio.fqm.service.DerivedTableIdentificationService;
-import org.folio.fqm.service.FqlToSqlConverterService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -53,7 +50,6 @@ class IdStreamerTest {
       new IdStreamer(
         context,
         entityTypeRepository,
-        new DerivedTableIdentificationService(entityTypeRepository),
         new QueryDetailsRepository(context)
       );
   }
@@ -123,7 +119,7 @@ class IdStreamerTest {
     Fql fql = new Fql(new EqualsCondition("field", "value"));
     Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {};
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
-    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null, null);
+    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null);
 
     when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());

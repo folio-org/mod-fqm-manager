@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
-import org.folio.fqm.service.DerivedTableIdentificationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
@@ -38,7 +37,6 @@ public class IdStreamer {
 
   private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
-  private final DerivedTableIdentificationService derivedTableIdentifier;
   private final QueryDetailsRepository queryDetailsRepository;
 
   /**

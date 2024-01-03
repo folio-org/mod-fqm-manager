@@ -4,4 +4,5 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="sql/update-query-details-table.sql" relativeToChangelogFile="true"/>
+  <include file="update-drv-item-details-definition.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

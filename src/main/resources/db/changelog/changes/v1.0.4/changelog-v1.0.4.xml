@@ -4,8 +4,6 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="remove_entity_type_label_aliases.sql" relativeToChangelogFile="true" />
-  <include file="harvested-views.xml" relativeToChangelogFile="true"/>
-  <include file="derived-tables.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-circulation-loan-status-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-inventory-item-status-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-item-callnumber-location-definition.xml" relativeToChangelogFile="true"/>
@@ -13,20 +11,14 @@
   <include file="update-drv-item-holdingsrecord-instance-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-loan-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
-  <include file="update-src-acquisitions-unit-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-circulation-loan-policy-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-inventory-call-number-type-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-inventory-location-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-inventory-loclibrary-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-inventory-material-type-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-inventory-service-point-definition.xml" relativeToChangelogFile="true"/>
-  <include file="update-src-organizations-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-users-addresstypes-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-users-departments-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-users-groups-definition.xml" relativeToChangelogFile="true"/>
-
-  <!-- Uncomment below scripts once PO line entity type is fixed !-->
-  <!-- <include file="entity-type-definitions.xml" relativeToChangelogFile="true"/> !-->
-  <!-- <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/> !-->
 
 </databaseChangeLog>

@@ -46,7 +46,7 @@
                    "dataType": "objectType"
                   }
                 },
-                "valueGetter": "src_purchase_order_line.jsonb ->> 'fund_distribution'",
+                "valueGetter": "src_purchase_order_line.jsonb ->> 'fundDistribution'",
                 "visibleByDefault": false
             },
             {

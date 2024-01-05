@@ -60,7 +60,6 @@ public class QueryManagementService {
    * @param submitQuery Query to execute
    * @return ID of the query
    */
-  @Transactional
   public QueryIdentifier runFqlQueryAsync(SubmitQuery submitQuery) {
     Query query = Query.newQuery(submitQuery.getEntityTypeId(),
       submitQuery.getFqlQuery(),

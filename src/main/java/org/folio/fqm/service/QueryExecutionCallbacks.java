@@ -9,7 +9,6 @@ import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -23,7 +22,6 @@ public class QueryExecutionCallbacks {
   private final QueryRepository queryRepository;
   private final QueryResultsRepository queryResultsRepository;
 
-  @Transactional
   public void handleDataBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback) {
     Query query = queryRepository.getQuery(queryId, true)
       .orElseThrow(() -> new QueryNotFoundException(queryId));
@@ -37,7 +35,6 @@ public class QueryExecutionCallbacks {
     queryResultsRepository.saveQueryResults(queryId, resultIds);
   }
 
-  @Transactional
   public void handleSuccess(Query query, int totalCount) {
     Query savedQuery = queryRepository.getQuery(query.queryId(), true)
       .orElseThrow(() -> new QueryNotFoundException(query.queryId()));
@@ -50,7 +47,6 @@ public class QueryExecutionCallbacks {
     queryRepository.updateQuery(query.queryId(), QueryStatus.SUCCESS, OffsetDateTime.now(), null);
   }
 
-  @Transactional
   public void handleFailure(Query query, Throwable throwable) {
     log.error("Query Execution failed for queryId {}, entityTypeId {}. Failure reason: {}", query.queryId(),
       query.entityTypeId(), throwable.getMessage());

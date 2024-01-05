@@ -70,7 +70,7 @@ public class IdStreamer {
   }
 
   public List<UUID> getSortedIds(String derivedTableName,
-                                  int offset, int batchSize, UUID queryId) {
+                                 int offset, int batchSize, UUID queryId) {
     // THIS DOES NOT PROVIDE SORTED IDs! This is a temporary workaround to address performance issues until we
     // can do it properly
     return jooqContext.dsl()
@@ -82,43 +82,41 @@ public class IdStreamer {
       .offset(offset)
       .limit(batchSize)
       .fetchInto(UUID.class);
-    }
+  }
 
   private int streamIdsInBatch(EntityType entityType,
-                               boolean sortResults,
-                               Condition sqlWhereClause,
-                               int batchSize,
-                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    return jooqContext.transactionResult(ctx -> {
-      String idValueGetter = entityType
-        .getColumns()
+                                boolean sortResults,
+                                Condition sqlWhereClause,
+                                int batchSize,
+                                Consumer<IdsWithCancelCallback> idsConsumer) {
+    String idValueGetter = entityType
+      .getColumns()
+      .stream()
+      .filter(col -> ID_FIELD_NAME.equals(col.getName()))
+      .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
+      .findFirst()
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
+    try (
+      Cursor<Record1<Object>> idsCursor = jooqContext.dsl()
+        .select(field(idValueGetter))
+        .from(entityType.getFromClause())
+        .where(sqlWhereClause)
+        .orderBy(getSortFields(entityType, sortResults))
+        .fetchSize(batchSize)
+        .fetchLazy();
+      Stream<UUID> uuidStream = idsCursor
         .stream()
-        .filter(col -> ID_FIELD_NAME.equals(col.getName()))
-        .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
-        .findFirst()
-        .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
-      try (
-        Cursor<Record1<Object>> idsCursor = ctx.dsl()
-          .select(field(idValueGetter))
-          .from(entityType.getFromClause())
-          .where(sqlWhereClause)
-          .orderBy(getSortFields(entityType, sortResults))
-          .fetchSize(batchSize)
-          .fetchLazy();
-        Stream<UUID> uuidStream = idsCursor
-          .stream()
-          .map(row -> (UUID) row.getValue(idValueGetter));
-        Stream<List<UUID>> idsStream = StreamHelper.chunk(uuidStream, batchSize)
-      ) {
-        var total = new AtomicInteger();
-        idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
-                 .forEach(idsWithCancelCallback -> {
-                   idsConsumer.accept(idsWithCancelCallback);
-                   total.addAndGet(idsWithCancelCallback.ids().size());
-                 });
-        return total.get();
-      }
-    });
+        .map(row -> (UUID) row.getValue(idValueGetter));
+      Stream<List<UUID>> idsStream = StreamHelper.chunk(uuidStream, batchSize)
+    ) {
+      var total = new AtomicInteger();
+      idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
+        .forEach(idsWithCancelCallback -> {
+          idsConsumer.accept(idsWithCancelCallback);
+          total.addAndGet(idsWithCancelCallback.ids().size());
+        });
+      return total.get();
+    }
   }
 
   private List<SortField<Object>> getSortFields(EntityType entityType, boolean sortResults) {

@@ -1,7 +1,5 @@
 package org.folio.fqm.service;
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
@@ -23,7 +21,6 @@ public class QueryExecutionService {
   @Async
   // Long-running method. Running this method within a transaction boundary will hog db connection for
   // long time. Hence, do not run this method in a transaction.
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void executeQueryAsync(Query query) {
     try {
       log.info("Executing query {}", query.queryId());

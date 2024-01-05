@@ -14,4 +14,12 @@
   <include file="update-src-organizations-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
 
+  <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
+    <comment>Swap the columns in the query_results primary key, to improve performance</comment>
+    <sql>
+      ALTER TABLE query_results DROP CONSTRAINT IF EXISTS query_results_pkey;
+      ALTER TABLE query_results ADD PRIMARY KEY (query_id, result_id);
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>

@@ -9,7 +9,7 @@
           "id": "0069cf6f-2833-46db-8a51-8934769b8289",
           "name":"drv_user_details",
           "private" : false,
-          "fromClause": "src_users_users LEFT JOIN src_users_groups ON src_users_groups.id = ((src_users_users.jsonb ->> 'patronGroup'::text)::uuid) LEFT JOIN src_users_departments temp_departments ON (src_users_users.jsonb -> 'departments'::text) ? temp_departments.id::text",
+          "fromClause": "src_users_users LEFT JOIN src_users_groups ON src_users_groups.id = ((src_users_users.jsonb ->> 'patronGroup'::text)::uuid) LEFT JOIN src_users_departments temp_departments ON (src_users_users.jsonb -> 'departments'::text) ?? temp_departments.id::text",
           "groupByFields": [
             "src_users_users.id",
             "src_users_users.jsonb",

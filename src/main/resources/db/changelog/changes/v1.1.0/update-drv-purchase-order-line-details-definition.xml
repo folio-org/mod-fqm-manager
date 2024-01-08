@@ -220,9 +220,12 @@
             {
               "name": "purchase_order_notes",
               "dataType": {
-                "dataType": "stringType"
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "rangedUUIDType"
+                }
               },
-              "valueGetter": "jsonb_array_elements(purchase_order.jsonb -> 'notes'::text)::text",
+              "valueGetter": "ARRAY(SELECT jsonb_array_elements_text(purchase_order.jsonb -> 'notes'))",
               "visibleByDefault": false
             },
             {

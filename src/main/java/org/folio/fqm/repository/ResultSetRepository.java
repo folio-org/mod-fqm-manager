@@ -62,7 +62,7 @@ public class ResultSetRepository {
 //      .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
 //      .fetch();
 
-    List<Field> groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
+    var groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
     var initial = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
       .where(field(idValueGetter).in(ids));
@@ -97,7 +97,7 @@ public class ResultSetRepository {
 
 
     // NEW
-    List<Field> groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
+    var groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
     var initial = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
       .where(condition)

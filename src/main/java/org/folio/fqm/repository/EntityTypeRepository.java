@@ -75,8 +75,8 @@ public class EntityTypeRepository {
       );
   }
 
-  public List<Field> getGroupByFields(UUID entityTypeId) {
-    List<Field> groupByFields = new ArrayList<>();
+  public List<Field<Object>> getGroupByFields(UUID entityTypeId) {
+    List<Field<Object>> groupByFields = new ArrayList<>();
     getEntityTypeDefinition(entityTypeId)
       .map(EntityType::getGroupByFields)
       .orElse(List.of())

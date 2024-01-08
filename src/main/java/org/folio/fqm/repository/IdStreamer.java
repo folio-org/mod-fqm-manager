@@ -93,11 +93,11 @@ public class IdStreamer {
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
 
     // NEW
+    var groupByFields = entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId()));
     var initial =  jooqContext.dsl()
       .select(field(idValueGetter))
       .from(entityType.getFromClause())
       .where(sqlWhereClause);
-    List<Field> groupByFields = entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId()));
     if (!isEmpty(groupByFields)) {
       initial = (SelectConditionStep<Record1<Object>>) initial.groupBy(groupByFields);
     }

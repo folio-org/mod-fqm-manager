@@ -19,11 +19,8 @@ import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +28,8 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Log4j2
 @Repository
@@ -57,10 +56,22 @@ public class ResultSetRepository {
       .findFirst()
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
 
-    var result = jooqContext.select(fieldsToSelect)
+//    var result = jooqContext.select(fieldsToSelect)
+//      .from(entityType.getFromClause())
+//      .where(field(idValueGetter).in(ids))
+//      .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
+//      .fetch();
+
+    List<Field> groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
+    var initial = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
-      .where(field(idValueGetter).in(ids))
-      .fetch();
+      .where(field(idValueGetter).in(ids));
+    if (!isEmpty(groupByFields)) {
+      initial = (SelectConditionStep<Record>) initial.groupBy(groupByFields);
+    }
+    var result = initial.fetch();
+
+
     return recordToMap(result);
   }
 
@@ -74,13 +85,34 @@ public class ResultSetRepository {
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
-    var result = jooqContext.select(fieldsToSelect)
+//    var result = jooqContext.select(fieldsToSelect)
+//      .from(entityType.getFromClause())
+//      .where(condition)
+//      .and(afterIdCondition)
+//      .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
+//      .orderBy(sortCriteria)
+//      .limit(limit)
+//      .fetch();
+
+
+
+    // NEW
+    List<Field> groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
+    var initial = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
       .where(condition)
-      .and(afterIdCondition)
+      .and(afterIdCondition);
+    if (!isEmpty(groupByFields)) {
+      initial = (SelectConditionStep<Record>) initial.groupBy(groupByFields);
+    }
+    var result = initial
       .orderBy(sortCriteria)
       .limit(limit)
       .fetch();
+
+    // END NEW
+
+
     return recordToMap(result);
   }
 

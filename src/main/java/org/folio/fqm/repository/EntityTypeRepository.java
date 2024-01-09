@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.jooq.DSLContext;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -14,10 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.folio.querytool.domain.dto.EntityType;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
@@ -75,6 +73,15 @@ public class EntityTypeRepository {
       .map(
         row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField))
       );
+  }
+
+  public List<Field<Object>> getGroupByFields(UUID entityTypeId) {
+    List<Field<Object>> groupByFields = new ArrayList<>();
+    getEntityTypeDefinition(entityTypeId)
+      .map(EntityType::getGroupByFields)
+      .orElse(List.of())
+      .forEach(fieldString -> groupByFields.add(field(fieldString)));
+    return groupByFields;
   }
 
   @SneakyThrows

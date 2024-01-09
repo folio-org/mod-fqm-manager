@@ -9,14 +9,9 @@ import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.jooq.Condition;
-import org.jooq.Cursor;
-import org.jooq.DSLContext;
-import org.jooq.SortField;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.jooq.Record1;
-import org.jooq.Field;
 
 import java.util.List;
 import java.util.UUID;
@@ -96,11 +91,18 @@ public class IdStreamer {
       .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
       .findFirst()
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
+
+    var groupByFields = entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId()));
+    var selectionClause =  jooqContext.dsl()
+      .select(field(idValueGetter))
+      .from(entityType.getFromClause())
+      .where(sqlWhereClause);
+    if (!isEmpty(groupByFields)) {
+      selectionClause = (SelectConditionStep<Record1<Object>>) selectionClause.groupBy(groupByFields);
+    }
+
     try (
-      Cursor<Record1<Object>> idsCursor = jooqContext.dsl()
-        .select(field(idValueGetter))
-        .from(entityType.getFromClause())
-        .where(sqlWhereClause)
+      Cursor<Record1<Object>> idsCursor = selectionClause
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize)
         .fetchLazy();

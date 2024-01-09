@@ -92,27 +92,17 @@ public class IdStreamer {
       .findFirst()
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
 
-    // NEW
     var groupByFields = entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId()));
-    var initial =  jooqContext.dsl()
+    var selectionClause =  jooqContext.dsl()
       .select(field(idValueGetter))
       .from(entityType.getFromClause())
       .where(sqlWhereClause);
     if (!isEmpty(groupByFields)) {
-      initial = (SelectConditionStep<Record1<Object>>) initial.groupBy(groupByFields);
+      selectionClause = (SelectConditionStep<Record1<Object>>) selectionClause.groupBy(groupByFields);
     }
-    // END NEW
 
     try (
-//      Cursor<Record1<Object>> idsCursor = jooqContext.dsl()
-//        .select(field(idValueGetter))
-//        .from(entityType.getFromClause())
-//        .where(sqlWhereClause)
-//        .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
-//        .orderBy(getSortFields(entityType, sortResults))
-//        .fetchSize(batchSize)
-//        .fetchLazy();
-      Cursor<Record1<Object>> idsCursor = initial
+      Cursor<Record1<Object>> idsCursor = selectionClause
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize)
         .fetchLazy();

@@ -56,20 +56,14 @@ public class ResultSetRepository {
       .findFirst()
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
 
-//    var result = jooqContext.select(fieldsToSelect)
-//      .from(entityType.getFromClause())
-//      .where(field(idValueGetter).in(ids))
-//      .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
-//      .fetch();
-
     var groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
-    var initial = jooqContext.select(fieldsToSelect)
+    var selectionClause = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
       .where(field(idValueGetter).in(ids));
     if (!isEmpty(groupByFields)) {
-      initial = (SelectConditionStep<Record>) initial.groupBy(groupByFields);
+      selectionClause = (SelectConditionStep<Record>) selectionClause.groupBy(groupByFields);
     }
-    var result = initial.fetch();
+    var result = selectionClause.fetch();
 
 
     return recordToMap(result);
@@ -85,34 +79,19 @@ public class ResultSetRepository {
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
-//    var result = jooqContext.select(fieldsToSelect)
-//      .from(entityType.getFromClause())
-//      .where(condition)
-//      .and(afterIdCondition)
-//      .groupBy(entityTypeRepository.getGroupByFields(UUID.fromString(entityType.getId())))
-//      .orderBy(sortCriteria)
-//      .limit(limit)
-//      .fetch();
-
-
-
-    // NEW
     var groupByFields = entityTypeRepository.getGroupByFields(entityTypeId);
-    var initial = jooqContext.select(fieldsToSelect)
+
+    var selectionClause = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
       .where(condition)
       .and(afterIdCondition);
     if (!isEmpty(groupByFields)) {
-      initial = (SelectConditionStep<Record>) initial.groupBy(groupByFields);
+      selectionClause = (SelectConditionStep<Record>) selectionClause.groupBy(groupByFields);
     }
-    var result = initial
+    var result = selectionClause
       .orderBy(sortCriteria)
       .limit(limit)
       .fetch();
-
-    // END NEW
-
-
     return recordToMap(result);
   }
 

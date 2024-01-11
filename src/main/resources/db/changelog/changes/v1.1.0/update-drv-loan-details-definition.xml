@@ -120,6 +120,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((item_details.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
               "valueGetter": "item_details.jsonb -> 'status' ->> 'name'",
               "visibleByDefault": true
             },

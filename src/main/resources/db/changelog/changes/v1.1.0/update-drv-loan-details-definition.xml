@@ -232,6 +232,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_circulation_storage.f_unaccent((src_circulation_loan.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
               "valueGetter": "src_circulation_loan.jsonb -> 'status' ->> 'name'",
               "visibleByDefault": false
             },

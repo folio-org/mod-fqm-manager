@@ -5,6 +5,7 @@
 
   <include file="sql/update-query-details-table.sql" relativeToChangelogFile="true"/>
   <include file="update-drv-item-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-loan-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="harvested-views.xml" relativeToChangelogFile="true"/>
   <include file="derived-tables.xml" relativeToChangelogFile="true"/>
   <include file="sql/entity-type-definitions/insert-organizations-vendor-definition.sql" relativeToChangelogFile="true"/>

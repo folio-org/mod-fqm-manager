@@ -142,6 +142,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "loan_checkin_servicepoint_id",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(cispi.jsonb ->> 'name'::text))",
               "valueGetter": "cispi.jsonb ->> 'name'",
               "visibleByDefault": false
             },

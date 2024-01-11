@@ -164,7 +164,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "loan_checkout_servicepoint_name",
+              "name": ,
               "source": {
                 "columnName": "service_point_name",
                 "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
@@ -182,6 +182,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "filterValueGetter": "\"left\"(lower(src_circulation_loan.jsonb ->> 'dueDate'::text), 600)",
               "valueGetter": "src_circulation_loan.jsonb ->> 'dueDate'",
               "visibleByDefault": true
             },

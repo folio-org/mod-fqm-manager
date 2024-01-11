@@ -260,6 +260,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(user_details.jsonb ->> 'barcode'::text))",
               "valueGetter": "user_details.jsonb ->> 'barcode'",
               "visibleByDefault": true
             },

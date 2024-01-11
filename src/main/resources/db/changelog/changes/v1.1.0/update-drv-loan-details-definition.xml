@@ -77,6 +77,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "filterValueGetter": "\"left\"(lower((item_details.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text), 600)",
               "valueGetter": "item_details.jsonb -> 'effectiveCallNumberComponents' ->> 'callNumber'",
               "visibleByDefault": false
             },

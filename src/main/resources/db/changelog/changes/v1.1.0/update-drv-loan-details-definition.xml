@@ -317,6 +317,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "user_patron_group_id",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(patron_id_ref_data.jsonb ->> 'group'::text))",
               "valueGetter": "patron_id_ref_data.jsonb ->> 'group'",
               "visibleByDefault": true
             },

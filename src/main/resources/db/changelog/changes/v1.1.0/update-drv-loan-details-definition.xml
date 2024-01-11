@@ -269,6 +269,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "filterValueGetter": "\"left\"(user_details.jsonb ->> 'expirationDate'::text, 600)",
               "valueGetter": "user_details.jsonb ->> 'expirationDate'",
               "visibleByDefault": true
             },

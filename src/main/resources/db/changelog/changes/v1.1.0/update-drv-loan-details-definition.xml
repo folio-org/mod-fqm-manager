@@ -151,6 +151,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "filterValueGetter": "\"left\"(lower(src_circulation_loan.jsonb ->> 'loanDate'::text), 600)",
               "valueGetter": "src_circulation_loan.jsonb ->> 'loanDate'",
               "visibleByDefault": false
             },

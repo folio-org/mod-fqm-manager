@@ -173,6 +173,7 @@
                 "dataType": "stringType"
               },
               "idColumnName": "loan_checkout_servicepoint_id",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(cospi.jsonb ->> 'name'::text))",
               "valueGetter": "cospi.jsonb ->> 'name'",
               "visibleByDefault": false
             },

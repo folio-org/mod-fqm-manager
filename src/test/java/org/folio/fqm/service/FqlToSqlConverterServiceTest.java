@@ -8,6 +8,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -220,27 +221,27 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "contains string",
         """
-          {"arrayField": {"$contains": "some value"}}""",
-        field("arrayField").containsIgnoreCase("some value")
+          {"arrayField": {"$contains": "Some vALUE"}}""",
+        DSL.cast(field("arrayField"), String[].class).contains(new String[]{"some value"})
       ),
       Arguments.of(
         "contains numeric",
         """
           {"arrayField": {"$contains": 10}}""",
-        field("arrayField").contains(10)
+        DSL.cast(field("arrayField"), String[].class).contains(new String[]{"10"})
       ),
 
       Arguments.of(
         "not contains string",
         """
-          {"arrayField": {"$not_contains": "some value"}}""",
-        field("arrayField").notContainsIgnoreCase("some value").or(field("arrayField").isNull())
+          {"arrayField": {"$not_contains": "Some vALUE"}}""",
+        DSL.cast(field("arrayField"), String[].class).notContains(new String[]{"some value"})
       ),
       Arguments.of(
         "not contains numeric",
         """
           {"arrayField": {"$not_contains": 10}}""",
-        field("arrayField").notContains(10).or(field("arrayField").isNull())
+        DSL.cast(field("arrayField"), String[].class).notContains(new String[]{"10"})
       ),
 
       Arguments.of(
@@ -285,7 +286,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "condition on a field with a filter value getter",
         """
-           {"fieldWithFilterValueGetter": {"$eq": "Test value"}}""",
+          {"fieldWithFilterValueGetter": {"$eq": "Test value"}}""",
         field("thisIsAFilterValueGetter").eq("Test value".toLowerCase())
       )
     );

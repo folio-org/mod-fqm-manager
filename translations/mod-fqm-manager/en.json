@@ -168,7 +168,7 @@
   "entityType.drv_user_details.user_created_date": "User created date",
   "entityType.drv_user_details.user_date_of_birth": "User date of birth",
   "entityType.drv_user_details.user_department_ids": "User department IDs",
-  "entityType.drv_loan_details.user_department_names": "User department names",
+  "entityType.drv_user_details.user_department_names": "User department names",
   "entityType.drv_user_details.user_email": "User email",
   "entityType.drv_user_details.user_enrollment_date": "User enrollment date",
   "entityType.drv_user_details.user_expiration_date": "User expiration date",

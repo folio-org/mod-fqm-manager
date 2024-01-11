@@ -37,7 +37,8 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'addressTypeId'::text) FILTER (WHERE (add_id.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -48,7 +49,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'addressLine1'::text) FILTER (WHERE (add_id.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -59,7 +61,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'addressLine2'::text) FILTER (WHERE (add_id.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -70,7 +73,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value) JOIN src_users_addresstype a ON (add_id.value ->> 'addressTypeId'::text) = a.id::text)",
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'addressType'::text)) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
               "visibleByDefault": false,
               "idColumnName": "user_address_ids",
               "source": {
@@ -94,7 +98,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'city'::text) FILTER (WHERE (add_id.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -105,7 +110,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'countryId'::text) FILTER (WHERE (add_id.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -132,7 +138,8 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value::text) FILTER (WHERE (add_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -148,7 +155,8 @@
                 "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
                 "columnName": "department"
               },
-              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) add_id(value) JOIN src_users_departments a ON (add_id.value::text) = a.id::text)",
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
+              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
               "visibleByDefault": false
             },
             {
@@ -260,7 +268,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'postalCode'::text) FILTER (WHERE (add_id.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -298,7 +307,7 @@
               "dataType":{
                 "dataType":"stringType"
               },
-              "valueGetter": "concat_ws(', '::text, NULLIF(( SELECT subquery.addressline1 FROM ( SELECT add_id.value ->> 'addressLine1'::text AS addressline1, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.addressline2 FROM ( SELECT add_id.value ->> 'addressLine2'::text AS addressline2, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.city FROM ( SELECT add_id.value ->> 'city'::text AS city, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.region FROM ( SELECT add_id.value ->> 'region'::text AS region, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.postalcode FROM ( SELECT add_id.value ->> 'postalCode'::text AS postalcode, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.countryid FROM ( SELECT add_id.value ->> 'countryId'::text AS countryid, row_number() OVER (ORDER BY (add_id.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value)) subquery WHERE subquery.row_num = 1), ''::text))",
+              "valueGetter": "concat_ws(', '::text, NULLIF(( SELECT subquery.addressline1 FROM ( SELECT record.value ->> 'addressLine1'::text AS addressline1, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.addressline2 FROM ( SELECT record.value ->> 'addressLine2'::text AS addressline2, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.city FROM ( SELECT record.value ->> 'city'::text AS city, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.region FROM ( SELECT record.value ->> 'region'::text AS region, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.postalcode FROM ( SELECT record.value ->> 'postalCode'::text AS postalcode, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.countryid FROM ( SELECT record.value ->> 'countryId'::text AS countryid, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text))",
               "visibleByDefault": false
             },
             {
@@ -309,7 +318,8 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(add_id.value ->> 'region'::text) FILTER (WHERE (add_id.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) add_id(value))",
+              "valueGetter": "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "visibleByDefault": false
             },
             {

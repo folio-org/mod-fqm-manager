@@ -26,9 +26,9 @@
       <column name="definition">
         {
           "id": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
-          "name":"drv_loan_details",
-          "private" : false,
-          "fromClause": "src_circulation_loan LEFT JOIN src_circulation_loan_policy loan_policy_ref_data ON loan_policy_ref_data.id = ((src_circulation_loan.jsonb ->> 'loanPolicyId'::text)::uuid) LEFT JOIN src_inventory_service_point cospi ON cospi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkoutServicePointId'::text), 600)::uuid LEFT JOIN src_inventory_service_point cispi ON cispi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkinServicePointId'::text), 600)::uuid JOIN src_inventory_item item_details ON item_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'itemId'::text)), 600)::uuid LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = item_details.materialtypeid JOIN src_users_users user_details ON user_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'userId'::text)), 600)::uuid LEFT JOIN src_users_groups patron_id_ref_data ON patron_id_ref_data.id::text = (user_details.jsonb ->> 'patronGroup'::text) JOIN src_inventory_holdings_record hrim ON item_details.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id",
+          "name": "drv_loan_details",
+          "private": false,
+          "fromClause": "src_circulation_loan LEFT JOIN src_circulation_loan_policy loan_policy_ref_data ON loan_policy_ref_data.id = ((src_circulation_loan.jsonb ->> 'loanPolicyId'::text)::uuid) LEFT JOIN src_inventory_service_point cospi ON cospi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkoutServicePointId'::text), 600)::uuid LEFT JOIN src_inventory_service_point cispi ON cispi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkinServicePointId'::text), 600)::uuid JOIN src_inventory_item item_details ON item_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'itemId'::text)), 600)::uuid LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = item_details.materialtypeid JOIN src_users_users user_details ON user_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'userId'::text)), 600)::uuid LEFT JOIN src_users_groups patron_id_ref_data ON patron_id_ref_data.id = user_details.patrongroup JOIN src_inventory_holdings_record hrim ON item_details.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id",
           "columns": [
             {
               "name": "holdings_id",
@@ -164,7 +164,7 @@
               "visibleByDefault": false
             },
             {
-              "name": ,
+              "name": "loan_checkout_servicepoint_name",
               "source": {
                 "columnName": "service_point_name",
                 "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"

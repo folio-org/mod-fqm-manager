@@ -10,6 +10,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -202,17 +203,22 @@ public class FqlToSqlConverterService {
 
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, Field<Object> field) {
     if (containsCondition.value() instanceof String value) {
-      return caseInsensitiveComparison(containsCondition, entityType, field, value, Field::containsIgnoreCase, Field::contains);
+      // Casting required to use ARRAY_CONTAINS operator
+      // Assumes usage of a filterValueGetter with lower() function
+      return DSL.cast(field, String[].class).contains(new String[] {value.toLowerCase()});
     }
-    return field.contains(containsCondition.value());
+    // Cast non-string types to string for easy comparison
+    return DSL.cast(field, String[].class).contains(new String[] {containsCondition.value().toString()});
   }
 
   private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType, Field<Object> field) {
     if (notContainsCondition.value() instanceof String value) {
-      return caseInsensitiveComparison(notContainsCondition, entityType, field, value, Field::notContainsIgnoreCase, Field::notContains)
-        .or(field.isNull());
+      // Casting required to use ARRAY_CONTAINS operator
+      // Assumes usage of a filterValueGetter with lower() function
+      return DSL.cast(field, String[].class).notContains(new String[] {value.toLowerCase()});
     }
-    return field.notContains(notContainsCondition.value()).or(field.isNull());
+    // Cast non-string types to string for easy comparison
+    return DSL.cast(field, String[].class).notContains(new String[] {notContainsCondition.value().toString()});
   }
 
   /**

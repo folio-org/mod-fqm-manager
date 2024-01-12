@@ -164,7 +164,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "loan_checkout_servicepoint_name",
+              "name":"loan_checkout_servicepoint_name",
               "source": {
                 "columnName": "service_point_name",
                 "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
@@ -251,6 +251,7 @@
               "dataType": {
                 "dataType": "booleanType"
               },
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(user_details.jsonb ->> 'active'::text))",
               "valueGetter": "user_details.jsonb ->> 'active'",
               "visibleByDefault": false
             },

@@ -35,9 +35,9 @@ import static org.jooq.impl.DSL.val;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FqlToSqlConverterService {
 
-  // The compiler is unable to determine handle a type parameter on ConditionHandler
-  // (depending on how it's constrained, it either fails to compile this initialization or uses of the variable)
-  // IDEs seem to be able to handle ConditionHandler
+  // Suppress warnings here because the compiler is unable to determine a type parameter on ConditionHandler
+  // (depending on how it's constrained, it either fails to compile this initialization or the uses of this variable).
+  // IDEs seem to be able to handle ConditionHandler, though
   @SuppressWarnings("rawtypes")
   private static final Map<Class<? extends FqlCondition<?>>, ConditionHandler> sqlConverters = Map.ofEntries(
     buildMapping(EqualsCondition.class, FqlToSqlConverterService::handleEquals),

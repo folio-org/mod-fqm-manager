@@ -184,78 +184,7 @@
     }
   ],
   "requires": [
-    {
-      "id": "item-storage",
-      "version": "10.0"
-    },
-    {
-      "id": "holdings-storage",
-      "version": "6.0"
-    },
-    {
-      "id": "instance-storage",
-      "version": "10.0"
-    },
-    {
-      "id": "loan-types",
-      "version": "2.2"
-    },
-    {
-      "id": "material-types",
-      "version": "2.2"
-    },
-    {
-      "id": "shelf-locations",
-      "version": "1.1"
-    },
-    {
-      "id": "location-units",
-      "version": "2.0"
-    },
-    {
-      "id": "locations",
-      "version": "3.0"
-    },
-    {
-      "id": "call-number-types",
-      "version": "1.0"
-    },
-    {
-      "id": "holdings-types",
-      "version": "1.0"
-    },
-    {
-      "id": "service-points",
-      "version": "3.3"
-    },
-    {
-      "id": "users",
-      "version": "16.0"
-    },
-    {
-      "id": "loan-policy-storage",
-      "version": "2.3"
-    },
-    {
-      "id": "loan-storage",
-      "version": "7.1"
-    },
-    {
-      "id": "organizations-storage.organizations",
-      "version": "3.3"
-    },
-    {
-      "id": "orders-storage.po-lines",
-      "version": "12.0"
-    },
-    {
-      "id": "orders-storage.purchase-orders",
-      "version": "8.0"
-    },
-    {
-      "id": "acquisitions-units-storage.units",
-      "version": "1.1"
-    }
+
   ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",

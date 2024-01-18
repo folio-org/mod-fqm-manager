@@ -2,16 +2,14 @@ package org.folio.fqm.repository;
 
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,4 +58,15 @@ class EntityTypeRepositoryTest {
     Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID);
     assertTrue(actualEntityTypeDefinition.isPresent());
   }
+
+//  @Test
+//  public void shouldReturnListOfEntityTypeColumn() {
+//    UUID entityTypeId = UUID.randomUUID();
+//    EntityTypeColumn entityTypeColumn = new EntityTypeColumn().name("test1");
+//    EntityTypeColumn entityTypeColumn1 = new EntityTypeColumn().name("test2");
+//    List<EntityTypeColumn> expectResult = List.of(entityTypeColumn, entityTypeColumn1);
+//    EntityType entityType = new EntityType().id(entityTypeId.toString()).columns(expectResult);
+//    List<EntityTypeColumn> actualResult = repo.fetchNamesForSingleCheckbox(entityTypeId);
+//    assertEquals(expectResult, actualResult);
+ // }
 }

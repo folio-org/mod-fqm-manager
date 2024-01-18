@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
+import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;

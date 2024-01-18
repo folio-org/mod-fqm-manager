@@ -11,10 +11,12 @@
   <include file="sql/entity-type-definitions/insert-organizations-vendor-definition.sql" relativeToChangelogFile="true"/>
   <include file="sql/entity-type-definitions/insert-purchase-order-lines-acquisition-definition.sql" relativeToChangelogFile="true"/>
   <include file="sql/entity-type-definitions/insert-purchase-order-line-definition.sql" relativeToChangelogFile="true"/>
+  <include file="sql/entity-type-definitions/insert-custom-fields-definition.sql" relativeToChangelogFile="true"/>
   <include file="update-src-acquisitions-unit-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-organizations-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="alter-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
 
   <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
     <comment>Swap the columns in the query_results primary key, to improve performance</comment>

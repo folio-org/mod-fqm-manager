@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.List;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +60,7 @@ public class EntityTypeService {
       .map((EntityType entityType) -> {
         entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
 
-        entityType.getColumns().forEach(column -> 
+        entityType.getColumns().forEach(column ->
           column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
         );
 

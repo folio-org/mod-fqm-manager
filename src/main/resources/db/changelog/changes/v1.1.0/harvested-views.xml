@@ -48,4 +48,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_custom_fields" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "custom_fields" schemaName="${tenant_id}_mod_users"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="user_custom_fields">
+      SELECT * FROM ${tenant_id}_mod_users.custom_fields
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

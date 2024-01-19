@@ -2,7 +2,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="update-purchase-order-line-details-entity-type-definition" author="bsharp@ebsco.com">
+  <changeSet id="update-purchase-order-line-details-entity-type-definition" runOnChange="true" author="bsharp@ebsco.com">
     <update tableName="entity_type_definition">
       <column name="definition">
         {
@@ -10,7 +10,7 @@
           "name": "drv_purchase_order_line_details",
           "private": false,
           "fromClause": "src_purchase_order_line JOIN src_purchase_order purchase_order ON purchase_order.id = ((src_purchase_order_line.jsonb ->> 'purchaseOrderId'::text)::uuid) LEFT JOIN src_users_users user_details ON user_details.id = (((purchase_order.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)::uuid) LEFT JOIN src_users_users user_details_for_order_updated_by ON user_details_for_order_updated_by.id = (((purchase_order.jsonb -> 'metadata'::text) ->> 'updatedByUserId'::text)::uuid) LEFT JOIN src_users_users user_details_for_pol_created_by ON user_details_for_pol_created_by.id = (((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)::uuid) LEFT JOIN src_users_users user_details_for_pol_updated_by ON user_details_for_pol_updated_by.id = (((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'updatedByUserId'::text)::uuid) LEFT JOIN src_organizations organization_details ON organization_details.id = ((purchase_order.jsonb ->> 'vendor'::text)::uuid) LEFT JOIN src_users_users user_details_of_assignee ON user_details_of_assignee.id = ((purchase_order.jsonb ->> 'assignedTo'::text)::uuid) ",
-        "columns": [
+          "columns": [
             {
               "name": "acqunit_ids",
               "dataType": {
@@ -19,7 +19,8 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "valueGetter": "( SELECT array_to_string(array_agg(acq_id.value), ','::text) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+              "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "visibleByDefault": false
             },
             {
@@ -30,7 +31,8 @@
                     "dataType": "stringType"
                   }
                 },
-                "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value) JOIN src_acquisitions_unit acq_unit ON acq_id.value = acq_unit.id::text)",
+                "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+                "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
                 "visibleByDefault": false,
                 "idColumnName": "acqunit_ids",
                 "source": {

@@ -23,9 +23,11 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.or;
+import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
 
 /**
@@ -89,7 +91,7 @@ public class FqlToSqlConverterService {
     if (equalsCondition.value() instanceof String value) {
       return caseInsensitiveComparison(equalsCondition, entityType, field, value, Field::equalIgnoreCase, Field::eq);
     }
-    return field.eq(equalsCondition.value());
+    return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
   }
 
   private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, Field<Object> field) {
@@ -99,7 +101,7 @@ public class FqlToSqlConverterService {
     if (notEqualsCondition.value() instanceof String value) {
       return caseInsensitiveComparison(notEqualsCondition, entityType, field, value, Field::notEqualIgnoreCase, Field::ne);
     }
-    return field.ne(notEqualsCondition.value());
+    return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
   }
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, Field<Object> field) {
@@ -146,11 +148,11 @@ public class FqlToSqlConverterService {
   private static Condition handleIn(InCondition inCondition, EntityType entityType, Field<Object> field) {
     List<Condition> conditionList = inCondition
       .value().stream()
-      .map((Object val) -> {
+      .map(val -> {
         if (val instanceof String value) {
           return caseInsensitiveComparison(inCondition, entityType, field, value, Field::equalIgnoreCase, Field::eq);
         } else {
-          return field.eq(val);
+          return field.eq(valueField(val, inCondition, entityType));
         }
       })
       .toList();
@@ -165,7 +167,7 @@ public class FqlToSqlConverterService {
         if (val instanceof String value) {
           return caseInsensitiveComparison(notInCondition, entityType, field, value, Field::notEqualIgnoreCase, Field::notEqual);
         } else {
-          return field.notEqual(val);
+          return field.notEqual(valueField(val, notInCondition, entityType));
         }
       })
       .toList();
@@ -177,9 +179,9 @@ public class FqlToSqlConverterService {
       return handleDate(greaterThanCondition, field);
     }
     if (greaterThanCondition.orEqualTo()) {
-      return field.greaterOrEqual(greaterThanCondition.value());
+      return field.greaterOrEqual(valueField(greaterThanCondition.value(), greaterThanCondition, entityType));
     }
-    return field.greaterThan(greaterThanCondition.value());
+    return field.greaterThan(valueField(greaterThanCondition.value(), greaterThanCondition, entityType));
   }
 
   private static Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType, Field<Object> field) {
@@ -187,9 +189,9 @@ public class FqlToSqlConverterService {
       return handleDate(lessThanCondition, field);
     }
     if (lessThanCondition.orEqualTo()) {
-      return field.lessOrEqual(lessThanCondition.value());
+      return field.lessOrEqual(valueField(lessThanCondition.value(), lessThanCondition, entityType));
     }
-    return field.lessThan(lessThanCondition.value());
+    return field.lessThan(valueField(lessThanCondition.value(), lessThanCondition, entityType));
   }
 
   private static Condition handleAnd(AndCondition andCondition, EntityType entityType, Field<Object> field) {
@@ -204,21 +206,19 @@ public class FqlToSqlConverterService {
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, Field<Object> field) {
     if (containsCondition.value() instanceof String value) {
       // Casting required to use ARRAY_CONTAINS operator
-      // Assumes usage of a filterValueGetter with lower() function
-      return DSL.cast(field, String[].class).contains(new String[] {value.toLowerCase()});
+      return cast(field, String[].class).contains(valueField(new String[]{value.toLowerCase()}, containsCondition, entityType));
     }
     // Cast non-string types to string for easy comparison
-    return DSL.cast(field, String[].class).contains(new String[] {containsCondition.value().toString()});
+    return cast(field, String[].class).contains(valueField(new String[]{containsCondition.value().toString()}, containsCondition, entityType));
   }
 
   private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType, Field<Object> field) {
     if (notContainsCondition.value() instanceof String value) {
       // Casting required to use ARRAY_CONTAINS operator
-      // Assumes usage of a filterValueGetter with lower() function
-      return DSL.cast(field, String[].class).notContains(new String[] {value.toLowerCase()});
+      return cast(field, String[].class).notContains(valueField(new String[]{value.toLowerCase()}, notContainsCondition, entityType));
     }
     // Cast non-string types to string for easy comparison
-    return DSL.cast(field, String[].class).notContains(new String[] {notContainsCondition.value().toString()});
+    return cast(field, String[].class).notContains(valueField(new String[]{notContainsCondition.value().toString()}, notContainsCondition, entityType));
   }
 
   /**
@@ -233,14 +233,14 @@ public class FqlToSqlConverterService {
    */
   private static Condition caseInsensitiveComparison(FieldCondition<?> fieldCondition, EntityType entityType, Field<Object> field,
                                                      String value,
-                                                     BiFunction<Field<Object>, String, Condition> toCaseInsensitiveCondition,
-                                                     BiFunction<Field<Object>, String, Condition> toCaseSensitiveCondition) {
+                                                     BiFunction<Field<Object>, Field<String>, Condition> toCaseInsensitiveCondition,
+                                                     BiFunction<Field<Object>, Field<Object>, Condition> toCaseSensitiveCondition) {
     EntityTypeColumn column = getColumn(fieldCondition, entityType);
     boolean shouldConvertColumnToLower = column.getFilterValueGetter() == null;
 
     return shouldConvertColumnToLower
-      ? toCaseInsensitiveCondition.apply(field, value)
-      : toCaseSensitiveCondition.apply(field, value.toLowerCase());
+      ? toCaseInsensitiveCondition.apply(field, valueField(value, fieldCondition, entityType))
+      : toCaseSensitiveCondition.apply(field, valueField(value.toLowerCase(), fieldCondition, entityType));
   }
 
   private static Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
@@ -251,6 +251,17 @@ public class FqlToSqlConverterService {
       .findFirst()
       .map(SqlFieldIdentificationUtils::getSqlFilterField)
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), columnName));
+  }
+
+  // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get
+  // a reasonable level of type-safety with the return type on this method
+  @SuppressWarnings("unchecked")
+  private static <T> Field<T> valueField(T value, FieldCondition<?> condition, EntityType entityType) {
+    EntityTypeColumn column = getColumn(condition, entityType);
+    if (column.getValueFunction() != null) {
+      return DSL.field(column.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
+    }
+    return val(value);
   }
 
   /**

@@ -18,10 +18,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.or;
+import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,7 +44,14 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("arrayField").dataType(new ArrayType()),
           new EntityTypeColumn().name("fieldWithFilterValueGetter")
             .dataType(new EntityDataType().dataType("stringType"))
+            .filterValueGetter("thisIsAFilterValueGetter"),
+          new EntityTypeColumn().name("fieldWithFilterValueGetterAndValueFunction")
+            .dataType(new EntityDataType().dataType("stringType"))
             .filterValueGetter("thisIsAFilterValueGetter")
+            .valueFunction("lower(:value)"),
+          new EntityTypeColumn().name("fieldWithAValueFunction")
+            .dataType(new EntityDataType().dataType("stringType"))
+            .valueFunction("upper(:value)")
         )
       );
   }
@@ -288,6 +296,40 @@ class FqlToSqlConverterServiceTest {
         """
           {"fieldWithFilterValueGetter": {"$eq": "Test value"}}""",
         field("thisIsAFilterValueGetter").eq("Test value".toLowerCase())
+      ),
+
+      Arguments.of(
+        "condition on a field with a filter value getter and a value function",
+        """
+         {
+            "$and": [
+              {"fieldWithFilterValueGetterAndValueFunction": {"$eq": "Test value"}},
+              {"fieldWithAValueFunction": {"$eq": "Test value2"}}
+            ]
+          }""",
+        field("thisIsAFilterValueGetter").eq(field("lower(:value)", param("value", "Test value".toLowerCase())))
+          .and(field("fieldWithAValueFunction").equalIgnoreCase(field("upper(:value)", String.class, param("value", "Test value2"))))
+      ),
+
+      Arguments.of(
+        "in operator on a field with a valueFunction",
+        """
+          {"fieldWithAValueFunction": {"$in": ["value1", 2, true]}}""",
+        or(
+          field("fieldWithAValueFunction").equalIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
+          field("fieldWithAValueFunction").eq(field("upper(:value)", String.class, param("value", 2))),
+          field("fieldWithAValueFunction").eq(field("upper(:value)", String.class, param("value", true))))
+      ),
+
+      Arguments.of(
+        "not-in operator on a field with a valueFunction",
+        """
+          {"fieldWithAValueFunction": {"$nin": ["value1", 2, true]}}""",
+        and(
+          field("fieldWithAValueFunction").notEqualIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
+          field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
+          field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
+        )
       )
     );
   }

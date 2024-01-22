@@ -377,6 +377,15 @@ Example:
 }
 ```
 
+## FQL reserved field names
+Field names may be prefixed with special characters to indicate that the field is reserved for a specific purpose.
+
+### Underscore (_)
+Fields prefixed with an underscore are reserved for use by FQM.
+
+#### _deleted
+The field name "_deleted" can be used to indicate that the record corresponding to a particular content ID has been deleted.
+
 ## Additional information
 
 ### Issue tracker

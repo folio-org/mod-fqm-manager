@@ -31,9 +31,11 @@ public class ResultSetService {
   private static List<Map<String, Object>> getSortedContents(List<UUID> contentIds, List<Map<String, Object>> unsortedResults) {
     Map<UUID, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> (UUID) content.get(ID_FIELD_NAME), Function.identity()));
-
     return contentIds.stream()
-      .map(contentsMap::get)
+      .map(id -> {
+        var contents = contentsMap.get(id);
+        return contents == null ? Map.<String, Object>of(ID_FIELD_NAME, id, "_deleted", true) : contents;
+      })
       .toList();
   }
 }

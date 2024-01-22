@@ -6,10 +6,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,13 +31,16 @@ class ResultSetServiceTest {
   @Test
   void shouldGetResultSet() {
     UUID entityTypeId = UUID.randomUUID();
-    List<Map<String, Object>> expectedResult = TestDataFixture.getEntityContents();
-    List<Map<String, Object>> reversedContent = Lists.reverse(expectedResult);
+    UUID deletedContentId = UUID.randomUUID();
+    List<Map<String, Object>> expectedResult = new ArrayList<>(TestDataFixture.getEntityContents());
+    List<Map<String, Object>> reversedContent = new ArrayList<>(Lists.reverse(expectedResult));
+    expectedResult.add(Map.of("id", deletedContentId, "_deleted", true));
     List<String> fields = List.of("id", "key1", "key2");
     List<UUID> listIds = new ArrayList<>();
     expectedResult.forEach(content ->
       listIds.add((UUID) content.get(ID_FIELD_NAME))
     );
+
     when(
       resultSetRepository.getResultSet(entityTypeId, fields, listIds)
     )

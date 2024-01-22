@@ -33,7 +33,7 @@ public class ResultSetService {
       .collect(Collectors.toMap(content -> (UUID) content.get(ID_FIELD_NAME), Function.identity()));
 
     return contentIds.stream()
-      .map(contentsMap::get)
+      .map(id -> contentsMap.getOrDefault(id, Map.of("id", id, "_deleted", true)))
       .toList();
   }
 }

@@ -60,6 +60,30 @@
               "visibleByDefault": false
             },
             {
+              "name": "po_workflow_status",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "purchase_order.jsonb ->> 'workflowStatus'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'workflowStatus'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
+              "visibleByDefault": true,
+              "values": [
+                {
+                  "value": "closed",
+                  "label": "Closed"
+                },
+                {
+                  "value": "open",
+                  "label": "Open"
+                },
+                {
+                  "value": "pending",
+                  "label": "Pending"
+                }
+              ]
+            },
+            {
               "name": "purchase_order_approved",
               "dataType": {
                 "dataType": "stringType"

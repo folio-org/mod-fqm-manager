@@ -24,6 +24,7 @@ import java.util.function.BiFunction;
 
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.cast;
+import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.or;
@@ -51,7 +52,8 @@ public class FqlToSqlConverterService {
     buildMapping(AndCondition.class, FqlToSqlConverterService::handleAnd),
     buildMapping(RegexCondition.class, FqlToSqlConverterService::handleRegEx),
     buildMapping(ContainsCondition.class, FqlToSqlConverterService::handleContains),
-    buildMapping(NotContainsCondition.class, FqlToSqlConverterService::handleNotContains)
+    buildMapping(NotContainsCondition.class, FqlToSqlConverterService::handleNotContains),
+    buildMapping(EmptyCondition.class, FqlToSqlConverterService::handleEmpty)
   );
 
   /**
@@ -221,13 +223,29 @@ public class FqlToSqlConverterService {
     return cast(field, String[].class).notContains(valueField(new String[]{notContainsCondition.value().toString()}, notContainsCondition, entityType));
   }
 
+  private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, Field<Object> field) {
+    String fieldType = getColumn(emptyCondition, entityType)
+      .getDataType()
+      .getDataType();
+    boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
+    return switch (fieldType) {
+      case "stringType" -> isEmpty ? nullCondition.or(field.eq("")) : nullCondition.and(field.ne(""));
+      case "arrayType" -> {
+        var cardinality = cardinality(DSL.cast(field, String[].class));
+        yield isEmpty ? nullCondition.or(cardinality.eq(0)) :  nullCondition.and(cardinality.ne(0));
+      }
+      default -> nullCondition;
+    };
+  }
+
   /**
    * Create a case-insensitive comparison of the given fieldCondition with the given entityType.
    * <p /><b>Note: This method always converts the comparison value to lower-case, while the column will be converted
    * to lower-case only if it does not have a filterValueGetter (currently, we assume the filterValueGetter
    * will convert the column to lower-case. If that assumption changes, this method will need to be updated)</b>
    *
-   * @param value The value side of the string comparison (i.e., the value being compared to the field)
+   * @param value                      The value side of the string comparison (i.e., the value being compared to the field)
    * @param toCaseInsensitiveCondition The function to build a Condition where the column is converted to lower-case
    * @param toCaseSensitiveCondition   The function to build a Condition where the column is *not* converted to lower-case
    */

@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.ColumnNotFoundException;
-import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -19,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.cardinality;
+import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.or;
@@ -41,7 +42,8 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("field2").dataType(new EntityDataType().dataType("stringType")),
           new EntityTypeColumn().name("field3").dataType(new EntityDataType().dataType("stringType")),
           new EntityTypeColumn().name("field4").dataType(new DateType()),
-          new EntityTypeColumn().name("arrayField").dataType(new ArrayType()),
+          new EntityTypeColumn().name("field5").dataType(new EntityDataType().dataType("integerType")),
+          new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("fieldWithFilterValueGetter")
             .dataType(new EntityDataType().dataType("stringType"))
             .filterValueGetter("thisIsAFilterValueGetter"),
@@ -330,6 +332,43 @@ class FqlToSqlConverterServiceTest {
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
         )
+      ),
+
+      Arguments.of(
+        "empty",
+        """
+          {"field5": {"$empty": true}}""",
+        field("field5").isNull()
+      ),
+      Arguments.of(
+        "not empty",
+        """
+          {"field5": {"$empty": false}}""",
+        field("field5").isNotNull()
+      ),
+      Arguments.of(
+        "empty string",
+        """
+          {"field1": {"$empty": true}}""",
+        field("field1").isNull().or(field("field1").eq(""))
+      ),
+      Arguments.of(
+        "not empty string",
+        """
+          {"field1": {"$empty": false}}""",
+        field("field1").isNotNull().and(field("field1").ne(""))
+      ),
+      Arguments.of(
+        "empty array",
+        """
+          {"arrayField": {"$empty": true}}""",
+        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+      ),
+      Arguments.of(
+        "not empty array",
+        """
+          {"arrayField": {"$empty": false}}""",
+        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0))
       )
     );
   }

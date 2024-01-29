@@ -2,7 +2,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="add-filter-value-getters-for-item-details" author="mweaver@ebsco.com">
+  <changeSet id="add-filter-value-getters-for-item-details" author="mweaver@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <viewExists viewName="src_inventory_item"/>
       <viewExists viewName="src_inventory_holdings_record"/>
@@ -18,7 +18,7 @@
         SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
       </sqlCheck>
     </preConditions>
-    <comment>Add filterValueGetters to various columns</comment>
+    <comment>Add filterValueGetters and valueFunctions to various columns</comment>
     <update tableName="entity_type_definition">
       <column name="definition">
         {
@@ -65,6 +65,7 @@
                 "dataType": "stringType"
               },
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(instance_details.jsonb ->> 'title'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
               "valueGetter": "instance_details.jsonb ->> 'title'",
               "visibleByDefault": true
             },
@@ -74,6 +75,7 @@
                 "dataType": "dateType"
               },
               "filterValueGetter": "\"left\"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
+              "valueFunction": "\"left\"(lower(:value), 600)",
               "valueGetter": "instance_details.jsonb -> 'metadata' ->> 'updatedDate'",
               "visibleByDefault": false
             },
@@ -83,6 +85,7 @@
                 "dataType": "stringType"
               },
               "filterValueGetter": "lower(src_inventory_item.jsonb ->> 'barcode'::text)",
+              "valueFunction": "lower(:value)",
               "valueGetter": "src_inventory_item.jsonb ->> 'barcode'",
               "visibleByDefault": true
             },
@@ -105,6 +108,7 @@
               },
               "idColumnName": "item_level_call_number_typeid",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_item_number_type_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "call_item_number_type_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },
@@ -151,6 +155,7 @@
               },
               "idColumnName": "item_effective_call_number_typeid",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_number_type_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "call_number_type_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },
@@ -210,6 +215,7 @@
               },
               "idColumnName": "item_effective_location_id",
               "filterValueGetter": " lower(${tenant_id}_mod_inventory_storage.f_unaccent(effective_location_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": " lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "effective_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": true
             },
@@ -219,6 +225,7 @@
                 "dataType": "stringType"
               },
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_item.jsonb ->> 'hrid'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "src_inventory_item.jsonb ->> 'hrid'",
               "visibleByDefault": false
             },
@@ -241,6 +248,7 @@
               },
               "idColumnName": "item_material_type_id",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "material_type_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },
@@ -271,6 +279,7 @@
               },
               "idColumnName": "item_permanent_location_id",
               "filterValueGetter": "lower(${tenant_id}g_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}g_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "permanent_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },
@@ -284,6 +293,7 @@
                 "dataType": "stringType"
               },
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
               "valueGetter": "src_inventory_item.jsonb -> 'status' ->> 'name'",
               "visibleByDefault": false
             },
@@ -306,6 +316,7 @@
               },
               "idColumnName": "item_temporary_location_id",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(temporary_location_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "temporary_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },

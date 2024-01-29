@@ -81,14 +81,18 @@ class EntityTypeRepositoryTest {
   void fetchNamesForSingleCheckboxTest() {
     UUID id = UUID.randomUUID();
     when(repo.getDerivedTableName(id)).thenReturn(Optional.of("mockedTableName"));
+
+    // Mocking the Result class
     Result mockedResult = mock(Result.class);
     when(mockedResult.stream()).thenReturn(Stream.of(
       mockRecord("value1", "refId1"),
       mockRecord("value2", "refId2")
     ));
-
-    // Adjusting the method call with any() if the parameters are UUID
-    when(repo.fetchNamesForSingleCheckbox(any(UUID.class))).thenReturn(Collections.emptyList());
+    when(repo.fetchNamesForSingleCheckbox(any(UUID.class))).thenAnswer(invocation -> {
+      UUID argument = invocation.getArgument(0); // Getting the UUID argument passed to the method
+      // Return your expected result based on the argument
+      return Arrays.asList(new EntityTypeColumn().name("value1"), new EntityTypeColumn().name("value2"));
+    });
 
     // Calling the method
     List<EntityTypeColumn> result = repo.fetchNamesForSingleCheckbox(UUID.randomUUID());

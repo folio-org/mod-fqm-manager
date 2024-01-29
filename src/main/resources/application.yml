@@ -9,11 +9,11 @@ spring:
     writer:
       username: ${DB_USERNAME:postgres}
       password: ${DB_PASSWORD:postgres}
-      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:db}
+      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:postgres}
     reader:
       username: ${DB_USERNAME:postgres}
       password: ${DB_PASSWORD:postgres}
-      url: jdbc:postgresql://${DB_HOST_READER:localhost}:${DB_PORT_READER:5432}/${DB_DATABASE:db}
+      url: jdbc:postgresql://${DB_HOST_READER:localhost}:${DB_PORT_READER:5432}/${DB_DATABASE:postgres}
     hikari:
       # time in ms to wait for db connection
       initialization-fail-timeout: 1800000

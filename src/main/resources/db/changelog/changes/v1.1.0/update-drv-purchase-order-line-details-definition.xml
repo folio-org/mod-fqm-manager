@@ -21,6 +21,7 @@
               },
               "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -33,6 +34,7 @@
                 },
                 "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
                 "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+                "valueFunction": "lower(:value)",
                 "visibleByDefault": false,
                 "idColumnName": "acqunit_ids",
                 "source": {

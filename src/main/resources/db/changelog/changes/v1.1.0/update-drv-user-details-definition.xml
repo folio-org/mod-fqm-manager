@@ -18,6 +18,7 @@
               },
               "valueGetter": "src_users_users.jsonb ->> 'active'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'active'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": true,
               "values": [
                 {
@@ -40,6 +41,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -52,6 +54,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -64,6 +67,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -76,6 +80,7 @@
               },
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'addressType'::text)) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false,
               "idColumnName": "user_address_ids",
               "source": {
@@ -90,6 +95,7 @@
               },
               "valueGetter": "src_users_users.jsonb ->> 'barcode'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": true
             },
             {
@@ -102,6 +108,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -114,6 +121,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -142,6 +150,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -159,6 +168,7 @@
               },
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -168,6 +178,7 @@
               },
               "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'email'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'email'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": false
             },
             {
@@ -185,6 +196,7 @@
               },
               "valueGetter": "src_users_users.jsonb ->> 'expirationDate'",
               "filterValueGetter": "\"left\"(src_users_users.jsonb ->> 'expirationDate'::text, 600)",
+              "valueFunction": "\"left\"(:value, 600)",
               "visibleByDefault": false
             },
             {
@@ -194,6 +206,7 @@
               },
               "valueGetter": "src_users_users.jsonb ->> 'externalSystemId'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'externalSystemId'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": false
             },
             {
@@ -203,6 +216,7 @@
               },
               "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'firstName'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)",
               "visibleByDefault": true
             },
             {
@@ -220,6 +234,7 @@
               },
               "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'lastName'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)",
               "visibleByDefault": true
             },
             {
@@ -245,6 +260,7 @@
               },
               "valueGetter": "src_users_groups.jsonb ->> 'group'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_groups.jsonb ->> 'group'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": false,
               "idColumnName": "user_patron_group_id",
               "source": {
@@ -278,6 +294,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -309,6 +326,7 @@
               },
               "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'preferredFirstName'",
               "filterValueGetter": "${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
+              "valueFunction": "${tenant_id}_mod_users.f_unaccent(:value)",
               "visibleByDefault": true
             },
             {
@@ -329,6 +347,7 @@
               },
               "valueGetter": "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
               "visibleByDefault": false
             },
             {
@@ -346,6 +365,7 @@
               },
               "valueGetter": "src_users_users.jsonb ->> 'username'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'username'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
               "visibleByDefault": true
             }
           ],

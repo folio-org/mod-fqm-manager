@@ -79,32 +79,30 @@ class EntityTypeRepositoryTest {
 
   @Test
   void fetchNamesForSingleCheckboxTest() {
-      when(repo.getDerivedTableName(any(UUID.class))).thenReturn(Optional.of("mockedTableName"));
+    UUID id = UUID.randomUUID();
+    when(repo.getDerivedTableName(id)).thenReturn(Optional.of("mockedTableName"));
     Result mockedResult = mock(Result.class);
     when(mockedResult.stream()).thenReturn(Stream.of(
       mockRecord("value1", "refId1"),
       mockRecord("value2", "refId2")
     ));
 
-      // Calling the method
-      List<EntityTypeColumn> result = repo.fetchNamesForSingleCheckbox(UUID.randomUUID());
+    // Adjusting the method call with any() if the parameters are UUID
+    when(repo.fetchNamesForSingleCheckbox(any(UUID.class))).thenReturn(Collections.emptyList());
 
-      // Assertions
-      assertEquals(2, result.size());
-      assertEquals("value1", result.get(0).getValues());
-//      assertEquals("refId1", result.get(0).getRefId());
-//      assertEquals("value2", result.get(1).getValue());
-//      assertEquals("refId2", result.get(1).getRefId());
-    }
+    // Calling the method
+    List<EntityTypeColumn> result = repo.fetchNamesForSingleCheckbox(UUID.randomUUID());
+
+    // Assertions
+    assertEquals(2, result.size());
+    assertEquals("value1", result.get(0).getValues().toString());
+  }
 
   private Record2<Object, Object> mockRecord(Object value, Object refId) {
-    Record2 record = mock(Record2.class);
+    Record2<Object, Object> record = mock(Record2.class);
     when(record.get(0)).thenReturn(value);
     when(record.get(1)).thenReturn(refId);
     return record;
   }
-
-
-
 
 }

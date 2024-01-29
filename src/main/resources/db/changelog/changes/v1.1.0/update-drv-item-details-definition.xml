@@ -278,8 +278,8 @@
                 "dataType": "stringType"
               },
               "idColumnName": "item_permanent_location_id",
-              "filterValueGetter": "lower(${tenant_id}g_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
-              "valueFunction": "lower(${tenant_id}g_mod_inventory_storage.f_unaccent(:value))",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "permanent_location_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
             },

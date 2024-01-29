@@ -3,15 +3,30 @@ package org.folio.fqm.repository;
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.jooq.*;
+import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
+import java.util.stream.Stream;
+
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -25,6 +40,9 @@ class EntityTypeRepositoryTest {
 
   @Autowired
   private EntityTypeRepository repo;
+
+  @Mock
+  private DSLContext jooqContext;
 
   @Test
   void shouldFetchAllPublicEntityTypes() {
@@ -59,14 +77,34 @@ class EntityTypeRepositoryTest {
     assertTrue(actualEntityTypeDefinition.isPresent());
   }
 
-//  @Test
-//  public void shouldReturnListOfEntityTypeColumn() {
-//    UUID entityTypeId = UUID.randomUUID();
-//    EntityTypeColumn entityTypeColumn = new EntityTypeColumn().name("test1");
-//    EntityTypeColumn entityTypeColumn1 = new EntityTypeColumn().name("test2");
-//    List<EntityTypeColumn> expectResult = List.of(entityTypeColumn, entityTypeColumn1);
-//    EntityType entityType = new EntityType().id(entityTypeId.toString()).columns(expectResult);
-//    List<EntityTypeColumn> actualResult = repo.fetchNamesForSingleCheckbox(entityTypeId);
-//    assertEquals(expectResult, actualResult);
- // }
+  @Test
+  void fetchNamesForSingleCheckboxTest() {
+      when(repo.getDerivedTableName(any(UUID.class))).thenReturn(Optional.of("mockedTableName"));
+    Result mockedResult = mock(Result.class);
+    when(mockedResult.stream()).thenReturn(Stream.of(
+      mockRecord("value1", "refId1"),
+      mockRecord("value2", "refId2")
+    ));
+
+      // Calling the method
+      List<EntityTypeColumn> result = repo.fetchNamesForSingleCheckbox(UUID.randomUUID());
+
+      // Assertions
+      assertEquals(2, result.size());
+      assertEquals("value1", result.get(0).getValues());
+//      assertEquals("refId1", result.get(0).getRefId());
+//      assertEquals("value2", result.get(1).getValue());
+//      assertEquals("refId2", result.get(1).getRefId());
+    }
+
+  private Record2<Object, Object> mockRecord(Object value, Object refId) {
+    Record2 record = mock(Record2.class);
+    when(record.get(0)).thenReturn(value);
+    when(record.get(1)).thenReturn(refId);
+    return record;
+  }
+
+
+
+
 }

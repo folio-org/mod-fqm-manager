@@ -35,6 +35,10 @@ import static org.jooq.impl.DSL.*;
 public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String TABLE_NAME = "entity_type_definition";
+  public static final  String requiredFieldName = "jsonb ->> 'name'";
+  public static final String refId =  "jsonb ->> 'refId'";
+  public static final String whereClauseName = "jsonb ->> 'type'";
+  public static final String customFieldType = "SINGLE_CHECKBOX";
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
@@ -53,38 +57,20 @@ public class EntityTypeRepository {
   public List<EntityTypeColumn> fetchNamesForSingleCheckbox(UUID entityTypeId) {
     log.info("Getting derived table name for entity type ID: {}", entityTypeId);
     String sourceViewName = getDerivedTableName(entityTypeId).get();
-    List<EntityTypeColumn> entityColumnsList = new ArrayList<>();
 
-    String requiredFieldName = "jsonb ->> 'name'";
-    String refId =  "jsonb ->> 'refId'";
-    String whereClauseName = "jsonb ->> 'type'";
-    String customFieldType = "SINGLE_CHECKBOX";
-
-    ValueWithLabel valueWithLabelTrue = new ValueWithLabel().label("True").value("true");
-    ValueWithLabel valueWithLabelFalse = new ValueWithLabel().label("False").value("false");
-
-    Result<Record2<Object, Object>> result = jooqContext
+    return jooqContext
       .select(field(requiredFieldName), field(refId))
       .from(sourceViewName)
       .where(field(whereClauseName).eq(customFieldType))
-      .fetch();
-
-    result.stream()
+      .fetch()
+      .stream()
       .map(record -> {
         Object value = record.get(0);
-        Object refSelect = record.get(1);
-        EntityTypeColumn entityTypeColumn = new EntityTypeColumn();
+        Object refId1 = record.get(1);
         assert value != null;
-        entityTypeColumn.name(value.toString());
-        entityTypeColumn.dataType(new BooleanType());
-        entityTypeColumn.values(List.of(valueWithLabelTrue, valueWithLabelFalse));
-        entityTypeColumn.visibleByDefault(false);
-        entityTypeColumn.valueGetter("src_users_users.jsonb -> 'customFields' ->> '"+refSelect+"'");
-        return entityTypeColumn;
+        return createEntityTypeColumn(value.toString(), refId1.toString());
       })
-      .forEach(entityColumnsList::add);
-
-    return entityColumnsList;
+      .collect(Collectors.toList());
   }
 
 
@@ -124,6 +110,20 @@ public class EntityTypeRepository {
       .map(
         row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField))
       );
+  }
+
+  private EntityTypeColumn createEntityTypeColumn(String value, String refId) {
+    ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
+    ValueWithLabel falseValue = new ValueWithLabel().label("False").value("false");
+
+    EntityTypeColumn entityTypeColumn = new EntityTypeColumn();
+    entityTypeColumn.name(value);
+    entityTypeColumn.dataType(new BooleanType());
+    entityTypeColumn.values(List.of(trueValue, falseValue));
+    entityTypeColumn.visibleByDefault(false);
+    entityTypeColumn.valueGetter("src_users_users.jsonb -> 'customFields' ->> '" + refId + "'");
+
+    return entityTypeColumn;
   }
 
   @SneakyThrows

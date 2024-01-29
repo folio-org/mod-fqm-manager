@@ -63,7 +63,6 @@ public class EntityTypeService {
         entityType.getColumns().forEach(column ->
           column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
         );
-
         return entityType;
       });
   }

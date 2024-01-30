@@ -15,7 +15,9 @@ public class MaterializedViewRefreshRepository {
 
   private static final List<String> materializedViewNames = List.of(
     "drv_circulation_loan_status",
-    "drv_inventory_item_status"
+    "drv_inventory_item_status",
+    "drv_pol_payment_status",
+    "drv_pol_receipt_status"
   );
 
   private final DSLContext jooqContext;

@@ -1,32 +1,21 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
+import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.jooq.*;
-import org.jooq.Record;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
-import java.util.stream.Stream;
-
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -43,6 +32,7 @@ class EntityTypeRepositoryTest {
 
   @Mock
   private DSLContext jooqContext;
+
 
   @Test
   void shouldFetchAllPublicEntityTypes() {
@@ -78,35 +68,40 @@ class EntityTypeRepositoryTest {
   }
 
   @Test
-  void fetchNamesForSingleCheckboxTest() {
-    UUID id = UUID.randomUUID();
-    when(repo.getDerivedTableName(id)).thenReturn(Optional.of("mockedTableName"));
+  void retrieveCustomFieldNamesForSingleCheckboxTest() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID customFieldEntityTypeId = UUID.randomUUID();
+    String sourceViewName = "user_custom_fields";
+    EntityTypeColumn entityTypeColumn1 = new EntityTypeColumn().name("name").dataType(new BooleanType()).visibleByDefault(false);
+    ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("Test_entity_type")
+      .customFieldEntityTypeId(customFieldEntityTypeId.toString())
+      .columns(List.of(entityTypeColumn1))
+      .root(true);
+    assertEquals(entityType.getColumns().size(), 1);
+    Optional<EntityType> actualEntityType = repo.getEntityTypeDefinition(UUID.fromString(entityType.getId()));
 
-    // Mocking the Result class
-    Result mockedResult = mock(Result.class);
-    when(mockedResult.stream()).thenReturn(Stream.of(
-      mockRecord("value1", "refId1"),
-      mockRecord("value2", "refId2")
-    ));
-    when(repo.fetchNamesForSingleCheckbox(any(UUID.class))).thenAnswer(invocation -> {
-      UUID argument = invocation.getArgument(0); // Getting the UUID argument passed to the method
-      // Return your expected result based on the argument
-      return Arrays.asList(new EntityTypeColumn().name("value1"), new EntityTypeColumn().name("value2"));
-    });
-
-    // Calling the method
-    List<EntityTypeColumn> result = repo.fetchNamesForSingleCheckbox(UUID.randomUUID());
-
-    // Assertions
-    assertEquals(2, result.size());
-    assertEquals("value1", result.get(0).getValues().toString());
+    EntityType customEntityType = new EntityType().id(customFieldEntityTypeId.toString()).sourceView(sourceViewName);
+    EntityTypeColumn customColumn = new EntityTypeColumn().name("name").visibleByDefault(false).valueGetter("src_users_users.jsonb-> 'customFields' ->> '" + "refId" + "'").values(List.of(trueValue));
+    assertEquals(actualEntityType.get().getColumns().size(), 2);
   }
 
-  private Record2<Object, Object> mockRecord(Object value, Object refId) {
-    Record2<Object, Object> record = mock(Record2.class);
-    when(record.get(0)).thenReturn(value);
-    when(record.get(1)).thenReturn(refId);
-    return record;
+  @Test
+  void retrieveDefaultFieldNamesForSingleCheckboxTest() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID customFieldEntityTypeId = UUID.randomUUID();
+    EntityTypeColumn entityTypeColumn1 = new EntityTypeColumn().name("name").dataType(new BooleanType()).visibleByDefault(false);
+    ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("Test_entity_type")
+      .customFieldEntityTypeId(customFieldEntityTypeId.toString())
+      .columns(List.of(entityTypeColumn1))
+      .root(true);
+    assertEquals(entityType.getColumns().size(), 1);
+    Optional<EntityType> actualEntityType = repo.getEntityTypeDefinition(UUID.fromString(entityType.getId()));
+    assertEquals(actualEntityType.get().getColumns().size(), 1);
   }
-
 }

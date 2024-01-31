@@ -23,8 +23,14 @@ public class EntityTypeRepositoryTestDataProvider implements MockDataProvider {
     .name(TEST_DERIVED_TABLE_NAME)
     .labelAlias("derived_table_alias_01");
 
+  public static final String requiredField = "name";
+
+  public static final String REF_ID = "refId";
+
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*\\.ENTITY_TYPE_DEFINITION WHERE ID = .*";
+
+  private static final String CUSTOM_ENTITY_TYPE = "SELECT .*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
@@ -44,9 +50,17 @@ public class EntityTypeRepositoryTestDataProvider implements MockDataProvider {
       Result<Record1<Object>> result = create.newResult(definitionField);
       result.add(create.newRecord(definitionField).values(writeValueAsString(TEST_ENTITY_DEFINITION)));
       mockResult = new MockResult(1, result);
+    } else if (sql.matches(CUSTOM_ENTITY_TYPE)) {
+      var customField = field("jsonb ->> 'name'");
+      var refId = field("jsonb ->> 'refId'");
+      Result<Record2<Object, Object>> result = create.newResult(customField, refId);
+      result.add(create.newRecord(customField, refId).values(requiredField, REF_ID));
+      mockResult = new MockResult(1, result);
     }
-    return new MockResult[]{mockResult};
+      return new MockResult[]{mockResult};
+
   }
+
 
   @SneakyThrows
   private String writeValueAsString(Object value) {

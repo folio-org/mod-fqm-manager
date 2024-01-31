@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -13,8 +12,6 @@ import org.folio.querytool.domain.dto.BooleanType;
 import org.jooq.DSLContext;
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.Result;
-import org.jooq.Record2;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -35,10 +31,7 @@ import static org.jooq.impl.DSL.*;
 public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String TABLE_NAME = "entity_type_definition";
-  public static final  String requiredFieldName = "jsonb ->> 'name'";
-  public static final String refId =  "jsonb ->> 'refId'";
-  public static final String whereClauseName = "jsonb ->> 'type'";
-  public static final String customFieldType = "SINGLE_CHECKBOX";
+
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
@@ -52,25 +45,6 @@ public class EntityTypeRepository {
       .from(table(TABLE_NAME))
       .where(field(ID_FIELD_NAME).eq(entityTypeId))
       .fetchOptional(derivedTableNameField);
-  }
-
-  public List<EntityTypeColumn> fetchNamesForSingleCheckbox(UUID entityTypeId) {
-    log.info("Getting derived table name for entity type ID: {}", entityTypeId);
-    String sourceViewName = getDerivedTableName(entityTypeId).get();
-
-    return jooqContext
-      .select(field(requiredFieldName), field(refId))
-      .from(sourceViewName)
-      .where(field(whereClauseName).eq(customFieldType))
-      .fetch()
-      .stream()
-      .map(record -> {
-        Object value = record.get(0);
-        Object refId1 = record.get(1);
-        assert value != null;
-        return createEntityTypeColumn(value.toString(), refId1.toString());
-      })
-      .collect(Collectors.toList());
   }
 
 
@@ -90,7 +64,7 @@ public class EntityTypeRepository {
 
     String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
     if (customFieldsEntityTypeId != null) {
-      entityType.getColumns().addAll(fetchNamesForSingleCheckbox(UUID.fromString(customFieldsEntityTypeId)));
+      entityType.getColumns().addAll(retrieveCustomFieldNamesForSingleCheckbox(UUID.fromString(customFieldsEntityTypeId)));
     }
     return Optional.of(entityType);
   }
@@ -111,6 +85,31 @@ public class EntityTypeRepository {
         row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField))
       );
   }
+
+  private List<EntityTypeColumn> retrieveCustomFieldNamesForSingleCheckbox(UUID entityTypeId) {
+    log.info("Getting derived table name for entity type ID: {}", entityTypeId);
+    String sourceViewName = getDerivedTableName(entityTypeId).get();
+
+    String requiredFieldName = "jsonb ->> 'name'";
+    String refId = "jsonb ->> 'refId'";
+    String whereClauseName = "jsonb ->> 'type'";
+    String customFieldType = "SINGLE_CHECKBOX";
+
+    return jooqContext
+      .select(field(requiredFieldName), field(refId))
+      .from(sourceViewName)
+      .where(field(whereClauseName).eq(customFieldType))
+      .fetch()
+      .stream()
+      .map(record -> {
+        Object value = record.get(0);
+        Object refId1 = record.get(1);
+        assert value != null;
+        return createEntityTypeColumn(value.toString(), refId1.toString());
+      })
+      .collect(Collectors.toList());
+  }
+
 
   private EntityTypeColumn createEntityTypeColumn(String value, String refId) {
     ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");

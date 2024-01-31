@@ -14,7 +14,7 @@ import java.net.URL;
 public class ItemStatusEnumTest {
 
   @Test
-  public void checkNumberOfItemStatuesDoNotChanged() {
+  void checkNumberOfItemStatuesDoNotChanged() {
     try {
 
       URL url = new URL("https://raw.githubusercontent.com/folio-org/mod-inventory-storage/master/ramls/item.json");

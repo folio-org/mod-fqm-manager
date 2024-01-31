@@ -24,4 +24,6 @@
     </sql>
   </changeSet>
 
+  <include file="update-drv-purchase-order-line-details-definition-add-fund-distribution-filters.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

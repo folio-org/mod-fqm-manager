@@ -1,8 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
-import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.*;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -35,6 +34,7 @@ class EntityTypeRepositoryTest {
   // Data pre-configured in postgres test container DB.
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
+  private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0293");
   private static final String ENTITY_TYPE_01_LABEL = "entity_type-01";
   private static final String ENTITY_TYPE_02_LABEL = "entity_type-02";
 
@@ -100,6 +100,47 @@ class EntityTypeRepositoryTest {
     // Assertions
     assertEquals(2, result.size());
     assertEquals("value1", result.get(0).getValues().toString());
+  }
+
+  @Test
+  void getEntityTypeDefinitionWithCustomFields() {
+    String valueGetter1 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn1'";
+    String valueGetter2 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn2'";
+    var values = List.of(
+      new ValueWithLabel().label("True").value("true"),
+      new ValueWithLabel().label("False").value("false")
+    );
+    EntityTypeColumn baseColumn = new EntityTypeColumn()
+      .name("base_column")
+      .dataType(new EntityDataType().dataType("stringType"));
+    EntityTypeColumn customFieldColumn1 = new EntityTypeColumn()
+      .name("custom_column_1")
+      .dataType(new BooleanType())
+      .valueGetter(valueGetter1)
+      .values(values)
+      .visibleByDefault(false);
+    EntityTypeColumn customFieldColumn2 = new EntityTypeColumn()
+      .name("custom_column_2")
+      .dataType(new BooleanType())
+      .valueGetter(valueGetter2)
+      .values(values)
+      .visibleByDefault(false);
+//    EntityType baseEntityType = new EntityType()
+//      .name("base_entity_type")
+//      .id(baseEntityTypeId.toString())
+//      .columns(List.of(baseColumn))
+//      .customFieldEntityTypeId(customFieldEntityTypeId.toString());
+//    EntityType customFieldEntityType = new EntityType()
+//      .name("custom_field_entity_type")
+//      .id(customFieldEntityTypeId.toString())
+//      .sourceView("custom_fields_view");
+    EntityType expectedEntityType = new EntityType()
+      .name("base_entity_type")
+      .id(ENTITY_TYPE_02_ID.toString())
+      .columns(List.of(baseColumn, customFieldColumn1, customFieldColumn2))
+      .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
+    EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID).orElseThrow();
+    assertEquals(expectedEntityType, actualEntityType);
   }
 
   private Record2<Object, Object> mockRecord(Object value, Object refId) {

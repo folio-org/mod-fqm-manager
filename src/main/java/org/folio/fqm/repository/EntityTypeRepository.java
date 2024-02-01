@@ -57,7 +57,7 @@ public class EntityTypeRepository {
   public List<EntityTypeColumn> fetchNamesForSingleCheckbox(UUID entityTypeId) {
     log.info("Getting derived table name for entity type ID: {}", entityTypeId);
     String sourceViewName = getDerivedTableName(entityTypeId).get();
-
+    String sourceViewName =
     return jooqContext
       .select(field(requiredFieldName), field(refId))
       .from(sourceViewName)
@@ -89,6 +89,7 @@ public class EntityTypeRepository {
     EntityType entityType = entityTypeOptional.orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
 
     String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
+    String customFieldSourceView = getEntityTypeDefinition(UUID.fromString(customFieldsEntityTypeId))
     if (customFieldsEntityTypeId != null) {
       entityType.getColumns().addAll(fetchNamesForSingleCheckbox(UUID.fromString(customFieldsEntityTypeId)));
     }

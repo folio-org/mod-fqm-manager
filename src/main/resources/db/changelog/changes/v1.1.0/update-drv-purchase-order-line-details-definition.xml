@@ -166,7 +166,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_description",
+              "name": "pol_description",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -174,19 +174,19 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_estimated_price",
+              "name": "pol_estimated_price",
               "dataType": {
-                "dataType": "stringType"
+                "dataType": "numberType"
               },
-              "valueGetter": "src_purchase_order_line.jsonb -> 'cost' ->> 'poLineEstimatedPrice'",
+              "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' -> 'poLineEstimatedPrice')::float",
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_exchange_rate",
+              "name": "pol_exchange_rate",
               "dataType": {
-                "dataType": "stringType"
+                "dataType": "numberType"
               },
-              "valueGetter": "src_purchase_order_line.jsonb -> 'cost' ->> 'exchangeRate'",
+              "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' ->> 'exchangeRate')::float",
               "visibleByDefault": false
             },
             {
@@ -198,31 +198,45 @@
               "visibleByDefault": true
             },
             {
-              "name": "purchase_order_line_number",
+              "name": "pol_number",
               "dataType": {
                 "dataType": "stringType"
               },
               "valueGetter": "src_purchase_order_line.jsonb ->> 'poLineNumber'",
+              "filterValueGetter": "lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'poLineNumber'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))",
               "visibleByDefault": true
             },
             {
-              "name": "purchase_order_line_payment_status",
+              "name": "pol_payment_status",
               "dataType": {
                 "dataType": "stringType"
               },
               "valueGetter": "src_purchase_order_line.jsonb ->> 'paymentStatus'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'paymentStatus'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
+              "source": {
+                "entityTypeId": "2168014f-9316-4760-9d82-d0306d5f59e4",
+                "columnName": "payment_status"
+              },
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_receipt_status",
+              "name": "pol_receipt_status",
               "dataType": {
                 "dataType": "stringType"
               },
               "valueGetter": "src_purchase_order_line.jsonb ->> 'receiptStatus'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'receiptStatus'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
+              "source": {
+                "entityTypeId": "5fefec2a-9d6c-474c-8698-b0ea77186c12",
+                "columnName": "receipt_status"
+              },
               "visibleByDefault": true
             },
             {
-              "name": "purchase_order_line_updated_by",
+              "name": "pol_updated_by",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -230,7 +244,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_updater_id",
+              "name": "pol_updated_by_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
@@ -238,7 +252,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_updated_date",
+              "name": "pol_updated_date",
               "dataType": {
                 "dataType": "dateType"
               },

@@ -246,7 +246,7 @@
               "visibleByDefault": true
             },
             {
-              "name": "PO notes",
+              "name": "po_notes",
               "dataType": {
                 "dataType": "arrayType",
                 "itemDataType": {
@@ -257,16 +257,17 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_type",
+              "name": "po_type",
               "dataType": {
                 "dataType": "stringType"
               },
               "valueGetter": "purchase_order.jsonb ->> 'orderType'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'orderType'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": false
             },
             {
-              "name": "PO updated by",
+              "name": "po_updated_by",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -274,7 +275,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "PO updated by ID",
+              "name": "po_updated_by_id",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -282,7 +283,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "PO updated date",
+              "name": "po_updated_date",
               "dataType": {
                 "dataType": "dateType"
               },
@@ -296,6 +297,7 @@
               },
               "valueGetter": "organization_details.jsonb ->> 'code'",
               "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'code'::text)",
+              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
               "visibleByDefault": false,
               "idColumnName": "vendor_id",
               "source": {
@@ -318,6 +320,7 @@
               },
               "valueGetter": "organization_details.jsonb ->> 'name'",
               "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'name'::text)",
+              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
               "visibleByDefault": false,
               "idColumnName": "vendor_id",
               "source": {

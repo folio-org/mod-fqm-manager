@@ -26,7 +26,7 @@ class ItemStatusEnumTest {
 
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("GET");
-      connection.setConnectTimeout(2);
+      connection.setConnectTimeout(2000);
 
       int responseCode = connection.getResponseCode();
       //Make sure that the service returns content; otherwise, skip the test and do not mark it as failed

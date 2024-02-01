@@ -4,5 +4,5 @@ VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0294','custom-fields-entity-type', '{
              "name":"custom-fields-entity-type",
              "labelAlias" : "custom-fields-entity-type",
              "private" : true,
-             "sourceView": "custom_field_source_view"
+             "sourceView": "custom_fields_source_view"
          }');

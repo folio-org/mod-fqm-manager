@@ -110,21 +110,47 @@ class EntityTypeRepositoryTest {
       new ValueWithLabel().label("True").value("true"),
       new ValueWithLabel().label("False").value("false")
     );
-    EntityTypeColumn baseColumn = new EntityTypeColumn()
-      .name("base_column")
-      .dataType(new EntityDataType().dataType("stringType"));
-    EntityTypeColumn customFieldColumn1 = new EntityTypeColumn()
-      .name("custom_column_1")
-      .dataType(new BooleanType())
-      .valueGetter(valueGetter1)
-      .values(values)
-      .visibleByDefault(false);
-    EntityTypeColumn customFieldColumn2 = new EntityTypeColumn()
-      .name("custom_column_2")
-      .dataType(new BooleanType())
-      .valueGetter(valueGetter2)
-      .values(values)
-      .visibleByDefault(false);
+    List<EntityTypeColumn> expectedColumns = List.of(
+      new EntityTypeColumn()
+        .name("id")
+        .dataType(new RangedUUIDType())
+        .labelAlias("Entity Type ID")
+        .visibleByDefault(false),
+      new EntityTypeColumn()
+        .name("column-01")
+        .dataType(new RangedUUIDType())
+        .labelAlias("Column 1")
+        .visibleByDefault(false),
+      new EntityTypeColumn()
+        .name("column-02")
+        .dataType(new StringType())
+        .labelAlias("Column 2")
+        .visibleByDefault(true),
+      new EntityTypeColumn()
+        .name("custom_column_1")
+        .dataType(new BooleanType())
+        .valueGetter(valueGetter1)
+        .values(values)
+        .visibleByDefault(false),
+      new EntityTypeColumn()
+        .name("custom_column_2")
+        .dataType(new BooleanType())
+        .valueGetter(valueGetter2)
+        .values(values)
+        .visibleByDefault(false)
+    );
+//    EntityTypeColumn customFieldColumn1 = new EntityTypeColumn()
+//      .name("custom_column_1")
+//      .dataType(new BooleanType())
+//      .valueGetter(valueGetter1)
+//      .values(values)
+//      .visibleByDefault(false);
+//    EntityTypeColumn customFieldColumn2 = new EntityTypeColumn()
+//      .name("custom_column_2")
+//      .dataType(new BooleanType())
+//      .valueGetter(valueGetter2)
+//      .values(values)
+//      .visibleByDefault(false);
 //    EntityType baseEntityType = new EntityType()
 //      .name("base_entity_type")
 //      .id(baseEntityTypeId.toString())
@@ -135,9 +161,9 @@ class EntityTypeRepositoryTest {
 //      .id(customFieldEntityTypeId.toString())
 //      .sourceView("custom_fields_view");
     EntityType expectedEntityType = new EntityType()
-      .name("base_entity_type")
+      .name("entity_type-02")
       .id(ENTITY_TYPE_02_ID.toString())
-      .columns(List.of(baseColumn, customFieldColumn1, customFieldColumn2))
+      .columns(expectedColumns)
       .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID).orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);

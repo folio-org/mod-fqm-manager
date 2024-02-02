@@ -209,7 +209,7 @@
   "entityType.drv_purchase_order_line_details.fund_distribution": "Fund distribution list",
   "entityType.drv_purchase_order_line_details.po_number": "PO number",
   "entityType.drv_purchase_order_line_details.po_workflow_status": "PO workflow status",
-  "entityType.drv_purchase_order_line_details.purchase_order_approved": "Purchase order approved",
+  "entityType.drv_purchase_order_line_details.po_approved": "PO approved",
   "entityType.drv_purchase_order_line_details.purchase_order_assigned_to": "Purchase order assigned to",
   "entityType.drv_purchase_order_line_details.purchase_order_assigned_to_id": "Purchase order assigned to ID",
   "entityType.drv_purchase_order_line_details.po_created_by": "PO created by",

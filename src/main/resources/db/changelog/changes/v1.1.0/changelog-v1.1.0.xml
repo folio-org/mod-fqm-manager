@@ -26,6 +26,7 @@
     <sqlFile path="sql/create-mat-view-pol-receipt-status.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+
   <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
     <comment>Swap the columns in the query_results primary key, to improve performance</comment>
     <sql>

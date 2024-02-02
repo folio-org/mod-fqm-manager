@@ -285,10 +285,92 @@
             },
             {
               "name": "item_status",
-              "source": {
-                "columnName": "item_status",
-                "entityTypeId": "a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d"
-              },
+              "values": [
+                {
+                  "label": "Aged to lost",
+                  "value": "Aged to lost"
+                },
+                {
+                  "label": "Available",
+                  "value": "Available"
+                },
+                {
+                  "label": "Awaiting pickup",
+                  "value": "Awaiting pickup"
+                },
+                {
+                  "label": "Awaiting delivery",
+                  "value": "Awaiting delivery"
+                },
+                {
+                  "label": "Checked out",
+                  "value": "Checked out"
+                },
+                {
+                  "label": "Claimed returned",
+                  "value": "Claimed returned"
+                },
+                {
+                  "label": "Declared lost",
+                  "value": "Declared lost"
+                },
+                {
+                  "label": "In process",
+                  "value": "In process"
+                },
+                {
+                  "label": "In process (non-requestable)",
+                  "value": "In process (non-requestable)"
+                },
+                {
+                  "label": "In transit",
+                  "value": "In transit"
+                },
+                {
+                  "label": "Intellectual item",
+                  "value": "Intellectual item"
+                },
+                {
+                  "label": "Long missing",
+                  "value": "Long missing"
+                },
+                {
+                  "label": "Lost and paid",
+                  "value": "Lost and paid"
+                },
+                {
+                  "label": "Missing",
+                  "value": "Missing"
+                },
+                {
+                  "label": "On order",
+                  "value": "On order"
+                },
+                {
+                  "label": "Paged",
+                  "value": "Paged"
+                },
+                {
+                  "label": "Restricted",
+                  "value": "Restricted"
+                },
+                {
+                  "label": "Order closed",
+                  "value": "Order closed"
+                },
+                {
+                  "label": "Unavailable",
+                  "value": "Unavailable"
+                },
+                {
+                  "label": "Unknown",
+                  "value": "Unknown"
+                },
+                {
+                  "label": "Withdrawn",
+                  "value": "Withdrawn"
+                }
+              ],
               "dataType": {
                 "dataType": "stringType"
               },

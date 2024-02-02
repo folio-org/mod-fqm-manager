@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -13,8 +12,6 @@ import org.folio.querytool.domain.dto.BooleanType;
 import org.jooq.DSLContext;
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.Result;
-import org.jooq.Record2;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -56,7 +52,6 @@ public class EntityTypeRepository {
 
   public List<EntityTypeColumn> fetchNamesForSingleCheckbox(UUID entityTypeId) {
     log.info("Getting derived table name for entity type ID: {}", entityTypeId);
-//    String sourceViewName = getDerivedTableName(entityTypeId).get();
     String sourceViewName = getEntityTypeDefinition(entityTypeId)
       .map(EntityType::getSourceView)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));

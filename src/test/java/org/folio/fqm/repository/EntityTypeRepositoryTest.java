@@ -96,7 +96,7 @@ class EntityTypeRepositoryTest {
   }
 
   @Test
-  void getEntityTypeDefinitionWithCustomFields() {
+  void shouldGetEntityTypeDefinitionWithCustomFields() {
     String valueGetter1 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn1'";
     String valueGetter2 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn2'";
     var values = List.of(

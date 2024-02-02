@@ -3,12 +3,8 @@ package org.folio.fqm.repository;
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.querytool.domain.dto.*;
 import org.jooq.*;
-import org.jooq.Record;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +16,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -139,27 +132,6 @@ class EntityTypeRepositoryTest {
         .values(values)
         .visibleByDefault(false)
     );
-//    EntityTypeColumn customFieldColumn1 = new EntityTypeColumn()
-//      .name("custom_column_1")
-//      .dataType(new BooleanType())
-//      .valueGetter(valueGetter1)
-//      .values(values)
-//      .visibleByDefault(false);
-//    EntityTypeColumn customFieldColumn2 = new EntityTypeColumn()
-//      .name("custom_column_2")
-//      .dataType(new BooleanType())
-//      .valueGetter(valueGetter2)
-//      .values(values)
-//      .visibleByDefault(false);
-//    EntityType baseEntityType = new EntityType()
-//      .name("base_entity_type")
-//      .id(baseEntityTypeId.toString())
-//      .columns(List.of(baseColumn))
-//      .customFieldEntityTypeId(customFieldEntityTypeId.toString());
-//    EntityType customFieldEntityType = new EntityType()
-//      .name("custom_field_entity_type")
-//      .id(customFieldEntityTypeId.toString())
-//      .sourceView("custom_fields_view");
     EntityType expectedEntityType = new EntityType()
       .name("entity_type-02")
       .id(ENTITY_TYPE_02_ID.toString())

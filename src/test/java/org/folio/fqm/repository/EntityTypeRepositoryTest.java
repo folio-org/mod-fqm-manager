@@ -34,7 +34,7 @@ class EntityTypeRepositoryTest {
   // Data pre-configured in postgres test container DB.
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
-  private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0293");
+  private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0294");
   private static final String ENTITY_TYPE_01_LABEL = "entity_type-01";
   private static final String ENTITY_TYPE_02_LABEL = "entity_type-02";
 
@@ -113,7 +113,7 @@ class EntityTypeRepositoryTest {
     List<EntityTypeColumn> expectedColumns = List.of(
       new EntityTypeColumn()
         .name("id")
-        .dataType(new RangedUUIDType())
+        .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
         .labelAlias("Entity Type ID")
         .visibleByDefault(false),
       new EntityTypeColumn()
@@ -163,6 +163,8 @@ class EntityTypeRepositoryTest {
     EntityType expectedEntityType = new EntityType()
       .name("entity_type-02")
       .id(ENTITY_TYPE_02_ID.toString())
+      ._private(false)
+      .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
       .columns(expectedColumns)
       .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID).orElseThrow();

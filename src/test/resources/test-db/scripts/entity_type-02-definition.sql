@@ -2,7 +2,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
 VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0292','entity_type-02', '{
              "id": "0cb79a4c-f7eb-4941-a104-745224ae0292",
              "name":"entity_type-02",
-             "labelAlias" : "entity_type-02",
              "private" : false,
              "customFieldEntityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0294",
              "columns": [

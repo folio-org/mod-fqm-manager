@@ -24,7 +24,7 @@
               "visibleByDefault": false
             },
             {
-                "name": "acqunit_names",
+                "name": "acquisition_unit",
                 "dataType": {
                   "dataType": "arrayType",
                   "itemDataType": {
@@ -84,11 +84,23 @@
               ]
             },
             {
-              "name": "purchase_order_approved",
+              "name": "po_approved",
+              "values": [
+                {
+                  "label": "True",
+                  "value": "true"
+               },
+                {
+                  "label": "False",
+                  "value": "false"
+               }
+              ],
               "dataType": {
-                "dataType": "stringType"
+                "dataType": "booleanType"
               },
               "valueGetter": "purchase_order.jsonb ->> 'approved'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'approved'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": false
             },
             {
@@ -108,7 +120,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_created_by",
+              "name": "po_created_by",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -116,23 +128,27 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_created_by_id",
+              "name": "po_created_by_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'createdByUserId'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_created_date",
+              "name": "po_created_date",
               "dataType": {
                 "dataType": "dateType"
               },
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'createdDate'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_id",
+              "name": "po_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
@@ -140,7 +156,7 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_created_by",
+              "name": "pol_created_by",
               "dataType": {
                 "dataType": "stringType"
               },
@@ -148,7 +164,7 @@
               "visibleByDefault": true
             },
             {
-              "name": "purchase_order_line_created_by_id",
+              "name": "pol_created_by_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
@@ -156,11 +172,13 @@
               "visibleByDefault": false
             },
             {
-              "name": "purchase_order_line_created_date",
+              "name": "pol_created_date",
               "dataType": {
                 "dataType": "dateType"
               },
               "valueGetter": "src_purchase_order_line.jsonb -> 'metadata' ->> 'createdDate'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": false
             },
             {

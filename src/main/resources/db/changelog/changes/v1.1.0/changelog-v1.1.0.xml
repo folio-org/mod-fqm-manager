@@ -15,15 +15,15 @@
   <include file="update-src-organizations-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
-  <include file="sql/add-pol-payment-status-definition.sql" relativeToChangelogFile="true"/>
-  <include file="sql/add-pol-receipt-status-definition.sql" relativeToChangelogFile="true"/>
 
-  <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com">
+  <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
     </preConditions>
     <sqlFile path="sql/create-mat-view-pol-payment-status.sql" relativeToChangelogFile="true"/>
     <sqlFile path="sql/create-mat-view-pol-receipt-status.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/add-pol-payment-status-definition.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/add-pol-receipt-status-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
 

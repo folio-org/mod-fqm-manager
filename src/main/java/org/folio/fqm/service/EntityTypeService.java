@@ -54,18 +54,42 @@ public class EntityTypeService {
    * @param entityTypeId the ID to search for
    * @return the entity type definition if found, empty otherwise
    */
+//  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
+//    return entityTypeRepository
+//      .getEntityTypeDefinition(entityTypeId)
+//      .map((EntityType entityType) -> {
+//        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
+//
+//        entityType.getColumns().forEach(column ->
+//          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
+//        );
+//        return entityType;
+//      });
+//  }
+
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
-      .map((EntityType entityType) -> {
-        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
-
-        entityType.getColumns().forEach(column ->
-          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
-        );
-        return entityType;
-      });
+      .map(this::localizeEntityType);
   }
+
+  private EntityType localizeEntityType(EntityType entityType) {
+    entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
+
+    boolean shouldPerformLocalization = entityType.getColumns().stream()
+      .noneMatch(column -> Boolean.TRUE.equals(column.getIsCustomField()));
+
+    if (!shouldPerformLocalization) {
+      entityType.getColumns().forEach(column -> {
+        if (column.getIsCustomField() == null) {
+          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()));
+        }
+      });
+    }
+
+    return entityType;
+  }
+
 
   /**
    * Return top 1000 values of an entity type column, matching the given search text

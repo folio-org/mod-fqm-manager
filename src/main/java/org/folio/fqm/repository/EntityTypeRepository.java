@@ -38,6 +38,7 @@ public class EntityTypeRepository {
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
+
   public Optional<String> getDerivedTableName(UUID entityTypeId) {
     log.info("Getting derived table name for entity type ID: {}", entityTypeId);
 
@@ -86,12 +87,12 @@ public class EntityTypeRepository {
     EntityType entityType = entityTypeOptional.orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
 
     String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
-//    String customFieldSourceView = getEntityTypeDefinition(UUID.fromString(customFieldsEntityTypeId));
     if (customFieldsEntityTypeId != null) {
       entityType.getColumns().addAll(fetchNamesForSingleCheckbox(UUID.fromString(customFieldsEntityTypeId)));
     }
     return Optional.of(entityType);
   }
+
 
   public List<RawEntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
     log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
@@ -120,7 +121,7 @@ public class EntityTypeRepository {
     entityTypeColumn.values(List.of(trueValue, falseValue));
     entityTypeColumn.visibleByDefault(false);
     entityTypeColumn.valueGetter("src_users_users.jsonb -> 'customFields' ->> '" + refId + "'");
-
+    entityTypeColumn.labelAlias(value);
     return entityTypeColumn;
   }
 

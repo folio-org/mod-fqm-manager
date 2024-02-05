@@ -57,15 +57,7 @@ public class EntityTypeService {
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
-      .map((EntityType entityType) -> {
-        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
-
-        entityType.getColumns().forEach(column -> 
-          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
-        );
-
-        return entityType;
-      });
+      .map(this::localizeEntityType);
   }
 
   /**
@@ -108,5 +100,22 @@ public class EntityTypeService {
 
   private static String getColumnValue(Map<String, Object> allValues, String columnName) {
     return allValues.get(columnName).toString();
+  }
+
+  private EntityType localizeEntityType(EntityType entityType) {
+    entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
+
+    boolean shouldPerformLocalization = entityType.getColumns().stream()
+      .noneMatch(column -> Boolean.TRUE.equals(column.getIsCustomField()));
+
+    if (!shouldPerformLocalization) {
+      entityType.getColumns().forEach(column -> {
+        if (column.getIsCustomField() == null) {
+          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()));
+        }
+      });
+    }
+
+    return entityType;
   }
 }

@@ -13,6 +13,7 @@
   <include file="sql/entity-type-definitions/insert-purchase-order-line-definition.sql" relativeToChangelogFile="true"/>
   <include file="update-src-acquisitions-unit-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-organizations-definition.xml" relativeToChangelogFile="true"/>
+  <include file="sql/entity-type-definitions/insert-custom-fields-definition.sql" relativeToChangelogFile="true"/>
   <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="sql/add-pol-payment-status-definition.sql" relativeToChangelogFile="true"/>

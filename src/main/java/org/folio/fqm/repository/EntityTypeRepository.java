@@ -119,7 +119,7 @@ public class EntityTypeRepository {
     ValueWithLabel falseValue = new ValueWithLabel().label("False").value("false");
 
     return new EntityTypeColumn()
-      .name(value)
+      .name("User " +value)
       .dataType(new BooleanType())
       .values(List.of(trueValue, falseValue))
       .visibleByDefault(false)

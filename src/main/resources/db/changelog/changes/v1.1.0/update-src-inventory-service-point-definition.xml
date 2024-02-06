@@ -2,45 +2,45 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="update-src-organizations-definition" author="bsharp@ebsco.com" runOnChange="true">
+  <changeSet id="update-src-inventory-service-point-definition" author="bsharp@ebsco.com" runOnChange="true">
     <update tableName="entity_type_definition">
       <column name="definition">
         {
-          "id": "489234a9-8703-48cd-85e3-7f84011bafa3",
-          "name": "src_organizations",
+          "id": "89cdeac4-9582-4388-800b-9ccffd8d7691",
+          "name": "src_inventory_service_point",
           "root": true,
-          "fromClause": "src_organizations",
+          "fromClause": "src_inventory_service_point",
           "columns": [
             {
               "name": "id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "valueGetter": "src_organizations.id",
+              "valueGetter": "src_inventory_service_point.id",
               "isIdColumn": true,
               "visibleByDefault": true
             },
             {
-              "name": "vendor_name",
+              "name": "service_point_name",
               "dataType": {
                 "dataType": "stringType"
               },
-              "valueGetter": "src_organizations.jsonb ->> 'name'",
+              "valueGetter": "src_inventory_service_point.jsonb ->> 'name'",
               "visibleByDefault": true
             },
             {
-              "name": "vendor_code",
+              "name": "service_point_code",
               "dataType": {
                 "dataType": "stringType"
               },
-              "valueGetter": "src_organizations.jsonb ->> 'code'",
+              "valueGetter": "src_inventory_service_point.jsonb ->> 'code'",
               "visibleByDefault": true
             }
           ],
           "private": true
         }
       </column>
-      <where>id = '489234a9-8703-48cd-85e3-7f84011bafa3'</where>
+      <where>id = '89cdeac4-9582-4388-800b-9ccffd8d7691'</where>
     </update>
   </changeSet>
 </databaseChangeLog>

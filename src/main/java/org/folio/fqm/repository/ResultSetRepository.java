@@ -10,15 +10,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.service.FqlToSqlConverterService;
+import org.folio.fqm.utils.IdColumnUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -42,35 +46,70 @@ public class ResultSetRepository {
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
-                                                List<UUID> ids) {
+                                                List<List<String>> ids) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
     EntityType entityType = getEntityType(entityTypeId);
     var fieldsToSelect = getSqlFields(entityType, fields);
-    String idValueGetter = entityType
-      .getColumns()
-      .stream()
-      .filter(col -> ID_FIELD_NAME.equals(col.getName()))
-      .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
-      .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
-
+    List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
+    List<String> idColumnValueGetters = IdColumnUtils.getIdColumnValueGetters(entityType);
+    Condition whereClause = DSL.noCondition();
+    for (int i = 0; i < idColumnValueGetters.size(); i++) {
+      List<String> idColumnValues = new ArrayList<>();
+      for (List<String> idList : ids) {
+        idColumnValues.add(idList.get(i));
+      }
+      String idColumnName = idColumnNames.get(i);
+      String idColumnValueGetter = idColumnValueGetters.get(i);
+      String columnDataType = entityType
+        .getColumns()
+        .stream()
+        .filter(col -> col.getName().equals(idColumnName))
+        .map(EntityTypeColumn::getDataType)
+        .map(EntityDataType::getDataType)
+        .findFirst()
+        .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), idColumnName));
+      if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
+        List<UUID> idColumnValuesAsUUIDs = idColumnValues
+          .stream()
+          .map(UUID::fromString)
+          .toList();
+        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
+      } else {
+        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
+      }
+    }
     var result = jooqContext.select(fieldsToSelect)
       .from(entityType.getFromClause())
-      .where(field(idValueGetter).in(ids))
+      .where(whereClause)
       .fetch();
     return recordToMap(result);
   }
 
-  public List<Map<String, Object>> getResultSet(UUID entityTypeId, Fql fql, List<String> fields, UUID afterId, int limit) {
+  public List<Map<String, Object>> getResultSet(UUID entityTypeId, Fql fql, List<String> fields, List<String> afterId, int limit) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
-    Condition afterIdCondition = afterId != null ? field(ID_FIELD_NAME).greaterThan(afterId) : DSL.noCondition();
     EntityType entityType = getEntityType(entityTypeId);
+    List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
+    Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
+    Condition afterIdCondition;
+    if (afterId != null) {
+      String[] afterIdArray = afterId.toArray(new String[0]);
+      afterIdCondition = field(idValueGetter).greaterThan(afterIdArray);
+    } else {
+      afterIdCondition = DSL.noCondition();
+    }
+    // Make sure idColumns are included in results
+    for (String idColumnName : idColumnNames) {
+      if (!fields.contains(idColumnName)) {
+        fields.add(idColumnName);
+      }
+    }
+
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     var fieldsToSelect = getSqlFields(entityType, fields);
     var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();

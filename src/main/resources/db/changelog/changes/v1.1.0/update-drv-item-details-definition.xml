@@ -235,6 +235,7 @@
                 "dataType": "rangedUUIDType"
               },
               "valueGetter": "src_inventory_item.id",
+              "isIdColumn": true,
               "visibleByDefault": false
             },
             {

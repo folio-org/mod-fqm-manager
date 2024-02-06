@@ -1,0 +1,16 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="MODFQMMGR-137" author="bsharp@ebsco.com">
+    <comment>Update result_id column from UUID to string array</comment>
+    <sql>
+      ALTER TABLE query_results DROP CONSTRAINT IF EXISTS query_results_pkey;
+      ALTER TABLE query_results ADD COLUMN new_result_id text[];
+      UPDATE query_results SET new_result_id = ARRAY[result_id];
+      ALTER TABLE query_results DROP COLUMN result_id;
+      ALTER TABLE query_results RENAME COLUMN new_result_id TO result_id;
+      ALTER TABLE query_results ADD PRIMARY KEY (query_id, result_id);
+    </sql>
+  </changeSet>
+</databaseChangeLog>

@@ -1,8 +1,5 @@
 package org.folio.fqm.service;
 
-import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,8 +12,6 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
-import org.jooq.Condition;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +30,6 @@ class QueryResultsSorterServiceTest {
   void shouldStreamSortedIds() {
     UUID queryId = UUID.randomUUID();
     int batchSize = 100;
-    var sqlSelectionClause = select(field("result_id"))
-      .from("corsair_lib_mod_fqm_manager.query_results")
-      .where(field("query_id").eq(queryId));
-    Condition sqlWhereClause = DSL.field(ID_FIELD_NAME).in(sqlSelectionClause);
     Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
     IntConsumer totalCountConsumer = mock(IntConsumer.class);
     Consumer<Throwable> errorConsumer = mock(Consumer.class);
@@ -60,10 +51,12 @@ class QueryResultsSorterServiceTest {
     int offset = 0;
     int limit = 0;
     String derivedTableName = "query_results";
-    List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> expectedIds = List.of(
+      List.of(UUID.randomUUID().toString()), List.of(UUID.randomUUID().toString())
+    );
     when(idStreamer.getSortedIds(derivedTableName, offset, limit, queryId))
       .thenReturn(expectedIds);
-    List<UUID> actualIds = queryResultsSorterService.getSortedIds(
+    List<List<String>> actualIds = queryResultsSorterService.getSortedIds(
       queryId,
       offset,
       limit

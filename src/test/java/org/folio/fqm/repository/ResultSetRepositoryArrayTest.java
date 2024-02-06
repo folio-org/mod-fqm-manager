@@ -33,7 +33,9 @@ class ResultSetRepositoryArrayTest {
 
   @Test
   void getResultSetShouldHandleArray() {
-    List<UUID> listIds = List.of(UUID.randomUUID());
+    List<List<String>> listIds = List.of(
+      List.of(UUID.randomUUID().toString())
+    );
     List<String> fields = List.of("id", "testField");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryArrayTestDataProvider.TEST_ENTITY_WITH_ARRAY_CONTENTS;
     List<Map<String, Object>> expectedList = List.of(

@@ -1,19 +1,23 @@
 package org.folio.fqm.utils;
 
-import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
+import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
+import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -57,29 +61,33 @@ class IdStreamerTest {
   @Test
   void shouldFetchIdStreamForQueryId() {
     UUID queryId = UUID.randomUUID();
-    List<UUID> actualList = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback ->
-      actualList.addAll(idsWithCancelCallback.ids());
+    List<List<String>> expectedIds = new ArrayList<>();
+    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    List<List<String>> actualIds = new ArrayList<>();
+    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
+      List<String[]> ids = idsWithCancelCallback.ids();
+      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
+    };
     int idsCount = idStreamer.streamIdsInBatch(
       queryId,
       true,
       2,
       idsConsumer
     );
-    assertEquals(
-      IdStreamerTestDataProvider.TEST_CONTENT_IDS,
-      actualList,
-      "Expected List should equal Actual List"
-    );
+    assertEquals(expectedIds, actualIds);
     assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
   }
 
   @Test
   void shouldFetchIdStreamForFql() {
-    Fql fql = new Fql(new EqualsCondition("field1", "value1"));
-    List<UUID> actualList = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback ->
-      actualList.addAll(idsWithCancelCallback.ids());
+    Fql fql = new Fql(new EqualsCondition(new FqlField("field1"), "value1"));
+    List<List<String>> expectedIds = new ArrayList<>();
+    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    List<List<String>> actualIds = new ArrayList<>();
+    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
+      List<String[]> ids = idsWithCancelCallback.ids();
+      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
+    };
     int idsCount = idStreamer.streamIdsInBatch(
       ENTITY_TYPE_ID,
       true,
@@ -87,11 +95,7 @@ class IdStreamerTest {
       2,
       idsConsumer
     );
-    assertEquals(
-      IdStreamerTestDataProvider.TEST_CONTENT_IDS,
-      actualList,
-      "Expected List should equal Actual List"
-    );
+    assertEquals(expectedIds, actualIds);
     assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
   }
 
@@ -101,23 +105,22 @@ class IdStreamerTest {
     int offset = 0;
     int limit = 0;
     String derivedTableName = "query_results";
-    List<UUID> actualIds = idStreamer.getSortedIds(
+    List<List<String>> expectedIds = new ArrayList<>();
+    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    List<List<String>> actualIds = idStreamer.getSortedIds(
       derivedTableName,
       offset,
       limit,
       queryId
     );
-    // Disabled for temporary workaround - This should assert that it's equal to IdStreamerTestDataProvider.TEST_CONTENT_IDS
-    assertEquals(
-      TEST_ENTITY_TYPE_DEFINITION.getId(),
-      actualIds.get(0).toString()
-    );
+    assertEquals(expectedIds, actualIds);
   }
 
   @Test
   void shouldThrowExceptionWhenEntityTypeNotFound() {
-    Fql fql = new Fql(new EqualsCondition("field", "value"));
-    Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {};
+    Fql fql = new Fql(new EqualsCondition(new FqlField("field"), "value"));
+    Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {
+    };
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
     IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null);
 

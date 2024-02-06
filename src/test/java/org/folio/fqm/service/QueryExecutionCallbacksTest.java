@@ -35,7 +35,10 @@ class QueryExecutionCallbacksTest {
   @Test
   void shouldHandleDataBatch() {
     UUID queryId = UUID.randomUUID();
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<String[]> resultIds = List.of(
+      new String[] {UUID.randomUUID().toString()},
+      new String[] {UUID.randomUUID().toString()}
+    );
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
       OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
@@ -48,7 +51,10 @@ class QueryExecutionCallbacksTest {
   void shouldHandleDataBatchForCancelledQuery() {
     AtomicBoolean streamClosed = new AtomicBoolean(false);
     UUID queryId = UUID.randomUUID();
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<String[]> resultIds = List.of(
+      new String[] {UUID.randomUUID().toString()},
+      new String[] {UUID.randomUUID().toString()}
+    );
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> streamClosed.set(true));
     assertFalse(streamClosed.get());
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),

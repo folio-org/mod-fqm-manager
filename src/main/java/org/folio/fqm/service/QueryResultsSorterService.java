@@ -55,8 +55,8 @@ public class QueryResultsSorterService {
     }
   }
 
-  public List<UUID> getSortedIds(UUID queryId,
-                                 int offset, int limit) {
+  public List<List<String>> getSortedIds(UUID queryId,
+                                         int offset, int limit) {
     log.debug("Getting sorted ids for query {}, offset {}, limit {}", queryId, offset, limit);
     // Sort ids based on the sort criteria defined in the entity type definition
     // Note: This does not sort right now, due to performance concerns. Instead, it just pulls straight from query_results

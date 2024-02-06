@@ -201,6 +201,7 @@
                 "dataType": "rangedUUIDType"
               },
               "valueGetter": "src_circulation_loan.id",
+              "isIdColumn": true,
               "visibleByDefault": false
             },
             {

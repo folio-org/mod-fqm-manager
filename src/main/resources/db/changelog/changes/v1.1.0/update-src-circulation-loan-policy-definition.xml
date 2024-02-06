@@ -2,45 +2,37 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="update-src-organizations-definition" author="bsharp@ebsco.com" runOnChange="true">
+  <changeSet id="update-src-circulation-loan-policy-definition" author="bsharp@ebsco.com" runOnChange="true">
     <update tableName="entity_type_definition">
       <column name="definition">
         {
-          "id": "489234a9-8703-48cd-85e3-7f84011bafa3",
-          "name": "src_organizations",
+          "id": "5e7de445-bcc6-4008-8032-8d9602b854d7",
+          "name": "src_circulation_loan_policy",
           "root": true,
-          "fromClause": "src_organizations",
+          "fromClause": "src_circulation_loan_policy",
           "columns": [
             {
               "name": "id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "valueGetter": "src_organizations.id",
+              "valueGetter": "src_circulation_loan_policy.id",
               "isIdColumn": true,
               "visibleByDefault": true
             },
             {
-              "name": "vendor_name",
+              "name": "policy_name",
               "dataType": {
                 "dataType": "stringType"
               },
-              "valueGetter": "src_organizations.jsonb ->> 'name'",
-              "visibleByDefault": true
-            },
-            {
-              "name": "vendor_code",
-              "dataType": {
-                "dataType": "stringType"
-              },
-              "valueGetter": "src_organizations.jsonb ->> 'code'",
+              "valueGetter": "src_circulation_loan_policy.jsonb ->> 'name'",
               "visibleByDefault": true
             }
           ],
           "private": true
         }
       </column>
-      <where>id = '489234a9-8703-48cd-85e3-7f84011bafa3'</where>
+      <where>id = '5e7de445-bcc6-4008-8032-8d9602b854d7'</where>
     </update>
   </changeSet>
 </databaseChangeLog>

@@ -41,14 +41,14 @@ public class FqlQueryController implements FqlQueryApi {
   }
 
   @Override
-  public ResponseEntity<List<UUID>> getSortedIds(UUID queryId, Integer offset, Integer limit){
+  public ResponseEntity<List<List<String>>> getSortedIds(UUID queryId, Integer offset, Integer limit){
     return ResponseEntity.ok(queryManagementService.getSortedIds(queryId, offset, limit));
   }
 
 
   @Override
   public ResponseEntity<ResultsetPage> runFqlQuery(String query, UUID entityTypeId, List<String> fields,
-                                                   UUID afterId, Integer limit) {
+                                                   List<String> afterId, Integer limit) {
     return ResponseEntity.ok(queryManagementService.runFqlQuery(query, entityTypeId, fields, afterId, limit));
   }
 

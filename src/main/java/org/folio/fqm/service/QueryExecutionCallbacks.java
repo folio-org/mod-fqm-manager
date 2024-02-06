@@ -30,7 +30,7 @@ public class QueryExecutionCallbacks {
       idsWithCancelCallback.cancel();
       return;
     }
-    List<UUID> resultIds = idsWithCancelCallback.ids();
+    List<String[]> resultIds = idsWithCancelCallback.ids();
     log.info("Saving query results for queryId: {}. Count: {}", queryId, resultIds.size());
     queryResultsRepository.saveQueryResults(queryId, resultIds);
   }

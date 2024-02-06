@@ -2,45 +2,45 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="update-src-organizations-definition" author="bsharp@ebsco.com" runOnChange="true">
+  <changeSet id="update-src-inventory-loclibrary-definition" author="bsharp@ebsco.com" runOnChange="true">
     <update tableName="entity_type_definition">
       <column name="definition">
         {
-          "id": "489234a9-8703-48cd-85e3-7f84011bafa3",
-          "name": "src_organizations",
+          "id": "cf9f5c11-e943-483c-913b-81d1e338accc",
+          "name": "src_inventory_loclibrary",
           "root": true,
-          "fromClause": "src_organizations",
+          "fromClause": "src_inventory_loclibrary",
           "columns": [
             {
               "name": "id",
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "valueGetter": "src_organizations.id",
+              "valueGetter": "src_inventory_loclibrary.id",
               "isIdColumn": true,
               "visibleByDefault": true
             },
             {
-              "name": "vendor_name",
+              "name": "loclibrary_name",
               "dataType": {
                 "dataType": "stringType"
               },
-              "valueGetter": "src_organizations.jsonb ->> 'name'",
+              "valueGetter": "src_inventory_loclibrary.jsonb ->> 'name'",
               "visibleByDefault": true
             },
             {
-              "name": "vendor_code",
+              "name": "loclibrary_code",
               "dataType": {
                 "dataType": "stringType"
               },
-              "valueGetter": "src_organizations.jsonb ->> 'code'",
+              "valueGetter": "src_inventory_loclibrary.jsonb ->> 'code'",
               "visibleByDefault": true
             }
           ],
           "private": true
         }
       </column>
-      <where>id = '489234a9-8703-48cd-85e3-7f84011bafa3'</where>
+      <where>id = 'cf9f5c11-e943-483c-913b-81d1e338accc'</where>
     </update>
   </changeSet>
 </databaseChangeLog>

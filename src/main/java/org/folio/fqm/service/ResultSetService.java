@@ -1,40 +1,65 @@
 package org.folio.fqm.service;
 
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.fqm.utils.IdColumnUtils;
+import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
+  private final EntityTypeRepository entityTypeRepository;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
-                                                List<UUID> ids) {
+                                                List<List<String>> ids) {
     List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(entityTypeId, fields, ids);
     // Sort the contents in Java code as sorting in DB views run very slow intermittently
-    return getSortedContents(ids, unsortedResults);
+    return getSortedContents(entityTypeId, ids, unsortedResults);
   }
 
-  private static List<Map<String, Object>> getSortedContents(List<UUID> contentIds, List<Map<String, Object>> unsortedResults) {
-    Map<UUID, Map<String, Object>> contentsMap = unsortedResults.stream()
-      .collect(Collectors.toMap(content -> (UUID) content.get(ID_FIELD_NAME), Function.identity()));
-    return contentIds.stream()
+  private List<Map<String, Object>> getSortedContents(UUID entityTypeId, List<List<String>> contentIds, List<Map<String, Object>> unsortedResults) {
+    EntityType entityType = entityTypeRepository.getEntityTypeDefinition(entityTypeId)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
+    Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
+      .collect(Collectors.toMap(content -> {
+            List<String> keys = new ArrayList<>();
+            idColumnNames.forEach(columnName -> keys.add(content.containsKey(columnName) ? content.get(columnName).toString() : "NULL"));
+            return keys;
+          },
+          Function.identity())
+      );
+
+    return contentIds
+      .stream()
       .map(id -> {
         var contents = contentsMap.get(id);
-        return contents == null ? Map.<String, Object>of(ID_FIELD_NAME, id, "_deleted", true) : contents;
+        if (contents == null) {
+          // Record has been deleted. Populate the idColumns of the record, and add a _deleted key to indicate deletion.
+          Map<String, Object> deletedRecordMap = new HashMap<>();
+          AtomicInteger columnCount = new AtomicInteger(0);
+          deletedRecordMap.put("_deleted", true);
+          idColumnNames.forEach(idColumnName -> deletedRecordMap.put(idColumnName, id.get(columnCount.getAndIncrement())));
+          return deletedRecordMap;
+        }
+        return contents;
       })
       .toList();
   }

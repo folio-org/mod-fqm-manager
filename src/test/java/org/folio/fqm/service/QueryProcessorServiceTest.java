@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
+import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
@@ -36,7 +37,7 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldGetIdsInBatch() {
-    Fql fql = new Fql(new EqualsCondition("status", "missing"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
     UUID entityTypeId = UUID.randomUUID();
@@ -65,7 +66,7 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldConsumeButNotThrowError() {
-    Fql fql = new Fql(new EqualsCondition("status", "missing"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
     UUID entityTypeId = UUID.randomUUID();
@@ -102,9 +103,9 @@ class QueryProcessorServiceTest {
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;
-    UUID afterId = UUID.randomUUID();
+    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql expectedFql = new Fql(new EqualsCondition("field1", "value1"));
+    Fql expectedFql = new Fql(new EqualsCondition(new FqlField("status"), "value1"));
     List<String> fields = List.of("field1", "field2");
     List<Map<String, Object>> expectedContent = List.of(
       Map.of("field1", "value1", "field2", "value2"),

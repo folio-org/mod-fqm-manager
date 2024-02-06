@@ -9,6 +9,7 @@
           "id": "0069cf6f-2833-46db-8a51-8934769b8289",
           "name":"drv_user_details",
           "private" : false,
+          "customFieldEntityTypeId":"ffb91f00-eb1c-4936-a637-f8708c967c73",
           "fromClause": "src_users_users LEFT JOIN src_users_groups ON src_users_groups.id = src_users_users.patrongroup",
           "columns": [
             {

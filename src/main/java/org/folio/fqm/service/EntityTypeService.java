@@ -2,9 +2,9 @@ package org.folio.fqm.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -59,11 +59,14 @@ public class EntityTypeService {
       .getEntityTypeDefinition(entityTypeId)
       .map((EntityType entityType) -> {
         entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
-
-        entityType.getColumns().forEach(column -> 
-          column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()))
-        );
-
+        entityType.getColumns().forEach(column -> {
+          //Custom field names are not localized as they are user-defined at runtime, leaving no translations available.
+          if (Boolean.TRUE.equals(column.getIsCustomField())) {
+            column.setLabelAlias(column.getName());
+          } else {
+            column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()));
+          }
+        });
         return entityType;
       });
   }

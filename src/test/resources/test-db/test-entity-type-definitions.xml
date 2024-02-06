@@ -13,4 +13,10 @@
   <changeSet id="private-entity_type-03-definition.sql.sql" author="pkjacob@ebsco.com">
     <sqlFile path="test-db/scripts/private-entity_type-03-definition.sql.sql" relativeToChangelogFile="false"/>
   </changeSet>
+  <changeSet id="custom-fields-source-view.sql" author="bsharp@ebsco.com">
+    <sqlFile path="test-db/scripts/custom-fields-source-view.sql" relativeToChangelogFile="false"/>
+  </changeSet>
+  <changeSet id="custom-fields-entity-type-definition.sql" author="bsharp@ebsco.com">
+    <sqlFile path="test-db/scripts/custom-fields-entity-type-definition.sql" relativeToChangelogFile="false"/>
+  </changeSet>
 </databaseChangeLog>

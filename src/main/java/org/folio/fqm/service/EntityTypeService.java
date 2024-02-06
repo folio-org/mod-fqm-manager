@@ -62,7 +62,7 @@ public class EntityTypeService {
         entityType.getColumns().forEach(column -> {
           //Custom field names are not localized as they are user-defined at runtime, leaving no translations available.
           if (Boolean.TRUE.equals(column.getIsCustomField())) {
-            column.setLabelAlias(entityType.getLabelAlias().substring(0, entityType.getLabelAlias().length() - 1)+" " +column.getName());
+            column.setLabelAlias(column.getName());
           } else {
             column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()));
           }

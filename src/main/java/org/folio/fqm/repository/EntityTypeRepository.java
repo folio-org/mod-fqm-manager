@@ -93,9 +93,11 @@ public class EntityTypeRepository {
 
   private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId) {
     log.info("Getting derived table name for entity type ID: {}", entityTypeId);
-    String sourceViewName = getEntityTypeDefinition(entityTypeId)
-      .map(EntityType::getSourceView)
+    EntityType entityTypeDefinition = getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    String sourceViewName = entityTypeDefinition.getSourceView();
+    String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
+
     return jooqContext
       .select(field(REQUIRED_FIELD_NAME), field(REF_ID))
       .from(sourceViewName)
@@ -109,12 +111,12 @@ public class EntityTypeRepository {
         Object value = row.get(REQUIRED_FIELD_NAME);
         Object extractedRefId = row.get(REF_ID);
         assert value != null : "The value is marked as non-nullable in the database";
-        return handleSingleCheckBox(value.toString(), extractedRefId.toString());
+        return handleSingleCheckBox(value.toString(), extractedRefId.toString(), sourceViewExtractor);
       })
       .toList();
   }
 
-  private EntityTypeColumn handleSingleCheckBox(String value, String refId) {
+  private EntityTypeColumn handleSingleCheckBox(String value, String refId, String sourceViewExtractor) {
     ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
     ValueWithLabel falseValue = new ValueWithLabel().label("False").value("false");
 
@@ -123,7 +125,7 @@ public class EntityTypeRepository {
       .dataType(new BooleanType())
       .values(List.of(trueValue, falseValue))
       .visibleByDefault(false)
-      .valueGetter("src_users_users.jsonb -> 'customFields' ->> '" + refId + "'")
+      .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
       .labelAlias(value)
       .isCustomField(true);
   }

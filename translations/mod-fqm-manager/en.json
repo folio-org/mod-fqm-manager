@@ -198,7 +198,7 @@
   "entityType.src_acquisitions_unit.id": "ID",
   "entityType.src_acquisitions_unit.acquisitions_name": "Acquisitions names",
 
-  "entityType.drv_purchase_order_line_details": "Purchase order Lines",
+  "entityType.drv_purchase_order_line_details": "Purchase order lines",
   "entityType.drv_purchase_order_line_details.acqunit_ids": "Acquisition unit ID list",
   "entityType.drv_purchase_order_line_details.acquisition_unit": "Acquisition unit list",
   "entityType.drv_purchase_order_line_details.fund_distribution_code": "Fund distribution code",

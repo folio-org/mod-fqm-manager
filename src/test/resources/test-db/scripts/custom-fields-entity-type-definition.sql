@@ -4,5 +4,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
               "name":"custom-fields-entity-type",
               "labelAlias" : "custom-fields-entity-type",
               "private" : true,
-              "sourceView": "custom_fields_source_view"
-          }');
+              "sourceView": "custom_fields_source_view",
+              "sourceViewExtractor": "src_users_users.jsonb -> ''customFields''"
+              }');

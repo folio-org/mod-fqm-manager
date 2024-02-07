@@ -208,6 +208,5 @@
     "entityType.drv_purchase_order_line_details.po_updated_date": "PO updated date",
     "entityType.drv_purchase_order_line_details.vendor_code": "Vendor code",
     "entityType.drv_purchase_order_line_details.vendor_id": "Vendor ID",
-    "entityType.drv_purchase_order_line_details.vendor_name": "Vendor name",
-
+    "entityType.drv_purchase_order_line_details.vendor_name": "Vendor name"
 }

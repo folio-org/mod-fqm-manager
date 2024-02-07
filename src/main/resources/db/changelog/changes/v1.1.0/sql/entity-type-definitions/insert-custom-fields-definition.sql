@@ -5,5 +5,6 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
          "labelAlias": "Custom fields",
          "root": true,
          "private" : true,
-         "sourceView": "src_user_custom_fields"
- }') ON CONFLICT (id) DO UPDATE SET derived_table_name = EXCLUDED.derived_table_name, definition = EXCLUDED.definition;
+         "sourceView": "src_user_custom_fields",
+         "sourceViewExtractor": "src_users_users.jsonb -> ''customFields''"
+         }') ON CONFLICT (id) DO UPDATE SET derived_table_name = EXCLUDED.derived_table_name, definition = EXCLUDED.definition;

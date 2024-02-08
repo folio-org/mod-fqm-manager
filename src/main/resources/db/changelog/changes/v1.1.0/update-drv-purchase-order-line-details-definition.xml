@@ -2,7 +2,7 @@
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
   <changeSet id="update-purchase-order-line-details-entity-type-definition" runOnChange="true"
-    author="bsharp@ebsco.com">
+    author="bsharp@ebsco.com,novercash@ebsco.com">
     <update tableName="entity_type_definition">
       <column name="definition">
         {

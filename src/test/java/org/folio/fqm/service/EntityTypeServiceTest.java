@@ -150,6 +150,9 @@ class EntityTypeServiceTest {
 
     when(repo.getEntityTypeDefinition(entityTypeId))
       .thenReturn(Optional.of(expectedEntityType));
+    when(localizationService.localizeEntityType(expectedEntityType))
+      .thenReturn(expectedEntityType);
+
     EntityType actualDefinition = entityTypeService
       .getEntityTypeDefinition(entityTypeId)
       .get();

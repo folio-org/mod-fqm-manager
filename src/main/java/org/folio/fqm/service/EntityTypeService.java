@@ -1,7 +1,14 @@
 package org.folio.fqm.service;
 
-import lombok.RequiredArgsConstructor;
+import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -12,19 +19,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 public class EntityTypeService {
-  private static final String COLUMN_VALUE_SEARCH_FQL = "{\"%s\": {\"$regex\": \"%s\"}}";
+
+  private static final String COLUMN_VALUE_SEARCH_FQL =
+    "{\"%s\": {\"$regex\": \"%s\"}}";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private final EntityTypeRepository entityTypeRepository;
   private final LocalizationService localizationService;
@@ -43,7 +43,9 @@ public class EntityTypeService {
       .map(rawEntityTypeSummary ->
         new EntityTypeSummary()
           .id(rawEntityTypeSummary.id())
-          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()))
+          .label(
+            localizationService.getEntityTypeLabel(rawEntityTypeSummary.name())
+          )
       )
       .toList();
   }
@@ -57,18 +59,7 @@ public class EntityTypeService {
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
-      .map((EntityType entityType) -> {
-        entityType.setLabelAlias(localizationService.getEntityTypeLabel(entityType.getName()));
-        entityType.getColumns().forEach(column -> {
-          //Custom field names are not localized as they are user-defined at runtime, leaving no translations available.
-          if (Boolean.TRUE.equals(column.getIsCustomField())) {
-            column.setLabelAlias(entityType.getLabelAlias().substring(0, entityType.getLabelAlias().length() - 1)+" " +column.getName());
-          } else {
-            column.setLabelAlias(localizationService.getEntityTypeColumnLabel(entityType.getName(), column.getName()));
-          }
-        });
-        return entityType;
-      });
+      .map(localizationService::localizeEntityType);
   }
 
   /**
@@ -80,36 +71,57 @@ public class EntityTypeService {
    *                     that contain the specified searchText.
    */
   @Transactional(readOnly = true)
-  public ColumnValues getColumnValues(UUID entityTypeId, String columnName, @Nullable String searchText) {
-    String fql = String.format(COLUMN_VALUE_SEARCH_FQL, columnName, searchText == null ? "" : searchText);
+  public ColumnValues getColumnValues(
+    UUID entityTypeId,
+    String columnName,
+    @Nullable String searchText
+  ) {
+    String fql = String.format(
+      COLUMN_VALUE_SEARCH_FQL,
+      columnName,
+      searchText == null ? "" : searchText
+    );
     List<Map<String, Object>> results = queryService.processQuery(
       entityTypeId,
       fql,
       List.of(ID_FIELD_NAME, columnName),
       null,
-      COLUMN_VALUE_DEFAULT_PAGE_SIZE);
+      COLUMN_VALUE_DEFAULT_PAGE_SIZE
+    );
     List<ValueWithLabel> valueWithLabels = results
       .stream()
       .map(result -> toValueWithLabel(result, columnName))
-      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .sorted(
+        Comparator.comparing(
+          ValueWithLabel::getLabel,
+          String.CASE_INSENSITIVE_ORDER
+        )
+      )
       .toList();
     return new ColumnValues().content(valueWithLabels);
   }
 
   public String getDerivedTableName(UUID entityTypeId) {
-    return entityTypeRepository.getDerivedTableName(entityTypeId)
+    return entityTypeRepository
+      .getDerivedTableName(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 
-  private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String columnName) {
+  private static ValueWithLabel toValueWithLabel(
+    Map<String, Object> allValues,
+    String columnName
+  ) {
     var valueWithLabel = new ValueWithLabel()
       .label(getColumnValue(allValues, columnName));
-    return allValues.containsKey(ID_FIELD_NAME) ?
-      valueWithLabel.value(getColumnValue(allValues, ID_FIELD_NAME)) :
-      valueWithLabel.value(valueWithLabel.getLabel()); // value = label for entity types that do not have "id" column
+    return allValues.containsKey(ID_FIELD_NAME)
+      ? valueWithLabel.value(getColumnValue(allValues, ID_FIELD_NAME))
+      : valueWithLabel.value(valueWithLabel.getLabel()); // value = label for entity types that do not have "id" column
   }
 
-  private static String getColumnValue(Map<String, Object> allValues, String columnName) {
+  private static String getColumnValue(
+    Map<String, Object> allValues,
+    String columnName
+  ) {
     return allValues.get(columnName).toString();
   }
 }

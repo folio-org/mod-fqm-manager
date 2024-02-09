@@ -76,7 +76,7 @@
                       "name": "fund_id",
                       "property": "fundId",
                       "dataType": "rangedUUIDType"
-                    }
+                    },
                     {
                       "name": "value",
                       "property": "value",

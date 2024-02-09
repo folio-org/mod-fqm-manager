@@ -7,6 +7,7 @@
   "entityType.src_inventory_material_type.material_type_name": "Material type name",
 
   "entityType.drv_item_details": "Items",
+  "entityType.drv_item_details._custom_field_possessive": "Item's {customField}",
   "entityType.drv_item_details.holdings_id": "Holdings ID",
   "entityType.drv_item_details.instance_created_date": "Instance created date",
   "entityType.drv_item_details.instance_id": "Instance ID",
@@ -38,7 +39,7 @@
   "entityType.drv_item_details.item_temporary_location_name": "Item temporary location name",
   "entityType.drv_item_details.item_updated_date": "Item updated date",
 
-  "entityType.drv_item_callnumber_location": "Item, Call number and location",
+  "entityType.drv_item_callnumber_location": "Item, call number and location",
   "entityType.drv_item_callnumber_location.id": "Item ID",
   "entityType.drv_item_callnumber_location.item_hrid": "Item hrid",
   "entityType.drv_item_callnumber_location.item_effective_call_number": "Effective call number",
@@ -64,6 +65,7 @@
   "entityType.drv_item_callnumber_location.item_material_type": "Material type",
 
   "entityType.drv_loan_details": "Loans",
+  "entityType.drv_loan_details._custom_field_possessive": "Loan's {customField}",
   "entityType.drv_loan_details.holdings_id": "Holdings ID",
   "entityType.drv_loan_details.instance_id": "Instance ID",
   "entityType.drv_loan_details.instance_primary_contributor": "Instance primary contributor",
@@ -157,6 +159,7 @@
   "entityType.drv_item_holdingsrecord_instance.item_updated_date": "Item updated date",
 
   "entityType.drv_user_details": "Users",
+  "entityType.drv_user_details._custom_field_possessive": "User's {customField}",
   "entityType.drv_user_details.user_active": "User active",
   "entityType.drv_user_details.user_address_ids": "User address ID list",
   "entityType.drv_user_details.user_address_line1": "User address list (line 1)",
@@ -199,6 +202,7 @@
   "entityType.src_acquisitions_unit.acquisitions_name": "Acquisitions names",
 
   "entityType.drv_purchase_order_line_details": "Purchase order lines",
+  "entityType.drv_purchase_order_line_details._custom_field_possessive": "Purchase order line's {customField}",
   "entityType.drv_purchase_order_line_details.acqunit_ids": "Acquisition unit ID list",
   "entityType.drv_purchase_order_line_details.acquisition_unit": "Acquisition unit list",
   "entityType.drv_purchase_order_line_details.fund_distribution_code": "Fund distribution code",
@@ -206,7 +210,12 @@
   "entityType.drv_purchase_order_line_details.fund_distribution_type": "Fund distribution type",
   "entityType.drv_purchase_order_line_details.fund_distribution_value": "Fund distribution value",
   "entityType.drv_purchase_order_line_details.fund_id": "Fund ID",
-  "entityType.drv_purchase_order_line_details.fund_distribution": "Fund distribution list",
+  "entityType.drv_purchase_order_line_details.fund_distribution": "Fund distributions",
+  "entityType.drv_purchase_order_line_details.fund_distribution.code": "Code",
+  "entityType.drv_purchase_order_line_details.fund_distribution.distribution_type": "Distribution type",
+  "entityType.drv_purchase_order_line_details.fund_distribution.encumbrance": "Encumbrance",
+  "entityType.drv_purchase_order_line_details.fund_distribution.fund_id": "Fund ID",
+  "entityType.drv_purchase_order_line_details.fund_distribution.value": "Value",
   "entityType.drv_purchase_order_line_details.po_number": "PO number",
   "entityType.drv_purchase_order_line_details.po_workflow_status": "PO workflow status",
   "entityType.drv_purchase_order_line_details.po_approved": "PO approved",

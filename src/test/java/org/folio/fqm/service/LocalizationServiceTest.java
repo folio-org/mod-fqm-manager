@@ -116,9 +116,9 @@ class LocalizationServiceTest {
     String expectedInnermostTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner";
     String expectedInnermostTranslation = "Nested * 2 Property";
 
-    // array -> object -> object
+    // array -> array -> object -> object -> array
     NestedObjectProperty innermost = new NestedObjectProperty()
-      .dataType(new StringType())
+      .dataType(new ArrayType().itemDataType(new StringType()))
       .name("nested_property_inner");
     NestedObjectProperty inner = new NestedObjectProperty()
       .name("nested_property")
@@ -129,7 +129,9 @@ class LocalizationServiceTest {
       .addColumnsItem(
         new EntityTypeColumn()
           .name("column_name")
-          .dataType(new ArrayType().itemDataType(new ObjectType().addPropertiesItem(inner)))
+          .dataType(
+            new ArrayType().itemDataType(new ArrayType().itemDataType(new ObjectType().addPropertiesItem(inner)))
+          )
       );
 
     when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);

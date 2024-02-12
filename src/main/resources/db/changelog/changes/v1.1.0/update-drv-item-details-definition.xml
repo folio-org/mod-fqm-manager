@@ -242,6 +242,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "idColumnName": "item_material_type_id",
               "valueSourceApi": {
                 "path": "material-types",
                 "valueJsonPath": "$.mtypes.*.id",

@@ -1,10 +1,15 @@
 package org.folio.fqm.service;
 
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
-import org.folio.querytool.domain.dto.*;
+import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.ValueSourceApi;
+import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,6 +41,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private QueryProcessorService queryProcessorService;
+
+  @Mock
+  private SimpleHttpClient simpleHttpClient;
 
   @InjectMocks
   private EntityTypeService entityTypeService;
@@ -70,6 +79,10 @@ class EntityTypeServiceTest {
   void shouldGetValueWithLabel() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("whatever")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     List<String> fields = List.of("id", valueColumnName);
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
@@ -79,15 +92,15 @@ class EntityTypeServiceTest {
           new ValueWithLabel().value("value_02").label("label_02")
         )
       );
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
 
-    when(queryProcessorService.processQuery(entityTypeId, expectedFql, fields, null, 1000))
+    when(queryProcessorService.processQuery(any(), any(), any(), any(), any()))
       .thenReturn(
         List.of(
           Map.of("id", "value_01", valueColumnName, "label_01"),
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -97,27 +110,28 @@ class EntityTypeServiceTest {
   void shouldReturnValueAsLabelIfIdColumnDoNotExist() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    List<String> fields = List.of("id", valueColumnName);
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
 
-    ColumnValues expectedColumnValueLabel = new ColumnValues()
-      .content(
-        List.of(
-          new ValueWithLabel().value("value_01").label("value_01"),
-          new ValueWithLabel().value("value_02").label("value_02")
-        )
-      );
-    String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-
-    when(queryProcessorService.processQuery(entityTypeId, expectedFql, fields, null, 1000))
+    when(queryProcessorService.processQuery(eq(entityTypeId), any(), any(), any(), any()))
       .thenReturn(
         List.of(
           Map.of(valueColumnName, "value_01"),
           Map.of(valueColumnName, "value_02")
         )
       );
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
+    ColumnValues expectedColumnValues = new ColumnValues().content(
+      List.of(
+        new ValueWithLabel().value("value_01").label("value_01"),
+        new ValueWithLabel().value("value_02").label("value_02")
+      ));
     ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
-    assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
+
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
 
   @Test
@@ -125,8 +139,14 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
     List<String> fields = List.of("id", valueColumnName);
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("this is a thing")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
+
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
     entityTypeService.getColumnValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
@@ -136,11 +156,85 @@ class EntityTypeServiceTest {
   void shouldHandleNullSearchText() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("yep")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
     entityTypeService.getColumnValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
+  }
+
+  @Test
+  void shouldReturnPredefinedValues() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "column_name";
+    List<ValueWithLabel> values = List.of(
+      new ValueWithLabel().value("value_01").label("value_01"),
+      new ValueWithLabel().value("value_02").label("value_02")
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
+
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+
+    assertEquals(new ColumnValues().content(values), actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldReturnValuesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "column_name";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .valueSourceApi(new ValueSourceApi()
+          .path("fake-path")
+          .valueJsonPath("$.what.ever.dude.*.theValue") // Approach 1: Explicitly use the full path
+          .labelJsonPath("$..theLabel") // Approach 2: Just dive all the way down and find everything with this key
+        )
+      ));
+
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(simpleHttpClient.get("fake-path")).thenReturn("""
+           {
+             "what": {
+               "ever": {
+                 "dude": [
+                   {
+                     "theValue": "who",
+                     "theLabel": "cares?"
+                   },
+                   {
+                     "theValue": "so",
+                     "theLabel": "lame"
+                   },
+                   {
+                     "theValue": "yeah",
+                     "theLabel": "right"
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "r");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("who").label("cares?"),
+      new ValueWithLabel().value("yeah").label("right")
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
 
   @Test

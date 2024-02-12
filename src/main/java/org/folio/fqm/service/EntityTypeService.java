@@ -1,12 +1,17 @@
 package org.folio.fqm.service;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -14,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -24,11 +31,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class EntityTypeService {
-  private static final String COLUMN_VALUE_SEARCH_FQL = "{\"%s\": {\"$regex\": \"%s\"}}";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private final EntityTypeRepository entityTypeRepository;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
+  private final SimpleHttpClient columnValueClient;
 
   /**
    * Returns the list of all entity types.
@@ -70,7 +77,54 @@ public class EntityTypeService {
    */
   @Transactional(readOnly = true)
   public ColumnValues getColumnValues(UUID entityTypeId, String columnName, @Nullable String searchText) {
-    String fql = String.format(COLUMN_VALUE_SEARCH_FQL, columnName, searchText == null ? "" : searchText);
+    searchText = searchText == null ? "" : searchText;
+
+    EntityType entityType = entityTypeRepository.getEntityTypeDefinition(entityTypeId)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityTypeColumn column = entityType.getColumns()
+      .stream()
+      .filter(col -> Objects.equals(columnName, col.getName()))
+      .findFirst()
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), columnName));
+
+    if (column.getValues() != null) {
+     return getColumnValuesFromEntityTypeColumn(column, searchText);
+    }
+
+    if (column.getValueSourceApi() != null) {
+      return getColumnValuesFromApi(column, searchText);
+    }
+
+    return getColumnValuesFromEntityType(entityTypeId, columnName, searchText);
+
+  }
+
+  private ColumnValues getColumnValuesFromEntityTypeColumn(EntityTypeColumn column, String searchText) {
+    var filteredColumns = column.getValues().stream()
+      .filter(valueWithLabel -> valueWithLabel.getLabel().contains(searchText))
+      .toList();
+    return new ColumnValues().content(filteredColumns);
+  }
+
+  private ColumnValues getColumnValuesFromApi(EntityTypeColumn column, String searchText) {
+    String rawJson = columnValueClient.get(column.getValueSourceApi().getPath());
+    DocumentContext parsedJson = JsonPath.parse(rawJson);
+    List<String> values = parsedJson.read(column.getValueSourceApi().getValueJsonPath());
+    List<String> labels = parsedJson.read(column.getValueSourceApi().getLabelJsonPath());
+
+    List<ValueWithLabel> results = new ArrayList<>(values.size());
+    for (int i = 0; i < values.size(); i++) {
+      String value = values.get(i);
+      String label = labels.get(i);
+      if (label.contains(searchText)) {
+        results.add(new ValueWithLabel().value(value).label(label));
+      }
+    }
+    return new ColumnValues().content(results);
+  }
+
+  private ColumnValues getColumnValuesFromEntityType(UUID entityTypeId, String columnName, String searchText) {
+    String fql = "{\"%s\": {\"$regex\": \"%s\"}}".formatted(columnName, searchText);
     List<Map<String, Object>> results = queryService.processQuery(
       entityTypeId,
       fql,

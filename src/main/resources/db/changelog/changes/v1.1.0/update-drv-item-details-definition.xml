@@ -18,7 +18,7 @@
         SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_item_status';
       </sqlCheck>
     </preConditions>
-    <comment>Add filterValueGetters and valueFunctions to various columns</comment>
+    <comment>Add filterValueGetters, valueFunctions, and valueSourceApis to various columns</comment>
     <update tableName="entity_type_definition">
       <column name="definition">
         {
@@ -239,14 +239,15 @@
             },
             {
               "name": "item_material_type",
-              "source": {
-                "columnName": "material_type_name",
-                "entityTypeId": "917ea5c8-cafe-4fa6-a942-e2388a88c6f6"
-              },
               "dataType": {
                 "dataType": "stringType"
               },
               "idColumnName": "item_material_type_id",
+              "valueSourceApi": {
+                "path": "material-types",
+                "valueJsonPath": "$.mtypes.*.id",
+                "labelJsonPath": "$.mtypes.*.name"
+              },
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "material_type_ref_data.jsonb ->> 'name'",

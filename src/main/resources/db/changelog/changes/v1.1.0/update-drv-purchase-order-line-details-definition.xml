@@ -50,12 +50,12 @@
                     {
                       "name": "code",
                       "property": "code",
-                      "dataType": "stringType"
+                      "dataType": {"dataType": "stringType"}
                     },
                     {
                       "name": "distribution_type",
                       "property": "distributionType",
-                      "dataType": "stringType",
+                      "dataType": {"dataType": "stringType"},
                       "values": [
                         {
                           "label": "percentage",
@@ -70,17 +70,17 @@
                     {
                       "name": "encumbrance",
                       "property": "encumbrance",
-                      "dataType": "rangedUUIDType"
+                      "dataType": {"dataType": "rangedUUIDType"}
                     },
                     {
                       "name": "fund_id",
                       "property": "fundId",
-                      "dataType": "rangedUUIDType"
+                      "dataType": {"dataType": "rangedUUIDType"}
                     },
                     {
                       "name": "value",
                       "property": "value",
-                      "dataType": "numberType"
+                      "dataType": {"dataType": "numberType"}
                     }
                   ]
                 }

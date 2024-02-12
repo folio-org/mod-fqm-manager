@@ -1,4 +1,5 @@
 {
+    "entityType.drv_user_details._custom_field_possessive": "[THIS IS TRANSLATED FOR {customField}]",
     "entityType.drv_loan_status": "Loan status",
     "entityType.drv_loan_status.loan_status": "Loan status",
     "entityType.src_inventory_material_type": "Material type",

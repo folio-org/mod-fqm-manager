@@ -73,8 +73,8 @@ public class FqlToSqlConverterService {
       case "NotInCondition" -> handleNotIn((NotInCondition) fqlCondition, entityType, field);
       case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
       case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
-      case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType, field);
-      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
+      case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
+      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, field);
       case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
       case "NotContainsCondition" -> handleNotContains((NotContainsCondition) fqlCondition, entityType, field);
       case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
@@ -192,11 +192,11 @@ public class FqlToSqlConverterService {
     return field.lessThan(valueField(lessThanCondition.value(), lessThanCondition, entityType));
   }
 
-  private static Condition handleAnd(AndCondition andCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleAnd(AndCondition andCondition, EntityType entityType) {
     return and(andCondition.value().stream().map(c -> getSqlCondition(c, entityType)).toList());
   }
 
-  private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleRegEx(RegexCondition regexCondition, Field<Object> field) {
     // perform case-insensitive regex search
     return condition("{0} ~* {1}", field, val(regexCondition.value()));
   }
@@ -276,10 +276,5 @@ public class FqlToSqlConverterService {
       return DSL.field(column.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
     }
     return val(value);
-  }
-
-  @FunctionalInterface
-  private interface ConditionHandler<T extends FqlCondition<?>> {
-    Condition handle(T fqlCondition, EntityType entityType, Field<Object> field);
   }
 }

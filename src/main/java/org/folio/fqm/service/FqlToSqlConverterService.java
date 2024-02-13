@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiFunction;
 
 import static org.jooq.impl.DSL.and;
@@ -37,24 +36,6 @@ import static org.jooq.impl.DSL.val;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FqlToSqlConverterService {
-
-  // Suppress warnings here because the compiler is unable to determine a type parameter on ConditionHandler
-  // (depending on how it's constrained, it either fails to compile this initialization or the uses of this variable).
-  // IDEs seem to be able to handle ConditionHandler, though
-  @SuppressWarnings("rawtypes")
-  private static final Map<Class<? extends FqlCondition<?>>, ConditionHandler> sqlConverters = Map.ofEntries(
-    buildMapping(EqualsCondition.class, FqlToSqlConverterService::handleEquals),
-    buildMapping(NotEqualsCondition.class, FqlToSqlConverterService::handleNotEquals),
-    buildMapping(InCondition.class, FqlToSqlConverterService::handleIn),
-    buildMapping(NotInCondition.class, FqlToSqlConverterService::handleNotIn),
-    buildMapping(GreaterThanCondition.class, FqlToSqlConverterService::handleGreaterThan),
-    buildMapping(LessThanCondition.class, FqlToSqlConverterService::handleLessThan),
-    buildMapping(AndCondition.class, FqlToSqlConverterService::handleAnd),
-    buildMapping(RegexCondition.class, FqlToSqlConverterService::handleRegEx),
-    buildMapping(ContainsCondition.class, FqlToSqlConverterService::handleContains),
-    buildMapping(NotContainsCondition.class, FqlToSqlConverterService::handleNotContains),
-    buildMapping(EmptyCondition.class, FqlToSqlConverterService::handleEmpty)
-  );
 
   /**
    * This regex matches the ISO_LOCAL_DATE format. Required: yyyy-MM-dd.
@@ -77,13 +58,28 @@ public class FqlToSqlConverterService {
   /**
    * Converts the given FQL condition to the corresponding SQL query
    */
-  // The unchecked warning is suppressed because sqlConverters has to have a raw type, forcing its use to have an unchecked call
-  @SuppressWarnings("unchecked")
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     final Field<Object> field = fqlCondition instanceof FieldCondition<?> fieldCondition
       ? field(fieldCondition, entityType)
       : null;
-    return sqlConverters.getOrDefault(fqlCondition.getClass(), (condition, et, f) -> falseCondition()).handle(fqlCondition, entityType, field);
+
+    // TODO: make this better
+    // I don't love the casts here, but the only way to avoid that is a massive chain of if-else statements
+    // with instanceof, and that'd be well over double the size. Hopefully JDK 21 will bring some improvements...
+    return switch (fqlCondition.getClass().getSimpleName()) {
+      case "EqualsCondition" -> handleEquals((EqualsCondition) fqlCondition, entityType, field);
+      case "NotEqualsCondition" -> handleNotEquals((NotEqualsCondition) fqlCondition, entityType, field);
+      case "InCondition" -> handleIn((InCondition) fqlCondition, entityType, field);
+      case "NotInCondition" -> handleNotIn((NotInCondition) fqlCondition, entityType, field);
+      case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
+      case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
+      case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
+      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, field);
+      case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
+      case "NotContainsCondition" -> handleNotContains((NotContainsCondition) fqlCondition, entityType, field);
+      case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
+      default -> falseCondition();
+    };
   }
 
   private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType, Field<Object> field) {
@@ -196,11 +192,11 @@ public class FqlToSqlConverterService {
     return field.lessThan(valueField(lessThanCondition.value(), lessThanCondition, entityType));
   }
 
-  private static Condition handleAnd(AndCondition andCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleAnd(AndCondition andCondition, EntityType entityType) {
     return and(andCondition.value().stream().map(c -> getSqlCondition(c, entityType)).toList());
   }
 
-  private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleRegEx(RegexCondition regexCondition, Field<Object> field) {
     // perform case-insensitive regex search
     return condition("{0} ~* {1}", field, val(regexCondition.value()));
   }
@@ -280,20 +276,5 @@ public class FqlToSqlConverterService {
       return DSL.field(column.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
     }
     return val(value);
-  }
-
-  /**
-   * Build a mapping from a condition class to a condition handler.
-   * Note: This method exists in order to provide some type-safety around sqlConverters, to ensure the class and condition
-   * handler are for matching implementations of FqlCondition, since we can provide more powerful type constraints on
-   * methods than we can on an object
-   */
-  private static <T extends FqlCondition<?>> Map.Entry<Class<T>, ? extends ConditionHandler<T>> buildMapping(Class<T> conditionClass, ConditionHandler<T> f) {
-    return Map.entry(conditionClass, f);
-  }
-
-  @FunctionalInterface
-  private interface ConditionHandler<T extends FqlCondition<?>> {
-    Condition handle(T fqlCondition, EntityType entityType, Field<Object> field);
   }
 }

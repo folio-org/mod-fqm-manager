@@ -295,6 +295,7 @@
                 "dataType": "numberType"
               },
               "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' -> 'poLineEstimatedPrice')::float",
+              "valueFunction": "(:value)::float",
               "visibleByDefault": false
             },
             {
@@ -303,6 +304,7 @@
                 "dataType": "numberType"
               },
               "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' ->> 'exchangeRate')::float",
+              "valueFunction": "(:value)::float",
               "visibleByDefault": false
             },
             {

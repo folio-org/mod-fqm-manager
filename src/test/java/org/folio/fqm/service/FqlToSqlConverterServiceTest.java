@@ -39,10 +39,12 @@ class FqlToSqlConverterServiceTest {
       .columns(
         List.of(
           new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),
-          new EntityTypeColumn().name("field2").dataType(new EntityDataType().dataType("stringType")),
+          new EntityTypeColumn().name("field2").dataType(new EntityDataType().dataType("booleanType")),
           new EntityTypeColumn().name("field3").dataType(new EntityDataType().dataType("stringType")),
-          new EntityTypeColumn().name("field4").dataType(new DateType()),
+          new EntityTypeColumn().name("field4").dataType(new DateType().dataType("dateType")),
           new EntityTypeColumn().name("field5").dataType(new EntityDataType().dataType("integerType")),
+          new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
+          new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("fieldWithFilterValueGetter")
             .dataType(new EntityDataType().dataType("stringType"))
@@ -70,14 +72,14 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "equals numeric",
         """
-          {"field1": {"$eq": 10}}""",
-        field("field1").equal(10)
+          {"field5": {"$eq": 10}}""",
+        field("field5").equal(10)
       ),
       Arguments.of(
         "equals boolean",
         """
-          {"field1": {"$eq": true}}""",
-        field("field1").equal(true)
+          {"field2": {"$eq": true}}""",
+        field("field2").equal(true)
       ),
       Arguments.of(
         "equals date and time",
@@ -92,6 +94,18 @@ class FqlToSqlConverterServiceTest {
         field("field4").greaterOrEqual("2023-06-02")
           .and(field("field4").lessThan("2023-06-03"))
       ),
+      Arguments.of(
+        "equals ranged UUID",
+        """
+          {"rangedUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("rangedUUIDField").equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+      ),
+      Arguments.of(
+        "equals open UUID",
+        """
+          {"openUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("openUUIDField").equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+      ),
 
       Arguments.of(
         "not equals string",
@@ -102,14 +116,14 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not equals numeric",
         """
-          {"field1": {"$ne": 10}}""",
-        field("field1").notEqual(10)
+          {"field5": {"$ne": 10}}""",
+        field("field5").notEqual(10)
       ),
       Arguments.of(
         "not equals boolean",
         """
-          {"field1": {"$ne": true}}""",
-        field("field1").notEqual(true)
+          {"field2": {"$ne": true}}""",
+        field("field2").notEqual(true)
       ),
       Arguments.of(
         "not equals date and time",
@@ -123,6 +137,18 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$ne": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-03")
           .or(field("field4").lessThan("2023-06-02"))
+      ),
+      Arguments.of(
+        "not equals ranged UUID",
+        """
+          {"rangedUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("rangedUUIDField").notEqualIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+      ),
+      Arguments.of(
+        "not equals open UUID",
+        """
+          {"openUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("openUUIDField").notEqualIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
       ),
 
       Arguments.of(
@@ -261,34 +287,28 @@ class FqlToSqlConverterServiceTest {
             "$and": [
               {"field1": {"$eq": "some value"}},
               {"field2": {"$eq": true}},
-              {"field3": {"$lte": 3}},
-              {"field1": {"$eq": false}},
-              {"field2": {"$in": ["value1", 2, true]}},
-              {"field3": {"$ne": 5}},
-              {"field1": {"$gt": 9}},
-              {"field2": {"$lt": 11}},
-              {"field3": {"$nin": ["value1", 2, true]}}
+              {"field5": {"$lte": 3}},
+              {"field2": {"$in": [false, true]}},
+              {"field5": {"$ne": 5}},
+              {"field5": {"$gt": 9}},
+              {"field3": {"$nin": ["value1", "value2"]}}
             ]
           }""",
         field("field1").equalIgnoreCase("some value")
           .and(field("field2").eq(true))
-          .and(field("field3").lessOrEqual(3))
-          .and(field("field1").eq(false))
+          .and(field("field5").lessOrEqual(3))
           .and(
             or(
-              field("field2").equalIgnoreCase("value1"),
-              field("field2").eq(2),
+              field("field2").eq(false),
               field("field2").eq(true)
             )
           )
-          .and(field("field3").notEqual(5))
-          .and(field("field1").greaterThan(9))
-          .and(field("field2").lessThan(11))
+          .and(field("field5").notEqual(5))
+          .and(field("field5").greaterThan(9))
           .and(
             and(
               field("field3").notEqualIgnoreCase("value1"),
-              field("field3").notEqual(2),
-              field("field3").notEqual(true)
+              field("field3").notEqualIgnoreCase("value2")
             )
           )
       ),

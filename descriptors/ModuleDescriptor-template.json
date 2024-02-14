@@ -260,6 +260,10 @@
     {
       "id": "acquisitions-units-storage.units",
       "version": "1.1"
+    },
+    {
+      "id": "organizations-storage.organization-types",
+      "version": "1.0"
     }
   ],
   "launchDescriptor": {

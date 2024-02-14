@@ -33,6 +33,14 @@
   <changeSet id="insert-holdings-definition.sql" runOnChange="true" author="kjain@ebsco.com, bsharp@ebsco.com">
     <sqlFile path="sql/entity-type-definitions/insert-holdings-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
+
+  <changeSet id="insert-organization-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-organization-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+  <changeSet id="insert-organization-types-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-organization-types-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
   <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>

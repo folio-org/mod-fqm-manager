@@ -289,6 +289,7 @@
   "entityType.drv_purchase_order_line_details.vendor_id": "Vendor ID",
   "entityType.drv_purchase_order_line_details.vendor_name": "Vendor name",
 
+<<<<<<< HEAD
   "entityType.drv_inventory_statistical_code_full": "Statistical code",
   "entityType.drv_inventory_statistical_code_full.id": "Statistical code ID",
   "entityType.drv_inventory_statistical_code_full.statistical_code": "Statistical code",
@@ -309,4 +310,35 @@
   "entityType.drv_holdings_record_details.holdings_temporary_location_id": "Holdings temporary location ID",
   "entityType.drv_holdings_record_details.holdings_statistical_code_ids": "Holdings statistical code ID list",
   "entityType.drv_holdings_record_details.holdings_statistical_codes": "Holdings statistical code list"
+=======
+  "entityType.src_organization_type": "Organization types",
+  "entityType.src_organization_type.id": "ID",
+  "entityType.src_organization_type.organization_types_name": "Type",
+
+  "entityType.drv_organization_details" : "Organizations",
+  "entityType.drv_organization_details.last_updated": "Last updated",
+  "entityType.drv_organization_details.code": "Code",
+  "entityType.drv_organization_details.name": "Name",
+  "entityType.drv_organization_details.organization_status": "Organization status",
+  "entityType.drv_organization_details.description": "Description",
+  "entityType.drv_organization_details.accounting_code": "Accounting code",
+  "entityType.drv_organization_details.payment_method": "Payment method",
+  "entityType.drv_organization_details.discount_percent": "Discount percent",
+  "entityType.drv_organization_details.claiming_interval": "Claiming interval",
+  "entityType.drv_organization_details.export_to_accounting": "Export to accounting",
+  "entityType.drv_organization_details.subscription_interval": "Subscription interval",
+  "entityType.drv_organization_details.expected_invoice_interval": "Expected invoice interval",
+  "entityType.drv_organization_details.expected_receipt_interval": "Expected receipt interval",
+  "entityType.drv_organization_details.renewal_activation_interval": "Renewal activation interval",
+  "entityType.drv_organization_details.expected_activation_interval": "Expected activation interval",
+  "entityType.drv_organization_details.vendor_currencies": "Vendor currencies",
+  "entityType.drv_organization_details.tax_id": "Tax ID",
+  "entityType.drv_organization_details.tax_percentage": "Tax percentage",
+  "entityType.drv_organization_details.account_number": "Account number",
+  "entityType.drv_organization_details.account_status": "Account status",
+  "entityType.drv_organization_details.alias": "Alias",
+  "entityType.drv_organization_details.organization_type_ids": "Type ID list",
+  "entityType.drv_organization_details.organization_type_name": "Type list",
+  "entityType.drv_organization_details.id": "ID"
+>>>>>>> 01522bb (MODFQMMGR-136: adding organization entity type)
 }

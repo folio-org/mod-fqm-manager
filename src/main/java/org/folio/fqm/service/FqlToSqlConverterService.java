@@ -44,6 +44,10 @@ public class FqlToSqlConverterService {
    * an exact comparison will be performed.
    */
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
+  private static final String STRING_TYPE = "stringType";
+  private static final String RANGED_UUID_TYPE = "rangedUUIDType";
+  private static final String OPEN_UUID_TYPE = "openUUIDType";
+  private static final String DATE_TYPE = "dateType";
 
   private final FqlService fqlService;
 
@@ -86,8 +90,9 @@ public class FqlToSqlConverterService {
     if (isDateCondition(equalsCondition, entityType)) {
       return handleDate(equalsCondition, field);
     }
-    if (equalsCondition.value() instanceof String value) {
-      return caseInsensitiveComparison(equalsCondition, entityType, field, value, Field::equalIgnoreCase, Field::eq);
+    String dataType = getColumnDataType(entityType, equalsCondition);
+    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType))  {
+      return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), Field::equalIgnoreCase, Field::eq);
     }
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
   }
@@ -96,8 +101,9 @@ public class FqlToSqlConverterService {
     if (isDateCondition(notEqualsCondition, entityType)) {
       return handleDate(notEqualsCondition, field);
     }
-    if (notEqualsCondition.value() instanceof String value) {
-      return caseInsensitiveComparison(notEqualsCondition, entityType, field, value, Field::notEqualIgnoreCase, Field::ne);
+    String dataType = getColumnDataType(entityType, notEqualsCondition);
+    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType)) {
+      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), Field::notEqualIgnoreCase, Field::ne);
     }
     return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
   }
@@ -226,7 +232,7 @@ public class FqlToSqlConverterService {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
     return switch (fieldType) {
-      case "stringType" -> isEmpty ? nullCondition.or(field.eq("")) : nullCondition.and(field.ne(""));
+      case STRING_TYPE -> isEmpty ? nullCondition.or(field.eq("")) : nullCondition.and(field.ne(""));
       case "arrayType" -> {
         var cardinality = cardinality(DSL.cast(field, String[].class));
         yield isEmpty ? nullCondition.or(cardinality.eq(0)) :  nullCondition.and(cardinality.ne(0));
@@ -265,6 +271,15 @@ public class FqlToSqlConverterService {
       .findFirst()
       .map(SqlFieldIdentificationUtils::getSqlFilterField)
       .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), columnName));
+  }
+
+  private static String getColumnDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
+    return entityType.getColumns()
+      .stream()
+      .filter(col -> fieldCondition.fieldName().equals(col.getName()))
+      .map(col -> col.getDataType().getDataType())
+      .findFirst()
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.fieldName()));
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get

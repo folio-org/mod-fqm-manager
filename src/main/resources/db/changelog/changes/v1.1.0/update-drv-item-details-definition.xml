@@ -248,6 +248,10 @@
                 "valueJsonPath": "$.mtypes.*.id",
                 "labelJsonPath": "$.mtypes.*.name"
               },
+              "source": {
+                "columnName": "item_material_type",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
+              },
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "material_type_ref_data.jsonb ->> 'name'",

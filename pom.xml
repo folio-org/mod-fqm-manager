@@ -24,9 +24,9 @@
   <properties>
     <!-- runtime dependencies -->
     <folio-spring-base.version>7.1.2</folio-spring-base.version>
-    <folio-query-tool-metadata.version>1.1.0-SNAPSHOT</folio-query-tool-metadata.version>
+    <folio-query-tool-metadata.version>1.1.0</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
-    <lib-fqm-query-processor.version>1.1.0-SNAPSHOT</lib-fqm-query-processor.version>
+    <lib-fqm-query-processor.version>1.2.0-SNAPSHOT</lib-fqm-query-processor.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <snakeyaml.version>2.0</snakeyaml.version>
     <org.postgresql.version>42.5.4</org.postgresql.version>

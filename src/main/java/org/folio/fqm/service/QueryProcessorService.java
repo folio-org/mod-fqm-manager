@@ -62,7 +62,6 @@ public class QueryProcessorService {
   /**
    * Process the FQL query and return the results.
    *
-   * @param tenantId     Tenant ID
    * @param entityTypeId Entity type ID
    * @param fqlQuery     FQL query
    * @param fields       fields to return in query results
@@ -72,7 +71,7 @@ public class QueryProcessorService {
    * @param limit        Count of records to be returned.
    * @return Results matching the query
    */
-  public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, UUID afterId, Integer limit) {
+  public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
     return resultSetRepository.getResultSet(entityTypeId, fql, fields, afterId, limit);
   }

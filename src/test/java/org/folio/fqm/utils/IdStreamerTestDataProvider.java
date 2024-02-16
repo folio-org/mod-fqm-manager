@@ -27,7 +27,7 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
     .id(UUID.randomUUID().toString())
     .columns(
       List.of(
-        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).valueGetter(EntityTypeRepository.ID_FIELD_NAME),
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).valueGetter(EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true),
         new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType"))
       )
     )
@@ -37,8 +37,8 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
-  private static final String GET_IDS_QUERY_REGEX = "SELECT ID FROM .* WHERE .* ORDER BY ID ASC";
-  private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT ID FROM .* WHERE ID IN \\(SELECT RESULT_ID FROM .*_MOD_FQM_MANAGER.QUERY_RESULTS WHERE QUERY_ID = .*";
+  private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
+  private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
   private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";
   private static final String GET_IDS_REGEX = ".*QUERY_RESULTS.*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -61,8 +61,8 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
       result.add(create.newRecord(definitionField).values(writeValueAsString(TEST_ENTITY_TYPE_DEFINITION)));
       mockResult = new MockResult(1, result);
     } else if (sql.matches(GET_IDS_QUERY_REGEX) || sql.matches(GET_SORTED_IDS_QUERY_REGEX)) {
-      Result<Record1<Object>> result = create.newResult(DSL.field(EntityTypeRepository.ID_FIELD_NAME));
-      TEST_CONTENT_IDS.forEach(id -> result.add(create.newRecord(DSL.field(EntityTypeRepository.ID_FIELD_NAME)).values(id)));
+      Result<Record1<String[]>> result = create.newResult(DSL.cast(DSL.field(EntityTypeRepository.ID_FIELD_NAME), String[].class));
+      TEST_CONTENT_IDS.forEach(id -> result.add(create.newRecord(DSL.cast(DSL.field(EntityTypeRepository.ID_FIELD_NAME), String[].class)).values(new String[] {id.toString()})));
       mockResult = new MockResult(1, result);
     } else if (sql.matches(GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX)) {
       var entityTypeIdField = field("entity_type_id", UUID.class);

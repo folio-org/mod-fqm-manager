@@ -137,7 +137,10 @@ class QueryManagementServiceTest {
     boolean includeResults = true;
     int offset = 0;
     int limit = 100;
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> resultIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<Map<String, Object>> contents = List.of(
       Map.of("id", resultIds.get(0), "field1", "value1", "field2", "value2"),
       Map.of("id", resultIds.get(1), "field1", "value1", "field2", "value2")
@@ -165,7 +168,10 @@ class QueryManagementServiceTest {
     boolean includeResults = true;
     int offset = 0;
     int limit = 100;
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> resultIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<Map<String, Object>> contents = List.of(
       Map.of("id", resultIds.get(0)),
       Map.of("id", resultIds.get(1))
@@ -195,7 +201,10 @@ class QueryManagementServiceTest {
     boolean includeResults = true;
     int offset = 0;
     int limit = 100;
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> resultIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<Map<String, Object>> contents = List.of(
       Map.of("id", resultIds.get(0)),
       Map.of("id", resultIds.get(1))
@@ -226,7 +235,10 @@ class QueryManagementServiceTest {
     boolean includeResults = true;
     int offset = 0;
     int limit = 100;
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> resultIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<Map<String, Object>> contents = List.of(
       Map.of("id", resultIds.get(0), "field1", "value1", "field2", "value2"),
       Map.of("id", resultIds.get(1), "field1", "value1", "field2", "value2")
@@ -399,11 +411,14 @@ class QueryManagementServiceTest {
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
-    List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> expectedIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenReturn(derivedTableName);
     when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
-    List<UUID> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
+    List<List<String>> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
   }
 
@@ -431,7 +446,10 @@ class QueryManagementServiceTest {
   @Test
   void shouldGetContents() {
     UUID entityTypeId = UUID.randomUUID();
-    List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> ids = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<String> fields = List.of("id", "field1", "field2");
     List<Map<String, Object>> expectedContents = List.of(
       Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),

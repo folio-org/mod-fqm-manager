@@ -4,14 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record2;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.Table;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.field;
 
@@ -21,16 +25,15 @@ import static org.jooq.impl.DSL.field;
 public class QueryResultsRepository {
   private static final Table<Record> QUERY_RESULTS_TABLE = table("query_results");
   private static final Field<UUID> QUERY_ID_FIELD = field("query_id", UUID.class);
-  private static final Field<UUID> RESULT_ID_FIELD = field("result_id", UUID.class);
 
   private final DSLContext jooqContext;
 
 
-  public void saveQueryResults(UUID queryId, List<UUID> resultIds) {
+  public void saveQueryResults(UUID queryId, List<String[]> resultIds) {
     log.info("Received data batch for queryId {}", queryId);
     log.debug("Data batch: {}", resultIds);
 
-    List<Record2<UUID, UUID>> records = resultIds.stream()
+    List<Record2<UUID, String[]>> records = resultIds.stream()
       .map(resultId -> jooqContext.newRecord(QUERY_ID_FIELD, RESULT_ID_FIELD).values(queryId, resultId))
       .toList();
     jooqContext.insertInto(QUERY_RESULTS_TABLE, QUERY_ID_FIELD, RESULT_ID_FIELD)
@@ -43,17 +46,21 @@ public class QueryResultsRepository {
     return jooqContext.fetchCount(QUERY_RESULTS_TABLE.where(QUERY_ID_FIELD.eq(queryId)));
   }
 
-  public List<UUID> getQueryResultIds(UUID queryId, int offset, int limit) {
+  public List<List<String>> getQueryResultIds(UUID queryId, int offset, int limit) {
     log.info("Retrieving results for queryId {}", queryId);
-    List<UUID> resultIds = jooqContext.select(RESULT_ID_FIELD)
+    List<List<String>> resultLists = jooqContext.select(RESULT_ID_FIELD)
       .from(QUERY_RESULTS_TABLE)
       .where(QUERY_ID_FIELD.eq(queryId))
       .orderBy(RESULT_ID_FIELD)
       .offset(offset)
       .limit(limit)
-      .fetchInto(UUID.class);
-    log.debug("Retrieved result ids for queryId {}. Result ids: {}", queryId, resultIds);
-    return resultIds;
+      .fetch()
+      .map(Record1::value1)
+      .stream()
+      .map(Arrays::asList)
+      .toList();
+    log.debug("Retrieved result ids for queryId {}. Result ids: {}", queryId, resultLists);
+    return resultLists;
   }
 
   public void deleteQueryResults(List<UUID> queryId) {

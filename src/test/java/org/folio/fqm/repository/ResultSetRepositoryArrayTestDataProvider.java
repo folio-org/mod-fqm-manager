@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -38,7 +39,7 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
 
   private static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME),
+      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(ID_FIELD_NAME).isIdColumn(true),
       new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
     ))
     .name("TEST_ARRAY_ENTITY_TYPE")

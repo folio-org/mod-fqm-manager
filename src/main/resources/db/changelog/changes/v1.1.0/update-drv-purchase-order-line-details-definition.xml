@@ -94,6 +94,7 @@
                 "dataType": "rangedUUIDType"
               },
               "valueGetter": "src_purchase_order_line.id",
+              "isIdColumn": true,
               "visibleByDefault": true
             },
             {

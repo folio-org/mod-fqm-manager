@@ -218,6 +218,7 @@
                 "dataType":"rangedUUIDType"
               },
               "valueGetter": "src_users_users.id",
+              "isIdColumn": true,
               "visibleByDefault": true
             },
             {

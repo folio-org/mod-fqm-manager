@@ -2,6 +2,7 @@ package org.folio.fqm.repository;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
+import org.folio.fql.model.field.FqlField;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -35,7 +36,10 @@ class ResultSetRepositoryTest {
 
   @Test
   void getResultSetWithNullFieldsShouldReturnEmptyList() {
-    List<UUID> listIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> listIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), null, listIds);
     assertEquals(expectedList, actualList);
@@ -43,7 +47,10 @@ class ResultSetRepositoryTest {
 
   @Test
   void getResultSetWithEmptyFieldsShouldEmptyList() {
-    List<UUID> listIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> listIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
@@ -52,7 +59,11 @@ class ResultSetRepositoryTest {
 
   @Test
   void getResultSetShouldReturnResultsWithRequestedFields() {
-    List<UUID> listIds = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> listIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     List<String> fields = List.of("id", "key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
     // Since we are only asking for "id" and "key2" fields, create expected list without key1 included
@@ -68,9 +79,9 @@ class ResultSetRepositoryTest {
   @Test
   void shouldRunSynchronousQueryAndReturnContents() {
     UUID entityTypeId = UUID.randomUUID();
-    UUID afterId = UUID.randomUUID();
+    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition("key1", "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
     // Since we are only asking for "id" and "key1" fields, create expected list without key2 included
@@ -86,9 +97,9 @@ class ResultSetRepositoryTest {
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithEmptyFields() {
     UUID entityTypeId = UUID.randomUUID();
-    UUID afterId = UUID.randomUUID();
+    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition("key1", "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
@@ -98,9 +109,9 @@ class ResultSetRepositoryTest {
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithNullFields() {
     UUID entityTypeId = UUID.randomUUID();
-    UUID afterId = UUID.randomUUID();
+    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition("key1", "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, null, afterId, limit);
     assertEquals(expectedList, actualList);
@@ -110,7 +121,7 @@ class ResultSetRepositoryTest {
   void shouldRunSynchronousQueryAndHandleNullAfterIdParameter() {
     UUID entityTypeId = UUID.randomUUID();
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition("key1", "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, null, limit);
     assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);

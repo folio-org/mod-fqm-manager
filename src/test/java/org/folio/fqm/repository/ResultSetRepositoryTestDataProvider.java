@@ -2,9 +2,7 @@ package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.folio.querytool.domain.dto.EntityDataType;
-import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.*;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -43,9 +41,9 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
 
   private static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME).valueGetter(ID_FIELD_NAME),
-      new EntityTypeColumn().name("key1").dataType(new EntityDataType().dataType("stringType")).valueGetter("key1"),
-      new EntityTypeColumn().name("key2").dataType(new EntityDataType().dataType("stringType")).valueGetter("key2")
+      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(ID_FIELD_NAME).isIdColumn(true),
+      new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter("key1").valueGetter("key1"),
+      new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter("key2").valueGetter("key2")
     ))
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE");

@@ -183,7 +183,8 @@ class FqlQueryControllerTest {
   @Test
   void shouldRunSynchronousQueryWithOptionalParametersAndReturnResults() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
-    UUID afterId = UUID.randomUUID();
+    UUID afterUUID = UUID.randomUUID();
+    List<String> afterId = List.of(afterUUID.toString());
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
@@ -203,7 +204,7 @@ class FqlQueryControllerTest {
       .queryParam("query", fqlQuery)
       .queryParam("entityTypeId", entityTypeId.toString())
       .queryParam("fields", fields)
-      .queryParam("afterId", afterId.toString())
+      .queryParam("afterId", afterUUID.toString())
       .queryParam("limit", limit.toString());
     mockMvc.perform(builder)
       .andExpect(status().isOk())
@@ -275,7 +276,10 @@ class FqlQueryControllerTest {
     UUID queryId = UUID.randomUUID();
     Integer offset = 0;
     Integer limit = 100;
-    List<UUID> expectedIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> expectedIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
     when(queryManagementService.getSortedIds(queryId, offset, limit)).thenReturn(expectedIds);
     RequestBuilder builder = get("/query/" + queryId + "/sortedIds").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
@@ -283,8 +287,8 @@ class FqlQueryControllerTest {
       .queryParam("limit", limit.toString());
     mockMvc.perform(builder)
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[0]", is(expectedIds.get(0).toString())))
-      .andExpect(jsonPath("$.[1]", is(expectedIds.get(1).toString())));
+      .andExpect(jsonPath("$.[0]", is(expectedIds.get(0))))
+      .andExpect(jsonPath("$.[1]", is(expectedIds.get(1))));
   }
 
   @Test
@@ -307,7 +311,10 @@ class FqlQueryControllerTest {
     UUID id1 = UUID.randomUUID();
     UUID id2 = UUID.randomUUID();
     List<String> fields = List.of("id", "field1", "field2");
-    List<UUID> ids = List.of(id1, id2);
+    List<List<String>> ids = List.of(
+      List.of(id1.toString()),
+      List.of(id2.toString())
+    );
     ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
       .fields(fields)
       .ids(ids);
@@ -336,7 +343,10 @@ class FqlQueryControllerTest {
     UUID id1 = UUID.randomUUID();
     UUID id2 = UUID.randomUUID();
     List<String> fields = List.of("id", "field1", "field2");
-    List<UUID> ids = List.of(id1, id2);
+    List<List<String>> ids = List.of(
+      List.of(id1.toString()),
+      List.of(id2.toString())
+    );
     ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
       .fields(fields)
       .ids(ids);
@@ -354,7 +364,10 @@ class FqlQueryControllerTest {
     UUID id1 = UUID.randomUUID();
     UUID id2 = UUID.randomUUID();
     List<String> fields = List.of("id", "field1", "field2");
-    List<UUID> ids = List.of(id1, id2);
+    List<List<String>> ids = List.of(
+      List.of(id1.toString()),
+      List.of(id2.toString())
+    );
     ContentsRequest contentsRequest = new ContentsRequest().fields(fields)
       .ids(ids);
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)

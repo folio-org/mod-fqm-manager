@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.model.Fql;
+import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service class responsible for managing a query
@@ -83,7 +85,7 @@ public class QueryManagementService {
    * @return Page containing the results of the query
    */
   public ResultsetPage runFqlQuery(String query, UUID entityTypeId, List<String> fields,
-                                   UUID afterId, Integer limit) {
+                                   List<String> afterId, Integer limit) {
     validateQuery(entityTypeId, query);
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
@@ -158,7 +160,7 @@ public class QueryManagementService {
     }
   }
 
-  public List<UUID> getSortedIds(UUID queryId, int offset, int limit) {
+  public List<List<String>> getSortedIds(UUID queryId, int offset, int limit) {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
@@ -167,7 +169,7 @@ public class QueryManagementService {
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
-  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<UUID> ids) {
+  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
     return resultSetService.getResultSet(entityTypeId, fields, ids);
   }
 
@@ -177,12 +179,15 @@ public class QueryManagementService {
         Query query = queryRepository.getQuery(queryId, false)
           .orElseThrow(() -> new QueryNotFoundException(queryId));
         Fql fql = fqlService.getFql(query.fqlQuery());
-        fields = fqlService.getFqlFields(fql);
+        fields = fqlService.getFqlFields(fql)
+          .stream()
+          .map(FqlField::getColumnName)
+          .collect(Collectors.toList());
       }
       if (!fields.contains("id")) {
         fields.add("id");
       }
-      List<UUID> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
+      List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
       return resultSetService.getResultSet(entityTypeId, fields, resultIds);
     }
     return List.of();

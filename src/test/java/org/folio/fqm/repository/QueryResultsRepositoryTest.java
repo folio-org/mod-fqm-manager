@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,12 +32,17 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
-    List<UUID> expectedResultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<List<String>> expectedResultIds = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
+    List<String[]> expectedResultIdArray = new ArrayList<>();
+    expectedResultIds.forEach(id -> expectedResultIdArray.add(id.toArray(new String[0])));
     Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(query);
-    queryResultsRepository.saveQueryResults(queryId, expectedResultIds);
-    List<UUID> actualResultIds = queryResultsRepository.getQueryResultIds(queryId, 0, 100);
+    queryResultsRepository.saveQueryResults(queryId, expectedResultIdArray);
+    List<List<String>> actualResultIds = queryResultsRepository.getQueryResultIds(queryId, 0, 100);
     assertThat(expectedResultIds).containsExactlyInAnyOrderElementsOf(actualResultIds);
   }
 
@@ -47,7 +53,10 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
     Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);
@@ -63,7 +72,10 @@ class QueryResultsRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     UUID queryId = UUID.randomUUID();
-    List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
     Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);

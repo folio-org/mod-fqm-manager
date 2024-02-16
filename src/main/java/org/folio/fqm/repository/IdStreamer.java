@@ -1,10 +1,10 @@
 package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.FqlToSqlConverterService;
+import org.folio.fqm.utils.IdColumnUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
@@ -18,6 +18,8 @@ import org.springframework.stereotype.Repository;
 import org.jooq.Record1;
 import org.jooq.Field;
 
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +28,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
+import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.table;
@@ -33,7 +36,6 @@ import static org.jooq.impl.DSL.table;
 @Repository
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class IdStreamer {
-  private static final String RESULT_ID = "result_id";
 
   private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
@@ -62,26 +64,30 @@ public class IdStreamer {
     UUID entityTypeId = queryDetailsRepository.getEntityTypeId(queryId);
     EntityType entityType = getEntityType(entityTypeId);
     Condition condition = field(ID_FIELD_NAME).in(
-      select(field(RESULT_ID))
+      select(RESULT_ID_FIELD)
         .from(table("query_results"))
         .where(field("query_id").eq(queryId))
     );
     return streamIdsInBatch(entityType, sortResults, condition, batchSize, idsConsumer);
   }
 
-  public List<UUID> getSortedIds(String derivedTableName,
-                                 int offset, int batchSize, UUID queryId) {
+  public List<List<String>> getSortedIds(String derivedTableName,
+                                         int offset, int batchSize, UUID queryId) {
     // THIS DOES NOT PROVIDE SORTED IDs! This is a temporary workaround to address performance issues until we
     // can do it properly
     return jooqContext.dsl()
-      .select(field(RESULT_ID))
+      .select(RESULT_ID_FIELD)
       // NOTE: derivedTableName is <schema>.query_results here as part of the workaround
       .from(table(derivedTableName))
       .where(field("query_id").eq(queryId))
-      .orderBy(field(RESULT_ID))
+      .orderBy(RESULT_ID_FIELD)
       .offset(offset)
       .limit(batchSize)
-      .fetchInto(UUID.class);
+      .fetch()
+      .map(Record1::value1)
+      .stream()
+      .map(Arrays::asList)
+      .toList();
   }
 
   private int streamIdsInBatch(EntityType entityType,
@@ -89,25 +95,19 @@ public class IdStreamer {
                                 Condition sqlWhereClause,
                                 int batchSize,
                                 Consumer<IdsWithCancelCallback> idsConsumer) {
-    String idValueGetter = entityType
-      .getColumns()
-      .stream()
-      .filter(col -> ID_FIELD_NAME.equals(col.getName()))
-      .map(col -> col.getValueGetter() != null ? col.getValueGetter() : col.getName())
-      .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), ID_FIELD_NAME));
+    Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
     try (
-      Cursor<Record1<Object>> idsCursor = jooqContext.dsl()
+      Cursor<Record1<String[]>> idsCursor = jooqContext.dsl()
         .select(field(idValueGetter))
         .from(entityType.getFromClause())
         .where(sqlWhereClause)
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize)
         .fetchLazy();
-      Stream<UUID> uuidStream = idsCursor
+      Stream<String[]> idStream = idsCursor
         .stream()
-        .map(row -> (UUID) row.getValue(idValueGetter));
-      Stream<List<UUID>> idsStream = StreamHelper.chunk(uuidStream, batchSize)
+        .map(row -> row.getValue(idValueGetter));
+      Stream<List<String[]>> idsStream = StreamHelper.chunk(idStream, batchSize)
     ) {
       var total = new AtomicInteger();
       idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))

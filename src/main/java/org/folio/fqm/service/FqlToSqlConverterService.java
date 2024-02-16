@@ -138,9 +138,9 @@ public class FqlToSqlConverterService {
   private static EntityTypeColumn getColumn(FieldCondition<?> fieldCondition, EntityType entityType) {
     return entityType.getColumns()
       .stream()
-      .filter(col -> col.getName().equals(fieldCondition.fieldName()))
+      .filter(col -> col.getName().equals(fieldCondition.field().getColumnName()))
       .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.fieldName()));
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
@@ -264,7 +264,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
-    String columnName = condition.fieldName();
+    String columnName = condition.field().getColumnName();
     return entityType.getColumns()
       .stream()
       .filter(col -> columnName.equals(col.getName()))
@@ -276,10 +276,10 @@ public class FqlToSqlConverterService {
   private static String getColumnDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
     return entityType.getColumns()
       .stream()
-      .filter(col -> fieldCondition.fieldName().equals(col.getName()))
+      .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
       .map(col -> col.getDataType().getDataType())
       .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.fieldName()));
+      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get

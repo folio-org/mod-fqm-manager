@@ -19,6 +19,17 @@
   <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-custom-field-entity-type-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-item-callnumber-location-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-item-holdingsrecord-instance-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-circulation-loan-policy-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-inventory-call-number-type-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-inventory-location-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-inventory-loclibrary-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-inventory-material-type-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-inventory-service-point-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-users-addresstypes-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-users-departments-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-src-users-groups-definition.xml" relativeToChangelogFile="true"/>
 
   <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
@@ -38,5 +49,7 @@
       ALTER TABLE query_results ADD PRIMARY KEY (query_id, result_id);
     </sql>
   </changeSet>
+
+  <include file="update-query-results-table.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

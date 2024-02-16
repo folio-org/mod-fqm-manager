@@ -122,7 +122,7 @@ public class EntityTypeRepository {
 
     return new EntityTypeColumn()
       .name(value)
-      .dataType(new BooleanType())
+      .dataType(new BooleanType().dataType("booleanType"))
       .values(List.of(trueValue, falseValue))
       .visibleByDefault(false)
       .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")

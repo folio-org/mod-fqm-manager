@@ -23,7 +23,7 @@ public class LocalizationService {
   private static final String ENTITY_TYPE_COLUMN_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s.%s";
   // refers to a property inside an objectType column inside the entity type, e.g. "City" inside "Address" column inside "Users"
   private static final String ENTITY_TYPE_COLUMN_NESTED_LABEL_TRANSLATION_TEMPLATE =
-  "mod-fqm-manager.entityType.%s.%s.%s";
+    "mod-fqm-manager.entityType.%s.%s.%s";
   private static final String ENTITY_TYPE_COLUMN_NESTED_LABEL_QUALIFIED_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s.%s.%s._qualified";
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
@@ -105,7 +105,11 @@ public class LocalizationService {
     String nestedPropertyName
   ) {
     return translationService.format(
-      ENTITY_TYPE_COLUMN_NESTED_LABEL_QUALIFIED_TRANSLATION_TEMPLATE.formatted(tableName, columnName, nestedPropertyName)
+      ENTITY_TYPE_COLUMN_NESTED_LABEL_QUALIFIED_TRANSLATION_TEMPLATE.formatted(
+        tableName,
+        columnName,
+        nestedPropertyName
+      )
     );
   }
 

@@ -85,7 +85,7 @@
                       "name": "value",
                       "property": "value",
                       "dataType": {"dataType": "numberType"},
-                      "valueGetter": "( SELECT jsonb_agg(elems.value ->> 'value') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT jsonb_agg(elems.value -> 'value') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
                     }
                   ]
                 }

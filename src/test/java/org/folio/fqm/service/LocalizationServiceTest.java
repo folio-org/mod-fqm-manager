@@ -79,6 +79,8 @@ class LocalizationServiceTest {
     String expectedOuterTranslation = "Outer Column";
     String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
     String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
 
     EntityType entityType = new EntityType()
       .name("table_name")
@@ -93,6 +95,7 @@ class LocalizationServiceTest {
 
     when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
     when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
 
     localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 
@@ -101,9 +104,14 @@ class LocalizationServiceTest {
       expectedInnerTranslation,
       ((ObjectType) entityType.getColumns().get(0).getDataType()).getProperties().get(0).getLabelAlias()
     );
+    assertEquals(
+      expectedInnerQualifiedTranslation,
+      ((ObjectType) entityType.getColumns().get(0).getDataType()).getProperties().get(0).getLabelAliasFullyQualified()
+    );
 
     verify(translationService, times(1)).format(expectedOuterTranslationKey);
     verify(translationService, times(1)).format(expectedInnerTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
     verifyNoMoreInteractions(translationService);
   }
 
@@ -113,8 +121,12 @@ class LocalizationServiceTest {
     String expectedOuterTranslation = "Outer Column";
     String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
     String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
     String expectedInnermostTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner";
     String expectedInnermostTranslation = "Nested * 2 Property";
+    String expectedInnermostQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner._qualified";
+    String expectedInnermostQualifiedTranslation = "Outer Column's Nested Property's Nested * 2 Property";
 
     // array -> array -> object -> object -> array
     NestedObjectProperty innermost = new NestedObjectProperty()
@@ -137,16 +149,22 @@ class LocalizationServiceTest {
     when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
     when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
     when(translationService.format(expectedInnermostTranslationKey)).thenReturn(expectedInnermostTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
+    when(translationService.format(expectedInnermostQualifiedTranslationKey)).thenReturn(expectedInnermostQualifiedTranslation);
 
     localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 
     assertEquals(expectedOuterTranslation, entityType.getColumns().get(0).getLabelAlias());
     assertEquals(expectedInnerTranslation, inner.getLabelAlias());
     assertEquals(expectedInnermostTranslation, innermost.getLabelAlias());
+    assertEquals(expectedInnerQualifiedTranslation, inner.getLabelAliasFullyQualified());
+    assertEquals(expectedInnermostQualifiedTranslation, innermost.getLabelAliasFullyQualified());
 
     verify(translationService, times(1)).format(expectedOuterTranslationKey);
     verify(translationService, times(1)).format(expectedInnerTranslationKey);
     verify(translationService, times(1)).format(expectedInnermostTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
+    verify(translationService, times(1)).format(expectedInnermostQualifiedTranslationKey);
     verifyNoMoreInteractions(translationService);
   }
 }

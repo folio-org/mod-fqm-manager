@@ -59,4 +59,26 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_statistical_code" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_statistical_code">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.statistical_code
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_statistical_code_type" author="bsharp@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "statistical_code_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_statistical_code_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.statistical_code_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

@@ -259,5 +259,18 @@
   "entityType.drv_purchase_order_line_details.po_updated_date": "PO updated date",
   "entityType.drv_purchase_order_line_details.vendor_code": "Vendor code",
   "entityType.drv_purchase_order_line_details.vendor_id": "Vendor ID",
-  "entityType.drv_purchase_order_line_details.vendor_name": "Vendor name"
+  "entityType.drv_purchase_order_line_details.vendor_name": "Vendor name",
+
+  "entityType.drv_inventory_statistical_code_full": "Statistical code",
+  "entityType.drv_inventory_statistical_code_full.id": "Statistical code ID",
+  "entityType.drv_inventory_statistical_code_full.statistical_code": "Statistical code",
+
+  "entityType.drv_holdings_record_details": "Holdings",
+  "entityType.drv_holdings_record_details.instance_id": "Instance ID",
+  "entityType.drv_holdings_record_details.id": "Holdings ID",
+  "entityType.drv_holdings_record_details.holdings_hrid": "Holdings HRID",
+  "entityType.drv_holdings_record_details.holdings_suppress_from_discovery": "Holdings suppress from discovery",
+  "entityType.drv_holdings_record_details.holdings_statistical_code_ids": "Holdings statistical code ID list",
+  "entityType.drv_holdings_record_details.holdings_statistical_code_names": "Holdings statistical code list"
+
 }

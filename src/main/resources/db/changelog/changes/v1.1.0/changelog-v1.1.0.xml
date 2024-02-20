@@ -52,4 +52,6 @@
 
   <include file="update-query-results-table.xml" relativeToChangelogFile="true"/>
 
+  <include file="insert-instances-definition.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -2,6 +2,15 @@
   "entityType.drv_loan_status": "Loan status",
   "entityType.drv_loan_status.loan_status": "Loan status",
 
+  "entityType.drv_instances": "Instances",
+  "entityType.drv_instances.instance_cataloged_date": "Instance cataloged date",
+  "entityType.drv_instances.instance_metadata_created_date": "Instance created date",
+  "entityType.drv_instances.instance_hrid": "Instance HRID",
+  "entityType.drv_instances.id": "Instance UUID",
+  "entityType.drv_instances.instance_title": "Instance resource title",
+  "entityType.drv_instances.instance_discovery_suppress": "Instance suppress from discovery",
+  "entityType.drv_instances.instance_metadata_updated_date": "Instance updated date",
+
   "entityType.src_inventory_material_type": "Material type",
   "entityType.src_inventory_material_type.id": "Id",
   "entityType.src_inventory_material_type.material_type_name": "Material type name",

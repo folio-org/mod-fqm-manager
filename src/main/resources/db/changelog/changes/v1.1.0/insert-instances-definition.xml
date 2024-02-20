@@ -1,0 +1,121 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="MODFQMMGR-129" author="mweaver@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <viewExists viewName="src_inventory_instance"/>
+    </preConditions>
+    <comment>Add the Instance entity type</comment>
+
+    <!-- Insert the row if it doesn't exist, then update it separately.
+         This is purely for the sake of readability. This relies on ${tenant_id}, so it has to be done
+         in an XML changeset file (or YAML/JSON/whatever. Pretty much anything other than a .sql). By splitting it up,
+         the JSON blob can be an XML tag's body, rather than having to be nested inside a string, making it easier to
+         use syntax highlighting (JSON within XML = reasonably easy to work with. JSON within SQL with XML = not so
+         much) ¯\_(ツ)_/¯
+         This also makes it easy to keep this idempotent
+     -->
+    <sql>
+      INSERT INTO entity_type_definition (id, derived_table_name, definition)
+      VALUES ('6b08439b-4f8e-4468-8046-ea620f5cfb74', 'drv_instances', '{}') ON CONFLICT (id) DO NOTHING;
+    </sql>
+
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+          "name": "drv_instances",
+          "private": false,
+          "fromClause": "src_inventory_instance",
+          "columns": [
+            {
+              "name": "instance_cataloged_date",
+              "dataType": {
+                "dataType": "dateType"
+              },
+              "valueGetter": "src_inventory_instance.jsonb ->> 'catalogedDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "instance_metadata_created_date",
+              "dataType": {
+                "dataType": "dateType"
+              },
+              "valueGetter": "src_inventory_instance.jsonb -> 'metadata' ->> 'createdDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "instance_hrid",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_inventory_instance.jsonb ->> 'hrid'",
+              "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'hrid'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "id",
+              "isIdColumn": true,
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "valueGetter": "src_inventory_instance.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "instance_title",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "src_inventory_instance.jsonb ->> 'title'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(jsonb ->> 'title'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
+              "visibleByDefault": true
+            },
+            {
+              "name": "instance_discovery_suppress",
+              "dataType": {
+                "dataType": "booleanType"
+              },
+              "values": [
+                {
+                  "value": "true",
+                  "label": "True"
+                },
+                {
+                  "value": "false",
+                  "label": "False"
+                }
+              ],
+              "valueGetter": "src_inventory_instance.jsonb ->> 'discoverySuppress'",
+              "filterValueGetter": "\"left\"(lower(src_inventory_instance.jsonb ->> 'discoverySuppress'::text), 600)",
+              "valueFunction": "\"left\"(lower(:value), 600)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "instance_metadata_updated_date",
+              "dataType": {
+                "dataType": "dateType"
+              },
+              "valueGetter": "src_inventory_instance.jsonb -> 'metadata' ->> 'updatedDate'",
+              "filterValueGetter": "\"left\"(lower((jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
+              "valueFunction": "\"left\"(lower(:value), 600)",
+              "visibleByDefault": true
+            }
+          ],
+          "defaultSort": [
+            {
+              "columnName": "id",
+              "direction": "ASC"
+            }
+          ]
+        }
+
+      </column>
+      <where>id = '6b08439b-4f8e-4468-8046-ea620f5cfb74'</where>
+
+    </update>
+  </changeSet>
+</databaseChangeLog>

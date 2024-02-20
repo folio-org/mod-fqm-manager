@@ -1,15 +1,27 @@
 package org.folio.fqm.service;
 
-import org.folio.fql.model.*;
+import org.folio.fql.model.AndCondition;
+import org.folio.fql.model.ContainsCondition;
+import org.folio.fql.model.EmptyCondition;
+import org.folio.fql.model.EqualsCondition;
+import org.folio.fql.model.FieldCondition;
+import org.folio.fql.model.FqlCondition;
+import org.folio.fql.model.GreaterThanCondition;
+import org.folio.fql.model.InCondition;
+import org.folio.fql.model.LessThanCondition;
+import org.folio.fql.model.NotContainsCondition;
+import org.folio.fql.model.NotEqualsCondition;
+import org.folio.fql.model.NotInCondition;
+import org.folio.fql.model.RegexCondition;
 import org.folio.fql.service.FqlService;
+import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.Field;
 import org.jooq.Condition;
-import org.jooq.Field;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,7 +75,7 @@ public class FqlToSqlConverterService {
    * Converts the given FQL condition to the corresponding SQL query
    */
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
-    final Field<Object> field = fqlCondition instanceof FieldCondition<?> fieldCondition
+    final org.jooq.Field<Object> field = fqlCondition instanceof FieldCondition<?> fieldCondition
       ? field(fieldCondition, entityType)
       : null;
 
@@ -86,29 +98,29 @@ public class FqlToSqlConverterService {
     };
   }
 
-  private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (isDateCondition(equalsCondition, entityType)) {
       return handleDate(equalsCondition, field);
     }
-    String dataType = getColumnDataType(entityType, equalsCondition);
+    String dataType = getFieldDataType(entityType, equalsCondition);
     if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType))  {
-      return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), Field::equalIgnoreCase, Field::eq);
+      return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
     }
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
   }
 
-  private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (isDateCondition(notEqualsCondition, entityType)) {
       return handleDate(notEqualsCondition, field);
     }
-    String dataType = getColumnDataType(entityType, notEqualsCondition);
+    String dataType = getFieldDataType(entityType, notEqualsCondition);
     if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType)) {
-      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), Field::notEqualIgnoreCase, Field::ne);
+      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne);
     }
     return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
   }
 
-  private static Condition handleDate(FieldCondition<?> fieldCondition, Field<Object> field) {
+  private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field) {
     Condition condition = falseCondition();
     var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
@@ -135,26 +147,24 @@ public class FqlToSqlConverterService {
     return condition;
   }
 
-  private static EntityTypeColumn getColumn(FieldCondition<?> fieldCondition, EntityType entityType) {
-    return entityType.getColumns()
-      .stream()
-      .filter(col -> col.getName().equals(fieldCondition.field().getColumnName()))
-      .findFirst()
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
+  private static Field getField(FieldCondition<?> fieldCondition, EntityType entityType) {
+    return FqlValidationService
+      .findFieldDefinition(fieldCondition.field(), entityType)
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
-    EntityDataType dataType = getColumn(fieldCondition, entityType).getDataType();
+    EntityDataType dataType = getField(fieldCondition, entityType).getDataType();
     return dataType instanceof DateType
       && ((String) fieldCondition.value()).matches(DATE_REGEX);
   }
 
-  private static Condition handleIn(InCondition inCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
     List<Condition> conditionList = inCondition
       .value().stream()
       .map(val -> {
         if (val instanceof String value) {
-          return caseInsensitiveComparison(inCondition, entityType, field, value, Field::equalIgnoreCase, Field::eq);
+          return caseInsensitiveComparison(inCondition, entityType, field, value, org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
         } else {
           return field.eq(valueField(val, inCondition, entityType));
         }
@@ -164,12 +174,12 @@ public class FqlToSqlConverterService {
     return or(conditionList);
   }
 
-  private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, org.jooq.Field<Object> field) {
     List<Condition> conditionList = notInCondition
       .value().stream()
       .map(val -> {
         if (val instanceof String value) {
-          return caseInsensitiveComparison(notInCondition, entityType, field, value, Field::notEqualIgnoreCase, Field::notEqual);
+          return caseInsensitiveComparison(notInCondition, entityType, field, value, org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::notEqual);
         } else {
           return field.notEqual(valueField(val, notInCondition, entityType));
         }
@@ -178,7 +188,7 @@ public class FqlToSqlConverterService {
     return and(conditionList);
   }
 
-  private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (isDateCondition(greaterThanCondition, entityType)) {
       return handleDate(greaterThanCondition, field);
     }
@@ -188,7 +198,7 @@ public class FqlToSqlConverterService {
     return field.greaterThan(valueField(greaterThanCondition.value(), greaterThanCondition, entityType));
   }
 
-  private static Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (isDateCondition(lessThanCondition, entityType)) {
       return handleDate(lessThanCondition, field);
     }
@@ -202,12 +212,12 @@ public class FqlToSqlConverterService {
     return and(andCondition.value().stream().map(c -> getSqlCondition(c, entityType)).toList());
   }
 
-  private static Condition handleRegEx(RegexCondition regexCondition, Field<Object> field) {
+  private static Condition handleRegEx(RegexCondition regexCondition, org.jooq.Field<Object> field) {
     // perform case-insensitive regex search
     return condition("{0} ~* {1}", field, val(regexCondition.value()));
   }
 
-  private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (containsCondition.value() instanceof String value) {
       // Casting required to use ARRAY_CONTAINS operator
       return cast(field, String[].class).contains(valueField(new String[]{value.toLowerCase()}, containsCondition, entityType));
@@ -216,7 +226,7 @@ public class FqlToSqlConverterService {
     return cast(field, String[].class).contains(valueField(new String[]{containsCondition.value().toString()}, containsCondition, entityType));
   }
 
-  private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType, Field<Object> field) {
+  private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (notContainsCondition.value() instanceof String value) {
       // Casting required to use ARRAY_CONTAINS operator
       return cast(field, String[].class).notContains(valueField(new String[]{value.toLowerCase()}, notContainsCondition, entityType));
@@ -225,8 +235,8 @@ public class FqlToSqlConverterService {
     return cast(field, String[].class).notContains(valueField(new String[]{notContainsCondition.value().toString()}, notContainsCondition, entityType));
   }
 
-  private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, Field<Object> field) {
-    String fieldType = getColumn(emptyCondition, entityType)
+  private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    String fieldType = getField(emptyCondition, entityType)
       .getDataType()
       .getDataType();
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
@@ -243,52 +253,45 @@ public class FqlToSqlConverterService {
 
   /**
    * Create a case-insensitive comparison of the given fieldCondition with the given entityType.
-   * <p /><b>Note: This method always converts the comparison value to lower-case, while the column will be converted
+   * <p /><b>Note: This method always converts the comparison value to lower-case, while the field will be converted
    * to lower-case only if it does not have a filterValueGetter (currently, we assume the filterValueGetter
-   * will convert the column to lower-case. If that assumption changes, this method will need to be updated)</b>
+   * will convert the field to lower-case. If that assumption changes, this method will need to be updated)</b>
    *
    * @param value                      The value side of the string comparison (i.e., the value being compared to the field)
-   * @param toCaseInsensitiveCondition The function to build a Condition where the column is converted to lower-case
-   * @param toCaseSensitiveCondition   The function to build a Condition where the column is *not* converted to lower-case
+   * @param toCaseInsensitiveCondition The function to build a Condition where the field is converted to lower-case
+   * @param toCaseSensitiveCondition   The function to build a Condition where the field is *not* converted to lower-case
    */
-  private static Condition caseInsensitiveComparison(FieldCondition<?> fieldCondition, EntityType entityType, Field<Object> field,
-                                                     String value,
-                                                     BiFunction<Field<Object>, Field<String>, Condition> toCaseInsensitiveCondition,
-                                                     BiFunction<Field<Object>, Field<Object>, Condition> toCaseSensitiveCondition) {
-    EntityTypeColumn column = getColumn(fieldCondition, entityType);
-    boolean shouldConvertColumnToLower = column.getFilterValueGetter() == null;
+  private static Condition caseInsensitiveComparison(FieldCondition<?> fieldCondition, EntityType entityType, org.jooq.Field<Object> field, String value,
+                                                     BiFunction<org.jooq.Field<Object>, org.jooq.Field<String>, Condition> toCaseInsensitiveCondition,
+                                                     BiFunction<org.jooq.Field<Object>, org.jooq.Field<Object>, Condition> toCaseSensitiveCondition) {
+    Field entityField = getField(fieldCondition, entityType);
+    boolean shouldConvertColumnToLower = entityField.getFilterValueGetter() == null;
 
     return shouldConvertColumnToLower
       ? toCaseInsensitiveCondition.apply(field, valueField(value, fieldCondition, entityType))
       : toCaseSensitiveCondition.apply(field, valueField(value.toLowerCase(), fieldCondition, entityType));
   }
 
-  private static Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
-    String columnName = condition.field().getColumnName();
-    return entityType.getColumns()
-      .stream()
-      .filter(col -> columnName.equals(col.getName()))
-      .findFirst()
-      .map(SqlFieldIdentificationUtils::getSqlFilterField)
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), columnName));
+  private static org.jooq.Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
+    return SqlFieldIdentificationUtils.getSqlFilterField(getField(condition, entityType));
   }
 
-  private static String getColumnDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
+  private static String getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
       .map(col -> col.getDataType().getDataType())
       .findFirst()
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get
   // a reasonable level of type-safety with the return type on this method
   @SuppressWarnings("unchecked")
-  private static <T> Field<T> valueField(T value, FieldCondition<?> condition, EntityType entityType) {
-    EntityTypeColumn column = getColumn(condition, entityType);
-    if (column.getValueFunction() != null) {
-      return DSL.field(column.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
+  private static <T> org.jooq.Field<T> valueField(T value, FieldCondition<?> condition, EntityType entityType) {
+    Field field = getField(condition, entityType);
+    if (field.getValueFunction() != null) {
+      return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
     }
     return val(value);
   }

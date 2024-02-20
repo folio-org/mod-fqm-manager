@@ -59,7 +59,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_statistical_code" author="kjain@ebsco.com">
+  <changeSet id="create_view_statistical_code" author="kjain@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -70,7 +70,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_statistical_code_type" author="bsharp@ebsco.com">
+  <changeSet id="create_view_statistical_code_type" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "statistical_code_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>

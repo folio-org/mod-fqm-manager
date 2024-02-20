@@ -271,6 +271,6 @@
   "entityType.drv_holdings_record_details.holdings_hrid": "Holdings HRID",
   "entityType.drv_holdings_record_details.holdings_suppress_from_discovery": "Holdings suppress from discovery",
   "entityType.drv_holdings_record_details.holdings_statistical_code_ids": "Holdings statistical code ID list",
-  "entityType.drv_holdings_record_details.holdings_statistical_code_names": "Holdings statistical code list"
+  "entityType.drv_holdings_record_details.holdings_statistical_codes": "Holdings statistical code list"
 
 }

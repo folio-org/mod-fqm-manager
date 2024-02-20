@@ -2,7 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fql.model.*;
 import org.folio.fql.service.FqlService;
-import org.folio.fqm.exception.ColumnNotFoundException;
+import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -140,7 +140,7 @@ public class FqlToSqlConverterService {
       .stream()
       .filter(col -> col.getName().equals(fieldCondition.field().getColumnName()))
       .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
@@ -270,7 +270,7 @@ public class FqlToSqlConverterService {
       .filter(col -> columnName.equals(col.getName()))
       .findFirst()
       .map(SqlFieldIdentificationUtils::getSqlFilterField)
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), columnName));
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), columnName));
   }
 
   private static String getColumnDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
@@ -279,7 +279,7 @@ public class FqlToSqlConverterService {
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
       .map(col -> col.getDataType().getDataType())
       .findFirst()
-      .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field().getColumnName()));
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get

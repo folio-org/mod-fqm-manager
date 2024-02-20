@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
 import org.folio.fql.service.FqlService;
-import org.folio.fqm.exception.ColumnNotFoundException;
+import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -406,7 +406,7 @@ class FqlToSqlConverterServiceTest {
       {"non_existing_column": {"$nin": ["value1", 2, true]}}
       """;
     assertThrows(
-      ColumnNotFoundException.class,
+      FieldNotFoundException.class,
       () -> fqlToSqlConverter.getSqlCondition(fqlWithNonExistingColumn, entityType)
     );
   }

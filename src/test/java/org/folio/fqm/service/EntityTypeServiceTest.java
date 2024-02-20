@@ -102,7 +102,7 @@ class EntityTypeServiceTest {
       );
     when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
   }
 
@@ -129,7 +129,7 @@ class EntityTypeServiceTest {
         new ValueWithLabel().value("value_01").label("value_01"),
         new ValueWithLabel().value("value_02").label("value_02")
       ));
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
@@ -148,7 +148,7 @@ class EntityTypeServiceTest {
 
     when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    entityTypeService.getColumnValues(entityTypeId, valueColumnName, searchText);
+    entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
 
@@ -164,7 +164,7 @@ class EntityTypeServiceTest {
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
     when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    entityTypeService.getColumnValues(entityTypeId, valueColumnName, null);
+    entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
 
@@ -183,7 +183,7 @@ class EntityTypeServiceTest {
 
     when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
     assertEquals(new ColumnValues().content(values), actualColumnValueLabel);
   }
@@ -228,7 +228,7 @@ class EntityTypeServiceTest {
            }
       """);
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getColumnValues(entityTypeId, valueColumnName, "r");
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "r");
 
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("who").label("cares?"),

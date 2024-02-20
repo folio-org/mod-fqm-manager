@@ -34,8 +34,8 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   @Override
-  public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String columnName, String search) {
-    return ResponseEntity.ok(entityTypeService.getColumnValues(entityTypeId, columnName, search));
+  public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String fieldName, String search) {
+    return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
   }
 
   @Override

@@ -51,7 +51,8 @@
                       "name": "code",
                       "property": "code",
                       "dataType": {"dataType": "stringType"},
-                      "valueGetter": "( SELECT jsonb_agg(elems.value ->> 'code') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     },
                     {
                       "name": "distribution_type",
@@ -67,25 +68,28 @@
                           "value": "amount"
                         }
                       ],
-                      "valueGetter": "( SELECT jsonb_agg(elems.value ->> 'distributionType') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     },
                     {
                       "name": "encumbrance",
                       "property": "encumbrance",
                       "dataType": {"dataType": "rangedUUIDType"},
-                      "valueGetter": "( SELECT jsonb_agg(elems.value ->> 'encumbrance') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     },
                     {
                       "name": "fund_id",
                       "property": "fundId",
                       "dataType": {"dataType": "rangedUUIDType"},
-                      "valueGetter": "( SELECT jsonb_agg(elems.value ->> 'fundId') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     },
                     {
                       "name": "value",
                       "property": "value",
                       "dataType": {"dataType": "numberType"},
-                      "valueGetter": "( SELECT jsonb_agg(elems.value -> 'value') FROM src_purchase_order_line, jsonb_array_elements(jsonb -> 'fundDistribution') AS elems)"
+                      "valueGetter": "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     }
                   ]
                 }

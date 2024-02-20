@@ -10,7 +10,6 @@ import org.jooq.Record2;
 import org.jooq.Table;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

@@ -19,7 +19,6 @@ import org.jooq.Record1;
 import org.jooq.Field;
 
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;

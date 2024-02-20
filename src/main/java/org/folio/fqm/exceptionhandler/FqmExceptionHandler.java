@@ -3,7 +3,7 @@ package org.folio.fqm.exceptionhandler;
 import lombok.extern.slf4j.Slf4j;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.exception.InvalidFqlException;
-import org.folio.fqm.exception.ColumnNotFoundException;
+import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 @Slf4j
 public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
-  @ExceptionHandler({EmptyResultDataAccessException.class, ColumnNotFoundException.class,
+  @ExceptionHandler({EmptyResultDataAccessException.class, FieldNotFoundException.class,
     EntityTypeNotFoundException.class, QueryNotFoundException.class
   })
   public ResponseEntity<String> handleFqmExceptions(Exception ex, WebRequest request) {

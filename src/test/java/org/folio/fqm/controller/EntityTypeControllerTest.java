@@ -1,8 +1,8 @@
 package org.folio.fqm.controller;
 
 
-import org.folio.fqm.exception.ColumnNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.querytool.domain.dto.*;
@@ -112,7 +112,7 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types/{id}/columns/{columnName}/values", entityTypeId, columnName)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, null)).thenReturn(columnValues.content(expectedColumnValueLabel));
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, null)).thenReturn(columnValues.content(expectedColumnValueLabel));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.content[0].value", is(expectedColumnValueLabel.get(0).getValue())))
@@ -134,7 +134,7 @@ class EntityTypeControllerTest {
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("search", "label_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, "label_01")).thenReturn(columnValues.content(expectedColumnValueLabel));
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, "label_01")).thenReturn(columnValues.content(expectedColumnValueLabel));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.content[0].value", is(expectedColumnValueLabel.get(0).getValue())))
@@ -153,7 +153,7 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types/{id}/columns/{columnName}/values", entityTypeId, columnName)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, null)).thenReturn(columnValues.content(expectedColumnValueLabel));
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, null)).thenReturn(columnValues.content(expectedColumnValueLabel));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.content[0].value", is(expectedColumnValueLabel.get(0).getValue())))
@@ -173,7 +173,7 @@ class EntityTypeControllerTest {
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("search", "value_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, "value_01")).thenReturn(columnValues.content(expectedColumnValueLabel));
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, "value_01")).thenReturn(columnValues.content(expectedColumnValueLabel));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.content[0].value", is(expectedColumnValueLabel.get(0).getValue())));
@@ -186,8 +186,8 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types/{id}/columns/{columnName}/values", entityTypeId, columnName)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, null))
-      .thenThrow(new ColumnNotFoundException("entity_type", columnName));
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, null))
+      .thenThrow(new FieldNotFoundException("entity_type", columnName));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isNotFound());
   }
@@ -199,7 +199,7 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types/{id}/columns/{columnName}/values", entityTypeId, columnName)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01");
-    when(entityTypeService.getColumnValues(entityTypeId, columnName, null))
+    when(entityTypeService.getFieldValues(entityTypeId, columnName, null))
       .thenThrow(new EntityTypeNotFoundException(entityTypeId));
     mockMvc.perform(requestBuilder)
       .andExpect(status().isNotFound());

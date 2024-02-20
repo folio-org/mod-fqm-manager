@@ -10,10 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.folio.fql.model.Fql;
-import org.folio.fqm.exception.ColumnNotFoundException;
+import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.IdColumnUtils;
@@ -70,7 +69,7 @@ public class ResultSetRepository {
         .map(EntityTypeColumn::getDataType)
         .map(EntityDataType::getDataType)
         .findFirst()
-        .orElseThrow(() -> new ColumnNotFoundException(entityType.getName(), idColumnName));
+        .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), idColumnName));
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()

@@ -31,7 +31,7 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+              "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
               "visibleByDefault": false,
               "idColumnName": "acqunit_ids",
@@ -187,6 +187,7 @@
                 }
               },
               "valueGetter": "ARRAY(SELECT jsonb_array_elements_text(purchase_order.jsonb -> 'notes'))",
+              "filterValueGetter": "ARRAY(SELECT lower(jsonb_array_elements_text(purchase_order.jsonb -> 'notes')))",
               "visibleByDefault": false
             },
             {

@@ -73,7 +73,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     } else if (sql.matches(LIST_CONTENTS_BY_ID_SELECTOR_REGEX) || sql.matches(LIST_CONTENTS_BY_IDS_REGEX) ||
       sql.matches(GET_RESULT_SET_SYNC_REGEX)) {
       var fields = TEST_ENTITY_CONTENTS.get(0).keySet().stream().sorted().map(DSL::field).toList();
-      Result<Record> result = create.newResult(fields.toArray(Field[]::new));
+      Result<Record> result = create.newResult(fields.toArray(org.jooq.Field[]::new));
       result.addAll(
         TEST_ENTITY_CONTENTS.stream().map(row -> {
             Record record = create.newRecord(fields);

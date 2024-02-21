@@ -30,7 +30,9 @@
   <include file="update-src-users-addresstypes-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-users-departments-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-src-users-groups-definition.xml" relativeToChangelogFile="true"/>
-
+  <changeSet id="insert-holdings-definition.sql" runOnChange="true" author="kjain@ebsco.com, bsharp@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-holdings-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
   <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
@@ -39,6 +41,14 @@
     <sqlFile path="sql/create-mat-view-pol-receipt-status.sql" relativeToChangelogFile="true"/>
     <sqlFile path="sql/add-pol-payment-status-definition.sql" relativeToChangelogFile="true"/>
     <sqlFile path="sql/add-pol-receipt-status-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+  <changeSet id="create-mat-view-drv-inventory-statistical-code-full" author="bsharp@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>
+      <tableExists tableName = "statistical_code_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <sqlFile path="sql/create-mat-view-drv-inventory-statistical-code-full.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/entity-type-definitions/add-drv-inventory-statistical-code-full-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
 

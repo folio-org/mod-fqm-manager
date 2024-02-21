@@ -131,7 +131,9 @@
       "description": "Get details of a single entity type",
       "visible":  true,
       "subPermissions": [
-        "inventory-storage.material-types.collection.get"
+        "inventory-storage.material-types.collection.get",
+        "inventory-storage.locations.collection.get",
+        "inventory-storage.location-units.libraries.collection.get"
       ]
     },
     {

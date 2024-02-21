@@ -266,10 +266,19 @@
   "entityType.drv_inventory_statistical_code_full.statistical_code": "Statistical code",
 
   "entityType.drv_holdings_record_details": "Holdings",
+  "entityType.drv_holdings_record_details.holdings_effective_location": "Holdings effective location",
+  "entityType.drv_holdings_record_details.holdings_effective_location_id": "Holdings effective location ID",
+  "entityType.drv_holdings_record_details.holdings_effective_library_code": "Holdings effective library code",
+  "entityType.drv_holdings_record_details.holdings_effective_library_name": "Holdings effective library name",
+  "entityType.drv_holdings_record_details.holdings_effective_library_id": "Holdings effective library ID",
   "entityType.drv_holdings_record_details.instance_id": "Instance ID",
   "entityType.drv_holdings_record_details.id": "Holdings ID",
+  "entityType.drv_holdings_record_details.holdings_permanent_location": "Holdings permanent location",
+  "entityType.drv_holdings_record_details.holdings_permanent_location_id": "Holdings permanent location ID",
   "entityType.drv_holdings_record_details.holdings_hrid": "Holdings HRID",
   "entityType.drv_holdings_record_details.holdings_suppress_from_discovery": "Holdings suppress from discovery",
+  "entityType.drv_holdings_record_details.holdings_temporary_location": "Holdings temporary location",
+  "entityType.drv_holdings_record_details.holdings_temporary_location_id": "Holdings temporary location ID",
   "entityType.drv_holdings_record_details.holdings_statistical_code_ids": "Holdings statistical code ID list",
   "entityType.drv_holdings_record_details.holdings_statistical_codes": "Holdings statistical code list"
 

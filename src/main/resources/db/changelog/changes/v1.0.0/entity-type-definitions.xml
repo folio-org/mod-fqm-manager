@@ -12,7 +12,7 @@
     <sqlFile path="sql/entity-type-definitions/insert-loan-details-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
-  <changeSet id="insert-user-details-definition" author="kjain@ebsco.com">
+  <changeSet id="insert-user-details-definition" author="kjain@ebsco.com" runOnChange="true">
     <sqlFile path="sql/entity-type-definitions/insert-user-details-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 

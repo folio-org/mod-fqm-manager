@@ -46,6 +46,11 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
+          new EntityTypeColumn().name("arrayFieldWithValueFunction")
+            .dataType(new EntityDataType().dataType("arrayType"))
+            .valueGetter("valueGetter")
+            .filterValueGetter("foo(valueGetter)")
+            .valueFunction("foo(:value)"),
           new EntityTypeColumn().name("fieldWithFilterValueGetter")
             .dataType(new EntityDataType().dataType("stringType"))
             .filterValueGetter("thisIsAFilterValueGetter"),
@@ -263,27 +268,27 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "contains string",
         """
-          {"arrayField": {"$contains": "Some vALUE"}}""",
-        DSL.cast(field("arrayField"), String[].class).contains(new String[]{"some value"})
+          {"arrayField": {"$contains_all": ["Some vALUE"]}}""",
+        DSL.cast(field("arrayField"), String[].class).contains(DSL.cast(DSL.array("Some vALUE"), String[].class))
       ),
       Arguments.of(
         "contains numeric",
         """
-          {"arrayField": {"$contains": 10}}""",
-        DSL.cast(field("arrayField"), String[].class).contains(new String[]{"10"})
+          {"arrayField": {"$contains_all": [10]}}""",
+        DSL.cast(field("arrayField"), String[].class).contains(DSL.cast(DSL.array(10), String[].class))
       ),
 
       Arguments.of(
         "not contains string",
         """
-          {"arrayField": {"$not_contains": "Some vALUE"}}""",
-        DSL.cast(field("arrayField"), String[].class).notContains(new String[]{"some value"})
+          {"arrayField": {"$not_contains_all": ["Some vALUE"]}}""",
+        DSL.cast(field("arrayField"), String[].class).notContains(DSL.cast(DSL.array("Some vALUE"), String[].class))
       ),
       Arguments.of(
         "not contains numeric",
         """
-          {"arrayField": {"$not_contains": 10}}""",
-        DSL.cast(field("arrayField"), String[].class).notContains(new String[]{"10"})
+          {"arrayField": {"$not_contains_all": [10]}}""",
+        DSL.cast(field("arrayField"), String[].class).notContains(DSL.cast(DSL.array(10), String[].class))
       ),
 
       Arguments.of(
@@ -358,6 +363,48 @@ class FqlToSqlConverterServiceTest {
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
         )
+      ),
+
+      Arguments.of(
+        "contains_all condition on a field with a filter value getter and a value function",
+        """
+         {    "arrayFieldWithValueFunction": {"$contains_all": ["value1", "value2"]}}
+         }""",
+        DSL
+          .cast(
+            field("foo(valueGetter)"),
+            String[].class
+          )
+          .contains(
+            DSL.cast(
+              DSL.array(
+                field("foo(:value1)",  String.class, param("value", "value1")),
+                field("foo(:value)", String.class, param("value", "value2"))
+              ),
+              String[].class
+            )
+          )
+      ),
+
+      Arguments.of(
+        "not_contains_all condition on a field with a filter value getter and a value function",
+        """
+         {    "arrayFieldWithValueFunction": {"$not_contains_all": [10, 20]}}
+         }""",
+        DSL
+          .cast(
+            field("foo(valueGetter)"),
+            String[].class
+          )
+          .notContains(
+            DSL.cast(
+              DSL.array(
+                field("foo(:value)",  Integer.class, param("value", 10)),
+                field("foo(:value)", Integer.class, param("value", 20))
+              ),
+              String[].class
+            )
+          )
       ),
 
       Arguments.of(

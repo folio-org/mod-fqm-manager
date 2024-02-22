@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
 import org.folio.fql.model.AndCondition;
-import org.folio.fql.model.ContainsCondition;
+import org.folio.fql.model.ContainsAllCondition;
 import org.folio.fql.model.EmptyCondition;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.FieldCondition;
@@ -9,7 +9,7 @@ import org.folio.fql.model.FqlCondition;
 import org.folio.fql.model.GreaterThanCondition;
 import org.folio.fql.model.InCondition;
 import org.folio.fql.model.LessThanCondition;
-import org.folio.fql.model.NotContainsCondition;
+import org.folio.fql.model.NotContainsAllCondition;
 import org.folio.fql.model.NotEqualsCondition;
 import org.folio.fql.model.NotInCondition;
 import org.folio.fql.model.RegexCondition;
@@ -30,10 +30,14 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.array;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
@@ -91,8 +95,8 @@ public class FqlToSqlConverterService {
       case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
       case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
       case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
-      case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
-      case "NotContainsCondition" -> handleNotContains((NotContainsCondition) fqlCondition, entityType, field);
+      case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
+      case "NotContainsAllCondition" -> handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
       case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
       default -> falseCondition();
     };
@@ -223,22 +227,24 @@ public class FqlToSqlConverterService {
     return condition("{0} ~* {1}", field, valueField(regexCondition.value(), regexCondition, entityType));
   }
 
-  private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (containsCondition.value() instanceof String value) {
-      // Casting required to use ARRAY_CONTAINS operator
-      return cast(field, String[].class).contains(valueField(new String[]{value.toLowerCase()}, containsCondition, entityType));
-    }
-    // Cast non-string types to string for easy comparison
-    return cast(field, String[].class).contains(valueField(new String[]{containsCondition.value().toString()}, containsCondition, entityType));
+  private static Condition handleContainsAll(ContainsAllCondition containsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    var valueList = containsAllCondition
+      .value()
+      .stream()
+      .map(val -> valueField(val, containsAllCondition, entityType))
+      .toArray(org.jooq.Field[]::new);
+    var valueArray = cast(array(valueList), String[].class);
+    return cast(field, String[].class).contains(valueArray);
   }
 
-  private static Condition handleNotContains(NotContainsCondition notContainsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (notContainsCondition.value() instanceof String value) {
-      // Casting required to use ARRAY_CONTAINS operator
-      return cast(field, String[].class).notContains(valueField(new String[]{value.toLowerCase()}, notContainsCondition, entityType));
-    }
-    // Cast non-string types to string for easy comparison
-    return cast(field, String[].class).notContains(valueField(new String[]{notContainsCondition.value().toString()}, notContainsCondition, entityType));
+  private static Condition handleNotContainsAll(NotContainsAllCondition notContainsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    var valueList = notContainsAllCondition
+      .value()
+      .stream()
+      .map(val -> valueField(val, notContainsAllCondition, entityType))
+      .toArray(org.jooq.Field[]::new);
+    var valueArray = cast(array(valueList), String[].class);
+    return cast(field, String[].class).notContains(valueArray);
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {

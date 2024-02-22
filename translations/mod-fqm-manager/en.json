@@ -271,7 +271,7 @@
   "entityType.drv_holdings_record_details.holdings_effective_library_code": "Holdings effective library code",
   "entityType.drv_holdings_record_details.holdings_effective_library_name": "Holdings effective library name",
   "entityType.drv_holdings_record_details.holdings_effective_library_id": "Holdings effective library ID",
-  "entityType.drv_holdings_record_details.instance_id": "Instance ID",
+  "entityType.drv_holdings_record_details.instance_id": "Instance UUID",
   "entityType.drv_holdings_record_details.id": "Holdings ID",
   "entityType.drv_holdings_record_details.holdings_permanent_location": "Holdings permanent location",
   "entityType.drv_holdings_record_details.holdings_permanent_location_id": "Holdings permanent location ID",

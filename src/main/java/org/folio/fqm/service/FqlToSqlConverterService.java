@@ -153,6 +153,12 @@ public class FqlToSqlConverterService {
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
+  private static Field getFieldForFiltering(FieldCondition<?> fieldCondition, EntityType entityType) {
+    return FqlValidationService
+      .findFieldDefinitionForQuerying(fieldCondition.field(), entityType)
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+  }
+
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
     EntityDataType dataType = getField(fieldCondition, entityType).getDataType();
     return dataType instanceof DateType
@@ -273,7 +279,7 @@ public class FqlToSqlConverterService {
   }
 
   private static org.jooq.Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
-    return SqlFieldIdentificationUtils.getSqlFilterField(getField(condition, entityType));
+    return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
   }
 
   private static String getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {

@@ -81,4 +81,37 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_instance_status" author="kjain@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "instance_status" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_status">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_status
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_mode_of_issuance" author="kjain@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "mode_of_issuance" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_mode_of_issuance">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.mode_of_issuance
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_contributor_type" author="kjain@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "contributor_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_contributor_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.contributor_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

@@ -156,9 +156,11 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                       },
                      "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(hrd.jsonb -> ''statisticalCodeIds''::text) record(value))",
+                     "filterValueGetter": "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(hrd.jsonb -> ''statisticalCodeIds''::text) record(value))",
+                     "valueFunction": "lower(:value)",
                      "visibleByDefault": false
                  },
-                  {
+                 {
                       "name": "holdings_statistical_codes",
                       "dataType":{
                         "dataType":"arrayType",
@@ -172,9 +174,11 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "columnName": "statistical_code"
                       },
                       "valueGetter": "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((hrd.jsonb -> ''statisticalCodeIds''::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+                      "filterValueGetter": "( SELECT array_agg(lower(statcode.statistical_code)) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((hrd.jsonb -> ''statisticalCodeIds''::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+                      "valueFunction": "lower(:value)",
                       "visibleByDefault": true
-                  },
-                  {
+                 },
+                 {
                       "name": "holdings_suppress_from_discovery",
                       "dataType": {
                           "dataType":"booleanType"
@@ -193,8 +197,8 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "filterValueGetter": "\"left\"(lower(hrd.jsonb ->> ''discoverySuppress''::text), 600)",
                       "valueFunction": "\"left\"(lower(:value), 600)",
                       "visibleByDefault": true
-                  },
-                  {
+                 },
+                 {
                     "name": "holdings_temporary_location",
                     "dataType": {
                       "dataType": "stringType"
@@ -211,8 +215,8 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                     "idColumnName": "holdings_temporary_location_id",
                     "valueGetter": "temporary_location.jsonb ->> ''name''",
                     "visibleByDefault": false
-                  },
-                  {
+                 },
+                 {
                     "name": "holdings_temporary_location_id",
                     "dataType": {
                       "dataType": "rangedUUIDType"
@@ -228,15 +232,15 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                     },
                     "valueGetter": "hrd.temporarylocationid",
                     "visibleByDefault": false
-                  },
-                  {
+                 },
+                 {
                        "name": "instance_id",
                        "dataType": {
                            "dataType":"rangedUUIDType"
                          },
                        "valueGetter": "hrd.instanceid",
                        "visibleByDefault": true
-                  }
+                 }
              ],
              "defaultSort": [
                {

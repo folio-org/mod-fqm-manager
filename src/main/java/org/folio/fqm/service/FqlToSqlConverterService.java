@@ -90,7 +90,7 @@ public class FqlToSqlConverterService {
       case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
       case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
       case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
-      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, field);
+      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
       case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
       case "NotContainsCondition" -> handleNotContains((NotContainsCondition) fqlCondition, entityType, field);
       case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
@@ -218,9 +218,9 @@ public class FqlToSqlConverterService {
     return and(andCondition.value().stream().map(c -> getSqlCondition(c, entityType)).toList());
   }
 
-  private static Condition handleRegEx(RegexCondition regexCondition, org.jooq.Field<Object> field) {
+  private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, org.jooq.Field<Object> field) {
     // perform case-insensitive regex search
-    return condition("{0} ~* {1}", field, val(regexCondition.value()));
+    return condition("{0} ~* {1}", field, valueField(regexCondition.value(), regexCondition, entityType));
   }
 
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {

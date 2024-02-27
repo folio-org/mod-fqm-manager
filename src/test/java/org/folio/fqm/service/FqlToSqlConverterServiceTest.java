@@ -234,6 +234,12 @@ class FqlToSqlConverterServiceTest {
         condition("{0} ~* {1}", field("field1"), val("some_text"))
       ),
       Arguments.of(
+        "regex",
+        """
+          {"fieldWithAValueFunction": {"$regex": "some_text"}}""",
+        condition("{0} ~* {1}", field("fieldWithAValueFunction"), field("upper(:value)", String.class, param("value", "some_text")))
+      ),
+      Arguments.of(
         "in list",
         """
           {"field1": {"$in": ["value1", 2, true]}}""",

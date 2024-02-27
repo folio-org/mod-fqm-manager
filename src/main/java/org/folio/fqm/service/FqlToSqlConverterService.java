@@ -160,7 +160,7 @@ public class FqlToSqlConverterService {
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
-    EntityDataType dataType = getField(fieldCondition, entityType).getDataType();
+    EntityDataType dataType = getFieldForFiltering(fieldCondition, entityType).getDataType();
     return dataType instanceof DateType
       && ((String) fieldCondition.value()).matches(DATE_REGEX);
   }
@@ -242,7 +242,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String fieldType = getField(emptyCondition, entityType)
+    String fieldType = getFieldForFiltering(emptyCondition, entityType)
       .getDataType()
       .getDataType();
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
@@ -270,7 +270,7 @@ public class FqlToSqlConverterService {
   private static Condition caseInsensitiveComparison(FieldCondition<?> fieldCondition, EntityType entityType, org.jooq.Field<Object> field, String value,
                                                      BiFunction<org.jooq.Field<Object>, org.jooq.Field<String>, Condition> toCaseInsensitiveCondition,
                                                      BiFunction<org.jooq.Field<Object>, org.jooq.Field<Object>, Condition> toCaseSensitiveCondition) {
-    Field entityField = getField(fieldCondition, entityType);
+    Field entityField = getFieldForFiltering(fieldCondition, entityType);
     boolean shouldConvertColumnToLower = entityField.getFilterValueGetter() == null;
 
     return shouldConvertColumnToLower

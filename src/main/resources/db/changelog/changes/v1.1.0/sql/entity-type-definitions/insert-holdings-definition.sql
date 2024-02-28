@@ -3,7 +3,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
              "id": "8418e512-feac-4a6a-a56d-9006aab31e33",
              "name":"drv_holdings_record_details",
              "private" : false,
-             "fromClause" : "src_inventory_holdings_record hrd JOIN src_inventory_location effective_location ON effective_location.id = hrd.effectivelocationid JOIN src_inventory_loclibrary effective_library ON effective_library.id = effective_location.libraryid JOIN src_inventory_location permanent_location ON permanent_location.id = hrd.permanentlocationid JOIN src_inventory_location temporary_location ON temporary_location.id = hrd.temporarylocationid",
+             "fromClause" : "src_inventory_holdings_record hrd LEFT JOIN src_inventory_location effective_location ON effective_location.id = hrd.effectivelocationid LEFT JOIN src_inventory_loclibrary effective_library ON effective_library.id = effective_location.libraryid LEFT JOIN src_inventory_location permanent_location ON permanent_location.id = hrd.permanentlocationid LEFT JOIN src_inventory_location temporary_location ON temporary_location.id = hrd.temporarylocationid",
              "columns": [
                  {
                    "name": "holdings_effective_location",
@@ -194,7 +194,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         }
                       ],
                       "valueGetter": "hrd.jsonb ->> ''discoverySuppress''",
-                      "filterValueGetter": "\"left\"(lower(hrd.jsonb ->> ''discoverySuppress''::text), 600)",
+                      "filterValueGetter": "COALESCE(\"left\"(lower(hrd.jsonb ->> ''discoverySuppress''::text), 600), ''false'')",
                       "valueFunction": "\"left\"(lower(:value), 600)",
                       "visibleByDefault": true
                  },

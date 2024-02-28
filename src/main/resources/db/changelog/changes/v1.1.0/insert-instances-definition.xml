@@ -70,7 +70,7 @@
                 "dataType": "stringType"
               },
               "valueGetter": "src_inventory_instance.jsonb ->> 'title'",
-              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(jsonb ->> 'title'::text)), 600)",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'title'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
               "visibleByDefault": true
             },
@@ -100,7 +100,7 @@
                 "dataType": "dateType"
               },
               "valueGetter": "src_inventory_instance.jsonb -> 'metadata' ->> 'updatedDate'",
-              "filterValueGetter": "\"left\"(lower((jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
+              "filterValueGetter": "\"left\"(lower((src_inventory_instance.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
               "valueFunction": "\"left\"(lower(:value), 600)",
               "visibleByDefault": true
             },

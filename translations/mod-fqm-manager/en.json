@@ -6,6 +6,10 @@
   "entityType.src_inventory_contributor_type.id": "Id",
   "entityType.src_inventory_contributor_type.contributor_type": "Contributor type",
 
+  "entityType.src_inventory_contributor_name_type": "Contributor name type",
+  "entityType.src_inventory_contributor_name_type.id": "Id",
+  "entityType.src_inventory_contributor_name_type.contributor_name_type": "Contributor name type",
+
   "entityType.src_inventory_instance_status": "Instance status",
   "entityType.src_inventory_instance_status.id": "Id",
   "entityType.src_inventory_instance_status.status": "Status",
@@ -30,6 +34,10 @@
   "entityType.drv_instances.instance_contributor_type": "Instance contributor type list",
   "entityType.drv_instances.instance_status_id": "Instance status ID",
   "entityType.drv_instances.mode_of_issuance_id": "Instance mode of issuance ID",
+  "entityType.drv_instances.instance_source": "Instance source",
+  "entityType.drv_instances.instance_contributor_type_name_ids": "Instance contributor name type ID list",
+  "entityType.drv_instances.instance_contributor_name_type": "Instance contributor name type list",
+  "entityType.drv_instances.instance_language": "Instance language",
 
   "entityType.src_inventory_material_type": "Material type",
   "entityType.src_inventory_material_type.id": "Id",

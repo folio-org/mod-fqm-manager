@@ -114,4 +114,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_contributor_name_type" author="kjain@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "contributor_name_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_contributor_name_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.contributor_name_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

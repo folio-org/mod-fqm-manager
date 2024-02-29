@@ -93,7 +93,6 @@ public class ResultSetRepository {
       return List.of();
     }
     EntityType entityType = getEntityType(entityTypeId);
-    List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
     Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
     Condition afterIdCondition;
     if (afterId != null) {
@@ -101,12 +100,6 @@ public class ResultSetRepository {
       afterIdCondition = field(idValueGetter).greaterThan(afterIdArray);
     } else {
       afterIdCondition = DSL.noCondition();
-    }
-    // Make sure idColumns are included in results
-    for (String idColumnName : idColumnNames) {
-      if (!fields.contains(idColumnName)) {
-        fields.add(idColumnName);
-      }
     }
 
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);

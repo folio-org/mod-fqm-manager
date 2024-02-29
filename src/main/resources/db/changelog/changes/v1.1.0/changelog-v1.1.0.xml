@@ -59,6 +59,10 @@
   <changeSet id="insert-instance-status-definition.sql" runOnChange="true" author="kjain@ebsco.com">
     <sqlFile path="sql/entity-type-definitions/insert-instance-status-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
+  <changeSet id="insert-contributor-type-name-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-contributor-type-name-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
   <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
     <comment>Swap the columns in the query_results primary key, to improve performance</comment>
     <sql>

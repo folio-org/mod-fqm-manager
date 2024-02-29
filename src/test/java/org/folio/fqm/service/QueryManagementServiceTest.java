@@ -12,6 +12,7 @@ import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
@@ -19,6 +20,7 @@ import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -80,7 +82,13 @@ class QueryManagementServiceTest {
   void shouldSaveValidFqlQuery() {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType().name("test-entity");
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
     String fqlQuery = """
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
@@ -93,6 +101,38 @@ class QueryManagementServiceTest {
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
     verify(queryExecutionService, times(1)).executeQueryAsync(any());
+  }
+
+  @Test
+  void shouldAddIdColumnsToQueryIfNotPresent() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> expectedFields = List.of("field1", "id");
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(new ArrayList<>(List.of("field1")));
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+    QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
+    assertEquals(expectedIdentifier, actualIdentifier);
+
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture());
+    assertEquals(expectedFields, queryCaptor.getValue().fields());
   }
 
   @Test
@@ -266,7 +306,13 @@ class QueryManagementServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnResultSet() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType().name("test-entity");
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
@@ -288,7 +334,13 @@ class QueryManagementServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithFieldAndIdsIfIdsNotProvided() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType().name("test-entity");
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
@@ -311,7 +363,12 @@ class QueryManagementServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnResultWithOnlyIdsIfFieldsNotProvided() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType().name("test-entity");
+    EntityTypeColumn idColumn = new EntityTypeColumn()
+      .name("id")
+      .isIdColumn(true);
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(idColumn));
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;

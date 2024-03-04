@@ -325,7 +325,7 @@
   "entityType.drv_organization_details.id": "ID",
   "entityType.drv_organization_details.alias": "Organization alias",
 
-  "entityType.drv_organization_contacts": "Organizations — vendor info",
+  "entityType.drv_organization_contacts": "Organizations — contact info",
   "entityType.drv_organization_contacts.id": "Organization ID",
   "entityType.drv_organization_contacts.last_updated": "Organization last updated",
   "entityType.drv_organization_contacts.name": "Organization name",

@@ -38,8 +38,8 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'name'::text)",
-              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "valueGetter": "org.jsonb->>'name'",
               "visibleByDefault": false
             },
@@ -48,8 +48,8 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'code'::text)",
-              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'code'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "valueGetter": "org.jsonb->>'code'",
               "visibleByDefault": false
             },
@@ -58,8 +58,8 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'erpCode'::text)",
-              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'erpCode'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "valueGetter": "org.jsonb->>'erpCode'",
               "visibleByDefault": false
             },
@@ -83,8 +83,8 @@
                 "dataType": "stringType"
               },
               "valueGetter": "org.jsonb->>'status'",
-              "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text)",
-              "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "visibleByDefault": false
             },
             {
@@ -95,7 +95,7 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "valueGetter": "ARRAY( SELECT jsonb_array_elements_text(org.jsonb->'organizationTypes') as org_id)",
+              "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb->'organizationTypes'::text) record(value))",
               "visibleByDefault": false
             },
             {
@@ -111,7 +111,7 @@
                 "entityTypeId": "6b335e41-2654-4e2a-9b4e-c6930b330ccc",
                 "columnName": "organization_types_name"
               },
-              "valueGetter": "ARRAY( SELECT d.jsonb->>'name' FROM jsonb_array_elements_text(org.jsonb->'organizationTypes') as org_id JOIN src_organization_types d ON org_id = d.id::text)",
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
               "visibleByDefault": false
             },
             {
@@ -130,7 +130,9 @@
                   "dataType": "stringType"
                 }
               },
-              "valueGetter": "(SELECT jsonb_agg(alias_data.jsonb->>'value') FROM jsonb_array_elements(org.jsonb->'aliases') AS alias_data(alias_data))",
+              "valueGetter": "(SELECT array_agg(alias) FROM jsonb_array_elements_text(org.jsonb -> 'aliases') AS alias)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'aliases'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "visibleByDefault": false
             },
             {

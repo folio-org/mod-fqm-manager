@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fql.model.AndCondition;
 import org.folio.fql.model.ContainsAllCondition;
+import org.folio.fql.model.ContainsAnyCondition;
 import org.folio.fql.model.EmptyCondition;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.FieldCondition;
@@ -10,6 +11,7 @@ import org.folio.fql.model.GreaterThanCondition;
 import org.folio.fql.model.InCondition;
 import org.folio.fql.model.LessThanCondition;
 import org.folio.fql.model.NotContainsAllCondition;
+import org.folio.fql.model.NotContainsAnyCondition;
 import org.folio.fql.model.NotEqualsCondition;
 import org.folio.fql.model.NotInCondition;
 import org.folio.fql.model.RegexCondition;
@@ -30,18 +32,17 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
+import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.falseCondition;
+import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
@@ -97,6 +98,8 @@ public class FqlToSqlConverterService {
       case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
       case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
       case "NotContainsAllCondition" -> handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
+      case "ContainsAnyCondition" -> handleContainsAny((ContainsAnyCondition) fqlCondition, entityType, field);
+      case "NotContainsAnyCondition" -> handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
       case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
       default -> falseCondition();
     };
@@ -245,6 +248,26 @@ public class FqlToSqlConverterService {
       .toArray(org.jooq.Field[]::new);
     var valueArray = cast(array(valueList), String[].class);
     return cast(field, String[].class).notContains(valueArray);
+  }
+
+  private static Condition handleContainsAny(ContainsAnyCondition containsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    var valueList = containsAnyCondition
+      .value()
+      .stream()
+      .map(val -> valueField(val, containsAnyCondition, entityType))
+      .toArray(org.jooq.Field[]::new);
+    var valueArray = cast(array(valueList), String[].class);
+    return arrayOverlap(cast(field, String[].class), valueArray);
+  }
+
+  private static Condition handleNotContainsAny(NotContainsAnyCondition notContainsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    var valueList = notContainsAnyCondition
+      .value()
+      .stream()
+      .map(val -> valueField(val, notContainsAnyCondition, entityType))
+      .toArray(org.jooq.Field[]::new);
+    var valueArray = cast(array(valueList), String[].class);
+    return not(arrayOverlap(cast(field, String[].class), valueArray));
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {

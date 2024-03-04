@@ -117,7 +117,7 @@ public class IntegrationTestBase {
       .get("/entity-types")
       .then()
       .statusCode(200)
-      .body("$.size()", is(6));
+      .body("$.size()", is(7));
   }
 
 }

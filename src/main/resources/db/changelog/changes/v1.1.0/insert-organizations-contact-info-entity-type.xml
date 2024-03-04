@@ -2,16 +2,6 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="[MODFQMMGR-176] Create supporting address categories view" author="novercash@ebsco.com">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName = "organization_types" schemaName="${tenant_id}_mod_organizations_storage"/>
-    </preConditions>
-    <createView
-      replaceIfExists="true"
-      viewName="src_organization_categories">
-      SELECT * FROM ${tenant_id}_mod_organizations_storage.categories
-    </createView>
-  </changeSet>
   <changeSet id="[MODFQMMGR-176] Create entity type for organizations contact info" author="novercash@ebsco.com" runOnChange="true">
     <!-- Insert the row, then fill it in later, for readability. -->
     <sql>

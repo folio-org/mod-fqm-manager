@@ -308,5 +308,20 @@
   "entityType.drv_holdings_record_details.holdings_temporary_location": "Holdings temporary location",
   "entityType.drv_holdings_record_details.holdings_temporary_location_id": "Holdings temporary location ID",
   "entityType.drv_holdings_record_details.holdings_statistical_code_ids": "Holdings statistical code ID list",
-  "entityType.drv_holdings_record_details.holdings_statistical_codes": "Holdings statistical code list"
+  "entityType.drv_holdings_record_details.holdings_statistical_codes": "Holdings statistical code list",
+
+  "entityType.src_organization_type": "Organization types",
+  "entityType.src_organization_type.id": "ID",
+  "entityType.src_organization_type.organization_types_name": "Type",
+  "entityType.drv_organization_details" : "Organizations — vendor info",
+  "entityType.drv_organization_details.last_updated": "Organization last updated",
+  "entityType.drv_organization_details.code": "Organization code",
+  "entityType.drv_organization_details.name": "Organization name",
+  "entityType.drv_organization_details.organization_status": "Organization status",
+  "entityType.drv_organization_details.description": "Organization description",
+  "entityType.drv_organization_details.accounting_code": "Organization accounting code",
+  "entityType.drv_organization_details.organization_type_ids": "Organization type ID list",
+  "entityType.drv_organization_details.organization_type_name": "Organization type names list",
+  "entityType.drv_organization_details.id": "ID",
+  "entityType.drv_organization_details.alias": "Organization alias"
 }

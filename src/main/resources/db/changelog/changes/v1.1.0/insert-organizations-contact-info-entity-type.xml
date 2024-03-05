@@ -1,0 +1,299 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="[MODFQMMGR-176] Create entity type for organizations contact info" author="novercash@ebsco.com" runOnChange="true">
+    <!-- Insert the row, then fill it in later, for readability. -->
+    <sql>
+      INSERT INTO entity_type_definition (id, derived_table_name, definition)
+      VALUES ('7a7860cd-e939-504f-b51f-ed3e1e6b12b9', 'drv_organization_contacts', '{}') ON CONFLICT (id) DO NOTHING;
+    </sql>
+
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+          "name": "drv_organization_contacts",
+          "private": false,
+          "fromClause": "src_organizations AS org",
+          "columns": [
+            {
+              "name": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
+              },
+              "isIdColumn": true,
+              "valueGetter": "org.id",
+              "visibleByDefault": true
+            },
+            {
+              "name": "last_updated",
+              "dataType": {
+                "dataType": "dateType"
+              },
+              "valueGetter": "org.jsonb->'metadata'->>'updatedDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "name",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'name'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+              "valueGetter": "org.jsonb->>'name'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "code",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'code'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+              "valueGetter": "org.jsonb->>'code'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "accounting_code",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'erpCode'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+              "valueGetter": "org.jsonb->>'erpCode'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "organization_status",
+              "values": [
+                {
+                  "label": "Active",
+                  "value": "active"
+                },
+                {
+                  "label": "Inactive",
+                  "value": "inactive"
+                },
+                {
+                  "label": "Pending",
+                  "value": "pending"
+                }
+              ],
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "org.jsonb->>'status'",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "organization_type_ids",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "rangedUUIDType"
+                }
+              },
+              "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb->'organizationTypes'::text) record(value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "organization_type_name",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "idColumnName": "organization_type_ids",
+              "source": {
+                "entityTypeId": "6b335e41-2654-4e2a-9b4e-c6930b330ccc",
+                "columnName": "organization_types_name"
+              },
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "description",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "valueGetter": "org.jsonb->>'description'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "alias",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "valueGetter": "(SELECT array_agg(alias) FROM jsonb_array_elements_text(org.jsonb -> 'aliases') AS alias)",
+              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'aliases'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "address",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "objectType",
+                  "properties": [
+                    {
+                      "name": "address_line_1",
+                      "property": "addressLine1",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'addressLine1') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'addressLine1')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "address_line_2",
+                      "property": "addressLine2",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'addressLine2') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'addressLine2')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "city",
+                      "property": "city",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'city') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'city')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "state_region",
+                      "property": "stateRegion",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'stateRegion') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'stateRegion')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "postal_code",
+                      "property": "zipCode",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'zipCode') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'zipCode')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "country",
+                      "property": "country",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'country') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'country')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    }
+                  ]
+                }
+              },
+              "valueGetter": "org.jsonb ->> 'addresses'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "phone_number",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "objectType",
+                  "properties": [
+                    {
+                      "name": "phone_number",
+                      "property": "phoneNumber",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'phoneNumber') FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'phoneNumber')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "type",
+                      "property": "type",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'type') FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'type')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    }
+                  ]
+                }
+              },
+              "valueGetter": "org.jsonb ->> 'phoneNumbers'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "email",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "objectType",
+                  "properties": [
+                    {
+                      "name": "email",
+                      "property": "value",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'value') FROM jsonb_array_elements(org.jsonb->'emails') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "description",
+                      "property": "description",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'description') FROM jsonb_array_elements(org.jsonb->'emails') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    }
+                  ]
+                }
+              },
+              "valueGetter": "org.jsonb ->> 'emails'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "url",
+              "dataType": {
+                "dataType": "arrayType",
+                "itemDataType": {
+                  "dataType": "objectType",
+                  "properties": [
+                    {
+                      "name": "url",
+                      "property": "value",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'value') FROM jsonb_array_elements(org.jsonb->'urls') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "description",
+                      "property": "description",
+                      "dataType": { "dataType": "stringType" },
+                      "valueGetter": "( SELECT array_agg(elems.value ->> 'description') FROM jsonb_array_elements(org.jsonb->'urls') AS elems)",
+                      "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
+                      "valueFunction": "lower(:value)"
+                    }
+                  ]
+                }
+              },
+              "valueGetter": "org.jsonb ->> 'urls'",
+              "visibleByDefault": false
+            }
+          ],
+          "defaultSort": [
+            {
+              "columnName": "id",
+              "direction": "ASC"
+            }
+          ]
+        }        
+      </column>
+      <where>id = '7a7860cd-e939-504f-b51f-ed3e1e6b12b9'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

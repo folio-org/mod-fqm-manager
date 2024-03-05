@@ -70,6 +70,7 @@
     <sqlFile path="sql/entity-type-definitions/insert-organization-types-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+  <include file="insert-organizations-contact-info-entity-type.xml" relativeToChangelogFile="true"/>
 
   <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
     <comment>Swap the columns in the query_results primary key, to improve performance</comment>
@@ -82,5 +83,4 @@
   <include file="update-query-results-table.xml" relativeToChangelogFile="true"/>
 
   <include file="insert-instances-definition.xml" relativeToChangelogFile="true"/>
-
 </databaseChangeLog>

@@ -375,5 +375,14 @@
   "entityType.drv_organization_contacts.url.url": "URL",
   "entityType.drv_organization_contacts.url.url._qualified": "Contact URL",
   "entityType.drv_organization_contacts.url.description": "Description",
-  "entityType.drv_organization_contacts.url.description._qualified": "Contact URL description"
+  "entityType.drv_organization_contacts.url.description._qualified": "Contact URL description",
+  "entityType.drv_organization_details.agreements": "Organization agreements",
+  "entityType.drv_organization_details.agreements.name": "Vendor terms name",
+  "entityType.drv_organization_details.agreements.name._qualified": "Agreement vendor terms name",
+  "entityType.drv_organization_details.agreements.discount": "Discount percentage",
+  "entityType.drv_organization_details.agreements.discount._qualified": "Agreement discount percentage",
+  "entityType.drv_organization_details.agreements.referenceUrl": "Reference URL",
+  "entityType.drv_organization_details.agreements.referenceUrl._qualified": "Agreement reference URL",
+  "entityType.drv_organization_details.agreements.notes": "Notes",
+  "entityType.drv_organization_details.agreements.notes._qualified": "Agreement notes"
 }

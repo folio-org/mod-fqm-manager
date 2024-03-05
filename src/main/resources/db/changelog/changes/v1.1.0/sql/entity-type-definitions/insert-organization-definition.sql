@@ -256,7 +256,50 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                    },
                    "valueGetter": "(SELECT array_agg(vendorCurrency) FROM jsonb_array_elements_text(org.jsonb->''vendorCurrencies'') AS vendorCurrency)",
                    "visibleByDefault": false
-                 }
+                 },
+                 {
+                  "name": "agreements",
+                  "dataType": {
+                    "dataType": "arrayType",
+                    "itemDataType": {
+                      "dataType": "objectType",
+                      "properties": [
+                        {
+                          "name": "name",
+                          "property": "name",
+                          "dataType": {"dataType": "stringType"},
+                          "valueGetter": "( SELECT array_agg(elems.value ->> ''name'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                          "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''name'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                          "valueFunction": "lower(:value)"
+                        },
+                       {
+                          "name": "discount",
+                          "property": "discount",
+                          "dataType": {"dataType": "numberType"},
+                          "valueGetter": "( SELECT array_agg(elems.value ->> ''discount'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)"
+                        },
+                        {
+                          "name": "referenceUrl",
+                          "property": "referenceUrl",
+                          "dataType": {"dataType": "stringType"},
+                          "valueGetter": "( SELECT array_agg(elems.value ->> ''referenceUrl'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                          "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''referenceUrl'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                          "valueFunction": "lower(:value)"
+                        },
+                        {
+                           "name": "notes",
+                           "property": "notes",
+                           "dataType": {"dataType": "stringType"},
+                           "valueGetter": "( SELECT array_agg(elems.value ->> ''notes'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''notes'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                           "valueFunction": "lower(:value)"
+                        }
+                      ]
+                    }
+                   },
+                  "valueGetter": "org.jsonb ->> ''agreements''",
+                  "visibleByDefault": false
+                }
               ],
              "defaultSort": [
                {

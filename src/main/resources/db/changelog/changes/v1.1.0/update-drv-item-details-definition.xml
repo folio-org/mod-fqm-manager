@@ -32,6 +32,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.holdingsrecordid",
               "visibleByDefault": false
             },
@@ -40,6 +41,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "instance_details.jsonb -> 'metadata' ->> 'createdDate'",
               "visibleByDefault": false
             },
@@ -48,6 +50,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "hrim.instanceid",
               "visibleByDefault": false
             },
@@ -56,6 +59,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "jsonb_path_query_first(instance_details.jsonb, '$.\"contributors\"[*]?(@.\"primary\" == true).\"name\"'::jsonpath) #>> '{}'::text[]",
               "visibleByDefault": false
             },
@@ -64,6 +68,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(instance_details.jsonb ->> 'title'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
               "valueGetter": "instance_details.jsonb ->> 'title'",
@@ -74,6 +79,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "filterValueGetter": "\"left\"(lower((instance_details.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
               "valueFunction": "\"left\"(lower(:value), 600)",
               "valueGetter": "instance_details.jsonb -> 'metadata' ->> 'updatedDate'",
@@ -84,6 +90,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "filterValueGetter": "lower(src_inventory_item.jsonb ->> 'barcode'::text)",
               "valueFunction": "lower(:value)",
               "valueGetter": "src_inventory_item.jsonb ->> 'barcode'",
@@ -94,6 +101,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb ->> 'itemLevelCallNumber'",
               "visibleByDefault": false
             },
@@ -106,6 +114,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_level_call_number_typeid",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_item_number_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -117,6 +126,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'",
               "visibleByDefault": false
             },
@@ -125,6 +135,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb ->> 'copyNumber'",
               "visibleByDefault": true
             },
@@ -133,6 +144,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb -> 'metadata' ->> 'createdDate'",
               "visibleByDefault": false
             },
@@ -141,6 +153,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text))",
               "visibleByDefault": true
             },
@@ -153,6 +166,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_effective_call_number_typeid",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_number_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -164,6 +178,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb -> 'effectiveCallNumberComponents' ->> 'typeId'",
               "visibleByDefault": false
             },
@@ -172,6 +187,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "loclib_ref_data.jsonb ->> 'code'",
               "visibleByDefault": false
             },
@@ -180,6 +196,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "loclib_ref_data.id",
               "visibleByDefault": false
             },
@@ -192,6 +209,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_effective_library_id",
               "valueGetter": "loclib_ref_data.jsonb ->> 'name'",
               "visibleByDefault": false
@@ -201,6 +219,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.effectivelocationid",
               "visibleByDefault": false
             },
@@ -213,6 +232,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_effective_location_id",
               "filterValueGetter": " lower(${tenant_id}_mod_inventory_storage.f_unaccent(effective_location_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": " lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -224,6 +244,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_item.jsonb ->> 'hrid'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "src_inventory_item.jsonb ->> 'hrid'",
@@ -234,6 +255,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.id",
               "isIdColumn": true,
               "visibleByDefault": false
@@ -253,6 +275,7 @@
                 "columnName": "item_material_type",
                 "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
+              "queryable": true,
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
               "valueGetter": "material_type_ref_data.jsonb ->> 'name'",
@@ -263,6 +286,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.materialtypeid",
               "visibleByDefault": false
             },
@@ -271,6 +295,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.permanentlocationid",
               "visibleByDefault": false
             },
@@ -283,6 +308,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_permanent_location_id",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -411,6 +437,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
               "valueGetter": "src_inventory_item.jsonb -> 'status' ->> 'name'",
@@ -421,6 +448,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.temporarylocationid",
               "visibleByDefault": false
             },
@@ -433,6 +461,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "item_temporary_location_id",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(temporary_location_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -444,6 +473,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_item.jsonb -> 'metadata' ->> 'updatedDate'",
               "visibleByDefault": false
             }

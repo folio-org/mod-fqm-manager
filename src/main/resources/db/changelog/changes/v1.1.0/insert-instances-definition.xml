@@ -34,6 +34,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'catalogedDate'",
               "visibleByDefault": false
             },
@@ -42,6 +43,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb -> 'metadata' ->> 'createdDate'",
               "visibleByDefault": false
             },
@@ -50,6 +52,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'hrid'",
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'hrid'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -61,6 +64,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.id",
               "visibleByDefault": true
             },
@@ -69,6 +73,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'title'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'title'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)",
@@ -89,6 +94,7 @@
                   "label": "False"
                 }
               ],
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'discoverySuppress'",
               "filterValueGetter": "\"left\"(lower(src_inventory_instance.jsonb ->> 'discoverySuppress'::text), 600)",
               "valueFunction": "\"left\"(lower(:value), 600)",
@@ -99,6 +105,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb -> 'metadata' ->> 'updatedDate'",
               "filterValueGetter": "\"left\"(lower((src_inventory_instance.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
               "valueFunction": "\"left\"(lower(:value), 600)",
@@ -112,6 +119,7 @@
                     "dataType": "rangedUUIDType"
                   }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'statisticalCodeIds'::text) record(value))",
               "visibleByDefault": false
             },
@@ -123,6 +131,7 @@
                     "dataType": "stringType"
                   }
               },
+              "queryable": true,
               "idColumnName": "instance_statistical_code_ids",
               "source": {
                 "entityTypeId": "d2da8cc7-9171-4d3e-8aba-4da286eb5f1c",
@@ -136,6 +145,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'statusId'",
               "visibleByDefault": false
             },
@@ -144,6 +154,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "instance_status_id",
               "valueSourceApi": {
                 "path": "instance-statuses",
@@ -164,6 +175,7 @@
               "dataType": {
                "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'modeOfIssuanceId'",
               "visibleByDefault": false
             },
@@ -172,6 +184,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "idColumnName": "mode_of_issuance_id",
               "valueSourceApi": {
                 "path": "modes-of-issuance",
@@ -195,6 +208,7 @@
                   "dataType": "rangedUUIDType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(record.value ->> 'contributorTypeId'::text) FILTER (WHERE (record.value ->> 'contributorTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'contributorTypeId'::text)) FILTER (WHERE (record.value ->> 'contributorTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "visibleByDefault": false
@@ -207,6 +221,7 @@
                   "dataType": "stringType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_type a ON (record.value ->> 'contributorTypeId'::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_type a ON (record.value ->> contributorTypeId'::text) = a.id::text)",
               "visibleByDefault": false,
@@ -221,6 +236,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'source'",
               "visibleByDefault": false
             },
@@ -232,6 +248,7 @@
                     "dataType": "rangedUUIDType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(record.value ->> 'contributorNameTypeId'::text) FILTER (WHERE (record.value ->> 'contributorNameTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'contributorNameTypeId'::text)) FILTER (WHERE (record.value ->> 'contributorNameTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "visibleByDefault": false
@@ -244,6 +261,7 @@
                   "dataType": "stringType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value ->> 'contributorNameTypeId'::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value ->> contributorNameTypeId'::text) = a.id::text)",
               "visibleByDefault": false,
@@ -254,17 +272,18 @@
               }
             },
             {
-            "name": "instance_language",
-            "dataType":{
-              "dataType":"arrayType",
-              "itemDataType": {
-                "dataType": "stringType"
-               }
+              "name": "instance_language",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
               },
-            "valueGetter": "(SELECT array_agg(lng) FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'languages') AS lng)",
-            "visibleByDefault": false
+              "queryable": true,
+              "valueGetter": "(SELECT array_agg(lng) FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'languages') AS lng)",
+              "visibleByDefault": false
             }
-        ],
+          ],
           "defaultSort": [
             {
               "columnName": "id",
@@ -272,10 +291,8 @@
             }
           ]
         }
-
       </column>
       <where>id = '6b08439b-4f8e-4468-8046-ea620f5cfb74'</where>
-
     </update>
   </changeSet>
 </databaseChangeLog>

@@ -19,6 +19,7 @@
                   "dataType": "rangedUUIDType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "valueFunction": "lower(:value)",
@@ -32,6 +33,7 @@
                   "dataType": "stringType"
                 }
               },
+              "queryable": true,
               "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
               "valueFunction": "lower(:value)",
@@ -53,6 +55,7 @@
                       "name": "code",
                       "property": "code",
                       "dataType": {"dataType": "stringType"},
+                      "queryable": true,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -71,6 +74,7 @@
                           "value": "amount"
                         }
                       ],
+                      "queryable": true,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -79,6 +83,7 @@
                       "name": "encumbrance",
                       "property": "encumbrance",
                       "dataType": {"dataType": "rangedUUIDType"},
+                      "queryable": true,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -87,6 +92,7 @@
                       "name": "fund_id",
                       "property": "fundId",
                       "dataType": {"dataType": "rangedUUIDType"},
+                      "queryable": true,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -95,6 +101,7 @@
                       "name": "value",
                       "property": "value",
                       "dataType": {"dataType": "numberType"},
+                      "queryable": true,
                       "valueGetter": "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     }
                   ]
@@ -108,6 +115,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.id",
               "isIdColumn": true,
               "visibleByDefault": true
@@ -127,6 +135,7 @@
               "dataType": {
                 "dataType": "booleanType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'approved'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'approved'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -137,6 +146,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((user_details_of_assignee.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((user_details_of_assignee.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
               "visibleByDefault": true
             },
@@ -145,6 +155,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'assignedTo'",
               "visibleByDefault": false
             },
@@ -153,6 +164,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((user_details.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((user_details.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
               "visibleByDefault": false
             },
@@ -161,6 +173,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'createdByUserId'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -171,6 +184,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'createdDate'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -181,6 +195,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb ->> 'purchaseOrderId'",
               "visibleByDefault": false
             },
@@ -192,6 +207,7 @@
                   "dataType": "stringType"
                 }
               },
+              "queryable": true,
               "valueGetter": "ARRAY(SELECT jsonb_array_elements_text(purchase_order.jsonb -> 'notes'))",
               "filterValueGetter": "ARRAY(SELECT lower(jsonb_array_elements_text(purchase_order.jsonb -> 'notes')))",
               "valueFunction": "lower(:value)",
@@ -202,6 +218,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'poNumber'",
               "visibleByDefault": false
             },
@@ -220,6 +237,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'orderType'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'orderType'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -230,6 +248,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((user_details_for_order_updated_by.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((user_details_for_order_updated_by.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
               "visibleByDefault": false
             },
@@ -238,6 +257,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'updatedByUserId'",
               "visibleByDefault": false
             },
@@ -246,6 +266,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb -> 'metadata' ->> 'updatedDate'",
               "visibleByDefault": false
             },
@@ -254,6 +275,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'workflowStatus'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> 'workflowStatus'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -278,6 +300,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((user_details_for_pol_created_by.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((user_details_for_pol_created_by.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
               "visibleByDefault": true
             },
@@ -286,6 +309,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb -> 'metadata' ->> 'createdByUserId'",
               "visibleByDefault": false
             },
@@ -294,6 +318,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb -> 'metadata' ->> 'createdDate'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -304,6 +329,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb ->> 'poLineDescription'",
               "visibleByDefault": false
             },
@@ -312,6 +338,7 @@
               "dataType": {
                 "dataType": "numberType"
               },
+              "queryable": true,
               "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' -> 'poLineEstimatedPrice')::float",
               "valueFunction": "(:value)::float",
               "visibleByDefault": false
@@ -321,6 +348,7 @@
               "dataType": {
                 "dataType": "numberType"
               },
+              "queryable": true,
               "valueGetter": "(src_purchase_order_line.jsonb -> 'cost' ->> 'exchangeRate')::float",
               "valueFunction": "(:value)::float",
               "visibleByDefault": false
@@ -330,6 +358,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb ->> 'poLineNumber'",
               "filterValueGetter": "lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'poLineNumber'::text))",
               "valueFunction": "lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))",
@@ -340,6 +369,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb ->> 'paymentStatus'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'paymentStatus'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -354,6 +384,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb ->> 'receiptStatus'",
               "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'receiptStatus'::text)), 600)",
               "valueFunction": "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)",
@@ -368,6 +399,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "concat_ws(', '::text, NULLIF((user_details_for_pol_updated_by.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((user_details_for_pol_updated_by.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
               "visibleByDefault": false
             },
@@ -376,6 +408,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb -> 'metadata' ->> 'updatedByUserId'",
               "visibleByDefault": false
             },
@@ -384,6 +417,7 @@
               "dataType": {
                 "dataType": "dateType"
               },
+              "queryable": true,
               "valueGetter": "src_purchase_order_line.jsonb -> 'metadata' ->> 'updatedDate'",
               "visibleByDefault": true
             },
@@ -392,6 +426,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "organization_details.jsonb ->> 'code'",
               "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'code'::text)",
               "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",
@@ -407,6 +442,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "purchase_order.jsonb ->> 'vendor'",
               "visibleByDefault": false
             },
@@ -415,6 +451,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
+              "queryable": true,
               "valueGetter": "organization_details.jsonb ->> 'name'",
               "filterValueGetter": "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'name'::text)",
               "valueFunction": "${tenant_id}_mod_organizations_storage.f_unaccent(:value)",

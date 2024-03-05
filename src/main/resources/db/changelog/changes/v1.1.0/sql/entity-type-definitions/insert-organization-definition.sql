@@ -123,7 +123,140 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   "valueGetter": "org.id",
                   "isIdColumn": true,
                   "visibleByDefault": true
-                }
+                },
+                {
+                  "name": "payment_method",
+                  "values": [
+                    {
+                      "label": "Credit Card",
+                      "value": "Credit Card"
+                    },
+                    {
+                      "label": "Cash",
+                      "value": "Cash"
+                    },
+                    {
+                      "label": "Physical Check",
+                      "value": "Physical Check"
+                    },
+                    {
+                      "label": "EFT",
+                      "value": "EFT"
+                    },
+                    {
+                      "label": "Deposit Account",
+                      "value": "Deposit Account"
+                    }
+                  ],
+                  "dataType": {
+                    "dataType": "stringType"
+                  },
+                  "valueGetter": "org.jsonb->>''paymentMethod''",
+                  "visibleByDefault": false
+                },
+               {
+                  "name": "discount_percent",
+                  "dataType": {
+                    "dataType": "numberType"
+                  },
+                  "valueGetter": "org.jsonb->>''discountPercent''",
+                  "visibleByDefault": false
+                },
+                {
+                  "name": "claiming_interval",
+                  "dataType": {
+                    "dataType": "integerType"
+                  },
+                  "valueGetter": "org.jsonb->>''claimingInterval''",
+                  "visibleByDefault": false
+                },
+                {
+                   "name": "export_to_accounting",
+                   "values": [
+                     {
+                       "label": "True",
+                       "value": "true"
+                     },
+                     {
+                       "label": "False",
+                       "value": "false"
+                     }
+                   ],
+                   "dataType": {
+                     "dataType": "booleanType"
+                   },
+                   "valueGetter": "org.jsonb->>''exportToAccounting''",
+                   "visibleByDefault": false
+                 },
+                 {
+                   "name": "subscription_interval",
+                   "dataType": {
+                     "dataType": "integerType"
+                   },
+                   "valueGetter": "org.jsonb->>''subscriptionInterval''",
+                   "visibleByDefault": false
+                 },
+                 {
+                   "name": "expected_invoice_interval",
+                   "dataType": {
+                     "dataType": "integerType"
+                   },
+                   "valueGetter": "org.jsonb->>''expectedInvoiceInterval''",
+                   "visibleByDefault": false
+                 },
+                 {
+                   "name": "expected_receipt_interval",
+                   "dataType": {
+                     "dataType": "integerType"
+                   },
+                   "valueGetter": "org.jsonb->>''expectedReceiptInterval''",
+                   "visibleByDefault": false
+                 },
+                 {
+                   "name": "renewal_activation_interval",
+                   "dataType": {
+                     "dataType": "integerType"
+                   },
+                   "valueGetter": "org.jsonb->>''renewalActivationInterval''",
+                   "visibleByDefault": false
+                 },
+                 {
+                   "name": "expected_activation_interval",
+                   "dataType": {
+                     "dataType": "integerType"
+                   },
+                   "valueGetter": "org.jsonb->>''expectedActivationInterval''",
+                   "visibleByDefault": false
+                 },
+                 {
+                    "name": "tax_id",
+                    "dataType": {
+                      "dataType": "stringType"
+                    },
+                    "valueGetter": "org.jsonb->>''taxId''",
+                    "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> ''taxId''::text))",
+                    "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+                    "visibleByDefault": false
+                  },
+                  {
+                    "name": "tax_percentage",
+                    "dataType": {
+                      "dataType": "numberType"
+                    },
+                    "valueGetter": "org.jsonb->>''taxPercentage''",
+                    "visibleByDefault": false
+                  },
+                 {
+                   "name": "vendor_currencies",
+                   "dataType": {
+                     "dataType": "arrayType",
+                     "itemDataType": {
+                       "dataType": "stringType"
+                     }
+                   },
+                   "valueGetter": "(SELECT array_agg(vendorCurrency) FROM jsonb_array_elements_text(org.jsonb->''vendorCurrencies'') AS vendorCurrency)",
+                   "visibleByDefault": false
+                 }
               ],
              "defaultSort": [
                {

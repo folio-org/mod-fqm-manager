@@ -18,10 +18,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.array;
+import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
@@ -266,29 +269,55 @@ class FqlToSqlConverterServiceTest {
       ),
 
       Arguments.of(
-        "contains string",
+        "contains all string",
         """
           {"arrayField": {"$contains_all": ["Some vALUE"]}}""",
-        DSL.cast(field("arrayField"), String[].class).contains(DSL.cast(DSL.array("Some vALUE"), String[].class))
+        cast(field("arrayField"), String[].class).contains(cast(array("Some vALUE"), String[].class))
       ),
       Arguments.of(
-        "contains numeric",
+        "contains all numeric",
         """
           {"arrayField": {"$contains_all": [10]}}""",
-        DSL.cast(field("arrayField"), String[].class).contains(DSL.cast(DSL.array(10), String[].class))
+        cast(field("arrayField"), String[].class).contains(cast(array(10), String[].class))
       ),
 
       Arguments.of(
-        "not contains string",
+        "not contains all string",
         """
           {"arrayField": {"$not_contains_all": ["Some vALUE"]}}""",
-        DSL.cast(field("arrayField"), String[].class).notContains(DSL.cast(DSL.array("Some vALUE"), String[].class))
+        cast(field("arrayField"), String[].class).notContains(cast(array("Some vALUE"), String[].class))
       ),
       Arguments.of(
-        "not contains numeric",
+        "not contains all numeric",
         """
           {"arrayField": {"$not_contains_all": [10]}}""",
-        DSL.cast(field("arrayField"), String[].class).notContains(DSL.cast(DSL.array(10), String[].class))
+        cast(field("arrayField"), String[].class).notContains(cast(array(10), String[].class))
+      ),
+
+      Arguments.of(
+        "contains any string",
+        """
+          {"arrayField": {"$contains_any": ["Some vALUE"]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class))
+      ),
+      Arguments.of(
+        "contains any numeric",
+        """
+          {"arrayField": {"$contains_any": [10]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class))
+      ),
+
+      Arguments.of(
+        "not contains any string",
+        """
+          {"arrayField": {"$not_contains_any": ["Some vALUE"]}}""",
+        not(arrayOverlap(cast(field("arrayField"), String[].class), (cast(array("Some vALUE"), String[].class))))
+      ),
+      Arguments.of(
+        "not contains any numeric",
+        """
+          {"arrayField": {"$not_contains_any": [10]}}""",
+        not(arrayOverlap(cast(field("arrayField"), String[].class), (cast(array(10), String[].class))))
       ),
 
       Arguments.of(
@@ -376,8 +405,8 @@ class FqlToSqlConverterServiceTest {
             String[].class
           )
           .contains(
-            DSL.cast(
-              DSL.array(
+            cast(
+              array(
                 field("foo(:value1)",  String.class, param("value", "value1")),
                 field("foo(:value)", String.class, param("value", "value2"))
               ),
@@ -397,8 +426,8 @@ class FqlToSqlConverterServiceTest {
             String[].class
           )
           .notContains(
-            DSL.cast(
-              DSL.array(
+            cast(
+              array(
                 field("foo(:value)",  Integer.class, param("value", 10)),
                 field("foo(:value)", Integer.class, param("value", 20))
               ),

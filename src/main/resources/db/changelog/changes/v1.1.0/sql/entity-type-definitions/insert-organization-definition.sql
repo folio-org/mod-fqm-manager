@@ -333,7 +333,40 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "valueGetter": "org.jsonb ->> ''agreements''",
                   "visibleByDefault": false
+                },
+              {
+                "name": "acqunit_ids",
+                "dataType": {
+                  "dataType": "arrayType",
+                  "itemDataType": {
+                    "dataType": "rangedUUIDType"
+                  }
+                },
+                "queryable": true,
+                "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> ''acqUnitIds''::text) acq_id(value))",
+                "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> ''acqUnitIds''::text) acq_id(value))",
+                "valueFunction": "lower(:value)",
+                "visibleByDefault": false
+              },
+              {
+                "name": "acquisition_unit",
+                "dataType": {
+                  "dataType": "arrayType",
+                  "itemDataType": {
+                    "dataType": "stringType"
+                  }
+                },
+                "queryable": true,
+                "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> ''name''::text) FILTER (WHERE (acq_unit.jsonb ->> ''name''::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> ''acqUnitIds''::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
+                "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> ''name''::text)) FILTER (WHERE (acq_unit.jsonb ->> ''name''::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> ''acqUnitIds''::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+                "valueFunction": "lower(:value)",
+                "visibleByDefault": false,
+                "idColumnName": "acqunit_ids",
+                "source": {
+                  "entityTypeId": "cc51f042-03e2-43d1-b1d6-11aa6a39bc78",
+                  "columnName": "acquisitions_name"
                 }
+              }
               ],
               "defaultSort": [
                 {

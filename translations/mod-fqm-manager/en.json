@@ -386,5 +386,7 @@
   "entityType.drv_organization_details.agreements.referenceUrl": "Reference URL",
   "entityType.drv_organization_details.agreements.referenceUrl._qualified": "Agreement reference URL",
   "entityType.drv_organization_details.agreements.notes": "Notes",
-  "entityType.drv_organization_details.agreements.notes._qualified": "Agreement notes"
+  "entityType.drv_organization_details.agreements.notes._qualified": "Agreement notes",
+  "entityType.drv_organization_details.acqunit_ids": "Acquisition unit ID list",
+  "entityType.drv_organization_details.acquisition_unit": "Acquisition unit list"
 }

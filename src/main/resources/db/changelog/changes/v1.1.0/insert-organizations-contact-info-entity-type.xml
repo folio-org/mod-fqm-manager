@@ -321,7 +321,7 @@
                   ]
                 }
               },
-              "valueGetter": "( SELECT array_agg(url || jsonb_build_object('categoryNames', ( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ))) FROM jsonb_array_elements(org.jsonb->'urls') as url)",
+              "valueGetter": "( SELECT jsonb_agg(url || jsonb_build_object('categoryNames', ( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid )))::text FROM jsonb_array_elements(org.jsonb->'urls') as url)",
               "visibleByDefault": false
             },
             {

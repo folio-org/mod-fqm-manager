@@ -8,9 +8,15 @@
   <include file="update-drv-loan-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="harvested-views.xml" relativeToChangelogFile="true"/>
   <include file="derived-tables.xml" relativeToChangelogFile="true"/>
-  <include file="sql/entity-type-definitions/insert-organizations-vendor-definition.sql" relativeToChangelogFile="true"/>
-  <include file="sql/entity-type-definitions/insert-purchase-order-lines-acquisition-definition.sql" relativeToChangelogFile="true"/>
-  <include file="sql/entity-type-definitions/insert-purchase-order-line-definition.sql" relativeToChangelogFile="true"/>
+  <changeSet id="insert-organizations-vendor-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-organizations-vendor-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+  <changeSet id="insert-purchase-order-lines-acquisition-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-purchase-order-lines-acquisition-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+  <changeSet id="insert-purchase-order-line-definition.sql" runOnChange="true" author="kjain@ebsco.com">
+    <sqlFile path="sql/entity-type-definitions/insert-purchase-order-line-definition.sql" relativeToChangelogFile="true"/>
+  </changeSet>
   <changeSet id="insert-custom-fields-definition.sql" runOnChange="true" author="kjain@ebsco.com">
     <sqlFile path="sql/entity-type-definitions/insert-custom-fields-definition.sql" relativeToChangelogFile="true"/>
   </changeSet>

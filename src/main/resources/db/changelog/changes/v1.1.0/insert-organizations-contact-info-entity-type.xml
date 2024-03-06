@@ -411,7 +411,7 @@
               "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
               "valueFunction": "lower(:value)",
               "visibleByDefault": false,
-              "idColumnName": "acquisition_unit_name",
+              "idColumnName": "acquisition_unit_id",
               "source": {
                 "entityTypeId": "cc51f042-03e2-43d1-b1d6-11aa6a39bc78",
                 "columnName": "acquisitions_name"

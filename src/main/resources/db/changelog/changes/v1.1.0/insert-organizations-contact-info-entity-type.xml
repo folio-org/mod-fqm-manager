@@ -4,7 +4,7 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
   <changeSet id="[MODFQMMGR-185] Create supporting organization contact categories view" author="novercash@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "organization_types" schemaName="${tenant_id}_mod_organizations_storage"/>
+      <tableExists tableName="categories" schemaName="${tenant_id}_mod_organizations_storage"/>
     </preConditions>
     <createView
       replaceIfExists="true"

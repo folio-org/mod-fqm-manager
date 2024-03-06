@@ -297,11 +297,31 @@
                       "queryable": true,
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
                       "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "category_ids",
+                      "property": "categories",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "rangedUUIDType" }
+                      },
+                      "queryable": false,
+                      "filterValueGetter": "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'urls') AS url_obj, jsonb_array_elements(url_obj->'categories') as elems )"
+                    },
+                    {
+                      "name": "category_names",
+                      "property": "categoriesNames",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "stringType" }
+                      },
+                      "queryable": true,
+                      "filterValueGetter": "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'urls') as url, jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )"
                     }
                   ]
                 }
               },
-              "valueGetter": "org.jsonb ->> 'urls'",
+              "valueGetter": "( SELECT array_agg(url || jsonb_build_object('categoryNames', ( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ))) FROM jsonb_array_elements(org.jsonb->'urls') as url)",
               "visibleByDefault": false
             },
             {
@@ -344,7 +364,7 @@
               "direction": "ASC"
             }
           ]
-        }        
+        }
       </column>
       <where>id = '7a7860cd-e939-504f-b51f-ed3e1e6b12b9'</where>
     </update>

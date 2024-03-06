@@ -158,7 +158,6 @@
                       "property": "addressLine1",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'addressLine1') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'addressLine1')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -167,7 +166,6 @@
                       "property": "addressLine2",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'addressLine2') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'addressLine2')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -176,7 +174,6 @@
                       "property": "city",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'city') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'city')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -185,7 +182,6 @@
                       "property": "stateRegion",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'stateRegion') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'stateRegion')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -194,7 +190,6 @@
                       "property": "zipCode",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'zipCode') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'zipCode')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -203,7 +198,6 @@
                       "property": "country",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'country') FROM jsonb_array_elements(org.jsonb->'addresses') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'country')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
                     }
@@ -225,7 +219,6 @@
                       "property": "phoneNumber",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'phoneNumber') FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'phoneNumber')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -234,7 +227,6 @@
                       "property": "type",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'type') FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'type')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
                       "valueFunction": "lower(:value)"
                     }
@@ -256,7 +248,6 @@
                       "property": "value",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'value') FROM jsonb_array_elements(org.jsonb->'emails') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -265,7 +256,6 @@
                       "property": "description",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'description') FROM jsonb_array_elements(org.jsonb->'emails') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
                       "valueFunction": "lower(:value)"
                     }
@@ -287,7 +277,6 @@
                       "property": "value",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'value') FROM jsonb_array_elements(org.jsonb->'urls') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
                       "valueFunction": "lower(:value)"
                     },
@@ -296,7 +285,6 @@
                       "property": "description",
                       "dataType": { "dataType": "stringType" },
                       "queryable": true,
-                      "valueGetter": "( SELECT array_agg(elems.value ->> 'description') FROM jsonb_array_elements(org.jsonb->'urls') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
                       "valueFunction": "lower(:value)"
                     }

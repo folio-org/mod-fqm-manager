@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.2</version>
+    <version>3.2.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -23,7 +23,7 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-base.version>7.1.2</folio-spring-base.version>
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
     <folio-query-tool-metadata.version>1.2.0-SNAPSHOT</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <lib-fqm-query-processor.version>1.2.0-SNAPSHOT</lib-fqm-query-processor.version>

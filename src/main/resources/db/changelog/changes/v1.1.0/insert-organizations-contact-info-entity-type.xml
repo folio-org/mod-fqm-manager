@@ -210,11 +210,31 @@
                       "queryable": true,
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'country')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
                       "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "category_ids",
+                      "property": "categories",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "rangedUUIDType" }
+                      },
+                      "queryable": false,
+                      "filterValueGetter": "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'addresses') AS address_obj, jsonb_array_elements(address_obj->'categories') as elems )"
+                    },
+                    {
+                      "name": "category_names",
+                      "property": "categoriesNames",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "stringType" }
+                      },
+                      "queryable": true,
+                      "filterValueGetter": "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'addresses') as address, jsonb_array_elements(address->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )"
                     }
                   ]
                 }
               },
-              "valueGetter": "org.jsonb ->> 'addresses'",
+              "valueGetter": "( SELECT jsonb_agg(address || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(address->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'addresses') as address)",
               "visibleByDefault": false
             },
             {
@@ -239,11 +259,31 @@
                       "queryable": true,
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'type')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
                       "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "category_ids",
+                      "property": "categories",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "rangedUUIDType" }
+                      },
+                      "queryable": false,
+                      "filterValueGetter": "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS phone_obj, jsonb_array_elements(phone_obj->'categories') as elems )"
+                    },
+                    {
+                      "name": "category_names",
+                      "property": "categoriesNames",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "stringType" }
+                      },
+                      "queryable": true,
+                      "filterValueGetter": "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'phoneNumbers') as phone, jsonb_array_elements(phone->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )"
                     }
                   ]
                 }
               },
-              "valueGetter": "org.jsonb ->> 'phoneNumbers'",
+              "valueGetter": "( SELECT jsonb_agg(phone || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(phone->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'phoneNumbers') as phone)",
               "visibleByDefault": false
             },
             {
@@ -268,11 +308,31 @@
                       "queryable": true,
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
                       "valueFunction": "lower(:value)"
+                    },
+                    {
+                      "name": "category_ids",
+                      "property": "categories",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "rangedUUIDType" }
+                      },
+                      "queryable": false,
+                      "filterValueGetter": "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'emails') AS email_obj, jsonb_array_elements(email_obj->'categories') as elems )"
+                    },
+                    {
+                      "name": "category_names",
+                      "property": "categoriesNames",
+                      "dataType": {
+                        "dataType": "arrayType",
+                        "itemDataType": { "dataType": "stringType" }
+                      },
+                      "queryable": true,
+                      "filterValueGetter": "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'emails') as email, jsonb_array_elements(email->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )"
                     }
                   ]
                 }
               },
-              "valueGetter": "org.jsonb ->> 'emails'",
+              "valueGetter": "( SELECT jsonb_agg(email || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(email->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'emails') as email)",
               "visibleByDefault": false
             },
             {

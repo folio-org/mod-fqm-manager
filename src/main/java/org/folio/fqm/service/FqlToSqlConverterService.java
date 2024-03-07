@@ -65,6 +65,31 @@ public class FqlToSqlConverterService {
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String OPEN_UUID_TYPE = "openUUIDType";
   private static final String DATE_TYPE = "dateType";
+  public static final String ALL_NULLS = """
+          true = ALL(
+            SELECT(
+              unnest(
+                cast(
+                  %s
+                  as varchar[]
+                )
+              )
+            ) IS NULL
+          )
+          """;
+  public static final String NOT_ALL_NULLS = """
+          false = ANY(
+            SELECT(
+              unnest(
+                cast(
+                  %s
+                  as varchar[]
+                )
+              )
+            ) IS NULL
+          )
+          """;
+
 
   private final FqlService fqlService;
 
@@ -271,16 +296,19 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String fieldType = getFieldForFiltering(emptyCondition, entityType)
-      .getDataType()
-      .getDataType();
+    String fieldType = getFieldDataType(entityType, emptyCondition);
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
+
     return switch (fieldType) {
       case STRING_TYPE -> isEmpty ? nullCondition.or(field.eq("")) : nullCondition.and(field.ne(""));
       case "arrayType" -> {
-        var cardinality = cardinality(DSL.cast(field, String[].class));
-        yield isEmpty ? nullCondition.or(cardinality.eq(0)) :  nullCondition.and(cardinality.ne(0));
+        var cardinality = cardinality(cast(field, String[].class));
+        if (isEmpty) {
+          yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
+        } else {
+          yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
+        }
       }
       default -> nullCondition;
     };

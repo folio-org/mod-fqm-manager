@@ -17,6 +17,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.List;
 
+
+import static org.folio.fqm.service.FqlToSqlConverterService.ALL_NULLS;
+import static org.folio.fqm.service.FqlToSqlConverterService.NOT_ALL_NULLS;
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
 import static org.jooq.impl.DSL.arrayOverlap;
@@ -464,13 +467,13 @@ class FqlToSqlConverterServiceTest {
         "empty array",
         """
           {"arrayField": {"$empty": true}}""",
-        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0)).or(ALL_NULLS.formatted("arrayField"))
       ),
       Arguments.of(
         "not empty array",
         """
           {"arrayField": {"$empty": false}}""",
-        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0))
+        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(NOT_ALL_NULLS.formatted("arrayField"))
       )
     );
   }

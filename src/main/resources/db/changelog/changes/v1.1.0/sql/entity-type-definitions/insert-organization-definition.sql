@@ -81,20 +81,35 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
                   "visibleByDefault": false
                 },
-                {
-                  "name": "alias",
-                  "dataType": {
-                    "dataType": "arrayType",
-                    "itemDataType": {
-                      "dataType": "stringType"
-                    }
-                  },
-                  "queryable": true,
-                  "valueGetter": "(SELECT array_agg(alias) FROM jsonb_array_elements_text(org.jsonb -> ''aliases'') AS alias)",
-                  "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>''aliases''::text))",
-                  "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
-                  "visibleByDefault": false
-                },
+                 {
+                   "name": "alias",
+                   "dataType": {
+                     "dataType": "arrayType",
+                     "itemDataType": {
+                       "dataType": "objectType",
+                       "properties": [
+                         {
+                           "name": "value",
+                           "property": "value",
+                           "dataType": {"dataType": "stringType"},
+                           "queryable": true,
+                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''value'')) FROM jsonb_array_elements(org.jsonb -> ''aliases'') AS elems)",
+                           "valueFunction": "lower(:value)"
+                         },
+                        {
+                           "name": "description",
+                           "property": "description",
+                           "dataType": {"dataType": "stringType"},
+                           "queryable": true,
+                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''description'')) FROM jsonb_array_elements(org.jsonb -> ''aliases'') AS elems)",
+                           "valueFunction": "lower(:value)"
+                         }
+                       ]
+                     }
+                   },
+                   "valueGetter": "org.jsonb ->> ''aliases''",
+                   "visibleByDefault": false
+                 },
                 {
                   "name": "organization_type_ids",
                   "dataType": {

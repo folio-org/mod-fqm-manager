@@ -55,7 +55,7 @@
               "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "valueGetter": "org.jsonb->>'name'",
-              "visibleByDefault": false
+              "visibleByDefault": true
             },
             {
               "name": "code",
@@ -66,7 +66,7 @@
               "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'code'::text))",
               "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
               "valueGetter": "org.jsonb->>'code'",
-              "visibleByDefault": false
+              "visibleByDefault": true
             },
             {
               "name": "accounting_code",
@@ -102,7 +102,7 @@
               "valueGetter": "org.jsonb->>'status'",
               "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text))",
               "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
-              "visibleByDefault": false
+              "visibleByDefault": true
             },
             {
               "name": "organization_type_ids",
@@ -147,13 +147,28 @@
               "dataType": {
                 "dataType": "arrayType",
                 "itemDataType": {
-                  "dataType": "stringType"
-                }
-              },
-              "queryable": true,
-              "valueGetter": "(SELECT array_agg(alias) FROM jsonb_array_elements_text(org.jsonb -> 'aliases') AS alias)",
-              "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'aliases'::text))",
-              "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
+                  "dataType": "objectType",
+                  "properties": [
+                      {
+                        "name": "value",
+                        "property": "value",
+                        "dataType": {"dataType": "stringType"},
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                        "name": "description",
+                        "property": "description",
+                        "dataType": {"dataType": "stringType"},
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      }
+                  ]
+              }
+            },
+              "valueGetter": "org.jsonb ->> 'aliases'",
               "visibleByDefault": false
             },
             {

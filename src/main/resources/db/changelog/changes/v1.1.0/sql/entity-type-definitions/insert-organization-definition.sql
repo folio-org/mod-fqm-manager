@@ -365,8 +365,157 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                 "source": {
                   "entityTypeId": "cc51f042-03e2-43d1-b1d6-11aa6a39bc78",
                   "columnName": "acquisitions_name"
-                }
-              }
+                  }
+                },
+              {
+                "name": "accounts",
+                "dataType": {
+                  "dataType": "arrayType",
+                  "itemDataType": {
+                    "dataType": "objectType",
+                    "properties": [
+                      {
+                        "name": "name",
+                        "property": "name",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''name'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                        "name": "notes",
+                        "property": "notes",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''notes'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                        "name": "accountNo",
+                        "property": "accountNo",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''accountNo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                        "name": "libraryCode",
+                        "property": "libraryCode",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''libraryCode'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                        "name": "libraryEdiCode",
+                        "property": "libraryEdiCode",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''libraryEdiCode'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                     {
+                        "name": "contactInfo",
+                        "property": "contactInfo",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''contactInfo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                     {
+                        "name": "appSystemNo",
+                        "property": "appSystemNo",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''appSystemNo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                     {
+                        "name": "description",
+                        "property": "description",
+                        "dataType": { "dataType": "stringType" },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''description'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                        "valueFunction": "lower(:value)"
+                      },
+                      {
+                         "name": "accountStatus",
+                         "property": "accountStatus",
+                         "dataType": {"dataType": "stringType"},
+                         "values": [
+                            {
+                               "label": "Active",
+                               "value": "active"
+                             },
+                             {
+                               "label": "Inactive",
+                               "value": "inactive"
+                             },
+                             {
+                               "label": "Pending",
+                               "value": "pending"
+                             }
+                         ],
+                         "queryable": true,
+                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''accountStatus'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                         "valueFunction": "lower(:value)"
+                       },
+                       {
+                         "name": "paymentMethod",
+                         "property": "paymentMethod",
+                         "dataType": {"dataType": "stringType"},
+                         "values": [
+                            {
+                               "label": "Credit Card",
+                               "value": "Credit Card"
+                             },
+                             {
+                               "label": "Cash",
+                               "value": "Cash"
+                             },
+                             {
+                               "label": "Physical Check",
+                               "value": "Physical Check"
+                             },
+                             {
+                               "label": "EFT",
+                               "value": "EFT"
+                             },
+                             {
+                               "label": "Deposit Account",
+                               "value": "Deposit Account"
+                             }
+                         ],
+                         "queryable": true,
+                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''paymentMethod'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
+                         "valueFunction": "lower(:value)"
+                       },
+                      {
+                        "name": "acqUnitIds",
+                        "property": "acqUnitIds",
+                        "dataType": {
+                          "dataType": "arrayType",
+                          "itemDataType": { "dataType": "rangedUUIDType" }
+                        },
+                        "queryable": false,
+                        "filterValueGetter": "( SELECT array_agg(lower(elems#>>''{}'')) FROM jsonb_array_elements(org.jsonb->''accounts'') AS acc_obj, jsonb_array_elements(acc_obj->''acqUnitIds'') as elems )"
+                      },
+                      {
+                        "name": "acquisition_unit",
+                        "property": "acquisitionUnit",
+                        "dataType": {
+                          "dataType": "arrayType",
+                          "itemDataType": { "dataType": "stringType" }
+                        },
+                        "queryable": true,
+                        "filterValueGetter": "( SELECT array_agg(lower(au.jsonb->>''name'')) FROM jsonb_array_elements(org.jsonb->''accounts'') as acc, jsonb_array_elements(acc->''acqUnitIds'') as acdId JOIN src_acquisitions_unit au ON au.id = (acdId#>>''{}'')::uuid )"
+                      }
+                    ]
+                  }
+                },
+                "valueGetter": "(SELECT jsonb_agg(accounts || jsonb_build_object(''acquisitionUnit'', COALESCE(( SELECT array_agg(au.jsonb->>''name'') FROM jsonb_array_elements(accounts->''acqUnitIds'') as acdId JOIN src_acquisitions_unit au on au.id = (acdId#>>''{}'')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->''accounts'') as accounts)",
+                "visibleByDefault": false
+             }
               ],
               "defaultSort": [
                 {

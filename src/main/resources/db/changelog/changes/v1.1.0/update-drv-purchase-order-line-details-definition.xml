@@ -325,6 +325,21 @@
               "visibleByDefault": false
             },
             {
+              "name": "pol_currency",
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_purchase_order_line.jsonb -> 'cost' ->> 'currency'",
+              "filterValueGetter": "lower(src_purchase_order_line.jsonb -> 'cost' ->> 'currency')",
+              "valueFunction": "lower(:value)",
+              "source": {
+                "entityTypeId": "b50c43a9-0e77-4d4d-934e-52ff94223969",
+                "columnName": "currency"
+              },
+              "visibleByDefault": false
+            },
+            {
               "name": "pol_description",
               "dataType": {
                 "dataType": "stringType"

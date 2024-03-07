@@ -18,7 +18,8 @@ public class MaterializedViewRefreshRepository {
     "drv_inventory_item_status",
     "drv_pol_payment_status",
     "drv_pol_receipt_status",
-    "drv_inventory_statistical_code_full"
+    "drv_inventory_statistical_code_full",
+    "drv_pol_currency"
   );
 
   private final DSLContext jooqContext;

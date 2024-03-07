@@ -89,4 +89,13 @@
   <include file="update-query-results-table.xml" relativeToChangelogFile="true"/>
 
   <include file="insert-instances-definition.xml" relativeToChangelogFile="true"/>
+
+  <changeSet id="MODFQMMGR-184" author="bsharp@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <comment>Add materialized view for POL currencies</comment>
+    <sqlFile path="sql/entity-type-definitions/insert-pol-currency-definition.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-mat-view-pol-currency.sql" relativeToChangelogFile="true"/>
+  </changeSet>
 </databaseChangeLog>

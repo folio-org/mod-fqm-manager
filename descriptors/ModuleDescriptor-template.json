@@ -307,6 +307,9 @@
       },
       { "name": "task.execution.pool.max-size",
         "value": "10"
+      },
+      { "name": "MAX_QUERY_SIZE",
+        "value": "1250000"
       }
     ]
   }

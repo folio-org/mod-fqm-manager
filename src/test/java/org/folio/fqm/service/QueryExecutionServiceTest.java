@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,8 @@ class QueryExecutionServiceTest {
   private QueryProcessorService queryProcessorService;
   @Mock
   private FolioExecutionContext executionContext;
+  @Mock
+  private Supplier<DataBatchCallback> dataBatchCallbackSupplier;
 
   @Test
   void testQueryExecutionService() {
@@ -34,8 +37,10 @@ class QueryExecutionServiceTest {
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
     Query query = Query.newQuery(entityTypeId, fqlQuery, fields, createdById);
+    int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    queryExecutionService.executeQueryAsync(query);
+
+    queryExecutionService.executeQueryAsync(query, maxSize);
     FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityTypeId, fqlQuery, false);
     verify(queryProcessorService, times(1)).getIdsInBatch(
       eq(fqlQueryWithContext),

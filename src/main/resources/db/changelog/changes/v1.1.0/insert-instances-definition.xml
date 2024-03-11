@@ -281,6 +281,10 @@
               },
               "queryable": true,
               "valueGetter": "(SELECT array_agg(lng) FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'languages') AS lng)",
+              "source": {
+              "entityTypeId": "a435d29f-ff11-4b7a-8a5f-3c5505452208",
+              "columnName": "languages"
+              },
               "visibleByDefault": false
             }
           ],

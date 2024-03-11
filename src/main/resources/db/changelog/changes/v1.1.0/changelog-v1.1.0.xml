@@ -98,4 +98,15 @@
     <sqlFile path="sql/entity-type-definitions/insert-pol-currency-definition.sql" relativeToChangelogFile="true"/>
     <sqlFile path="sql/create-mat-view-pol-currency.sql" relativeToChangelogFile="true"/>
   </changeSet>
+
+  <changeSet id="MODFQMMGR-171" author="kjain@ebsco.com" runOnChange="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "instance" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <comment>Add materialized view for languages</comment>
+    <sqlFile path="sql/entity-type-definitions/insert-languages-definition.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-mat-view-languages.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+
 </databaseChangeLog>

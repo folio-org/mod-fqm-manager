@@ -441,7 +441,6 @@
   "entityType.drv_organization_contacts.url.category_names._qualified": "URL category names",
   "entityType.drv_organization_contacts.acquisition_unit_id": "Acquisition unit IDs",
   "entityType.drv_organization_contacts.acquisition_unit_name": "Acquisition units",
-
   "entityType.drv_pol_currency": "POL currency",
   "entityType.drv_pol_currency.currency": "POL currency"
 }

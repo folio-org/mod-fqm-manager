@@ -19,7 +19,7 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(purchase_order.jsonb -> 'acqUnitIds'::text) acq_id(value))",
               "valueFunction": "lower(:value)",
@@ -33,7 +33,7 @@
                   "dataType": "stringType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((purchase_order.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
               "valueFunction": "lower(:value)",
@@ -55,7 +55,7 @@
                       "name": "code",
                       "property": "code",
                       "dataType": {"dataType": "stringType"},
-                      "queryable": true,
+                      "queryable": false,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -74,7 +74,7 @@
                           "value": "amount"
                         }
                       ],
-                      "queryable": true,
+                      "queryable": false,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -83,7 +83,7 @@
                       "name": "encumbrance",
                       "property": "encumbrance",
                       "dataType": {"dataType": "rangedUUIDType"},
-                      "queryable": true,
+                      "queryable": false,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -92,7 +92,7 @@
                       "name": "fund_id",
                       "property": "fundId",
                       "dataType": {"dataType": "rangedUUIDType"},
-                      "queryable": true,
+                      "queryable": false,
                       "valueGetter": "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)",
                       "valueFunction": "lower(:value)"
@@ -101,7 +101,7 @@
                       "name": "value",
                       "property": "value",
                       "dataType": {"dataType": "numberType"},
-                      "queryable": true,
+                      "queryable": false,
                       "valueGetter": "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(src_purchase_order_line.jsonb -> 'fundDistribution') AS elems)"
                     }
                   ]

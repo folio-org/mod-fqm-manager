@@ -92,7 +92,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "name": "value",
                            "property": "value",
                            "dataType": {"dataType": "stringType"},
-                           "queryable": true,
+                           "queryable": false,
                            "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''value'')) FROM jsonb_array_elements(org.jsonb -> ''aliases'') AS elems)",
                            "valueFunction": "lower(:value)"
                          },
@@ -100,7 +100,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                            "name": "description",
                            "property": "description",
                            "dataType": {"dataType": "stringType"},
-                           "queryable": true,
+                           "queryable": false,
                            "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''description'')) FROM jsonb_array_elements(org.jsonb -> ''aliases'') AS elems)",
                            "valueFunction": "lower(:value)"
                          }
@@ -118,7 +118,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "rangedUUIDType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> ''organizationTypes''::text) record(value))",
                   "visibleByDefault": false
                 },
@@ -130,7 +130,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "stringType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "idColumnName": "organization_type_ids",
                   "source": {
                     "entityTypeId": "6b335e41-2654-4e2a-9b4e-c6930b330ccc",
@@ -290,7 +290,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "stringType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "valueGetter": "(SELECT array_agg(vendorCurrency) FROM jsonb_array_elements_text(org.jsonb->''vendorCurrencies'') AS vendorCurrency)",
                   "visibleByDefault": false
                 },
@@ -307,7 +307,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": {
                             "dataType": "stringType"
                           },
-                          "queryable": true,
+                          "queryable": false,
                           "valueGetter": "( SELECT array_agg(elems.value ->> ''name'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''name'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "valueFunction": "lower(:value)"
@@ -318,7 +318,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": {
                             "dataType": "numberType"
                           },
-                          "queryable": true,
+                          "queryable": false,
                           "valueGetter": "( SELECT array_agg(elems.value ->> ''discount'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)"
                         },
                         {
@@ -327,7 +327,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": {
                             "dataType": "stringType"
                           },
-                          "queryable": true,
+                          "queryable": false,
                           "valueGetter": "( SELECT array_agg(elems.value ->> ''referenceUrl'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''referenceUrl'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "valueFunction": "lower(:value)"
@@ -338,7 +338,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": {
                             "dataType": "stringType"
                           },
-                          "queryable": true,
+                          "queryable": false,
                           "valueGetter": "( SELECT array_agg(elems.value ->> ''notes'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''notes'')) FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
                           "valueFunction": "lower(:value)"
@@ -357,7 +357,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                     "dataType": "rangedUUIDType"
                   }
                 },
-                "queryable": true,
+                "queryable": false,
                 "valueGetter": "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> ''acqUnitIds''::text) acq_id(value))",
                 "filterValueGetter": "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> ''acqUnitIds''::text) acq_id(value))",
                 "valueFunction": "lower(:value)",
@@ -371,7 +371,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                     "dataType": "stringType"
                   }
                 },
-                "queryable": true,
+                "queryable": false,
                 "valueGetter": "( SELECT array_agg(acq_unit.jsonb ->> ''name''::text) FILTER (WHERE (acq_unit.jsonb ->> ''name''::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> ''acqUnitIds''::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
                 "filterValueGetter": "( SELECT array_agg(lower(acq_unit.jsonb ->> ''name''::text)) FILTER (WHERE (acq_unit.jsonb ->> ''name''::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> ''acqUnitIds''::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
                 "valueFunction": "lower(:value)",
@@ -393,7 +393,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "name",
                         "property": "name",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''name'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -401,7 +401,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "notes",
                         "property": "notes",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''notes'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -409,7 +409,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "accountNo",
                         "property": "accountNo",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''accountNo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -417,7 +417,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "libraryCode",
                         "property": "libraryCode",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''libraryCode'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -425,7 +425,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "libraryEdiCode",
                         "property": "libraryEdiCode",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''libraryEdiCode'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -433,7 +433,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "contactInfo",
                         "property": "contactInfo",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''contactInfo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -441,7 +441,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "appSystemNo",
                         "property": "appSystemNo",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''appSystemNo'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -449,7 +449,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                         "name": "description",
                         "property": "description",
                         "dataType": { "dataType": "stringType" },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''description'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                         "valueFunction": "lower(:value)"
                       },
@@ -471,7 +471,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                                "value": "pending"
                              }
                          ],
-                         "queryable": true,
+                         "queryable": false,
                          "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''accountStatus'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                          "valueFunction": "lower(:value)"
                        },
@@ -501,7 +501,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                                "value": "Deposit Account"
                              }
                          ],
-                         "queryable": true,
+                         "queryable": false,
                          "filterValueGetter": "( SELECT array_agg(lower(elems.value ->> ''paymentMethod'')) FROM jsonb_array_elements(org.jsonb -> ''accounts'') AS elems)",
                          "valueFunction": "lower(:value)"
                        },
@@ -522,7 +522,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                           "dataType": "arrayType",
                           "itemDataType": { "dataType": "stringType" }
                         },
-                        "queryable": true,
+                        "queryable": false,
                         "filterValueGetter": "( SELECT array_agg(lower(au.jsonb->>''name'')) FROM jsonb_array_elements(org.jsonb->''accounts'') as acc, jsonb_array_elements(acc->''acqUnitIds'') as acdId JOIN src_acquisitions_unit au ON au.id = (acdId#>>''{}'')::uuid )"
                       }
                     ]

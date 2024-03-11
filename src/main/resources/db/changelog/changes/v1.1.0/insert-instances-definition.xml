@@ -119,7 +119,7 @@
                     "dataType": "rangedUUIDType"
                   }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'statisticalCodeIds'::text) record(value))",
               "visibleByDefault": false
             },
@@ -131,7 +131,7 @@
                     "dataType": "stringType"
                   }
               },
-              "queryable": true,
+              "queryable": false,
               "idColumnName": "instance_statistical_code_ids",
               "source": {
                 "entityTypeId": "d2da8cc7-9171-4d3e-8aba-4da286eb5f1c",
@@ -145,7 +145,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "src_inventory_instance.jsonb ->> 'statusId'",
               "visibleByDefault": false
             },
@@ -154,7 +154,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "queryable": true,
+              "queryable": false,
               "idColumnName": "instance_status_id",
               "valueSourceApi": {
                 "path": "instance-statuses",
@@ -208,7 +208,7 @@
                   "dataType": "rangedUUIDType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(record.value ->> 'contributorTypeId'::text) FILTER (WHERE (record.value ->> 'contributorTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'contributorTypeId'::text)) FILTER (WHERE (record.value ->> 'contributorTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "visibleByDefault": false
@@ -221,7 +221,7 @@
                   "dataType": "stringType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_type a ON (record.value ->> 'contributorTypeId'::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_type a ON (record.value ->> contributorTypeId'::text) = a.id::text)",
               "visibleByDefault": false,
@@ -248,7 +248,7 @@
                     "dataType": "rangedUUIDType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(record.value ->> 'contributorNameTypeId'::text) FILTER (WHERE (record.value ->> 'contributorNameTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'contributorNameTypeId'::text)) FILTER (WHERE (record.value ->> 'contributorNameTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value))",
               "visibleByDefault": false
@@ -261,7 +261,7 @@
                   "dataType": "stringType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value ->> 'contributorNameTypeId'::text) = a.id::text)",
               "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements(src_inventory_instance.jsonb -> 'contributors'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value ->> contributorNameTypeId'::text) = a.id::text)",
               "visibleByDefault": false,
@@ -279,7 +279,7 @@
                   "dataType": "stringType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "(SELECT array_agg(lng) FROM jsonb_array_elements_text(src_inventory_instance.jsonb -> 'languages') AS lng)",
               "source": {
               "entityTypeId": "a435d29f-ff11-4b7a-8a5f-3c5505452208",

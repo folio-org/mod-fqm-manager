@@ -164,7 +164,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "rangedUUIDType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(hrd.jsonb -> ''statisticalCodeIds''::text) record(value))",
                   "filterValueGetter": "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(hrd.jsonb -> ''statisticalCodeIds''::text) record(value))",
                   "valueFunction": "lower(:value)",
@@ -178,7 +178,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "stringType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "idColumnName": "holdings_statistical_code_ids",
                   "source": {
                     "entityTypeId": "d2da8cc7-9171-4d3e-8aba-4da286eb5f1c",

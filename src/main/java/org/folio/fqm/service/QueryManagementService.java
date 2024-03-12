@@ -193,23 +193,20 @@ public class QueryManagementService {
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
+    entityTypeService
+      .getEntityTypeDefinition(entityTypeId)
+      .map(IdColumnUtils::getIdColumnNames)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId))
+      .forEach(colName -> {
+        if (!fields.contains(colName)) {
+          fields.add(colName);
+        }
+      });
     return resultSetService.getResultSet(entityTypeId, fields, ids);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
     if (includeResults) {
-      if (CollectionUtils.isEmpty(fields)) {
-        Query query = queryRepository.getQuery(queryId, false)
-          .orElseThrow(() -> new QueryNotFoundException(queryId));
-        Fql fql = fqlService.getFql(query.fqlQuery());
-        fields = fqlService.getFqlFields(fql)
-          .stream()
-          .map(FqlField::getColumnName)
-          .collect(Collectors.toList());
-      }
-      if (!fields.contains("id")) {
-        fields.add("id");
-      }
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
       return resultSetService.getResultSet(entityTypeId, fields, resultIds);
     }

@@ -18,6 +18,7 @@ import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -75,11 +78,44 @@ class QueryManagementServiceTest {
   @Mock
   private FqlService fqlService;
 
+  private final int maxConfiguredQuerySize = 1000;
+
   @InjectMocks
   private QueryManagementService queryManagementService;
 
+  @BeforeEach
+  void setup() {
+    queryManagementService.setMaxConfiguredQuerySize(maxConfiguredQuerySize);
+  }
+
   @Test
   void shouldSaveValidFqlQuery() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    int maxQuerySize = 100;
+    SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery).maxSize(maxQuerySize);
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+    QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
+    assertEquals(expectedIdentifier, actualIdentifier);
+    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(maxQuerySize));
+  }
+
+  @Test
+  void shouldUseConfiguredMaxQuerySizeIfMaxSizeNotProvidedInQuery() {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
@@ -100,7 +136,7 @@ class QueryManagementServiceTest {
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(any());
+    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(maxConfiguredQuerySize));
   }
 
   @Test
@@ -117,12 +153,14 @@ class QueryManagementServiceTest {
     String fqlQuery = """
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
+    int maxQuerySize = 10000;
     List<String> expectedFields = List.of("field1", "id");
     ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
     SubmitQuery submitQuery = new SubmitQuery()
       .entityTypeId(entityTypeId)
       .fqlQuery(fqlQuery)
-      .fields(new ArrayList<>(List.of("field1")));
+      .fields(new ArrayList<>(List.of("field1")))
+      .maxSize(maxQuerySize);
     QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
     when(executionContext.getUserId()).thenReturn(createdById);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
@@ -131,7 +169,7 @@ class QueryManagementServiceTest {
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
 
-    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture());
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(maxConfiguredQuerySize));
     assertEquals(expectedFields, queryCaptor.getValue().fields());
   }
 
@@ -143,12 +181,13 @@ class QueryManagementServiceTest {
     String fqlQuery = """
       {"field1": {"$xy": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
+    int maxQuerySize = 100;
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
     when(executionContext.getUserId()).thenReturn(createdById);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
-    verify(queryExecutionService, times(0)).executeQueryAsync(any());
+    verify(queryExecutionService, times(0)).executeQueryAsync(any(), eq(maxQuerySize));
   }
 
   @Test
@@ -314,8 +353,8 @@ class QueryManagementServiceTest {
       .name("test-entity")
       .columns(columns);
     String fqlQuery = """
-                      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     Integer defaultLimit = 100;
     List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<Map<String, Object>> expectedContent = List.of(
@@ -342,8 +381,8 @@ class QueryManagementServiceTest {
       .name("test-entity")
       .columns(columns);
     String fqlQuery = """
-                      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     Integer defaultLimit = 100;
     List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<Map<String, Object>> expectedContent = List.of(
@@ -370,8 +409,8 @@ class QueryManagementServiceTest {
       .name("test-entity")
       .columns(List.of(idColumn));
     String fqlQuery = """
-                      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     Integer defaultLimit = 100;
     List<UUID> resultIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     List<Map<String, Object>> expectedContent = List.of(
@@ -392,8 +431,8 @@ class QueryManagementServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
-                      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of());
@@ -405,8 +444,8 @@ class QueryManagementServiceTest {
   void validateQueryShouldThrowErrorIfEntityTypeNotFound() {
     UUID entityTypeId = UUID.randomUUID();
     String fqlQuery = """
-                      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     doThrow(new EntityTypeNotFoundException(entityTypeId))
       .when(entityTypeService).getEntityTypeDefinition(entityTypeId);
     assertThrows(EntityTypeNotFoundException.class,
@@ -418,8 +457,8 @@ class QueryManagementServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
-                      {"field1": {"$nn": ["value1", "value2", "value3", "value4", "value5" ] }}
-                      """;
+      {"field1": {"$nn": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(fqlValidationService.validateFql(entityType, fqlQuery))
       .thenReturn(Map.of("field1", "field is invalid"));

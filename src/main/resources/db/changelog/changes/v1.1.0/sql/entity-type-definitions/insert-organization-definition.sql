@@ -68,6 +68,8 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "org.jsonb->>''description''",
+                  "filterValueGetter": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>''description''::text))",
+                  "valueFunction": "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))",
                   "visibleByDefault": false
                 },
                 {

@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.model.Fql;
@@ -57,6 +58,9 @@ public class QueryManagementService {
   private final FqlService fqlService;
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
+  @Setter
+  @Value("${mod-fqm-manager.max-query-size}")
+  private int maxConfiguredQuerySize;
 
   /**
    * Initiates the asynchronous execution of a query and returns the corresponding query ID.
@@ -80,9 +84,10 @@ public class QueryManagementService {
       submitQuery.getFqlQuery(),
       fields,
       executionContext.getUserId());
+    int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
-    queryExecutionService.executeQueryAsync(query);
+    queryExecutionService.executeQueryAsync(query, maxQuerySize);
     return queryIdentifier;
   }
 

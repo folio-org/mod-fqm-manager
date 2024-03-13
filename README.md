@@ -46,6 +46,7 @@ mvn clean install
 | DB_USERNAME                        | postgres      | Postgres username                     |
 | DB_PASSWORD                        | postgres      | Postgres password                     |
 | DB_DATABASE                        | postgres      | Postgres database name                |
+| MAX_QUERY_SIZE                     | 1250000       | max result count per query            |
 | server.port                        | 8081          | Server port                           |
 | QUERY_RETENTION_DURATION           | 3h            | Older queries get deleted             |
 | task.execution.pool.core-size      | 9             | Core number of concurrent async tasks |

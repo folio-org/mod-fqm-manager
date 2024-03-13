@@ -5,6 +5,7 @@ import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.MaxQuerySizeExceededException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -33,5 +34,12 @@ public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
     String url = webRequest.getHttpMethod() + " " + webRequest.getRequest().getRequestURI();
     log.error("Request failed. URL: {}. Failure reason : {}", url, exception.getMessage());
     return new ResponseEntity<>(exception.getError(), exception.getHttpStatus());
+  }
+
+  @ExceptionHandler(MaxQuerySizeExceededException.class)
+  public ResponseEntity<Error> handleMaxSizeExceeded(MaxQuerySizeExceededException exception,
+                                                       ServletWebRequest webRequest) {
+    log.error("Unexpected exception: {}", exception.getMessage(), exception);
+    return new ResponseEntity<>(exception.getError(), HttpStatus.BAD_REQUEST);
   }
 }

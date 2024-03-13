@@ -267,7 +267,7 @@
     "dockerPull": false,
     "dockerArgs": {
       "HostConfig": {
-        "Memory": 357913941,
+        "Memory": 629145600,
         "PortBindings": { "8081/tcp": [ { "HostPort": "%p" } ] }
       }
     },
@@ -307,6 +307,9 @@
       },
       { "name": "task.execution.pool.max-size",
         "value": "10"
+      },
+      { "name": "MAX_QUERY_SIZE",
+        "value": "1250000"
       }
     ]
   }

@@ -1,5 +1,6 @@
 mod-fqm-manager:
   query-retention-duration: 3h
+  max-query-size: ${MAX_QUERY_SIZE:1250000}
 server:
   port: 8081
 spring:

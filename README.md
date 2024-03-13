@@ -348,20 +348,36 @@ Example:
 {"field1": {"$nin": ["value1", "value2"]}}
 ```
 
-### $contains
-Matches all records where the field (an array) contains the specified value. Supports string, number, and uuid types.
+### $contains_all
+Matches all records where the field (an array) contains all the specified values. Supports array of string, number, uuid, and boolean types.
 
 Example:
 ```json
-{"field1": {"$contains": 12}}
+{"field1": {"$contains_all": [1, 2, 3]}}
 ```
 
-### $not_contains
-Matches all records where the field (an array) does not contain the specified value, or is null. Supports string, number, and uuid types.
+### $not_contains_all
+Matches all records where the field (an array) does not contain all the specified values. Supports array of string, number, uuid, and boolean types.
 
 Example:
 ```json
-{"field1": {"$not_contains": "value1"}}
+{"field1": {"$not_contains_all": [1, 2, 3]}}
+```
+
+### $contains_any
+Matches all records where the field (an array) contains any of the specified values. Supports array of string, number, uuid, and boolean types.
+
+Example:
+```json
+{"field1": {"$contains_any": [1, 2, 3]}}
+```
+
+### $not_contains_any
+Matches all records where the field (an array) does not contain any of the specified values. Supports array of string, number, uuid, and boolean types.
+
+Example:
+```json
+{"field1": {"$not_contains_any": [1, 2, 3]}}
 ```
 
 ### $empty

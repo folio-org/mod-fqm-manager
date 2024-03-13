@@ -12,7 +12,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "rangedUUIDType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "visibleByDefault": false
                 },
                 {
@@ -23,7 +23,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                       "dataType": "stringType"
                     }
                   },
-                  "queryable": true,
+                  "queryable": false,
                   "visibleByDefault": false,
                   "idColumnName": "acqunit_ids",
                   "source": {

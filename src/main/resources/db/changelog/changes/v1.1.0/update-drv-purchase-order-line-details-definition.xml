@@ -207,7 +207,7 @@
                   "dataType": "stringType"
                 }
               },
-              "queryable": true,
+              "queryable": false,
               "valueGetter": "ARRAY(SELECT jsonb_array_elements_text(purchase_order.jsonb -> 'notes'))",
               "filterValueGetter": "ARRAY(SELECT lower(jsonb_array_elements_text(purchase_order.jsonb -> 'notes')))",
               "valueFunction": "lower(:value)",

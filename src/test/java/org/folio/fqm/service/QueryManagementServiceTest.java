@@ -243,106 +243,6 @@ class QueryManagementServiceTest {
   }
 
   @Test
-  void shouldReturnQueryContentsWithOnlyIdsForEmptyFields() {
-    boolean includeResults = true;
-    int offset = 0;
-    int limit = 100;
-    List<List<String>> resultIds = List.of(
-      List.of(UUID.randomUUID().toString()),
-      List.of(UUID.randomUUID().toString())
-    );
-    List<Map<String, Object>> contents = List.of(
-      Map.of("id", resultIds.get(0)),
-      Map.of("id", resultIds.get(1))
-    );
-    // Query's fields parameter is empty, so only ids should be requested and retrieved
-    List<String> fields = new ArrayList<>();
-    Query expectedQuery = TestDataFixture.getMockQuery(fields);
-    Optional<QueryDetails> expectedDetails = Optional.of(new QueryDetails()
-      .queryId(expectedQuery.queryId())
-      .entityTypeId(expectedQuery.entityTypeId())
-      .fqlQuery(expectedQuery.fqlQuery())
-      .fields(expectedQuery.fields())
-      .status(QueryDetails.StatusEnum.valueOf(expectedQuery.status().toString()))
-      .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
-      .totalRecords(2)
-      .content(contents));
-    when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
-    when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
-    when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), List.of("id"), resultIds)).thenReturn(contents);
-    Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
-    assertEquals(expectedDetails, actualDetails);
-  }
-
-  @Test
-  void shouldReturnQueryContentsWithOnlyIdsForNullFields() {
-    boolean includeResults = true;
-    int offset = 0;
-    int limit = 100;
-    List<List<String>> resultIds = List.of(
-      List.of(UUID.randomUUID().toString()),
-      List.of(UUID.randomUUID().toString())
-    );
-    List<Map<String, Object>> contents = List.of(
-      Map.of("id", resultIds.get(0)),
-      Map.of("id", resultIds.get(1))
-    );
-    // Query's fields parameter is null, so only ids should be requested and retrieved
-    List<String> fields = null;
-    Query expectedQuery = TestDataFixture.getMockQuery(fields);
-    Optional<QueryDetails> expectedDetails = Optional.of(new QueryDetails()
-      .queryId(expectedQuery.queryId())
-      .entityTypeId(expectedQuery.entityTypeId())
-      .fqlQuery(expectedQuery.fqlQuery())
-      .fields(expectedQuery.fields())
-      .status(QueryDetails.StatusEnum.valueOf(expectedQuery.status().toString()))
-      .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
-      .totalRecords(2)
-      .content(contents));
-    when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
-    when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
-    when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), List.of("id"), resultIds)).thenReturn(contents);
-    Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
-    assertEquals(expectedDetails, actualDetails);
-  }
-
-  // This test ensures that record ids are retrieved even if they are not included in the query's fields parameter
-  @Test
-  void shouldReturnRequestedFieldsWithIdsIfIdsNotIncludedInFields() {
-    boolean includeResults = true;
-    int offset = 0;
-    int limit = 100;
-    List<List<String>> resultIds = List.of(
-      List.of(UUID.randomUUID().toString()),
-      List.of(UUID.randomUUID().toString())
-    );
-    List<Map<String, Object>> contents = List.of(
-      Map.of("id", resultIds.get(0), "field1", "value1", "field2", "value2"),
-      Map.of("id", resultIds.get(1), "field1", "value1", "field2", "value2")
-    );
-    List<String> fields = new ArrayList<>(List.of("field1", "field2"));
-    List<String> expectedFields = new ArrayList<>(List.of("field1", "field2", "id"));
-    Query expectedQuery = TestDataFixture.getMockQuery(fields);
-    Optional<QueryDetails> expectedDetails = Optional.of(new QueryDetails()
-      .queryId(expectedQuery.queryId())
-      .entityTypeId(expectedQuery.entityTypeId())
-      .fqlQuery(expectedQuery.fqlQuery())
-      .fields(expectedQuery.fields())
-      .status(QueryDetails.StatusEnum.valueOf(expectedQuery.status().toString()))
-      .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
-      .totalRecords(2)
-      .content(contents));
-    when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
-    when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
-    when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedFields, resultIds)).thenReturn(contents);
-    Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
-    assertEquals(expectedDetails, actualDetails);
-  }
-
-  @Test
   void shouldRunSynchronousQueryAndReturnResultSet() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
@@ -542,6 +442,11 @@ class QueryManagementServiceTest {
   @Test
   void shouldGetContents() {
     UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType().columns(columns);
     List<List<String>> ids = List.of(
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString())
@@ -551,8 +456,33 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
     when(resultSetService.getResultSet(entityTypeId, fields, ids)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids);
+    assertEquals(expectedContents, actualContents);
+  }
+
+  @Test
+  void shouldGetContentsWithIdsIfIdsNotProvided() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType().columns(columns);
+    List<List<String>> ids = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
+    List<String> providedFields = new ArrayList<>(List.of("field1", "field2"));
+    List<String> expectedFields = List.of("field1", "field2", "id");
+    List<Map<String, Object>> expectedContents = List.of(
+      Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),
+      Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
+    );
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(resultSetService.getResultSet(entityTypeId, expectedFields, ids)).thenReturn(expectedContents);
+    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, providedFields, ids);
     assertEquals(expectedContents, actualContents);
   }
 

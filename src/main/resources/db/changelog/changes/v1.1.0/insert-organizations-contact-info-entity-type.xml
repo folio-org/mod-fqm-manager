@@ -240,7 +240,7 @@
                     },
                     {
                       "name": "category_names",
-                      "property": "categoriesNames",
+                      "property": "categoryNames",
                       "dataType": {
                         "dataType": "arrayType",
                         "itemDataType": { "dataType": "stringType" }
@@ -289,7 +289,7 @@
                     },
                     {
                       "name": "category_names",
-                      "property": "categoriesNames",
+                      "property": "categoryNames",
                       "dataType": {
                         "dataType": "arrayType",
                         "itemDataType": { "dataType": "stringType" }

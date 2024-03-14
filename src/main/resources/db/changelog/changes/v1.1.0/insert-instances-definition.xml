@@ -145,7 +145,7 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "queryable": false,
+              "queryable": true,
               "valueGetter": "src_inventory_instance.jsonb ->> 'statusId'",
               "visibleByDefault": false
             },
@@ -154,7 +154,7 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "queryable": false,
+              "queryable": true,
               "idColumnName": "instance_status_id",
               "valueSourceApi": {
                 "path": "instance-statuses",

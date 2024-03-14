@@ -189,6 +189,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''discountPercent'')::float",
+                  "valueFunction": "(:value)::float",
                   "visibleByDefault": false
                 },
                 {
@@ -198,6 +199,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''claimingInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -226,6 +228,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''subscriptionInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -234,7 +237,8 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                     "dataType": "integerType"
                   },
                   "queryable": true,
-                  "valueGetter": "org.jsonb->>''expectedInvoiceInterval''",
+                  "valueGetter": "(org.jsonb->''expectedInvoiceInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -244,6 +248,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''expectedReceiptInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -253,6 +258,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''renewalActivationInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -262,6 +268,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''expectedActivationInterval'')::integer",
+                  "valueFunction": "(:value)::integer",
                   "visibleByDefault": false
                 },
                 {
@@ -282,6 +289,7 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                   },
                   "queryable": true,
                   "valueGetter": "(org.jsonb->''taxPercentage'')::float",
+                  "valueFunction": "(:value)::float",
                   "visibleByDefault": false
                 },
                 {
@@ -321,7 +329,8 @@ INSERT INTO entity_type_definition (id, derived_table_name, definition)
                             "dataType": "numberType"
                           },
                           "queryable": false,
-                          "valueGetter": "( SELECT array_agg(elems.value ->> ''discount'') FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)"
+                          "valueGetter": "( SELECT array_agg(elems.value -> ''discount'')::float FROM jsonb_array_elements(org.jsonb -> ''agreements'') AS elems)",
+                          "valueFunction": "(:value)::float"
                         },
                         {
                           "name": "referenceUrl",

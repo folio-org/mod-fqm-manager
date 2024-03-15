@@ -91,12 +91,10 @@
   <include file="insert-instances-definition.xml" relativeToChangelogFile="true"/>
 
   <changeSet id="MODFQMMGR-184" author="bsharp@ebsco.com" runOnChange="true">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
-    </preConditions>
-    <comment>Add materialized view for POL currencies</comment>
-    <sqlFile path="sql/entity-type-definitions/insert-pol-currency-definition.sql" relativeToChangelogFile="true"/>
-    <sqlFile path="sql/create-mat-view-pol-currency.sql" relativeToChangelogFile="true"/>
+    <comment>Remove unneeded materialized view for POL currencies</comment>
+    <sql> DROP MATERIALIZED VIEW IF EXISTS drv_pol_currency;
+          DELETE FROM entity_type_definition WHERE derived_table_name = 'drv_pol_currency';
+    </sql>
   </changeSet>
 
   <changeSet id="MODFQMMGR-171" author="kjain@ebsco.com" runOnChange="true">
@@ -107,6 +105,5 @@
     <sqlFile path="sql/entity-type-definitions/insert-languages-definition.sql" relativeToChangelogFile="true"/>
     <sqlFile path="sql/create-mat-view-languages.sql" relativeToChangelogFile="true"/>
   </changeSet>
-
 
 </databaseChangeLog>

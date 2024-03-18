@@ -22,6 +22,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,7 +73,7 @@ public class EntityTypeService {
    * Return top 1000 values of an entity type field, matching the given search text
    *
    * @param entityTypeId ID of the entity type
-   * @param fieldName   Name of the field for which values have to be returned
+   * @param fieldName    Name of the field for which values have to be returned
    * @param searchText   Nullable search text. If a search text is provided, the returned values will include only those
    *                     that contain the specified searchText.
    */
@@ -94,6 +95,10 @@ public class EntityTypeService {
 
     if (field.getValueSourceApi() != null) {
       return getFieldValuesFromApi(field, searchText);
+    }
+
+    if (field.getName().equals("pol_currency")) {
+      return getCurrencyValues();
     }
 
     return getFieldValuesFromEntityType(entityTypeId, fieldName, searchText);
@@ -140,6 +145,18 @@ public class EntityTypeService {
       .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(valueWithLabels);
+  }
+
+  private static ColumnValues getCurrencyValues() {
+    List<ValueWithLabel> currencies =
+      Currency
+        .getAvailableCurrencies()
+        .stream()
+        .map(currency -> new ValueWithLabel()
+          .value(currency.getCurrencyCode())
+          .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
+        .toList();
+    return new ColumnValues().content(currencies);
   }
 
   public String getDerivedTableName(UUID entityTypeId) {

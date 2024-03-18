@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -266,5 +267,30 @@ class EntityTypeServiceTest {
       entityTypeId
     );
     assertEquals(derivedTableName, actualDerivedTableName);
+  }
+
+  @Test
+  void shouldReturnCurrencies() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "pol_currency";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("currency-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name("pol_currency")
+      ));
+
+    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+
+
+    List<ValueWithLabel> actualColumnValues = entityTypeService
+      .getFieldValues(entityTypeId, valueColumnName, "")
+      .getContent();
+
+    // Check that a few known currencies are present
+    assertTrue(actualColumnValues.contains(new ValueWithLabel().value("USD").label("US Dollar (USD)")));
+    assertTrue(actualColumnValues.contains(new ValueWithLabel().value("INR").label("Indian Rupee (INR)")));
+    assertTrue(actualColumnValues.contains(new ValueWithLabel().value("AMD").label("Armenian Dram (AMD)")));
+    assertTrue(actualColumnValues.contains(new ValueWithLabel().value("GEL").label("Georgian Lari (GEL)")));
   }
 }

@@ -99,7 +99,7 @@
               "dataType":{
                 "dataType":"stringType"
               },
-              "queryable": false,
+              "queryable": true,
               "valueGetter": "src_users_users.jsonb ->> 'barcode'",
               "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
               "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",

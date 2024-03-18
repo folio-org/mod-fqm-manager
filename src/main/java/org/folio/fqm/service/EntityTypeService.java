@@ -109,7 +109,7 @@ public class EntityTypeService {
   }
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath());
+    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());

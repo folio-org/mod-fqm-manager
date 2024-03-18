@@ -205,7 +205,7 @@ class EntityTypeServiceTest {
       ));
 
     when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
-    when(simpleHttpClient.get("fake-path")).thenReturn("""
+    when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
            {
              "what": {
                "ever": {

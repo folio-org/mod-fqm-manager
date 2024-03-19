@@ -11,6 +11,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +57,7 @@ public class EntityTypeService {
           .id(rawEntityTypeSummary.id())
           .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()))
       )
+      .sorted(Comparator.comparing(EntityTypeSummary::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
   }
 
@@ -67,6 +70,10 @@ public class EntityTypeService {
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
+      .map(entityType -> {
+        sortColumnsInEntityType(entityType);
+        return entityType;
+      })
       .map(localizationService::localizeEntityType);
   }
 
@@ -110,6 +117,7 @@ public class EntityTypeService {
       .getValues()
       .stream()
       .filter(valueWithLabel -> valueWithLabel.getLabel().contains(searchText))
+      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(filteredValues);
   }
@@ -176,5 +184,11 @@ public class EntityTypeService {
 
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
+  }
+  private void sortColumnsInEntityType(EntityType entityType) {
+    List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
+      .sorted(Comparator.comparing(EntityTypeColumn::getName))
+      .collect(Collectors.toList());
+    entityType.setColumns(sortedColumns);
   }
 }

@@ -106,4 +106,31 @@
     <sqlFile path="sql/create-mat-view-languages.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
+  <!-- These slow change sets should be last, since they depend on previously run change sets! -->
+  <!-- Note: These don't do concurrent refreshes, since that requires the views to have been refreshed before -->
+  <changeSet id="MODFQMMGR-210-refresh-payment-status" author="mweaver@ebsco.com" runOnChange="true" context="slow">
+    <preConditions onFail="CONTINUE">
+      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_pol_payment_status';</sqlCheck>
+    </preConditions>
+    <sql>REFRESH MATERIALIZED VIEW drv_pol_payment_status;</sql>
+  </changeSet>
+  <changeSet id="MODFQMMGR-210-refresh-receipt-status" author="mweaver@ebsco.com" runOnChange="true" context="slow">
+    <preConditions onFail="CONTINUE">
+      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_pol_receipt_status';</sqlCheck>
+    </preConditions>
+    <sql>REFRESH MATERIALIZED VIEW drv_pol_receipt_status;</sql>
+  </changeSet>
+  <changeSet id="MODFQMMGR-210-refresh-statistical-code" author="mweaver@ebsco.com" runOnChange="true" context="slow">
+    <preConditions onFail="CONTINUE">
+      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_statistical_code_full';</sqlCheck>
+    </preConditions>
+    <sql>REFRESH MATERIALIZED VIEW drv_inventory_statistical_code_full;</sql>
+  </changeSet>
+  <changeSet id="MODFQMMGR-210-refresh-languages" author="mweaver@ebsco.com" runOnChange="true" context="slow">
+    <preConditions onFail="CONTINUE">
+      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_languages';</sqlCheck>
+    </preConditions>
+    <sql>REFRESH MATERIALIZED VIEW drv_languages;</sql>
+  </changeSet>
+
 </databaseChangeLog>

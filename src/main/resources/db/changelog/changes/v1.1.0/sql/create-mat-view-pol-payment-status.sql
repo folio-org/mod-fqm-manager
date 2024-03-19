@@ -13,7 +13,8 @@ UNION
 			('Payment Not Required'),
 			('Pending')
 		) AS hardcoded_statuses(payment_status)
-	);
+	)
+WITH NO DATA;
 
 CREATE UNIQUE INDEX fqm_pol_payment_status
 ON ${tenant_id}_mod_fqm_manager.drv_pol_payment_status(payment_status);

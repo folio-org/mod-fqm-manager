@@ -20,6 +20,15 @@ public class FqmTenantService extends TenantService {
   @Override
   public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
     this.folioSpringLiquibase.setChangeLogParameters(Map.of("tenant_id", this.context.getTenantId()));
+
+    // Run all of the regular DB migration scripts (those that aren't marked as "slow")
+    this.folioSpringLiquibase.setContexts("!slow");
     super.createOrUpdateTenant(tenantAttributes);
+
+    // Run all of the slow DB migration scripts in a separate thread
+    this.folioSpringLiquibase.setContexts("slow");
+    var slowRun = new Thread(() -> super.createOrUpdateTenant(tenantAttributes));
+    slowRun.setDaemon(true);
+    slowRun.start();
   }
 }

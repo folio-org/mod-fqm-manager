@@ -13,7 +13,8 @@ UNION
 			('Pending'),
 			('Receipt Not Required')
 		) AS hardcoded_statuses(receipt_status)
-	) ;
+	)
+WITH NO DATA;
 
 CREATE UNIQUE INDEX fqm_pol_receipt_status
 ON ${tenant_id}_mod_fqm_manager.drv_pol_receipt_status(receipt_status);

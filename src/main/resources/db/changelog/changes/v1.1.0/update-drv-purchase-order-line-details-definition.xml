@@ -333,6 +333,10 @@
               "valueGetter": "src_purchase_order_line.jsonb -> 'cost' ->> 'currency'",
               "filterValueGetter": "lower(src_purchase_order_line.jsonb -> 'cost' ->> 'currency')",
               "valueFunction": "lower(:value)",
+              "source": {
+                "entityTypeId": "90403847-8c47-4f58-b117-9a807b052808",
+                "columnName": "pol_currency"
+              },
               "visibleByDefault": false
             },
             {

@@ -18,6 +18,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.util.Comparator.comparing;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.util.ArrayList;
@@ -149,13 +150,14 @@ public class EntityTypeService {
 
   private static ColumnValues getCurrencyValues() {
     List<ValueWithLabel> currencies =
-      Currency
+      new ArrayList<>(Currency
         .getAvailableCurrencies()
         .stream()
         .map(currency -> new ValueWithLabel()
           .value(currency.getCurrencyCode())
           .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
-        .toList();
+        .sorted(comparing(ValueWithLabel::getLabel))
+        .toList());
     return new ColumnValues().content(currencies);
   }
 

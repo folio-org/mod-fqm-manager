@@ -301,7 +301,7 @@ public class FqlToSqlConverterService {
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
 
     return switch (fieldType) {
-      case STRING_TYPE -> isEmpty ? nullCondition.or(field.eq("")) : nullCondition.and(field.ne(""));
+      case STRING_TYPE -> isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
       case "arrayType" -> {
         var cardinality = cardinality(cast(field, String[].class));
         if (isEmpty) {

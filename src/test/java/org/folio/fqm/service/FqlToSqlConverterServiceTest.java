@@ -455,13 +455,13 @@ class FqlToSqlConverterServiceTest {
         "empty string",
         """
           {"field1": {"$empty": true}}""",
-        field("field1").isNull().or(field("field1").eq(""))
+        field("field1").isNull().or(cast(field("field1"), String.class).eq(""))
       ),
       Arguments.of(
         "not empty string",
         """
           {"field1": {"$empty": false}}""",
-        field("field1").isNotNull().and(field("field1").ne(""))
+        field("field1").isNotNull().and(cast(field("field1"), String.class).ne(""))
       ),
       Arguments.of(
         "empty array",

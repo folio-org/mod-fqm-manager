@@ -187,7 +187,7 @@ public class EntityTypeService {
   }
   private void sortColumnsInEntityType(EntityType entityType) {
     List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
-      .sorted(Comparator.comparing(EntityTypeColumn::getLabelAlias))
+      .sorted(Comparator.comparing(EntityTypeColumn::getName))
       .collect(Collectors.toList());
     entityType.setColumns(sortedColumns);
   }

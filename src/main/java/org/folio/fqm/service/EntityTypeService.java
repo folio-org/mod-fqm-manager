@@ -70,11 +70,12 @@ public class EntityTypeService {
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
+      .map(localizationService::localizeEntityType)
       .map(entityType -> {
         sortColumnsInEntityType(entityType);
         return entityType;
-      })
-      .map(localizationService::localizeEntityType);
+      });
+
   }
 
   /**
@@ -187,7 +188,7 @@ public class EntityTypeService {
   }
   private void sortColumnsInEntityType(EntityType entityType) {
     List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
-      .sorted(Comparator.comparing(EntityTypeColumn::getLabelAlias))
+      .sorted(Comparator.comparing(column -> column.getLabelAlias().toLowerCase()))
       .collect(Collectors.toList());
     entityType.setColumns(sortedColumns);
   }

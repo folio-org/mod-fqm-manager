@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.util.ArrayList;
@@ -188,8 +189,8 @@ public class EntityTypeService {
   }
   private void sortColumnsInEntityType(EntityType entityType) {
     List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
-      .sorted(Comparator.comparing(column -> column.getLabelAlias().toLowerCase()))
-      .collect(Collectors.toList());
+      .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+      .toList();
     entityType.setColumns(sortedColumns);
   }
 }

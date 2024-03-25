@@ -296,7 +296,7 @@
     "entityType.drv_organization_details.accounting_code": "Organization accounting code",
     "entityType.drv_organization_details.organization_type_ids": "Organization type IDs",
     "entityType.drv_organization_details.organization_type_name": "Organization type names",
-    "entityType.drv_organization_details.id": "ID",
+    "entityType.drv_organization_details.id": "Organization ID",
     "entityType.drv_organization_details.alias": "Organization alias",
     "entityType.drv_organization_details.payment_method": "Organization payment method",
     "entityType.drv_organization_details.discount_percent": "Organization discount percent",

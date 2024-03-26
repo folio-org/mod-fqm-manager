@@ -1,0 +1,430 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="update-user-details-entity-type-definition" runOnChange="true" author="bsharp@ebsco.com">
+    <update tableName="entity_type_definition">
+      <column name="definition">
+        {
+          "id": "0069cf6f-2833-46db-8a51-8934769b8289",
+          "name":"drv_user_details",
+          "private" : false,
+          "customFieldEntityTypeId":"ffb91f00-eb1c-4936-a637-f8708c967c73",
+          "fromClause": "src_users_users LEFT JOIN src_users_groups ON src_users_groups.id = src_users_users.patrongroup",
+          "columns": [
+            {
+              "name": "user_active",
+              "dataType":{
+                "dataType":"booleanType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'active'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'active'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": true,
+              "values": [
+                {
+                  "value": "true",
+                  "label": "True"
+                },
+                {
+                  "value": "false",
+                  "label": "False"
+                }
+              ]
+            },
+            {
+              "name": "user_address_ids",
+              "dataType": {
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "rangedUUIDType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_address_line1",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_address_line2",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_address_type_names",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'addressType'::text)) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false,
+              "idColumnName": "user_address_ids",
+              "source": {
+                "entityTypeId": "e627a89b-682b-41fe-b532-f4262020a451",
+                "columnName": "addressType"
+              }
+            },
+            {
+              "name": "user_barcode",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'barcode'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": true
+            },
+            {
+              "name": "user_cities",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_country_ids",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_created_date",
+              "dataType":{
+                "dataType":"dateType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'metadata' ->> 'createdDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_date_of_birth",
+              "dataType":{
+                "dataType":"dateType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'dateOfBirth'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_department_ids",
+              "dataType": {
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "rangedUUIDType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_department_names",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "idColumnName": "user_department_ids",
+              "source": {
+                "entityTypeId": "c8364551-7e51-475d-8473-88951181452d",
+                "columnName": "department"
+              },
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
+              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((src_users_users.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_email",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'email'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'email'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_enrollment_date",
+              "dataType":{
+                "dataType":"dateType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'enrollmentDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_expiration_date",
+              "dataType":{
+                "dataType":"dateType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'expirationDate'",
+              "filterValueGetter": "\"left\"(src_users_users.jsonb ->> 'expirationDate'::text, 600)",
+              "valueFunction": "\"left\"(:value, 600)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_external_system_id",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'externalSystemId'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'externalSystemId'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_first_name",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'firstName'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)",
+              "visibleByDefault": true
+            },
+            {
+              "name": "id",
+              "dataType":{
+                "dataType":"rangedUUIDType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.id",
+              "isIdColumn": true,
+              "visibleByDefault": true
+            },
+            {
+              "name": "user_last_name",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'lastName'",
+              "filterValueGetter": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
+              "valueFunction": "\"left\"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)",
+              "visibleByDefault": true
+            },
+            {
+              "name": "user_middle_name",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'middleName'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_mobile_phone",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'mobilePhone'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_patron_group",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_groups.jsonb ->> 'group'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_groups.jsonb ->> 'group'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": false,
+              "idColumnName": "user_patron_group_id",
+              "source": {
+                "entityTypeId": "e611264d-377e-4d87-a93f-f1ca327d3db0",
+                "columnName": "group"
+              },
+              "valueSourceApi": {
+                "path": "groups",
+                "valueJsonPath": "$.usergroups.*.id",
+                "labelJsonPath": "$.usergroups.*.group"
+              }
+            },
+            {
+              "name": "user_patron_group_id",
+              "dataType":{
+                "dataType":"rangedUUIDType"
+              },
+              "source": {
+                "columnName": "id",
+                "entityTypeId": "e611264d-377e-4d87-a93f-f1ca327d3db0"
+              },
+              "valueSourceApi": {
+                "path": "groups",
+                "valueJsonPath": "$.usergroups.*.id",
+                "labelJsonPath": "$.usergroups.*.id"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_groups.id",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_phone",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'phone'",
+              "visibleByDefault": true
+            },
+            {
+              "name": "user_postal_codes",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_preferred_contact_type",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "CASE (src_users_users.jsonb -> 'personal'::text) ->> 'preferredContactTypeId'::text WHEN '001'::text THEN 'Mail (Primary Address)'::text WHEN '002'::text THEN 'Email'::text WHEN '003'::text THEN 'Text Message'::text ELSE 'unknown'::text END",
+              "visibleByDefault": false,
+              "values": [
+                {
+                  "value": "Email",
+                  "label": "Email"
+                },
+                {
+                  "value": "Mail (Primary Address)",
+                  "label": "Mail (Primary Address)"
+                },
+                {
+                  "value": "Text Message",
+                  "label": "Text Message"
+                }
+              ]
+            },
+            {
+              "name": "user_preferred_first_name",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'personal' ->> 'preferredFirstName'",
+              "filterValueGetter": "${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
+              "valueFunction": "${tenant_id}_mod_users.f_unaccent(:value)",
+              "visibleByDefault": true
+            },
+            {
+              "name": "user_primary_address",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "concat_ws(', '::text, NULLIF(( SELECT subquery.addressline1 FROM ( SELECT record.value ->> 'addressLine1'::text AS addressline1, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.addressline2 FROM ( SELECT record.value ->> 'addressLine2'::text AS addressline2, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.city FROM ( SELECT record.value ->> 'city'::text AS city, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.region FROM ( SELECT record.value ->> 'region'::text AS region, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.postalcode FROM ( SELECT record.value ->> 'postalCode'::text AS postalcode, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text), NULLIF(( SELECT subquery.countryid FROM ( SELECT record.value ->> 'countryId'::text AS countryid, row_number() OVER (ORDER BY (record.value ->> 'primaryAddress'::text)) AS row_num FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value)) subquery WHERE subquery.row_num = 1), ''::text))",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_regions",
+              "dataType":{
+                "dataType":"arrayType",
+                "itemDataType": {
+                  "dataType": "stringType"
+                }
+              },
+              "queryable": false,
+              "valueGetter": "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "filterValueGetter": "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+              "valueFunction": "lower(:value)",
+              "visibleByDefault": false
+            },
+            {
+              "name": "user_updated_date",
+              "dataType":{
+                "dataType":"dateType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb -> 'metadata' ->> 'updatedDate'",
+              "visibleByDefault": false
+            },
+            {
+              "name": "username",
+              "dataType":{
+                "dataType":"stringType"
+              },
+              "queryable": true,
+              "valueGetter": "src_users_users.jsonb ->> 'username'",
+              "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'username'::text))",
+              "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+              "visibleByDefault": true
+            }
+          ],
+          "defaultSort": [
+            {
+              "columnName": "id",
+              "direction": "ASC"
+            }
+          ]
+        }
+      </column>
+      <where>id = '0069cf6f-2833-46db-8a51-8934769b8289'</where>
+    </update>
+  </changeSet>
+</databaseChangeLog>

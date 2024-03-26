@@ -1,5 +1,9 @@
 # 2.0.x
 
+## 2.0.1
+- Update translations
+- [MODFQMMGR-216](https://folio-org.atlassian.net/browse/MODFQMMGR-216) Fix NPE
+
 ## 2.0.0
 - [MODFQMMGR-87](https://folio-org.atlassian.net/browse/MODFQMMGR-87) Move FQM-specific code from lib-fqm-query-processor
 - [MODFQMMGR-78](https://folio-org.atlassian.net/browse/MODFQMMGR-78) Add back-end localization to entity types

@@ -52,4 +52,30 @@ class MaterializedViewRefreshRepositoryTest {
     assertDoesNotThrow(() -> materializedViewRefreshRepository.refreshExchangeRates(tenantId));
 
   }
+
+  @Test
+  void shouldUseUSDAsDefaultCurrencyIfSystemCurrencyNotDefined() {
+    String tenantId = "tenant_01";
+    String localeSettingsPath = "configurations/entries";
+    Map<String, String> localSettingsParams = Map.of(
+      "query", "(module==ORG and configName==localeSettings)"
+    );
+    String exchangeRatePath = "finance/exchange-rate";
+    when(simpleHttpClient.get(localeSettingsPath, localSettingsParams)).thenReturn("""
+           {
+             "configs": [
+           {"id":"2a132a01-623b-4d3a-9d9a-2feb777665c2","module":"ORG","configName":"localeSettings","enabled":true,"value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}}],
+             "totalRecords": 1,
+             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
+           }
+      """);
+    when(simpleHttpClient.get(eq(exchangeRatePath), any())).thenReturn("""
+       {
+         "from": "someCurrency",
+         "to": "USD",
+         "exchangeRate": 1.25
+      """);
+    assertDoesNotThrow(() -> materializedViewRefreshRepository.refreshExchangeRates(tenantId));
+
+  }
 }

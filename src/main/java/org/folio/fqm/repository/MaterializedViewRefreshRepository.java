@@ -27,11 +27,39 @@ public class MaterializedViewRefreshRepository {
     "drv_languages"
   );
 
-  // TODO: need to get this from somewhere
   private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
+    "JPY",
+    "BGN",
+    "CZK",
+    "DKK",
     "GBP",
-    "INR"
+    "HUF",
+    "PLN",
+    "RON",
+    "SEK",
+    "CHF",
+    "ISK",
+    "NOK",
+    "HRK",
+    "RUB",
+    "TRY",
+    "AUD",
+    "BRL",
+    "CAD",
+    "CNY",
+    "HKD",
+    "IDR",
+    "ILS",
+    "INR",
+    "KRW",
+    "MXN",
+    "MYR",
+    "NZD",
+    "PHP",
+    "SGD",
+    "THB",
+    "ZAR"
   );
 
   private final DSLContext jooqContext;
@@ -47,21 +75,36 @@ public class MaterializedViewRefreshRepository {
   }
 
   // TODO: Also need to handle situation where there is no localeSettings defined
+  // TODO: What to do if default currency is not a system-supported one?
   public void refreshExchangeRates(String tenantId) {
+
     String localeSettingsPath = "configurations/entries";
     Map<String, String> localSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
     log.info("Refreshing exchange rates");
-    var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
-    String defaultCurrencyCode = "USD"; // TODO: have to get this from somewhere
-    DocumentContext localeSettings = JsonPath.parse(rawJson);
-    var value = localeSettings.read("configs[0].value");
-    DocumentContext locale = JsonPath.parse((String) value);
-    var currency = locale.read("currency");
-//    JsonPath.
+    String systemCurrencyCode;
+    try {
+      var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
+      Object value = JsonPath.parse(rawJson).read("configs[0].value");
+      DocumentContext locale = JsonPath.parse((String) value);
+      systemCurrencyCode = locale.read("currency");
+    } catch(Exception e) {
+      log.info("No system currency defined, defaulting to USD");
+      systemCurrencyCode = "USD";
+    }
+
+    String exchangeRatePath = "finance/exchange-rate";
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
-      log.info("Getting currency exchange rate from {} to {}", defaultCurrencyCode, currencyCode);
+      log.info("Getting currency exchange rate from {} to {}", currencyCode, systemCurrencyCode);
+
+      Map<String, String> exchangeRateParams = Map.of(
+        "from", currencyCode,
+      "to", systemCurrencyCode
+      );
+      // TODO: may need another try block for this
+      var exchangeRateResponse = simpleHttpClient.get(exchangeRatePath, exchangeRateParams);
+      var exchangeRate = JsonPath.parse(exchangeRateResponse).read("exchangeRate");
 
     }
   }

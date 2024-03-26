@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>2.0.0</version>
+  <version>2.0.1-SNAPSHOT</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 

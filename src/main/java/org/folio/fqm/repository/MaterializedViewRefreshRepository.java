@@ -7,6 +7,7 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,9 +25,11 @@ public class MaterializedViewRefreshRepository {
     "drv_languages"
   );
 
+  // TODO: need to get this from somewhere
   private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
-    "GBP"
+    "GBP",
+    "INR"
   );
 
   private final DSLContext jooqContext;
@@ -34,18 +37,22 @@ public class MaterializedViewRefreshRepository {
   private final SimpleHttpClient simpleHttpClient;
 
   public void refreshMaterializedViews(String tenantId) {
-//    for (String matViewName : materializedViewNames) {
-//      String fullName = tenantId + "_mod_fqm_manager." + matViewName;
-//      log.info("Refreshing materialized view {}", fullName);
-//      jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
-//    }
-    refreshExchangeRates(tenantId);
+    for (String matViewName : materializedViewNames) {
+      String fullName = tenantId + "_mod_fqm_manager." + matViewName;
+      log.info("Refreshing materialized view {}", fullName);
+      jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
+    }
   }
 
   public void refreshExchangeRates(String tenantId) {
-    String localeSettingsGetter = "configurations/entries?query=(module==ORG and configName==localeSettings)";
+    String localeSettingsPath = "configurations/entries";
+    Map<String, String> localSettingsParams = Map.of(
+      "query", "(module==ORG and configName==localeSettings)"
+    );
     log.info("Refreshing exchange rates");
+    var localeSettings = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
     String defaultCurrencyCode = "USD"; // TODO: have to get this from somewhere
+
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
       log.info("Getting currency exchange rate from {} to {}", defaultCurrencyCode, currencyCode);
 

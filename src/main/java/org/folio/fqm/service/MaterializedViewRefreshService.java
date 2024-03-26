@@ -11,5 +11,6 @@ public class MaterializedViewRefreshService {
 
   public void refreshMaterializedViews(String tenantId) {
     materializedViewRefreshRepository.refreshMaterializedViews(tenantId);
+    materializedViewRefreshRepository.refreshExchangeRates(tenantId);
   }
 }

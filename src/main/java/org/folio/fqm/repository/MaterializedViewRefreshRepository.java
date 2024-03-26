@@ -1,5 +1,7 @@
 package org.folio.fqm.repository;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -44,15 +46,20 @@ public class MaterializedViewRefreshRepository {
     }
   }
 
+  // TODO: Also need to handle situation where there is no localeSettings defined
   public void refreshExchangeRates(String tenantId) {
     String localeSettingsPath = "configurations/entries";
     Map<String, String> localSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
     log.info("Refreshing exchange rates");
-    var localeSettings = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
+    var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
     String defaultCurrencyCode = "USD"; // TODO: have to get this from somewhere
-
+    DocumentContext localeSettings = JsonPath.parse(rawJson);
+    var value = localeSettings.read("configs[0].value");
+    DocumentContext locale = JsonPath.parse((String) value);
+    var currency = locale.read("currency");
+//    JsonPath.
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
       log.info("Getting currency exchange rate from {} to {}", defaultCurrencyCode, currencyCode);
 

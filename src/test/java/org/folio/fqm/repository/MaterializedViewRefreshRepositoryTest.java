@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -42,25 +43,13 @@ class MaterializedViewRefreshRepositoryTest {
     );
     when(simpleHttpClient.get(localeSettingsPath, localSettingsParams)).thenReturn("""
            {
-             "what": {
-               "ever": {
-                 "dude": [
-                   {
-                     "theValue": "who",
-                     "theLabel": "cares?"
-                   },
-                   {
-                     "theValue": "so",
-                     "theLabel": "lame"
-                   },
-                   {
-                     "theValue": "yeah",
-                     "theLabel": "right"
-                   }
-                 ]
-               }
-             }
+             "configs": [
+           {"id":"2a132a01-623b-4d3a-9d9a-2feb777665c2","module":"ORG","configName":"localeSettings","enabled":true,"value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}}],
+             "totalRecords": 1,
+             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
            }
       """);
+    assertDoesNotThrow(() -> materializedViewRefreshRepository.refreshExchangeRates(tenantId));
+
   }
 }

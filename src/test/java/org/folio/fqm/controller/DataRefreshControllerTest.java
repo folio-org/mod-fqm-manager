@@ -1,7 +1,7 @@
 package org.folio.fqm.controller;
 
-import org.folio.fqm.resource.MaterializedViewRefreshController;
-import org.folio.fqm.service.MaterializedViewRefreshService;
+import org.folio.fqm.resource.DataRefreshController;
+import org.folio.fqm.service.DataRefreshService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -19,14 +19,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(MaterializedViewRefreshController.class)
-class MaterializedViewRefreshControllerTest {
+@WebMvcTest(DataRefreshController.class)
+class DataRefreshControllerTest {
   @Autowired
   private MockMvc mockMvc;
   @MockBean
   private FolioExecutionContext executionContext;
   @MockBean
-  private MaterializedViewRefreshService materializedViewRefreshService;
+  private DataRefreshService dataRefreshService;
 
   @Test
   void refreshMaterializedViewsTest() throws Exception {
@@ -35,9 +35,9 @@ class MaterializedViewRefreshControllerTest {
       .header(XOkapiHeaders.TENANT, tenantId)
       .contentType(APPLICATION_JSON);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(materializedViewRefreshService).refreshMaterializedViews(tenantId);
+    doNothing().when(dataRefreshService).refreshData(tenantId);
     mockMvc.perform(requestBuilder)
       .andExpect(status().isNoContent());
-    verify(materializedViewRefreshService, times(1)).refreshMaterializedViews(tenantId);
+    verify(dataRefreshService, times(1)).refreshData(tenantId);
   }
 }

@@ -113,7 +113,7 @@
               },
               "source": {
                 "columnName": "item_material_type",
-                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
+                "entityTypeId": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a"
               },
               "filterValueGetter": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
               "valueFunction": "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -124,15 +124,6 @@
               "name": "item_material_type_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
-              },
-              "valueSourceApi": {
-                "path": "material-types",
-                "valueJsonPath": "$.mtypes.*.id",
-                "labelJsonPath": "$.mtypes.*.id"
-              },
-              "source": {
-                "columnName": "id",
-                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "queryable": true,
               "valueGetter": "item_details.materialtypeid",
@@ -158,15 +149,6 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "source": {
-                "columnName": "id",
-                "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
-              },
-              "valueSourceApi": {
-                "path": "service-points",
-                "valueJsonPath": "$.servicepoints.*.id",
-                "labelJsonPath": "$.servicepoints.*.id"
-               },
               "queryable": true,
               "valueGetter": "cispi.id",
               "visibleByDefault": false
@@ -174,8 +156,8 @@
             {
               "name": "loan_checkin_servicepoint_name",
               "source": {
-                "columnName": "service_point_name",
-                "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
+                "columnName": "loan_checkin_servicepoint_name",
+                "entityTypeId": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a"
               },
               "valueSourceApi": {
                 "path": "service-points",
@@ -208,15 +190,6 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "source": {
-                "columnName": "id",
-                "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
-              },
-              "valueSourceApi": {
-                "path": "service-points",
-                "valueJsonPath": "$.servicepoints.*.id",
-                "labelJsonPath": "$.servicepoints.*.id"
-                },
               "queryable": true,
               "valueGetter": "cospi.id",
               "visibleByDefault": false
@@ -224,8 +197,8 @@
             {
               "name":"loan_checkout_servicepoint_name",
               "source": {
-                "columnName": "service_point_name",
-                "entityTypeId": "89cdeac4-9582-4388-800b-9ccffd8d7691"
+                "columnName": "loan_checkout_servicepoint_name",
+                "entityTypeId": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a"
               },
               "dataType": {
                 "dataType": "stringType"
@@ -268,15 +241,6 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "source": {
-              "columnName": "id",
-              "entityTypeId": "5e7de445-bcc6-4008-8032-8d9602b854d7"
-              },
-              "valueSourceApi": {
-                "path": "loan-policy-storage/loan-policies",
-                "valueJsonPath": "$.loanPolicies.*.id",
-                "labelJsonPath": "$.loanPolicies.*.name"
-              },
               "queryable": true,
               "valueGetter": "loan_policy_ref_data.id",
               "visibleByDefault": false
@@ -284,8 +248,8 @@
             {
               "name": "loan_policy_name",
               "source": {
-                "columnName": "policy_name",
-                "entityTypeId": "5e7de445-bcc6-4008-8032-8d9602b854d7"
+                "columnName": "loan_policy_name",
+                "entityTypeId": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a"
               },
               "valueSourceApi": {
                 "path": "loan-policy-storage/loan-policies",
@@ -410,8 +374,8 @@
             {
               "name": "user_patron_group",
               "source": {
-                "columnName": "group",
-                "entityTypeId": "e611264d-377e-4d87-a93f-f1ca327d3db0"
+                "columnName": "user_patron_group",
+                "entityTypeId": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a"
               },
               "valueSourceApi": {
                 "path": "groups",
@@ -432,15 +396,6 @@
               "name": "user_patron_group_id",
               "dataType": {
                 "dataType": "rangedUUIDType"
-              },
-              "source": {
-                "columnName": "id",
-                "entityTypeId": "e611264d-377e-4d87-a93f-f1ca327d3db0"
-              },
-              "valueSourceApi": {
-              "path": "groups",
-              "valueJsonPath": "$.usergroups.*.id",
-              "labelJsonPath": "$.usergroups.*.id"
               },
               "queryable": true,
               "valueGetter": "patron_id_ref_data.id",

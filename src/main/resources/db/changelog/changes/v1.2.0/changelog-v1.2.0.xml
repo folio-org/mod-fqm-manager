@@ -5,4 +5,6 @@
   <include file="update-drv-loan-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-item-details-definition.xml" relativeToChangelogFile="true"/>
   <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-organizations-vendor-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

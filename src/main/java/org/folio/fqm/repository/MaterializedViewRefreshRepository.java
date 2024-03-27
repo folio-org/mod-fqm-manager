@@ -80,27 +80,12 @@ public class MaterializedViewRefreshRepository {
   // TODO: Also need to handle situation where there is no localeSettings defined
   // TODO: What to do if default currency is not a system-supported one?
   public void refreshExchangeRates(String tenantId) {
-    String localeSettingsPath = "configurations/entries";
-    Map<String, String> localSettingsParams = Map.of(
-      "query", "(module==ORG and configName==localeSettings)"
-    );
     log.info("Refreshing exchange rates");
-    String systemCurrencyCode;
-    try {
-      var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
-      Object value = JsonPath.parse(rawJson).read("configs[0].value");
-      DocumentContext locale = JsonPath.parse((String) value);
-      systemCurrencyCode = locale.read("currency");
-    } catch(Exception e) {
-      log.info("No system currency defined, defaulting to USD");
-      systemCurrencyCode = "USD";
-    }
-
+    String systemCurrencyCode = getSystemCurrencyCode();
     String exchangeRatePath = "finance/exchange-rate";
     Map<String, Double> exchangeRates = new HashMap<>();
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
       log.info("Getting currency exchange rate from {} to {}", currencyCode, systemCurrencyCode);
-
       Map<String, String> exchangeRateParams = Map.of(
         "from", currencyCode,
       "to", systemCurrencyCode
@@ -119,12 +104,32 @@ public class MaterializedViewRefreshRepository {
 
     }
     String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
-    var step1 = jooqContext.insertInto(table(fullTableName));
-    var step2 = step1.values(exchangeRates);
-    var step3 = step2.execute();
-//    jooqContext
-//      .insertInto(table(fullTableName))
-//      .values(exchangeRates)
-//      .execute();
+//    var step1 = jooqContext.insertInto(table(fullTableName));
+//    var step2 = step1.values(exchangeRates);
+//    var step3 = step2.execute();
+    jooqContext
+      .insertInto(table(fullTableName))
+      .values(exchangeRates)
+      .execute();
+  }
+
+  private String getSystemCurrencyCode() {
+    String localeSettingsPath = "configurations/entries";
+    Map<String, String> localSettingsParams = Map.of(
+      "query", "(module==ORG and configName==localeSettings)"
+    );
+    try {
+      var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
+      Object value = JsonPath.parse(rawJson).read("configs[0].value");
+      DocumentContext locale = JsonPath.parse((String) value);
+      return locale.read("currency");
+    } catch(Exception e) {
+      log.info("No system currency defined, defaulting to USD");
+      return "USD";
+    }
+  }
+
+  private Double getExchangeRate(String fromCurrency, String toCurrency) {
+    return null;
   }
 }

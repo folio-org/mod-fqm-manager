@@ -4,5 +4,6 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="sql/create-table-currency-exchange-rates.sql" relativeToChangelogFile="true"/>
+  <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

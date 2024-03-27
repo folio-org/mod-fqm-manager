@@ -30,7 +30,7 @@ public class MaterializedViewRefreshRepository {
     "drv_languages"
   );
 
-  private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
+  static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
     "JPY",
     "BGN",
@@ -97,7 +97,7 @@ public class MaterializedViewRefreshRepository {
     }
 
     String exchangeRatePath = "finance/exchange-rate";
-    Map<String, Float> exchangeRates = new HashMap<>();
+    Map<String, Double> exchangeRates = new HashMap<>();
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
       log.info("Getting currency exchange rate from {} to {}", currencyCode, systemCurrencyCode);
 
@@ -105,7 +105,7 @@ public class MaterializedViewRefreshRepository {
         "from", currencyCode,
       "to", systemCurrencyCode
       );
-      Float exchangeRate;
+      Double exchangeRate;
       try {
         var exchangeRateResponse = simpleHttpClient.get(exchangeRatePath, exchangeRateParams);
         var exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
@@ -119,9 +119,12 @@ public class MaterializedViewRefreshRepository {
 
     }
     String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
-    jooqContext
-      .insertInto(table(fullTableName))
-      .values(exchangeRates)
-      .execute();
+    var step1 = jooqContext.insertInto(table(fullTableName));
+    var step2 = step1.values(exchangeRates);
+    var step3 = step2.execute();
+//    jooqContext
+//      .insertInto(table(fullTableName))
+//      .values(exchangeRates)
+//      .execute();
   }
 }

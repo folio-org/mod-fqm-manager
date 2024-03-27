@@ -8,8 +8,11 @@ import org.folio.fqm.client.SimpleHttpClient;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.jooq.impl.DSL.table;
 
 @Repository
 @RequiredArgsConstructor
@@ -77,7 +80,6 @@ public class MaterializedViewRefreshRepository {
   // TODO: Also need to handle situation where there is no localeSettings defined
   // TODO: What to do if default currency is not a system-supported one?
   public void refreshExchangeRates(String tenantId) {
-
     String localeSettingsPath = "configurations/entries";
     Map<String, String> localSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
@@ -95,6 +97,7 @@ public class MaterializedViewRefreshRepository {
     }
 
     String exchangeRatePath = "finance/exchange-rate";
+    Map<String, Float> exchangeRates = new HashMap<>();
     for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
       log.info("Getting currency exchange rate from {} to {}", currencyCode, systemCurrencyCode);
 
@@ -102,10 +105,23 @@ public class MaterializedViewRefreshRepository {
         "from", currencyCode,
       "to", systemCurrencyCode
       );
-      // TODO: may need another try block for this
-      var exchangeRateResponse = simpleHttpClient.get(exchangeRatePath, exchangeRateParams);
-      var exchangeRate = JsonPath.parse(exchangeRateResponse).read("exchangeRate");
+      Float exchangeRate;
+      try {
+        var exchangeRateResponse = simpleHttpClient.get(exchangeRatePath, exchangeRateParams);
+        var exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
+        exchangeRate = exchangeRateInfo.read("exchangeRate");
+        log.info("Exchange rate: {}", exchangeRate);
+      } catch (Exception e) {
+        log.info("Failed to get exchange rate from {} to {}", currencyCode, systemCurrencyCode);
+        exchangeRate = null;
+      }
+      exchangeRates.put(currencyCode, exchangeRate);
 
     }
+    String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
+    jooqContext
+      .insertInto(table(fullTableName))
+      .values(exchangeRates)
+      .execute();
   }
 }

@@ -38,6 +38,7 @@ class MaterializedViewRefreshRepositoryTest {
   void shouldRefreshExchangeRates() {
     String tenantId = "tenant_01";
     String localeSettingsPath = "configurations/entries";
+    String exchangeRatePath = "finance/exchange-rate";
     Map<String, String> localSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
@@ -48,6 +49,13 @@ class MaterializedViewRefreshRepositoryTest {
              "totalRecords": 1,
              "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
            }
+      """);
+    when(simpleHttpClient.get(eq(exchangeRatePath), any())).thenReturn("""
+       {
+         "from": "someCurrency",
+         "to": "USD",
+         "exchangeRate": 1.25
+       }
       """);
     assertDoesNotThrow(() -> materializedViewRefreshRepository.refreshExchangeRates(tenantId));
 

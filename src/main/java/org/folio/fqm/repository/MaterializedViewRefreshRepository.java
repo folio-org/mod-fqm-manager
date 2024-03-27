@@ -20,8 +20,13 @@ import static org.jooq.impl.DSL.table;
 public class MaterializedViewRefreshRepository {
 
   private static final String REFRESH_MATERIALIZED_VIEW_SQL = "REFRESH MATERIALIZED VIEW CONCURRENTLY ";
+  private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
+  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
+  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
+    "query", "(module==ORG and configName==localeSettings)"
+  );
 
-  private static final List<String> materializedViewNames = List.of(
+  private static final List<String> MATERIALIZED_VIEW_NAMES = List.of(
     "drv_circulation_loan_status",
     "drv_inventory_item_status",
     "drv_pol_payment_status",
@@ -70,7 +75,7 @@ public class MaterializedViewRefreshRepository {
   private final SimpleHttpClient simpleHttpClient;
 
   public void refreshMaterializedViews(String tenantId) {
-    for (String matViewName : materializedViewNames) {
+    for (String matViewName : MATERIALIZED_VIEW_NAMES) {
       String fullName = tenantId + "_mod_fqm_manager." + matViewName;
       log.info("Refreshing materialized view {}", fullName);
       jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
@@ -81,47 +86,25 @@ public class MaterializedViewRefreshRepository {
   // TODO: What to do if default currency is not a system-supported one?
   public void refreshExchangeRates(String tenantId) {
     log.info("Refreshing exchange rates");
-    String systemCurrencyCode = getSystemCurrencyCode();
-    String exchangeRatePath = "finance/exchange-rate";
-    Map<String, Double> exchangeRates = new HashMap<>();
-    for (String currencyCode : SYSTEM_SUPPORTED_CURRENCIES) {
-      log.info("Getting currency exchange rate from {} to {}", currencyCode, systemCurrencyCode);
-      Map<String, String> exchangeRateParams = Map.of(
-        "from", currencyCode,
-      "to", systemCurrencyCode
-      );
-      Double exchangeRate;
-      try {
-        var exchangeRateResponse = simpleHttpClient.get(exchangeRatePath, exchangeRateParams);
-        var exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
-        exchangeRate = exchangeRateInfo.read("exchangeRate");
-        log.info("Exchange rate: {}", exchangeRate);
-      } catch (Exception e) {
-        log.info("Failed to get exchange rate from {} to {}", currencyCode, systemCurrencyCode);
-        exchangeRate = null;
-      }
-      exchangeRates.put(currencyCode, exchangeRate);
-
-    }
     String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
-//    var step1 = jooqContext.insertInto(table(fullTableName));
-//    var step2 = step1.values(exchangeRates);
-//    var step3 = step2.execute();
+    String systemCurrency = getSystemCurrencyCode();
+    Map<String, Double> exchangeRates = new HashMap<>();
+    SYSTEM_SUPPORTED_CURRENCIES.forEach(currency -> exchangeRates.put(currency, getExchangeRate(currency, systemCurrency)));
     jooqContext
       .insertInto(table(fullTableName))
       .values(exchangeRates)
       .execute();
+    //    var step1 = jooqContext.insertInto(table(fullTableName));
+//    var step2 = step1.values(exchangeRates);
+//    var step3 = step2.execute();
   }
 
   private String getSystemCurrencyCode() {
-    String localeSettingsPath = "configurations/entries";
-    Map<String, String> localSettingsParams = Map.of(
-      "query", "(module==ORG and configName==localeSettings)"
-    );
+    log.info("Getting system currency");
     try {
-      var rawJson = simpleHttpClient.get(localeSettingsPath, localSettingsParams);
-      Object value = JsonPath.parse(rawJson).read("configs[0].value");
-      DocumentContext locale = JsonPath.parse((String) value);
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      Object localeSettings = JsonPath.parse(localeSettingsResponse).read("configs[0].value");
+      DocumentContext locale = JsonPath.parse((String) localeSettings);
       return locale.read("currency");
     } catch(Exception e) {
       log.info("No system currency defined, defaulting to USD");
@@ -130,6 +113,18 @@ public class MaterializedViewRefreshRepository {
   }
 
   private Double getExchangeRate(String fromCurrency, String toCurrency) {
-    return null;
+    log.info("Getting currency exchange rate from {} to {}", fromCurrency, toCurrency);
+    Map<String, String> exchangeRateParams = Map.of(
+      "from", fromCurrency,
+      "to", toCurrency
+    );
+    try {
+      var exchangeRateResponse = simpleHttpClient.get(GET_EXCHANGE_RATE_PATH, exchangeRateParams);
+      var exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
+      return exchangeRateInfo.read("exchangeRate");
+    } catch (Exception e) {
+      log.info("Failed to get exchange rate from {} to {}", fromCurrency, toCurrency);
+      return null;
+    }
   }
 }

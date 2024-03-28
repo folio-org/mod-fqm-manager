@@ -286,15 +286,6 @@
               "dataType": {
                 "dataType": "rangedUUIDType"
               },
-              "valueSourceApi": {
-                "path": "material-types",
-                "valueJsonPath": "$.mtypes.*.id",
-                "labelJsonPath": "$.mtypes.*.id"
-              },
-              "source": {
-                "columnName": "id",
-                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
-              },
               "queryable": true,
               "valueGetter": "src_inventory_item.materialtypeid",
               "visibleByDefault": false

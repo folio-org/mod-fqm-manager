@@ -22,6 +22,8 @@ public class TestcontainerBeanFactoryPostProcessor implements BeanFactoryPostPro
 
     System.setProperty("DB_HOST", dbContainer.getHost());
     System.setProperty("DB_PORT", "" + dbContainer.getMappedPort(POSTGRES_PORT));
+    System.setProperty("DB_HOST_READER", dbContainer.getHost());
+    System.setProperty("DB_PORT_READER", "" + dbContainer.getMappedPort(POSTGRES_PORT));
     System.setProperty("DB_DATABASE", dbContainer.getDatabaseName());
     System.setProperty("DB_USERNAME", dbContainer.getUsername());
     System.setProperty("DB_PASSWORD", dbContainer.getPassword());

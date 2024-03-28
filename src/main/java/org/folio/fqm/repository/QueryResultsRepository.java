@@ -8,6 +8,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Table;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
@@ -25,6 +26,7 @@ public class QueryResultsRepository {
   private static final Table<Record> QUERY_RESULTS_TABLE = table("query_results");
   private static final Field<UUID> QUERY_ID_FIELD = field("query_id", UUID.class);
 
+  @Qualifier("readerJooqContext") private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
 
 
@@ -42,12 +44,12 @@ public class QueryResultsRepository {
 
   public int getQueryResultsCount(UUID queryId) {
     log.info("Retrieving result count for queryId {}", queryId);
-    return jooqContext.fetchCount(QUERY_RESULTS_TABLE.where(QUERY_ID_FIELD.eq(queryId)));
+    return readerJooqContext.fetchCount(QUERY_RESULTS_TABLE.where(QUERY_ID_FIELD.eq(queryId)));
   }
 
   public List<List<String>> getQueryResultIds(UUID queryId, int offset, int limit) {
     log.info("Retrieving results for queryId {}", queryId);
-    List<List<String>> resultLists = jooqContext.select(RESULT_ID_FIELD)
+    List<List<String>> resultLists = readerJooqContext.select(RESULT_ID_FIELD)
       .from(QUERY_RESULTS_TABLE)
       .where(QUERY_ID_FIELD.eq(queryId))
       .orderBy(RESULT_ID_FIELD)

@@ -8,6 +8,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Table;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
@@ -25,7 +26,7 @@ public class QueryResultsRepository {
   private static final Table<Record> QUERY_RESULTS_TABLE = table("query_results");
   private static final Field<UUID> QUERY_ID_FIELD = field("query_id", UUID.class);
 
-  private final DSLContext jooqContext;
+  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
 
 
   public void saveQueryResults(UUID queryId, List<String[]> resultIds) {

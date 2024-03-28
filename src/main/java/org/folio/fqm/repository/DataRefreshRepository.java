@@ -8,16 +8,16 @@ import org.folio.fqm.client.SimpleHttpClient;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.table;
 
 @Repository
 @RequiredArgsConstructor
 @Log4j2
-public class MaterializedViewRefreshRepository {
+public class DataRefreshRepository {
 
   private static final String REFRESH_MATERIALIZED_VIEW_SQL = "REFRESH MATERIALIZED VIEW CONCURRENTLY ";
   private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
@@ -88,8 +88,11 @@ public class MaterializedViewRefreshRepository {
     log.info("Refreshing exchange rates");
     String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
     String systemCurrency = getSystemCurrencyCode();
-    Map<String, Double> exchangeRates = new HashMap<>();
-    SYSTEM_SUPPORTED_CURRENCIES.forEach(currency -> exchangeRates.put(currency, getExchangeRate(currency, systemCurrency)));
+    Map<String, Double> exchangeRates = SYSTEM_SUPPORTED_CURRENCIES
+      .stream()
+      .collect(Collectors.toMap(currency -> currency, currency -> getExchangeRate(currency, systemCurrency)));
+//    Map<String, Double> exchangeRates = new HashMap<>();
+//    SYSTEM_SUPPORTED_CURRENCIES.forEach(currency -> exchangeRates.put(currency, getExchangeRate(currency, systemCurrency)));
     jooqContext
       .insertInto(table(fullTableName))
       .values(exchangeRates)

@@ -14,6 +14,7 @@ import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.SortField;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.jooq.Record1;
 import org.jooq.Field;
@@ -36,7 +37,7 @@ import static org.jooq.impl.DSL.table;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class IdStreamer {
 
-  private final DSLContext jooqContext;
+  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
   private final QueryDetailsRepository queryDetailsRepository;
 

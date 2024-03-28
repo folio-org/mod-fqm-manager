@@ -12,6 +12,7 @@ import org.jooq.DSLContext;
 import org.jooq.Condition;
 import org.jooq.Field;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,8 @@ public class EntityTypeRepository {
   public static final String REF_ID = "jsonb ->> 'refId'";
   public static final String TYPE_FIELD = "jsonb ->> 'type'";
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
-  private final DSLContext jooqContext;
+
+  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
   public Optional<String> getDerivedTableName(UUID entityTypeId) {

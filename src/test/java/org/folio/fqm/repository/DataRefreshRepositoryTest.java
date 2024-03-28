@@ -10,22 +10,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static org.folio.fqm.repository.MaterializedViewRefreshRepository.SYSTEM_SUPPORTED_CURRENCIES;
+import static org.folio.fqm.repository.DataRefreshRepository.SYSTEM_SUPPORTED_CURRENCIES;
 import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MaterializedViewRefreshRepositoryTest {
+class DataRefreshRepositoryTest {
   @InjectMocks
-  private MaterializedViewRefreshRepository materializedViewRefreshRepository;
+  private DataRefreshRepository dataRefreshRepository;
   @Mock
   private DSLContext jooqContext;
   @Mock
@@ -37,7 +34,7 @@ class MaterializedViewRefreshRepositoryTest {
     String expectedItemStatusSql = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.drv_inventory_item_status";
     String expectedLoanStatusSql = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.drv_circulation_loan_status";
     when(jooqContext.execute(anyString())).thenReturn(1);
-    materializedViewRefreshRepository.refreshMaterializedViews(tenantId);
+    dataRefreshRepository.refreshMaterializedViews(tenantId);
     verify(jooqContext, times(1)).execute(expectedItemStatusSql);
     verify(jooqContext, times(1)).execute(expectedLoanStatusSql);
   }
@@ -74,7 +71,7 @@ class MaterializedViewRefreshRepositoryTest {
     when(jooqContext.insertInto(table(fullTableName))).thenReturn(insertSetStepMock);
     when(insertSetStepMock.values(expectedExchangeRates)).thenReturn(insertValuesStepNMock);
     when(insertValuesStepNMock.execute()).thenReturn(1);
-    assertDoesNotThrow(() -> materializedViewRefreshRepository.refreshExchangeRates(tenantId));
+    assertDoesNotThrow(() -> dataRefreshRepository.refreshExchangeRates(tenantId));
     verify(insertValuesStepNMock, times(1)).execute();
   }
 

@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +9,9 @@ import org.folio.fqm.client.SimpleHttpClient;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.table;
 
@@ -82,32 +83,33 @@ public class DataRefreshRepository {
     }
   }
 
-  // TODO: Also need to handle situation where there is no localeSettings defined
-  // TODO: What to do if default currency is not a system-supported one?
   public void refreshExchangeRates(String tenantId) {
     log.info("Refreshing exchange rates");
-    String fullTableName = tenantId + "_mod_fqm_manager." + "currency_exchange_rates";
+    String fullTableName = tenantId + "_mod_fqm_manager.currency_exchange_rates";
     String systemCurrency = getSystemCurrencyCode();
-    Map<String, Double> exchangeRates = SYSTEM_SUPPORTED_CURRENCIES
-      .stream()
-      .collect(Collectors.toMap(currency -> currency, currency -> getExchangeRate(currency, systemCurrency)));
-//    Map<String, Double> exchangeRates = new HashMap<>();
-//    SYSTEM_SUPPORTED_CURRENCIES.forEach(currency -> exchangeRates.put(currency, getExchangeRate(currency, systemCurrency)));
+    if (!SYSTEM_SUPPORTED_CURRENCIES.contains(systemCurrency)) {
+      log.info("System currency does not support automatic exchange rate calculation");
+      return;
+    }
+    Map<String, Double> exchangeRates = new HashMap<>();
+    for (String currency : SYSTEM_SUPPORTED_CURRENCIES) {
+      Double exchangeRate = getExchangeRate(currency, systemCurrency);
+      if (!Double.isNaN(exchangeRate)) {
+        exchangeRates.put(currency, exchangeRate);
+      }
+    }
     jooqContext
       .insertInto(table(fullTableName))
       .values(exchangeRates)
       .execute();
-    //    var step1 = jooqContext.insertInto(table(fullTableName));
-//    var step2 = step1.values(exchangeRates);
-//    var step3 = step2.execute();
   }
 
   private String getSystemCurrencyCode() {
     log.info("Getting system currency");
     try {
       String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
-      Object localeSettings = JsonPath.parse(localeSettingsResponse).read("configs[0].value");
-      DocumentContext locale = JsonPath.parse((String) localeSettings);
+      JsonNode localeSettings = JsonPath.parse(localeSettingsResponse).read("configs[0].value");
+      DocumentContext locale = JsonPath.parse(localeSettings);
       return locale.read("currency");
     } catch(Exception e) {
       log.info("No system currency defined, defaulting to USD");
@@ -122,12 +124,12 @@ public class DataRefreshRepository {
       "to", toCurrency
     );
     try {
-      var exchangeRateResponse = simpleHttpClient.get(GET_EXCHANGE_RATE_PATH, exchangeRateParams);
-      var exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
+      String exchangeRateResponse = simpleHttpClient.get(GET_EXCHANGE_RATE_PATH, exchangeRateParams);
+      DocumentContext exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
       return exchangeRateInfo.read("exchangeRate");
     } catch (Exception e) {
       log.info("Failed to get exchange rate from {} to {}", fromCurrency, toCurrency);
-      return null;
+      return Double.NaN;
     }
   }
 }

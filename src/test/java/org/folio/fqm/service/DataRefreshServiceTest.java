@@ -1,6 +1,6 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.repository.MaterializedViewRefreshRepository;
+import org.folio.fqm.repository.DataRefreshRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,17 +12,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class MaterializedViewRefreshServiceTest {
+class DataRefreshServiceTest {
   @InjectMocks
-  private MaterializedViewRefreshService materializedViewRefreshService;
+  private DataRefreshService dataRefreshService;
   @Mock
-  private MaterializedViewRefreshRepository materializedViewRefreshRepository;
+  private DataRefreshRepository dataRefreshRepository;
 
   @Test
   void refreshMaterializedViewsTest() {
     String tenantId = "tenant_01";
-    doNothing().when(materializedViewRefreshRepository).refreshMaterializedViews(tenantId);
-    materializedViewRefreshService.refreshMaterializedViews(tenantId);
-    verify(materializedViewRefreshRepository, times(1)).refreshMaterializedViews(tenantId);
+    doNothing().when(dataRefreshRepository).refreshMaterializedViews(tenantId);
+    dataRefreshService.refreshMaterializedViews(tenantId);
+    verify(dataRefreshRepository, times(1)).refreshMaterializedViews(tenantId);
   }
 }

@@ -2,7 +2,7 @@
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
   <changeSet id="update-purchase-order-line-details-entity-type-definition" runOnChange="true"
-    author="bsharp@ebsco.com,novercash@ebsco.com,kjain@ebsco.com">
+    author="bsharp@ebsco.com">
     <update tableName="entity_type_definition">
       <column name="definition">
         {
@@ -40,13 +40,8 @@
               "visibleByDefault": false,
               "idColumnName": "acqunit_ids",
               "source": {
-                "entityTypeId": "90403847-8c47-4f58-b117-9a807b052808",
-                "columnName": "acquisition_unit"
-              },
-              "valueSourceApi": {
-                "path": "acquisitions-units/units",
-                "valueJsonPath": "$.acquisitionsUnits.*.id",
-                "labelJsonPath": "$.acquisitionsUnits.*.name"
+                "entityTypeId": "cc51f042-03e2-43d1-b1d6-11aa6a39bc78",
+                "columnName": "acquisitions_name"
               }
             },
             {
@@ -453,13 +448,8 @@
               "visibleByDefault": false,
               "idColumnName": "vendor_id",
               "source": {
-                "entityTypeId": "90403847-8c47-4f58-b117-9a807b052808",
+                "entityTypeId": "489234a9-8703-48cd-85e3-7f84011bafa3",
                 "columnName": "vendor_code"
-              },
-              "valueSourceApi": {
-                "path": "organizations/organizations",
-                "valueJsonPath": "$.organizations.*.id",
-                "labelJsonPath": "$.organizations.*.code"
               }
             },
             {
@@ -483,13 +473,8 @@
               "visibleByDefault": false,
               "idColumnName": "vendor_id",
               "source": {
-                "entityTypeId": "90403847-8c47-4f58-b117-9a807b052808",
+                "entityTypeId": "489234a9-8703-48cd-85e3-7f84011bafa3",
                 "columnName": "vendor_name"
-              },
-              "valueSourceApi": {
-                "path": "organizations/organizations",
-                "valueJsonPath": "$.organizations.*.id",
-                "labelJsonPath": "$.organizations.*.name"
               }
             }
           ],
@@ -505,4 +490,3 @@
     </update>
   </changeSet>
 </databaseChangeLog>
-

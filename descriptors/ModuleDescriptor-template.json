@@ -180,7 +180,11 @@
       "permissionName": "fqm.materializedViews.post",
       "displayName": "FQM - Refresh materialized views",
       "description": "Refresh FQM materialized views",
-      "visible":  true
+      "visible":  true,
+      "subPermissions": [
+        "configuration.entries.collection.get",
+        "finance.exchange-rate.item.get"
+      ]
     },
     {
       "permissionName": "fqm.query.all",
@@ -297,6 +301,14 @@
     },
     {
       "id": "statistical-codes",
+      "version": "1.0"
+    },
+    {
+      "id": "configuration",
+      "version": "2.0"
+    },
+    {
+      "id": "finance.exchange-rate",
       "version": "1.0"
     }
   ],

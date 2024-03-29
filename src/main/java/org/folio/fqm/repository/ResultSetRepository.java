@@ -30,6 +30,7 @@ import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResultSetRepository {
 
-  private final DSLContext jooqContext;
+  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
   private final EntityTypeRepository entityTypeRepository;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,

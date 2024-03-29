@@ -1,0 +1,10 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <include file="update-drv-loan-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-item-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-user-details-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-organizations-vendor-definition.xml" relativeToChangelogFile="true"/>
+  <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>

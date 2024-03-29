@@ -4,6 +4,9 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.config.DataSourceFolioWrapper;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -34,8 +37,7 @@ public class DataSourceConfiguration {
   }
 
   @Primary
-  @Qualifier("dataSource")
-  @Bean(name = "dataSource")
+  @Bean("dataSource")
   @ConfigurationProperties("spring.datasource.hikari")
   public DataSource writerDataSource() {
     return writerDataSourceProperties()
@@ -43,8 +45,7 @@ public class DataSourceConfiguration {
       .build();
   }
 
-  @Bean
-  @Qualifier("readerDataSource")
+  @Bean("readerDataSource")
   @ConfigurationProperties("spring.datasource.hikari")
   public DataSource readerDataSource(FolioExecutionContext context) {
     DataSourceProperties dataSourceProperties = readerDataSourceProperties();
@@ -61,15 +62,24 @@ public class DataSourceConfiguration {
   }
 
   @Primary
-  @Qualifier("jdbcTemplate")
-  @Bean(name = "jdbcTemplate")
+  @Bean("jdbcTemplate")
   public JdbcTemplate writerJdbcTemplate(DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
 
-  @Bean
-  @Qualifier("readerJdbcTemplate")
+  @Bean("readerJdbcTemplate")
   public JdbcTemplate readerJdbcTemplate(@Qualifier("readerDataSource") DataSource dataSource) {
     return new JdbcTemplate(dataSource);
+  }
+
+  @Primary
+  @Bean("dslContext")
+  public DSLContext writerJooqContext(DataSource dataSource) {
+    return DSL.using(dataSource, SQLDialect.POSTGRES);
+  }
+
+  @Bean("readerJooqContext")
+  public DSLContext readerJooqContext(@Qualifier("readerDataSource") DataSource dataSource) {
+    return DSL.using(dataSource, SQLDialect.POSTGRES);
   }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,7 +33,7 @@ class EntityTypeRepositoryTest {
   private EntityTypeRepository repo;
 
   @Mock
-  private DSLContext jooqContext;
+  @Qualifier("readerJooqContext") private DSLContext jooqContext;
 
 
   @Test

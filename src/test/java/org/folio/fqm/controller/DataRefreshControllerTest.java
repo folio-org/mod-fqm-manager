@@ -29,7 +29,7 @@ class DataRefreshControllerTest {
   private DataRefreshService dataRefreshService;
 
   @Test
-  void refreshMaterializedViewsTest() throws Exception {
+  void refreshDataTest() throws Exception {
     String tenantId = "tenant_01";
     RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/materialized-views/refresh")
       .header(XOkapiHeaders.TENANT, tenantId)

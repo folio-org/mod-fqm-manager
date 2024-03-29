@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -124,9 +125,15 @@ public class DataRefreshRepository {
     log.info("Getting system currency");
     try {
       String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
-      JsonNode localeSettings = JsonPath.parse(localeSettingsResponse).read("configs[0].value");
-      DocumentContext locale = JsonPath.parse(localeSettings);
-      return locale.read("currency");
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
+      String valueString = localeSettingsNode
+        .path("configs")
+        .get(0)
+        .path("value")
+        .asText();
+      JsonNode valueNode = objectMapper.readTree(valueString);
+      return valueNode.path("currency").asText();
     } catch (Exception e) {
       log.info("No system currency defined, defaulting to USD");
       return "USD";

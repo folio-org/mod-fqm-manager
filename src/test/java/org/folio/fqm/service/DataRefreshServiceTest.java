@@ -19,10 +19,12 @@ class DataRefreshServiceTest {
   private DataRefreshRepository dataRefreshRepository;
 
   @Test
-  void refreshMaterializedViewsTest() {
+  void refreshDataTest() {
     String tenantId = "tenant_01";
     doNothing().when(dataRefreshRepository).refreshMaterializedViews(tenantId);
+    doNothing().when(dataRefreshRepository).refreshExchangeRates(tenantId);
     dataRefreshService.refreshData(tenantId);
     verify(dataRefreshRepository, times(1)).refreshMaterializedViews(tenantId);
+    verify(dataRefreshRepository, times(1)).refreshExchangeRates(tenantId);
   }
 }

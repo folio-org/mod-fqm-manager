@@ -403,7 +403,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetSortedIds() {
-    String derivedTableName = "table_01";
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     int offset = 0;
     int limit = 0;
@@ -412,7 +411,7 @@ class QueryManagementServiceTest {
       List.of(UUID.randomUUID().toString())
     );
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenReturn(derivedTableName);
+    when(entityTypeService.getEntityTypeDefinition(query.entityTypeId())).thenReturn(Optional.of(new EntityType()));
     when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
     List<List<String>> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
@@ -425,7 +424,7 @@ class QueryManagementServiceTest {
     int offset = 0;
     int limit = 0;
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
-    when(entityTypeService.getDerivedTableName(query.entityTypeId())).thenThrow(new EntityTypeNotFoundException(query.entityTypeId()));
+    when(entityTypeService.getEntityTypeDefinition(query.entityTypeId())).thenReturn(Optional.empty());
     assertThrows(EntityTypeNotFoundException.class, () -> queryManagementService.getSortedIds(queryId, offset, limit));
   }
 

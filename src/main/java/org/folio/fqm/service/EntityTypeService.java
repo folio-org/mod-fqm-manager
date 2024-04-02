@@ -171,12 +171,6 @@ public class EntityTypeService {
     return new ColumnValues().content(currencies);
   }
 
-  public String getDerivedTableName(UUID entityTypeId) {
-    return entityTypeRepository
-      .getDerivedTableName(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-  }
-
   private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String fieldName) {
     var valueWithLabel = new ValueWithLabel().label(getFieldValue(allValues, fieldName));
     return allValues.containsKey(ID_FIELD_NAME)

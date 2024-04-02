@@ -187,7 +187,8 @@ public class QueryManagementService {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getDerivedTableName(query.entityTypeId());
+    entityTypeService.getEntityTypeDefinition(query.entityTypeId())
+      .orElseThrow(() -> new EntityTypeNotFoundException(query.entityTypeId()));
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }

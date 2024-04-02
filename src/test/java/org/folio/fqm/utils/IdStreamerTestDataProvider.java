@@ -35,7 +35,6 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE");
 
-  private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
@@ -50,12 +49,7 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
 
     String sql = ctx.sql().toUpperCase();
 
-    if (sql.matches(DERIVED_TABLE_NAME_QUERY_REGEX)) {
-      var derivedTableNameField = field("derived_table_name");
-      Result<Record1<Object>> result = create.newResult(derivedTableNameField);
-      result.add(create.newRecord(derivedTableNameField).values("derived_table_01"));
-      mockResult = new MockResult(1, result);
-    } else if (sql.matches(ENTITY_TYPE_DEFINITION_REGEX)) {
+    if (sql.matches(ENTITY_TYPE_DEFINITION_REGEX)) {
       var definitionField = field("definition");
       Result<Record1<Object>> result = create.newResult(definitionField);
       result.add(create.newRecord(definitionField).values(writeValueAsString(TEST_ENTITY_TYPE_DEFINITION)));

@@ -56,12 +56,12 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
     var json = new ObjectMapper().writeValueAsString(entityType);
     var sql = """
       insert into %s_mod_fqm_manager.entity_type_definition
-        (id, derived_table_name, definition) values
-        (:id, :name, :definition::json)
+        (id, definition) values
+        (:id, :definition::json)
       """.formatted(TENANT_ID);
 
     NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(getDataSource());
-    jdbcTemplate.update(sql, Map.of("id", UUID.fromString(entityType.getId()), "name", entityType.getName(), "definition", json));
+    jdbcTemplate.update(sql, Map.of("id", UUID.fromString(entityType.getId()), "definition", json));
 
     // When we query for a value that only actually matches the mock data when it gets run through the valueFunction
     // and is compared against the value produced by the filterValueGetter

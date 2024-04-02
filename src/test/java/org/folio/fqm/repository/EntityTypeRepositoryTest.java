@@ -58,12 +58,6 @@ class EntityTypeRepositoryTest {
   }
 
   @Test
-  void shouldReturnValidDerivedTableName() {
-    String actualTableName = repo.getDerivedTableName(ENTITY_TYPE_01_ID).get();
-    assertEquals(ENTITY_TYPE_01_LABEL, actualTableName);
-  }
-
-  @Test
   void shouldReturnValidEntityTypeDefinition() {
     Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID);
     assertTrue(actualEntityTypeDefinition.isPresent());

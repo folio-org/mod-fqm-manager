@@ -34,32 +34,24 @@ import static org.jooq.impl.DSL.trueCondition;
 @RequiredArgsConstructor
 @Log4j2
 public class EntityTypeRepository {
-  public static final String ID_FIELD_NAME = "id";
   public static final String TABLE_NAME = "entity_type_definition";
+  
+  public static final String ID_FIELD_NAME = "id";
+  public static final String DEFINITION_FIELD_NAME = "definition";
+
   public static final String REQUIRED_FIELD_NAME = "jsonb ->> 'name'";
   public static final String REF_ID = "jsonb ->> 'refId'";
   public static final String TYPE_FIELD = "jsonb ->> 'type'";
+
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
 
   @Qualifier("readerJooqContext") private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
-  public Optional<String> getDerivedTableName(UUID entityTypeId) {
-    log.info("Getting derived table name for entity type ID: {}", entityTypeId);
-
-    Field<String> derivedTableNameField = field("derived_table_name", String.class);
-
-    return jooqContext
-      .select(derivedTableNameField)
-      .from(table(TABLE_NAME))
-      .where(field(ID_FIELD_NAME).eq(entityTypeId))
-      .fetchOptional(derivedTableNameField);
-  }
-
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     log.info("Getting definition name for entity type ID: {}", entityTypeId);
 
-    Field<String> definitionField = field("definition", String.class);
+    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
 
     return jooqContext
       .select(definitionField)
@@ -94,7 +86,7 @@ public class EntityTypeRepository {
   }
 
   private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId) {
-    log.info("Getting derived table name for entity type ID: {}", entityTypeId);
+    log.info("Getting columns for entity type ID: {}", entityTypeId);
     EntityType entityTypeDefinition = getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     String sourceViewName = entityTypeDefinition.getSourceView();

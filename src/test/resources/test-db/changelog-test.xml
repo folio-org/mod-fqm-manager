@@ -5,6 +5,7 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <include file="db/changelog/changes/v1.0.0/core-tables.xml" relativeToChangelogFile="false"/>
+  <include file="db/changelog/changes/v2.1.0/remove-derived-table-name-column.yaml" relativeToChangelogFile="false"/>
   <include file="test-entity-type-definitions.xml" relativeToChangelogFile="true"/>
   <include file="db/changelog/changes/v1.1.0/update-query-results-table.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

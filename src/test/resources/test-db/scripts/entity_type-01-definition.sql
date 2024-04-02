@@ -1,5 +1,7 @@
-INSERT INTO entity_type_definition (id, derived_table_name, definition)
-VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0291','entity_type-01', '{
+INSERT INTO entity_type_definition (id, definition)
+VALUES (
+    '0cb79a4c-f7eb-4941-a104-745224ae0291',
+    '{
              "id": "0cb79a4c-f7eb-4941-a104-745224ae0291",
              "name":"entity_type-01",
              "labelAlias" : "entity_type-01",
@@ -36,4 +38,5 @@ VALUES ('0cb79a4c-f7eb-4941-a104-745224ae0291','entity_type-01', '{
                    "direction": "ASC"
                  }
                ]
-         }');
+         }'
+  );

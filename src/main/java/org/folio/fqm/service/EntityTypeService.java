@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -169,12 +168,6 @@ public class EntityTypeService {
         .sorted(comparing(ValueWithLabel::getLabel))
         .toList());
     return new ColumnValues().content(currencies);
-  }
-
-  public String getDerivedTableName(UUID entityTypeId) {
-    return entityTypeRepository
-      .getDerivedTableName(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 
   private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String fieldName) {

@@ -183,11 +183,13 @@ public class QueryManagementService {
     }
   }
 
+  @SuppressWarnings("java:S2201") // we just use orElseThrow to conveniently throw an exception, we don't want the value
   public List<List<String>> getSortedIds(UUID queryId, int offset, int limit) {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getDerivedTableName(query.entityTypeId());
+    entityTypeService.getEntityTypeDefinition(query.entityTypeId())
+      .orElseThrow(() -> new EntityTypeNotFoundException(query.entityTypeId()));
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }

@@ -46,6 +46,9 @@ class EntityTypeServiceTest {
   @Mock
   private SimpleHttpClient simpleHttpClient;
 
+  @Mock
+  private EntityTypeFlatteningService entityTypeFlatteningService;
+
   @InjectMocks
   private EntityTypeService entityTypeService;
 
@@ -243,10 +246,8 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(repo.getEntityTypeDefinition(entityTypeId))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
       .thenReturn(Optional.of(expectedEntityType));
-    when(localizationService.localizeEntityType(expectedEntityType))
-      .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
       .getEntityTypeDefinition(entityTypeId)

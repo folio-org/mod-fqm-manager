@@ -1,14 +1,17 @@
 package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.IdColumnUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
@@ -27,7 +30,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.select;
@@ -35,11 +37,13 @@ import static org.jooq.impl.DSL.table;
 
 @Repository
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Log4j2
 public class IdStreamer {
 
-  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
-  private final EntityTypeRepository entityTypeRepository;
+  @Qualifier("readerJooqContext")
+  private final DSLContext jooqContext;
   private final QueryDetailsRepository queryDetailsRepository;
+  private final EntityTypeFlatteningService entityTypeFlatteningService;
 
   /**
    * Executes the given Fql Query and stream the result Ids back.
@@ -49,7 +53,9 @@ public class IdStreamer {
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    EntityType entityType = getEntityType(entityTypeId);
+    EntityType entityType = entityTypeFlatteningService
+      .getFlattenedEntityType(entityTypeId, true)
+      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     Condition sqlWhereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
@@ -63,12 +69,12 @@ public class IdStreamer {
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     UUID entityTypeId = queryDetailsRepository.getEntityTypeId(queryId);
     EntityType entityType = getEntityType(entityTypeId);
-    Condition condition = field(ID_FIELD_NAME).in(
+    Condition condition = field("\"source1\".id").in(
       select(RESULT_ID_FIELD)
         .from(table("query_results"))
         .where(field("query_id").eq(queryId))
     );
-    return streamIdsInBatch(entityType, sortResults, condition, batchSize, idsConsumer);
+    return streamIdsInBatch(entityType, sortResults, condition, batchSize, idsConsumer); // TODO: fix this
   }
 
   public List<List<String>> getSortedIds(String derivedTableName,
@@ -91,19 +97,29 @@ public class IdStreamer {
   }
 
   private int streamIdsInBatch(EntityType entityType,
-                                boolean sortResults,
-                                Condition sqlWhereClause,
-                                int batchSize,
-                                Consumer<IdsWithCancelCallback> idsConsumer) {
+                               boolean sortResults,
+                               Condition sqlWhereClause,
+                               int batchSize,
+                               Consumer<IdsWithCancelCallback> idsConsumer) {
+    String finalJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
+    String finalWhereClause = sqlWhereClause.toString();
+    for (EntityTypeSource source : entityType.getSources()) {
+      String toReplace = ":" + source.getAlias();
+      String alias = "\"" + source.getAlias() + "\"";
+      finalWhereClause = finalWhereClause.replace(toReplace, alias);
+    }
+    System.out.println("Final where clause: " + finalWhereClause);
     try (
+      // NEW WAY
       Cursor<Record1<String[]>> idsCursor = jooqContext.dsl()
         .select(field(idValueGetter))
-        .from(entityType.getFromClause())
-        .where(sqlWhereClause)
+        .from(finalJoinClause)
+        .where(finalWhereClause)
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize)
         .fetchLazy();
+
       Stream<String[]> idStream = idsCursor
         .stream()
         .map(row -> row.getValue(idValueGetter));
@@ -136,7 +152,7 @@ public class IdStreamer {
   }
 
   private EntityType getEntityType(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId)
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 }

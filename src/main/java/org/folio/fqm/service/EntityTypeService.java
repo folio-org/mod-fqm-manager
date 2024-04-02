@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+
 @Service
 @RequiredArgsConstructor
 public class EntityTypeService {
@@ -158,10 +159,16 @@ public class EntityTypeService {
   }
 
   private static ColumnValues getCurrencyValues() {
+    List<String> excludedCurrencyCodes = List.of(
+      "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
+      "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
+      "MZM", "XPD", "PHP", "XPT", "PTE", "ROL", "RUR", "CSD", "SLE", "SLL", "XAG", "SKK", "SIT", "ESP", "XDR", "XSU", "SDD", "SRG", "STD", "XTS",
+      "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
     List<ValueWithLabel> currencies =
       new ArrayList<>(Currency
         .getAvailableCurrencies()
         .stream()
+        .filter(currency -> !excludedCurrencyCodes.contains(currency.getCurrencyCode()))
         .map(currency -> new ValueWithLabel()
           .value(currency.getCurrencyCode())
           .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
@@ -180,6 +187,7 @@ public class EntityTypeService {
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
   }
+
   private void sortColumnsInEntityType(EntityType entityType) {
     List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
       .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))

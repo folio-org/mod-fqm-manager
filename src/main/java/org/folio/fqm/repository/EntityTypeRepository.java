@@ -15,7 +15,6 @@ import org.jooq.Field;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.folio.querytool.domain.dto.EntityType;

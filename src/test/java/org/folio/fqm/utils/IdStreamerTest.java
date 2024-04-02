@@ -23,6 +23,7 @@ import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.QueryDetailsRepository;
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -38,6 +39,7 @@ class IdStreamerTest {
   private static final UUID ENTITY_TYPE_ID = UUID.randomUUID();
 
   private IdStreamer idStreamer;
+  EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
   void setup() {
@@ -55,11 +57,13 @@ class IdStreamerTest {
       context,
       new ObjectMapper()
     );
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
     this.idStreamer =
       new IdStreamer(
-        readerContext,
-        entityTypeRepository,
-        new QueryDetailsRepository(readerContext)
+
+        context,
+        new QueryDetailsRepository(context),
+        entityTypeFlatteningService
       );
   }
 
@@ -85,7 +89,7 @@ class IdStreamerTest {
 
   @Test
   void shouldFetchIdStreamForFql() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("field1"), "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("source1_field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     List<List<String>> actualIds = new ArrayList<>();
@@ -121,16 +125,21 @@ class IdStreamerTest {
     assertEquals(expectedIds, actualIds);
   }
 
+  // TODO: this test is kind of butchered. Clean up if possible
   @Test
   void shouldThrowExceptionWhenEntityTypeNotFound() {
     Fql fql = new Fql(new EqualsCondition(new FqlField("field"), "value"));
     Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {
     };
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
-    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null);
+
 
     when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());
+
+    entityTypeFlatteningService = new EntityTypeFlatteningService(mockRepository, new ObjectMapper());
+
+    IdStreamer idStreamerWithMockRepo = new IdStreamer(null,null, entityTypeFlatteningService);
 
     assertThrows(
       EntityTypeNotFoundException.class,

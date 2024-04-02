@@ -32,7 +32,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 public class EntityTypeService {
@@ -45,6 +44,7 @@ public class EntityTypeService {
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
 
   private final EntityTypeRepository entityTypeRepository;
+  private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
   private final SimpleHttpClient fieldValueClient;
@@ -90,14 +90,22 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    return entityTypeRepository
-      .getEntityTypeDefinition(entityTypeId)
-      .map(localizationService::localizeEntityType)
-      .map(entityType -> {
-        sortColumnsInEntityType(entityType);
-        return entityType;
-      });
+//    return entityTypeRepository
+//      .getEntityTypeDefinition(entityTypeId)
+//      .map(localizationService::localizeEntityType)
+//      .map(entityType -> {
+//        sortColumnsInEntityType(entityType);
+//        return entityType;
+//      });
 
+//    return entityTypeRepository.getCompositeEntityTypeDefinition(entityTypeId)
+//      .map(localizationService::localizeEntityType)
+//      .map(entityType -> {
+//        sortColumnsInEntityType(entityType);
+//        return entityType;
+//      });
+
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
   }
 
   /**

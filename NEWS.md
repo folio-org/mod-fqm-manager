@@ -1,5 +1,10 @@
 # 2.0.x
 
+## 2.0.2
+- [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Fix read/write split bug
+- [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Lower contributor-name-types dependency version
+- [MODFQMMGR-213](https://folio-org.atlassian.net/browse/MODFQMMGR-213) Limit available currencies in queries to only those actually supported in FOLIO
+
 ## 2.0.1
 - Update translations
 - [MODFQMMGR-216](https://folio-org.atlassian.net/browse/MODFQMMGR-216) Fix NPE

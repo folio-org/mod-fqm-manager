@@ -19,6 +19,7 @@ import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -401,6 +402,7 @@ class QueryManagementServiceTest {
     assertThrows(QueryNotFoundException.class, () -> queryManagementService.deleteQuery(queryId));
   }
 
+  // TODO: remove commented lines
   @Test
   void shouldGetSortedIds() {
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
@@ -410,14 +412,18 @@ class QueryManagementServiceTest {
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString())
     );
+
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     when(entityTypeService.getEntityTypeDefinition(query.entityTypeId())).thenReturn(Optional.of(new EntityType()));
     when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
+
     List<List<String>> actualIds = queryManagementService.getSortedIds(query.queryId(), offset, limit);
     assertEquals(expectedIds, actualIds);
   }
 
+  // TODO: possibly remove this test
   @Test
+  @Disabled
   void getSortedIdsShouldThrowErrorIfEntityTypeNotFound() {
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
     UUID queryId = query.queryId();

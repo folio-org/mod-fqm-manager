@@ -3,6 +3,7 @@ package org.folio.fqm.repository;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -32,8 +33,14 @@ class ResultSetRepositoryTest {
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
+<<<<<<< HEAD
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
     this.repo = new ResultSetRepository(context, entityTypeRepository);
+=======
+    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(context, new ObjectMapper());
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository);
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
+>>>>>>> ea7045f (MODFQMMGR-230: Update mod-fqm-manager to support nested entity types)
   }
 
   @Test
@@ -66,13 +73,13 @@ class ResultSetRepositoryTest {
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString())
     );
-    List<String> fields = List.of("id", "key1");
+    List<String> fields = List.of("source1_id", "source1_key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
     // Since we are only asking for "id" and "key2" fields, create expected list without key1 included
     List<Map<String, Object>> expectedList = List.of(
-      Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
-      Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      Map.of("source1_id", expectedFullList.get(0).get("id"), "source1_key1", "value1"),
+      Map.of("source1_id", expectedFullList.get(1).get("id"), "source1_key1", "value3"),
+      Map.of("source1_id", expectedFullList.get(2).get("id"), "source1_key1", "value5")
     );
     List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
     assertEquals(expectedList, actualList);
@@ -83,14 +90,14 @@ class ResultSetRepositoryTest {
     UUID entityTypeId = UUID.randomUUID();
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
-    List<String> fields = List.of("id", "key1");
+    Fql fql = new Fql(new EqualsCondition(new FqlField("source1_key1"), "value1"));
+    List<String> fields = List.of("source1_id", "source1_key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
     // Since we are only asking for "id" and "key1" fields, create expected list without key2 included
     List<Map<String, Object>> expectedList = List.of(
-      Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
-      Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      Map.of("source1_id", expectedFullList.get(0).get("id"), "source1_key1", "value1"),
+      Map.of("source1_id", expectedFullList.get(1).get("id"), "source1_key1", "value3"),
+      Map.of("source1_id", expectedFullList.get(2).get("id"), "source1_key1", "value5")
     );
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
     assertEquals(expectedList, actualList);
@@ -123,9 +130,14 @@ class ResultSetRepositoryTest {
   void shouldRunSynchronousQueryAndHandleNullAfterIdParameter() {
     UUID entityTypeId = UUID.randomUUID();
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
-    List<String> fields = List.of("id", "key1", "key2");
+    Fql fql = new Fql(new EqualsCondition(new FqlField("source1_key1"), "value1"));
+    List<String> fields = List.of("source1_id", "source1_key1", "source1_key2");
+    List<Map<String, Object>> expectedList = List.of(
+      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(0).get("id"), "source1_key1", "value1", "source1_key2", "value2"),
+      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(1).get("id"), "source1_key1", "value3", "source1_key2", "value4"),
+      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(2).get("id"), "source1_key1", "value5", "source1_key2", "value6")
+    );
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, null, limit);
-    assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);
+    assertEquals(expectedList, actualList);
   }
 }

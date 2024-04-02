@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -30,7 +31,8 @@ class ResultSetRepositoryArrayTest {
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
 
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-    this.repo = new ResultSetRepository(context, entityTypeRepository);
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
   }
 
   @Test

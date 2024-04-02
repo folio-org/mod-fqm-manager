@@ -3,9 +3,11 @@ package org.folio.fqm.utils;
 import lombok.experimental.UtilityClass;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.jooq.impl.DSL.field;
@@ -40,11 +42,28 @@ public class IdColumnUtils {
    * @return List of value getters for the id columns of the entity type
    */
   public static List<String> getIdColumnValueGetters(EntityType entityType) {
-    return entityType
-      .getColumns()
+    var columns = entityType
+      .getColumns();
+
+      return columns
       .stream()
       .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
       .map(EntityTypeColumn::getValueGetter)
+//      .map(valueGetter -> {
+//        EntityTypeSource source = entityType.getSources()
+//          .stream()
+//          .filter(currentSource -> valueGetter.contains(":" + currentSource.getAlias()))
+//          .findFirst()
+//          .orElseThrow(() -> new IllegalStateException("FAILED TO GET VALUE GETTER"));
+//
+//        String toReplace = ":" + source.getAlias();
+//        System.out.println("Replacing string " + toReplace);
+//        String alias = "\"" + source.getAlias() + "\"";
+//        System.out.println("Before: " + valueGetter);
+//        String afterValueGetter = valueGetter.replace(toReplace, alias);
+//        System.out.println("After: " + afterValueGetter);
+//        return afterValueGetter;
+//      })
       .toList();
   }
 

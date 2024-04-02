@@ -20,6 +20,7 @@ public class QueryExecutionService {
   private final FolioExecutionContext folioExecutionContext;
   private final QueryExecutionCallbacks callbacks;
   private final Supplier<DataBatchCallback> dataBatchCallbackSupplier;
+  private final EntityTypeService entityTypeService;
 
   @Async
   // Long-running method. Running this method within a transaction boundary will hog db connection for

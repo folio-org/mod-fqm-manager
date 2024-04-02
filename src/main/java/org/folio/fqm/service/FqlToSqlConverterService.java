@@ -22,6 +22,8 @@ import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.Field;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static org.jooq.impl.DSL.and;
@@ -66,29 +69,29 @@ public class FqlToSqlConverterService {
   private static final String OPEN_UUID_TYPE = "openUUIDType";
   private static final String DATE_TYPE = "dateType";
   public static final String ALL_NULLS = """
-          true = ALL(
-            SELECT(
-              unnest(
-                cast(
-                  %s
-                  as varchar[]
-                )
-              )
-            ) IS NULL
+    true = ALL(
+      SELECT(
+        unnest(
+          cast(
+            %s
+            as varchar[]
           )
-          """;
+        )
+      ) IS NULL
+    )
+    """;
   public static final String NOT_ALL_NULLS = """
-          false = ANY(
-            SELECT(
-              unnest(
-                cast(
-                  %s
-                  as varchar[]
-                )
-              )
-            ) IS NULL
+    false = ANY(
+      SELECT(
+        unnest(
+          cast(
+            %s
+            as varchar[]
           )
-          """;
+        )
+      ) IS NULL
+    )
+    """;
 
 
   private final FqlService fqlService;
@@ -135,7 +138,7 @@ public class FqlToSqlConverterService {
       return handleDate(equalsCondition, field);
     }
     String dataType = getFieldDataType(entityType, equalsCondition);
-    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType))  {
+    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType)) {
       return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
     }
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
@@ -301,7 +304,8 @@ public class FqlToSqlConverterService {
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
 
     return switch (fieldType) {
-      case STRING_TYPE -> isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
+      case STRING_TYPE ->
+        isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
       case "arrayType" -> {
         var cardinality = cardinality(cast(field, String[].class));
         if (isEmpty) {

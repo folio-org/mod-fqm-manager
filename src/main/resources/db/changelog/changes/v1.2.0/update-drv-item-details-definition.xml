@@ -108,11 +108,16 @@
             {
               "name": "item_level_call_number_type_name",
               "source": {
-                "columnName": "call_number_type_name",
-                "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d"
+                "columnName": "item_level_call_number_type_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
                 "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "call-number-types",
+                "valueJsonPath": "$.callNumberTypes.*.id",
+                "labelJsonPath": "$.callNumberTypes.*.name"
               },
               "queryable": true,
               "idColumnName": "item_level_call_number_typeid",
@@ -160,11 +165,16 @@
             {
               "name": "item_effective_call_number_type_name",
               "source": {
-                "columnName": "call_number_type_name",
-                "entityTypeId": "5c8315be-13f5-4df5-ae8b-086bae83484d"
+                "columnName": "item_effective_call_number_type_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
                 "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "call-number-types",
+                "valueJsonPath": "$.callNumberTypes.*.id",
+                "labelJsonPath": "$.callNumberTypes.*.name"
               },
               "queryable": true,
               "idColumnName": "item_effective_call_number_typeid",
@@ -203,11 +213,16 @@
             {
               "name": "item_effective_library_name",
               "source": {
-                "columnName": "loclibrary_name",
-                "entityTypeId": "cf9f5c11-e943-483c-913b-81d1e338accc"
+                "columnName": "item_effective_library_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
                 "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "location-units/libraries",
+                "valueJsonPath": "$.loclibs.*.id",
+                "labelJsonPath": "$.loclibs.*.name"
               },
               "queryable": true,
               "idColumnName": "item_effective_library_id",
@@ -226,11 +241,16 @@
             {
               "name": "item_effective_location_name",
               "source": {
-                "columnName": "location_name",
-                "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b"
+                "columnName": "item_effective_location_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
                 "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "locations",
+                "valueJsonPath": "$.locations.*.id",
+                "labelJsonPath": "$.locations.*.name"
               },
               "queryable": true,
               "idColumnName": "item_effective_location_id",
@@ -302,11 +322,16 @@
             {
               "name": "item_permanent_location_name",
               "source": {
-                "columnName": "location_name",
-                "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b"
+                "columnName": "item_permanent_location_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
                 "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "locations",
+                "valueJsonPath": "$.locations.*.id",
+                "labelJsonPath": "$.locations.*.name"
               },
               "queryable": true,
               "idColumnName": "item_permanent_location_id",
@@ -457,11 +482,16 @@
             {
               "name": "item_temporary_location_name",
               "source": {
-                "columnName": "location_name",
-                "entityTypeId": "a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b"
+                "columnName": "item_temporary_location_name",
+                "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292"
               },
               "dataType": {
-                "dataType": "stringType"
+              "dataType": "stringType"
+              },
+              "valueSourceApi": {
+                "path": "locations",
+                "valueJsonPath": "$.locations.*.id",
+                "labelJsonPath": "$.locations.*.name"
               },
               "queryable": true,
               "idColumnName": "item_temporary_location_id",

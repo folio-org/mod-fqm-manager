@@ -60,8 +60,8 @@ public class EntityTypeInitializationService {
 
     List<EntityType> desiredEntityTypes = Stream
       .concat(
-        Arrays.stream(resourceResolver.getResources("classpath*:/entity-types/**/*.json")),
-        Arrays.stream(resourceResolver.getResources("classpath*:/entity-types/**/*.json5"))
+        Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),
+        Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json5"))
       )
       .filter(Resource::isReadable)
       .map(resource -> {

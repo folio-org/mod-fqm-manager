@@ -32,7 +32,7 @@ public class TestDbSetupConfiguration {
   }
 
   @Bean
-  @DependsOn("liquibase")
+  @DependsOn("readerDataSource")
   EntityTypeInitializer entityTypeInitializer() {
     return new EntityTypeInitializer();
   }

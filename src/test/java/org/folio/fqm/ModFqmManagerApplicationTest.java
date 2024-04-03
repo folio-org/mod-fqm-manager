@@ -3,10 +3,6 @@ package org.folio.fqm;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.validation.Valid;
-import lombok.extern.log4j.Log4j2;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +16,6 @@ import org.folio.spring.liquibase.FolioLiquibaseConfiguration;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.folio.tenant.rest.resource.TenantApi;
 
-@Log4j2
 @ActiveProfiles({"test", "db-test"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ModFqmManagerApplicationTest {
@@ -37,25 +32,8 @@ class ModFqmManagerApplicationTest {
 
     @Override
     public ResponseEntity<Void> postTenant(@Valid TenantAttributes tenantAttributes) {
-      log.info("============================");
-      log.info("POST TENANT HELLO");
-      log.info("============================");
       return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-  }
-
-  @BeforeAll
-  static void setUp() {
-    log.info("============================");
-    log.info("SETUP HELLO");
-    log.info("============================");
-  }
-
-  @AfterAll
-  static void after() {
-    log.info("============================");
-    log.info("AFTER HELLO");
-    log.info("============================");
   }
 
   @Test

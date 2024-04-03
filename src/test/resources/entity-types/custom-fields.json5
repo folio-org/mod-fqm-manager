@@ -4,5 +4,5 @@
   labelAlias: 'custom-fields-entity-type',
   private: true,
   sourceView: 'custom_fields_source_view',
-  sourceViewExtractor: "src_users_users.jsonb -> ''customFields''",
+  sourceViewExtractor: "src_users_users.jsonb -> 'customFields'",
 }

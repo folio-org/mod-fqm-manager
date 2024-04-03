@@ -1,20 +1,32 @@
 package org.folio.fqm.service;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Map;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 @Primary
 public class FqmTenantService extends TenantService {
-  public FqmTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase) {
+
+  private final EntityTypeInitializationService entityTypeInitializationService;
+
+  @Autowired
+  public FqmTenantService(
+    JdbcTemplate jdbcTemplate,
+    FolioExecutionContext context,
+    FolioSpringLiquibase folioSpringLiquibase,
+    EntityTypeInitializationService entityTypeInitializationService
+  ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
+    this.entityTypeInitializationService = entityTypeInitializationService;
   }
 
   @Override
@@ -27,8 +39,17 @@ public class FqmTenantService extends TenantService {
 
     // Run all of the slow DB migration scripts in a separate thread
     this.folioSpringLiquibase.setContexts("slow");
-    var slowRun = new Thread(() -> super.createOrUpdateTenant(tenantAttributes));
+    Thread slowRun = new Thread(() -> super.createOrUpdateTenant(tenantAttributes));
     slowRun.setDaemon(true);
     slowRun.start();
+  }
+
+  @Override
+  protected void afterLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    try {
+      entityTypeInitializationService.initializeEntityTypes();
+    } catch (IOException e) {
+      throw new UncheckedIOException("Failed to initialize entity types", e);
+    }
   }
 }

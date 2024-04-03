@@ -89,7 +89,7 @@ class EntityTypeRepositoryTest {
         .visibleByDefault(true),
       new EntityTypeColumn()
         .name("custom_column_1")
-        .dataType(new BooleanType())
+        .dataType(new BooleanType().dataType("booleanType"))
         .valueGetter(valueGetter1)
         .labelAlias("custom_column_1")
         .values(values)
@@ -97,7 +97,7 @@ class EntityTypeRepositoryTest {
         .isCustomField(true),
       new EntityTypeColumn()
         .name("custom_column_2")
-        .dataType(new BooleanType())
+        .dataType(new BooleanType().dataType("booleanType"))
         .valueGetter(valueGetter2)
         .labelAlias("custom_column_2")
         .values(values)

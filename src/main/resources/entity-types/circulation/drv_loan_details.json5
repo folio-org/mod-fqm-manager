@@ -1,0 +1,393 @@
+{
+  id: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+  name: 'drv_loan_details',
+  private: false,
+  fromClause: "src_circulation_loan LEFT JOIN src_circulation_loan_policy loan_policy_ref_data ON loan_policy_ref_data.id = ((src_circulation_loan.jsonb ->> 'loanPolicyId'::text)::uuid) LEFT JOIN src_inventory_service_point cospi ON cospi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkoutServicePointId'::text), 600)::uuid LEFT JOIN src_inventory_service_point cispi ON cispi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkinServicePointId'::text), 600)::uuid JOIN src_inventory_item item_details ON item_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'itemId'::text)), 600)::uuid LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = item_details.materialtypeid JOIN src_users_users user_details ON user_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'userId'::text)), 600)::uuid LEFT JOIN src_users_groups patron_id_ref_data ON patron_id_ref_data.id = user_details.patrongroup JOIN src_inventory_holdings_record hrim ON item_details.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id",
+  columns: [
+    {
+      name: 'holdings_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'item_details.holdingsrecordid',
+    },
+    {
+      name: 'instance_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'hrim.instanceid',
+    },
+    {
+      name: 'instance_primary_contributor',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'jsonb_path_query_first(instance_details.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
+    },
+    {
+      name: 'instance_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "instance_details.jsonb ->> 'title'",
+      filterValueGetter: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(instance_details.jsonb ->> \'title\'::text)), 600)',
+      valueFunction: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(:value)), 600)',
+    },
+    {
+      name: 'item_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "item_details.jsonb ->> 'barcode'",
+      filterValueGetter: "lower(item_details.jsonb ->> 'barcode'::text)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'item_call_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "item_details.jsonb -> 'effectiveCallNumberComponents' ->> 'callNumber'",
+      filterValueGetter: "\"left\"(lower((item_details.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text), 600)",
+      valueFunction: '"left"(lower(:value), 600)',
+    },
+    {
+      name: 'item_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'item_details.id',
+    },
+    {
+      name: 'item_material_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'item_material_type_id',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "material_type_ref_data.jsonb ->> 'name'",
+      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'item_material_type',
+        entityTypeId: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+      },
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.id',
+        labelJsonPath: '$.mtypes.*.name',
+      },
+    },
+    {
+      name: 'item_material_type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'item_details.materialtypeid',
+    },
+    {
+      name: 'item_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "item_details.jsonb -> 'status' ->> 'name'",
+      filterValueGetter: "\"left\"(lower(fs09000000_mod_inventory_storage.f_unaccent((item_details.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
+      valueFunction: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(:value)), 600)',
+      source: {
+        columnName: 'item_status',
+        entityTypeId: 'a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d',
+      },
+    },
+    {
+      name: 'loan_checkin_servicepoint_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'cispi.id',
+    },
+    {
+      name: 'loan_checkin_servicepoint_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'loan_checkin_servicepoint_id',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "cispi.jsonb ->> 'name'",
+      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(cispi.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'loan_checkin_servicepoint_name',
+        entityTypeId: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+      },
+      valueSourceApi: {
+        path: 'service-points',
+        valueJsonPath: '$.servicepoints.*.id',
+        labelJsonPath: '$.servicepoints.*.name',
+      },
+    },
+    {
+      name: 'loan_checkout_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "src_circulation_loan.jsonb ->> 'loanDate'",
+      filterValueGetter: '"left"(lower(src_circulation_loan.jsonb ->> \'loanDate\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
+    },
+    {
+      name: 'loan_checkout_servicepoint_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'cospi.id',
+    },
+    {
+      name: 'loan_checkout_servicepoint_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'loan_checkout_servicepoint_id',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "cospi.jsonb ->> 'name'",
+      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(cospi.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'loan_checkout_servicepoint_name',
+        entityTypeId: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+      },
+      valueSourceApi: {
+        path: 'service-points',
+        valueJsonPath: '$.servicepoints.*.id',
+        labelJsonPath: '$.servicepoints.*.name',
+      },
+    },
+    {
+      name: 'loan_due_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "src_circulation_loan.jsonb ->> 'dueDate'",
+      filterValueGetter: '"left"(lower(src_circulation_loan.jsonb ->> \'dueDate\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'src_circulation_loan.id',
+    },
+    {
+      name: 'loan_policy_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'loan_policy_ref_data.id',
+    },
+    {
+      name: 'loan_policy_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'loan_policy_id',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "loan_policy_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'loan_policy_name',
+        entityTypeId: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+      },
+      valueSourceApi: {
+        path: 'loan-policy-storage/loan-policies',
+        valueJsonPath: '$.loanPolicies.*.id',
+        labelJsonPath: '$.loanPolicies.*.name',
+      },
+    },
+    {
+      name: 'loan_return_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "src_circulation_loan.jsonb ->> 'returnDate'",
+    },
+    {
+      name: 'loan_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "src_circulation_loan.jsonb -> 'status' ->> 'name'",
+      filterValueGetter: "\"left\"(lower(fs09000000_mod_circulation_storage.f_unaccent((src_circulation_loan.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
+      valueFunction: '"left"(lower(fs09000000_mod_circulation_storage.f_unaccent(:value)), 600)',
+      source: {
+        columnName: 'loan_status',
+        entityTypeId: '146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2',
+      },
+    },
+    {
+      name: 'user_active',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "user_details.jsonb ->> 'active'",
+      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(user_details.jsonb ->> 'active'::text))",
+      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'user_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "user_details.jsonb ->> 'barcode'",
+      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(user_details.jsonb ->> 'barcode'::text))",
+      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'user_expiration_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "user_details.jsonb ->> 'expirationDate'",
+      filterValueGetter: '"left"(user_details.jsonb ->> \'expirationDate\'::text, 600)',
+      valueFunction: '"left"(:value, 600)',
+    },
+    {
+      name: 'user_first_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "user_details.jsonb -> 'personal' ->> 'firstName'",
+      filterValueGetter: "\"left\"(lower(fs09000000_mod_users.f_unaccent((user_details.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
+      valueFunction: '"left"(lower(fs09000000_mod_users.f_unaccent(:value)), 600)',
+    },
+    {
+      name: 'user_full_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "concat(user_details.jsonb -> 'personal' ->> 'lastName', ', ', user_details.jsonb -> 'personal' ->> 'firstName')",
+    },
+    {
+      name: 'user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'user_details.id',
+    },
+    {
+      name: 'user_last_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "user_details.jsonb -> 'personal' ->> 'lastName'",
+      filterValueGetter: "\"left\"(lower(fs09000000_mod_users.f_unaccent((user_details.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
+      valueFunction: '"left"(lower(fs09000000_mod_users.f_unaccent(:value)), 600)',
+    },
+    {
+      name: 'user_patron_group',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'user_patron_group_id',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "patron_id_ref_data.jsonb ->> 'group'",
+      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(patron_id_ref_data.jsonb ->> 'group'::text))",
+      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      source: {
+        columnName: 'user_patron_group',
+        entityTypeId: '4e09d89a-44ed-418e-a9cc-820dfb27bf3a',
+      },
+      valueSourceApi: {
+        path: 'groups',
+        valueJsonPath: '$.usergroups.*.id',
+        labelJsonPath: '$.usergroups.*.group',
+      },
+    },
+    {
+      name: 'user_patron_group_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'patron_id_ref_data.id',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'user_full_name',
+      direction: 'ASC',
+    },
+    {
+      columnName: 'loan_due_date',
+      direction: 'ASC',
+    },
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

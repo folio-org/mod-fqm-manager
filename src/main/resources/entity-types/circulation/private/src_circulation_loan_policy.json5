@@ -1,0 +1,26 @@
+{
+  id: '5e7de445-bcc6-4008-8032-8d9602b854d7',
+  name: 'src_circulation_loan_policy',
+  root: true,
+  private: true,
+  fromClause: 'src_circulation_loan_policy',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: 'src_circulation_loan_policy.id',
+    },
+    {
+      name: 'policy_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_circulation_loan_policy.jsonb ->> 'name'",
+    },
+  ],
+}

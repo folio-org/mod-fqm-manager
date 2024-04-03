@@ -1,19 +1,14 @@
 package org.folio.fqm.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.fql.model.Fql;
-import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.fqm.utils.IdColumnUtils;
@@ -36,7 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Service class responsible for managing a query

@@ -1,0 +1,26 @@
+{
+  id: 'bc03686c-657e-4f74-9d89-91eac5ea86a4',
+  name: 'src_inventory_instance_status',
+  root: true,
+  private: true,
+  fromClause: 'src_inventory_instance_status',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: 'src_inventory_instance_status.id',
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_inventory_instance_status.jsonb ->> 'name'",
+    },
+  ],
+}

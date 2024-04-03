@@ -1,0 +1,16 @@
+{
+  id: '2168014f-9316-4760-9d82-d0306d5f59e4',
+  name: 'drv_pol_payment_status',
+  root: false,
+  private: true,
+  fromClause: 'drv_pol_payment_status',
+  columns: [
+    {
+      name: 'payment_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+    },
+  ],
+}

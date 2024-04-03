@@ -1,0 +1,34 @@
+{
+  id: '489234a9-8703-48cd-85e3-7f84011bafa3',
+  name: 'src_organizations',
+  root: true,
+  private: true,
+  fromClause: 'src_organizations',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: 'src_organizations.id',
+    },
+    {
+      name: 'vendor_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_organizations.jsonb ->> 'name'",
+    },
+    {
+      name: 'vendor_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_organizations.jsonb ->> 'code'",
+    },
+  ],
+}

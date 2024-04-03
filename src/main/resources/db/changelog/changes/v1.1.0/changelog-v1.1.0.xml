@@ -34,7 +34,6 @@
   <changeSet id="MODFQMMGR-184" author="bsharp@ebsco.com" runOnChange="true">
     <comment>Remove unneeded materialized view for POL currencies</comment>
     <sql> DROP MATERIALIZED VIEW IF EXISTS drv_pol_currency;
-          DELETE FROM entity_type_definition WHERE derived_table_name = 'drv_pol_currency';
     </sql>
   </changeSet>
 

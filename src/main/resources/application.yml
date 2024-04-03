@@ -67,6 +67,8 @@ spring:
         max-size: 10 # Max number of concurrent async tasks
         queue-capacity: 1000
       thread-name-prefix: mod-fqm-manager-
+  banner:
+    location: classpath:/banner.txt
 coffee-boots:
   cache:
     spec:

@@ -45,7 +45,7 @@ public class TestDbSetupConfiguration {
     @PostConstruct
     public void populateEntityTypes() throws IOException {
       log.info("======== Entity type initializer @PostConstruct");
-      // entityTypeInitializationService.initializeEntityTypes();
+      entityTypeInitializationService.initializeEntityTypes();
     }
   }
 }

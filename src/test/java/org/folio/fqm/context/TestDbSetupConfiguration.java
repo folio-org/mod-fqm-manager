@@ -34,7 +34,6 @@ public class TestDbSetupConfiguration {
     return new EntityTypeInitializer();
   }
 
-  @Component
   static class EntityTypeInitializer {
 
     @Autowired

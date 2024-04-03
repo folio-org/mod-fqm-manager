@@ -1,0 +1,26 @@
+{
+  id: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
+  name: 'src_acquisitions_unit',
+  root: true,
+  fromClause: 'src_acquisitions_unit',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'src_acquisitions_unit.id',
+      isIdColumn: true,
+      visibleByDefault: true,
+    },
+    {
+      name: 'acquisitions_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_acquisitions_unit.jsonb ->> 'name'",
+      visibleByDefault: true,
+    },
+  ],
+  private: true,
+}

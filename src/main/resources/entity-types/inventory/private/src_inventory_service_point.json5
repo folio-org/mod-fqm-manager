@@ -1,0 +1,34 @@
+{
+  id: '89cdeac4-9582-4388-800b-9ccffd8d7691',
+  name: 'src_inventory_service_point',
+  root: true,
+  fromClause: 'src_inventory_service_point',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'src_inventory_service_point.id',
+      isIdColumn: true,
+      visibleByDefault: true,
+    },
+    {
+      name: 'service_point_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_service_point.jsonb ->> 'name'",
+      visibleByDefault: true,
+    },
+    {
+      name: 'service_point_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_service_point.jsonb ->> 'code'",
+      visibleByDefault: true,
+    },
+  ],
+  private: true,
+}

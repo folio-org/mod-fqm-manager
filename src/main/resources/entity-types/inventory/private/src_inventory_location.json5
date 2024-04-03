@@ -1,0 +1,34 @@
+{
+  id: 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b',
+  name: 'src_inventory_location',
+  root: true,
+  fromClause: 'src_inventory_location',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'src_inventory_location.id',
+      isIdColumn: true,
+      visibleByDefault: true,
+    },
+    {
+      name: 'location_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_location.jsonb ->> 'name'",
+      visibleByDefault: true,
+    },
+    {
+      name: 'location_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_location.jsonb ->> 'code'",
+      visibleByDefault: true,
+    },
+  ],
+  private: true,
+}

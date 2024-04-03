@@ -1,0 +1,17 @@
+{
+  id: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
+  name: 'drv_languages',
+  fromClause: 'drv_languages',
+  root: true,
+  private: true,
+  columns: [
+    {
+      name: 'languages',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: 'drv_languages.languages',
+      visibleByDefault: true,
+    },
+  ],
+}

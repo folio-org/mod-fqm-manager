@@ -1,0 +1,26 @@
+{
+  id: '5c8315be-13f5-4df5-ae8b-086bae83484d',
+  name: 'src_inventory_call_number_type',
+  root: true,
+  fromClause: 'src_inventory_call_number_type',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'src_inventory_call_number_type.id',
+      isIdColumn: true,
+      visibleByDefault: true,
+    },
+    {
+      name: 'call_number_type_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_call_number_type.jsonb ->> 'name'",
+      visibleByDefault: true,
+    },
+  ],
+  private: true,
+}

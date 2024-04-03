@@ -1,0 +1,34 @@
+{
+  id: 'cf9f5c11-e943-483c-913b-81d1e338accc',
+  name: 'src_inventory_loclibrary',
+  root: true,
+  fromClause: 'src_inventory_loclibrary',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'src_inventory_loclibrary.id',
+      isIdColumn: true,
+      visibleByDefault: true,
+    },
+    {
+      name: 'loclibrary_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_loclibrary.jsonb ->> 'name'",
+      visibleByDefault: true,
+    },
+    {
+      name: 'loclibrary_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "src_inventory_loclibrary.jsonb ->> 'code'",
+      visibleByDefault: true,
+    },
+  ],
+  private: true,
+}

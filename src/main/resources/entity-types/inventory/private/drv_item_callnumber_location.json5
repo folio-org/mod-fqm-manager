@@ -9,225 +9,225 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_item.holdingsrecordid',
       visibleByDefault: false,
+      valueGetter: 'src_inventory_item.holdingsrecordid',
     },
     {
       name: 'item_barcode',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_inventory_item.jsonb ->> 'barcode'",
       visibleByDefault: true,
+      valueGetter: "src_inventory_item.jsonb ->> 'barcode'",
     },
     {
       name: 'item_level_call_number',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumber'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumber'",
     },
     {
       name: 'item_level_call_number_type_name',
-      source: {
-        columnName: 'call_number_type_name',
-        entityTypeId: '5c8315be-13f5-4df5-ae8b-086bae83484d',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_level_call_number_typeid',
-      valueGetter: "call_item_number_type_ref_data.jsonb ->> 'name'",
       visibleByDefault: false,
+      valueGetter: "call_item_number_type_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'call_number_type_name',
+        entityTypeId: '5c8315be-13f5-4df5-ae8b-086bae83484d',
+      },
     },
     {
       name: 'item_level_call_number_typeid',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'",
     },
     {
       name: 'item_copy_number',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_inventory_item.jsonb ->> 'copyNumber'",
       visibleByDefault: true,
+      valueGetter: "src_inventory_item.jsonb ->> 'copyNumber'",
     },
     {
       name: 'item_created_date',
       dataType: {
         dataType: 'dateType',
       },
-      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'createdDate'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
       name: 'item_effective_call_number',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text))",
       visibleByDefault: true,
+      valueGetter: "concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text))",
     },
     {
       name: 'item_effective_call_number_type_name',
-      source: {
-        columnName: 'call_number_type_name',
-        entityTypeId: '5c8315be-13f5-4df5-ae8b-086bae83484d',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_effective_call_number_typeid',
-      valueGetter: "call_number_type_ref_data.jsonb ->> 'name'",
       visibleByDefault: false,
+      valueGetter: "call_number_type_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'call_number_type_name',
+        entityTypeId: '5c8315be-13f5-4df5-ae8b-086bae83484d',
+      },
     },
     {
       name: 'item_effective_call_number_typeid',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: "src_inventory_item.jsonb -> 'effectiveCallNumberComponents' ->> 'typeId'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'effectiveCallNumberComponents' ->> 'typeId'",
     },
     {
       name: 'item_effective_library_code',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "loclib_ref_data.jsonb ->> 'code'",
       visibleByDefault: false,
+      valueGetter: "loclib_ref_data.jsonb ->> 'code'",
     },
     {
       name: 'item_effective_library_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'loclib_ref_data.id',
       visibleByDefault: false,
+      valueGetter: 'loclib_ref_data.id',
     },
     {
       name: 'item_effective_library_name',
-      source: {
-        columnName: 'loclibrary_name',
-        entityTypeId: 'cf9f5c11-e943-483c-913b-81d1e338accc',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_effective_library_id',
-      valueGetter: "loclib_ref_data.jsonb ->> 'name'",
       visibleByDefault: false,
+      valueGetter: "loclib_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'loclibrary_name',
+        entityTypeId: 'cf9f5c11-e943-483c-913b-81d1e338accc',
+      },
     },
     {
       name: 'item_effective_location_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_item.effectivelocationid',
       visibleByDefault: false,
+      valueGetter: 'src_inventory_item.effectivelocationid',
     },
     {
       name: 'item_effective_location_name',
-      source: {
-        columnName: 'location_name',
-        entityTypeId: 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_effective_location_id',
-      valueGetter: "effective_location_ref_data.jsonb ->> 'name'",
       visibleByDefault: true,
+      valueGetter: "effective_location_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'location_name',
+        entityTypeId: 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b',
+      },
     },
     {
       name: 'item_hrid',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_inventory_item.jsonb ->> 'hrid'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'hrid'",
     },
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_item.id',
       isIdColumn: true,
       visibleByDefault: false,
+      valueGetter: 'src_inventory_item.id',
     },
     {
       name: 'item_material_type',
-      source: {
-        columnName: 'material_type_name',
-        entityTypeId: '917ea5c8-cafe-4fa6-a942-e2388a88c6f6',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_material_type_id',
-      valueGetter: "material_type_ref_data.jsonb ->> 'name'",
       visibleByDefault: false,
+      valueGetter: "material_type_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'material_type_name',
+        entityTypeId: '917ea5c8-cafe-4fa6-a942-e2388a88c6f6',
+      },
     },
     {
       name: 'item_material_type_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_item.materialtypeid',
       visibleByDefault: false,
+      valueGetter: 'src_inventory_item.materialtypeid',
     },
     {
       name: 'item_permanent_location_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_item.permanentlocationid',
       visibleByDefault: false,
+      valueGetter: 'src_inventory_item.permanentlocationid',
     },
     {
       name: 'item_permanent_location_name',
-      source: {
-        columnName: 'location_name',
-        entityTypeId: 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b',
-      },
       dataType: {
         dataType: 'stringType',
       },
       idColumnName: 'item_permanent_location_id',
-      valueGetter: "permanent_location_ref_data.jsonb ->> 'name'",
       visibleByDefault: false,
+      valueGetter: "permanent_location_ref_data.jsonb ->> 'name'",
+      source: {
+        columnName: 'location_name',
+        entityTypeId: 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b',
+      },
     },
     {
       name: 'item_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'status' ->> 'name'",
       source: {
         columnName: 'item_status',
         entityTypeId: 'a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d',
       },
-      dataType: {
-        dataType: 'stringType',
-      },
-      valueGetter: "src_inventory_item.jsonb -> 'status' ->> 'name'",
-      visibleByDefault: false,
     },
     {
       name: 'item_updated_date',
       dataType: {
         dataType: 'dateType',
       },
-      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'updatedDate'",
       visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'updatedDate'",
     },
   ],
   defaultSort: [
     {
-      direction: 'ASC',
       columnName: 'id',
+      direction: 'ASC',
     },
   ],
 }

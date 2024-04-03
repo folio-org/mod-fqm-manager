@@ -10,8 +10,8 @@
         dataType: 'dateType',
       },
       queryable: true,
-      valueGetter: "org.jsonb->'metadata'->>'updatedDate'",
       visibleByDefault: false,
+      valueGetter: "org.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'code',
@@ -19,10 +19,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: true,
       valueGetter: "org.jsonb->>'code'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'code'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: true,
     },
     {
       name: 'name',
@@ -30,13 +30,21 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: true,
       valueGetter: "org.jsonb->>'name'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'name'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: true,
     },
     {
       name: 'organization_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "org.jsonb->>'status'",
+      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'status'::text))",
+      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
       values: [
         {
           label: 'Active',
@@ -51,14 +59,6 @@
           value: 'pending',
         },
       ],
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      valueGetter: "org.jsonb->>'status'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'status'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: true,
     },
     {
       name: 'description',
@@ -66,10 +66,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "org.jsonb->>'description'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'description'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: false,
     },
     {
       name: 'accounting_code',
@@ -77,10 +77,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "org.jsonb->>'erpCode'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'erpCode'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: false,
     },
     {
       name: 'alias',
@@ -92,7 +92,9 @@
             {
               name: 'value',
               property: 'value',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
               valueFunction: 'lower(:value)',
@@ -100,7 +102,9 @@
             {
               name: 'description',
               property: 'description',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
               valueFunction: 'lower(:value)',
@@ -108,8 +112,8 @@
           ],
         },
       },
-      valueGetter: "org.jsonb ->> 'aliases'",
       visibleByDefault: false,
+      valueGetter: "org.jsonb ->> 'aliases'",
     },
     {
       name: 'organization_type_ids',
@@ -120,8 +124,8 @@
         },
       },
       queryable: false,
-      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'organizationTypes'::text) record(value))",
       visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'organizationTypes'::text) record(value))",
     },
     {
       name: 'organization_type_name',
@@ -131,27 +135,33 @@
           dataType: 'stringType',
         },
       },
-      queryable: false,
       idColumnName: 'organization_type_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
       source: {
         entityTypeId: '6b335e41-2654-4e2a-9b4e-c6930b330ccc',
         columnName: 'organization_types_name',
       },
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
-      visibleByDefault: false,
     },
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
-      valueGetter: 'org.id',
       isIdColumn: true,
+      queryable: true,
       visibleByDefault: true,
+      valueGetter: 'org.id',
     },
     {
       name: 'payment_method',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "org.jsonb->>'paymentMethod'",
       values: [
         {
           label: 'Credit Card',
@@ -174,12 +184,6 @@
           value: 'Deposit Account',
         },
       ],
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      valueGetter: "org.jsonb->>'paymentMethod'",
-      visibleByDefault: false,
     },
     {
       name: 'discount_percent',
@@ -187,9 +191,9 @@
         dataType: 'numberType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'discountPercent')::float",
       valueFunction: '(:value)::float',
-      visibleByDefault: false,
     },
     {
       name: 'claiming_interval',
@@ -197,12 +201,18 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'claimingInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'export_to_accounting',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "org.jsonb->>'exportToAccounting'",
       values: [
         {
           label: 'True',
@@ -213,12 +223,6 @@
           value: 'false',
         },
       ],
-      dataType: {
-        dataType: 'booleanType',
-      },
-      queryable: true,
-      valueGetter: "org.jsonb->>'exportToAccounting'",
-      visibleByDefault: false,
     },
     {
       name: 'subscription_interval',
@@ -226,9 +230,9 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'subscriptionInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'expected_invoice_interval',
@@ -236,9 +240,9 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'expectedInvoiceInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'expected_receipt_interval',
@@ -246,9 +250,9 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'expectedReceiptInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'renewal_activation_interval',
@@ -256,9 +260,9 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'renewalActivationInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'expected_activation_interval',
@@ -266,9 +270,9 @@
         dataType: 'integerType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'expectedActivationInterval')::integer",
       valueFunction: '(:value)::integer',
-      visibleByDefault: false,
     },
     {
       name: 'tax_id',
@@ -276,10 +280,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "org.jsonb->>'taxId'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'taxId'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: false,
     },
     {
       name: 'tax_percentage',
@@ -287,9 +291,9 @@
         dataType: 'numberType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "(org.jsonb->'taxPercentage')::float",
       valueFunction: '(:value)::float',
-      visibleByDefault: false,
     },
     {
       name: 'vendor_currencies',
@@ -300,8 +304,8 @@
         },
       },
       queryable: false,
-      valueGetter: "(SELECT array_agg(vendorCurrency) FROM jsonb_array_elements_text(org.jsonb->'vendorCurrencies') AS vendorCurrency)",
       visibleByDefault: false,
+      valueGetter: "(SELECT array_agg(vendorCurrency) FROM jsonb_array_elements_text(org.jsonb->'vendorCurrencies') AS vendorCurrency)",
     },
     {
       name: 'agreements',
@@ -356,8 +360,8 @@
           ],
         },
       },
-      valueGetter: "org.jsonb ->> 'agreements'",
       visibleByDefault: false,
+      valueGetter: "org.jsonb ->> 'agreements'",
     },
     {
       name: 'acqunit_ids',
@@ -368,10 +372,10 @@
         },
       },
       queryable: false,
+      visibleByDefault: false,
       valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'acqUnitIds'::text) acq_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'acqUnitIds'::text) acq_id(value))",
       valueFunction: 'lower(:value)',
-      visibleByDefault: false,
     },
     {
       name: 'acquisition_unit',
@@ -381,12 +385,12 @@
           dataType: 'stringType',
         },
       },
+      idColumnName: 'acqunit_ids',
       queryable: false,
+      visibleByDefault: false,
       valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      idColumnName: 'acqunit_ids',
       source: {
         entityTypeId: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
         columnName: 'acquisitions_name',
@@ -402,7 +406,9 @@
             {
               name: 'name',
               property: 'name',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'name')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -410,7 +416,9 @@
             {
               name: 'notes',
               property: 'notes',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'notes')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -418,7 +426,9 @@
             {
               name: 'accountNo',
               property: 'accountNo',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'accountNo')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -426,7 +436,9 @@
             {
               name: 'libraryCode',
               property: 'libraryCode',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'libraryCode')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -434,7 +446,9 @@
             {
               name: 'libraryEdiCode',
               property: 'libraryEdiCode',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'libraryEdiCode')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -442,7 +456,9 @@
             {
               name: 'contactInfo',
               property: 'contactInfo',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'contactInfo')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -450,7 +466,9 @@
             {
               name: 'appSystemNo',
               property: 'appSystemNo',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'appSystemNo')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -458,7 +476,9 @@
             {
               name: 'description',
               property: 'description',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -466,7 +486,9 @@
             {
               name: 'accountStatus',
               property: 'accountStatus',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               values: [
                 {
                   label: 'Active',
@@ -488,7 +510,9 @@
             {
               name: 'paymentMethod',
               property: 'paymentMethod',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               values: [
                 {
                   label: 'Credit Card',
@@ -520,7 +544,9 @@
               property: 'acqUnitIds',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'rangedUUIDType' },
+                itemDataType: {
+                  dataType: 'rangedUUIDType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'accounts') AS acc_obj, jsonb_array_elements(acc_obj->'acqUnitIds') as elems )",
@@ -530,7 +556,9 @@
               property: 'acquisitionUnit',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'stringType' },
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(au.jsonb->>'name')) FROM jsonb_array_elements(org.jsonb->'accounts') as acc, jsonb_array_elements(acc->'acqUnitIds') as acdId JOIN src_acquisitions_unit au ON au.id = (acdId#>>'{}')::uuid )",
@@ -538,8 +566,8 @@
           ],
         },
       },
-      valueGetter: "(SELECT jsonb_agg(accounts || jsonb_build_object('acquisitionUnit', COALESCE(( SELECT array_agg(au.jsonb->>'name') FROM jsonb_array_elements(accounts->'acqUnitIds') as acdId JOIN src_acquisitions_unit au on au.id = (acdId#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'accounts') as accounts)",
       visibleByDefault: false,
+      valueGetter: "(SELECT jsonb_agg(accounts || jsonb_build_object('acquisitionUnit', COALESCE(( SELECT array_agg(au.jsonb->>'name') FROM jsonb_array_elements(accounts->'acqUnitIds') as acdId JOIN src_acquisitions_unit au on au.id = (acdId#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'accounts') as accounts)",
     },
   ],
   defaultSort: [

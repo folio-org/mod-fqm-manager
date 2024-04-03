@@ -1,26 +1,26 @@
 {
   id: '6b335e41-2654-4e2a-9b4e-c6930b330ccc',
   name: 'src_organization_types',
-  fromClause: 'src_organization_types',
   root: true,
   private: true,
+  fromClause: 'src_organization_types',
   columns: [
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_organization_types.id',
       isIdColumn: true,
       visibleByDefault: true,
+      valueGetter: 'src_organization_types.id',
     },
     {
       name: 'organization_types_name',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_organization_types.jsonb ->> 'name'",
       visibleByDefault: true,
+      valueGetter: "src_organization_types.jsonb ->> 'name'",
     },
   ],
 }

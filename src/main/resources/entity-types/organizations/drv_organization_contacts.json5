@@ -9,10 +9,10 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
       isIdColumn: true,
-      valueGetter: 'org.id',
+      queryable: true,
       visibleByDefault: true,
+      valueGetter: 'org.id',
     },
     {
       name: 'last_updated',
@@ -20,8 +20,8 @@
         dataType: 'dateType',
       },
       queryable: true,
-      valueGetter: "org.jsonb->'metadata'->>'updatedDate'",
       visibleByDefault: false,
+      valueGetter: "org.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'name',
@@ -29,10 +29,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: true,
+      valueGetter: "org.jsonb->>'name'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'name'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      valueGetter: "org.jsonb->>'name'",
-      visibleByDefault: true,
     },
     {
       name: 'code',
@@ -40,10 +40,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: true,
+      valueGetter: "org.jsonb->>'code'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'code'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      valueGetter: "org.jsonb->>'code'",
-      visibleByDefault: true,
     },
     {
       name: 'accounting_code',
@@ -51,13 +51,21 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: false,
+      valueGetter: "org.jsonb->>'erpCode'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'erpCode'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      valueGetter: "org.jsonb->>'erpCode'",
-      visibleByDefault: false,
     },
     {
       name: 'organization_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "org.jsonb->>'status'",
+      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text))",
+      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
       values: [
         {
           label: 'Active',
@@ -72,14 +80,6 @@
           value: 'pending',
         },
       ],
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      valueGetter: "org.jsonb->>'status'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'status'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: true,
     },
     {
       name: 'organization_type_ids',
@@ -90,8 +90,8 @@
         },
       },
       queryable: false,
-      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb->'organizationTypes'::text) record(value))",
       visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb->'organizationTypes'::text) record(value))",
     },
     {
       name: 'organization_type_name',
@@ -101,14 +101,14 @@
           dataType: 'stringType',
         },
       },
-      queryable: false,
       idColumnName: 'organization_type_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
       source: {
         entityTypeId: '6b335e41-2654-4e2a-9b4e-c6930b330ccc',
         columnName: 'organization_types_name',
       },
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
-      visibleByDefault: false,
     },
     {
       name: 'description',
@@ -116,10 +116,10 @@
         dataType: 'stringType',
       },
       queryable: true,
+      visibleByDefault: false,
       valueGetter: "org.jsonb->>'description'",
       filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'description'::text))",
       valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
-      visibleByDefault: false,
     },
     {
       name: 'alias',
@@ -131,7 +131,9 @@
             {
               name: 'value',
               property: 'value',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
               valueFunction: 'lower(:value)',
@@ -139,7 +141,9 @@
             {
               name: 'description',
               property: 'description',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'aliases') AS elems)",
               valueFunction: 'lower(:value)',
@@ -147,8 +151,8 @@
           ],
         },
       },
-      valueGetter: "org.jsonb ->> 'aliases'",
       visibleByDefault: false,
+      valueGetter: "org.jsonb ->> 'aliases'",
     },
     {
       name: 'address',
@@ -160,7 +164,9 @@
             {
               name: 'address_line_1',
               property: 'addressLine1',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'addressLine1')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -168,7 +174,9 @@
             {
               name: 'address_line_2',
               property: 'addressLine2',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'addressLine2')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -176,7 +184,9 @@
             {
               name: 'city',
               property: 'city',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'city')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -184,7 +194,9 @@
             {
               name: 'state_region',
               property: 'stateRegion',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'stateRegion')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -192,7 +204,9 @@
             {
               name: 'postal_code',
               property: 'zipCode',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'zipCode')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -200,7 +214,9 @@
             {
               name: 'country',
               property: 'country',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'country')) FROM jsonb_array_elements(org.jsonb -> 'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -210,7 +226,9 @@
               property: 'categories',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'rangedUUIDType' },
+                itemDataType: {
+                  dataType: 'rangedUUIDType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'addresses') AS address_obj, jsonb_array_elements(address_obj->'categories') as elems )",
@@ -220,7 +238,9 @@
               property: 'categoryNames',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'stringType' },
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'addresses') as address, jsonb_array_elements(address->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )",
@@ -228,8 +248,8 @@
           ],
         },
       },
-      valueGetter: "( SELECT jsonb_agg(address || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(address->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'addresses') as address)",
       visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(address || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(address->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'addresses') as address)",
     },
     {
       name: 'phone_number',
@@ -241,7 +261,9 @@
             {
               name: 'phone_number',
               property: 'phoneNumber',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'phoneNumber')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
               valueFunction: 'lower(:value)',
@@ -249,7 +271,9 @@
             {
               name: 'type',
               property: 'type',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'type')) FROM jsonb_array_elements(org.jsonb -> 'phoneNumbers') AS elems)",
               valueFunction: 'lower(:value)',
@@ -259,7 +283,9 @@
               property: 'categories',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'rangedUUIDType' },
+                itemDataType: {
+                  dataType: 'rangedUUIDType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'phoneNumbers') AS phone_obj, jsonb_array_elements(phone_obj->'categories') as elems )",
@@ -269,7 +295,9 @@
               property: 'categoryNames',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'stringType' },
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'phoneNumbers') as phone, jsonb_array_elements(phone->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )",
@@ -277,8 +305,8 @@
           ],
         },
       },
-      valueGetter: "( SELECT jsonb_agg(phone || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(phone->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'phoneNumbers') as phone)",
       visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(phone || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(phone->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'phoneNumbers') as phone)",
     },
     {
       name: 'email',
@@ -290,7 +318,9 @@
             {
               name: 'email',
               property: 'value',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
               valueFunction: 'lower(:value)',
@@ -298,7 +328,9 @@
             {
               name: 'description',
               property: 'description',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'emails') AS elems)",
               valueFunction: 'lower(:value)',
@@ -308,7 +340,9 @@
               property: 'categories',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'rangedUUIDType' },
+                itemDataType: {
+                  dataType: 'rangedUUIDType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'emails') AS email_obj, jsonb_array_elements(email_obj->'categories') as elems )",
@@ -318,7 +352,9 @@
               property: 'categoriesNames',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'stringType' },
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'emails') as email, jsonb_array_elements(email->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )",
@@ -326,8 +362,8 @@
           ],
         },
       },
-      valueGetter: "( SELECT jsonb_agg(email || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(email->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'emails') as email)",
       visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(email || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(email->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ),  array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'emails') as email)",
     },
     {
       name: 'url',
@@ -339,7 +375,9 @@
             {
               name: 'url',
               property: 'value',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'value')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
               valueFunction: 'lower(:value)',
@@ -347,7 +385,9 @@
             {
               name: 'description',
               property: 'description',
-              dataType: { dataType: 'stringType' },
+              dataType: {
+                dataType: 'stringType',
+              },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'description')) FROM jsonb_array_elements(org.jsonb -> 'urls') AS elems)",
               valueFunction: 'lower(:value)',
@@ -357,7 +397,9 @@
               property: 'categories',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'rangedUUIDType' },
+                itemDataType: {
+                  dataType: 'rangedUUIDType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(org.jsonb->'urls') AS url_obj, jsonb_array_elements(url_obj->'categories') as elems )",
@@ -367,7 +409,9 @@
               property: 'categoriesNames',
               dataType: {
                 dataType: 'arrayType',
-                itemDataType: { dataType: 'stringType' },
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
               queryable: false,
               filterValueGetter: "( SELECT array_agg(lower(cats.jsonb->>'value')) FROM jsonb_array_elements(org.jsonb->'urls') as url, jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats ON cats.id = (category_id#>>'{}')::uuid )",
@@ -375,8 +419,8 @@
           ],
         },
       },
-      valueGetter: "( SELECT jsonb_agg(url || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'urls') as url)",
       visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(url || jsonb_build_object('categoryNames', COALESCE(( SELECT array_agg(cats.jsonb->>'value') FROM jsonb_array_elements(url->'categories') as category_id JOIN src_organization_categories cats on cats.id = (category_id#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(org.jsonb->'urls') as url)",
     },
     {
       name: 'acquisition_unit_id',
@@ -387,10 +431,10 @@
         },
       },
       queryable: false,
+      visibleByDefault: false,
       valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'acqUnitIds'::text) acq_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(org.jsonb -> 'acqUnitIds'::text) acq_id(value))",
       valueFunction: 'lower(:value)',
-      visibleByDefault: false,
     },
     {
       name: 'acquisition_unit_name',
@@ -400,12 +444,12 @@
           dataType: 'stringType',
         },
       },
+      idColumnName: 'acquisition_unit_id',
       queryable: false,
+      visibleByDefault: false,
       valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((org.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      idColumnName: 'acquisition_unit_id',
       source: {
         entityTypeId: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
         columnName: 'acquisitions_name',

@@ -2,6 +2,7 @@
   id: 'e627a89b-682b-41fe-b532-f4262020a451',
   name: 'src_users_addresstype',
   root: true,
+  private: true,
   fromClause: 'src_users_addresstype',
   columns: [
     {
@@ -9,18 +10,17 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_users_addresstype.id',
       isIdColumn: true,
       visibleByDefault: true,
+      valueGetter: 'src_users_addresstype.id',
     },
     {
       name: 'addressType',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_users_addresstype.jsonb ->> 'addressType'",
       visibleByDefault: true,
+      valueGetter: "src_users_addresstype.jsonb ->> 'addressType'",
     },
   ],
-  private: true,
 }

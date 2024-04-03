@@ -2,6 +2,7 @@
   id: '917ea5c8-cafe-4fa6-a942-e2388a88c6f6',
   name: 'src_inventory_material_type',
   root: true,
+  private: true,
   fromClause: 'src_inventory_material_type',
   columns: [
     {
@@ -9,18 +10,17 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'src_inventory_material_type.id',
       isIdColumn: true,
       visibleByDefault: true,
+      valueGetter: 'src_inventory_material_type.id',
     },
     {
       name: 'material_type_name',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "src_inventory_material_type.jsonb ->> 'name'",
       visibleByDefault: true,
+      valueGetter: "src_inventory_material_type.jsonb ->> 'name'",
     },
   ],
-  private: true,
 }

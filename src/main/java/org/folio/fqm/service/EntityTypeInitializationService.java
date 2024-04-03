@@ -72,14 +72,13 @@ public class EntityTypeInitializationService {
           throw new UncheckedIOException(e);
         }
       })
-      .collect(Collectors.toList());
+      .toList();
 
     // lambdas ensure we don't do the stream/map/etc. unless logging is enabled
     log.info(
       "Found {} entity types in package: {}",
       () -> desiredEntityTypes.size(),
-      () ->
-        desiredEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).collect(Collectors.toList())
+      () -> desiredEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
     );
 
     entityTypeRepository.replaceEntityTypeDefinitions(desiredEntityTypes);

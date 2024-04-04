@@ -8,6 +8,8 @@ export default function PostgresConnector({
 }: Readonly<{
   socket: Socket;
 }>) {
+  const [open, setOpen] = useState(true);
+
   const [postgresConnection, setPostgresConnection] = useState<PostgresConnection>({
     host: 'localhost',
     port: 5432,
@@ -21,11 +23,14 @@ export default function PostgresConnector({
     socket.on('postgres-connection-change', (msg) => {
       console.log('Postgres Connection change', msg);
       setConnectionState(msg);
+      if (msg.connected) {
+        setOpen(false);
+      }
     });
   }, []);
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion expanded={open} onChange={() => setOpen((o) => !o)}>
       <AccordionSummary>
         <span>
           Postgres Connection{' '}

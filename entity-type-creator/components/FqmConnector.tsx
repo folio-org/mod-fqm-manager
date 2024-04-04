@@ -8,6 +8,8 @@ export default function FqmConnector({
 }: Readonly<{
   socket: Socket;
 }>) {
+  const [open, setOpen] = useState(true);
+
   const [fqmConnection, setFqmConnection] = useState<FqmConnection>({
     host: 'localhost',
     port: 8081,
@@ -20,11 +22,14 @@ export default function FqmConnector({
     socket.on('fqm-connection-change', (msg) => {
       console.log('FQM Connection change', msg);
       setConnectionState(msg);
+      if (msg.connected) {
+        setOpen(false);
+      }
     });
   }, []);
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion expanded={open} onChange={() => setOpen((o) => !o)}>
       <AccordionSummary>
         <span>
           FQM Connection{' '}

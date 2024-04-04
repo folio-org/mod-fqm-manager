@@ -156,8 +156,9 @@ export default function EntityTypeManager({
                 </Select>
               </FormControl>
             </Grid> */}
-            <Grid xs={12}>
+            <Grid container item xs={12}>
               <CodeMirror
+                style={{ width: 0, flexGrow: 1 }}
                 value={entityType.fromClause}
                 onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
                 extensions={[codeMirrorExtension]}

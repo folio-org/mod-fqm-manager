@@ -13,8 +13,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb ->> 'active'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(src_users_users.jsonb ->> 'active'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'active'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
       values: [
         {
           value: 'true',
@@ -100,8 +100,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb ->> 'barcode'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'user_cities',
@@ -195,8 +195,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_users_users.jsonb -> 'personal' ->> 'email'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'email'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'email'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'user_enrollment_date',
@@ -226,8 +226,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_users_users.jsonb ->> 'externalSystemId'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(src_users_users.jsonb ->> 'externalSystemId'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'externalSystemId'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'user_first_name',
@@ -237,8 +237,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb -> 'personal' ->> 'firstName'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_users.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
       name: 'id',
@@ -258,8 +258,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb -> 'personal' ->> 'lastName'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_users.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
       name: 'user_middle_name',
@@ -288,8 +288,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_users_groups.jsonb ->> 'group'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(src_users_groups.jsonb ->> 'group'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_groups.jsonb ->> 'group'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
       source: {
         entityTypeId: '0069cf6f-2833-46db-8a51-8934769b8289',
         columnName: 'user_patron_group',
@@ -363,8 +363,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb -> 'personal' ->> 'preferredFirstName'",
-      filterValueGetter: "fs09000000_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
-      valueFunction: 'fs09000000_mod_users.f_unaccent(:value)',
+      filterValueGetter: "${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
+      valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)',
     },
     {
       name: 'user_primary_address',
@@ -406,8 +406,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb ->> 'username'",
-      filterValueGetter: "lower(fs09000000_mod_users.f_unaccent(src_users_users.jsonb ->> 'username'::text))",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'username'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
   ],
   defaultSort: [

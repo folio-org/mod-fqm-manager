@@ -136,8 +136,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "purchase_order.jsonb ->> 'approved'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'approved\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'approved\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           label: 'True',
@@ -184,8 +184,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "purchase_order.jsonb -> 'metadata' ->> 'createdByUserId'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdByUserId'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'po_created_date',
@@ -195,8 +195,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "purchase_order.jsonb -> 'metadata' ->> 'createdDate'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((purchase_order.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'po_id',
@@ -238,8 +238,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "purchase_order.jsonb ->> 'orderType'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'orderType\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'orderType\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           label: 'Ongoing',
@@ -286,8 +286,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "purchase_order.jsonb ->> 'workflowStatus'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'workflowStatus\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(purchase_order.jsonb ->> \'workflowStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'closed',
@@ -329,8 +329,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_purchase_order_line.jsonb -> 'metadata' ->> 'createdDate'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_orders_storage.f_unaccent((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((src_purchase_order_line.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'pol_currency',
@@ -384,8 +384,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_purchase_order_line.jsonb ->> 'poLineNumber'",
-      filterValueGetter: "lower(fs09000000_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'poLineNumber'::text))",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> 'poLineNumber'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
     },
     {
       name: 'pol_payment_status',
@@ -395,8 +395,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_purchase_order_line.jsonb ->> 'paymentStatus'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> \'paymentStatus\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> \'paymentStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       source: {
         entityTypeId: '2168014f-9316-4760-9d82-d0306d5f59e4',
         columnName: 'payment_status',
@@ -410,8 +410,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_purchase_order_line.jsonb ->> 'receiptStatus'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> \'receiptStatus\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_orders_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(src_purchase_order_line.jsonb ->> \'receiptStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       source: {
         entityTypeId: '5fefec2a-9d6c-474c-8698-b0ea77186c12',
         columnName: 'receipt_status',
@@ -453,8 +453,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "organization_details.jsonb ->> 'code'",
-      filterValueGetter: "fs09000000_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'code'::text)",
-      valueFunction: 'fs09000000_mod_organizations_storage.f_unaccent(:value)',
+      filterValueGetter: "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'code'::text)",
+      valueFunction: '${tenant_id}_mod_organizations_storage.f_unaccent(:value)',
       source: {
         entityTypeId: '90403847-8c47-4f58-b117-9a807b052808',
         columnName: 'vendor_code',
@@ -483,8 +483,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "organization_details.jsonb ->> 'name'",
-      filterValueGetter: "fs09000000_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'name'::text)",
-      valueFunction: 'fs09000000_mod_organizations_storage.f_unaccent(:value)',
+      filterValueGetter: "${tenant_id}_mod_organizations_storage.f_unaccent(organization_details.jsonb ->> 'name'::text)",
+      valueFunction: '${tenant_id}_mod_organizations_storage.f_unaccent(:value)',
       source: {
         entityTypeId: '90403847-8c47-4f58-b117-9a807b052808',
         columnName: 'vendor_name',

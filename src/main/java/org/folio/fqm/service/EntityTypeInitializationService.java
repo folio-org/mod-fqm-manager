@@ -5,17 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 @Log4j2
 @Service
@@ -23,15 +26,19 @@ public class EntityTypeInitializationService {
 
   private final EntityTypeRepository entityTypeRepository;
 
+  private final FolioExecutionContext folioExecutionContext;
+
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
 
   @Autowired
   public EntityTypeInitializationService(
     EntityTypeRepository entityTypeRepository,
+    FolioExecutionContext folioExecutionContext,
     ResourcePatternResolver resourceResolver
   ) {
     this.entityTypeRepository = entityTypeRepository;
+    this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
 
     // this enables all JSON5 features, except for numeric ones (hex, starting/trailing
@@ -66,7 +73,12 @@ public class EntityTypeInitializationService {
       .filter(Resource::isReadable)
       .map(resource -> {
         try {
-          return objectMapper.readValue(resource.getInputStream(), EntityType.class);
+          return objectMapper.readValue(
+            resource
+              .getContentAsString(StandardCharsets.UTF_8)
+              .replace("${tenant_id}", folioExecutionContext.getTenantId()),
+            EntityType.class
+          );
         } catch (IOException e) {
           log.error("Unable to read entity type from resource: {}", resource.getDescription(), e);
           throw new UncheckedIOException(e);

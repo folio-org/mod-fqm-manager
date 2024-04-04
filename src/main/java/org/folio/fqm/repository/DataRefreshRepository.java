@@ -47,6 +47,7 @@ public class DataRefreshRepository {
 
   static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
+    "EUR",
     "JPY",
     "BGN",
     "CZK",

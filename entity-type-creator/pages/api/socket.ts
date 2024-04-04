@@ -1,6 +1,6 @@
 import verifyFqmConnection from '@/socket/verify-connection-fqm';
 import verifyPostgresConnection from '@/socket/verify-connection-postgres';
-import { FqmConnection, PostgresConnection } from '@/types';
+import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import { Server } from 'Socket.IO';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -62,6 +62,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       findEntityTypes();
     });
 
+    socket.on('get-translations', async () => {
+      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
+    });
+
     socket.on('create-entity-type', async (name) => {
       console.log('Creating entity type', name);
 
@@ -71,6 +75,16 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       await mkdir(dir, { recursive: true });
 
       await writeFile(ENTITY_TYPE_FILE_PATH + name, json5.stringify({ id: uuid(), name: '' }, null, 2));
+
+      findEntityTypes();
+    });
+
+    socket.on('save-entity-type', async ({ file, entityType }: { file: string; entityType: EntityType }) => {
+      console.log('Saving entity type', file, entityType);
+
+      await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(entityType, null, 2));
+
+      socket.emit('saved-entity-type');
 
       findEntityTypes();
     });

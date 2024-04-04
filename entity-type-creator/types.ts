@@ -4,3 +4,11 @@ export interface FqmConnection {
   tenant: string;
   limit: number;
 }
+
+export interface PostgresConnection {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+}

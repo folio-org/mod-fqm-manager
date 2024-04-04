@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { FqmConnection } from '../types';
 
-export default function FqmConnection({
+export default function FqmConnector({
   socket,
 }: Readonly<{
   socket: Socket;
@@ -46,7 +46,7 @@ export default function FqmConnection({
           }}
         >
           <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
               <TextField
                 label="Host"
                 fullWidth
@@ -72,6 +72,17 @@ export default function FqmConnection({
                 fullWidth
                 value={fqmConnection.tenant}
                 onChange={(e) => setFqmConnection({ ...fqmConnection, tenant: e.target.value })}
+                required
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <TextField
+                label="Fetch limit"
+                type="number"
+                fullWidth
+                inputProps={{ min: 1, step: 1 }}
+                value={fqmConnection.limit}
+                onChange={(e) => setFqmConnection({ ...fqmConnection, limit: parseInt(e.target.value) })}
                 required
               />
             </Grid>

@@ -1,4 +1,5 @@
 import FqmConnector from '@/components/FqmConnector';
+import PostgresConnector from '@/components/PostgresConnector';
 import { Box, Container } from '@mui/material';
 import { useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
@@ -28,6 +29,7 @@ export default function EntryPoint() {
       <Container>
         <Box sx={{ m: 2 }}>
           <FqmConnector socket={socket} />
+          <PostgresConnector socket={socket} />
         </Box>
       </Container>
     )

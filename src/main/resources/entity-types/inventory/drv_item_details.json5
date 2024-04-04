@@ -48,8 +48,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "instance_details.jsonb ->> 'title'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(instance_details.jsonb ->> \'title\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(instance_details.jsonb ->> \'title\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'instance_updated_date',
@@ -91,8 +91,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "call_item_number_type_ref_data.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(call_item_number_type_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_item_number_type_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_level_call_number_type_name',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',
@@ -148,8 +148,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "call_number_type_ref_data.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(call_number_type_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(call_number_type_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_effective_call_number_type_name',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',
@@ -224,8 +224,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "effective_location_ref_data.jsonb ->> 'name'",
-      filterValueGetter: " lower(fs09000000_mod_inventory_storage.f_unaccent(effective_location_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: ' lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: " lower(${tenant_id}_mod_inventory_storage.f_unaccent(effective_location_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: ' lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_effective_location_name',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',
@@ -244,8 +244,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_inventory_item.jsonb ->> 'hrid'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(src_inventory_item.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_item.jsonb ->> 'hrid'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'id',
@@ -266,8 +266,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "material_type_ref_data.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(material_type_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_material_type',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',
@@ -305,8 +305,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "permanent_location_ref_data.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(permanent_location_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_permanent_location_name',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',
@@ -358,8 +358,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_inventory_item.jsonb -> 'status' ->> 'name'",
-      filterValueGetter: "\"left\"(lower(fs09000000_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
-      valueFunction: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((src_inventory_item.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
       values: [
         {
           label: 'Aged to lost',
@@ -465,8 +465,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "temporary_location_ref_data.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(temporary_location_ref_data.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(temporary_location_ref_data.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'item_temporary_location_name',
         entityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0292',

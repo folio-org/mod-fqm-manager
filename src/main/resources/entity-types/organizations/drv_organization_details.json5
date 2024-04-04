@@ -21,8 +21,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "org.jsonb->>'code'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'code'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
     },
     {
       name: 'name',
@@ -32,8 +32,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "org.jsonb->>'name'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
     },
     {
       name: 'organization_status',
@@ -43,8 +43,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "org.jsonb->>'status'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'status'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'status'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
       values: [
         {
           label: 'Active',
@@ -68,8 +68,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "org.jsonb->>'description'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'description'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'description'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
     },
     {
       name: 'accounting_code',
@@ -79,8 +79,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "org.jsonb->>'erpCode'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb->>'erpCode'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb->>'erpCode'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
     },
     {
       name: 'alias',
@@ -282,8 +282,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "org.jsonb->>'taxId'",
-      filterValueGetter: "lower(fs09000000_mod_organizations_storage.f_unaccent(org.jsonb ->> 'taxId'::text))",
-      valueFunction: 'lower(fs09000000_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(org.jsonb ->> 'taxId'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
     },
     {
       name: 'tax_percentage',

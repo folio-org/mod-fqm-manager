@@ -30,8 +30,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "src_inventory_instance.jsonb ->> 'hrid'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> 'hrid'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'id',
@@ -51,8 +51,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_inventory_instance.jsonb ->> 'title'",
-      filterValueGetter: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> \'title\'::text)), 600)',
-      valueFunction: '"left"(lower(fs09000000_mod_inventory_storage.f_unaccent(:value)), 600)',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(src_inventory_instance.jsonb ->> \'title\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'instance_discovery_suppress',
@@ -133,8 +133,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "inst_stat.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(inst_stat.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(inst_stat.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'status',
         entityTypeId: 'bc03686c-657e-4f74-9d89-91eac5ea86a4',
@@ -163,8 +163,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "mode_issuance.jsonb ->> 'name'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(mode_issuance.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(mode_issuance.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
         columnName: 'mode_of_issuance',
         entityTypeId: '60e315d6-db28-4077-9277-b946411fe7d9',

@@ -105,8 +105,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "hrd.jsonb ->> 'hrid'",
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(hrd.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(hrd.jsonb ->> 'hrid'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'id',

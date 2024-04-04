@@ -1,43 +1,47 @@
+import { PostgreSQL, sql } from '@codemirror/lang-sql';
+import { StreamLanguage } from '@codemirror/language';
 import { Refresh } from '@mui/icons-material';
-import {
-  Alert,
-  Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
+import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { EntityType } from '../types';
+import { formatSql } from '@/utils/sqlUtils';
 
 export default function EntityTypeManager({
   entityTypes,
   entityType: { file, data: initialValues },
   translations,
+  schema,
   socket,
 }: Readonly<{
   entityTypes: Pick<EntityType, 'id' | 'name'>[];
   entityType: { file: string; data: EntityType };
   translations: Record<string, string>;
+  schema: Record<string, string[]>;
   socket: Socket;
 }>) {
   const [entityType, setEntityType] = useState<EntityType>(initialValues);
   const [translationsBuffer, setTranslationsBuffer] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setEntityType(initialValues);
+    setEntityType({ ...initialValues, fromClause: formatSql(initialValues.fromClause) });
     setTranslationsBuffer({});
   }, [initialValues]);
 
   const effectiveTranslations = { ...translations, ...translationsBuffer };
+
+  const codeMirrorExtension = useMemo(
+    () =>
+      sql({
+        dialect: PostgreSQL,
+        schema: schema,
+        defaultSchema: '${tenant_id}_mod_fqm_manager',
+        upperCaseKeywords: true,
+      }),
+    [schema]
+  );
 
   return (
     <form
@@ -129,29 +133,36 @@ export default function EntityTypeManager({
               />
             </Grid>
             {/* <Grid item xs={6}>
-            <FormControl fullWidth>
-              <InputLabel id="custom-field-select-label">Custom field entity type</InputLabel>
-              <Select
-                labelId="custom-field-select-label"
-                fullWidth
-                value={entityType.customFieldEntityTypeId ?? ''}
-                onChange={(e) =>
-                  e.target.value
-                    ? setEntityType({ ...entityType, customFieldEntityTypeId: e.target.value })
-                    : setEntityType({ ...entityType, customFieldEntityTypeId: undefined })
-                }
-              >
-                <MenuItem value="">
-                  <i>None</i>
-                </MenuItem>
-                {entityTypes.map((et) => (
-                  <MenuItem key={et.id} value={et.id}>
-                    {et.name} ({et.id})
+              <FormControl fullWidth>
+                <InputLabel id="custom-field-select-label">Custom field entity type</InputLabel>
+                <Select
+                  labelId="custom-field-select-label"
+                  fullWidth
+                  value={entityType.customFieldEntityTypeId ?? ''}
+                  onChange={(e) =>
+                    e.target.value
+                      ? setEntityType({ ...entityType, customFieldEntityTypeId: e.target.value })
+                      : setEntityType({ ...entityType, customFieldEntityTypeId: undefined })
+                  }
+                >
+                  <MenuItem value="">
+                    <i>None</i>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid> */}
+                  {entityTypes.map((et) => (
+                    <MenuItem key={et.id} value={et.id}>
+                      {et.name} ({et.id})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid> */}
+            <Grid xs={12}>
+              <CodeMirror
+                value={entityType.fromClause}
+                onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
+                extensions={[codeMirrorExtension]}
+              />
+            </Grid>
           </Grid>
         </fieldset>
 

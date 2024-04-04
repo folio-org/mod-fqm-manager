@@ -7,8 +7,10 @@ import EntityTypeEditor from './EntityTypeEditor';
 import NewEntityTypeDialog from './NewEntityTypeDialog';
 
 export default function EntityTypeManager({
+  schema,
   socket,
 }: Readonly<{
+  schema: Record<string, string[]>;
   socket: Socket;
 }>) {
   const [entityTypes, setEntityTypes] = useState<{ file: string; data: EntityType }[]>([]);
@@ -72,6 +74,7 @@ export default function EntityTypeManager({
           entityTypes={entityTypesCondensed}
           entityType={selectedEntityType}
           translations={translations}
+          schema={schema}
           socket={socket}
         />
       )}

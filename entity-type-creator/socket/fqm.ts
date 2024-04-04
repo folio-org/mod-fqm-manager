@@ -1,6 +1,6 @@
 import { FqmConnection } from '@/types';
 
-export default async function verifyFqmConnection(fqmConnection: FqmConnection) {
+export async function verifyFqmConnection(fqmConnection: FqmConnection) {
   console.log('Attempting to verify FQM connection', fqmConnection);
 
   try {

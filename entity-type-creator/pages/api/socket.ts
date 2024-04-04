@@ -1,5 +1,5 @@
-import verifyFqmConnection from '@/socket/verify-connection-fqm';
-import verifyPostgresConnection from '@/socket/verify-connection-postgres';
+import { verifyFqmConnection } from '@/socket/fqm';
+import { aggregateSchemaForAutocompletion, verifyPostgresConnection } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import { Server } from 'Socket.IO';
 import json5 from 'json5';
@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 export const ENTITY_TYPE_FILE_PATH = '../src/main/resources/entity-types/';
 
 let fqmConnection: FqmConnection;
-let pg: postgres.Sql;
+let pg: postgres.Sql | null = null;
 
 export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<any>) {
   const socket = res.socket as any;
@@ -37,6 +37,12 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       socket.emit('entity-types', files);
     }
 
+    async function fetchDbSchema() {
+      if (pg && fqmConnection) {
+        socket.emit('database-schema', await aggregateSchemaForAutocompletion(pg, fqmConnection.tenant));
+      }
+    }
+
     socket.on('connect-to-fqm', async (params: FqmConnection) => {
       console.log('Connecting to FQM', params);
 
@@ -45,6 +51,8 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       fqmConnection = params;
 
       socket.emit('fqm-connection-change', await verifyFqmConnection(fqmConnection));
+
+      fetchDbSchema();
     });
 
     socket.on('connect-to-postgres', async (params: PostgresConnection) => {
@@ -53,9 +61,11 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       socket.emit('postgres-connection-change', { connected: false, message: 'Attempting to connect...' });
 
       const result = await verifyPostgresConnection(params);
-      pg = result.pg;
+      if (result.forClient.connected) pg = result.pg;
 
       socket.emit('postgres-connection-change', result.forClient);
+
+      fetchDbSchema();
     });
 
     socket.on('enumerate-files', () => {
@@ -82,6 +92,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('save-entity-type', async ({ file, entityType }: { file: string; entityType: EntityType }) => {
       console.log('Saving entity type', file, entityType);
 
+      // todo: sorting
       await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(entityType, null, 2));
 
       socket.emit('saved-entity-type');

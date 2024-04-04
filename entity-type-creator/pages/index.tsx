@@ -7,6 +7,7 @@ import io, { Socket } from 'socket.io-client';
 
 export default function EntryPoint() {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [schema, setSchema] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     (async () => {
@@ -18,6 +19,11 @@ export default function EntryPoint() {
 
         newSocket.on('connect', () => {
           console.log('connected');
+        });
+
+        newSocket.on('database-schema', (schema) => {
+          console.log('Received schema', schema);
+          setSchema(schema);
         });
 
         setSocket(newSocket);
@@ -45,7 +51,7 @@ export default function EntryPoint() {
           </Tabs>
         </Box>
         <Box sx={{ display: selectedTab === 0 ? 'block' : 'none' }}>
-          <EntityTypeManager socket={socket} />
+          <EntityTypeManager socket={socket} schema={schema} />
         </Box>
         <Box sx={{ display: selectedTab === 1 ? 'block' : 'none' }}>Item Two</Box>
       </Container>

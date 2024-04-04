@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codemirror/lang-sql": "^6.6.2",
     "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.4",
     "@emotion/server": "^11.11.0",
@@ -16,6 +17,7 @@
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
     "@mui/material-nextjs": "^5.15.11",
+    "@uiw/react-codemirror": "^4.21.25",
     "json5": "^2.2.3",
     "next": "^14.1.4",
     "postgres": "^3.4.4",
@@ -23,6 +25,7 @@
     "react-dom": "^18",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "sql-formatter": "^15.3.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

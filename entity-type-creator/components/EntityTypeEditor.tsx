@@ -189,7 +189,10 @@ export default function EntityTypeManager({
                       })
                     }
                     translations={effectiveTranslations}
-                    setTranslation={(key, value) => setTranslationsBuffer({ ...translationsBuffer, [key]: value })}
+                    setTranslation={(key, value) => {
+                      console.log(key, value);
+                      setTranslationsBuffer({ ...translationsBuffer, [key]: value });
+                    }}
                     first={i === 0}
                     last={i === entityType.columns!.length - 1}
                     onMoveUp={() => {

@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import CodeMirror from '@uiw/react-codemirror';
 import { useMemo } from 'react';
+import NestedDataTypeEditor from './NestedDataTypeEditor';
 
 export default function EntityTypeFieldEditor({
   parentName,
@@ -30,6 +31,7 @@ export default function EntityTypeFieldEditor({
   onMoveDown,
   onMoveUp,
   onDelete,
+  isNested = false,
 }: {
   parentName: string;
   entityType: EntityType;
@@ -44,6 +46,7 @@ export default function EntityTypeFieldEditor({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onDelete: () => void;
+  isNested?: boolean;
 }) {
   return (
     <fieldset>
@@ -72,15 +75,17 @@ export default function EntityTypeFieldEditor({
               />
             }
           />
-          <FormControlLabel
-            label="Visible by default"
-            control={
-              <Checkbox
-                checked={field.visibleByDefault}
-                onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
-              />
-            }
-          />
+          {!isNested && (
+            <FormControlLabel
+              label="Visible by default"
+              control={
+                <Checkbox
+                  checked={field.visibleByDefault}
+                  onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
+                />
+              }
+            />
+          )}
         </Grid>
         <Grid item container xs={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
           <IconButton disabled={first} onClick={onMoveUp}>
@@ -102,43 +107,56 @@ export default function EntityTypeFieldEditor({
             value={translations[`entityType.${parentName}.${field.name}`] ?? ''}
           />
         </Grid>
-        <Grid item xs={5}>
-          <FormControl fullWidth>
-            <InputLabel id={`${parentName}-${field.name}-id-column`}>ID column</InputLabel>
-            <Select
-              labelId={`${parentName}-${field.name}-id-column`}
+        {isNested ? (
+          <Grid item xs={7}>
+            <TextField
+              label="Translation (fully qualified)"
               fullWidth
-              value={field.idColumnName ?? ''}
-              onChange={(e) =>
-                e.target.value
-                  ? onChange({ ...field, idColumnName: e.target.value })
-                  : onChange({ ...field, idColumnName: undefined })
-              }
-            >
-              <MenuItem value="">
-                <i>None</i>
-              </MenuItem>
-              {entityType
-                .columns!.filter((f) => f.name !== field.name)
-                .map((f) => (
-                  <MenuItem key={f.name} value={f.name} sx={{ fontFamily: 'monospace' }}>
-                    {f.name}
+              onChange={(e) => setTranslation(`entityType.${parentName}.${field.name}._qualified`, e.target.value)}
+              value={translations[`entityType.${parentName}.${field.name}._qualified`] ?? ''}
+            />
+          </Grid>
+        ) : (
+          <>
+            <Grid item xs={5}>
+              <FormControl fullWidth>
+                <InputLabel id={`${parentName}-${field.name}-id-column`}>ID column</InputLabel>
+                <Select
+                  labelId={`${parentName}-${field.name}-id-column`}
+                  fullWidth
+                  value={field.idColumnName ?? ''}
+                  onChange={(e) =>
+                    e.target.value
+                      ? onChange({ ...field, idColumnName: e.target.value })
+                      : onChange({ ...field, idColumnName: undefined })
+                  }
+                >
+                  <MenuItem value="">
+                    <i>None</i>
                   </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={2} container sx={{ justifyContent: 'space-around' }}>
-          <FormControlLabel
-            label="Is ID column"
-            control={
-              <Checkbox
-                checked={field.visibleByDefault}
-                onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
+                  {entityType
+                    .columns!.filter((f) => f.name !== field.name)
+                    .map((f) => (
+                      <MenuItem key={f.name} value={f.name} sx={{ fontFamily: 'monospace' }}>
+                        {f.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2} container sx={{ justifyContent: 'space-around' }}>
+              <FormControlLabel
+                label="Is ID column"
+                control={
+                  <Checkbox
+                    checked={field.visibleByDefault}
+                    onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
+                  />
+                }
               />
-            }
-          />
-        </Grid>
+            </Grid>
+          </>
+        )}
 
         <Grid item xs={5}>
           <FormControl fullWidth>
@@ -463,6 +481,17 @@ export default function EntityTypeFieldEditor({
           ),
           [field.valueFunction]
         )}
+
+        <NestedDataTypeEditor
+          parentName={`${parentName}.${field.name}`}
+          dataType={field.dataType}
+          onChange={(newDataType) => onChange({ ...field, dataType: newDataType })}
+          entityType={entityType}
+          entityTypes={entityTypes}
+          codeMirrorExtension={codeMirrorExtension}
+          translations={translations}
+          setTranslation={setTranslation}
+        />
       </Grid>
     </fieldset>
   );

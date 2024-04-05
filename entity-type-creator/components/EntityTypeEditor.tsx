@@ -168,7 +168,8 @@ export default function EntityTypeManager({
         </fieldset>
 
         <Alert severity="warning" sx={{ mt: 1, mb: 1 }}>
-          Any comments will be removed from the JSON after editing here. Please double check your git diff carefully!
+          Comments, if any, will be removed from the JSON after saving the entity type here. Please double check your
+          git diff carefully!
         </Alert>
         <Button type="submit" variant="contained" fullWidth>
           Save

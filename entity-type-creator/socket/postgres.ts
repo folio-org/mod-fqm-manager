@@ -49,13 +49,13 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
 
   const schemaAggregated: Record<string, string[]> = {};
   for (const { table_schema, table_name, column_name } of columns) {
-    const schema = (table_schema as string).replace(`${tenant}_`, '${tenant_id}_');
+    const schema = (table_schema as string).replace(`${tenant}_`, 'TENANT_');
     schemaAggregated[`${schema}.${table_name}`] = [...(schemaAggregated[`${schema}.${table_name}`] ?? []), column_name];
   }
 
   const routinesAggregated: Record<string, string[]> = {};
   for (const { routine_schema, function_name } of routines) {
-    const schema = routine_schema.replace(`${tenant}_`, '${tenant_id}_');
+    const schema = routine_schema.replace(`${tenant}_`, 'TENANT_');
     routinesAggregated[schema] = [...(routinesAggregated[schema] ?? []), function_name];
   }
 

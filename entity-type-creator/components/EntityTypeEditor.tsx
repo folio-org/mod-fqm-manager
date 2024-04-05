@@ -1,5 +1,5 @@
+import { formatSql } from '@/utils/sqlUtils';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
-import { StreamLanguage } from '@codemirror/language';
 import { Refresh } from '@mui/icons-material';
 import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import CodeMirror from '@uiw/react-codemirror';
@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { DataTypeValue, EntityType } from '../types';
-import { formatSql } from '@/utils/sqlUtils';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 
 export default function EntityTypeManager({
@@ -27,7 +26,17 @@ export default function EntityTypeManager({
   const [translationsBuffer, setTranslationsBuffer] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setEntityType({ ...initialValues, fromClause: formatSql(initialValues.fromClause) });
+    setEntityType({
+      ...initialValues,
+      fromClause: formatSql(initialValues.fromClause),
+      columns: initialValues.columns?.map((column) => ({
+        ...column,
+        valueGetter: column.valueGetter ? formatSql(column.valueGetter) : undefined,
+        filterValueGetter: column.filterValueGetter ? formatSql(column.filterValueGetter) : undefined,
+        valueFunction: column.valueFunction ? formatSql(column.valueFunction) : undefined,
+      })),
+    });
+
     setTranslationsBuffer({});
   }, [initialValues]);
 
@@ -38,7 +47,7 @@ export default function EntityTypeManager({
       sql({
         dialect: PostgreSQL,
         schema: schema,
-        defaultSchema: '${tenant_id}_mod_fqm_manager',
+        defaultSchema: 'TENANT_mod_fqm_manager',
         upperCaseKeywords: true,
       }),
     [schema]
@@ -154,13 +163,16 @@ export default function EntityTypeManager({
                 </Select>
               </FormControl>
             </Grid> */}
-            <Grid container item xs={12}>
-              <CodeMirror
-                style={{ width: 0, flexGrow: 1 }}
-                value={entityType.fromClause}
-                onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
-                extensions={[codeMirrorExtension]}
-              />
+            <Grid item xs={12}>
+              <fieldset style={{ display: 'flex' }}>
+                <legend>FROM clause</legend>
+                <CodeMirror
+                  style={{ width: 0, flexGrow: 1 }}
+                  value={entityType.fromClause}
+                  onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
+                  extensions={[codeMirrorExtension]}
+                />
+              </fieldset>
             </Grid>
             <Grid item xs={12}>
               <fieldset>
@@ -172,6 +184,7 @@ export default function EntityTypeManager({
                     parentName={entityType.name}
                     entityType={entityType}
                     entityTypes={entityTypes}
+                    codeMirrorExtension={codeMirrorExtension}
                     field={column}
                     onChange={(newColumn) =>
                       setEntityType({

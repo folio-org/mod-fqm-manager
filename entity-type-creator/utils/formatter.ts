@@ -10,6 +10,13 @@ function preferredOrder<T extends object>(obj: T, order: (keyof T)[]) {
   return newObject as T;
 }
 
+function serializeSqlForTenantTemplating(sql: string | undefined) {
+  if (sql) {
+    return sql.replaceAll('TENANT_', '${tenant_id}_');
+  }
+  return sql;
+}
+
 // desired root key order
 const desiredRootKeyOrder = [
   'id',
@@ -41,15 +48,22 @@ const desiredFieldKeyOrder = [
 const desiredDataTypeKeyOrder = ['dataType', 'itemDataType', 'properties'] as (keyof DataType)[];
 
 function fixField(field: EntityTypeField) {
+  field.dataType = preferredOrder(field.dataType, desiredDataTypeKeyOrder);
+
+  field.valueGetter = serializeSqlForTenantTemplating(field.valueGetter);
+  field.filterValueGetter = serializeSqlForTenantTemplating(field.filterValueGetter);
+  field.valueFunction = serializeSqlForTenantTemplating(field.valueFunction);
+
   if (Array.isArray(field.dataType?.properties)) {
     field.dataType.properties = field.dataType.properties.map(fixField);
   }
-  field.dataType = preferredOrder(field.dataType, desiredDataTypeKeyOrder);
+
   return preferredOrder<EntityTypeField>(field, desiredFieldKeyOrder);
 }
 
 export default function entityTypeFormatter(data: EntityType) {
   data.columns = data.columns?.map(fixField);
+  data.fromClause = serializeSqlForTenantTemplating(data.fromClause);
   if (data.defaultSort) {
     data.defaultSort = data.defaultSort.map((s) => preferredOrder(s, desiredDefaultSortKeyOrder));
   }

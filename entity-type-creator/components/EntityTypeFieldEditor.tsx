@@ -1,4 +1,5 @@
 import { DataTypeValue, EntityType, EntityTypeField } from '@/types';
+import { LanguageSupport } from '@codemirror/language';
 import { ArrowDownward, ArrowUpward, Clear } from '@mui/icons-material';
 import {
   Button,
@@ -12,12 +13,14 @@ import {
   Select,
   TextField,
 } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
 import { useMemo } from 'react';
 
 export default function EntityTypeFieldEditor({
   parentName,
   entityType,
   entityTypes,
+  codeMirrorExtension,
   field,
   onChange,
   translations,
@@ -31,6 +34,7 @@ export default function EntityTypeFieldEditor({
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
+  codeMirrorExtension: LanguageSupport;
   field: EntityTypeField;
   onChange: (newColumn: EntityTypeField) => void;
   translations: Record<string, string>;
@@ -389,6 +393,69 @@ export default function EntityTypeFieldEditor({
               </Grid>
             ),
           [field.values]
+        )}
+
+        {useMemo(
+          () => (
+            <Grid item xs={12}>
+              <fieldset style={{ display: 'flex' }}>
+                <legend>valueGetter</legend>
+                <CodeMirror
+                  style={{ width: 0, flexGrow: 1 }}
+                  value={field.valueGetter}
+                  onChange={(value) =>
+                    value.trim().length
+                      ? onChange({ ...field, valueGetter: value })
+                      : onChange({ ...field, valueGetter: undefined })
+                  }
+                  extensions={[codeMirrorExtension]}
+                />
+              </fieldset>
+            </Grid>
+          ),
+          [field.valueGetter]
+        )}
+
+        {useMemo(
+          () => (
+            <Grid item xs={12} sx={{ mb: 0 }}>
+              <fieldset style={{ display: 'flex' }}>
+                <legend>filterValueGetter</legend>
+                <CodeMirror
+                  style={{ width: 0, flexGrow: 1 }}
+                  value={field.filterValueGetter}
+                  onChange={(value) =>
+                    value.trim().length
+                      ? onChange({ ...field, filterValueGetter: value })
+                      : onChange({ ...field, filterValueGetter: undefined })
+                  }
+                  extensions={[codeMirrorExtension]}
+                />
+              </fieldset>
+            </Grid>
+          ),
+          [field.filterValueGetter]
+        )}
+
+        {useMemo(
+          () => (
+            <Grid item xs={12} sx={{ mt: 0 }}>
+              <fieldset style={{ display: 'flex' }}>
+                <legend>valueFunction</legend>
+                <CodeMirror
+                  style={{ width: 0, flexGrow: 1 }}
+                  value={field.valueFunction}
+                  onChange={(value) =>
+                    value.trim().length
+                      ? onChange({ ...field, valueFunction: value })
+                      : onChange({ ...field, valueFunction: undefined })
+                  }
+                  extensions={[codeMirrorExtension]}
+                />
+              </fieldset>
+            </Grid>
+          ),
+          [field.valueFunction]
         )}
       </Grid>
     </fieldset>

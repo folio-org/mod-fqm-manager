@@ -1,4 +1,13 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, Grid, TextField, Typography } from '@mui/material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { PostgresConnection } from '../types';
@@ -106,14 +115,18 @@ export default function PostgresConnector({
               </Button>
             </Grid>
           </Grid>
-          <Typography>
+          <Alert severity="info">
             <i>
               If you need to access a remote database via a jumpbox, use SSH port forwarding locally to expose it
               locally (e.g. on port 5433):
             </i>
             <br />
             <code>ssh -NL 5433:remote-db-server:5432 user@jumpbox</code>
-          </Typography>
+          </Alert>
+          <Alert severity="warning">
+            SQL statements with <code>{'${tenant_id}'}</code> have been replaced with <code>TENANT</code>, due to
+            limitations in the code editor. They will be saved as the normal <code>{'${tenant_id}'}</code>.
+          </Alert>
         </form>
       </AccordionDetails>
     </Accordion>

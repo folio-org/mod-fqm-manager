@@ -24,7 +24,7 @@ export default function EntityTypeManager({
 
   useEffect(() => {
     socket.on('entity-types', (entityTypes) => {
-      console.log('Received', entityTypes.length, 'from socket');
+      console.log('Received', entityTypes.length, 'entity types from socket');
       setEntityTypes(entityTypes);
     });
 

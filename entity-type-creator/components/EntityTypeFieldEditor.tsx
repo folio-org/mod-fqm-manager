@@ -397,9 +397,11 @@ export default function EntityTypeFieldEditor({
 
         {useMemo(
           () => (
-            <Grid item xs={12}>
-              <fieldset style={{ display: 'flex' }}>
-                <legend>valueGetter</legend>
+            <>
+              <Grid item xs={2} sx={{ fontFamily: 'monospace' }}>
+                valueGetter
+              </Grid>
+              <Grid item container xs={10}>
                 <CodeMirror
                   style={{ width: 0, flexGrow: 1 }}
                   value={field.valueGetter}
@@ -410,17 +412,19 @@ export default function EntityTypeFieldEditor({
                   }
                   extensions={[codeMirrorExtension]}
                 />
-              </fieldset>
-            </Grid>
+              </Grid>
+            </>
           ),
           [field.valueGetter]
         )}
 
         {useMemo(
           () => (
-            <Grid item xs={12} sx={{ mb: 0 }}>
-              <fieldset style={{ display: 'flex' }}>
-                <legend>filterValueGetter</legend>
+            <>
+              <Grid item xs={2} sx={{ fontFamily: 'monospace' }}>
+                filterValueGetter
+              </Grid>
+              <Grid item container xs={10}>
                 <CodeMirror
                   style={{ width: 0, flexGrow: 1 }}
                   value={field.filterValueGetter}
@@ -431,17 +435,19 @@ export default function EntityTypeFieldEditor({
                   }
                   extensions={[codeMirrorExtension]}
                 />
-              </fieldset>
-            </Grid>
+              </Grid>
+            </>
           ),
           [field.filterValueGetter]
         )}
 
         {useMemo(
           () => (
-            <Grid item xs={12} sx={{ mt: 0 }}>
-              <fieldset style={{ display: 'flex' }}>
-                <legend>valueFunction</legend>
+            <>
+              <Grid item xs={2} sx={{ fontFamily: 'monospace' }}>
+                valueFunction
+              </Grid>
+              <Grid item container xs={10}>
                 <CodeMirror
                   style={{ width: 0, flexGrow: 1 }}
                   value={field.valueFunction}
@@ -452,8 +458,8 @@ export default function EntityTypeFieldEditor({
                   }
                   extensions={[codeMirrorExtension]}
                 />
-              </fieldset>
-            </Grid>
+              </Grid>
+            </>
           ),
           [field.valueFunction]
         )}

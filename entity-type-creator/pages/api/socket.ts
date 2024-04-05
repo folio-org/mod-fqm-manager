@@ -99,6 +99,24 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
       findEntityTypes();
     });
+
+    socket.on('update-translations', async (newTranslations: Record<string, string>) => {
+      if (Object.keys(newTranslations).length === 0) return;
+
+      const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
+
+      const updatedTranslationSet = { ...curTranslations, ...newTranslations };
+      const sorted = Object.keys(updatedTranslationSet)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = updatedTranslationSet[key];
+          return acc;
+        }, {} as Record<string, string>);
+
+      await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
+      console.log('Updated translations');
+      socket.emit('translations', sorted);
+    });
   });
 
   res.end();

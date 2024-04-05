@@ -59,11 +59,12 @@ export default function EntityTypeManager({
         e.preventDefault();
 
         socket.emit('save-entity-type', { file, entityType });
-        // todo: something with translations
+        socket.emit('update-translations', translationsBuffer);
 
         socket.once('saved-entity-type', () => {
           window.alert('Saved!');
-          // socket will cause state clearing by pushing list of entity types
+          // socket will cause state clearing by re-pushing list of entity types
+          setTranslationsBuffer({});
         });
       }}
     >
@@ -71,11 +72,6 @@ export default function EntityTypeManager({
         <legend>
           Entity type <code>{entityType.name}</code>
         </legend>
-
-        <pre>
-          Translations buffer:
-          {JSON.stringify(translationsBuffer, null, 2)}
-        </pre>
 
         <fieldset>
           <legend>Metadata</legend>

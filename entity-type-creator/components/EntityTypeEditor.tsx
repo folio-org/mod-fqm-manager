@@ -6,8 +6,9 @@ import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
-import { EntityType } from '../types';
+import { DataTypeValue, EntityType } from '../types';
 import { formatSql } from '@/utils/sqlUtils';
+import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 
 export default function EntityTypeManager({
   entityTypes,
@@ -16,7 +17,7 @@ export default function EntityTypeManager({
   schema,
   socket,
 }: Readonly<{
-  entityTypes: Pick<EntityType, 'id' | 'name'>[];
+  entityTypes: EntityType[];
   entityType: { file: string; data: EntityType };
   translations: Record<string, string>;
   schema: Record<string, string[]>;
@@ -99,7 +100,7 @@ export default function EntityTypeManager({
                 inputProps={{ style: { fontFamily: 'monospace' } }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={6} container sx={{ justifyContent: 'space-around' }}>
               <FormControlLabel
                 label="Root"
                 control={
@@ -109,8 +110,6 @@ export default function EntityTypeManager({
                   />
                 }
               />
-            </Grid>
-            <Grid item xs={3}>
               <FormControlLabel
                 label="Private"
                 control={
@@ -123,8 +122,7 @@ export default function EntityTypeManager({
             </Grid>
             <Grid item xs={6}>
               <TextField
-                label="Label"
-                helperText="Translation (en), when applicable"
+                label="Translation (if applicable)"
                 fullWidth
                 onChange={(e) =>
                   setTranslationsBuffer({ ...translationsBuffer, [`entityType.${entityType.name}`]: e.target.value })
@@ -163,6 +161,68 @@ export default function EntityTypeManager({
                 onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
                 extensions={[codeMirrorExtension]}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <fieldset>
+                <legend>Columns</legend>
+
+                {entityType.columns?.map((column, i) => (
+                  <EntityTypeFieldEditor
+                    key={i}
+                    parentName={entityType.name}
+                    entityType={entityType}
+                    entityTypes={entityTypes}
+                    field={column}
+                    onChange={(newColumn) =>
+                      setEntityType({
+                        ...entityType,
+                        columns: entityType.columns?.map((c, j) => (j === i ? newColumn : c)),
+                      })
+                    }
+                    translations={effectiveTranslations}
+                    setTranslation={(key, value) => setTranslationsBuffer({ ...translationsBuffer, [key]: value })}
+                    first={i === 0}
+                    last={i === entityType.columns!.length - 1}
+                    onMoveUp={() => {
+                      const newColumns = entityType.columns!;
+                      newColumns[i] = entityType.columns![i - 1];
+                      newColumns[i - 1] = column;
+                      setEntityType({
+                        ...entityType,
+                        columns: newColumns,
+                      });
+                    }}
+                    onMoveDown={() => {
+                      const newColumns = entityType.columns!;
+                      newColumns[i] = entityType.columns![i + 1];
+                      newColumns[i + 1] = column;
+                      setEntityType({
+                        ...entityType,
+                        columns: newColumns,
+                      });
+                    }}
+                    onDelete={() =>
+                      setEntityType({ ...entityType, columns: entityType.columns!.filter((_, j) => j !== i) })
+                    }
+                  />
+                ))}
+                <Button
+                  variant="outlined"
+                  sx={{ width: '100%', height: '4em', mt: 2 }}
+                  size="large"
+                  onClick={() =>
+                    setEntityType({
+                      ...entityType,
+                      columns: [
+                        ...(entityType.columns ?? []),
+                        { name: '', dataType: { dataType: DataTypeValue.stringType } },
+                      ],
+                    })
+                  }
+                >
+                  Add column
+                </Button>
+              </fieldset>
             </Grid>
           </Grid>
         </fieldset>

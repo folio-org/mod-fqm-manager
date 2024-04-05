@@ -34,7 +34,7 @@ export default function EntityTypeManager({
     });
   }, []);
 
-  const entityTypesCondensed = entityTypes.map((et) => ({ id: et.data.id, name: et.data.name }));
+  const entityTypesFullList = entityTypes.map((et) => et.data);
   const selectedEntityType = entityTypes.find((et) => et.file === selected);
 
   return (
@@ -71,7 +71,7 @@ export default function EntityTypeManager({
 
       {selectedEntityType && (
         <EntityTypeEditor
-          entityTypes={entityTypesCondensed}
+          entityTypes={entityTypesFullList}
           entityType={selectedEntityType}
           translations={translations}
           schema={schema}

@@ -13,8 +13,21 @@ export interface PostgresConnection {
   password: string;
 }
 
+export enum DataTypeValue {
+  arrayType = 'arrayType',
+  booleanType = 'booleanType',
+  dateType = 'dateType',
+  enumType = 'enumType',
+  integerType = 'integerType',
+  numberType = 'numberType',
+  objectType = 'objectType',
+  openUUIDType = 'openUUIDType',
+  rangedUUIDType = 'rangedUUIDType',
+  stringType = 'stringType',
+}
+
 export interface DataType {
-  dataType: string;
+  dataType: DataTypeValue;
   itemDataType?: DataType;
   properties?: EntityTypeField[];
 }

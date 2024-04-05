@@ -1,6 +1,7 @@
 import { verifyFqmConnection } from '@/socket/fqm';
 import { aggregateSchemaForAutocompletion, verifyPostgresConnection } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
+import formatEntityType from '@/utils/formatter';
 import { Server } from 'Socket.IO';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -92,8 +93,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('save-entity-type', async ({ file, entityType }: { file: string; entityType: EntityType }) => {
       console.log('Saving entity type', file, entityType);
 
-      // todo: sorting
-      await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(entityType, null, 2));
+      await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(formatEntityType(entityType), null, 2) + '\n');
 
       socket.emit('saved-entity-type');
 

@@ -61,7 +61,7 @@ function fixField(field: EntityTypeField) {
   return preferredOrder<EntityTypeField>(field, desiredFieldKeyOrder);
 }
 
-export default function entityTypeFormatter(data: EntityType) {
+export default function formatEntityType(data: EntityType) {
   data.columns = data.columns?.map(fixField);
   data.fromClause = serializeSqlForTenantTemplating(data.fromClause);
   if (data.defaultSort) {

@@ -36,9 +36,6 @@ export default function EntryPoint() {
   return (
     socket && (
       <Container>
-        <Button variant="contained" color="error" onClick={() => setSocket(null)}>
-          RECONNECT
-        </Button>
         <Box sx={{ m: 2 }}>
           <FqmConnector socket={socket} />
           <PostgresConnector socket={socket} />

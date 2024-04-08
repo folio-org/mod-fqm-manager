@@ -1,0 +1,208 @@
+{
+  id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
+  name: 'drv_voucher_lines_details',
+  private: false,
+  fromClause: 'src_voucher_lines as vlines',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.id"
+    },
+    {
+      name: 'amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'amount'"
+    },
+    {
+      name: 'createdDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updatedDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'createdByUserId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb -> 'metadata' ->> 'createdByUserId'"
+    },
+    {
+      name: 'updatedByUserId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb -> 'metadata' ->> 'updatedByUserId'"
+    },
+    {
+      name: 'sourceIds',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'sourceIds'"
+    },
+    {
+      name: 'subTransactionId',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'subTransactionId'"
+    },
+    {
+      name: 'voucherId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'voucherId'"
+    },
+    {
+      name: 'externalAccountNumber',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'externalAccountNumber'"
+    },
+    {
+      name: 'fund_distribution',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'distribution_type',
+              property: 'distributionType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              values: [
+                {
+                  label: 'percentage',
+                  value: 'percentage',
+                },
+                {
+                  label: 'amount',
+                  value: 'amount',
+                },
+              ],
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'encumbrance',
+              property: 'encumbrance',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'invoiceLineId',
+              property: 'invoiceLineId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expenseClassId',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'expenseClassId') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'expenseClassId')) FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(vlines.jsonb -> 'fundDistribution') AS elems)",
+            },
+          ],
+        },
+      },
+      visibleByDefault: false,
+      valueGetter: "vlines.jsonb ->> 'fundDistribution'",
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

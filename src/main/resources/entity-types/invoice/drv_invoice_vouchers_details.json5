@@ -1,0 +1,343 @@
+{
+  id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
+  name: 'drv_vouchers_details',
+  private: false,
+  fromClause: 'src_vouchers as vouchers',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.id"
+    },
+    {
+      name: 'type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'type'",
+      values: [
+        {
+          label: 'Payment',
+          value: 'Payment',
+        },
+        {
+          label: 'Pre-payment',
+          value: 'Pre-payment',
+        },
+        {
+          label: 'Credit',
+          value: 'Credit',
+        },
+        {
+          label: 'Voucher',
+          value: 'Voucher',
+        },
+      ]
+    },
+    {
+      name: 'amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'amount'"
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'status'",
+      values: [
+        {
+          label: 'Awaiting payment',
+          value: 'Awaiting payment',
+        },
+        {
+          label: 'Paid',
+          value: 'Paid',
+        },
+        {
+          label: 'Cancelled',
+          value: 'Cancelled',
+        },
+      ]
+    },
+    {
+      name: 'createdDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updatedDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'createdByUserId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'metadata' ->> 'createdByUserId'"
+    },
+    {
+      name: 'updatedByUserId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'metadata' ->> 'updatedByUserId'"
+    },
+    {
+      name: 'vendorId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'vendorId'"
+    },
+    {
+      name: 'accountNo',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'accountNo'"
+    },
+    {
+      name: 'invoiceId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'invoiceId'"
+    },
+    {
+      name: 'acqUnitIds',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'acqUnitIds'"
+    },
+    {
+      name: 'voucherDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'voucherDate'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(vouchers.jsonb ->> 'voucherDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'batchGroupId',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'batchGroupId'"
+    },
+    {
+      name: 'exchangeRate',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'exchangeRate'"
+    },
+    {
+      name: 'voucherNumber',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'voucherNumber'"
+    },
+    {
+      name: 'accountingCode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'accountingCode'"
+    },
+    {
+      name: 'systemCurrency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'systemCurrency'"
+    },
+    {
+      name: 'enclosureNeeded',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'enclosureNeeded'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ]
+    },
+    {
+      name: 'invoiceCurrency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'invoiceCurrency'"
+    },
+    {
+      name: 'exportToAccounting',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'exportToAccounting'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      filterValueGetter: "lower(${tenant_id}_mod_invoice_storage.f_unaccent(vouchers.jsonb ->> 'exportToAccounting'::text))::float",
+      valueFunction: 'lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value))::float',
+    },
+    {
+      name: 'disbursementNumber',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'disbursementNumber'"
+    },
+    {
+      name: 'disbursementDate',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'disbursementDate'"
+    },
+    {
+      name: 'disbursementAmount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb ->> 'disbursementAmount'"
+    },
+    {
+      name: 'addressLine1',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'addressLine1'"
+    },
+    {
+      name: 'addressLine2',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'addressLine2'"
+    },
+    {
+      name: 'city',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'city'"
+    },
+    {
+      name: 'stateRegion',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'stateRegion'"
+    },
+    {
+      name: 'zipCode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'zipCode'"
+    },
+    {
+      name: 'country',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "vouchers.jsonb -> 'vendorAddress' ->> 'country'"
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

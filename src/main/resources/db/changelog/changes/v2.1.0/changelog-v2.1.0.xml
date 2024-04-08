@@ -5,4 +5,26 @@
 
   <include file="remove-derived-table-name-column.yaml" relativeToChangelogFile="true" />
 
+  <changeSet id="create_view_vouchers" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "vouchers" schemaName="${tenant_id}_mod_invoice_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_vouchers">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.vouchers
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_voucher_lines" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "voucher_lines" schemaName="${tenant_id}_mod_invoice_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_voucher_lines">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.voucher_lines
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

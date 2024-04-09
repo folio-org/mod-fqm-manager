@@ -46,8 +46,8 @@ public class EntityTypeRepository {
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
 
   @Qualifier("readerJooqContext")
+  private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
-
   private final ObjectMapper objectMapper;
 
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
@@ -55,7 +55,7 @@ public class EntityTypeRepository {
 
     Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
 
-    return jooqContext
+    return readerJooqContext
       .select(definitionField)
       .from(table(TABLE_NAME))
       .where(field(ID_FIELD_NAME).eq(entityTypeId))
@@ -78,7 +78,7 @@ public class EntityTypeRepository {
 
     Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
     Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
-    return jooqContext
+    return readerJooqContext
       .select(idField, nameField)
       .from(table(TABLE_NAME))
       .where(entityTypeIdCondition.and(publicEntityCondition))
@@ -110,7 +110,7 @@ public class EntityTypeRepository {
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
-    return jooqContext
+    return readerJooqContext
       .select(field(REQUIRED_FIELD_NAME), field(REF_ID))
       .from(sourceViewName)
       // This where condition will be removed when handling other CustomFieldTypes.

@@ -502,6 +502,6 @@
   "entityType.drv_voucher_lines_details.fund_distribution.expenseClassId": "Expense Class ID",
   "entityType.drv_voucher_lines_details.fund_distribution.expenseClassId._qualified": "Expense Class ID",
   "entityType.drv_voucher_lines_details.fund_distribution.value": "Value",
-  "entityType.drv_voucher_lines_details.fund_distribution.value._qualified": "Value",
+  "entityType.drv_voucher_lines_details.fund_distribution.value._qualified": "Value"
 
 }

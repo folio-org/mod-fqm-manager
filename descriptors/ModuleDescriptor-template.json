@@ -311,6 +311,18 @@
     {
       "id": "finance.exchange-rate",
       "version": "1.0"
+    },
+    {
+      "id": "voucher-storage.vouchers",
+      "version": "1.2"
+    },
+    {
+      "id": "voucher-storage.voucher-lines",
+      "version": "2.1"
+    },
+    {
+      "id": "voucher-storage.voucher-number",
+      "version": "1.1"
     }
   ],
   "launchDescriptor": {

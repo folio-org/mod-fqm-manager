@@ -41,20 +41,25 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
+    DSLContext readerContext = DSL.using(
+      new MockConnection(new IdStreamerTestDataProvider()),
+      SQLDialect.POSTGRES
+    );
     DSLContext context = DSL.using(
       new MockConnection(new IdStreamerTestDataProvider()),
       SQLDialect.POSTGRES
     );
 
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
+      readerContext,
       context,
       new ObjectMapper()
     );
     this.idStreamer =
       new IdStreamer(
-        context,
+        readerContext,
         entityTypeRepository,
-        new QueryDetailsRepository(context)
+        new QueryDetailsRepository(readerContext)
       );
   }
 

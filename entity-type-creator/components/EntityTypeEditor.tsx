@@ -12,18 +12,22 @@ import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 export default function EntityTypeManager({
   entityTypes,
   entityType: { file, data: initialValues },
+  setCurrentEntityType,
   translations,
   schema,
   socket,
 }: Readonly<{
   entityTypes: EntityType[];
   entityType: { file: string; data: EntityType };
+  setCurrentEntityType: (n: EntityType | null) => void;
   translations: Record<string, string>;
   schema: Record<string, string[]>;
   socket: Socket;
 }>) {
   const [entityType, setEntityType] = useState<EntityType>(initialValues);
   const [translationsBuffer, setTranslationsBuffer] = useState<Record<string, string>>({});
+
+  setCurrentEntityType(entityType);
 
   useEffect(() => {
     setEntityType({

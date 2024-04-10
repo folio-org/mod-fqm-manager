@@ -1,4 +1,4 @@
-import { PostgresConnection } from '@/types';
+import { EntityType, PostgresConnection } from '@/types';
 import postgres from 'postgres';
 
 export async function verifyPostgresConnection(postgresConnection: PostgresConnection) {
@@ -60,4 +60,28 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
   }
 
   return { ...schemaAggregated, ...routinesAggregated };
+}
+
+export async function persistEntityType(pg: postgres.Sql, tenant: string, entityType: EntityType) {
+  console.log('Persisting entity type', entityType);
+
+  // check if table entity_type_definition has matching ID for entityType.id
+  const existing = await pg`
+    SELECT id
+    FROM ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
+    WHERE id = ${entityType.id};`;
+
+  if (existing.length === 0) {
+    console.log('Inserting new entity type', entityType.id);
+
+    await pg`
+      INSERT INTO ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
+      (id, definition)
+      VALUES (${entityType.id}, ${pg.json(entityType as any)});`;
+  } else {
+    await pg`
+      UPDATE ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
+      SET definition = ${pg.json(entityType as any)}
+      WHERE id = ${entityType.id};`;
+  }
 }

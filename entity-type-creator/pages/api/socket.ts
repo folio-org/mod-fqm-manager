@@ -1,5 +1,5 @@
-import { verifyFqmConnection } from '@/socket/fqm';
-import { aggregateSchemaForAutocompletion, verifyPostgresConnection } from '@/socket/postgres';
+import { fetchEntityType, verifyFqmConnection } from '@/socket/fqm';
+import { aggregateSchemaForAutocompletion, persistEntityType, verifyPostgresConnection } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType from '@/utils/formatter';
 import { Server } from 'Socket.IO';
@@ -116,6 +116,50 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
       console.log('Updated translations');
       socket.emit('translations', sorted);
+    });
+
+    socket.on('check-entity-type-validity', async (entityType: EntityType) => {
+      console.log('Checking entity type validity', entityType);
+
+      if (!pg) {
+        socket.emit('check-entity-type-validity-result', {
+          persisted: false,
+          queried: false,
+          persistedError: 'No Postgres connection',
+        });
+        return;
+      }
+
+      try {
+        await persistEntityType(pg, fqmConnection.tenant, entityType);
+        socket.emit('check-entity-type-validity-result', {
+          persisted: true,
+          queried: false,
+        });
+      } catch (e: any) {
+        console.error('Error persisting entity type', e);
+        socket.emit('check-entity-type-validity-result', {
+          queried: false,
+          persisted: false,
+          persistedError: e.message,
+        });
+        return;
+      }
+
+      try {
+        socket.emit('check-entity-type-validity-result', {
+          persisted: true,
+          queried: true,
+          queryResults: JSON.stringify(JSON.parse(await fetchEntityType(fqmConnection, entityType.id)), null, 2),
+        });
+      } catch (e: any) {
+        console.error('Error fetching entity type', e);
+        socket.emit('check-entity-type-validity-result', {
+          persisted: true,
+          queried: false,
+          queryError: e.message,
+        });
+      }
     });
   });
 

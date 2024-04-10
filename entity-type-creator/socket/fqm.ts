@@ -22,3 +22,17 @@ export async function verifyFqmConnection(fqmConnection: FqmConnection) {
     return { connected: false, message: `Failed to connect: ${(e as any).message}` };
   }
 }
+
+export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId: string) {
+  const response = await fetch(`http://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityTypeId}`, {
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`Got ${response.status} ${response.statusText} (${await response.text()})`);
+  }
+
+  return await response.text();
+}

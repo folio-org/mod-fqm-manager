@@ -5,25 +5,47 @@
 
   <include file="remove-derived-table-name-column.yaml" relativeToChangelogFile="true" />
 
-  <changeSet id="create_view_vouchers" author="kjain@ebsco.com">
+  <changeSet id="create_view_vouchers" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "vouchers" schemaName="${tenant_id}_mod_invoice_storage"/>
     </preConditions>
     <createView
       replaceIfExists="true"
-      viewName="src_vouchers">
+      viewName="src_invoice_vouchers">
       SELECT * FROM ${tenant_id}_mod_invoice_storage.vouchers
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_voucher_lines" author="kjain@ebsco.com">
+  <changeSet id="create_view_voucher_lines" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "voucher_lines" schemaName="${tenant_id}_mod_invoice_storage"/>
     </preConditions>
     <createView
       replaceIfExists="true"
-      viewName="src_voucher_lines">
+      viewName="src_invoice_voucher_lines">
       SELECT * FROM ${tenant_id}_mod_invoice_storage.voucher_lines
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_ledger" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "ledger" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_ledger">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.ledger
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_fund" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "fund" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_fund">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.fund
     </createView>
   </changeSet>
 

@@ -1,0 +1,297 @@
+{
+  id: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+  name: 'drv_fund_details',
+  private: false,
+  fromClause: 'src_finance_fund as fnd',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "fnd.id"
+    },
+    {
+      name: '_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(fnd.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'allocated_from_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(SELECT array_agg(alc_id.value::text) FILTER (WHERE (alc_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'allocatedFromIds'::text) alc_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(alc_id.value::text)) FILTER (WHERE (alc_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'allocatedFromIds'::text) alc_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'allocated_to_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(SELECT array_agg(alc_id.value::text) FILTER (WHERE (alc_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'allocatedToIds'::text) alc_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(alc_id.value::text)) FILTER (WHERE (alc_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'allocatedToIds'::text) alc_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(fnd.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'description'"
+    },
+    {
+      name: 'external_account_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'externalAccountNo'"
+    },
+    {
+      name: 'fund_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      values: [
+        {
+          label: 'Active',
+          value: 'Active',
+        },
+        {
+          label: 'Frozen',
+          value: 'Frozen',
+        },
+        {
+          label: 'Inactive',
+          value: 'Inactive',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'fundStatus'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(fnd.jsonb ->> 'fundStatus'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'fund_type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'fundTypeId'"
+    },
+    {
+      name: 'ledger_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'ledgerId'"
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(fnd.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'donor_organization_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(SELECT array_agg(dorg_id.value::text) FILTER (WHERE (dorg_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'donorOrganizationIds'::text) dorg_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(dorg_id.value::text)) FILTER (WHERE (dorg_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'donorOrganizationIds'::text) dorg_id(value))",
+      valueFunction: 'lower(:value)'
+
+
+    },
+    {
+      name: 'restrict_by_locations',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'restrictByLocations'"
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'createdByUserId'"
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'updatedByUserId'"
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'createdByUsername'"
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb -> 'metadata' ->> 'updatedByUsername'"
+    },
+    {
+      name: 'tag_list',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(tnt_id.value::text) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(tnt_id.value::text)) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'locations',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'location_id',
+              property: 'locationId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'locationId') FROM jsonb_array_elements(fnd.jsonb -> 'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'locationId')) FROM jsonb_array_elements(fnd.jsonb -> 'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'tenant_id',
+              property: 'tenantId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'tenantId') FROM jsonb_array_elements(fnd.jsonb -> 'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'tenantId')) FROM jsonb_array_elements(fnd.jsonb -> 'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            }
+          ],
+        },
+      },
+      visibleByDefault: false,
+      valueGetter: "fnd.jsonb ->> 'locations'",
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(fnd.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      valueFunction: 'lower(:value)'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

@@ -2,7 +2,7 @@
   id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
   name: 'drv_vouchers_details',
   private: false,
-  fromClause: 'src_vouchers as vouchers',
+  fromClause: 'src_invoice_vouchers as vouchers',
   columns: [
     {
       name: 'id',
@@ -146,7 +146,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "vouchers.jsonb ->> 'acqUnitIds'"
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(vouchers.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(vouchers.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'voucher_date',

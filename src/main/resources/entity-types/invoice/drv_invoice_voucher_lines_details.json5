@@ -2,7 +2,7 @@
   id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
   name: 'drv_voucher_lines_details',
   private: false,
-  fromClause: 'src_voucher_lines as vlines',
+  fromClause: 'src_invoice_voucher_lines as vlines',
   columns: [
     {
       name: 'id',
@@ -69,7 +69,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "vlines.jsonb ->> 'sourceIds'"
+      valueGetter: "( SELECT array_agg(src_id.value::text) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(vlines.jsonb -> 'sourceIds'::text) src_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(src_id.value::text)) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(vlines.jsonb -> 'sourceIds'::text) src_id(value))",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'sub_transaction_id',

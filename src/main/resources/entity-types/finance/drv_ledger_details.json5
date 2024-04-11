@@ -1,0 +1,355 @@
+{
+  id: 'abce1078-b099-467f-811b-367bd05638e3',
+  name: 'drv_ledger_details',
+  private: false,
+  fromClause: 'src_finance_ledger as ldger',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "ldger.id"
+    },
+    {
+      name: '_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(ldger.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'description'"
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(ldger.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'fiscal_year_one_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'fiscalYearOneId'"
+    },
+    {
+      name: 'ledger_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      values: [
+        {
+          label: 'Active',
+          value: 'Active',
+        },
+        {
+          label: 'Frozen',
+          value: 'Frozen',
+        },
+        {
+          label: 'Inactive',
+          value: 'Inactive',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'ledgerStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(ldger.jsonb ->> \'ledgerStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'currency'"
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(ldger.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(ldger.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'restrict_encumbrance',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'restrictEncumbrance'"
+    },
+    {
+      name: 'restrict_expenditures',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb ->> 'restrictExpenditures'"
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'createdByUserId'"
+    },
+
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'updatedByUserId'"
+    },
+    {
+      name: 'allocated',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'allocated')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'available',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'available')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'net_transfers',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'netTransfers')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'createdByUsername'"
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ldger.jsonb -> 'metadata' ->> 'updatedByUsername'"
+    },
+    {
+      name: 'unavailable',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'unavailable')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'initial_allocation',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'initialAllocation')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'allocation_to',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'allocationTo')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'allocation_from',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'allocationFrom')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'total_funding',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'totalFunding')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'cash_balance',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'cashBalance')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'awaiting_payment',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'awaitingPayment')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'encumbered',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'encumbered')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'expenditures',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'expenditures')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'over_encumbrance',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'overEncumbrance')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'over_expended',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ldger.jsonb ->> 'overExpended')::float",
+      valueFunction: '(:value)::float'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

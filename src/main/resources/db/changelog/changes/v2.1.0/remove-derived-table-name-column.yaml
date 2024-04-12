@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove-derived-table-name-column
+      author: novercash@ebsco.com
+      changes:
+        - dropColumn:
+            tableName: entity_type_definition
+            columnName: derived_table_name

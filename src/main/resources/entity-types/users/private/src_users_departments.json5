@@ -1,0 +1,26 @@
+{
+  id: 'c8364551-7e51-475d-8473-88951181452d',
+  name: 'src_users_departments',
+  root: true,
+  private: true,
+  fromClause: 'src_users_departments',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: 'src_users_departments.id',
+    },
+    {
+      name: 'department',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_users_departments.jsonb ->> 'name'",
+    },
+  ],
+}

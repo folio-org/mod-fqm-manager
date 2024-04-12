@@ -1,0 +1,187 @@
+{
+  id: '0cb79a4c-f7eb-4941-a104-745224ae0293',
+  name: 'drv_item_holdingsrecord_instance',
+  private: true,
+  fromClause: 'src_inventory_item JOIN src_inventory_holdings_record hrim ON src_inventory_item.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id',
+  columns: [
+    {
+      name: 'holdings_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.holdingsrecordid',
+    },
+    {
+      name: 'instance_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      visibleByDefault: false,
+      valueGetter: "instance_details.jsonb -> 'metadata' ->> 'createdDate'",
+    },
+    {
+      name: 'instance_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'hrim.instanceid',
+    },
+    {
+      name: 'instance_primary_contributor',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'jsonb_path_query_first(instance_details.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
+    },
+    {
+      name: 'instance_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "instance_details.jsonb ->> 'title'",
+    },
+    {
+      name: 'instance_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      visibleByDefault: false,
+      valueGetter: "instance_details.jsonb -> 'metadata' ->> 'updatedDate'",
+    },
+    {
+      name: 'item_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_inventory_item.jsonb ->> 'barcode'",
+    },
+    {
+      name: 'item_level_call_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumber'",
+    },
+    {
+      name: 'item_level_call_number_typeid',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'",
+    },
+    {
+      name: 'item_copy_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_inventory_item.jsonb ->> 'copyNumber'",
+    },
+    {
+      name: 'item_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'createdDate'",
+    },
+    {
+      name: 'item_effective_call_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "concat_ws(', '::text, NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(src_inventory_item.jsonb ->> 'copyNumber'::text, ''::text))",
+    },
+    {
+      name: 'item_effective_call_number_typeid',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'effectiveCallNumberComponents' ->> 'typeId'",
+    },
+    {
+      name: 'item_effective_location_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.effectivelocationid',
+    },
+    {
+      name: 'item_hrid',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb ->> 'hrid'",
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.id',
+    },
+    {
+      name: 'item_material_type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.materialtypeid',
+    },
+    {
+      name: 'item_permanent_location_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.permanentlocationid',
+    },
+    {
+      name: 'item_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'status' ->> 'name'",
+      source: {
+        columnName: 'item_status',
+        entityTypeId: 'a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d',
+      },
+    },
+    {
+      name: 'item_temporary_location_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: false,
+      valueGetter: 'src_inventory_item.temporarylocationid',
+    },
+    {
+      name: 'item_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      visibleByDefault: false,
+      valueGetter: "src_inventory_item.jsonb -> 'metadata' ->> 'updatedDate'",
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

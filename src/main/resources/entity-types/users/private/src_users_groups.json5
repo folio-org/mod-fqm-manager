@@ -1,0 +1,26 @@
+{
+  id: 'e611264d-377e-4d87-a93f-f1ca327d3db0',
+  name: 'src_users_groups',
+  root: true,
+  private: true,
+  fromClause: 'src_users_groups',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: 'src_users_groups.id',
+    },
+    {
+      name: 'group',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: "src_users_groups.jsonb ->> 'group'",
+    },
+  ],
+}

@@ -9,6 +9,8 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     show-sql: true
+  banner:
+    location: classpath:/banner.txt
 folio:
   tenant:
     validation:

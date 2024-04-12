@@ -256,20 +256,6 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnDerivedTableName() {
-    UUID entityTypeId = UUID.randomUUID();
-    String derivedTableName = "derived_table_01";
-
-    when(repo.getDerivedTableName(entityTypeId))
-      .thenReturn(Optional.of(derivedTableName));
-
-    String actualDerivedTableName = entityTypeService.getDerivedTableName(
-      entityTypeId
-    );
-    assertEquals(derivedTableName, actualDerivedTableName);
-  }
-
-  @Test
   void shouldReturnCurrencies() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "pol_currency";

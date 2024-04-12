@@ -6,6 +6,5 @@
   <changeSet id="MODFQMMGR-202" author="bsharp@ebsco.com" runOnChange="true">
     <sqlFile path="sql/create-table-currency-exchange-rates.sql" relativeToChangelogFile="true"/>
   </changeSet>
-  <include file="update-drv-purchase-order-line-details-definition.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

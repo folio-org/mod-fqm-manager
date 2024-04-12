@@ -1,0 +1,24 @@
+{
+  id: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+  name: 'drv_inventory_statistical_code_full',
+  root: false,
+  private: true,
+  fromClause: 'drv_inventory_statistical_code_full',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: true,
+    },
+    {
+      name: 'statistical_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: 'drv_inventory_statistical_code_full.statistical_code',
+    },
+  ],
+}

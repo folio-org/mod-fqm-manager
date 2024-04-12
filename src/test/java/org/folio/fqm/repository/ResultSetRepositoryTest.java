@@ -27,10 +27,12 @@ class ResultSetRepositoryTest {
 
   @BeforeEach
   void setup() {
+    DSLContext readerContext = DSL.using(new MockConnection(
+      new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
-    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(context, new ObjectMapper());
+    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
     this.repo = new ResultSetRepository(context, entityTypeRepository);
   }
 

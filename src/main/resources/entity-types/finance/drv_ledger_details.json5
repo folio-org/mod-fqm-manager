@@ -15,7 +15,7 @@
       valueGetter: "ldger.id"
     },
     {
-      name: '_version',
+      name: 'version',
       dataType: {
         dataType: 'integerType',
       },

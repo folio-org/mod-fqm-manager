@@ -15,7 +15,7 @@
       valueGetter: "fnd.id"
     },
     {
-      name: '_version',
+      name: 'version',
       dataType: {
         dataType: 'integerType',
       },
@@ -132,8 +132,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "fnd.jsonb ->> 'name'",
-      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(fnd.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
     },
     {
       name: 'donor_organization_ids',

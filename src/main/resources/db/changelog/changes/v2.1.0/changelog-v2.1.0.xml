@@ -49,4 +49,26 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_expense_class" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "expense_class" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_expense_class">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.expense_class
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_fund_type" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "fund_type" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_fund_type">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.fund_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

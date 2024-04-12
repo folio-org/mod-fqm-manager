@@ -506,7 +506,7 @@
 
   "entityType.drv_fund_details": "Fund",
   "entityType.drv_fund_details.id": "ID",
-  "entityType.drv_fund_details._version": "Version",
+  "entityType.drv_fund_details.version": "Version",
   "entityType.drv_fund_details.allocated_from_ids": "Allocated from IDs",
   "entityType.drv_fund_details.allocated_to_ids": "Allocated to IDs",
   "entityType.drv_fund_details.code": "Code",
@@ -534,7 +534,7 @@
 
   "entityType.drv_ledger_details": "Ledger",
   "entityType.drv_ledger_details.id": "ID",
-  "entityType.drv_ledger_details._version": "Version",
+  "entityType.drv_ledger_details.version": "Version",
   "entityType.drv_ledger_details.code": "Code",
   "entityType.drv_ledger_details.description": "Description",
   "entityType.drv_ledger_details.name": "Name",
@@ -563,5 +563,23 @@
   "entityType.drv_ledger_details.encumbered": "Encumbered",
   "entityType.drv_ledger_details.expenditures": "Expenditures",
   "entityType.drv_ledger_details.over_encumbrance": "Over encumbrance",
-  "entityType.drv_ledger_details.over_expended": "Over expended"
+  "entityType.drv_ledger_details.over_expended": "Over expended",
+
+  "entityType.drv_expense_class_details": "Expense class",
+  "entityType.drv_expense_class_details.id": "ID",
+  "entityType.drv_expense_class_details.version": "Version",
+  "entityType.drv_expense_class_details.code": "Code",
+  "entityType.drv_expense_class_details.name": "Name",
+  "entityType.drv_expense_class_details.created_date": "Created date",
+  "entityType.drv_expense_class_details.updated_date": "Updated date",
+  "entityType.drv_expense_class_details.created_by_user_id": "Created by user ID",
+  "entityType.drv_expense_class_details.updated_by_user_id": "Updated by user ID",
+  "entityType.drv_expense_class_details.created_by_username": "Created by username",
+  "entityType.drv_expense_class_details.updated_by_username": "Updated by username",
+  "entityType.drv_expense_class_details.external_account_number_ext": "External account number ext",
+
+  "entityType.drv_fund_type_details": "Fund type",
+  "entityType.drv_fund_type_details.id": "ID",
+  "entityType.drv_fund_type_details.version": "Version",
+  "entityType.drv_fund_type_details.name": "Name"
 }

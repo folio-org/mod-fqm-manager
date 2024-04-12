@@ -1,0 +1,46 @@
+{
+  id: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
+  name: 'drv_fund_type_details',
+  private: false,
+  fromClause: 'src_finance_fund_type as ftype',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "ftype.id"
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(ftype.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    }
+  ,
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "ftype.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(ftype.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

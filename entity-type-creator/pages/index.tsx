@@ -2,6 +2,7 @@ import CheckValidity from '@/components/CheckValidity';
 import EntityTypeManager from '@/components/EntityTypeManager';
 import FqmConnector from '@/components/FqmConnector';
 import PostgresConnector from '@/components/PostgresConnector';
+import QueryTool from '@/components/QueryTool';
 import { EntityType } from '@/types';
 import { Box, Container, Drawer, Tab, Tabs } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -86,12 +87,15 @@ export default function EntryPoint() {
             >
               <Tab label="Hide" disabled={selectedBottomTab === 0} />
               <Tab label="Check Validity" />
-              <Tab label="DB Analyzer" />
+              <Tab label="Query Tool" />
               <Tab label={expandedBottom ? 'Collapse' : 'Expand'} />
             </Tabs>
 
             <Box sx={{ display: selectedBottomTab === 1 ? 'block' : 'none', p: 2 }}>
               <CheckValidity socket={socket} entityType={currentEntityType} />
+            </Box>
+            <Box sx={{ display: selectedBottomTab === 2 ? 'block' : 'none', p: 2 }}>
+              <QueryTool socket={socket} entityType={currentEntityType} />
             </Box>
           </Container>
         </Drawer>

@@ -14,7 +14,7 @@ export default function FqmConnector({
     host: 'localhost',
     port: 8081,
     tenant: 'fs09000000',
-    limit: 100,
+    limit: 10,
   });
   const [connectionState, setConnectionState] = useState({ connected: false, message: 'Waiting to connect...' });
 

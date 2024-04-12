@@ -1,4 +1,4 @@
-import { FqmConnection } from '@/types';
+import { EntityType, FqmConnection } from '@/types';
 
 export async function verifyFqmConnection(fqmConnection: FqmConnection) {
   console.log('Attempting to verify FQM connection', fqmConnection);
@@ -35,4 +35,27 @@ export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId
   }
 
   return await response.text();
+}
+
+export async function runQuery(fqmConnection: FqmConnection, entityType: EntityType, query: string) {
+  const response = await fetch(
+    `http://${fqmConnection.host}:${fqmConnection.port}/query?${new URLSearchParams({
+      query,
+      entityTypeId: entityType.id,
+      fields: entityType.columns?.map((column) => column.name).join(',') ?? '',
+      limit: `${fqmConnection.limit}`,
+    })}`,
+    {
+      method: 'GET',
+      headers: {
+        'x-okapi-tenant': fqmConnection.tenant,
+      },
+    }
+  );
+
+  if (response.status !== 200) {
+    throw new Error(`Got ${response.status} ${response.statusText}\n${JSON.stringify(await response.json(), null, 2)}`);
+  }
+
+  return (await response.json()).content as Record<string, string>[];
 }

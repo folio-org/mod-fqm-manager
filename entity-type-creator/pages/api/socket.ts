@@ -1,4 +1,4 @@
-import { fetchEntityType, verifyFqmConnection } from '@/socket/fqm';
+import { fetchEntityType, runQuery, verifyFqmConnection } from '@/socket/fqm';
 import { aggregateSchemaForAutocompletion, persistEntityType, verifyPostgresConnection } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType from '@/utils/formatter';
@@ -107,7 +107,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
       const updatedTranslationSet = { ...curTranslations, ...newTranslations };
       const sorted = Object.keys(updatedTranslationSet)
-        .sort()
+        .toSorted()
         .reduce((acc, key) => {
           acc[key] = updatedTranslationSet[key];
           return acc;
@@ -125,7 +125,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
         socket.emit('check-entity-type-validity-result', {
           persisted: false,
           queried: false,
-          persistedError: 'No Postgres connection',
+          persistError: 'No Postgres connection',
         });
         return;
       }
@@ -141,7 +141,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
         socket.emit('check-entity-type-validity-result', {
           queried: false,
           persisted: false,
-          persistedError: e.message,
+          persistError: e.message,
         });
         return;
       }
@@ -155,6 +155,46 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       } catch (e: any) {
         console.error('Error fetching entity type', e);
         socket.emit('check-entity-type-validity-result', {
+          persisted: true,
+          queried: false,
+          queryError: e.message,
+        });
+      }
+    });
+
+    socket.on('run-query', async ({ entityType, query }: { entityType: EntityType; query: string }) => {
+      console.log('Running query', query, 'on', entityType.name);
+
+      if (!pg) {
+        socket.emit('run-query-result', {
+          persisted: false,
+          persistError: 'No Postgres connection',
+        });
+        return;
+      }
+
+      try {
+        await persistEntityType(pg, fqmConnection.tenant, entityType);
+        socket.emit('run-query-result', {
+          persisted: true,
+        });
+      } catch (e: any) {
+        console.error('Error persisting entity type', e);
+        socket.emit('run-query-result', {
+          persisted: false,
+          persistError: e.message,
+        });
+        return;
+      }
+
+      try {
+        socket.emit('run-query-result', {
+          persisted: true,
+          queryResults: await runQuery(fqmConnection, entityType, query),
+        });
+      } catch (e: any) {
+        console.error('Error querying entity type', e);
+        socket.emit('run-query-result', {
           persisted: true,
           queried: false,
           queryError: e.message,

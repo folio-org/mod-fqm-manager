@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-export default function JSONTable({ data }: { data: Record<string, unknown>[] }) {
+export default function JSONTable({ data }: Readonly<{ data: Record<string, unknown>[] }>) {
   const keys = useMemo(() => {
     const keys = new Set<string>();
     for (const row of data) {

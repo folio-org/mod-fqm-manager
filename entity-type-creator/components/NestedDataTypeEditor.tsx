@@ -8,7 +8,7 @@ export default function NestedDataTypeEditor({
   dataType,
   onChange,
   ...rest
-}: {
+}: Readonly<{
   parentName: string;
   dataType: DataType;
   onChange: (newDataType: DataType) => void;
@@ -17,7 +17,7 @@ export default function NestedDataTypeEditor({
   codeMirrorExtension: LanguageSupport;
   translations: Record<string, string>;
   setTranslation: (key: string, value: string) => void;
-}) {
+}>) {
   if (dataType.dataType === 'arrayType') {
     return (
       <Grid item xs={12}>
@@ -102,7 +102,10 @@ export default function NestedDataTypeEditor({
 
           <Button
             onClick={() =>
-              onChange({ ...dataType, properties: [...dataType.properties!, { name: '', dataType: {} as DataType }] })
+              onChange({
+                ...dataType,
+                properties: [...(dataType.properties ?? []), { name: '', dataType: {} as DataType }],
+              })
             }
           >
             Add nested property

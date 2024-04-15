@@ -35,7 +35,14 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       const files = await Promise.all(
         (await readdir(ENTITY_TYPE_FILE_PATH, { recursive: true }))
           .filter((f) => f.endsWith('.json5'))
-          .map(async (f) => ({ file: f, data: json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString()) })),
+          .map(async (f) => {
+            try {
+              return { file: f, data: json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString()) };
+            } catch (e) {
+              console.error('Error reading entity type file', `${ENTITY_TYPE_FILE_PATH}${f}`, e);
+              return { file: `⚠️⚠️⚠️${f}⚠️⚠️⚠️`, data: {} };
+            }
+          }),
       );
 
       console.log('Found', files.length, 'entity types');

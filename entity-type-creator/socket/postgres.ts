@@ -101,7 +101,7 @@ export async function analyzeJsonb(
   tenant: string,
   db: string,
   table: string,
-  column: string
+  column: string,
 ) {
   console.log('Analyzing JSONB structure of', db, table, column);
 
@@ -114,10 +114,12 @@ export async function analyzeJsonb(
 
   let schema: Schema | null = null;
 
+  let done = 0;
+
   for (let scanned = 0; scanned < total && !aborted; scanned += 100) {
     console.log('Scanned', scanned, 'of', total, 'records');
     const query = pg`SELECT ${pg.unsafe(column)} FROM ${pg.unsafe(
-      `${db.replaceAll('TENANT', tenant)}.${table}`
+      `${db.replaceAll('TENANT', tenant)}.${table}`,
     )} LIMIT 100 OFFSET ${scanned}`;
 
     socket.removeAllListeners(`abort-analyze-jsonb-${db}-${table}-${column}`);
@@ -136,8 +138,10 @@ export async function analyzeJsonb(
       const thisBatch = createCompoundSchema(jsons);
       schema = schema ? mergeSchemas([schema, thisBatch]) : thisBatch;
 
+      done = Math.min(total, scanned + 100);
+
       socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
-        scanned: Math.min(total, scanned + 100),
+        scanned: done,
         total,
         finished: false,
       });
@@ -146,7 +150,7 @@ export async function analyzeJsonb(
 
   if (schema) {
     socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
-      scanned: total,
+      scanned: done,
       total,
       finished: true,
       result: schema,

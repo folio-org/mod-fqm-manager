@@ -71,4 +71,26 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_invoices" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "invoices" schemaName="${tenant_id}_mod_invoice_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_invoices">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.invoices
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_invoice_lines" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "invoice_lines" schemaName="${tenant_id}_mod_invoice_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_lines">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.invoice_lines
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

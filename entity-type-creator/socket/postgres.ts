@@ -1,5 +1,7 @@
 import { EntityType, PostgresConnection } from '@/types';
 import postgres from 'postgres';
+import { mergeSchemas, createCompoundSchema, Schema } from 'genson-js';
+import { Socket } from 'socket.io';
 
 export async function verifyPostgresConnection(postgresConnection: PostgresConnection) {
   console.log('Attempting to connect to Postgres FQM connection', postgresConnection);
@@ -28,7 +30,9 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
     SELECT
       table_schema,
       table_name,
-      column_name
+      table_type,
+      column_name,
+      data_type
     FROM
       information_schema.tables
       NATURAL JOIN information_schema.columns
@@ -37,7 +41,7 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
       AND table_schema NOT IN ('pg_catalog', 'information_schema');`;
 
   const routines = await pg`
-    SELECT
+    SELECT DISTINCT
       routine_schema,
       routine_name AS function_name
     FROM
@@ -48,9 +52,14 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
   console.log('found', columns.length, 'columns and', routines.length, 'routines');
 
   const schemaAggregated: Record<string, string[]> = {};
-  for (const { table_schema, table_name, column_name } of columns) {
+  const typeMapping: Record<string, string> = {};
+  const isView: Record<string, boolean> = {};
+
+  for (const { table_schema, table_name, table_type, column_name, data_type } of columns) {
     const schema = (table_schema as string).replace(`${tenant}_`, 'TENANT_');
     schemaAggregated[`${schema}.${table_name}`] = [...(schemaAggregated[`${schema}.${table_name}`] ?? []), column_name];
+    typeMapping[`${schema}.${table_name}.${column_name}`] = data_type;
+    isView[`${schema}.${table_name}`] = table_type === 'VIEW';
   }
 
   const routinesAggregated: Record<string, string[]> = {};
@@ -59,7 +68,7 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
     routinesAggregated[schema] = [...(routinesAggregated[schema] ?? []), function_name];
   }
 
-  return { ...schemaAggregated, ...routinesAggregated };
+  return { columns: schemaAggregated, routines: routinesAggregated, typeMapping, isView };
 }
 
 export async function persistEntityType(pg: postgres.Sql, tenant: string, entityType: EntityType) {
@@ -83,5 +92,64 @@ export async function persistEntityType(pg: postgres.Sql, tenant: string, entity
       UPDATE ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
       SET definition = ${pg.json(entityType as any)}
       WHERE id = ${entityType.id};`;
+  }
+}
+
+export async function analyzeJsonb(
+  socket: Socket,
+  pg: postgres.Sql,
+  tenant: string,
+  db: string,
+  table: string,
+  column: string
+) {
+  console.log('Analyzing JSONB structure of', db, table, column);
+
+  const total = (await pg`SELECT COUNT(1) FROM ${pg.unsafe(`${db.replaceAll('TENANT', tenant)}.${table}`)}`)[0].count;
+  console.log('Found', total, 'records to analyze');
+
+  socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, { scanned: 0, total, finished: false });
+
+  let aborted = false;
+
+  let schema: Schema | null = null;
+
+  for (let scanned = 0; scanned < total && !aborted; scanned += 100) {
+    console.log('Scanned', scanned, 'of', total, 'records');
+    const query = pg`SELECT ${pg.unsafe(column)} FROM ${pg.unsafe(
+      `${db.replaceAll('TENANT', tenant)}.${table}`
+    )} LIMIT 100 OFFSET ${scanned}`;
+
+    socket.removeAllListeners(`abort-analyze-jsonb-${db}-${table}-${column}`);
+    socket.once(`abort-analyze-jsonb-${db}-${table}-${column}`, () => {
+      console.log('Aborting analysis of', db, table, column);
+
+      aborted = true;
+      query.cancel();
+    });
+
+    const rows = await query;
+
+    if (!aborted) {
+      const jsons = rows.map((row) => row[column]);
+
+      const thisBatch = createCompoundSchema(jsons);
+      schema = schema ? mergeSchemas([schema, thisBatch]) : thisBatch;
+
+      socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
+        scanned: Math.min(total, scanned + 100),
+        total,
+        finished: false,
+      });
+    }
+  }
+
+  if (schema) {
+    socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
+      scanned: total,
+      total,
+      finished: true,
+      result: schema,
+    });
   }
 }

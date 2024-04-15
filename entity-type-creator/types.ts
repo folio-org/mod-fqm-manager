@@ -65,3 +65,10 @@ export interface EntityType {
   sourceView?: string;
   sourceViewExtractor?: string;
 }
+
+export interface Schema {
+  columns: Record<string, string[]>;
+  routines: Record<string, string[]>;
+  typeMapping: Record<string, string>;
+  isView: Record<string, boolean>;
+}

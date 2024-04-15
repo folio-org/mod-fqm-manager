@@ -1,8 +1,13 @@
 import { fetchEntityType, runQuery, verifyFqmConnection } from '@/socket/fqm';
-import { aggregateSchemaForAutocompletion, persistEntityType, verifyPostgresConnection } from '@/socket/postgres';
+import {
+  aggregateSchemaForAutocompletion,
+  analyzeJsonb,
+  persistEntityType,
+  verifyPostgresConnection,
+} from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType from '@/utils/formatter';
-import { Server } from 'Socket.IO';
+import { Server } from 'socket.io';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -30,7 +35,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       const files = await Promise.all(
         (await readdir(ENTITY_TYPE_FILE_PATH, { recursive: true }))
           .filter((f) => f.endsWith('.json5'))
-          .map(async (f) => ({ file: f, data: json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString()) }))
+          .map(async (f) => ({ file: f, data: json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString()) })),
       );
 
       console.log('Found', files.length, 'entity types');
@@ -108,10 +113,13 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       const updatedTranslationSet = { ...curTranslations, ...newTranslations };
       const sorted = Object.keys(updatedTranslationSet)
         .toSorted()
-        .reduce((acc, key) => {
-          acc[key] = updatedTranslationSet[key];
-          return acc;
-        }, {} as Record<string, string>);
+        .reduce(
+          (acc, key) => {
+            acc[key] = updatedTranslationSet[key];
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
 
       await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
       console.log('Updated translations');
@@ -200,6 +208,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
           queryError: e.message,
         });
       }
+    });
+
+    socket.on('analyze-jsonb', ({ db, table, column }: { db: string; table: string; column: string }) => {
+      analyzeJsonb(socket, pg!, fqmConnection.tenant, db, table, column);
     });
   });
 

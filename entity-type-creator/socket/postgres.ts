@@ -74,6 +74,8 @@ export async function aggregateSchemaForAutocompletion(pg: postgres.Sql, tenant:
 export async function persistEntityType(pg: postgres.Sql, tenant: string, entityType: EntityType) {
   console.log('Persisting entity type', entityType);
 
+  const entityTypeReplaced = JSON.parse(JSON.stringify(entityType).replaceAll('TENANT_', `${tenant}_`)) as EntityType;
+
   // check if table entity_type_definition has matching ID for entityType.id
   const existing = await pg`
     SELECT id
@@ -81,17 +83,17 @@ export async function persistEntityType(pg: postgres.Sql, tenant: string, entity
     WHERE id = ${entityType.id};`;
 
   if (existing.length === 0) {
-    console.log('Inserting new entity type', entityType.id);
+    console.log('Inserting new entity type', entityTypeReplaced.id);
 
     await pg`
       INSERT INTO ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
       (id, definition)
-      VALUES (${entityType.id}, ${pg.json(entityType as any)});`;
+      VALUES (${entityTypeReplaced.id}, ${pg.json(entityTypeReplaced as any)});`;
   } else {
     await pg`
       UPDATE ${pg.unsafe(tenant + '_mod_fqm_manager.entity_type_definition')}
-      SET definition = ${pg.json(entityType as any)}
-      WHERE id = ${entityType.id};`;
+      SET definition = ${pg.json(entityTypeReplaced as any)}
+      WHERE id = ${entityTypeReplaced.id};`;
   }
 }
 

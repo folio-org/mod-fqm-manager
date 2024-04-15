@@ -136,4 +136,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_organization_categories" author="bsharp@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="categories" schemaName="${tenant_id}_mod_organizations_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_organization_categories">
+      SELECT * FROM ${tenant_id}_mod_organizations_storage.categories
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

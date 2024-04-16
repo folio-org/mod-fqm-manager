@@ -50,7 +50,7 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
       headers: {
         'x-okapi-tenant': fqmConnection.tenant,
       },
-    }
+    },
   );
 
   if (response.status !== 200) {
@@ -58,4 +58,40 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
   }
 
   return (await response.json()).content as Record<string, string>[];
+}
+
+export async function install(fqmConnection: FqmConnection) {
+  const response = await fetch(`http://${fqmConnection.host}:${fqmConnection.port}/_/tenant`, {
+    method: 'POST',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      module_to: 'foo',
+    }),
+  });
+
+  const status = `${response.status} ${response.statusText}`;
+  console.log('Installing mod-fqm-manager yielded', status);
+
+  return { status, body: await response.text() };
+}
+
+export async function uninstall(fqmConnection: FqmConnection) {
+  const response = await fetch(`http://${fqmConnection.host}:${fqmConnection.port}/_/tenant`, {
+    method: 'POST',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      module_from: 'foo',
+    }),
+  });
+
+  const status = `${response.status} ${response.statusText}`;
+  console.log('Uninstalling mod-fqm-manager yielded', status);
+
+  return { status, body: await response.text() };
 }

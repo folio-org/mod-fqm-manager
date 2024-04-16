@@ -1,4 +1,4 @@
-import { fetchEntityType, runQuery, verifyFqmConnection } from '@/socket/fqm';
+import { fetchEntityType, install, runQuery, uninstall, verifyFqmConnection } from '@/socket/fqm';
 import {
   aggregateSchemaForAutocompletion,
   analyzeJsonb,
@@ -7,12 +7,12 @@ import {
 } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType from '@/utils/formatter';
-import { Server } from 'socket.io';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import postgres from 'postgres';
+import { Server } from 'socket.io';
 import { v4 as uuid } from 'uuid';
 
 export const ENTITY_TYPE_FILE_PATH = '../src/main/resources/entity-types/';
@@ -220,6 +220,9 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('analyze-jsonb', ({ db, table, column }: { db: string; table: string; column: string }) => {
       analyzeJsonb(socket, pg!, fqmConnection.tenant, db, table, column);
     });
+
+    socket.on('install-module', async () => socket.emit('install-module-result', await install(fqmConnection)));
+    socket.on('uninstall-module', async () => socket.emit('uninstall-module-result', await uninstall(fqmConnection)));
   });
 
   res.end();

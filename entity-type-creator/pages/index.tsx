@@ -2,6 +2,7 @@ import CheckValidity from '@/components/CheckValidity';
 import DBInspector from '@/components/DBInspector';
 import EntityTypeManager from '@/components/EntityTypeManager';
 import FqmConnector from '@/components/FqmConnector';
+import ModuleInstaller from '@/components/ModuleInstaller';
 import PostgresConnector from '@/components/PostgresConnector';
 import QueryTool from '@/components/QueryTool';
 import { EntityType, Schema } from '@/types';
@@ -72,7 +73,7 @@ export default function EntryPoint() {
             <Tabs
               value={selectedTab}
               onChange={(_e, n) => {
-                if (n === 4) {
+                if (n === 5) {
                   setExpandedBottom((e) => !e);
                 } else {
                   setSelectedTab(n);
@@ -81,6 +82,7 @@ export default function EntryPoint() {
               sx={{ borderTop: '1px solid #aaa' }}
             >
               <Tab label="Hide" disabled={selectedTab === 0} />
+              <Tab label="Module Installer" />
               <Tab label="Check Validity" />
               <Tab label="Query Tool" />
               <Tab label="DB Inspector" />
@@ -88,12 +90,15 @@ export default function EntryPoint() {
             </Tabs>
 
             <Box sx={{ display: selectedTab === 1 ? 'block' : 'none', p: 2 }}>
-              <CheckValidity socket={socket} entityType={currentEntityType} />
+              <ModuleInstaller socket={socket} />
             </Box>
             <Box sx={{ display: selectedTab === 2 ? 'block' : 'none', p: 2 }}>
-              <QueryTool socket={socket} entityType={currentEntityType} />
+              <CheckValidity socket={socket} entityType={currentEntityType} />
             </Box>
             <Box sx={{ display: selectedTab === 3 ? 'block' : 'none', p: 2 }}>
+              <QueryTool socket={socket} entityType={currentEntityType} />
+            </Box>
+            <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
               <DBInspector socket={socket} schema={schema} />
             </Box>
           </Container>

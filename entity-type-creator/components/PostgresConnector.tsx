@@ -1,13 +1,4 @@
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  Button,
-  Grid,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Button, Grid, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { PostgresConnection } from '../types';

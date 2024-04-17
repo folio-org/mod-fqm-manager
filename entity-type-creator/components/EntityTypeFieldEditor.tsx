@@ -165,9 +165,7 @@ export default function EntityTypeFieldEditor({
               labelId={`${parentName}-${field.name}-data-type`}
               fullWidth
               value={field.dataType?.dataType}
-              onChange={(e) =>
-                onChange({ ...field, dataType: { ...field.dataType, dataType: e.target.value as DataTypeValue } })
-              }
+              onChange={(e) => onChange({ ...field, dataType: { dataType: e.target.value as DataTypeValue } })}
             >
               {Object.values(DataTypeValue).map((dt) => (
                 <MenuItem key={dt} value={dt} sx={{ fontFamily: 'monospace' }}>
@@ -190,10 +188,10 @@ export default function EntityTypeFieldEditor({
                     field.valueSourceApi !== undefined
                       ? 'api'
                       : field.source !== undefined
-                      ? 'entity'
-                      : field.values !== undefined
-                      ? 'list'
-                      : ''
+                        ? 'entity'
+                        : field.values !== undefined
+                          ? 'list'
+                          : ''
                   }
                   onChange={(e) => {
                     switch (e.target.value) {
@@ -236,7 +234,7 @@ export default function EntityTypeFieldEditor({
               </FormControl>
             </Grid>
           ),
-          [field.valueSourceApi, field.source, field.values, entityType, onChange, parentName]
+          [field.valueSourceApi, field.source, field.values, entityType, onChange, parentName],
         )}
 
         {useMemo(
@@ -348,7 +346,7 @@ export default function EntityTypeFieldEditor({
                 </>
               )
             ),
-          [field.source, field.valueSourceApi, onChange, parentName, entityTypes]
+          [field.source, field.valueSourceApi, onChange, parentName, entityTypes],
         )}
 
         {useMemo(
@@ -410,7 +408,7 @@ export default function EntityTypeFieldEditor({
                 </fieldset>
               </Grid>
             ),
-          [field.values]
+          [field.values],
         )}
 
         {useMemo(
@@ -433,7 +431,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.valueGetter]
+          [field],
         )}
 
         {useMemo(
@@ -456,7 +454,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.filterValueGetter]
+          [field],
         )}
 
         {useMemo(
@@ -479,7 +477,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.valueFunction]
+          [field],
         )}
 
         <NestedDataTypeEditor

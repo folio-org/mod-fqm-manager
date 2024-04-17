@@ -52,10 +52,10 @@ export default function QueryTool({
           } else {
             setState({ state: State.PERSISTED });
           }
-        }
+        },
       );
     },
-    [state, socket]
+    [state, socket],
   );
 
   if (entityType === null) {

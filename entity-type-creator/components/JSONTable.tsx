@@ -36,6 +36,10 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
     return jsonKeys;
   }, [keys, data]);
 
+  if (data.length === 0) {
+    return <i style={{ color: '#ccc' }}>none</i>;
+  }
+
   return (
     <table style={{ fontFamily: 'monospace', textAlign: 'left', border: '1px solid', borderCollapse: 'collapse' }}>
       <thead>

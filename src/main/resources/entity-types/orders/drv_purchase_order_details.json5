@@ -1,0 +1,406 @@
+{
+  id: '230b18b1-ee3b-4382-9236-db44e5f30121',
+  name: 'drv_purchase_order_details',
+  fromClause: 'src_purchase_order AS po',
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: 'po.id',
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'po_number_prefix',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->>'poNumberPrefix'",
+    },
+    {
+      name: 'po_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->>'poNumber'",
+    },
+    {
+      name: 'po_number_suffix',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "po.jsonb->>'poNumberSuffix'",
+    },
+    {
+      name: 'bill_to',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->>'billTo'",
+    },
+    {
+      name: 'ship_to',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'shipTo'",
+    },
+    {
+      name: 'vendor',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'vendor'",
+    },
+    {
+      name: 'assigned_to',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'assignedTo'",
+    },
+    {
+      name: 'template',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: "po.jsonb->>'template'",
+    },
+    {
+      name: 'approved',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'approved'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'approval_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'approvalDate'",
+    },
+    {
+      name: 'approvedById',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'approvedById'",
+    },
+    {
+      name: 'manual_po',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'manualPo'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 're_encumber',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'reEncumber'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'order_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'orderType'",
+      values: [
+        {
+          value: 'One-Time',
+          label: 'One-time',
+        },
+        {
+          value: 'Ongoing',
+          label: 'Ongoing',
+        },
+      ],
+    },
+    {
+      name: 'workflow_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'workflowStatus'",
+      values: [
+        {
+          value: 'Pending',
+          label: 'Pending',
+        },
+        {
+          value: 'Open',
+          label: 'Open',
+        },
+        {
+          value: 'Closed',
+          label: 'Closed',
+        },
+      ],
+    },
+    {
+      name: 'date_ordered',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "po.jsonb->>'dateOrdered'",
+    },
+    {
+      name: 'ongoing_renewal_interval',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'interval'",
+    },
+    {
+      name: 'ongoing_is_subscription',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'isSubscription'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'ongoing_manual_renewal',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'manualRenewal'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'ongoing_renewal_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'renewalDate'",
+    },
+    {
+      name: 'ongoing_review_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'reviewDate'",
+    },
+    {
+      name: 'ongoing_review_period',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'reviewPeriod'",
+    },
+    {
+      name: 'ongoing_notes',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'ongoing'->>'notes'",
+    },
+    {
+      name: 'notes',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(po.jsonb->'notes')\n)",
+      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(po.jsonb->'notes'))\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'next_pol_number',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->>'nextPolNumber'",
+    },
+    {
+      name: 'tags',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(po.jsonb->'tags'->'tagList')\n)",
+      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(po.jsonb->'tags'->'tagList'))\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'close_reason',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: "po.jsonb->'closeReason'->>'reason'",
+    },
+    {
+      name: 'close_reason_note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "po.jsonb->'closeReasaon'->>'reason'",
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(po.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(po.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'acq_units',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'acq_unit_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(acq_unit.jsonb->>'name'::text) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((po.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON lower(record.value::text)=acq_unit.id::text\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_unit.jsonb->>'name'::text)) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((po.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON (record.value::text)=acq_unit.id::text\n)",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: '230b18b1-ee3b-4382-9236-db44e5f30121',
+        columnName: 'acq_units',
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name',
+      },
+    },
+  ],
+}

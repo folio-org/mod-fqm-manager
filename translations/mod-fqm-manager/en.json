@@ -633,5 +633,18 @@
   "entityType.src_users_departments.id": "Id",
   "entityType.src_users_groups": "Groups",
   "entityType.src_users_groups.group": "Group",
-  "entityType.src_users_groups.id": "Id"
+  "entityType.src_users_groups.id": "Id",
+
+  "entityType.drv_location_details": "Locations",
+  "entityType.drv_location_details.id": "ID",
+  "entityType.drv_location_details.code": "Code",
+  "entityType.drv_location_details.name": "Name",
+  "entityType.drv_location_details.description": "Description",
+  "entityType.drv_location_details.discovery_display_name": "Discovery display name",
+  "entityType.drv_location_details.is_active": "Is active",
+  "entityType.drv_location_details.institution_id": "Institution ID",
+  "entityType.drv_location_details.campus_id": "Campus ID",
+  "entityType.drv_location_details.details": "Details",
+  "entityType.drv_location_details.service_point_ids": "Service point IDs",
+  "entityType.drv_location_details.primary_service_point": "Primary service point"
 }

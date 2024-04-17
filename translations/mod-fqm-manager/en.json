@@ -646,5 +646,18 @@
   "entityType.drv_location_details.campus_id": "Campus ID",
   "entityType.drv_location_details.details": "Details",
   "entityType.drv_location_details.service_point_ids": "Service point IDs",
-  "entityType.drv_location_details.primary_service_point": "Primary service point"
+  "entityType.drv_location_details.primary_service_point": "Primary service point",
+  "entityType.drv_config_data_details": "Config data",
+  "entityType.drv_config_data_details.id": "ID",
+  "entityType.drv_config_data_details.code": "Code",
+  "entityType.drv_config_data_details.config_name": "Config name",
+  "entityType.drv_config_data_details.description": "Description",
+  "entityType.drv_config_data_details.value": "Value",
+  "entityType.drv_config_data_details.user_id": "User ID",
+  "entityType.drv_config_data_details.created_date": "Created date",
+  "entityType.drv_config_data_details.updated_date": "Updated date",
+  "entityType.drv_config_data_details.created_by_user_id": "Created by user ID",
+  "entityType.drv_config_data_details.created_by_username": "Created by username",
+  "entityType.drv_config_data_details.updated_by_user_id": "Updated by user ID",
+  "entityType.drv_config_data_details.updated_by_username": "Updated by username"
 }

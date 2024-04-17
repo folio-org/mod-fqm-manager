@@ -1,5 +1,8 @@
 # 2.0.x
 
+## 2.0.3
+- [MODFQMMGR-202](https://folio-org.atlassian.net/browse/MODFQMMGR-202) Include system exchange rate when set exchange rate isn't active
+
 ## 2.0.2
 - [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Fix read/write split bug
 - [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Lower contributor-name-types dependency version

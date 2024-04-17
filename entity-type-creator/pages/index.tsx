@@ -59,10 +59,10 @@ export default function EntryPoint() {
 
         <Drawer
           sx={{
-            height: selectedTab ? (expandedBottom ? '60vh' : '30vh') : undefined,
+            height: selectedTab ? (expandedBottom ? '100vh' : '30vh') : undefined,
             flexShrink: 0,
             '& .MuiDrawer-paper': {
-              height: selectedTab ? (expandedBottom ? '60vh' : '30vh') : undefined,
+              height: selectedTab ? (expandedBottom ? '100vh' : '30vh') : undefined,
               boxSizing: 'border-box',
             },
           }}

@@ -433,7 +433,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.valueGetter]
+          [field]
         )}
 
         {useMemo(
@@ -456,7 +456,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.filterValueGetter]
+          [field]
         )}
 
         {useMemo(
@@ -479,7 +479,7 @@ export default function EntityTypeFieldEditor({
               </Grid>
             </>
           ),
-          [field.valueFunction]
+          [field]
         )}
 
         <NestedDataTypeEditor

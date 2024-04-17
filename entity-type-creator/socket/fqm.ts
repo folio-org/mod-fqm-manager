@@ -57,7 +57,7 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
     throw new Error(`Got ${response.status} ${response.statusText}\n${JSON.stringify(await response.json(), null, 2)}`);
   }
 
-  return (await response.json()).content as Record<string, string>[];
+  return ((await response.json()).content as Record<string, string>[]) ?? [];
 }
 
 export async function install(fqmConnection: FqmConnection) {

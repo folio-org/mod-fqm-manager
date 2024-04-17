@@ -86,21 +86,28 @@ public class EntityTypeRepository {
       .map(row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField)));
   }
 
-  public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) throws JsonProcessingException {
+  public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {
     log.info("Replacing entity type definitions with new set of {} entities", entityTypes.size());
 
-    // we use this instead of truncate since it has better rollback support
-    jooqContext.deleteFrom(table(TABLE_NAME)).execute();
+    jooqContext.transaction(transaction -> {
+      transaction.dsl()
+        .deleteFrom(table(TABLE_NAME))
+        .where(
+          field(ID_FIELD_NAME, UUID.class)
+            .in(entityTypes.stream().map(et -> UUID.fromString(et.getId())).toList())
+        )
+        .execute();
 
-    InsertValuesStep2<Record, UUID, JSONB> insert = jooqContext
-      .insertInto(table(TABLE_NAME))
-      .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class));
+      InsertValuesStep2<Record, UUID, JSONB> insert = transaction.dsl()
+        .insertInto(table(TABLE_NAME))
+        .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class));
 
-    for (EntityType entityType : entityTypes) {
-      insert.values(UUID.fromString(entityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(entityType)));
-    }
+      for (EntityType entityType : entityTypes) {
+        insert.values(UUID.fromString(entityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(entityType)));
+      }
 
-    insert.execute();
+      insert.execute();
+    });
   }
 
   private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId) {

@@ -93,4 +93,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_config_data" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "config_data" schemaName="${tenant_id}_mod_configuration"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_configuration_config_data">
+      SELECT * FROM ${tenant_id}_mod_configuration.config_data
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

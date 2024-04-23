@@ -33,14 +33,9 @@ class ResultSetRepositoryTest {
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
-<<<<<<< HEAD
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-    this.repo = new ResultSetRepository(context, entityTypeRepository);
-=======
-    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(context, new ObjectMapper());
-    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository);
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
     this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
->>>>>>> ea7045f (MODFQMMGR-230: Update mod-fqm-manager to support nested entity types)
   }
 
   @Test

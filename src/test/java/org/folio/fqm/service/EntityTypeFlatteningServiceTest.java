@@ -1,5 +1,6 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
@@ -7,6 +8,8 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceJoin;
 import org.folio.querytool.domain.dto.StringType;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,8 +29,15 @@ class EntityTypeFlatteningServiceTest {
 
   @Mock
   private EntityTypeRepository entityTypeRepository;
-  @InjectMocks
+  private ObjectMapper objectMapper;
   private EntityTypeFlatteningService entityTypeFlatteningService;
+
+  @BeforeEach
+  void setup() {
+    entityTypeRepository = mock(EntityTypeRepository.class);
+    objectMapper = new ObjectMapper();
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper);
+  }
 
   private static final UUID SIMPLE_ENTITY_TYPE_ID = UUID.fromString("0686b9e4-accd-46f8-9e35-792c735733bb");
   private static final UUID COMPLEX_ENTITY_TYPE_ID = UUID.fromString("6c28028a-ca3b-4415-94e8-8525257abbab");

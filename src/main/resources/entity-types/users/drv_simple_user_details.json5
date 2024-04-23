@@ -9,6 +9,16 @@
       dataType: {
         dataType: 'booleanType',
       },
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
       queryable: true,
       visibleByDefault: true,
       valueGetter: "src_users_users.jsonb ->> 'active'",

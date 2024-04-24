@@ -257,11 +257,11 @@
     {
       name: 'user_patron_group_id',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'rangedUUIDType'
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: 'src_users_groups.id',
+      valueGetter: "src_users_users.jsonb ->> 'patronGroup'"
     },
     {
       name: 'user_phone',

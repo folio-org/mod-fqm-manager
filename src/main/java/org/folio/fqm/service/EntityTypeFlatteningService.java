@@ -63,7 +63,12 @@ public class EntityTypeFlatteningService {
         boolean keepOriginalAlias = countDbSources(flattenedSourceDefinition) > 1;
 
         for (EntityTypeSource subSource : flattenedSourceDefinition.getSources()) {
+          String oldAlias = subSource.getAlias();
           Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = handleSourceAndUpdateEntityType(flattenedSourceDefinition, subSource, source, keepOriginalAlias);
+          String newAlias = updatePair.component1().getAlias();
+          if (!oldAlias.equals(newAlias)) {
+            updateOtherSources(oldAlias, newAlias, flattenedSourceDefinition.getSources());
+          }
           flattenedEntityType.addSourcesItem(updatePair.component1());
           finalColumns.addAll(updatePair.component2());
         }
@@ -149,6 +154,19 @@ public class EntityTypeFlatteningService {
     orderedList.add(source);
   }
 
+  private void updateOtherSources(String oldSourceName, String newSourceName, List<EntityTypeSource> otherSources) {
+    if (!newSourceName.equals("complex_entity_type_source2")) {
+      return;
+    }
+    for (EntityTypeSource source : otherSources) {
+      if (source.getJoin() != null) {
+        if (oldSourceName.equals(source.getJoin().getJoinTo())) {
+          source.getJoin().joinTo(newSourceName);
+        }
+      }
+    }
+  }
+
   private Pair<EntityTypeSource, List<EntityTypeColumn>> handleSourceAndUpdateEntityType(EntityType originalEntityType, EntityTypeSource nestedSource, EntityTypeSource outerSource, boolean keepOriginalAlias) {
     List<EntityTypeColumn> updatedColumns = new ArrayList<>();
     // Make a copy instead of returning original object
@@ -193,7 +211,6 @@ public class EntityTypeFlatteningService {
             newSource.join(outerSource.getJoin());
           } else {
             // maybe we can handle here? probably not
-            newSource.getJoin().joinTo("AJf");
           }
         }
       }

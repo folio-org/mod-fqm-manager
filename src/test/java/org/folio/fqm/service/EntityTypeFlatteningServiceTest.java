@@ -482,7 +482,7 @@ class EntityTypeFlatteningServiceTest {
           .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
-            .joinTo("source2")
+            .joinTo("complex_entity_type_source2")
             .condition(":this.field1 = :that.field3")
           )
           .flattened(true),
@@ -494,7 +494,7 @@ class EntityTypeFlatteningServiceTest {
           .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
-            .joinTo("source2")
+            .joinTo("complex_entity_type_source2")
             .condition(":this.field1 = :that.field4")
           )
           .flattened(true)

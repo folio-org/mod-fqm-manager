@@ -38,7 +38,7 @@ public class EntityTypeFlatteningService {
       .name(originalEntityType.getName())
       ._private(originalEntityType.getPrivate())
       .defaultSort(originalEntityType.getDefaultSort())
-      .columns(originalEntityType.getColumns())
+      .columns(originalEntityType.getColumns()) // TODO: probably remove
       .idView(originalEntityType.getIdView())
       .customFieldEntityTypeId(originalEntityType.getCustomFieldEntityTypeId())
       .labelAlias(originalEntityType.getLabelAlias())

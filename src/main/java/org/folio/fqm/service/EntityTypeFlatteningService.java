@@ -155,14 +155,12 @@ public class EntityTypeFlatteningService {
   }
 
   private void updateOtherSources(String oldSourceName, String newSourceName, List<EntityTypeSource> otherSources) {
-    if (!newSourceName.equals("complex_entity_type_source2")) {
-      return;
-    }
+//    if (!newSourceName.equals("complex_entity_type_source2")) {
+//      return;
+//    }
     for (EntityTypeSource source : otherSources) {
-      if (source.getJoin() != null) {
-        if (oldSourceName.equals(source.getJoin().getJoinTo())) {
-          source.getJoin().joinTo(newSourceName);
-        }
+      if (source.getJoin() != null && oldSourceName.equals(source.getJoin().getJoinTo())) {
+        source.getJoin().joinTo(newSourceName);
       }
     }
   }
@@ -199,7 +197,7 @@ public class EntityTypeFlatteningService {
         }
       }
 
-      if (newAlias.toString().equals("complex_entity_type_source3")){
+      if (newAlias.toString().equals("complex_entity_type_source3")) {
         System.out.println("HERE");
       }
       if (outerSource != null) { // TODO: may not need "nestedSource.getJoin() == null"

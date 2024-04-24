@@ -180,12 +180,21 @@ public class EntityTypeFlatteningService {
           updatedColumns.add(column);
         }
       }
-//      if (outerSource != null && nestedSource.getJoin() == null) { // TODO: may not need "nestedSource.getJoin() == null"
-      if (outerSource != null) {
+
+      if (newAlias.toString().equals("complex_entity_type_source3")){
+        System.out.println("HERE");
+      }
+      if (outerSource != null) { // TODO: may not need "nestedSource.getJoin() == null"
+//      if (outerSource != null) {
         if (!Boolean.TRUE.equals(newSource.getFlattened())) {
           newSource.alias(newAlias.toString());
-          newSource.join(outerSource.getJoin());
           newSource.flattened(true);
+          if (nestedSource.getJoin() == null) {
+            newSource.join(outerSource.getJoin());
+          } else {
+            // maybe we can handle here? probably not
+            newSource.getJoin().joinTo("AJf");
+          }
         }
       }
     } else {
@@ -218,8 +227,7 @@ public class EntityTypeFlatteningService {
       String json = objectMapper.writeValueAsString(column);
       return objectMapper.readValue(json, EntityTypeColumn.class);
     } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+      return new EntityTypeColumn(); // TODO: do something better here
     }
   }
 

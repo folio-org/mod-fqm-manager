@@ -259,7 +259,7 @@ class EntityTypeFlatteningServiceTest {
           .useIdColumns(true)
       ));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(SIMPLE_ENTITY_TYPE));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(SIMPLE_ENTITY_TYPE_ID));
@@ -364,8 +364,8 @@ class EntityTypeFlatteningServiceTest {
           .useIdColumns(false)
       ));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(SIMPLE_ENTITY_TYPE));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(COMPLEX_ENTITY_TYPE));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
@@ -500,9 +500,9 @@ class EntityTypeFlatteningServiceTest {
           .flattened(true)
       ));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(SIMPLE_ENTITY_TYPE));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(COMPLEX_ENTITY_TYPE));
-    when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(TRIPLE_NESTED_ENTITY_TYPE));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(TRIPLE_NESTED_ENTITY_TYPE_ID));
@@ -514,8 +514,8 @@ class EntityTypeFlatteningServiceTest {
     String expectedJoinClause = "source2_target \"source2\" LEFT JOIN source3_target \"source3\" ON \"source3\".field5 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type1\" ON \"simple_entity_type1\".field1 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type2\" ON \"simple_entity_type2\".field1 = \"source2\".field4";
 
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(SIMPLE_ENTITY_TYPE));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(COMPLEX_ENTITY_TYPE));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
@@ -529,11 +529,21 @@ class EntityTypeFlatteningServiceTest {
     String expectedJoinClause = "source1_target \"source1\" JOIN source2_target \"source2\" ON \"source2\".field = \"source1\".field JOIN source3_target \"source3\" ON \"source3\".field = \"source2\".field JOIN source7_target \"source7\" ON \"source7\".field = \"source3\".field JOIN source4_target \"source4\" ON \"source4\".field = \"source3\".field JOIN source6_target \"source6\" ON \"source6\".field = \"source1\".field JOIN source5_target \"source5\" ON \"source5\".field = \"source4\".field";
 
 
-    when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(UNORDERED_ENTITY_TYPE));
+    when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
+  }
+
+  private EntityType copyEntityType(EntityType originalEntityType) {
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = objectMapper.writeValueAsString(originalEntityType);
+      return objectMapper.readValue(json, EntityType.class);
+    } catch (Exception e) {
+      return new EntityType();
+    }
   }
 }

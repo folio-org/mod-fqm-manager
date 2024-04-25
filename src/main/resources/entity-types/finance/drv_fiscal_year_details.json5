@@ -1,0 +1,317 @@
+{
+  "id": "e61f988a-1d47-4b16-b8be-220a1c38ca8a",
+  "name": "drv_fiscal_year_details",
+  "columns": [
+    {
+      "name": "id",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.id",
+      "visibleByDefault": false
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      "name": "name",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'name'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "code",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'code'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "currency",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'currency'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "description",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'description'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "period_start",
+      "dataType": {
+        "dataType": "dateType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'periodStart'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "period_end",
+      "dataType": {
+        "dataType": "dateType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'periodEnd'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "series",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      sourceAlias: 'fiscal_year',
+      "valueGetter": ":sourceAlias.jsonb ->> 'series'",
+      "visibleByDefault": false
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fiscal_year',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'financial_summary',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'allocated',
+              property: 'allocated',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'allocated') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'available',
+              property: 'available',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'available') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'unavailable',
+              property: 'unavailable',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'unavailable') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'initial_allocation',
+              property: 'initialAllocation',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'initialAllocation') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'allocation_to',
+              property: 'allocationTo',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'allocationTo') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'allocation_from',
+              property: 'allocationFrom',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'allocationFrom') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'total_funding',
+              property: 'totalFunding',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'totalFunding') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'cash_balance',
+              property: 'cashBalance',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'cashBalance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'awaitingPayment',
+              property: 'awaiting_payment',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'awaitingPayment') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'encumbered',
+              property: 'encumbered',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'encumbered') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'expenditures',
+              property: 'expenditures',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'expenditures') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'over_encumbrance',
+              property: 'overEncumbrance',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'overEncumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            },
+            {
+              name: 'over_expended',
+              property: 'overExpended',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'overExpended') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'financialSummary') AS elems)",
+            }
+          ],
+        },
+      },
+      sourceAlias: 'fiscal_year',
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'financialSummary'",
+    }
+  ],
+  "private": false,
+  sources: [
+    {
+      type: 'db',
+      target: 'src_finance_fiscal_year',
+      alias: 'fiscal_year'
+    }
+  ],
+  "defaultSort": [
+    {
+      "direction": "ASC",
+      "columnName": "id"
+    }
+  ]
+}

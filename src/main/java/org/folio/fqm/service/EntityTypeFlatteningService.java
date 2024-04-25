@@ -184,6 +184,7 @@ public class EntityTypeFlatteningService {
       EntityTypeColumn column = copyColumn(oldColumn);
       if (column.getSourceAlias().equals(nestedAlias)) {
         if (outerSource != null) { // temporary, need a better way to do this
+          column.name(outerSource.getAlias() + "." + column.getName());
           // Only treat column as idColumn if outer source specifies to do so
           column.isIdColumn(Boolean.TRUE.equals(outerSource.getUseIdColumns()) && Boolean.TRUE.equals(column.getIsIdColumn()));
           if (!Boolean.TRUE.equals(newSource.getFlattened())) {
@@ -217,7 +218,6 @@ public class EntityTypeFlatteningService {
       }
       column.valueGetter(valueGetter);
       column.filterValueGetter(filterValueGetter);
-      column.name(column.getSourceAlias() + "." + column.getName());
       finalColumns.add(column);
     }
     return finalColumns;

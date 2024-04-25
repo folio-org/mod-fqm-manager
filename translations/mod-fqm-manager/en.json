@@ -737,5 +737,6 @@
   "entityType.drv_simple_user_details.profile_picture_link": "Profile picture link",
   "entityType.drv_simple_user_details.meta": "Meta",
   "entityType.drv_simple_user_details.proxy_for": "Proxy for",
-  "entityType.drv_simple_user_details.username": "Username"
+  "entityType.drv_simple_user_details.username": "Username",
+
 }

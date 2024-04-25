@@ -1,7 +1,6 @@
 {
   id: '230b18b1-ee3b-4382-9236-db44e5f30121',
   name: 'drv_purchase_order_details',
-  fromClause: 'src_purchase_order AS po',
   columns: [
     {
       name: 'id',
@@ -438,11 +437,11 @@
       },
     },
   ],
-  "sources": [
+  sources: [
     {
       type: 'db',
-      "alias": 'po',
-      "target": 'src_purchase_order'
+      alias: 'po',
+      target: 'src_purchase_order'
     }
   ]
 }

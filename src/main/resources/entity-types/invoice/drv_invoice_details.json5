@@ -542,11 +542,11 @@
       valueFunction: 'lower(:value)',
     },
   ],
-  "sources": [
+  sources: [
     {
       type: 'db',
-      "alias": 'invoice',
-      "target": 'src_invoice_invoices'
+      alias: 'invoice',
+      target: 'src_invoice_invoices'
     }
   ],
   defaultSort: [

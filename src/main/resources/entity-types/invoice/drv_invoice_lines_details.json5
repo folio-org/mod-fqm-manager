@@ -487,11 +487,11 @@
       valueGetter: ":sourceAlias.jsonb->>'referenceNumbers'",
     },
   ],
-  "sources": [
+  sources: [
     {
       type: 'db',
-      "alias": 'invoice_lines',
-      "target": 'src_invoice_lines'
+      alias: 'invoice_lines',
+      target: 'src_invoice_lines'
     }
   ],
   defaultSort: [

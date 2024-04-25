@@ -366,11 +366,11 @@
       valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'country'"
     }
   ],
-  "sources": [
+  sources: [
     {
       type: 'db',
-      "alias": 'vouchers',
-      "target": 'src_invoice_vouchers'
+      alias: 'vouchers',
+      target: 'src_invoice_vouchers'
     }
   ],
   defaultSort: [

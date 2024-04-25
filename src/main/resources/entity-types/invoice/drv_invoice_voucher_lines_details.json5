@@ -212,11 +212,11 @@
       valueGetter: ":sourceAlias.jsonb ->> 'fundDistribution'",
     }
   ],
-  "sources": [
+  sources: [
     {
       type: 'db',
-      "alias": 'voucher_lines',
-      "target": 'src_invoice_voucher_lines'
+      alias: 'voucher_lines',
+      target: 'src_invoice_voucher_lines'
     }
   ],
   defaultSort: [

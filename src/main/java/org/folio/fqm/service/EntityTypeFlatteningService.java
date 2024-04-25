@@ -49,7 +49,7 @@ public class EntityTypeFlatteningService {
     List<EntityTypeColumn> finalColumns = new ArrayList<>();
     for (EntityTypeSource source : originalEntityType.getSources()) {
       if (source.getType().equals("db")) {
-        Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = handleSourceAndUpdateEntityType(originalEntityType, source, null, false); // TODO: think about this, may not be able to hardcode false here
+        Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = getConvertedSourceAndColumns(originalEntityType, source, null, false); // TODO: think about this, may not be able to hardcode false here
         flattenedEntityType.addSourcesItem(updatePair.component1());
         finalColumns.addAll(updatePair.component2());
       } else {
@@ -64,7 +64,7 @@ public class EntityTypeFlatteningService {
 
         for (EntityTypeSource subSource : flattenedSourceDefinition.getSources()) {
           String oldAlias = subSource.getAlias();
-          Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = handleSourceAndUpdateEntityType(flattenedSourceDefinition, subSource, source, keepOriginalAlias);
+          Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = getConvertedSourceAndColumns(flattenedSourceDefinition, subSource, source, keepOriginalAlias);
           String newAlias = updatePair.component1().getAlias();
           if (!oldAlias.equals(newAlias)) {
             updateOtherSources(oldAlias, newAlias, flattenedSourceDefinition.getSources());
@@ -93,7 +93,7 @@ public class EntityTypeFlatteningService {
       .filter(source -> source.getJoin() == null)
       .count();
     if (sourceWithoutJoinCount != 1) {
-      log.error("ERROR: number of joins without sources must be exactly 1, but was {}", sourceWithoutJoinCount);
+      log.error("ERROR: number of sources without joins must be exactly 1, but was {}", sourceWithoutJoinCount);
       return ""; // TODO: handle this better
     }
 
@@ -155,9 +155,6 @@ public class EntityTypeFlatteningService {
   }
 
   private void updateOtherSources(String oldSourceName, String newSourceName, List<EntityTypeSource> otherSources) {
-//    if (!newSourceName.equals("complex_entity_type_source2")) {
-//      return;
-//    }
     for (EntityTypeSource source : otherSources) {
       if (source.getJoin() != null && oldSourceName.equals(source.getJoin().getJoinTo())) {
         source.getJoin().joinTo(newSourceName);
@@ -165,7 +162,7 @@ public class EntityTypeFlatteningService {
     }
   }
 
-  private Pair<EntityTypeSource, List<EntityTypeColumn>> handleSourceAndUpdateEntityType(EntityType originalEntityType, EntityTypeSource nestedSource, EntityTypeSource outerSource, boolean keepOriginalAlias) {
+  private Pair<EntityTypeSource, List<EntityTypeColumn>> getConvertedSourceAndColumns(EntityType originalEntityType, EntityTypeSource nestedSource, EntityTypeSource outerSource, boolean keepOriginalAlias) {
     List<EntityTypeColumn> updatedColumns = new ArrayList<>();
     // Make a copy instead of returning original object
     EntityTypeSource newSource = new EntityTypeSource()
@@ -177,43 +174,32 @@ public class EntityTypeFlatteningService {
       .join(nestedSource.getJoin())
       .useIdColumns(outerSource == null || Boolean.TRUE.equals(outerSource.getUseIdColumns()));
     String nestedAlias = newSource.getAlias();
-    if (newSource.getType().equals("db")) {
-      StringBuilder newAlias = outerSource != null ? new StringBuilder(outerSource.getAlias()) : new StringBuilder();
-      if (keepOriginalAlias) {
-        newAlias.append("_").append(nestedAlias);
-      }
-      log.info("Updating source/columns for db source for original entity type " + originalEntityType.getName());
-      for (EntityTypeColumn oldColumn : originalEntityType.getColumns()) {
-        EntityTypeColumn column = copyColumn(oldColumn);
-        if (column.getSourceAlias().equals(nestedAlias)) {
-          if (outerSource != null) { // temporary, need a better way to do this
-            // Only treat column as idColumn if outer source specifies to do so
-            column.isIdColumn(Boolean.TRUE.equals(outerSource.getUseIdColumns()) && Boolean.TRUE.equals(column.getIsIdColumn()));
-            if (!Boolean.TRUE.equals(newSource.getFlattened())) {
-              column.sourceAlias(newAlias.toString());
-            }
-          }
-          updatedColumns.add(column);
-        }
-      }
 
-      if (newAlias.toString().equals("complex_entity_type_source3")) {
-        System.out.println("HERE");
-      }
-      if (outerSource != null) { // TODO: may not need "nestedSource.getJoin() == null"
-//      if (outerSource != null) {
-        if (!Boolean.TRUE.equals(newSource.getFlattened())) {
-          newSource.alias(newAlias.toString());
-          newSource.flattened(true);
-          if (nestedSource.getJoin() == null) {
-            newSource.join(outerSource.getJoin());
-          } else {
-            // maybe we can handle here? probably not
+    StringBuilder newAlias = outerSource != null ? new StringBuilder(outerSource.getAlias()) : new StringBuilder();
+    if (keepOriginalAlias) {
+      newAlias.append("_").append(nestedAlias);
+    }
+    log.info("Updating source/columns for db source for original entity type " + originalEntityType.getName());
+    for (EntityTypeColumn oldColumn : originalEntityType.getColumns()) {
+      EntityTypeColumn column = copyColumn(oldColumn);
+      if (column.getSourceAlias().equals(nestedAlias)) {
+        if (outerSource != null) { // temporary, need a better way to do this
+          // Only treat column as idColumn if outer source specifies to do so
+          column.isIdColumn(Boolean.TRUE.equals(outerSource.getUseIdColumns()) && Boolean.TRUE.equals(column.getIsIdColumn()));
+          if (!Boolean.TRUE.equals(newSource.getFlattened())) {
+            column.sourceAlias(newAlias.toString());
           }
         }
+        updatedColumns.add(column);
       }
-    } else {
-      log.error("SHOULD NOT BE HERE");
+    }
+
+    if (outerSource != null && !Boolean.TRUE.equals(newSource.getFlattened())) { // TODO: may not need "nestedSource.getJoin() == null"
+      newSource.alias(newAlias.toString());
+      newSource.flattened(true);
+      if (nestedSource.getJoin() == null) {
+        newSource.join(outerSource.getJoin());
+      }
     }
     return new Pair<>(newSource, updatedColumns);
   }

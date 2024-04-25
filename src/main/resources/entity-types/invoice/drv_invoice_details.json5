@@ -2,35 +2,37 @@
   id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
   name: 'drv_invoices_details',
   private: false,
-  fromClause: 'src_invoice_invoices AS invce',
   columns: [
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: 'invce.id',
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'accounting_code',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'accountingCode'",
+      valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
     },
     {
       name: 'adjustments_total',
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(invce.jsonb->>'adjustmentsTotal')::float",
+      valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -38,45 +40,50 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'approvedBy'",
+      valueGetter: ":sourceAlias.jsonb->>'approvedBy'",
     },
     {
       name: 'approval_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'approvalDate'",
+      valueGetter: ":sourceAlias.jsonb->>'approvalDate'",
     },
     {
       name: 'batch_group_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'batchGroupId'",
+      valueGetter: ":sourceAlias.jsonb->>'batchGroupId'",
     },
     {
       name: 'bill_to',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'billTo'",
+      valueGetter: ":sourceAlias.jsonb->>'billTo'",
     },
     {
       name: 'chk_subscription_overlap',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'chkSubscriptionOverlap'",
+      valueGetter: ":sourceAlias.jsonb->>'chkSubscriptionOverlap'",
       values: [
         {
           label: 'True',
@@ -93,27 +100,30 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'cancellationNote'",
+      valueGetter: ":sourceAlias.jsonb->>'cancellationNote'",
     },
     {
       name: 'currency',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'currency'",
+      valueGetter: ":sourceAlias.jsonb->>'currency'",
     },
     {
       name: 'enclosure_needed',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'enclosureNeeded'",
+      valueGetter: ":sourceAlias.jsonb->>'enclosureNeeded'",
       values: [
         {
           label: 'True',
@@ -130,9 +140,10 @@
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "(invce.jsonb->>'exchangeRate')::float",
+      valueGetter: "(:sourceAlias.jsonb->>'exchangeRate')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -140,9 +151,10 @@
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'exportToAccounting'",
+      valueGetter: ":sourceAlias.jsonb->>'exportToAccounting'",
       values: [
         {
           label: 'True',
@@ -159,27 +171,30 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'folioInvoiceNo'",
+      valueGetter: ":sourceAlias.jsonb->>'folioInvoiceNo'",
     },
     {
       name: 'invoice_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'invoiceDate'",
+      valueGetter: ":sourceAlias.jsonb->>'invoiceDate'",
     },
     {
       name: 'lock_total',
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(invce.jsonb->>'lockTotal')::float",
+      valueGetter: "(:sourceAlias.jsonb->>'lockTotal')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -187,54 +202,60 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'note'",
+      valueGetter: ":sourceAlias.jsonb->>'note'",
     },
     {
       name: 'payment_due',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'paymentDue'",
+      valueGetter: ":sourceAlias.jsonb->>'paymentDue'",
     },
     {
       name: 'payment_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'paymentDate'",
+      valueGetter: ":sourceAlias.jsonb->>'paymentDate'",
     },
     {
       name: 'payment_terms',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'paymentTerms'",
+      valueGetter: ":sourceAlias.jsonb->>'paymentTerms'",
     },
     {
       name: 'payment_method',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'paymentMethod'",
+      valueGetter: ":sourceAlias.jsonb->>'paymentMethod'",
     },
     {
       name: 'status',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'status'",
+      valueGetter: ":sourceAlias.jsonb->>'status'",
       values: [
         {
           label: 'Open',
@@ -263,9 +284,10 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'source'",
+      valueGetter: ":sourceAlias.jsonb->>'source'",
       values: [
         {
           label: 'User',
@@ -286,9 +308,10 @@
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(invce.jsonb->>'subTotal')::float",
+      valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -296,9 +319,10 @@
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(invce.jsonb->>'total')::float",
+      valueGetter: "(:sourceAlias.jsonb->>'total')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -306,45 +330,50 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'vendorInvoiceNo'",
+      valueGetter: ":sourceAlias.jsonb->>'vendorInvoiceNo'",
     },
     {
       name: 'disbursement_number',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'disbursementNumber'",
+      valueGetter: ":sourceAlias.jsonb->>'disbursementNumber'",
     },
     {
       name: 'voucher_number',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'voucherNumber'",
+      valueGetter: ":sourceAlias.jsonb->>'voucherNumber'",
     },
     {
       name: 'payment_id',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'paymentId'",
+      valueGetter: ":sourceAlias.jsonb->>'paymentId'",
     },
     {
       name: 'disbursement_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'disbursement_date'",
+      valueGetter: ":sourceAlias.jsonb->>'disbursement_date'",
     },
     {
       name: 'po_numbers',
@@ -354,10 +383,11 @@
           dataType: 'stringType',
         },
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(alc_id.value::text) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'poNumbers'::text) alc_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(alc_id.value::text)) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      valueGetter: "(\n  SELECT\n    array_agg(alc_id.value::text) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(alc_id.value::text)) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -365,36 +395,40 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'vendorId'",
+      valueGetter: ":sourceAlias.jsonb->>'vendorId'",
     },
     {
       name: 'fiscal_year_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'fiscalYearId'",
+      valueGetter: ":sourceAlias.jsonb->>'fiscalYearId'",
     },
     {
       name: 'account_no',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'accountNo'",
+      valueGetter: ":sourceAlias.jsonb->>'accountNo'",
     },
     {
       name: 'manual_payment',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->>'manualPayment'",
+      valueGetter: ":sourceAlias.jsonb->>'manualPayment'",
       values: [
         {
           label: 'True',
@@ -414,10 +448,11 @@
           dataType: 'rangedUUIDType',
         },
       },
+      sourceAlias: 'invce',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -425,9 +460,10 @@
       dataType: {
         dataType: 'numberType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(invce.jsonb->>'nextInvoiceLineNumber')::integer",
+      valueGetter: "(:sourceAlias.jsonb->>'nextInvoiceLineNumber')::integer",
       valueFunction: '(:value)::integer',
     },
     {
@@ -435,54 +471,60 @@
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'createdDate'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
     },
     {
       name: 'updated_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'updatedDate'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'created_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'createdByUserId'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
     {
       name: 'updated_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'updatedByUserId'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
     {
       name: 'created_by_username',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'createdByUsername'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
     },
     {
       name: 'updated_by_username',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invce',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "invce.jsonb->'metadata'->>'updatedByUsername'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
     },
     {
       name: 'tag_list',
@@ -492,12 +534,20 @@
           dataType: 'rangedUUIDType',
         },
       },
+      sourceAlias: 'invce',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(invce.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
+  ],
+  "sources": [
+    {
+      type: 'db',
+      "alias": 'invce',
+      "target": 'src_invoice_invoices'
+    }
   ],
   defaultSort: [
     {

@@ -8,7 +8,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
@@ -19,7 +19,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
@@ -29,7 +29,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'accountNumber'",
@@ -39,7 +39,7 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
@@ -50,7 +50,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'comment'",
@@ -60,7 +60,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'description'",
@@ -160,7 +160,7 @@
           ],
         },
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
     },
@@ -169,7 +169,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'invoiceId'",
@@ -179,7 +179,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'invoiceLineNumber'",
@@ -189,7 +189,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'invoiceLineStatus'",
@@ -225,7 +225,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'poLineId'",
@@ -235,7 +235,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'productId'",
@@ -245,7 +245,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'productIdType'",
@@ -255,7 +255,7 @@
       dataType: {
         dataType: 'integerType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'quantity')::integer",
@@ -266,7 +266,7 @@
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'releaseEncumbrance'",
@@ -286,7 +286,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionInfo'",
@@ -296,7 +296,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionStart'",
@@ -306,7 +306,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionEnd'",
@@ -316,7 +316,7 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
@@ -327,7 +327,7 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'total')::float",
@@ -338,7 +338,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
@@ -348,7 +348,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
@@ -358,7 +358,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
@@ -368,7 +368,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
@@ -378,7 +378,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
@@ -400,7 +400,7 @@
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
@@ -482,7 +482,7 @@
           ],
         },
       },
-      sourceAlias: 'ilines',
+      sourceAlias: 'invoice_lines',
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'referenceNumbers'",
     },
@@ -490,7 +490,7 @@
   "sources": [
     {
       type: 'db',
-      "alias": 'ilines',
+      "alias": 'invoice_lines',
       "target": 'src_invoice_lines'
     }
   ],

@@ -8,7 +8,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
@@ -19,7 +19,7 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'amount'"
@@ -29,7 +29,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
@@ -39,7 +39,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
@@ -49,7 +49,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'"
@@ -59,7 +59,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'"
@@ -72,7 +72,7 @@
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: false,
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(src_id.value::text) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'sourceIds'::text) src_id(value))",
@@ -87,7 +87,7 @@
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'subTransactionId'"
@@ -97,7 +97,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'voucherId'"
@@ -107,7 +107,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNumber'"
@@ -207,7 +207,7 @@
           ],
         },
       },
-      sourceAlias: 'vlines',
+      sourceAlias: 'voucher_lines',
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'fundDistribution'",
     }
@@ -215,7 +215,7 @@
   "sources": [
     {
       type: 'db',
-      "alias": 'vlines',
+      "alias": 'voucher_lines',
       "target": 'src_invoice_voucher_lines'
     }
   ],

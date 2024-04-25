@@ -217,7 +217,7 @@ public class EntityTypeFlatteningService {
       }
       column.valueGetter(valueGetter);
       column.filterValueGetter(filterValueGetter);
-      column.name(column.getSourceAlias() + "_" + column.getName());
+      column.name(column.getSourceAlias() + "." + column.getName());
       finalColumns.add(column);
     }
     return finalColumns;

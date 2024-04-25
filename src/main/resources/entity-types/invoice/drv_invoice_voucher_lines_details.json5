@@ -22,7 +22,8 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'amount'"
+      valueGetter: "(:sourceAlias.jsonb -> 'amount')::float",
+      valueFunction: "(:value)::float"
     },
     {
       name: 'created_date',

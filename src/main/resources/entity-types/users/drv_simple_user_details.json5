@@ -2,7 +2,6 @@
   id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
   name: 'drv_simple_user_details',
   private: false,
-  fromClause: 'src_users_users',
   columns: [
     {
       name: 'user_active',
@@ -21,8 +20,9 @@
       ],
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'active'",
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'active'::text))",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'active'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'active'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
     },
     {
@@ -35,8 +35,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -48,9 +49,10 @@
         },
       },
       queryable: false,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -62,9 +64,10 @@
         },
       },
       queryable: false,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -78,8 +81,9 @@
       idColumnName: 'user_address_ids',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'addressType'::text)) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'addressType'::text) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'addressType'::text)) FILTER (WHERE (a.jsonb ->> 'addressType'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value) JOIN src_users_addresstype a ON (record.value ->> 'addressTypeId'::text) = a.id::text)",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: '0069cf6f-2833-46db-8a51-8934769b8289',
@@ -98,8 +102,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'barcode'",
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'barcode'::text))",
+      sourceAlias: "user",
+      valueGetter: ":sourceAlias.jsonb ->> 'barcode'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'barcode'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
@@ -112,8 +117,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -126,8 +132,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -136,8 +143,9 @@
         dataType: 'dateType',
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'metadata' ->> 'createdDate'",
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
       name: 'user_date_of_birth',
@@ -145,8 +153,9 @@
         dataType: 'dateType',
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'dateOfBirth'",
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'dateOfBirth'",
     },
     {
       name: 'user_department_ids',
@@ -158,8 +167,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'departments'::text) record(value))",
+      sourceAlias: "user",
+      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -169,8 +179,9 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'email'",
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'email'::text))",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'email'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'email'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
@@ -180,7 +191,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb ->> 'enrollmentDate'",
+      sourceAlias: "user",
+      valueGetter: ":sourceAlias.jsonb ->> 'enrollmentDate'",
     },
     {
       name: 'user_expiration_date',
@@ -189,8 +201,9 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb ->> 'expirationDate'",
-      filterValueGetter: '"left"(src_users_users.jsonb ->> \'expirationDate\'::text, 600)',
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'expirationDate'",
+      filterValueGetter: '"left"(:sourceAlias.jsonb ->> \'expirationDate\'::text, 600)',
       valueFunction: '"left"(:value, 600)',
     },
     {
@@ -200,8 +213,9 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb ->> 'externalSystemId'",
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'externalSystemId'::text))",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonbb ->> 'externalSystemId'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'externalSystemId'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
@@ -211,8 +225,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'firstName'",
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'firstName'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
@@ -223,7 +238,8 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: 'src_users_users.id',
+      sourceAlias: 'user',
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'user_last_name',
@@ -232,8 +248,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'lastName'",
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb.jsonb -> 'personal' ->> 'lastName'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
@@ -242,8 +259,9 @@
         dataType: 'stringType',
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'middleName'",
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'middleName'",
     },
     {
       name: 'user_mobile_phone',
@@ -251,8 +269,9 @@
         dataType: 'stringType',
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'mobilePhone'",
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'mobilePhone'",
     },
     {
       name: 'user_patron_group_id',
@@ -260,8 +279,9 @@
         dataType: 'rangedUUIDType'
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb ->> 'patronGroup'"
+      valueGetter: ":sourceAlias.jsonb ->> 'patronGroup'"
     },
     {
       name: 'user_phone',
@@ -269,8 +289,9 @@
         dataType: 'stringType',
       },
       queryable: true,
+      sourceAlias: 'user',
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'phone'",
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'phone'",
     },
     {
       name: 'user_postal_codes',
@@ -282,8 +303,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -293,7 +315,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal'->> 'preferredContactTypeId'",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb -> 'personal'->> 'preferredContactTypeId'",
     },
     {
       name: 'profile_picture_link',
@@ -302,7 +325,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'personal'->> 'profilePictureLink'",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb -> 'personal'->> 'profilePictureLink'",
     },
     {
       name: 'user_preferred_first_name',
@@ -311,8 +335,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb -> 'personal' ->> 'preferredFirstName'",
-      filterValueGetter: "${tenant_id}_mod_users.f_unaccent((src_users_users.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'preferredFirstName'",
+      filterValueGetter: "${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
       valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)',
     },
     {
@@ -332,8 +357,9 @@
       ],
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'primaryAddress'::text) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'primaryAddress'::text)) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'primaryAddress'::text) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'primaryAddress'::text)) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)'
     },
     {
@@ -346,8 +372,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((src_users_users.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
+      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
       valueFunction: 'lower(:value)',
     },
     {
@@ -355,9 +382,10 @@
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'user',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "src_users_users.jsonb -> 'metadata' ->> 'updatedDate'",
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
     },
     {
       name: 'username',
@@ -366,8 +394,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'username'",
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(src_users_users.jsonb ->> 'username'::text))",
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'username'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
@@ -377,7 +406,8 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'type'"
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'type'"
     },
     {
       name: 'tag_list',
@@ -389,8 +419,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(src_users_users.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(src_users_users.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      sourceAlias: 'user',
+      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -400,7 +431,8 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'createdDate'"
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'createdDate'"
     },
     {
       name: 'updated_date',
@@ -409,7 +441,8 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "src_users_users.jsonb ->> 'updatedDate'"
+      sourceAlias: 'user',
+      valueGetter: ":sourceAlias.jsonb ->> 'updatedDate'"
     },
     {
       name: 'meta',
@@ -418,8 +451,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'meta'::text) acq_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(src_users_users.jsonb -> 'meta'::text) acq_id(value))",
+      sourceAlias: 'user',
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'meta'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'meta'::text) acq_id(value))",
       valueFunction: 'lower(:value)'
     },
     {
@@ -432,9 +466,17 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(pf.value::text) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(src_users_users.jsonb->'proxyFor'::text) pf (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(pf.value::text)) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(src_users_users.jsonb->'proxyFor'::text) pf (value)\n)",
+      sourceAlias: 'user',
+      valueGetter: "(\n  SELECT\n    array_agg(pf.value::text) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'proxyFor'::text) pf (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(pf.value::text)) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'proxyFor'::text) pf (value)\n)",
       valueFunction: 'lower(:value)',
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      target: 'src_users_users',
+      alias: 'user'
     }
   ],
   defaultSort: [

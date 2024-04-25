@@ -8,121 +8,135 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: 'po.id',
+      sourceAlias: 'po',
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'created_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->'metadata'->>'createdDate'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
     },
     {
       name: 'updated_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->'metadata'->>'updatedDate'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'created_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->'metadata'->>'createdByUserId'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
     {
       name: 'updated_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->'metadata'->>'updatedByUserId'",
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
     {
       name: 'po_number_prefix',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->>'poNumberPrefix'",
+      valueGetter: ":sourceAlias.jsonb->>'poNumberPrefix'",
     },
     {
       name: 'po_number',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->>'poNumber'",
+      valueGetter: ":sourceAlias.jsonb->>'poNumber'",
     },
     {
       name: 'po_number_suffix',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "po.jsonb->>'poNumberSuffix'",
+      valueGetter: ":sourceAlias.jsonb->>'poNumberSuffix'",
     },
     {
       name: 'bill_to',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->>'billTo'",
+      valueGetter: ":sourceAlias.jsonb->>'billTo'",
     },
     {
       name: 'ship_to',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'shipTo'",
+      valueGetter: ":sourceAlias.jsonb->>'shipTo'",
     },
     {
       name: 'vendor',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'vendor'",
+      valueGetter: ":sourceAlias.jsonb->>'vendor'",
     },
     {
       name: 'assigned_to',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'assignedTo'",
+      valueGetter: ":sourceAlias.jsonb->>'assignedTo'",
     },
     {
       name: 'template',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: "po.jsonb->>'template'",
+      sourceAlias: 'po',
+      valueGetter: ":sourceAlias.jsonb->>'template'",
     },
     {
       name: 'approved',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'approved'",
+      valueGetter: ":sourceAlias.jsonb->>'approved'",
       values: [
         {
           value: 'true',
@@ -139,27 +153,30 @@
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'approvalDate'",
+      valueGetter: ":sourceAlias.jsonb->>'approvalDate'",
     },
     {
       name: 'approvedById',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'approvedById'",
+      valueGetter: ":sourceAlias.jsonb->>'approvedById'",
     },
     {
       name: 'manual_po',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'manualPo'",
+      valueGetter: ":sourceAlias.jsonb->>'manualPo'",
       values: [
         {
           value: 'true',
@@ -176,9 +193,10 @@
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'reEncumber'",
+      valueGetter: ":sourceAlias.jsonb->>'reEncumber'",
       values: [
         {
           value: 'true',
@@ -195,9 +213,10 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'orderType'",
+      valueGetter: ":sourceAlias.jsonb->>'orderType'",
       values: [
         {
           value: 'One-Time',
@@ -214,9 +233,10 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'workflowStatus'",
+      valueGetter: ":sourceAlias.jsonb->>'workflowStatus'",
       values: [
         {
           value: 'Pending',
@@ -237,25 +257,28 @@
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "po.jsonb->>'dateOrdered'",
+      valueGetter: ":sourceAlias.jsonb->>'dateOrdered'",
     },
     {
       name: 'ongoing_renewal_interval',
       dataType: {
         dataType: 'integerType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'interval'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'interval'",
     },
     {
       name: 'ongoing_is_subscription',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'isSubscription'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'isSubscription'",
       values: [
         {
           value: 'true',
@@ -272,8 +295,9 @@
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'manualRenewal'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'manualRenewal'",
       values: [
         {
           value: 'true',
@@ -290,32 +314,36 @@
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'renewalDate'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'renewalDate'",
     },
     {
       name: 'ongoing_review_date',
       dataType: {
         dataType: 'dateType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'reviewDate'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'reviewDate'",
     },
     {
       name: 'ongoing_review_period',
       dataType: {
         dataType: 'integerType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'reviewPeriod'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'reviewPeriod'",
     },
     {
       name: 'ongoing_notes',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'ongoing'->>'notes'",
+      valueGetter: ":sourceAlias.jsonb->'ongoing'->>'notes'",
     },
     {
       name: 'notes',
@@ -325,8 +353,9 @@
           dataType: 'stringType',
         },
       },
-      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(po.jsonb->'notes')\n)",
-      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(po.jsonb->'notes'))\n)",
+      sourceAlias: 'po',
+      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(:sourceAlias.jsonb->'notes')\n)",
+      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(:sourceAlias.jsonb->'notes'))\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -334,8 +363,9 @@
       dataType: {
         dataType: 'integerType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->>'nextPolNumber'",
+      valueGetter: ":sourceAlias.jsonb->>'nextPolNumber'",
     },
     {
       name: 'tags',
@@ -345,8 +375,9 @@
           dataType: 'stringType',
         },
       },
-      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(po.jsonb->'tags'->'tagList')\n)",
-      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(po.jsonb->'tags'->'tagList'))\n)",
+      sourceAlias: 'po',
+      valueGetter: "ARRAY(\n  SELECT\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList')\n)",
+      filterValueGetter: "ARRAY(\n  SELECT\n    lower(jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'))\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -354,15 +385,17 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'po',
       queryable: true,
-      valueGetter: "po.jsonb->'closeReason'->>'reason'",
+      valueGetter: ":sourceAlias.jsonb->'closeReason'->>'reason'",
     },
     {
       name: 'close_reason_note',
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "po.jsonb->'closeReasaon'->>'reason'",
+      sourceAlias: 'po',
+      valueGetter: ":sourceAlias.jsonb->'closeReasaon'->>'reason'",
     },
     {
       name: 'acq_unit_ids',
@@ -372,10 +405,11 @@
           dataType: 'rangedUUIDType',
         },
       },
+      sourceAlias: 'po',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(po.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(po.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -386,11 +420,12 @@
           dataType: 'stringType',
         },
       },
+      sourceAlias: 'po',
       idColumnName: 'acq_unit_ids',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(acq_unit.jsonb->>'name'::text) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((po.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON lower(record.value::text)=acq_unit.id::text\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_unit.jsonb->>'name'::text)) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((po.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON (record.value::text)=acq_unit.id::text\n)",
+      valueGetter: "(\n  SELECT\n    array_agg(acq_unit.jsonb->>'name'::text) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((:sourceAlias.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON lower(record.value::text)=acq_unit.id::text\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_unit.jsonb->>'name'::text)) FILTER (\n      WHERE\n        (acq_unit.jsonb->>'name'::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text((:sourceAlias.jsonb->'acqUnitIds'::text)) record (value)\n    JOIN src_acquisitions_unit acq_unit ON (record.value::text)=acq_unit.id::text\n)",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: '230b18b1-ee3b-4382-9236-db44e5f30121',
@@ -403,4 +438,11 @@
       },
     },
   ],
+  "sources": [
+    {
+      type: 'db',
+      "alias": 'po',
+      "target": 'src_purchase_order'
+    }
+  ]
 }

@@ -2,27 +2,28 @@
   id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
   name: 'drv_location_details',
   private: false,
-  fromClause: 'src_inventory_location as lctin',
   columns: [
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
-      valueGetter: "lctin.id"
+      valueGetter: ":sourceAlias.id"
     },
     {
       name: 'code',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'code'",
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(lctin.jsonb ->> 'code'::text))",
+      valueGetter: ":sourceAlias.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
     },
     {
@@ -30,10 +31,11 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'name'",
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(lctin.jsonb ->> 'name'::text))",
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
     },
     {
@@ -41,27 +43,30 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'description'"
+      valueGetter: ":sourceAlias.jsonb ->> 'description'"
     },
     {
       name: 'discovery_display_name',
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'discoveryDisplayName'"
+      valueGetter: ":sourceAlias.jsonb ->> 'discoveryDisplayName'"
     },
     {
       name: 'is_active',
       dataType: {
         dataType: 'booleanType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'isActive'",
+      valueGetter: ":sourceAlias.jsonb ->> 'isActive'",
       values: [
         {
           label: 'True',
@@ -78,28 +83,31 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'institutionId'"
+      valueGetter: ":sourceAlias.jsonb ->> 'institutionId'"
     },
     {
       name: 'campus_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb ->> 'campusId'"
+      valueGetter: ":sourceAlias.jsonb ->> 'campusId'"
     },
     {
       name: 'details',
       dataType: {
         dataType: 'objectType',
       },
+      sourceAlias: 'location',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(lctin.jsonb -> 'details'::text) acq_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(lctin.jsonb -> 'details'::text) acq_id(value))",
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'details'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'details'::text) acq_id(value))",
       valueFunction: 'lower(:value)'
     },
     {
@@ -110,10 +118,11 @@
           dataType: 'rangedUUIDType',
         },
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(SELECT array_agg(sp_id.value::text) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(lctin.jsonb -> 'servicePointIds'::text) sp_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(sp_id.value::text)) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(lctin.jsonb -> 'servicePointIds'::text) sp_id(value))",
+      valueGetter: "(SELECT array_agg(sp_id.value::text) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(sp_id.value::text)) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
       valueFunction: 'lower(:value)'
     },
     {
@@ -121,11 +130,19 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "lctin.jsonb->>'primaryServicePoint'",
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(lctin.jsonb ->> 'primaryServicePoint'::text)), 600)",
+      valueGetter: ":sourceAlias.jsonb->>'primaryServicePoint'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'primaryServicePoint'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
+    }
+  ],
+  "sources": [
+    {
+      type: 'db',
+      "alias": 'location',
+      "target": 'src_inventory_location'
     }
   ],
   defaultSort: [

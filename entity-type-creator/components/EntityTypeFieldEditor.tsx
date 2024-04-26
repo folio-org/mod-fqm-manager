@@ -1,7 +1,8 @@
-import { DataTypeValue, EntityType, EntityTypeField } from '@/types';
+import { DataTypeValue, EntityType, EntityTypeField, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
 import { ArrowDownward, ArrowUpward, Clear } from '@mui/icons-material';
 import {
+  Autocomplete,
   Button,
   Checkbox,
   FormControl,
@@ -12,6 +13,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from '@mui/material';
 import CodeMirror from '@uiw/react-codemirror';
 import { useMemo } from 'react';
@@ -21,6 +23,7 @@ export default function EntityTypeFieldEditor({
   parentName,
   entityType,
   entityTypes,
+  sources,
   codeMirrorExtension,
   field,
   onChange,
@@ -36,6 +39,7 @@ export default function EntityTypeFieldEditor({
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
+  sources: EntityTypeSource[];
   codeMirrorExtension: LanguageSupport;
   field: EntityTypeField;
   onChange: (newColumn: EntityTypeField) => void;
@@ -55,7 +59,7 @@ export default function EntityTypeFieldEditor({
       </legend>
 
       <Grid container spacing={2}>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <TextField
             label="Name"
             required
@@ -65,11 +69,31 @@ export default function EntityTypeFieldEditor({
             inputProps={{ style: { fontFamily: 'monospace' } }}
           />
         </Grid>
-        <Grid item xs={5} container sx={{ justifyContent: 'space-around' }}>
+        <Grid item xs={3}>
+          <Autocomplete
+            freeSolo
+            options={sources.map((s) => s.alias)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Source"
+                value={field.sourceAlias ?? ''}
+                onChange={(e) =>
+                  onChange({
+                    ...field,
+                    sourceAlias: e.target.value,
+                  })
+                }
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={4} container sx={{ justifyContent: 'space-around' }}>
           <FormControlLabel
             label="Queryable"
             control={
               <Checkbox
+                indeterminate={field.queryable === undefined}
                 checked={field.queryable}
                 onChange={(e) => onChange({ ...field, queryable: e.target.checked })}
               />
@@ -80,6 +104,7 @@ export default function EntityTypeFieldEditor({
               label="Visible by default"
               control={
                 <Checkbox
+                  indeterminate={field.visibleByDefault === undefined}
                   checked={field.visibleByDefault}
                   onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
                 />
@@ -149,6 +174,7 @@ export default function EntityTypeFieldEditor({
                 label="Is ID column"
                 control={
                   <Checkbox
+                    indeterminate={field.visibleByDefault === undefined}
                     checked={field.visibleByDefault}
                     onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
                   />
@@ -479,6 +505,14 @@ export default function EntityTypeFieldEditor({
           ),
           [field],
         )}
+        <Grid item xs={2} />
+        <Grid item xs={10}>
+          <Typography variant="subtitle2" sx={{ mt: 0 }}>
+            <i>
+              Use <code>:sourceAlias</code> to refer to the selected source <code>{field.sourceAlias}</code>
+            </i>
+          </Typography>
+        </Grid>
 
         <NestedDataTypeEditor
           parentName={`${parentName}.${field.name}`}

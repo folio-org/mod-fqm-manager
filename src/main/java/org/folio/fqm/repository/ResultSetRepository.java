@@ -75,7 +75,8 @@ public class ResultSetRepository {
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()
-          .map(UUID::fromString)
+          // TODO: the below check keeps things just-about working, but still leads to records being counted as "deleted" if one of their id columns is null. Need to handle this better.
+          .map(val -> val != null ? UUID.fromString(val) : null)
           .toList();
         whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
       } else {

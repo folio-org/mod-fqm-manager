@@ -1,28 +1,28 @@
 {
-  id: "86475f57-7ee2-4b7f-b631-e1a4ead3cdc8",
-  name: "composite_vouchers_ledgers_funds",
+  id: "a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9",
+  name: "composite_ledger_fund",
   private: false,
   sources: [
     {
       type: "entity-type",
       id: "4c63c7f5-1a28-4394-b401-98c02c31492d",
-      alias: "funds",
+      alias: "fund",
       useIdColumns: true
     },
     {
       type: "entity-type",
       id: "abce1078-b099-467f-811b-367bd05638e3",
-      alias: "ledgers",
+      alias: "ledger",
       join: {
         type: "left join",
-        joinTo: "funds",
+        joinTo: "fund",
         condition: "(:that.jsonb ->> 'ledgerId')::uuid = :this.id"
       }
     },
   ],
   defaultSort: [
     {
-      columnName: "id",
+      columnName: "fund.id",
       direction: "ASC"
     }
   ]

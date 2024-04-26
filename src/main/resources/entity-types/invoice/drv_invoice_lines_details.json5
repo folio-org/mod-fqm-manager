@@ -388,6 +388,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",

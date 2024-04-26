@@ -105,7 +105,10 @@ public class EntityTypeFlatteningService {
       String alias = "\"" + source.getAlias() + "\"";
       String target = source.getTarget();
       if (join != null) {
-        String joinClause = " " + join.getType() + " " + target + " " + alias + " ON " + join.getCondition(); // NEW
+        String joinClause = " " + join.getType() + " " + target + " " + alias; // NEW
+        if (join.getCondition() != null) {
+          joinClause += " ON " + join.getCondition();
+        }
         joinClause = joinClause.replace(":this", alias);
         joinClause = joinClause.replace(":that", "\"" + join.getJoinTo() + "\"");
         log.info("Join clause: " + joinClause);

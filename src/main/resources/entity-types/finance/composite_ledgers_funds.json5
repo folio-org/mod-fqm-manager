@@ -1,0 +1,29 @@
+{
+  id: "a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9",
+  name: "composite_ledgers_funds",
+  private: false,
+  sources: [
+    {
+      type: "entity-type",
+      id: "4c63c7f5-1a28-4394-b401-98c02c31492d",
+      alias: "funds",
+      useIdColumns: true
+    },
+    {
+      type: "entity-type",
+      id: "abce1078-b099-467f-811b-367bd05638e3",
+      alias: "ledgers",
+      join: {
+        type: "left join",
+        joinTo: "funds",
+        condition: "(:that.jsonb ->> 'ledgerId')::uuid = :this.id"
+      }
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: "id",
+      direction: "ASC"
+    }
+  ]
+}

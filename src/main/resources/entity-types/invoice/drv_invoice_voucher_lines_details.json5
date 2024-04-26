@@ -210,7 +210,7 @@
       },
       sourceAlias: 'voucher_lines',
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'fundDistribution'",
+      valueGetter: ":sourceAlias.jsonb ->> 'fundDistributions'",
     }
   ],
   sources: [

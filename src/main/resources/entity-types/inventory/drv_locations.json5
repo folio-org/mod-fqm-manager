@@ -106,9 +106,7 @@
       sourceAlias: 'location',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'details'::text) acq_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'details'::text) acq_id(value))",
-      valueFunction: 'lower(:value)'
+      valueGetter: ":sourceAlias.jsonb ->> 'details'",
     },
     {
       name: 'service_point_ids',

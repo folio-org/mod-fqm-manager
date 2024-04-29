@@ -66,7 +66,7 @@ export default function NestedDataTypeEditor({
 
           {dataType.properties?.map((property, i) => (
             <EntityTypeFieldEditor
-              key={property.name}
+              key={i}
               parentName={parentName}
               field={property}
               onChange={(newProperty) =>

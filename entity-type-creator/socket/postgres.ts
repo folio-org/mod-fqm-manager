@@ -114,22 +114,34 @@ export async function analyzeJsonb(
 
   let aborted = false;
 
-  let schema: Schema | null = null;
+  let schema: Promise<Schema | null> = Promise.resolve(null);
 
   let done = 0;
 
-  for (let scanned = 0; scanned < total && !aborted; scanned += 100) {
-    console.log('Scanned', scanned, 'of', total, 'records');
+  for (let scanned = 0; scanned < total && !aborted; scanned += 500) {
+    console.log(new Date().toISOString(), 'Read', scanned, 'of', total, 'records');
     const query = pg`SELECT ${pg.unsafe(column)} FROM ${pg.unsafe(
       `${db.replaceAll('TENANT', tenant)}.${table}`,
-    )} LIMIT 100 OFFSET ${scanned}`;
+    )} LIMIT 500 OFFSET ${scanned}`;
 
     socket.removeAllListeners(`abort-analyze-jsonb-${db}-${table}-${column}`);
-    socket.once(`abort-analyze-jsonb-${db}-${table}-${column}`, () => {
+    socket.once(`abort-analyze-jsonb-${db}-${table}-${column}`, async () => {
       console.log('Aborting analysis of', db, table, column);
 
       aborted = true;
       query.cancel();
+
+      const result = await schema;
+
+      if (result) {
+        console.log(result);
+        socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
+          scanned: done,
+          total,
+          finished: true,
+          result,
+        });
+      }
     });
 
     const rows = await query;
@@ -137,10 +149,13 @@ export async function analyzeJsonb(
     if (!aborted) {
       const jsons = rows.map((row) => row[column]);
 
-      const thisBatch = createCompoundSchema(jsons);
-      schema = schema ? mergeSchemas([schema, thisBatch]) : thisBatch;
+      schema = schema.then((last) => {
+        const thisBatch = createCompoundSchema(jsons);
+        console.log(new Date().toISOString(), 'processing records', scanned, 'to', scanned + 500);
+        return last ? mergeSchemas([last, thisBatch]) : thisBatch;
+      });
 
-      done = Math.min(total, scanned + 100);
+      done = Math.min(total, scanned + 500);
 
       socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
         scanned: done,
@@ -150,12 +165,15 @@ export async function analyzeJsonb(
     }
   }
 
-  if (schema) {
+  const result = await schema;
+
+  if (result) {
+    console.log(result);
     socket.emit(`analyze-jsonb-result-${db}-${table}-${column}`, {
       scanned: done,
       total,
       finished: true,
-      result: schema,
+      result,
     });
   }
 }

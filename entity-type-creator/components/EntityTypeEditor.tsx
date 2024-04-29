@@ -221,10 +221,10 @@ export default function EntityTypeManager({
                     codeMirrorExtension={codeMirrorExtension}
                     field={column}
                     onChange={(newColumn) =>
-                      setEntityType({
-                        ...entityType,
-                        columns: entityType.columns?.map((c, j) => (j === i ? newColumn : c)),
-                      })
+                      setEntityType((et) => ({
+                        ...et,
+                        columns: et.columns?.map((c, j) => (j === i ? newColumn : c)),
+                      }))
                     }
                     translations={effectiveTranslations}
                     setTranslation={(key, value) => {

@@ -16,11 +16,12 @@ import {
   Typography,
 } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import NestedDataTypeEditor from './NestedDataTypeEditor';
 
 export default function EntityTypeFieldEditor({
   parentName,
+  labelDecoration = null,
   entityType,
   entityTypes,
   sources,
@@ -37,6 +38,7 @@ export default function EntityTypeFieldEditor({
   onDelete,
   isNested = false,
 }: Readonly<{
+  labelDecoration?: ReactNode;
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
@@ -57,6 +59,7 @@ export default function EntityTypeFieldEditor({
   return (
     <fieldset>
       <legend style={{ margin: '1em 0' }}>
+        {labelDecoration}
         <code>{field.name}</code>
       </legend>
 

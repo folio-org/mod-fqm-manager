@@ -1,6 +1,6 @@
 import { formatSql } from '@/utils/sqlUtils';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
-import { Refresh } from '@mui/icons-material';
+import { Refresh, UnfoldLess, UnfoldMore } from '@mui/icons-material';
 import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -56,6 +56,8 @@ export default function EntityTypeManager({
       }),
     [schema],
   );
+
+  const [hiddenColumns, setHiddenColumns] = useState<Record<string, boolean>>({ id: true });
 
   return (
     <form
@@ -211,63 +213,80 @@ export default function EntityTypeManager({
               <fieldset>
                 <legend>Columns</legend>
 
-                {entityType.columns?.map((column, i) => (
-                  <EntityTypeFieldEditor
-                    key={i}
-                    parentName={entityType.name}
-                    entityType={entityType}
-                    entityTypes={entityTypes}
-                    sources={entityType.sources ?? []}
-                    codeMirrorExtension={codeMirrorExtension}
-                    field={column}
-                    onChange={(newColumn) =>
-                      setEntityType((et) => ({
-                        ...et,
-                        columns: et.columns?.map((c, j) => (j === i ? newColumn : c)),
-                      }))
-                    }
-                    translations={effectiveTranslations}
-                    setTranslation={(key, value) => {
-                      console.log(key, value);
-                      setTranslationsBuffer({ ...translationsBuffer, [key]: value });
-                    }}
-                    first={i === 0}
-                    last={i === entityType.columns!.length - 1}
-                    onDuplicate={() =>
-                      setEntityType({
-                        ...entityType,
-                        columns: [
-                          ...entityType.columns!,
-                          {
-                            ...column,
-                            name: `${column.name}_copy`,
-                          },
-                        ],
-                      })
-                    }
-                    onMoveUp={() => {
-                      const newColumns = entityType.columns!;
-                      newColumns[i] = entityType.columns![i - 1];
-                      newColumns[i - 1] = column;
-                      setEntityType({
-                        ...entityType,
-                        columns: newColumns,
-                      });
-                    }}
-                    onMoveDown={() => {
-                      const newColumns = entityType.columns!;
-                      newColumns[i] = entityType.columns![i + 1];
-                      newColumns[i + 1] = column;
-                      setEntityType({
-                        ...entityType,
-                        columns: newColumns,
-                      });
-                    }}
-                    onDelete={() =>
-                      setEntityType({ ...entityType, columns: entityType.columns!.filter((_, j) => j !== i) })
-                    }
-                  />
-                ))}
+                {entityType.columns?.map((column, i) =>
+                  hiddenColumns[column.name] ? (
+                    <fieldset key={i}>
+                      <legend>
+                        <IconButton onClick={() => setHiddenColumns({ ...hiddenColumns, [column.name]: false })}>
+                          <UnfoldLess fontSize="small" />
+                        </IconButton>
+                        &nbsp;
+                        <span style={{ fontFamily: 'monospace' }}>{column.name}</span>
+                      </legend>
+                    </fieldset>
+                  ) : (
+                    <EntityTypeFieldEditor
+                      key={i}
+                      labelDecoration={
+                        <>
+                          <IconButton onClick={() => setHiddenColumns({ ...hiddenColumns, [column.name]: true })}>
+                            <UnfoldMore fontSize="small" />
+                          </IconButton>
+                          &nbsp;
+                        </>
+                      }
+                      parentName={entityType.name}
+                      entityType={entityType}
+                      entityTypes={entityTypes}
+                      sources={entityType.sources ?? []}
+                      codeMirrorExtension={codeMirrorExtension}
+                      field={column}
+                      onChange={(newColumn) =>
+                        setEntityType((et) => ({
+                          ...et,
+                          columns: et.columns?.map((c, j) => (j === i ? newColumn : c)),
+                        }))
+                      }
+                      translations={effectiveTranslations}
+                      setTranslation={(key, value) => setTranslationsBuffer({ ...translationsBuffer, [key]: value })}
+                      first={i === 0}
+                      last={i === entityType.columns!.length - 1}
+                      onDuplicate={() =>
+                        setEntityType({
+                          ...entityType,
+                          columns: [
+                            ...entityType.columns!,
+                            {
+                              ...column,
+                              name: `${column.name}_copy`,
+                            },
+                          ],
+                        })
+                      }
+                      onMoveUp={() => {
+                        const newColumns = entityType.columns!;
+                        newColumns[i] = entityType.columns![i - 1];
+                        newColumns[i - 1] = column;
+                        setEntityType({
+                          ...entityType,
+                          columns: newColumns,
+                        });
+                      }}
+                      onMoveDown={() => {
+                        const newColumns = entityType.columns!;
+                        newColumns[i] = entityType.columns![i + 1];
+                        newColumns[i + 1] = column;
+                        setEntityType({
+                          ...entityType,
+                          columns: newColumns,
+                        });
+                      }}
+                      onDelete={() =>
+                        setEntityType({ ...entityType, columns: entityType.columns!.filter((_, j) => j !== i) })
+                      }
+                    />
+                  ),
+                )}
                 <Button
                   variant="outlined"
                   sx={{ width: '100%', height: '4em', mt: 2 }}

@@ -19,6 +19,7 @@ export default function NewEntityTypeDialog({
             sx={{ mt: 2 }}
             freeSolo
             options={entityTypes.map((et) => et.file)}
+            onChange={(_e, nv) => setNewName(nv ?? '')}
             renderInput={(params) => (
               <TextField
                 {...params}

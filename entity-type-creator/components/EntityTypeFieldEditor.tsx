@@ -32,7 +32,7 @@ export default function EntityTypeFieldEditor({
   onMoveUp,
   onDelete,
   isNested = false,
-}: {
+}: Readonly<{
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
@@ -47,7 +47,7 @@ export default function EntityTypeFieldEditor({
   onMoveDown: () => void;
   onDelete: () => void;
   isNested?: boolean;
-}) {
+}>) {
   return (
     <fieldset>
       <legend style={{ margin: '1em 0' }}>

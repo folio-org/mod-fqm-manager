@@ -1,5 +1,5 @@
-import { Add } from '@mui/icons-material';
-import { MenuItem, Select, Typography } from '@mui/material';
+import { Add, Refresh } from '@mui/icons-material';
+import { IconButton, MenuItem, Select, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../types';
@@ -55,6 +55,9 @@ export default function EntityTypeManager({
               </MenuItem>
             ))}
         </Select>
+        <IconButton onClick={() => socket.emit('refresh-entity-types')}>
+          <Refresh />
+        </IconButton>
       </Typography>
 
       {selected === 'new' && (

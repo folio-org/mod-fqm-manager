@@ -24,6 +24,7 @@ const desiredRootKeyOrder = [
   'root',
   'private',
   'customFieldEntityTypeId',
+  'sources',
   'fromClause',
   'columns',
   'defaultSort',
@@ -33,6 +34,7 @@ const desiredRootKeyOrder = [
 const desiredDefaultSortKeyOrder = ['columnName', 'direction'] as (keyof Required<EntityType>['defaultSort'][0])[];
 const desiredFieldKeyOrder = [
   'name',
+  'sourceAlias',
   'dataType',
   'isIdColumn',
   'idColumnName',
@@ -63,7 +65,7 @@ function fixField(field: EntityTypeField) {
 
 export default function formatEntityType(data: EntityType) {
   data.columns = data.columns?.map(fixField);
-  data.fromClause = serializeSqlForTenantTemplating(data.fromClause);
+  data.fromClause = data.fromClause ? serializeSqlForTenantTemplating(data.fromClause) : undefined;
   if (data.defaultSort) {
     data.defaultSort = data.defaultSort.map((s) => preferredOrder(s, desiredDefaultSortKeyOrder));
   }

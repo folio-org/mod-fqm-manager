@@ -73,6 +73,7 @@ export default function EntityTypeFieldEditor({
           <Autocomplete
             freeSolo
             options={sources.map((s) => s.alias)}
+            value={field.sourceAlias ?? ''}
             onChange={(_e, nv) =>
               onChange({
                 ...field,
@@ -521,6 +522,7 @@ export default function EntityTypeFieldEditor({
         </Grid>
 
         <NestedDataTypeEditor
+          sources={sources}
           parentName={`${parentName}.${field.name}`}
           dataType={field.dataType}
           onChange={(newDataType) => onChange({ ...field, dataType: newDataType })}

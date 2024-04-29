@@ -1,4 +1,4 @@
-import { DataType, DataTypeValue, EntityType, EntityTypeField } from '@/types';
+import { DataType, DataTypeValue, EntityType, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
 import { Button, FormControl, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
@@ -9,6 +9,7 @@ export default function NestedDataTypeEditor({
   onChange,
   ...rest
 }: Readonly<{
+  sources: EntityTypeSource[];
   parentName: string;
   dataType: DataType;
   onChange: (newDataType: DataType) => void;

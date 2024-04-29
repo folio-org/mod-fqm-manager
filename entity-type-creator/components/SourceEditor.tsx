@@ -97,6 +97,7 @@ export default function SourceEditor({
             <Autocomplete
               freeSolo
               options={dbSources}
+              value={source.target}
               onChange={(_e, nv) => onChange({ ...source, target: nv ?? undefined })}
               renderInput={(params) => (
                 <TextField
@@ -150,6 +151,7 @@ export default function SourceEditor({
               <Autocomplete
                 freeSolo
                 options={sources.map((s) => s.alias).filter((a) => a != source.alias)}
+                value={source.join?.joinTo ?? ''}
                 onChange={(_e, nv) =>
                   onChange({
                     ...source,

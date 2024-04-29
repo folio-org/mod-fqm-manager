@@ -126,7 +126,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       findEntityTypes();
     });
 
-    socket.on('refresh-entity-types', () => findEntityTypes());
+    socket.on('refresh-entity-types', async () => {
+      findEntityTypes();
+      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
+    });
 
     socket.on('update-translations', async (newTranslations: Record<string, string>) => {
       if (Object.keys(newTranslations).length === 0) return;

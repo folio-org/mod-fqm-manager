@@ -35,7 +35,7 @@ export default function EntityTypeFieldEditor({
   onMoveUp,
   onDelete,
   isNested = false,
-}: {
+}: Readonly<{
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
@@ -51,7 +51,7 @@ export default function EntityTypeFieldEditor({
   onMoveDown: () => void;
   onDelete: () => void;
   isNested?: boolean;
-}) {
+}>) {
   return (
     <fieldset>
       <legend style={{ margin: '1em 0' }}>
@@ -73,6 +73,12 @@ export default function EntityTypeFieldEditor({
           <Autocomplete
             freeSolo
             options={sources.map((s) => s.alias)}
+            onChange={(_e, nv) =>
+              onChange({
+                ...field,
+                sourceAlias: nv ?? undefined,
+              })
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -174,9 +180,9 @@ export default function EntityTypeFieldEditor({
                 label="Is ID column"
                 control={
                   <Checkbox
-                    indeterminate={field.visibleByDefault === undefined}
-                    checked={field.visibleByDefault}
-                    onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
+                    indeterminate={field.isIdColumn === undefined}
+                    checked={field.isIdColumn}
+                    onChange={(e) => onChange({ ...field, isIdColumn: e.target.checked })}
                   />
                 }
               />

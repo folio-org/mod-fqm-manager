@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { pascalCase } from 'change-case';
 import { compile } from 'json-schema-to-typescript';
 import { format } from 'prettier';
@@ -19,6 +19,7 @@ export default function DBColumnInspector({
     total: number;
     finished: boolean;
     result?: unknown;
+    resultRaw?: unknown;
   } | null>(null);
 
   const analyze = useCallback(() => {
@@ -33,6 +34,7 @@ export default function DBColumnInspector({
 
           setAnalysis({
             ...result,
+            resultRaw: result.result,
             result: await format(
               await compile(result.result as any, `${pascalCase(db)}${pascalCase(table)}${pascalCase(column)}Schema`, {
                 additionalProperties: false,
@@ -40,13 +42,13 @@ export default function DBColumnInspector({
                 format: false,
                 ignoreMinAndMaxItems: true,
               }),
-              { parser: 'typescript', plugins: [prettierPluginTS, prettierPluginESTree] }
+              { parser: 'typescript', plugins: [prettierPluginTS, prettierPluginESTree] },
             ),
           });
         } else {
           setAnalysis(result);
         }
-      }
+      },
     );
   }, [db, table, column, socket]);
 
@@ -60,7 +62,20 @@ export default function DBColumnInspector({
               <button onClick={analyze}>re-analyze</button>
               <Typography>
                 Scanned {analysis.scanned} of {analysis.total} records
-                <pre>{analysis.result as string}</pre>
+                <Grid container>
+                  <Grid item xs={6}>
+                    <fieldset>
+                      <legend>Pretty interface</legend>
+                      <pre style={{ whiteSpace: 'pre-wrap' }}>{analysis.result as string}</pre>
+                    </fieldset>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <fieldset>
+                      <legend>Raw JSON schema (as guessed from data)</legend>
+                      <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(analysis.resultRaw, null, 2)}</pre>
+                    </fieldset>
+                  </Grid>
+                </Grid>
               </Typography>
             </>
           ) : (

@@ -112,6 +112,8 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       findEntityTypes();
     });
 
+    socket.on('refresh-entity-types', () => findEntityTypes());
+
     socket.on('update-translations', async (newTranslations: Record<string, string>) => {
       if (Object.keys(newTranslations).length === 0) return;
 

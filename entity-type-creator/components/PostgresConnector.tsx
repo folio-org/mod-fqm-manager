@@ -11,11 +11,11 @@ export default function PostgresConnector({
   const [open, setOpen] = useState(true);
 
   const [postgresConnection, setPostgresConnection] = useState<PostgresConnection>({
-    host: 'localhost',
+    host: 'rds-folio-perf-corsair.cluster-cdxr1geeeqbb.us-west-2.rds.amazonaws.com',
     port: 5432,
-    database: 'db',
-    user: 'postgres',
-    password: 'postgres',
+    database: 'folio',
+    user: 'folio',
+    password: 'postgres_password_123!',
   });
   const [connectionState, setConnectionState] = useState({ connected: false, message: 'Waiting to connect...' });
 

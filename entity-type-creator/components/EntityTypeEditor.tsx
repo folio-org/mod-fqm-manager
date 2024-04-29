@@ -2,12 +2,12 @@ import { formatSql } from '@/utils/sqlUtils';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { Refresh } from '@mui/icons-material';
 import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
-import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { DataTypeValue, EntityType } from '../types';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
+import SourceEditor from './SourceEditor';
 
 export default function EntityTypeManager({
   entityTypes,
@@ -32,7 +32,7 @@ export default function EntityTypeManager({
   useEffect(() => {
     setEntityType({
       ...initialValues,
-      fromClause: formatSql(initialValues.fromClause),
+      sources: initialValues.sources ?? [],
       columns: initialValues.columns?.map((column) => ({
         ...column,
         valueGetter: column.valueGetter ? formatSql(column.valueGetter) : undefined,
@@ -54,7 +54,7 @@ export default function EntityTypeManager({
         defaultSchema: 'TENANT_mod_fqm_manager',
         upperCaseKeywords: true,
       }),
-    [schema]
+    [schema],
   );
 
   return (
@@ -114,6 +114,7 @@ export default function EntityTypeManager({
                 label="Root"
                 control={
                   <Checkbox
+                    indeterminate={entityType.root === undefined}
                     checked={entityType.root}
                     onChange={(e) => setEntityType({ ...entityType, root: e.target.checked })}
                   />
@@ -123,6 +124,7 @@ export default function EntityTypeManager({
                 label="Private"
                 control={
                   <Checkbox
+                    indeterminate={entityType.private === undefined}
                     checked={entityType.private}
                     onChange={(e) => setEntityType({ ...entityType, private: e.target.checked })}
                   />
@@ -164,14 +166,45 @@ export default function EntityTypeManager({
               </FormControl>
             </Grid> */}
             <Grid item xs={12}>
-              <fieldset style={{ display: 'flex' }}>
-                <legend>FROM clause</legend>
-                <CodeMirror
-                  style={{ width: 0, flexGrow: 1 }}
-                  value={entityType.fromClause}
-                  onChange={(value) => setEntityType({ ...entityType, fromClause: value })}
-                  extensions={[codeMirrorExtension]}
-                />
+              <fieldset>
+                <legend>Sources</legend>
+                {entityType.sources?.map((source, i) => (
+                  <SourceEditor
+                    key={i}
+                    entityTypes={entityTypes}
+                    schema={schema}
+                    source={source}
+                    sources={entityType.sources ?? []}
+                    isRoot={i === 0}
+                    onChange={(newSource) =>
+                      setEntityType({
+                        ...entityType,
+                        sources: entityType.sources?.map((s, j) => (j === i ? newSource : s)),
+                      })
+                    }
+                    onRemove={() =>
+                      setEntityType({ ...entityType, sources: entityType.sources!.filter((_, j) => j !== i) })
+                    }
+                  />
+                ))}
+                <Button
+                  variant="outlined"
+                  sx={{ width: '100%', height: '4em', mt: 2 }}
+                  onClick={() =>
+                    setEntityType({
+                      ...entityType,
+                      sources: [
+                        ...(entityType.sources ?? []),
+                        {
+                          alias: '',
+                          type: 'db',
+                        },
+                      ],
+                    })
+                  }
+                >
+                  Add source
+                </Button>
               </fieldset>
             </Grid>
             <Grid item xs={12}>
@@ -184,6 +217,7 @@ export default function EntityTypeManager({
                     parentName={entityType.name}
                     entityType={entityType}
                     entityTypes={entityTypes}
+                    sources={entityType.sources ?? []}
                     codeMirrorExtension={codeMirrorExtension}
                     field={column}
                     onChange={(newColumn) =>

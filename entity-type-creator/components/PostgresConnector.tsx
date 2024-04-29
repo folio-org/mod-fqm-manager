@@ -11,11 +11,11 @@ export default function PostgresConnector({
   const [open, setOpen] = useState(true);
 
   const [postgresConnection, setPostgresConnection] = useState<PostgresConnection>({
-    host: 'localhost',
+    host: 'host',
     port: 5432,
-    database: 'db',
-    user: 'postgres',
-    password: 'postgres',
+    database: 'folio',
+    user: 'folio',
+    password: '',
   });
   const [connectionState, setConnectionState] = useState({ connected: false, message: 'Waiting to connect...' });
 

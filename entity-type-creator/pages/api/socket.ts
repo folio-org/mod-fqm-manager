@@ -7,6 +7,7 @@ import {
 } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType from '@/utils/formatter';
+import dotenv from 'dotenv';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -23,12 +24,25 @@ let pg: postgres.Sql | null = null;
 export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<any>) {
   const socket = res.socket as any;
 
+  dotenv.config({ path: '../.env' });
+
   console.log('Socket server is initializing');
   const io = new Server(socket?.server);
   socket.server.io = io;
 
   io.on('connection', (socket) => {
     console.log('connected!');
+
+    if ('DB_HOST' in process.env) {
+      console.log('Found DB credentials in .env, sending up');
+      socket.emit('db-credentials', {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_DATABASE,
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+      });
+    }
 
     async function findEntityTypes() {
       console.log('Looking for entity types in', ENTITY_TYPE_FILE_PATH);
@@ -112,7 +126,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       findEntityTypes();
     });
 
-    socket.on('refresh-entity-types', () => findEntityTypes());
+    socket.on('refresh-entity-types', async () => {
+      findEntityTypes();
+      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
+    });
 
     socket.on('update-translations', async (newTranslations: Record<string, string>) => {
       if (Object.keys(newTranslations).length === 0) return;

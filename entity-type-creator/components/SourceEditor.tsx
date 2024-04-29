@@ -22,7 +22,7 @@ export default function SourceEditor({
   isRoot,
   onChange,
   onRemove,
-}: {
+}: Readonly<{
   entityTypes: EntityType[];
   schema: Record<string, string[]>;
   source: EntityTypeSource;
@@ -30,7 +30,7 @@ export default function SourceEditor({
   isRoot: boolean;
   onChange: (newSource: EntityTypeSource) => void;
   onRemove: () => void;
-}) {
+}>) {
   const dbSources = useMemo(
     () =>
       Object.keys(schema)
@@ -97,6 +97,8 @@ export default function SourceEditor({
             <Autocomplete
               freeSolo
               options={dbSources}
+              value={source.target}
+              onChange={(_e, nv) => onChange({ ...source, target: nv ?? undefined })}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -114,18 +116,20 @@ export default function SourceEditor({
             <Delete />
           </IconButton>
         </Grid>
-        <Grid item xs={12}>
-          <FormControlLabel
-            label="Use ID columns"
-            control={
-              <Checkbox
-                indeterminate={source.useIdColumns === undefined}
-                checked={source.useIdColumns}
-                onChange={(e) => onChange({ ...source, useIdColumns: e.target.checked })}
-              />
-            }
-          />
-        </Grid>
+        {source.type === 'entity-type' && (
+          <Grid item xs={12}>
+            <FormControlLabel
+              label="Use ID columns"
+              control={
+                <Checkbox
+                  indeterminate={source.useIdColumns === undefined}
+                  checked={source.useIdColumns}
+                  onChange={(e) => onChange({ ...source, useIdColumns: e.target.checked })}
+                />
+              }
+            />
+          </Grid>
+        )}
 
         {!isRoot && (
           <>
@@ -147,6 +151,13 @@ export default function SourceEditor({
               <Autocomplete
                 freeSolo
                 options={sources.map((s) => s.alias).filter((a) => a != source.alias)}
+                value={source.join?.joinTo ?? ''}
+                onChange={(_e, nv) =>
+                  onChange({
+                    ...source,
+                    join: { ...(source.join ?? {}), joinTo: nv } as EntityTypeSource['join'],
+                  })
+                }
                 renderInput={(params) => (
                   <TextField
                     {...params}

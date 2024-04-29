@@ -20,6 +20,10 @@ export default function PostgresConnector({
   const [connectionState, setConnectionState] = useState({ connected: false, message: 'Waiting to connect...' });
 
   useEffect(() => {
+    socket.on('db-credentials', (conn) => {
+      setPostgresConnection(conn);
+      socket.emit('connect-to-postgres', conn);
+    });
     socket.on('postgres-connection-change', (msg) => {
       console.log('Postgres Connection change', msg);
       setConnectionState(msg);

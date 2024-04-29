@@ -1,6 +1,6 @@
 import { DataTypeValue, EntityType, EntityTypeField, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
-import { ArrowDownward, ArrowUpward, Clear } from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward, Clear, CopyAll } from '@mui/icons-material';
 import {
   Autocomplete,
   Button,
@@ -31,6 +31,7 @@ export default function EntityTypeFieldEditor({
   setTranslation,
   first,
   last,
+  onDuplicate,
   onMoveDown,
   onMoveUp,
   onDelete,
@@ -47,6 +48,7 @@ export default function EntityTypeFieldEditor({
   setTranslation: (key: string, value: string) => void;
   first: boolean;
   last: boolean;
+  onDuplicate: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
   onDelete: () => void;
@@ -95,7 +97,7 @@ export default function EntityTypeFieldEditor({
             )}
           />
         </Grid>
-        <Grid item xs={4} container sx={{ justifyContent: 'space-around' }}>
+        <Grid item xs={4} container sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
           <FormControlLabel
             label="Queryable"
             control={
@@ -120,14 +122,17 @@ export default function EntityTypeFieldEditor({
           )}
         </Grid>
         <Grid item container xs={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
+          <IconButton onClick={onDuplicate}>
+            <CopyAll fontSize="small" />
+          </IconButton>
           <IconButton disabled={first} onClick={onMoveUp}>
-            <ArrowUpward />
+            <ArrowUpward fontSize="small" />
           </IconButton>
           <IconButton disabled={last} onClick={onMoveDown}>
-            <ArrowDownward />
+            <ArrowDownward fontSize="small" />
           </IconButton>
           <IconButton onClick={onDelete}>
-            <Clear />
+            <Clear fontSize="small" />
           </IconButton>
         </Grid>
 
@@ -176,7 +181,7 @@ export default function EntityTypeFieldEditor({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={2} container sx={{ justifyContent: 'space-around' }}>
+            <Grid item xs={2} container sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
               <FormControlLabel
                 label="Is ID column"
                 control={

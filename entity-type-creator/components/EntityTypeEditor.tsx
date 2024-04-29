@@ -233,6 +233,18 @@ export default function EntityTypeManager({
                     }}
                     first={i === 0}
                     last={i === entityType.columns!.length - 1}
+                    onDuplicate={() =>
+                      setEntityType({
+                        ...entityType,
+                        columns: [
+                          ...entityType.columns!,
+                          {
+                            ...column,
+                            name: `${column.name}_copy`,
+                          },
+                        ],
+                      })
+                    }
                     onMoveUp={() => {
                       const newColumns = entityType.columns!;
                       newColumns[i] = entityType.columns![i - 1];

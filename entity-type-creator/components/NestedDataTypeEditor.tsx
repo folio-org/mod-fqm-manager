@@ -77,6 +77,12 @@ export default function NestedDataTypeEditor({
               }
               first={i === 0}
               last={i === dataType.properties!.length - 1}
+              onDuplicate={() =>
+                onChange({
+                  ...dataType,
+                  properties: [...dataType.properties!, { ...property, name: `${property.name}_copy` }],
+                })
+              }
               onMoveUp={() => {
                 const newProperties = dataType.properties!;
                 newProperties[i] = dataType.properties![i - 1];

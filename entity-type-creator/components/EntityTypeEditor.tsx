@@ -7,9 +7,9 @@ import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { DataTypeValue, EntityType, EntityTypeField } from '../types';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
+import { inferTranslationsFromColumn } from './Importer/ImportStep';
 import JSONSchemaImporter from './Importer/JSONSchemaImporter';
 import SourceEditor from './SourceEditor';
-import { sentenceCase } from 'change-case';
 
 export default function EntityTypeManager({
   entityTypes,
@@ -33,7 +33,7 @@ export default function EntityTypeManager({
     socket.off('add-column-from-db-inspector-pong');
     socket.on('add-column-from-db-inspector-pong', (column: EntityTypeField) => {
       setEntityType((et) => {
-        setTranslationsBuffer((tb) => ({ ...tb, [`entityType.${et.name}.${column.name}`]: sentenceCase(column.name) }));
+        setTranslationsBuffer((tb) => ({ ...tb, ...inferTranslationsFromColumn(column, et.name) }));
         return { ...et, columns: [...(et.columns ?? []), column] };
       });
     });
@@ -72,8 +72,7 @@ export default function EntityTypeManager({
   const [hiddenColumns, setHiddenColumns] = useState<Record<string, boolean>>({});
 
   useEffect(
-    () =>
-      setHiddenColumns(initialValues.columns?.reduce((acc, column) => ({ ...acc, [column.name]: false }), {}) ?? {}),
+    () => setHiddenColumns(initialValues.columns?.reduce((acc, column) => ({ ...acc, [column.name]: true }), {}) ?? {}),
     [initialValues],
   );
 
@@ -86,7 +85,7 @@ export default function EntityTypeManager({
           e.preventDefault();
 
           socket.emit('save-entity-type', { file, entityType });
-          socket.emit('update-translations', translationsBuffer);
+          socket.emit('update-translations', { entityType, newTranslations: translationsBuffer });
 
           socket.once('saved-entity-type', () => {
             window.alert('Saved!');
@@ -239,7 +238,7 @@ export default function EntityTypeManager({
                       <fieldset key={i}>
                         <legend>
                           <IconButton onClick={() => setHiddenColumns({ ...hiddenColumns, [column.name]: false })}>
-                            <UnfoldLess fontSize="small" />
+                            <UnfoldMore fontSize="small" />
                           </IconButton>
                           &nbsp;
                           <span style={{ fontFamily: 'monospace' }}>{column.name}</span>
@@ -251,7 +250,7 @@ export default function EntityTypeManager({
                         labelDecoration={
                           <>
                             <IconButton onClick={() => setHiddenColumns({ ...hiddenColumns, [column.name]: true })}>
-                              <UnfoldMore fontSize="small" />
+                              <UnfoldLess fontSize="small" />
                             </IconButton>
                             &nbsp;
                           </>

@@ -5,7 +5,7 @@ import {
   persistEntityType,
   verifyPostgresConnection,
 } from '@/socket/postgres';
-import { EntityType, FqmConnection, PostgresConnection } from '@/types';
+import { DataTypeValue, EntityType, FqmConnection, PostgresConnection } from '@/types';
 import formatEntityType, { fancyIndent } from '@/utils/formatter';
 import dotenv from 'dotenv';
 import json5 from 'json5';
@@ -134,26 +134,84 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
     });
 
-    socket.on('update-translations', async (newTranslations: Record<string, string>) => {
-      if (Object.keys(newTranslations).length === 0) return;
+    socket.on(
+      'update-translations',
+      async ({ entityType, newTranslations }: { entityType: EntityType; newTranslations: Record<string, string> }) => {
+        const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
 
-      const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
+        const updatedTranslationSet = { ...curTranslations, ...newTranslations };
 
-      const updatedTranslationSet = { ...curTranslations, ...newTranslations };
-      const sorted = Object.keys(updatedTranslationSet)
-        .toSorted()
-        .reduce(
-          (acc, key) => {
-            acc[key] = updatedTranslationSet[key];
-            return acc;
-          },
-          {} as Record<string, string>,
+        const keysForThisEntity = Object.keys(updatedTranslationSet).filter((k) =>
+          k.startsWith(`entityType.${entityType.name}`),
         );
+        const expectedKeysForThisEntity = [`entityType.${entityType.name}`];
+        const fieldsToHandle =
+          entityType.columns?.map((c) => ({ prop: false, field: c, prefix: `entityType.${entityType.name}` })) ?? [];
 
-      await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
-      console.log('Updated translations');
-      socket.emit('translations', sorted);
-    });
+        while (fieldsToHandle.length) {
+          console.log(fieldsToHandle);
+          const { prop, field, prefix } = fieldsToHandle.pop()!;
+          expectedKeysForThisEntity.push(`${prefix}.${field.name}`);
+          if (prop) {
+            expectedKeysForThisEntity.push(`${prefix}.${field.name}._qualified`);
+          }
+          if (
+            field.dataType?.dataType === DataTypeValue.arrayType &&
+            field.dataType.itemDataType?.dataType === DataTypeValue.objectType
+          ) {
+            fieldsToHandle.push(
+              ...(field.dataType.itemDataType.properties?.map((p) => ({
+                prop: true,
+                field: p,
+                prefix: `${prefix}.${field.name}`,
+              })) ?? []),
+            );
+          }
+          if (field.dataType?.dataType === DataTypeValue.objectType) {
+            fieldsToHandle.push(
+              ...(field.dataType.properties?.map((p) => ({
+                prop: true,
+                field: p,
+                prefix: `${prefix}.${field.name}`,
+              })) ?? []),
+            );
+          }
+        }
+
+        const keysToRemove = keysForThisEntity.filter((k) => !expectedKeysForThisEntity.includes(k));
+        const missingKeys = expectedKeysForThisEntity.filter((k) => !keysForThisEntity.includes(k));
+        console.log('Found keys to remove', keysToRemove);
+        console.log('Found missing keys', missingKeys);
+
+        if (keysToRemove.length) {
+          socket.emit(
+            'warning',
+            `Entity type ${entityType.name} had the following extra translations, which were stripped:\n${keysToRemove.join('\n')}`,
+          );
+        }
+        if (missingKeys.length) {
+          socket.emit(
+            'warning',
+            `Entity type ${entityType.name} is missing the following translations:\n${missingKeys.join('\n')}`,
+          );
+        }
+
+        const sorted = Object.keys(updatedTranslationSet)
+          .filter((k) => !keysToRemove.includes(k))
+          .toSorted()
+          .reduce(
+            (acc, key) => {
+              acc[key] = updatedTranslationSet[key];
+              return acc;
+            },
+            {} as Record<string, string>,
+          );
+
+        await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
+        console.log('Updated translations');
+        socket.emit('translations', sorted);
+      },
+    );
 
     socket.on('check-entity-type-validity', async (entityType: EntityType) => {
       console.log('Checking entity type validity', entityType);

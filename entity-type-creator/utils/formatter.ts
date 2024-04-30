@@ -81,7 +81,7 @@ export function fancyIndent(blob: string): string {
       // replace \n in the file with indented real newlines
       if (line.includes('\\n')) {
         const indentation = line.match(/^\s*/)?.[0] || '';
-        return line.replaceAll('\\n', `\n${indentation}`);
+        return line.replaceAll('\\n', `\\\n${indentation}`);
       } else {
         return line;
       }

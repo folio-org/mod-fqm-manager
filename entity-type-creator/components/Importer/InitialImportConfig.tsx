@@ -3,6 +3,7 @@ import { json } from '@codemirror/lang-json';
 import { Autocomplete, Button, DialogActions, DialogContent, Grid, TextField } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { Schema } from 'genson-js/dist';
+import json5 from 'json5';
 import { Dispatch, SetStateAction } from 'react';
 import { END_PAGE, State } from './JSONSchemaImporter';
 
@@ -66,7 +67,8 @@ export default function InitialImportConfig({
             const issues = state.warnings;
 
             try {
-              const schema = JSON.parse(state.schemaRaw) as Schema;
+              // use json5 for a little more niceness
+              const schema = json5.parse(state.schemaRaw) as Schema;
               const properties = schema.properties;
 
               if (!properties) {

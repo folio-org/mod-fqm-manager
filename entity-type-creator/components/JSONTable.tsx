@@ -73,7 +73,7 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
                     return (row[key] as string[]).join('\n');
                   } else if (jsonKeys[key]) {
                     return <JSONTable data={JSON.parse(row[key] as string)} />;
-                  } else if (typeof row[key] === 'object') {
+                  } else if (typeof row[key] === 'object' || row[key] === true || row[key] === false) {
                     return JSON.stringify(row[key], null, 2);
                   } else {
                     return row[key] as string | number;

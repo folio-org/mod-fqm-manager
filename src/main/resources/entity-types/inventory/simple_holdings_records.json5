@@ -577,6 +577,7 @@
             dataType: {
               dataType: 'stringType',
             },
+            property: 'displayType',
             queryable: false,
             valueGetter: "( SELECT array_agg(elems.value->>'displayType') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
             filterValueGetter: "( SELECT array_agg(lower(elems.value->>'displayType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
@@ -584,6 +585,7 @@
           },
           {
             name: 'entries',
+            property: 'entries',
             dataType: {
               dataType: 'arrayType',
               itemDataType: {

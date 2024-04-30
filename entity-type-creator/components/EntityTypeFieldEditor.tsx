@@ -15,12 +15,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import CodeMirror from '@uiw/react-codemirror';
-import { useMemo } from 'react';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import { ReactNode, useMemo } from 'react';
 import NestedDataTypeEditor from './NestedDataTypeEditor';
 
 export default function EntityTypeFieldEditor({
   parentName,
+  labelDecoration = null,
   entityType,
   entityTypes,
   sources,
@@ -37,6 +38,7 @@ export default function EntityTypeFieldEditor({
   onDelete,
   isNested = false,
 }: Readonly<{
+  labelDecoration?: ReactNode;
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
@@ -57,6 +59,7 @@ export default function EntityTypeFieldEditor({
   return (
     <fieldset>
       <legend style={{ margin: '1em 0' }}>
+        {labelDecoration}
         <code>{field.name}</code>
       </legend>
 
@@ -71,32 +74,45 @@ export default function EntityTypeFieldEditor({
             inputProps={{ style: { fontFamily: 'monospace' } }}
           />
         </Grid>
-        <Grid item xs={3}>
-          <Autocomplete
-            freeSolo
-            options={sources.map((s) => s.alias)}
-            value={field.sourceAlias ?? ''}
-            onChange={(_e, nv) =>
-              onChange({
-                ...field,
-                sourceAlias: nv ?? undefined,
-              })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Source"
-                value={field.sourceAlias ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    ...field,
-                    sourceAlias: e.target.value,
-                  })
-                }
-              />
-            )}
-          />
-        </Grid>
+        {!isNested ? (
+          <Grid item xs={3}>
+            <Autocomplete
+              freeSolo
+              options={sources.map((s) => s.alias)}
+              value={field.sourceAlias ?? ''}
+              onChange={(_e, nv) =>
+                onChange({
+                  ...field,
+                  sourceAlias: nv ?? undefined,
+                })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Source"
+                  value={field.sourceAlias ?? ''}
+                  onChange={(e) =>
+                    onChange({
+                      ...field,
+                      sourceAlias: e.target.value,
+                    })
+                  }
+                />
+              )}
+            />
+          </Grid>
+        ) : (
+          <Grid item xs={2}>
+            <TextField
+              label="Property"
+              required
+              fullWidth
+              value={field.property}
+              onChange={(e) => onChange({ ...field, property: e.target.value })}
+              inputProps={{ style: { fontFamily: 'monospace' } }}
+            />
+          </Grid>
+        )}
         <Grid item xs={4} container sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
           <FormControlLabel
             label="Queryable"
@@ -121,7 +137,7 @@ export default function EntityTypeFieldEditor({
             />
           )}
         </Grid>
-        <Grid item container xs={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
+        <Grid item container xs={isNested ? 3 : 2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
           <IconButton onClick={onDuplicate}>
             <CopyAll fontSize="small" />
           </IconButton>
@@ -272,7 +288,7 @@ export default function EntityTypeFieldEditor({
               </FormControl>
             </Grid>
           ),
-          [field.valueSourceApi, field.source, field.values, entityType, onChange, parentName],
+          [field.valueSourceApi, field.source, field.values, entityType, parentName],
         )}
 
         {useMemo(
@@ -384,7 +400,7 @@ export default function EntityTypeFieldEditor({
                 </>
               )
             ),
-          [field.source, field.valueSourceApi, onChange, parentName, entityTypes],
+          [field.source, field.valueSourceApi, parentName, entityTypes],
         )}
 
         {useMemo(
@@ -464,7 +480,7 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, valueGetter: value })
                       : onChange({ ...field, valueGetter: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>
@@ -487,7 +503,7 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, filterValueGetter: value })
                       : onChange({ ...field, filterValueGetter: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>
@@ -510,7 +526,7 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, valueFunction: value })
                       : onChange({ ...field, valueFunction: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>

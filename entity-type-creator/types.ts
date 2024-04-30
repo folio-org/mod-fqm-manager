@@ -34,6 +34,7 @@ export interface DataType {
 
 export interface EntityTypeField {
   name: string;
+  property?: string;
   dataType: DataType;
   sourceAlias?: string;
   isIdColumn?: boolean;

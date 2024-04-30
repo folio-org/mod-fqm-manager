@@ -198,11 +198,11 @@ public class EntityTypeFlatteningService {
       }
     }
 
-    if (outerSource != null && !Boolean.TRUE.equals(newSource.getFlattened())) { // TODO: may not need "nestedSource.getJoin() == null"
+    if (outerSource != null && !Boolean.TRUE.equals(newSource.getFlattened())) {
       newSource.alias(newAlias.toString());
-      newSource.flattened(true);
-      if (nestedSource.getJoin() == null) {
+      if (nestedSource.getJoin() == null && outerSource.getJoin() != null) {
         newSource.join(outerSource.getJoin());
+        newSource.flattened(true);
       }
     }
     return new Pair<>(newSource, updatedColumns);

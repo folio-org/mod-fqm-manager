@@ -196,8 +196,18 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(el::text)\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds'::text) el (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(el::text))\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds'::text) el (value)\n)",
+      valueGetter: "(\
+        SELECT\
+          array_agg(el::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds'::text) el (value)\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(el::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds'::text) el (value)\
+      )",
       valueFunction: 'lower(:value)',
     },
     {
@@ -232,7 +242,10 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
-      filterValueGetter: "COALESCE(\n  lower(:sourceAlias.jsonb->>'discoverySuppress'::text),\n  'false'\n)",
+      filterValueGetter: "COALESCE(\
+        lower(:sourceAlias.jsonb->>'discoverySuppress'::text),\
+        'false'\
+      )",
       values: [
         {
           label: 'True',
@@ -256,8 +269,18 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(el::text)\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds'::text) el (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(el::text))\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds'::text) el (value)\n)",
+      valueGetter: "(\
+        SELECT\
+          array_agg(el::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds'::text) el (value)\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(el::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds'::text) el (value)\
+      )",
       valueFunction: 'lower(:value)',
     },
     {
@@ -307,7 +330,18 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "coalesce(\n  (\n    SELECT\n      jsonb_agg(el::jsonb) FILTER (\n        WHERE\n          el IS NOT NULL\n      )\n    FROM\n      jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatements') el (value)\n  ),\n  '[]'::jsonb\n)::text",
+      valueGetter: "coalesce(\
+        (\
+          SELECT\
+            jsonb_agg(el::jsonb) FILTER (\
+              WHERE\
+                el IS NOT NULL\
+            )\
+          FROM\
+            jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatements') el (value)\
+        ),\
+        '[]'::jsonb\
+      )::text",
     },
     {
       name: 'holdings_statements_for_indexes',
@@ -356,7 +390,18 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "coalesce(\n  (\n    SELECT\n      jsonb_agg(el::jsonb) FILTER (\n        WHERE\n          el IS NOT NULL\n      )\n    FROM\n      jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatementsForIndexes') el (value)\n  ),\n  '[]'::jsonb\n)::text",
+      valueGetter: "coalesce(\
+        (\
+          SELECT\
+            jsonb_agg(el::jsonb) FILTER (\
+              WHERE\
+                el IS NOT NULL\
+            )\
+          FROM\
+            jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatementsForIndexes') el (value)\
+        ),\
+        '[]'::jsonb\
+      )::text",
     },
     {
       name: 'holdings_statements_for_supplements',
@@ -405,7 +450,18 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "coalesce(\n  (\n    SELECT\n      jsonb_agg(el::jsonb) FILTER (\n        WHERE\n          el IS NOT NULL\n      )\n    FROM\n      jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatementsForSupplements') el (value)\n  ),\n  '[]'::jsonb\n)::text",
+      valueGetter: "coalesce(\
+        (\
+          SELECT\
+            jsonb_agg(el::jsonb) FILTER (\
+              WHERE\
+                el IS NOT NULL\
+            )\
+          FROM\
+            jsonb_array_elements_text(:sourceAlias.jsonb->'holdingsStatementsForSupplements') el (value)\
+        ),\
+        '[]'::jsonb\
+      )::text",
     },
     {
       name: 'electronic_access',
@@ -567,87 +623,74 @@
       valueGetter: ":sourceAlias.jsonb->>'numberOfItems'",
     },
     {
-      name: 'receiving_history',
+      name: 'receiving_history_display_type',
       sourceAlias: 'hrd',
       dataType: {
-        dataType: 'objectType',
-        properties: [
-          {
-            name: 'display_type',
-            dataType: {
-              dataType: 'stringType',
-            },
-            property: 'displayType',
-            queryable: false,
-            valueGetter: "( SELECT array_agg(elems.value->>'displayType') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
-            filterValueGetter: "( SELECT array_agg(lower(elems.value->>'displayType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
-            valueFunction: 'lower(:value)',
-          },
-          {
-            name: 'entries',
-            property: 'entries',
-            dataType: {
-              dataType: 'arrayType',
-              itemDataType: {
-                dataType: 'objectType',
-                properties: [
-                  {
-                    name: 'public_display',
-                    property: 'publicDisplay',
-                    dataType: {
-                      dataType: 'booleanType',
-                    },
-                    queryable: false,
-                    valueGetter: "( SELECT array_agg(elems.value->>'publicDisplay') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicDisplay')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    valueFunction: 'lower(:value)',
-                    values: [
-                      {
-                        value: 'true',
-                        label: 'True',
-                      },
-                      {
-                        value: 'false',
-                        label: 'False',
-                      },
-                    ],
-                  },
-                  {
-                    name: 'enumeration',
-                    property: 'enumeration',
-                    dataType: {
-                      dataType: 'stringType',
-                    },
-                    queryable: false,
-                    valueGetter: "( SELECT array_agg(elems.value->>'enumeration') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'enumeration')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    valueFunction: 'lower(:value)',
-                  },
-                  {
-                    name: 'chronology',
-                    property: 'chronology',
-                    dataType: {
-                      dataType: 'stringType',
-                    },
-                    queryable: false,
-                    valueGetter: "( SELECT array_agg(elems.value->>'chronology') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'chronology')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
-                    valueFunction: 'lower(:value)',
-                  },
-                ],
-              },
-            },
-            queryable: false,
-            valueGetter: "( SELECT array_agg(elems.value->>'entries') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
-            filterValueGetter: "( SELECT array_agg(lower(elems.value->>'entries')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory') AS elems)",
-            valueFunction: 'lower(:value)',
-          },
-        ],
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'receivingHistory'",
+      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'displayType'",
+    },
+    {
+      name: 'receiving_history_entries',
+      sourceAlias: 'hrd',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'public_display',
+              property: 'publicDisplay',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'publicDisplay') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicDisplay')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+            {
+              name: 'enumeration',
+              property: 'enumeration',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'enumeration') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'enumeration')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'chronology',
+              property: 'chronology',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'chronology') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'chronology')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'entries'",
     },
     {
       name: 'administrative_notes',
@@ -675,8 +718,24 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(elems.value::text) FILTER (\n      WHERE\n        (elems.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(elems.value::text)) FILTER (\n      WHERE\n        (elems.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\n)",
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text)) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
       valueFunction: 'lower(:value)',
     },
     {

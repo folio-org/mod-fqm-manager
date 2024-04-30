@@ -262,12 +262,24 @@ function inferColumnFromSchema(
       queryable: ![DataTypeValue.arrayType, DataTypeValue.objectType].includes(dataType.dataType),
       visibleByDefault: false,
       isIdColumn: name === 'id',
-      valueGetter: `:sourceAlias.jsonb->>'${prop}'`,
+      valueGetter:
+        // if primitive array
+        dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
+          ? `( SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
+          : `:sourceAlias.jsonb->>'${prop}'`,
+      filterValueGetter:
+        dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
+          ? `( SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
+          : undefined,
       values: getValues(dataType),
     },
   };
 }
-function inferTranslationsFromColumn(column: EntityTypeField | undefined, parentName: string): Record<string, string> {
+
+export function inferTranslationsFromColumn(
+  column: EntityTypeField | undefined,
+  parentName: string,
+): Record<string, string> {
   if (!column) {
     return {};
   }

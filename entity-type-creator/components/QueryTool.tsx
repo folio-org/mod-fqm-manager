@@ -29,7 +29,7 @@ export default function QueryTool({
     state: State.NOT_STARTED,
   });
 
-  const [query, setQuery] = useState<string>('{"id":{"$ne":"zzz"}}');
+  const [query, setQuery] = useState<string>('{"id":{"$empty":false}}');
 
   const codeMirrorExtension = useMemo(() => json(), []);
 

@@ -6,7 +6,7 @@ import {
   verifyPostgresConnection,
 } from '@/socket/postgres';
 import { EntityType, FqmConnection, PostgresConnection } from '@/types';
-import formatEntityType from '@/utils/formatter';
+import formatEntityType, { fancyIndent } from '@/utils/formatter';
 import dotenv from 'dotenv';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -119,7 +119,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('save-entity-type', async ({ file, entityType }: { file: string; entityType: EntityType }) => {
       console.log('Saving entity type', file, entityType);
 
-      await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(formatEntityType(entityType), null, 2) + '\n');
+      await writeFile(
+        ENTITY_TYPE_FILE_PATH + file,
+        fancyIndent(json5.stringify(formatEntityType(entityType), null, 2)) + '\n',
+      );
 
       socket.emit('saved-entity-type');
 

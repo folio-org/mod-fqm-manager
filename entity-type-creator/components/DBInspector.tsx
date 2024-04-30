@@ -1,4 +1,4 @@
-import { Schema } from '@/types';
+import { EntityType, Schema } from '@/types';
 import { Box } from '@mui/system';
 import { useMemo } from 'react';
 import { Socket } from 'socket.io-client';
@@ -7,9 +7,11 @@ import DBColumnInspector from './DBColumnInspector';
 export default function DBInspector({
   socket,
   schema,
+  entityType,
 }: Readonly<{
   socket: Socket;
   schema: Schema;
+  entityType: EntityType | null;
 }>) {
   const hierarchicalSchema = useMemo(() => {
     const result: Record<
@@ -63,52 +65,62 @@ export default function DBInspector({
 
             {Object.keys(hierarchicalSchema[db].tables)
               .toSorted((a, b) => a.localeCompare(b))
-              .map((table) => (
-                <details key={table} style={{ marginLeft: '1em' }}>
-                  <summary>
-                    💾 {table} ({Object.keys(hierarchicalSchema[db].tables[table]).length})
-                  </summary>
+              .map((table) => {
+                const source = entityType?.sources?.find((s) => s.target === table)?.alias;
+                return (
+                  <details key={table} style={{ marginLeft: '1em' }}>
+                    <summary>
+                      💾 {table} ({Object.keys(hierarchicalSchema[db].tables[table]).length})
+                      {!!source && ` (🔗 source alias ${source})`}
+                    </summary>
 
-                  <ul>
-                    {Object.keys(hierarchicalSchema[db].tables[table])
-                      .toSorted((a, b) => a.localeCompare(b))
-                      .map((column) => (
-                        <DBColumnInspector
-                          key={column}
-                          socket={socket}
-                          db={db}
-                          table={table}
-                          column={column}
-                          dataType={hierarchicalSchema[db].tables[table][column]}
-                        />
-                      ))}
-                  </ul>
-                </details>
-              ))}
+                    <ul>
+                      {Object.keys(hierarchicalSchema[db].tables[table])
+                        .toSorted((a, b) => a.localeCompare(b))
+                        .map((column) => (
+                          <DBColumnInspector
+                            key={column}
+                            socket={socket}
+                            db={db}
+                            table={table}
+                            column={column}
+                            dataType={hierarchicalSchema[db].tables[table][column]}
+                            entityType={entityType}
+                          />
+                        ))}
+                    </ul>
+                  </details>
+                );
+              })}
             {Object.keys(hierarchicalSchema[db].views)
               .toSorted((a, b) => a.localeCompare(b))
-              .map((view) => (
-                <details key={view} style={{ marginLeft: '1em' }}>
-                  <summary>
-                    ✨ {view} ({Object.keys(hierarchicalSchema[db].views[view]).length})
-                  </summary>
+              .map((view) => {
+                const source = entityType?.sources?.find((s) => s.target === view)?.alias;
+                return (
+                  <details key={view} style={{ marginLeft: '1em' }}>
+                    <summary>
+                      ✨ {view} ({Object.keys(hierarchicalSchema[db].views[view]).length})
+                      {!!source && ` (🔗 source alias ${source})`}
+                    </summary>
 
-                  <ul>
-                    {Object.keys(hierarchicalSchema[db].views[view])
-                      .toSorted((a, b) => a.localeCompare(b))
-                      .map((column) => (
-                        <DBColumnInspector
-                          key={column}
-                          socket={socket}
-                          db={db}
-                          table={view}
-                          column={column}
-                          dataType={hierarchicalSchema[db].views[view][column]}
-                        />
-                      ))}
-                  </ul>
-                </details>
-              ))}
+                    <ul>
+                      {Object.keys(hierarchicalSchema[db].views[view])
+                        .toSorted((a, b) => a.localeCompare(b))
+                        .map((column) => (
+                          <DBColumnInspector
+                            key={column}
+                            socket={socket}
+                            db={db}
+                            table={view}
+                            column={column}
+                            dataType={hierarchicalSchema[db].views[view][column]}
+                            entityType={entityType}
+                          />
+                        ))}
+                    </ul>
+                  </details>
+                );
+              })}
           </details>
         ))}
     </Box>

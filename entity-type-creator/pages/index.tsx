@@ -99,7 +99,7 @@ export default function EntryPoint() {
               <QueryTool socket={socket} entityType={currentEntityType} />
             </Box>
             <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
-              <DBInspector socket={socket} schema={schema} />
+              <DBInspector socket={socket} schema={schema} entityType={currentEntityType} />
             </Box>
           </Container>
         </Drawer>

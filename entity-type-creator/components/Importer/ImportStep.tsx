@@ -247,6 +247,12 @@ function inferColumnFromSchema(
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`);
   issues.push(...dtIssues);
 
+  if (dataType.dataType === DataTypeValue.objectType) {
+    issues.push(
+      'This looks like an object type as the root; you likely will want to flatten this out into multiple columns manually.',
+    );
+  }
+
   return {
     issues,
     column: {

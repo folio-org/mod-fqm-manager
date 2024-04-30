@@ -1,0 +1,981 @@
+{
+  id: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+  name: 'simple_instances',
+  root: true,
+  private: false,
+  sources: [
+    {
+      alias: 'inst',
+      type: 'db',
+      target: 'src_inventory_instance',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'complete_updated_date',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.complete_updated_date',
+    },
+    {
+      name: 'instance_type_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.instancetypeid',
+    },
+    {
+      name: 'mode_of_issuance_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.modeofissuanceid',
+    },
+    {
+      name: 'version',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'_version'",
+    },
+    {
+      name: 'hrid',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'hrid'",
+    },
+    {
+      name: 'match_key',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'matchKey'",
+    },
+    {
+      name: 'source',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'title',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'title'",
+    },
+    {
+      name: 'index_title',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'indexTitle'",
+    },
+    {
+      name: 'alternative_titles',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'type_id',
+              property: 'alternativeTitleTypeId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitleTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitleTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'title',
+              property: 'alternativeTitle',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitle') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitle')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'alternativeTitles'",
+    },
+    {
+      name: 'editions',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'editions') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'editions') AS elems\
+      )",
+    },
+    {
+      name: 'series',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value->>'value')\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'series') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value->>'value'))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'series') AS elems\
+      )",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'identifiers',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'identifier_type_id',
+              property: 'identifierTypeId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'identifierTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'identifiers'",
+    },
+    {
+      name: 'contributors',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'name',
+              property: 'name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'contributor_type_id',
+              property: 'contributorTypeId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'contributor_type_text',
+              property: 'contributorTypeText',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'contributor_name_type_id',
+              property: 'contributorNameTypeId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'primary',
+              property: 'primary',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'primary') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'primary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'contributors'",
+    },
+    {
+      name: 'subjects',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value->>'value')\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value->>'value'))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems\
+      )",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'classifications',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'number',
+              property: 'classificationNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'classificationNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'type_id',
+              property: 'classificationTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'classifications'",
+    },
+    {
+      name: 'publication',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'publisher',
+              property: 'publisher',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'publisher') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publisher')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'place',
+              property: 'place',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'place') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'place')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'date_of_publication',
+              property: 'dateOfPublication',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'dateOfPublication') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'dateOfPublication')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'role',
+              property: 'role',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'publication'",
+    },
+    {
+      name: 'publication_frequency',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'publicationFrequency') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'publicationFrequency') AS elems\
+      )",
+    },
+    {
+      name: 'publication_range',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'publicationRange') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'publicationRange') AS elems\
+      )",
+    },
+    {
+      name: 'publication_period_start',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'publicationPeriod'->>'start'",
+    },
+    {
+      name: 'publication_period_end',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'publicationPeriod'->>'end'",
+    },
+    {
+      name: 'electronic_access',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'uri',
+              property: 'uri',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'uri') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'uri')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'link_text',
+              property: 'linkText',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'linkText') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'linkText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'materials_specification',
+              property: 'materialsSpecification',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'materialsSpecification') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'materialsSpecification')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'public_note',
+              property: 'publicNote',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'publicNote') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicNote')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'relationship_id',
+              property: 'relationshipId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'relationshipId') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'relationshipId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'electronicAccess'",
+    },
+    {
+      name: 'instance_format_ids',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
+      )",
+    },
+    {
+      name: 'physical_descriptions',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
+      )",
+    },
+    {
+      name: 'languages',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'languages') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'languages') AS elems\
+      )",
+    },
+    {
+      name: 'notes',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'instance_note_type_id',
+              property: 'instanceNoteTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'note',
+              property: 'note',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'staff_only',
+              property: 'staffOnly',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'notes'",
+    },
+    {
+      name: 'administrative_notes',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+      )",
+    },
+    {
+      name: 'cataloged_date',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'catalogedDate'",
+    },
+    {
+      name: 'previously_held',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'previouslyHeld'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'staff_suppress',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'staffSuppress'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'discovery_suppress',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'statistical_code_ids',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'statisticalCodeIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'statisticalCodeIds') AS elems\
+      )",
+    },
+    {
+      name: 'status_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'statusId'",
+    },
+    {
+      name: 'status_updated_date',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
+    },
+    {
+      name: 'tags',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text)) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'nature_of_content_term_ids',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'natureOfContentTermIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'natureOfContentTermIds') AS elems\
+      )",
+    },
+  ],
+}

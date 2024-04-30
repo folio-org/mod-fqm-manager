@@ -1,6 +1,6 @@
 {
   id: "86475f57-7ee2-4b7f-b631-e1a4ead3cdc8",
-  name: "composite_voucher_line_voucher_ledger_fund",
+  name: "composite_voucher__line_voucher__ledger_fund",
   private: false,
   sources: [
     {

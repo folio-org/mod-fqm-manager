@@ -245,6 +245,11 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
     socket.on('install-module', async () => socket.emit('install-module-result', await install(fqmConnection)));
     socket.on('uninstall-module', async () => socket.emit('uninstall-module-result', await uninstall(fqmConnection)));
+
+    // ping-pong right back
+    socket.on('add-column-from-db-inspector', (newColumn) =>
+      socket.emit('add-column-from-db-inspector-pong', newColumn),
+    );
   });
 
   res.end();

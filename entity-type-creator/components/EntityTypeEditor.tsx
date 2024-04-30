@@ -5,10 +5,11 @@ import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdorn
 import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
-import { DataTypeValue, EntityType } from '../types';
+import { DataTypeValue, EntityType, EntityTypeField } from '../types';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 import JSONSchemaImporter from './Importer/JSONSchemaImporter';
 import SourceEditor from './SourceEditor';
+import { sentenceCase } from 'change-case';
 
 export default function EntityTypeManager({
   entityTypes,
@@ -28,7 +29,17 @@ export default function EntityTypeManager({
   const [entityType, setEntityType] = useState<EntityType>(initialValues);
   const [translationsBuffer, setTranslationsBuffer] = useState<Record<string, string>>({});
 
-  setCurrentEntityType(entityType);
+  useEffect(() => {
+    socket.off('add-column-from-db-inspector-pong');
+    socket.on('add-column-from-db-inspector-pong', (column: EntityTypeField) => {
+      setEntityType((et) => {
+        setTranslationsBuffer((tb) => ({ ...tb, [`entityType.${et.name}.${column.name}`]: sentenceCase(column.name) }));
+        return { ...et, columns: [...(et.columns ?? []), column] };
+      });
+    });
+  }, [socket]);
+
+  useEffect(() => setCurrentEntityType(entityType), [entityType, setCurrentEntityType]);
 
   useEffect(() => {
     setEntityType({
@@ -59,6 +70,12 @@ export default function EntityTypeManager({
   );
 
   const [hiddenColumns, setHiddenColumns] = useState<Record<string, boolean>>({});
+
+  useEffect(
+    () =>
+      setHiddenColumns(initialValues.columns?.reduce((acc, column) => ({ ...acc, [column.name]: false }), {}) ?? {}),
+    [initialValues],
+  );
 
   const [showImporter, setShowImporter] = useState(false);
 

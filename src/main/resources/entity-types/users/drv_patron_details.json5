@@ -29,6 +29,7 @@
       },
       "queryable": true,
       sourceAlias: 'groups',
+      isIdColumn: true,
       "valueGetter": ":sourceAlias.id",
       "visibleByDefault": false
     },

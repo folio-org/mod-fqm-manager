@@ -104,4 +104,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_fiscal_year" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "fiscal_year" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_fiscal_year">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.fiscal_year
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

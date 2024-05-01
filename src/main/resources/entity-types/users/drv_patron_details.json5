@@ -1,0 +1,131 @@
+{
+  "id": "e7717b38-4ff3-4fb9-ae09-b3d0c8400710",
+  "name": "drv_group_details",
+  "columns": [
+    {
+      "name": "group",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      sourceAlias: 'groups',
+      "valueGetter": ":sourceAlias.jsonb -> 'group'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "desc",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      sourceAlias: 'groups',
+      "valueGetter": ":sourceAlias.jsonb -> 'desc'",
+      "visibleByDefault": false
+    },
+    {
+      "name": "id",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      sourceAlias: 'groups',
+      "valueGetter": ":sourceAlias.id",
+      "visibleByDefault": false
+    },
+    {
+      "name": "expiration_off_set_in_days",
+      "dataType": {
+        "dataType": "integerType"
+      },
+      "queryable": true,
+      sourceAlias: 'groups',
+      valueGetter: "(:sourceAlias.jsonb ->> 'expirationOffsetInDays')::integer",
+      valueFunction: '(:value)::integer',
+      "visibleByDefault": false
+    },
+    {
+      "name": "source",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      sourceAlias: 'groups',
+      "valueGetter": ":sourceAlias.jsonb -> 'source'",
+      "visibleByDefault": false
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'groups',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    }
+  ],
+  "private": false,
+  sources: [
+    {
+      type: 'db',
+      target: 'src_users_groups',
+      alias: 'groups'
+    }
+  ],
+  "defaultSort": [
+    {
+      "direction": "ASC",
+      "columnName": "id"
+    }
+  ]
+}

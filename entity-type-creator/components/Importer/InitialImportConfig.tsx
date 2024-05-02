@@ -75,9 +75,13 @@ export default function InitialImportConfig({
                 throw new Error('No properties found in schema');
               }
 
+              const flattenedProperties = flattenProperties(properties);
+
               setState((s) => ({
                 ...s,
-                schema: schema as Schema & { properties: NonNullable<Schema['properties']> },
+                schema: { ...schema, properties: flattenedProperties } as Schema & {
+                  properties: NonNullable<Schema['properties']>;
+                },
               }));
             } catch (e) {
               issues.push(`Invalid JSON schema: ${(e as any).message}`);
@@ -95,4 +99,30 @@ export default function InitialImportConfig({
       </DialogActions>
     </>
   );
+}
+
+function flattenProperties(props: Record<string, Schema>) {
+  let changed = false;
+
+  const result: Record<string, Schema> = {};
+
+  for (const [key, prop] of Object.entries(props)) {
+    if (prop.type !== 'object') {
+      result[key] = prop;
+      continue;
+    }
+
+    for (const [innerKey, innerProp] of Object.entries(prop.properties ?? {})) {
+      changed = true;
+      result[`${key}'->'${innerKey}`] = innerProp;
+    }
+  }
+
+  console.log('Flattened', props, 'into', result);
+
+  if (!changed) {
+    return props;
+  } else {
+    return flattenProperties(result);
+  }
 }

@@ -122,7 +122,8 @@ function getSimpleTypeOf(schema: Schema) {
       return 'unknown-ref' as const;
     }
   } else {
-    switch (schema.type) {
+    switch (Array.isArray(schema.type) ? schema.type.join(',') : schema.type) {
+      case 'string,null':
       case 'string':
         if ('format' in schema && schema.format === 'date-time') {
           return 'date' as const;
@@ -195,7 +196,7 @@ function getDataType(schema: Schema, path: string): [DataType, string[]] {
           valueGetter: `( SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
           filterValueGetter: `( SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
           valueFunction: 'lower(:value)',
-          values: getValues(innerDataType),
+          values: getValues(innerDataType, (propSchema as { enum?: string[] }).enum),
         };
       });
       return [{ dataType: DataTypeValue.objectType, properties }, issues];
@@ -207,8 +208,10 @@ function getDataType(schema: Schema, path: string): [DataType, string[]] {
   }
 }
 
-function getValues(dataType: DataType): { value: string; label: string }[] | undefined {
-  if (dataType.dataType === DataTypeValue.booleanType) {
+function getValues(dataType: DataType, enumValues?: string[]): { value: string; label: string }[] | undefined {
+  if (enumValues) {
+    return enumValues.map((v) => ({ value: v, label: sentenceCase(v) }));
+  } else if (dataType.dataType === DataTypeValue.booleanType) {
     return [
       { value: 'true', label: 'True' },
       { value: 'false', label: 'False' },
@@ -247,11 +250,7 @@ function inferColumnFromSchema(
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`);
   issues.push(...dtIssues);
 
-  if (dataType.dataType === DataTypeValue.objectType) {
-    issues.push(
-      'This looks like an object type as the root; you likely will want to flatten this out into multiple columns manually.',
-    );
-  }
+  const fullPath = `->'${prop}'`.replace(/->([^>]+)$/, '->>$1');
 
   return {
     issues,
@@ -266,12 +265,12 @@ function inferColumnFromSchema(
         // if primitive array
         dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
           ? `( SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
-          : `:sourceAlias.jsonb->>'${prop}'`,
+          : `:sourceAlias.jsonb${fullPath}`,
       filterValueGetter:
         dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
           ? `( SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
           : undefined,
-      values: getValues(dataType),
+      values: getValues(dataType, (propSchema as { enum?: string[] }).enum),
     },
   };
 }

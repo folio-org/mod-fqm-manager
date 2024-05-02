@@ -1,0 +1,113 @@
+{
+  id: '85a2b008-af8d-4890-9490-421cabcb7bad',
+  name: 'simple_organization_types',
+  root: true,
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'otype',
+      target: 'src_organization_types',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'version',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'_version'",
+    },
+    {
+      name: 'name',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'status',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'status'",
+      values: [
+        {
+          value: 'Active',
+          label: 'Active',
+        },
+        {
+          value: 'Inactive',
+          label: 'Inactive',
+        },
+      ],
+    },
+  ],
+}

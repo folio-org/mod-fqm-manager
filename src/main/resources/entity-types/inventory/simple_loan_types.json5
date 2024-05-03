@@ -1,0 +1,92 @@
+{
+  id: '04107b49-ad2f-47ad-879f-6737b3018027',
+  name: 'simple_loan_types',
+  root: true,
+  private: false,
+  sources: [
+    {
+      alias: 'lt',
+      type: 'db',
+      target: 'src_inventory_storage_loan_type',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'source',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+  ],
+}

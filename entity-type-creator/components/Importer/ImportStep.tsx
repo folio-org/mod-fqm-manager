@@ -1,13 +1,14 @@
 import { DataType, DataTypeValue, EntityType, EntityTypeField } from '@/types';
 import { json } from '@codemirror/lang-json';
-import { Alert, Autocomplete, Button, DialogActions, DialogContent, Grid, TextField, Typography } from '@mui/material';
+import { PostgreSQL, sql } from '@codemirror/lang-sql';
+import { Alert, Button, DialogActions, DialogContent, Typography } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { sentenceCase, snakeCase } from 'change-case';
 import { Schema } from 'genson-js/dist';
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
-import { END_PAGE, State } from './JSONSchemaImporter';
+import json5 from 'json5';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EntityTypeFieldEditor from '../EntityTypeFieldEditor';
-import { PostgreSQL, sql } from '@codemirror/lang-sql';
+import { END_PAGE, State } from './JSONSchemaImporter';
 
 export default function ImportStep({
   entityType,
@@ -23,28 +24,46 @@ export default function ImportStep({
   const prop = Object.keys(state.schema!.properties)[state.page];
   const propSchema = state.schema!.properties[prop];
 
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+
   const [provisionalIssues, setProvisionalIssues] = useState<string[]>([]);
   const [provisionalColumn, setProvisionalColumn] = useState<EntityTypeField | null>(null);
   const [provisionalTranslations, setProvisionalTranslations] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    console.log(overrides);
     if (prop === undefined) {
       setState((s) => ({ ...s, page: END_PAGE }));
       return;
     }
-    const { issues, column } = inferColumnFromSchema(entityType, state.source, prop, propSchema);
+    if (!(prop in overrides)) {
+      setOverrides({ [prop]: JSON.stringify({ _name: prop, ...propSchema }, null, 2) });
+    }
+    let resolvedSchema = propSchema;
+    if (prop in overrides) {
+      try {
+        resolvedSchema = json5.parse(overrides[prop]);
+      } catch (e) {
+        console.error('Invalid JSON', e);
+      }
+    }
+    const { issues, column } = inferColumnFromSchema(entityType, state.source, prop, resolvedSchema);
     const translations = inferTranslationsFromColumn(column, entityType.name);
     setProvisionalIssues(issues);
     setProvisionalColumn(column ?? null);
     setProvisionalTranslations(translations);
-  }, [prop]);
+  }, [prop, overrides]);
 
   return (
     <>
       <DialogContent>
         <fieldset>
           <legend>Raw schema</legend>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify({ _name: prop, ...propSchema }, null, 2)}</pre>
+          <CodeMirror
+            value={overrides[prop]}
+            onChange={(nv) => setOverrides({ [prop]: nv })}
+            extensions={[json(), EditorView.lineWrapping]}
+          />
         </fieldset>
         {provisionalIssues.length > 0 && (
           <Alert severity="warning">
@@ -130,6 +149,11 @@ function getSimpleTypeOf(schema: Schema) {
         } else if ('format' in schema && schema.format === 'date') {
           return 'date' as const;
         } else if ('format' in schema && schema.format === 'uuid') {
+          return 'uuid' as const;
+        } else if (
+          'pattern' in schema &&
+          schema.pattern === '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+        ) {
           return 'uuid' as const;
         } else {
           return 'string' as const;

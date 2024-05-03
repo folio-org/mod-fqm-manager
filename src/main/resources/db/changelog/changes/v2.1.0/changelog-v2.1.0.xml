@@ -7,7 +7,7 @@
 
   <changeSet id="create_view_vouchers" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "vouchers" schemaName="${tenant_id}_mod_invoice_storage"/>
+      <tableExists tableName="vouchers" schemaName="${tenant_id}_mod_invoice_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -18,7 +18,7 @@
 
   <changeSet id="create_view_voucher_lines" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "voucher_lines" schemaName="${tenant_id}_mod_invoice_storage"/>
+      <tableExists tableName="voucher_lines" schemaName="${tenant_id}_mod_invoice_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -29,7 +29,7 @@
 
   <changeSet id="create_view_ledger" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "ledger" schemaName="${tenant_id}_mod_finance_storage"/>
+      <tableExists tableName="ledger" schemaName="${tenant_id}_mod_finance_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -40,7 +40,7 @@
 
   <changeSet id="create_view_fund" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "fund" schemaName="${tenant_id}_mod_finance_storage"/>
+      <tableExists tableName="fund" schemaName="${tenant_id}_mod_finance_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -51,7 +51,7 @@
 
   <changeSet id="create_view_expense_class" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "expense_class" schemaName="${tenant_id}_mod_finance_storage"/>
+      <tableExists tableName="expense_class" schemaName="${tenant_id}_mod_finance_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -62,7 +62,7 @@
 
   <changeSet id="create_view_fund_type" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "fund_type" schemaName="${tenant_id}_mod_finance_storage"/>
+      <tableExists tableName="fund_type" schemaName="${tenant_id}_mod_finance_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -73,7 +73,7 @@
 
   <changeSet id="create_view_invoices" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "invoices" schemaName="${tenant_id}_mod_invoice_storage"/>
+      <tableExists tableName="invoices" schemaName="${tenant_id}_mod_invoice_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -84,7 +84,7 @@
 
   <changeSet id="create_view_invoice_lines" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "invoice_lines" schemaName="${tenant_id}_mod_invoice_storage"/>
+      <tableExists tableName="invoice_lines" schemaName="${tenant_id}_mod_invoice_storage" />
     </preConditions>
     <createView
       replaceIfExists="true"
@@ -95,12 +95,23 @@
 
   <changeSet id="create_view_config_data" runOnChange="true" author="kjain@ebsco.com">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName = "config_data" schemaName="${tenant_id}_mod_configuration"/>
+      <tableExists tableName="config_data" schemaName="${tenant_id}_mod_configuration" />
     </preConditions>
     <createView
       replaceIfExists="true"
       viewName="src_configuration_config_data">
       SELECT * FROM ${tenant_id}_mod_configuration.config_data
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_loan_type" runOnChange="true" author="novercash@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="loan_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_storage_loan_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.loan_type
     </createView>
   </changeSet>
 

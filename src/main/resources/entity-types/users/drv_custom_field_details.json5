@@ -1,0 +1,345 @@
+{
+  id: '0b70ae1e-a87a-4621-a2d8-143973821e39',
+  name: 'drv_user_custom_field_details',
+  root: false,
+  private: false,
+  sources: [
+    {
+      alias: 'custom_fields',
+      type: 'db',
+      target: 'src_user_custom_fields',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'type',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'type'",
+    },
+    {
+      name: 'order',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'order')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'ref_id',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'refId'",
+    },
+    {
+      name: 'visible',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'visible'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'help_text',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'helpText'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'required',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'required'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'text_field_field_format',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'textField'->>'fieldFormat'",
+    },
+    {
+      name: 'entity_type',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'entityType'",
+    },
+    {
+      name: 'is_repeatable',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'isRepeatable'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'select_field_options_values',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'select_field_option_value_id',
+              property: 'id',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'default',
+              property: 'default',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'default') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'default')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'selectField'->'options'->>'values'",
+    },
+    {
+      name: 'select_field_options_sorting_order',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'selectField'->'options'->>'sortingOrder'",
+    },
+    {
+      name: 'select_field_multi_select',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'selectField'->>'multiSelect'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'checkbox_field_default',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'checkboxField'->>'default'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+  ],
+}

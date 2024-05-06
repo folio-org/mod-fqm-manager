@@ -1,0 +1,229 @@
+{
+  id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+  name: 'drv_service_point_detail',
+  root: false,
+  private: false,
+  sources: [
+    {
+      alias: 'service_point',
+      type: 'db',
+      target: 'src_inventory_service_point',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'code',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+    },
+    {
+      name: 'name',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'pickup_location',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'pickupLocation'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'shelving_lag_time',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'shelvingLagTime')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'discovery_display_name',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'discoveryDisplayName'",
+    },
+    {
+      name: 'hold_shelf_expiry_period_duration',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'holdShelfExpiryPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'hold_shelf_expiry_period_interval_id',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'holdShelfExpiryPeriod'->>'intervalId'",
+    },
+    {
+      name: 'staff_slips',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'staff_slip_id',
+              property: 'id',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'print_by_default',
+              property: 'printByDefault',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'printByDefault') FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'printByDefault')) FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'staffSlips'",
+    },
+    {
+      name: 'description',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+    },
+    {
+      name: 'hold_shelf_closed_library_date_management',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'holdShelfClosedLibraryDateManagement'",
+    },
+  ],
+}

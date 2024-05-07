@@ -220,10 +220,8 @@ function getDataType(schema: Schema, path: string): [DataType, string[]] {
           property: prop,
           dataType: innerDataType,
           queryable: false,
-          valueGetter: `( SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-          filterValueGetter: `( SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-          valueFunction: 'lower(:value)',
           values: getValues(innerDataType, (propSchema as { enum?: string[] }).enum),
+          ...getNestedGetter(prop, path, innerDataType),
         };
       });
       return [{ dataType: DataTypeValue.objectType, properties }, issues];

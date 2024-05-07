@@ -152,7 +152,10 @@ function getSimpleTypeOf(schema: Schema) {
           return 'uuid' as const;
         } else if (
           'pattern' in schema &&
-          schema.pattern === '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+          (schema.pattern === '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$' ||
+            schema.pattern ===
+              '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' ||
+            schema.pattern === '^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$')
         ) {
           return 'uuid' as const;
         } else {
@@ -217,10 +220,8 @@ function getDataType(schema: Schema, path: string): [DataType, string[]] {
           property: prop,
           dataType: innerDataType,
           queryable: false,
-          valueGetter: `( SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-          filterValueGetter: `( SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-          valueFunction: 'lower(:value)',
           values: getValues(innerDataType, (propSchema as { enum?: string[] }).enum),
+          ...getNestedGetter(prop, path, innerDataType),
         };
       });
       return [{ dataType: DataTypeValue.objectType, properties }, issues];
@@ -230,6 +231,26 @@ function getDataType(schema: Schema, path: string): [DataType, string[]] {
       issues.push(`Unknown type: ${resolvedType}`);
       return [{ dataType: DataTypeValue.stringType }, issues];
   }
+}
+
+function getNestedGetter(prop: string, path: string, innerDataType: DataType) {
+  if (innerDataType.dataType === DataTypeValue.integerType) {
+    return {
+      valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
+      valueFunction: '(:value)::integer',
+    };
+  }
+  if (innerDataType.dataType === DataTypeValue.numberType) {
+    return {
+      valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::float) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
+      valueFunction: '(:value)::float',
+    };
+  }
+  return {
+    valueGetter: `( SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
+    filterValueGetter: `( SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
+    valueFunction: 'lower(:value)',
+  };
 }
 
 function getValues(dataType: DataType, enumValues?: string[]): { value: string; label: string }[] | undefined {
@@ -274,8 +295,6 @@ function inferColumnFromSchema(
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`);
   issues.push(...dtIssues);
 
-  const fullPath = `->'${prop}'`.replace(/->([^>]+)$/, '->>$1');
-
   return {
     issues,
     column: {
@@ -285,17 +304,37 @@ function inferColumnFromSchema(
       queryable: ![DataTypeValue.arrayType, DataTypeValue.objectType].includes(dataType.dataType),
       visibleByDefault: false,
       isIdColumn: name === 'id',
-      valueGetter:
-        // if primitive array
-        dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
-          ? `( SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
-          : `:sourceAlias.jsonb${fullPath}`,
-      filterValueGetter:
-        dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType
-          ? `( SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`
-          : undefined,
       values: getValues(dataType, (propSchema as { enum?: string[] }).enum),
+      ...getGetters(prop, dataType),
     },
+  };
+}
+
+function getGetters(prop: string, dataType: DataType) {
+  if (dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType) {
+    return {
+      valueGetter: `( SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`,
+      filterValueGetter: `( SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sourceAlias.jsonb->'${prop}') AS elems)`,
+    };
+  }
+
+  const fullPath = `->'${prop}'`.replace(/->([^>]+)$/, '->>$1');
+
+  if (dataType.dataType === DataTypeValue.integerType) {
+    return {
+      valueGetter: `(:sourceAlias.jsonb${fullPath})::integer`,
+      valueFunction: '(:value)::integer',
+    };
+  }
+  if (dataType.dataType === DataTypeValue.numberType) {
+    return {
+      valueGetter: `(:sourceAlias.jsonb${fullPath})::float`,
+      valueFunction: '(:value)::float',
+    };
+  }
+
+  return {
+    valueGetter: `:sourceAlias.jsonb${fullPath}`,
   };
 }
 

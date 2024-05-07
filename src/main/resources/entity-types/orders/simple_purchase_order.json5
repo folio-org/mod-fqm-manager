@@ -1,0 +1,373 @@
+{
+  id: '48de4796-11a2-44e9-abb7-01e84af87234',
+  name: 'simple_purchase_order',
+  root: true,
+  private: false,
+  sources: [
+    {
+      alias: 'po',
+      type: 'db',
+      target: 'src_purchase_order',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'approved',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'approved'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'approval_date',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'approvalDate'",
+    },
+    {
+      name: 'bill_to',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'billTo'",
+    },
+    {
+      name: 'close_reason',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'closeReason'->>'reason'",
+    },
+    {
+      name: 'close_reason_note',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'closeReason'->>'note'",
+    },
+    {
+      name: 'date_ordered',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'dateOrdered'",
+    },
+    {
+      name: 'manual_po',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'manualPo'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'notes',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems\
+      )",
+    },
+    {
+      name: 'po_number',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poNumber'",
+    },
+    {
+      name: 'po_number_prefix',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poNumberPrefix'",
+    },
+    {
+      name: 'po_number_suffix',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poNumberSuffix'",
+    },
+    {
+      name: 'order_type',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'orderType'",
+      values: [
+        {
+          value: 'One-Time',
+          label: 'One time',
+        },
+        {
+          value: 'Ongoing',
+          label: 'Ongoing',
+        },
+      ],
+    },
+    {
+      name: 're_encumber',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'reEncumber'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'ship_to',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'shipTo'",
+    },
+    {
+      name: 'template',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'template'",
+    },
+    {
+      name: 'vendor',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'vendor'",
+    },
+    {
+      name: 'acq_unit_ids',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+      )",
+    },
+    {
+      name: 'next_pol_number',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'nextPolNumber')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'tags',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'assigned_to',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'assignedTo'",
+    },
+  ],
+}

@@ -1,0 +1,1633 @@
+{
+  id: '58148257-bfb0-4687-8c42-d2833d772f3e',
+  name: 'simple_purchase_order_line',
+  root: true,
+  private: false,
+  sources: [
+    {
+      alias: 'pol',
+      type: 'db',
+      target: 'src_purchase_order_line',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'purchase_order_id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.purchaseorderid',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'edition',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'edition'",
+    },
+    {
+      name: 'checkin_items',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'checkinItems'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'agreement_id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'agreementId'",
+    },
+    {
+      name: 'acquisition_method',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'acquisitionMethod'",
+    },
+    {
+      name: 'automatic_export',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'automaticExport'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'alerts',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+      )",
+    },
+    {
+      name: 'cancellation_restriction',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'cancellationRestriction'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'cancellation_restriction_note',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'cancellationRestrictionNote'",
+    },
+    {
+      name: 'claims',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'claimed',
+              property: 'claimed',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'claimed') FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'claimed')) FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+            {
+              name: 'sent',
+              property: 'sent',
+              dataType: {
+                dataType: 'dateType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'sent') FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'sent')) FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'grace',
+              property: 'grace',
+              dataType: {
+                dataType: 'integerType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((elems.value->>'grace')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
+              valueFunction: '(:value)::integer',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'claims'",
+    },
+    {
+      name: 'claiming_active',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'claimingActive'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'claiming_interval',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'claimingInterval')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'collection',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'collection'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'contributors',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'contributor',
+              property: 'contributor',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'contributor') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributor')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'contributor_name_type_id',
+              property: 'contributorNameTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'contributors'",
+    },
+    {
+      name: 'cost_list_unit_price',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'listUnitPrice')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_list_unit_price_electronic',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'listUnitPriceElectronic')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_currency',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'cost'->>'currency'",
+    },
+    {
+      name: 'cost_additional_cost',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'additionalCost')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_discount',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'discount')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_discount_type',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'cost'->>'discountType'",
+      values: [
+        {
+          value: 'amount',
+          label: 'Amount',
+        },
+        {
+          value: 'percentage',
+          label: 'Percentage',
+        },
+      ],
+    },
+    {
+      name: 'cost_exchange_rate',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'exchangeRate')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_quantity_physical',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'quantityPhysical')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'cost_quantity_electronic',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'quantityElectronic')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'cost_po_line_estimated_price',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'poLineEstimatedPrice')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cost_fyro_adjustment_amount',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'cost'->>'fyroAdjustmentAmount')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'description',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+    },
+    {
+      name: 'details_receiving_note',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'receivingNote'",
+    },
+    {
+      name: 'details_is_acknowledged',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'isAcknowledged'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'details_is_bindary_active',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'isBindaryActive'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'details_subscription_from',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'subscriptionFrom'",
+    },
+    {
+      name: 'details_subscription_interval',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'details'->>'subscriptionInterval')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'details_subscription_to',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'subscriptionTo'",
+    },
+    {
+      name: 'details_product_ids',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'product_id',
+              property: 'productId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'productId') FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'productId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'product_id_type',
+              property: 'productIdType',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'productIdType') FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'productIdType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'qualifier',
+              property: 'qualifier',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'qualifier') FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'qualifier')) FROM jsonb_array_elements(:sourceAlias.jsonb->'details'->'productIds') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'details'->>'productIds'",
+    },
+    {
+      name: 'donor',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'donor'",
+    },
+    {
+      name: 'donor_organization_ids',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+      )",
+    },
+    {
+      name: 'eresource_activated',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'activated'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'eresource_activation_due',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'eresource'->>'activationDue')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'eresource_create_inventory',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'createInventory'",
+      values: [
+        {
+          value: 'Instance, Holding, Item',
+          label: 'Instance holding item',
+        },
+        {
+          value: 'Instance, Holding',
+          label: 'Instance holding',
+        },
+        {
+          value: 'Instance',
+          label: 'Instance',
+        },
+        {
+          value: 'None',
+          label: 'None',
+        },
+      ],
+    },
+    {
+      name: 'eresource_trial',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'trial'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'eresource_expected_activation',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'expectedActivation'",
+    },
+    {
+      name: 'eresource_user_limit',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'eresource'->>'userLimit')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'eresource_access_provider',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'accessProvider'",
+    },
+    {
+      name: 'eresource_material_type',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'materialType'",
+    },
+    {
+      name: 'eresource_resource_url',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'resourceUrl'",
+    },
+    {
+      name: 'eresource_license_code',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->'license'->>'code'",
+    },
+    {
+      name: 'eresource_license_description',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->'license'->>'description'",
+    },
+    {
+      name: 'eresource_license_reference',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'eresource'->'license'->>'reference'",
+    },
+    {
+      name: 'fund_distribution',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'encumbrance',
+              property: 'encumbrance',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_id',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'distribution_type',
+              property: 'distributionType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'amount',
+                  label: 'Amount',
+                },
+                {
+                  value: 'percentage',
+                  label: 'Percentage',
+                },
+              ],
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((elems.value->>'value')::float) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: '(:value)::float',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
+    },
+    {
+      name: 'instance_id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'instanceId'",
+    },
+    {
+      name: 'is_package',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'isPackage'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'locations',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'location_id',
+              property: 'locationId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'locationId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'locationId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'holding_id',
+              property: 'holdingId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'holdingId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'quantity',
+              property: 'quantity',
+              dataType: {
+                dataType: 'integerType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((elems.value->>'quantity')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: '(:value)::integer',
+            },
+            {
+              name: 'quantity_electronic',
+              property: 'quantityElectronic',
+              dataType: {
+                dataType: 'integerType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((elems.value->>'quantityElectronic')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: '(:value)::integer',
+            },
+            {
+              name: 'quantity_physical',
+              property: 'quantityPhysical',
+              dataType: {
+                dataType: 'integerType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((elems.value->>'quantityPhysical')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: '(:value)::integer',
+            },
+            {
+              name: 'tenant_id',
+              property: 'tenantId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'tenantId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'tenantId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'locations'",
+    },
+    {
+      name: 'search_location_ids',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+      )",
+    },
+    {
+      name: 'last_edi_export_date',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'lastEDIExportDate'",
+    },
+    {
+      name: 'order_format',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'orderFormat'",
+      values: [
+        {
+          value: 'Electronic Resource',
+          label: 'Electronic resource',
+        },
+        {
+          value: 'P/E Mix',
+          label: 'P/E mix',
+        },
+        {
+          value: 'Physical Resource',
+          label: 'Physical resource',
+        },
+        {
+          value: 'Other',
+          label: 'Other',
+        },
+      ],
+    },
+    {
+      name: 'package_po_line_id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'packagePoLineId'",
+    },
+    {
+      name: 'payment_status',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentStatus'",
+      values: [
+        {
+          value: 'Awaiting Payment',
+          label: 'Awaiting payment',
+        },
+        {
+          value: 'Cancelled',
+          label: 'Cancelled',
+        },
+        {
+          value: 'Fully Paid',
+          label: 'Fully paid',
+        },
+        {
+          value: 'Partially Paid',
+          label: 'Partially paid',
+        },
+        {
+          value: 'Payment Not Required',
+          label: 'Payment not required',
+        },
+        {
+          value: 'Pending',
+          label: 'Pending',
+        },
+        {
+          value: 'Ongoing',
+          label: 'Ongoing',
+        },
+      ],
+    },
+    {
+      name: 'physical_create_inventory',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'physical'->>'createInventory'",
+      values: [
+        {
+          value: 'Instance, Holding, Item',
+          label: 'Instance, holding, item',
+        },
+        {
+          value: 'Instance, Holding',
+          label: 'Instance, holding',
+        },
+        {
+          value: 'Instance',
+          label: 'Instance',
+        },
+        {
+          value: 'None',
+          label: 'None',
+        },
+      ],
+    },
+    {
+      name: 'physical_material_type',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'physical'->>'materialType'",
+    },
+    {
+      name: 'physical_material_supplier',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'physical'->>'materialSupplier'",
+    },
+    {
+      name: 'physical_expected_receipt_date',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'physical'->>'expectedReceiptDate'",
+    },
+    {
+      name: 'physical_receipt_due',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'physical'->>'receiptDue'",
+    },
+    {
+      name: 'physical_volumes',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+      )",
+    },
+    {
+      name: 'po_line_description',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poLineDescription'",
+    },
+    {
+      name: 'po_line_number',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poLineNumber'",
+    },
+    {
+      name: 'publication_date',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'publicationDate'",
+    },
+    {
+      name: 'publisher',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'publisher'",
+    },
+    {
+      name: 'receipt_date',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'receiptDate'",
+    },
+    {
+      name: 'receipt_status',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'receiptStatus'",
+      values: [
+        {
+          value: 'Awaiting Receipt',
+          label: 'Awaiting receipt',
+        },
+        {
+          value: 'Cancelled',
+          label: 'Cancelled',
+        },
+        {
+          value: 'Fully Received',
+          label: 'Fully received',
+        },
+        {
+          value: 'Partially Received',
+          label: 'Partially received',
+        },
+        {
+          value: 'Pending',
+          label: 'Pending',
+        },
+        {
+          value: 'Receipt Not Required',
+          label: 'Receipt not required',
+        },
+        {
+          value: 'Ongoing',
+          label: 'Ongoing',
+        },
+      ],
+    },
+    {
+      name: 'renewal_note',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'renewalNote'",
+    },
+    {
+      name: 'reporting_codes',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+      )",
+    },
+    {
+      name: 'requester',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'requester'",
+    },
+    {
+      name: 'rush',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'rush'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'selector',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'selector'",
+    },
+    {
+      name: 'source',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+      values: [
+        {
+          value: 'User',
+          label: 'User',
+        },
+        {
+          value: 'API',
+          label: 'API',
+        },
+        {
+          value: 'EDI',
+          label: 'EDI',
+        },
+        {
+          value: 'MARC',
+          label: 'MARC',
+        },
+        {
+          value: 'EBSCONET',
+          label: 'EBSCONET',
+        },
+      ],
+    },
+    {
+      name: 'tags',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+    },
+    {
+      name: 'title_or_package',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'titleOrPackage'",
+    },
+    {
+      name: 'vendor_detail_instructions',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'vendorDetail'->>'instructions'",
+    },
+    {
+      name: 'vendor_detail_note_from_vendor',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'vendorDetail'->>'noteFromVendor'",
+    },
+    {
+      name: 'vendor_detail_vendor_account',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'vendorDetail'->>'vendorAccount'",
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'vendor_detail_reference_numbers',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'ref_number',
+              property: 'refNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'refNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'refNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'ref_number_type',
+              property: 'refNumberType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'refNumberType') FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'refNumberType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'Vendor continuation reference number',
+                  label: 'Vendor continuation reference number',
+                },
+                {
+                  value: 'Vendor order reference number',
+                  label: 'Vendor order reference number',
+                },
+                {
+                  value: 'Vendor subscription reference number',
+                  label: 'Vendor subscription reference number',
+                },
+                {
+                  value: 'Vendor internal number',
+                  label: 'Vendor internal number',
+                },
+                {
+                  value: 'Vendor title number',
+                  label: 'Vendor title number',
+                },
+              ],
+            },
+            {
+              name: 'vendor_details_source',
+              property: 'vendorDetailsSource',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'vendorDetailsSource') FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'vendorDetailsSource')) FROM jsonb_array_elements(:sourceAlias.jsonb->'vendorDetail'->'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'OrderLine',
+                  label: 'Order line',
+                },
+                {
+                  value: 'InvoiceLine',
+                  label: 'Invoice line',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'vendorDetail'->>'referenceNumbers'",
+    },
+  ],
+}

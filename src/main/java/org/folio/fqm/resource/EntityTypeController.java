@@ -1,6 +1,7 @@
 package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class EntityTypeController implements org.folio.fqm.resource.EntityTypesApi, org.folio.querytool.rest.resource.EntityTypesApi {
   private final EntityTypeService entityTypeService;
 
+  @EntityTypePermissionsRequired
   @Override
   public ResponseEntity<EntityType> getEntityType(UUID entityTypeId) {
     return entityTypeService.getEntityTypeDefinition(entityTypeId)
@@ -30,9 +32,11 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @Override
   public ResponseEntity<List<EntityTypeSummary>> getEntityTypeSummary(List<UUID> entityTypeIds) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
+    // Permissions are handled in the service layer
     return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet));
   }
 
+  @EntityTypePermissionsRequired
   @Override
   public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String fieldName, String search) {
     return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));

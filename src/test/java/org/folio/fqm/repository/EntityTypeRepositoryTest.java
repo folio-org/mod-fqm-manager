@@ -1,7 +1,13 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
-import org.folio.querytool.domain.dto.*;
+import org.folio.querytool.domain.dto.BooleanType;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.RangedUUIDType;
+import org.folio.querytool.domain.dto.StringType;
+import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -39,8 +45,8 @@ class EntityTypeRepositoryTest {
   @Test
   void shouldFetchAllPublicEntityTypes() {
     List<RawEntityTypeSummary> expectedSummary = List.of(
-      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL),
-      new RawEntityTypeSummary(ENTITY_TYPE_02_ID, ENTITY_TYPE_02_LABEL)
+      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL, List.of()),
+      new RawEntityTypeSummary(ENTITY_TYPE_02_ID, ENTITY_TYPE_02_LABEL, List.of())
     );
 
     List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(Set.of());
@@ -51,7 +57,7 @@ class EntityTypeRepositoryTest {
   void shouldFetchEntityTypesOfGivenIds() {
     Set<UUID> ids = Set.of(ENTITY_TYPE_01_ID);
     List<RawEntityTypeSummary> expectedSummary = List.of(
-      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL));
+      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL, List.of()));
 
     List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");

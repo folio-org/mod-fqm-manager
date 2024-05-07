@@ -3,10 +3,19 @@ package org.folio.fqm;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.restassured.RestAssured;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.folio.spring.integration.XOkapiHeaders;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -17,6 +26,8 @@ import org.testcontainers.junit.jupiter.Container;
 import javax.sql.DataSource;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.greaterThan;
@@ -28,6 +39,12 @@ public class IntegrationTestBase {
   private static final Network network = Network.newNetwork();
 
   public static final String TENANT_ID = "beeuni";
+
+  protected static final MockWebServer mokapi = new MockWebServer();
+
+  static {
+    Testcontainers.exposeHostPorts(mokapi.getPort());
+  }
 
   @Container
   private static final PostgreSQLContainer<?> postgres =
@@ -50,12 +67,16 @@ public class IntegrationTestBase {
       .withEnv("DB_USERNAME", "myusername")
       .withEnv("DB_PASSWORD", "mypassword")
       .withEnv("DB_DATABASE", "mypostgres")
+      .withEnv("okapi_url", "http://host.testcontainers.internal:" + mokapi.getPort())
       .withStartupTimeout(Duration.ofMinutes(3))
       .dependsOn(postgres);
+
 
   @BeforeAll
   public static void beforeAll() {
     // General integration test config
+    mokapi.setDispatcher(new MockOkapiDispatcher());
+
     RestAssured.reset();
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     RestAssured.baseURI = "http://" + module.getHost() + ":" + module.getFirstMappedPort();
@@ -100,7 +121,7 @@ public class IntegrationTestBase {
 
   private static void postTenant(String body) {
     given()
-      .header("X-Okapi-Tenant", TENANT_ID)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType("application/json")
       .body(body)
       .when()
@@ -111,7 +132,7 @@ public class IntegrationTestBase {
 
   private static void smokeTest() {
     given()
-      .header("X-Okapi-Tenant", TENANT_ID)
+      .headers(getOkapiHeaders())
       .contentType("application/json")
       .when()
       .get("/entity-types")
@@ -120,4 +141,26 @@ public class IntegrationTestBase {
       .body("$.size()", greaterThan(0));
   }
 
+  protected static Map<String, String> getOkapiHeaders() {
+    return Map.of(
+      XOkapiHeaders.TENANT, TENANT_ID,
+      XOkapiHeaders.USER_ID, UUID.randomUUID().toString(),
+      XOkapiHeaders.URL, "http://host.testcontainers.internal:" + mokapi.getPort());
+  }
+
+  private static class MockOkapiDispatcher extends Dispatcher {
+    @NotNull
+    @Override
+    public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) {
+      if (recordedRequest.getPath().matches("/perms/users/[-0-9a-f]+/permissions\\?expanded=true&indexField=userId")) {
+        return new MockResponse().setBody("""
+          {
+            "permissionNames": ["fake-permission"],
+            "totalRecords": 0
+          }
+          """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+      }
+      throw new RuntimeException("Unexpected request: " + recordedRequest.getPath());
+    }
+  }
 }

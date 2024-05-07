@@ -6,7 +6,6 @@ import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.trueCondition;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
@@ -72,18 +71,21 @@ public class EntityTypeRepository {
 
   public List<RawEntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
     log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
-    Field<UUID> idField = field(ID_FIELD_NAME, UUID.class);
-    Field<String> nameField = field("definition ->> 'name'", String.class);
+    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
+
     Field<Boolean> privateEntityField = field("(definition ->> 'private')::boolean", Boolean.class);
 
     Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
     Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
     return readerJooqContext
-      .select(idField, nameField)
+      .select(definitionField)
       .from(table(TABLE_NAME))
       .where(entityTypeIdCondition.and(publicEntityCondition))
-      .fetch()
-      .map(row -> new RawEntityTypeSummary(row.get(idField), row.get(nameField)));
+      .fetch(definitionField)
+      .stream()
+      .map(this::unmarshallEntityType)
+      .map(entityType -> new RawEntityTypeSummary(UUID.fromString(entityType.getId()), entityType.getName(), entityType.getRequiredPermissions()))
+      .toList();
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {
@@ -155,5 +157,5 @@ public class EntityTypeRepository {
     return objectMapper.readValue(str, EntityType.class);
   }
 
-  public record RawEntityTypeSummary(UUID id, String name) {}
+  public record RawEntityTypeSummary(UUID id, String name, List<String> requiredPermissions) {}
 }

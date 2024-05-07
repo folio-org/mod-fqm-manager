@@ -48,6 +48,7 @@ public class EntityTypeService {
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
   private final SimpleHttpClient fieldValueClient;
+  private final PermissionsService permissionsService;
 
   /**
    * Returns the list of all entity types.
@@ -56,9 +57,11 @@ public class EntityTypeService {
    */
   @Transactional(readOnly = true)
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
+    Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
       .getEntityTypeSummary(entityTypeIds)
       .stream()
+      .filter(entityTypeSummary -> userPermissions.containsAll(entityTypeSummary.requiredPermissions()))
       .map(rawEntityTypeSummary ->
         new EntityTypeSummary()
           .id(rawEntityTypeSummary.id())

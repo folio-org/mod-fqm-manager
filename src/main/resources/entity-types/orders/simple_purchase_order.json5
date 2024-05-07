@@ -308,7 +308,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'nextPolNumber'",
+      valueGetter: "(:sourceAlias.jsonb->>'nextPolNumber')::integer",
+      valueFunction: '(:value)::integer',
     },
     {
       name: 'tags',

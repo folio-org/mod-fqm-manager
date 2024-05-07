@@ -237,13 +237,13 @@ function getNestedGetter(prop: string, path: string, innerDataType: DataType) {
   if (innerDataType.dataType === DataTypeValue.integerType) {
     return {
       valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-      valueFunction: ':value::integer',
+      valueFunction: '(:value)::integer',
     };
   }
   if (innerDataType.dataType === DataTypeValue.numberType) {
     return {
       valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::float) FROM jsonb_array_elements(:sourceAlias.jsonb${path}) AS elems)`,
-      valueFunction: ':value::float',
+      valueFunction: '(:value)::float',
     };
   }
   return {

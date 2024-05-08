@@ -1,453 +1,7 @@
 {
   id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
   name: 'drv_simple_user_details',
-  columns: [
-    {
-      name: 'user_active',
-      values: [
-        {
-          label: 'True',
-          value: 'true',
-        },
-        {
-          label: 'False',
-          value: 'false',
-        },
-      ],
-      dataType: {
-        dataType: 'booleanType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb ->> 'active'",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
-      visibleByDefault: true,
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'active'::text))",
-    },
-    {
-      name: 'user_address_ids',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressTypeId'::text) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressTypeId'::text)) FILTER (WHERE (record.value ->> 'addressTypeId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_address_line1',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine1'::text) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine1'::text)) FILTER (WHERE (record.value ->> 'addressLine1'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_address_line2',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'addressLine2'::text) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'addressLine2'::text)) FILTER (WHERE (record.value ->> 'addressLine2'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-
-    {
-      name: 'user_barcode',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb ->> 'barcode'",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
-      visibleByDefault: true,
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'barcode'::text))",
-    },
-    {
-      name: 'user_cities',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'city'::text) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'city'::text)) FILTER (WHERE (record.value ->> 'city'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_country_ids',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'countryId'::text) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'countryId'::text)) FILTER (WHERE (record.value ->> 'countryId'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_created_date',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'user_date_of_birth',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'dateOfBirth'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'user_department_ids',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value::text) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value::text)) FILTER (WHERE (record.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value))",
-    },
-
-    {
-      name: 'user_email',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'email'",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
-      visibleByDefault: false,
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'email'::text))",
-    },
-    {
-      name: 'user_enrollment_date',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb ->> 'enrollmentDate'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'user_expiration_date',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb ->> 'expirationDate'",
-      valueFunction: '"left"(:value, 600)',
-      visibleByDefault: false,
-      filterValueGetter: '"left"(:sourceAlias.jsonb ->> \'expirationDate\'::text, 600)',
-    },
-    {
-      name: 'user_external_system_id',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonbb ->> 'externalSystemId'",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
-      visibleByDefault: false,
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'externalSystemId'::text))",
-    },
-    {
-      name: 'user_first_name',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'firstName'",
-      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
-      visibleByDefault: true,
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
-    },
-    {
-      name: 'id',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      queryable: true,
-      isIdColumn: true,
-      sourceAlias: 'user',
-      valueGetter: ':sourceAlias.id',
-      visibleByDefault: true,
-    },
-    {
-      name: 'user_last_name',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'lastName'",
-      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
-      visibleByDefault: true,
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
-    },
-    {
-      name: 'user_middle_name',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'middleName'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'user_mobile_phone',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'mobilePhone'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'user_phone',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'phone'",
-      visibleByDefault: true,
-    },
-    {
-      name: 'user_postal_codes',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'postalCode'::text) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'postalCode'::text)) FILTER (WHERE (record.value ->> 'postalCode'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_preferred_first_name',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'personal' ->> 'preferredFirstName'",
-      valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)',
-      visibleByDefault: true,
-      filterValueGetter: "${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
-    },
-    {
-      name: 'user_primary_address',
-      dataType: {
-        dataType: 'booleanType',
-      },
-      values: [
-        {
-          value: 'true',
-          label: 'True',
-        },
-        {
-          value: 'false',
-          label: 'False',
-        },
-      ],
-      queryable: true,
-      visibleByDefault: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(record.value ->> 'primaryAddress'::text) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'primaryAddress'::text)) FILTER (WHERE (record.value ->> 'primaryAddress'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'user_regions',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: false,
-      valueGetter: "( SELECT array_agg(record.value ->> 'region'::text) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      sourceAlias: 'user',
-      filterValueGetter: "( SELECT array_agg(lower(record.value ->> 'region'::text)) FILTER (WHERE (record.value ->> 'region'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal'::text) -> 'addresses'::text) record(value))",
-    },
-    {
-      name: 'user_updated_date',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
-      visibleByDefault: false,
-    },
-    {
-      name: 'username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      valueGetter: ":sourceAlias.jsonb ->> 'username'",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
-      visibleByDefault: true,
-      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",
-    },
-    {
-      name: 'user_patron_group_id',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'patronGroup'",
-    },
-    {
-      name: 'created_date',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'createdDate'",
-    },
-    {
-      name: 'updated_date',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'updatedDate'",
-    },
-    {
-      name: 'meta',
-      dataType: {
-        dataType: 'objectType',
-      },
-      queryable: false,
-      visibleByDefault: false,
-      sourceAlias: 'user',
-      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'meta'::text) acq_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'meta'::text) acq_id(value))",
-      valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'proxy_for',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(pf.value::text) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'proxyFor'::text) pf (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(pf.value::text)) FILTER (\n      WHERE\n        (pf.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'proxyFor'::text) pf (value)\n)",
-      valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'type',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'type'",
-    },
-    {
-      name: 'tag_list',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      queryable: false,
-      sourceAlias: 'user',
-      visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'user_preferred_contact_type_id',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'personal'->> 'preferredContactTypeId'",
-    },
-    {
-      name: 'profile_picture_link',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      sourceAlias: 'user',
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'personal'->> 'profilePictureLink'",
-    },
-  ],
+  root: false,
   private: false,
   sources: [
     {
@@ -456,10 +10,486 @@
       alias: 'user',
     },
   ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'active',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'active'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'user_created_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'user_updated_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'email',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'email'",
+    },
+    {
+      name: 'last_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'lastName'",
+    },
+    {
+      name: 'first_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'firstName'",
+    },
+    {
+      name: 'preferred_contact_type_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'preferredContactTypeId'",
+    },
+    {
+      name: 'phone',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'phone'",
+    },
+    {
+      name: 'addresses',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'address_id',
+              property: 'id',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'city',
+              property: 'city',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'city') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'city')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'region',
+              property: 'region',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'region') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'region')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'country_id',
+              property: 'countryId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'countryId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'countryId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'postal_code',
+              property: 'postalCode',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'postalCode') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'postalCode')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'address_line1',
+              property: 'addressLine1',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'addressLine1') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine1')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'address_type_id',
+              property: 'addressTypeId',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'addressTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'primary_address',
+              property: 'primaryAddress',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+              valueGetter: "( SELECT array_agg(elems.value->>'primaryAddress') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'primaryAddress')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'address_line2',
+              property: 'addressLine2',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'addressLine2') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine2')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'addresses'",
+    },
+    {
+      name: 'middle_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'middleName'",
+    },
+    {
+      name: 'date_of_birth',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'dateOfBirth'",
+    },
+    {
+      name: 'mobile_phone',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'mobilePhone'",
+    },
+    {
+      name: 'preferred_first_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'preferredFirstName'",
+    },
+    {
+      name: 'username',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'username'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'createdDate'",
+    },
+    {
+      name: 'patron_group',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'patronGroup'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'updatedDate'",
+    },
+    {
+      name: 'expiration_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'expirationDate'",
+    },
+    {
+      name: 'barcode',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'barcode'",
+    },
+    {
+      name: 'external_system_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'externalSystemId'",
+    },
+    {
+      name: 'type',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'type'",
+    },
+    {
+      name: 'tags_tag_list',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+    },
+    {
+      name: 'proxy_for',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'proxyFor') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'proxyFor') AS elems\
+      )",
+    },
+    {
+      name: 'departments',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'departments') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements(:sourceAlias.jsonb->'departments') AS elems\
+      )",
+    },
+    {
+      name: 'enrollment_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'enrollmentDate'",
+    },
+  ],
   defaultSort: [
     {
-      direction: 'ASC',
       columnName: 'id',
+      direction: 'ASC',
     },
   ],
 }

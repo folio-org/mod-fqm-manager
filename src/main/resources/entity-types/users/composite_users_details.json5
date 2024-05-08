@@ -1,0 +1,29 @@
+{
+  id: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf',
+  name: 'composite_user_details',
+  private: false,
+  sources: [
+    {
+      alias: 'users',
+      type: 'entity-type',
+      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+      useIdColumns: true,
+    },
+    {
+      alias: 'groups',
+      type: 'entity-type',
+      id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      join: {
+        type: 'left join',
+        joinTo: 'users',
+        condition: "(:that.jsonb ->> 'patronGroup')::uuid = :this.id",
+      },
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'users.id',
+      direction: 'ASC',
+    },
+  ],
+}

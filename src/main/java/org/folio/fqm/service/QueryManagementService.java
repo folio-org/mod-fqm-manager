@@ -202,6 +202,7 @@ public class QueryManagementService {
           fields.add(colName);
         }
       });
+
     return resultSetService.getResultSet(entityTypeId, fields, ids);
   }
 

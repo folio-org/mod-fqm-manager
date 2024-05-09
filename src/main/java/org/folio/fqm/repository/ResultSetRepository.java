@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 import java.sql.SQLException;
@@ -85,15 +86,28 @@ public class ResultSetRepository {
     }
 
     String fromClause = entityTypeFlatteningService.getJoinClause(entityType);
-
-    // Have to get FROM clause
-    var result = jooqContext.select(fieldsToSelect)
+    var query = jooqContext.select(fieldsToSelect)
       .from(fromClause)
-      .where(whereClause)
-      .fetch();
+      .where(whereClause);
+
+    Result<Record> result;
+    if (isEmpty(entityType.getGroupByFields())) {
+      result = query.fetch();
+    } else {
+      Field<?>[] groupByFields = entityType
+        .getColumns()
+        .stream()
+        .filter(col -> entityType.getGroupByFields().contains(col.getName()))
+        .map(org.folio.querytool.domain.dto.Field::getValueGetter)
+        .map(DSL::field)
+        .toArray(Field[]::new);
+      result = query.groupBy(groupByFields).fetch();
+    }
+
     return recordToMap(result);
   }
 
+  // TODO: update for GROUP BY functionality
   public List<Map<String, Object>> getResultSet(UUID entityTypeId, Fql fql, List<String> fields, List<String> afterId, int limit) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
@@ -111,7 +125,6 @@ public class ResultSetRepository {
 
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     // TODO: might want to put next 5 lines in its own method in EntityTypeFlatteningService
-    //   also is it even necessary?
     String finalWhereClause = condition.toString();
     for (EntityTypeSource source : entityType.getSources()) {
       String toReplace = ":" + source.getAlias();
@@ -119,7 +132,6 @@ public class ResultSetRepository {
       finalWhereClause = finalWhereClause.replace(toReplace, alias);
     }
     var fieldsToSelect = getSqlFields(entityType, fields);
-    String idFieldWithAlias = "";
     String idColumnName = entityType
       .getColumns()
       .stream()
@@ -144,6 +156,7 @@ public class ResultSetRepository {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldSet.contains(col.getName()))
+      .filter(col -> !Boolean.TRUE.equals(col.getQueryOnly()))
       .map(col -> SqlFieldIdentificationUtils.getSqlResultsField(col).as(col.getName()))
       .toList();
   }

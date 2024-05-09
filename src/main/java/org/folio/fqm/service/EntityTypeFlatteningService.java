@@ -43,6 +43,7 @@ public class EntityTypeFlatteningService {
       .customFieldEntityTypeId(originalEntityType.getCustomFieldEntityTypeId())
       .labelAlias(originalEntityType.getLabelAlias())
       .root(originalEntityType.getRoot())
+      .groupByFields(originalEntityType.getGroupByFields())
       .sourceView(originalEntityType.getSourceView()) // Possibly unneeded
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor()); // Possibly unneeded
 
@@ -158,10 +159,15 @@ public class EntityTypeFlatteningService {
   }
 
   private void updateOtherSources(String oldSourceName, String newSourceName, List<EntityTypeSource> otherSources) {
+    String oldAlias = oldSourceName + ".";
     for (EntityTypeSource source : otherSources) {
       if (source.getJoin() != null && oldSourceName.equals(source.getJoin().getJoinTo())) {
         source.getJoin().joinTo(newSourceName);
       }
+      if (source.getTarget().contains(oldAlias)) {
+        source.target(source.getTarget().replace(oldAlias, "\"" + newSourceName + "\"."));
+      }
+
     }
   }
 
@@ -180,7 +186,7 @@ public class EntityTypeFlatteningService {
 
     StringBuilder newAlias = outerSource != null ? new StringBuilder(outerSource.getAlias()) : new StringBuilder();
     if (keepOriginalAlias) {
-      newAlias.append("_").append(nestedAlias);
+      newAlias.append(".").append(nestedAlias);
     }
     log.info("Updating source/columns for db source for original entity type " + originalEntityType.getName());
     for (EntityTypeColumn oldColumn : originalEntityType.getColumns()) {

@@ -15,7 +15,9 @@ import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
+import org.jooq.ResultQuery;
 import org.jooq.SortField;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -109,17 +111,33 @@ public class IdStreamer {
       String alias = "\"" + source.getAlias() + "\"";
       finalWhereClause = finalWhereClause.replace(toReplace, alias);
     }
-    System.out.println("Final where clause: " + finalWhereClause);
-    try (
-      // NEW WAY
-      Cursor<Record1<String[]>> idsCursor = jooqContext.dsl()
+    ResultQuery<Record1<String[]>> query = null;
+    if (!isEmpty(entityType.getGroupByFields())) {
+      Field<?>[] groupByFields = entityType
+        .getColumns()
+        .stream()
+        .filter(col -> entityType.getGroupByFields().contains(col.getName()))
+        .map(col -> col.getFilterValueGetter() == null ? col.getValueGetter() : col.getFilterValueGetter())
+        .map(DSL::field)
+        .toArray(Field[]::new);
+      query = jooqContext.dsl()
+        .select(field(idValueGetter))
+        .from(finalJoinClause)
+        .where(finalWhereClause)
+        .groupBy(groupByFields)
+        .orderBy(getSortFields(entityType, sortResults))
+        .fetchSize(batchSize);
+    } else {
+      query = jooqContext.dsl()
         .select(field(idValueGetter))
         .from(finalJoinClause)
         .where(finalWhereClause)
         .orderBy(getSortFields(entityType, sortResults))
-        .fetchSize(batchSize)
-        .fetchLazy();
+        .fetchSize(batchSize);
+    }
 
+    try (
+      Cursor<Record1<String[]>> idsCursor = query.fetchLazy();
       Stream<String[]> idStream = idsCursor
         .stream()
         .map(row -> row.getValue(idValueGetter));

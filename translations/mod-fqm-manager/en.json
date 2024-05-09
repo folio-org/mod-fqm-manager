@@ -866,6 +866,7 @@
   "entityType.drv_simple_user_details.created_by_user_id": "Created by user ID",
   "entityType.drv_simple_user_details.created_date": "Created date",
   "entityType.drv_simple_user_details.date_of_birth": "Date of birth",
+  "entityType.drv_simple_user_details.department_ids": "Department IDs",
   "entityType.drv_simple_user_details.departments": "Departments",
   "entityType.drv_simple_user_details.email": "Email",
   "entityType.drv_simple_user_details.enrollment_date": "Enrollment date",

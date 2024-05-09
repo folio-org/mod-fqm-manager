@@ -1,0 +1,102 @@
+{
+  id: 'd6729885-f2fb-4dc7-b7d0-a865a7f461e4',
+  name: 'composite_loan_details',
+  sources: [
+    {
+      alias: 'loans',
+      type: 'entity-type',
+      id: '00349126-c923-4045-a29f-3b6db4c6bea9',
+      useIdColumns: true,
+    },
+    {
+      alias: 'lpolicy',
+      type: 'entity-type',
+      id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      join: {
+        type: 'left join',
+        joinTo: 'loans',
+        condition: "(:that.jsonb ->> 'loanPolicyId')::uuid = :this.id",
+      },
+    },
+    {
+      alias: 'cospi',
+      type: 'entity-type',
+      id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      join: {
+        condition: "(:that.jsonb ->> 'checkoutServicePointId')::uuid = :this.id",
+        type: 'left join',
+        joinTo: 'loans',
+      },
+    },
+    {
+      alias: 'cispi',
+      type: 'entity-type',
+      id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      join: {
+        joinTo: 'loans',
+        condition: "(:that.jsonb ->> 'checkinServicePointId')::uuid = :this.id",
+        type: 'left join',
+      },
+    },
+    {
+      alias: 'items',
+      type: 'entity-type',
+      id: '372e025a-9444-473a-9ffd-fa0f63db1674',
+      join: {
+        condition: "(:that.jsonb ->> 'itemId')::uuid = :this.id",
+        joinTo: 'loans',
+        type: 'left join',
+      },
+    },
+    {
+      alias: 'mtypes',
+      type: 'entity-type',
+      id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      join: {
+        type: 'left join',
+        joinTo: 'items',
+        condition: "(:that.jsonb ->> 'materialTypeId')::uuid = :this.id",
+      },
+    },
+    {
+      alias: 'users',
+      type: 'entity-type',
+      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+      join: {
+        type: 'left join',
+        joinTo: 'loans',
+        condition: "(:that.jsonb ->> 'userId')::uuid = :this.id",
+      },
+    },
+    {
+      alias: 'groups',
+      type: 'entity-type',
+      id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      join: {
+        type: 'left join',
+        joinTo: 'users',
+        condition: "(:that.jsonb ->> 'patronGroup')::uuid = :this.id",
+      },
+    },
+    {
+      alias: 'holdings',
+      type: 'entity-type',
+      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      join: {
+        type: 'left join',
+        joinTo: 'items',
+        condition: "(:that.jsonb ->> 'holdingsRecordId')::uuid = :this.id",
+      },
+    },
+    {
+      alias: 'instance',
+      type: 'entity-type',
+      id: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      join: {
+        type: 'left join',
+        joinTo: 'holdings',
+        condition: "(:that.jsonb ->> 'instanceid')::uuid = :this.id",
+      },
+    },
+  ],
+}

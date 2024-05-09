@@ -450,7 +450,7 @@
       )",
     },
     {
-      name: 'departments',
+      name: 'department_ids',
       sourceAlias: 'user',
       dataType: {
         dataType: 'arrayType',
@@ -473,6 +473,31 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'departments') AS elems\
       )",
+    },
+    {
+      name: "departments",
+      source: {
+        columnName: "departments",
+        entityTypeId: "bb058933-cd06-4539-bd3a-6f248ff98ee2"
+      },
+      dataType: {
+        dataType: "arrayType",
+        itemDataType: {
+          dataType: "stringType"
+        }
+      },
+      sourceAlias: "user",
+      queryable: false,
+      idColumnName: "user_department_ids",
+      valueSourceApi: {
+        path: "departments",
+        labelJsonPath: "$.departments.*.name",
+        valueJsonPath: "$.departments.*.id"
+      },
+      visibleByDefault: false,
+      valueFunction: "lower(:value)",
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'departments'::text)) record(value) JOIN src_users_departments a ON (record.value::text) = a.id::text)"
     },
     {
       name: 'enrollment_date',

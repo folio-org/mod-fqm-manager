@@ -305,7 +305,7 @@
     "entityType.drv_organization_details.subscription_interval": "Interval předplatného organizace",
     "entityType.drv_organization_details.expected_invoice_interval": "Očekávaný interval fakturace organizace",
     "entityType.drv_organization_details.expected_receipt_interval": "Očekávaný interval příjmu organizace",
-    "entityType.drv_organization_details.renewal_activation_interval": "Interval aktivace obnovení organizace",
+    "entityType.drv_organization_details.renewal_activation_interval": "Interval prodloužení aktivace organizace",
     "entityType.drv_organization_details.expected_activation_interval": "Očekávaný interval aktivace organizace",
     "entityType.drv_organization_details.vendor_currencies": "Měny prodejců organizace",
     "entityType.drv_organization_details.tax_id": "DIČ organizace",

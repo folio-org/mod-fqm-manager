@@ -24,6 +24,7 @@ import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.QueryDetailsRepository;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.LocalizationService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -57,7 +58,8 @@ class IdStreamerTest {
       context,
       new ObjectMapper()
     );
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
+    LocalizationService localizationService = mock(LocalizationService.class);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     this.idStreamer =
       new IdStreamer(
 
@@ -132,12 +134,13 @@ class IdStreamerTest {
     Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {
     };
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
+    LocalizationService localizationService = mock(LocalizationService.class);
 
 
     when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());
 
-    entityTypeFlatteningService = new EntityTypeFlatteningService(mockRepository, new ObjectMapper());
+    entityTypeFlatteningService = new EntityTypeFlatteningService(mockRepository, new ObjectMapper(), localizationService);
 
     IdStreamer idStreamerWithMockRepo = new IdStreamer(null,null, entityTypeFlatteningService);
 

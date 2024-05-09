@@ -27,6 +27,7 @@ import java.util.UUID;
 public class EntityTypeFlatteningService {
   private final EntityTypeRepository entityTypeRepository;
   private final ObjectMapper objectMapper;
+  private final LocalizationService localizationService;
 
   // TODO: clean up
   public Optional<EntityType> getFlattenedEntityType(UUID entityTypeId, boolean doFinalRenames) {
@@ -81,7 +82,7 @@ public class EntityTypeFlatteningService {
       List<EntityTypeColumn> convertedColumns = finalColumnConversion(flattenedEntityType);
       flattenedEntityType.columns(convertedColumns);
     }
-    return Optional.of(flattenedEntityType);
+    return Optional.of(localizationService.localizeEntityType(flattenedEntityType));
   }
 
   public String getJoinClause(EntityType flattenedEntityType) {
@@ -188,7 +189,7 @@ public class EntityTypeFlatteningService {
     if (keepOriginalAlias) {
       newAlias.append(".").append(nestedAlias);
     }
-    log.info("Updating source/columns for db source for original entity type " + originalEntityType.getName());
+
     for (EntityTypeColumn oldColumn : originalEntityType.getColumns()) {
       EntityTypeColumn column = copyColumn(oldColumn);
       if (column.getSourceAlias().equals(nestedAlias)) {

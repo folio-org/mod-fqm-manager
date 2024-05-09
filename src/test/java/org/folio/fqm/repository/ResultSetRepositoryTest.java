@@ -4,6 +4,7 @@ import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.LocalizationService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -32,9 +34,10 @@ class ResultSetRepositoryTest {
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
+    LocalizationService localizationService = mock(LocalizationService.class);
 
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
   }
 

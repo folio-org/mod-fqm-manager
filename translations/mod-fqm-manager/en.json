@@ -1,4 +1,5 @@
 {
+  "entityType.composite_item_details": "Composite item details",
   "entityType.composite_loan_details": "Composite loan details",
   "entityType.composite_user_details": "Composite user details",
   "entityType.drv_acquisitions_unit_details": "Acquisitions unit",

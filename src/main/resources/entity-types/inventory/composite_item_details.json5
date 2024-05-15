@@ -9,7 +9,7 @@
       useIdColumns: true,
     },
     {
-      alias: 'locations',
+      alias: 'effective_location',
       type: 'entity-type',
       join: {
         type: 'left join',
@@ -43,7 +43,7 @@
       type: 'entity-type',
       join: {
         type: 'left join',
-        joinTo: 'locations',
+        joinTo: 'effective_location',
         condition: "(:that.jsonb ->> 'libraryid')::uuid =:this.id",
       },
       id: '32f58888-1a7b-4840-98f8-cc69ca93fc67',

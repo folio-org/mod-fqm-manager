@@ -90,22 +90,11 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-//    return entityTypeRepository
-//      .getEntityTypeDefinition(entityTypeId)
-//      .map(localizationService::localizeEntityType)
-//      .map(entityType -> {
-//        sortColumnsInEntityType(entityType);
-//        return entityType;
-//      });
-
-//    return entityTypeRepository.getCompositeEntityTypeDefinition(entityTypeId)
-//      .map(localizationService::localizeEntityType)
-//      .map(entityType -> {
-//        sortColumnsInEntityType(entityType);
-//        return entityType;
-//      });
-
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
+      .map(entityType -> {
+        sortColumnsInEntityType(entityType);
+        return entityType;
+      });
   }
 
   /**

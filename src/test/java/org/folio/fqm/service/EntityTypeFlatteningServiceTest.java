@@ -29,13 +29,14 @@ class EntityTypeFlatteningServiceTest {
 
   @Mock
   private EntityTypeRepository entityTypeRepository;
+  @Mock
+  private LocalizationService localizationService;
   private EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
   void setup() {
-    entityTypeRepository = mock(EntityTypeRepository.class);
     ObjectMapper objectMapper = new ObjectMapper();
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper, localizationService);
   }
 
   private static final UUID SIMPLE_ENTITY_TYPE_ID = UUID.fromString("0686b9e4-accd-46f8-9e35-792c735733bb");

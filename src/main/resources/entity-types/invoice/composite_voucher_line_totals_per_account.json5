@@ -84,6 +84,7 @@
         dataType: 'numberType',
       },
       valueGetter: "SUM((:sourceAlias.jsonb->'amount')::float)",
+      valueFunction: "(:value)::float"
     },
     {
       name: 'voucher_date',

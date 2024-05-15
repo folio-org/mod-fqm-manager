@@ -89,9 +89,9 @@
       },
     },
     {
-      type: 'entity-type',
+      type: 'db',
       alias: 'organization',
-      id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+      target: 'src_organizations',
       join: {
         type: 'left join',
         joinTo: 'purchase_order',
@@ -378,5 +378,15 @@
       visibleByDefault: true,
       valueGetter: "json_extract_path_text((:sourceAlias.jsonb->>'value')::json, 'name')",
     },
+    {
+      name: 'organization_code',
+      sourceAlias: 'organization',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+    }
   ],
 }

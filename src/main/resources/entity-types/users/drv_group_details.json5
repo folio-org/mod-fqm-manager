@@ -20,7 +20,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'group'",
+      valueGetter: ":sourceAlias.jsonb->>'group'",
     },
     {
       name: 'id',
@@ -52,7 +52,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'source'",
+      valueGetter: ":sourceAlias.jsonb->>'source'",
     },
     {
       name: 'created_date',
@@ -120,7 +120,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: "COALESCE(:sourceAlias.jsonb->'desc')",
+      valueGetter: ":sourceAlias.jsonb->>'desc'",
     },
   ],
   defaultSort: [

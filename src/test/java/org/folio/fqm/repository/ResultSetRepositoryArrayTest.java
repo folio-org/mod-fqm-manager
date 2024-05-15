@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.LocalizationService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -29,9 +31,10 @@ class ResultSetRepositoryArrayTest {
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
     DSLContext readerContext = DSL.using(new MockConnection(
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
+    LocalizationService localizationService = mock(LocalizationService.class);
 
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper());
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
   }
 

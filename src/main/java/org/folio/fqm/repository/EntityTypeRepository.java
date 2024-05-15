@@ -129,6 +129,7 @@ public class EntityTypeRepository {
       .visibleByDefault(false)
       .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
       .labelAlias(value)
+      .queryable(true)
       .isCustomField(true);
   }
 

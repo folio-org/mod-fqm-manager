@@ -94,6 +94,7 @@ class EntityTypeRepositoryTest {
         .labelAlias("custom_column_1")
         .values(values)
         .visibleByDefault(false)
+        .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name("custom_column_2")
@@ -102,6 +103,7 @@ class EntityTypeRepositoryTest {
         .labelAlias("custom_column_2")
         .values(values)
         .visibleByDefault(false)
+        .queryable(true)
         .isCustomField(true)
     );
     EntityType expectedEntityType = new EntityType()

@@ -2,7 +2,7 @@
   id: '6b08439b-4f8e-4468-8046-ea620f5cfb74',
   name: 'drv_instances',
   private: false,
-  fromClause: "src_inventory_instance JOIN src_inventory_instance_status inst_stat ON inst_stat.id :: text = src_inventory_instance.jsonb ->> 'statusId' :: text LEFT JOIN src_inventory_mode_of_issuance mode_issuance ON mode_issuance.id :: text = src_inventory_instance.jsonb ->> 'modeOfIssuanceId'::text",
+  fromClause: "src_inventory_instance LEFT JOIN src_inventory_instance_status inst_stat ON inst_stat.id :: text = src_inventory_instance.jsonb ->> 'statusId' :: text LEFT JOIN src_inventory_mode_of_issuance mode_issuance ON mode_issuance.id :: text = src_inventory_instance.jsonb ->> 'modeOfIssuanceId'::text",
   columns: [
     {
       name: 'instance_cataloged_date',

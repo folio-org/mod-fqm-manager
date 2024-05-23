@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import org.folio.fqm.repository.ResultSetRepositoryTestDataProvider;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
 import org.jooq.DSLContext;

@@ -12,9 +12,6 @@ import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,8 +38,6 @@ class ResultSetRepositoryTest {
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
     LocalizationService localizationService = mock(LocalizationService.class);
 
-    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-//    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
   }
@@ -145,11 +140,6 @@ class ResultSetRepositoryTest {
     int limit = 100;
     Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
-    List<Map<String, Object>> expectedList = List.of(
-      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(0).get("id"), "source1_key1", "value1", "source1_key2", "value2"),
-      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(1).get("id"), "source1_key1", "value3", "source1_key2", "value4"),
-      Map.of("source1_id", ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS.get(2).get("id"), "source1_key1", "value5", "source1_key2", "value6")
-    );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
       .thenReturn(Optional.ofNullable(ResultSetRepositoryTestDataProvider.ENTITY_TYPE));
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))

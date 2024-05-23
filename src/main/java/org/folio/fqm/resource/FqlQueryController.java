@@ -36,6 +36,12 @@ public class FqlQueryController implements FqlQueryApi {
 
   @Override
   public ResponseEntity<List<Map<String, Object>>> getContents(ContentsRequest contentsRequest) {
+    try {
+      Thread.sleep(7000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return ResponseEntity.ok(queryManagementService.getContents(contentsRequest.getEntityTypeId(),
       contentsRequest.getFields(), contentsRequest.getIds()));
   }

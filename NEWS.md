@@ -1,5 +1,9 @@
 # 2.0.x
 
+# 2.0.4
+- [MODFQMMGR-289](https://folio-org.atlassian.net/browse/MODFQMMGR-289) Fix bug where custom fields were not queryable
+- [MODFQMMGR-290](https://folio-org.atlassian.net/browse/MODFQMMGR-290) Fix bug in the Instances entity type where data was incorrectly filtered out in some cases
+
 ## 2.0.3
 - [MODFQMMGR-202](https://folio-org.atlassian.net/browse/MODFQMMGR-202) Include system exchange rate when set exchange rate isn't active
 

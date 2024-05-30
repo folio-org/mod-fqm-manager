@@ -580,5 +580,5 @@
     "organizations.organizations.item.get",
     "organizations-storage.organization-types.collection.get",
     "acquisitions-units.units.collection.get",
-  ]
+  ],
 }

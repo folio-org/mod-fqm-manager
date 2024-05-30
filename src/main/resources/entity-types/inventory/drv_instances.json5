@@ -277,5 +277,5 @@
     "inventory-storage.contributor-types.collection.get",
     "inventory-storage.statistical-codes.collection.get",
     "inventory-storage.statistical-code-types.collection.get",
-  ]
+  ],
 }

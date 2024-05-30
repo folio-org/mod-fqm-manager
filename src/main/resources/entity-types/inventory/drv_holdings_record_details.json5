@@ -267,6 +267,6 @@
     "inventory-storage.locations.collection.get",
     "inventory-storage.location-units.libraries.collection.get",
     "inventory-storage.statistical-codes.collection.get",
-    "inventory-storage.statistical-code-types.collection.get"
+    "inventory-storage.statistical-code-types.collection.get",
   ]
 }

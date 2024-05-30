@@ -4,6 +4,12 @@
   private: false,
   customFieldEntityTypeId: 'ffb91f00-eb1c-4936-a637-f8708c967c73',
   fromClause: 'src_users_users LEFT JOIN src_users_groups ON src_users_groups.id = src_users_users.patrongroup',
+  requiredPermissions: [
+    "usergroups.collection.get",
+    "addresstypes.collection.get",
+    "departments.collection.get",
+    "users.item.get",
+  ],
   columns: [
     {
       name: 'user_active',

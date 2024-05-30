@@ -3,6 +3,13 @@
   name: 'drv_holdings_record_details',
   private: false,
   fromClause: 'src_inventory_holdings_record hrd LEFT JOIN src_inventory_location effective_location ON effective_location.id = hrd.effectivelocationid LEFT JOIN src_inventory_loclibrary effective_library ON effective_library.id = effective_location.libraryid LEFT JOIN src_inventory_location permanent_location ON permanent_location.id = hrd.permanentlocationid LEFT JOIN src_inventory_location temporary_location ON temporary_location.id = hrd.temporarylocationid',
+  requiredPermissions: [
+    "inventory-storage.holdings.item.get",
+    "inventory-storage.locations.collection.get",
+    "inventory-storage.location-units.libraries.collection.get",
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get",
+  ],
   columns: [
     {
       name: 'holdings_effective_location',
@@ -261,12 +268,5 @@
       columnName: 'id',
       direction: 'ASC',
     },
-  ],
-  requiredPermissions: [
-    "inventory-storage.holdings.item.get",
-    "inventory-storage.locations.collection.get",
-    "inventory-storage.location-units.libraries.collection.get",
-    "inventory-storage.statistical-codes.collection.get",
-    "inventory-storage.statistical-code-types.collection.get",
   ],
 }

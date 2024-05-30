@@ -37,21 +37,22 @@ By utilizing the combination of source views, computed views, and other relevant
 mvn clean install
 ```
 ## Environment Variables
-| Name                               | Default Value | Description                           |
-|------------------------------------|---------------|---------------------------------------|
-| DB_HOST                            | localhost     | Postgres hostname                     |
-| DB_PORT                            | 5432          | Postgres port                         |
-| DB_HOST_READER                     | localhost     | Postgres hostname                     |
-| DB_PORT_READER                     | 5432          | Postgres port                         |
-| DB_USERNAME                        | postgres      | Postgres username                     |
-| DB_PASSWORD                        | postgres      | Postgres password                     |
-| DB_DATABASE                        | postgres      | Postgres database name                |
-| MAX_QUERY_SIZE                     | 1250000       | max result count per query            |
-| server.port                        | 8081          | Server port                           |
-| QUERY_RETENTION_DURATION           | 3h            | Older queries get deleted             |
-| task.execution.pool.core-size      | 9             | Core number of concurrent async tasks |
-| task.execution.pool.max-size       | 10            | Max number of concurrent async tasks  |
-| task.execution.pool.queue-capacity | 1000          | Size of the task queue                |
+| Name                                              | Default Value | Description                           |
+|---------------------------------------------------|---------------|---------------------------------------|
+| DB_HOST                                           | localhost     | Postgres hostname                     |
+| DB_PORT                                           | 5432          | Postgres port                         |
+| DB_HOST_READER                                    | localhost     | Postgres hostname                     |
+| DB_PORT_READER                                    | 5432          | Postgres port                         |
+| DB_USERNAME                                       | postgres      | Postgres username                     |
+| DB_PASSWORD                                       | postgres      | Postgres password                     |
+| DB_DATABASE                                       | postgres      | Postgres database name                |
+| MAX_QUERY_SIZE                                    | 1250000       | max result count per query            |
+| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions   |
+| server.port                                       | 8081          | Server port                           |
+| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted             |
+| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks |
+| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks  |
+| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                |
 
 ## Installing the module
 Follow the guide of Deploying Modules sections of the [Okapi Guide](https://github.com/folio-org/okapi/blob/master/doc/guide.md#example-1-deploying-and-using-a-simple-module) and Reference, which describe the process in detail.

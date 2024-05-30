@@ -46,6 +46,9 @@ class EntityTypeServiceTest {
   @Mock
   private SimpleHttpClient simpleHttpClient;
 
+  @Mock
+  private PermissionsService permissionsService;
+
   @InjectMocks
   private EntityTypeService entityTypeService;
 
@@ -59,8 +62,8 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeSummary(ids)).thenReturn(List.of(
-      new RawEntityTypeSummary(id1, "translation_label_01"),
-      new RawEntityTypeSummary(id2, "translation_label_02")));
+      new RawEntityTypeSummary(id1, "translation_label_01", List.of()),
+      new RawEntityTypeSummary(id2, "translation_label_02", List.of())));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
@@ -84,7 +87,6 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("whatever")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
-    List<String> fields = List.of("id", valueColumnName);
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
       .content(

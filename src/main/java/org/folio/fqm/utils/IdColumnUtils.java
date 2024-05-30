@@ -6,6 +6,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.jooq.impl.DSL.field;
@@ -25,12 +26,11 @@ public class IdColumnUtils {
    * @return List of id column names for the entity type
    */
   public static List<String> getIdColumnNames(EntityType entityType) {
-    return entityType
-      .getColumns()
-      .stream()
-      .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
-      .map(EntityTypeColumn::getName)
-      .toList();
+    return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
+        .stream()
+        .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
+        .map(EntityTypeColumn::getName)
+        .toList();
   }
 
   /**

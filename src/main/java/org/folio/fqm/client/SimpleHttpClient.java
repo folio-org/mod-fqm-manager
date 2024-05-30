@@ -14,7 +14,8 @@ import java.util.Map;
 public interface SimpleHttpClient {
   /**
    * Retrieve arbitrary data from a FOLIO API endpoint.
-   * @param path - the path of the API endpoint
+   *
+   * @param path        - the path of the API endpoint
    * @param queryParams - a map of query parameters to pass to the API endpoint
    * @return the body of the response (JSON)
    */

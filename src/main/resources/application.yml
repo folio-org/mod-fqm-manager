@@ -1,6 +1,7 @@
 mod-fqm-manager:
   query-retention-duration: 3h
   max-query-size: ${MAX_QUERY_SIZE:1250000}
+  permissions-cache-timeout-seconds: 60
 server:
   port: 8081
 spring:
@@ -74,6 +75,7 @@ coffee-boots:
     spec:
       queryCache: maximumSize=500,expireAfterWrite=1m
 folio:
+  is-eureka: false
   tenant:
     validation:
       enabled: true

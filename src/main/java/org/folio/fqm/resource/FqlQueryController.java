@@ -1,6 +1,7 @@
 package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.QueryManagementService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.QueryDetails;
@@ -23,35 +24,40 @@ public class FqlQueryController implements FqlQueryApi {
 
   private final QueryManagementService queryManagementService;
 
+  @EntityTypePermissionsRequired(SubmitQuery.class)
   @Override
   public ResponseEntity<QueryIdentifier> runFqlQueryAsync(SubmitQuery submitQuery) {
     return new ResponseEntity<>(queryManagementService.runFqlQueryAsync(submitQuery), HttpStatus.CREATED);
   }
 
+  @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
   public ResponseEntity<QueryDetails> getQuery(UUID queryId, Boolean includeResults, Integer offset, Integer limit) {
     Optional<QueryDetails> queryDetails = queryManagementService.getQuery(queryId, Boolean.TRUE.equals(includeResults), offset, limit);
     return queryDetails.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  @EntityTypePermissionsRequired(ContentsRequest.class)
   @Override
   public ResponseEntity<List<Map<String, Object>>> getContents(ContentsRequest contentsRequest) {
     return ResponseEntity.ok(queryManagementService.getContents(contentsRequest.getEntityTypeId(),
       contentsRequest.getFields(), contentsRequest.getIds()));
   }
 
+  @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
   public ResponseEntity<List<List<String>>> getSortedIds(UUID queryId, Integer offset, Integer limit){
     return ResponseEntity.ok(queryManagementService.getSortedIds(queryId, offset, limit));
   }
 
 
+  @EntityTypePermissionsRequired(parameterName = "entityTypeId")
   @Override
   public ResponseEntity<ResultsetPage> runFqlQuery(String query, UUID entityTypeId, List<String> fields,
                                                    List<String> afterId, Integer limit) {
     return ResponseEntity.ok(queryManagementService.runFqlQuery(query, entityTypeId, fields, afterId, limit));
   }
-
+  @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
   public ResponseEntity<Void> deleteQuery(UUID queryId) {
     queryManagementService.deleteQuery(queryId);

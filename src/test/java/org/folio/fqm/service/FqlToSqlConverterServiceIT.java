@@ -7,6 +7,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -72,7 +73,7 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
 
     // Then we get back the 1 expected row
     given()
-      .header("X-Okapi-Tenant", TENANT_ID)
+      .headers(getOkapiHeaders())
       .contentType("application/json")
       .when()
       .queryParams(

@@ -26,17 +26,20 @@
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}",
-          "permissionsRequired": ["fqm.entityTypes.item.get"]
+          "permissionsRequired": ["fqm.entityTypes.item.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types",
-          "permissionsRequired": ["fqm.entityTypes.collection.get"]
+          "permissionsRequired": ["fqm.entityTypes.collection.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
-          "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"]
+          "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["POST"],
@@ -52,27 +55,32 @@
         {
           "methods": ["GET"],
           "pathPattern": "/query",
-          "permissionsRequired": ["fqm.query.sync.get"]
+          "permissionsRequired": ["fqm.query.sync.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
-          "permissionsRequired": ["fqm.query.async.results.get"]
+          "permissionsRequired": ["fqm.query.async.results.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
-          "permissionsRequired": ["fqm.query.async.results.get"]
+          "permissionsRequired": ["fqm.query.async.results.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
-          "permissionsRequired": ["fqm.query.async.results.get"]
+          "permissionsRequired": ["fqm.query.async.results.get"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query",
-          "permissionsRequired": ["fqm.query.async.post"]
+          "permissionsRequired": ["fqm.query.async.post"],
+          "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["POST"],
@@ -82,7 +90,8 @@
         {
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
-          "permissionsRequired": ["fqm.query.async.delete"]
+          "permissionsRequired": ["fqm.query.async.delete"],
+          "modulePermissions": ["perms.users.get"]
         }
       ]
     },

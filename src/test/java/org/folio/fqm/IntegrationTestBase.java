@@ -155,8 +155,11 @@ public class IntegrationTestBase {
       if (recordedRequest.getPath().matches("/perms/users/[-0-9a-f]+/permissions\\?expanded=true&indexField=userId")) {
         return new MockResponse().setBody("""
           {
-            "permissionNames": ["fake-permission"],
-            "totalRecords": 0
+            "permissionNames": [ "organizations.organizations.item.get",
+                                 "organizations-storage.organization-types.collection.get",
+                                 "acquisitions-units.units.collection.get"
+            ],
+            "totalRecords": 3
           }
           """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }

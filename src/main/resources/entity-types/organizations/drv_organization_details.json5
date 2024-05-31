@@ -3,6 +3,11 @@
   name: 'drv_organization_details',
   private: false,
   fromClause: 'src_organizations as org',
+  requiredPermissions: [
+    "organizations.organizations.item.get",
+    "organizations-storage.organization-types.collection.get",
+    "acquisitions-units.units.collection.get",
+  ],
   columns: [
     {
       name: 'last_updated',

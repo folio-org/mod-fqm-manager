@@ -3,6 +3,15 @@
   name: 'drv_instances',
   private: false,
   fromClause: "src_inventory_instance LEFT JOIN src_inventory_instance_status inst_stat ON inst_stat.id :: text = src_inventory_instance.jsonb ->> 'statusId' :: text LEFT JOIN src_inventory_mode_of_issuance mode_issuance ON mode_issuance.id :: text = src_inventory_instance.jsonb ->> 'modeOfIssuanceId'::text",
+  requiredPermissions: [
+    "inventory-storage.instances.item.get",
+    "inventory-storage.instance-statuses.collection.get",
+    "inventory-storage.modes-of-issuance.collection.get",
+    "inventory-storage.contributor-name-types.collection.get",
+    "inventory-storage.contributor-types.collection.get",
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get",
+  ],
   columns: [
     {
       name: 'instance_cataloged_date',

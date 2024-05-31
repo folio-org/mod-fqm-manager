@@ -3,6 +3,17 @@
   name: 'drv_loan_details',
   private: false,
   fromClause: "src_circulation_loan LEFT JOIN src_circulation_loan_policy loan_policy_ref_data ON loan_policy_ref_data.id = ((src_circulation_loan.jsonb ->> 'loanPolicyId'::text)::uuid) LEFT JOIN src_inventory_service_point cospi ON cospi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkoutServicePointId'::text), 600)::uuid LEFT JOIN src_inventory_service_point cispi ON cispi.id = \"left\"(lower(src_circulation_loan.jsonb ->> 'checkinServicePointId'::text), 600)::uuid JOIN src_inventory_item item_details ON item_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'itemId'::text)), 600)::uuid LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = item_details.materialtypeid JOIN src_users_users user_details ON user_details.id = \"left\"(lower(f_unaccent(src_circulation_loan.jsonb ->> 'userId'::text)), 600)::uuid LEFT JOIN src_users_groups patron_id_ref_data ON patron_id_ref_data.id = user_details.patrongroup JOIN src_inventory_holdings_record hrim ON item_details.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id",
+  requiredPermissions: [
+    "users.item.get",
+    "usergroups.collection.get",
+    "circulation-storage.loan-policies.collection.get",
+    "circulation.loans.collection.get",
+    "inventory-storage.instances.item.get",
+    "inventory-storage.items.item.get",
+    "inventory-storage.holdings.item.get",
+    "inventory-storage.material-types.collection.get",
+    "inventory-storage.service-points.collection.get",
+  ],
   columns: [
     {
       name: 'holdings_id',

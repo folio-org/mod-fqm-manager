@@ -3,6 +3,12 @@
   name: 'drv_organization_contacts',
   private: false,
   fromClause: 'src_organizations AS org',
+  requiredPermissions: [
+    "organizations.organizations.item.get",
+    "organizations-storage.organization-types.collection.get",
+    "organizations-storage.categories.collection.get",
+    "acquisitions-units.units.collection.get",
+  ],
   columns: [
     {
       name: 'id',

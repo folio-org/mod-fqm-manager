@@ -3,6 +3,17 @@
   name: 'drv_item_details',
   private: false,
   fromClause: "src_inventory_item LEFT JOIN src_inventory_location effective_location_ref_data ON effective_location_ref_data.id = src_inventory_item.effectivelocationid LEFT JOIN src_inventory_call_number_type call_number_type_ref_data ON call_number_type_ref_data.id::text = ((src_inventory_item.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'typeId'::text) LEFT JOIN src_inventory_call_number_type call_item_number_type_ref_data ON call_item_number_type_ref_data.id::text = (src_inventory_item.jsonb ->> 'itemLevelCallNumberTypeId'::text) LEFT JOIN src_inventory_loclibrary loclib_ref_data ON loclib_ref_data.id = effective_location_ref_data.libraryid LEFT JOIN src_inventory_location permanent_location_ref_data ON permanent_location_ref_data.id = src_inventory_item.permanentlocationid LEFT JOIN src_inventory_material_type material_type_ref_data ON material_type_ref_data.id = src_inventory_item.materialtypeid LEFT JOIN src_inventory_location temporary_location_ref_data ON temporary_location_ref_data.id = src_inventory_item.temporarylocationid JOIN src_inventory_holdings_record hrim ON src_inventory_item.holdingsrecordid = hrim.id JOIN src_inventory_instance instance_details ON hrim.instanceid = instance_details.id",
+  requiredPermissions: [
+    "inventory-storage.instances.item.get",
+    "inventory-storage.holdings.item.get",
+    "inventory-storage.items.item.get",
+    "inventory-storage.locations.collection.get",
+    "inventory-storage.location-units.libraries.collection.get",
+    "inventory-storage.call-number-types.collection.get",
+    "inventory-storage.material-types.collection.get",
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get",
+  ],
   columns: [
     {
       name: 'holdings_id',

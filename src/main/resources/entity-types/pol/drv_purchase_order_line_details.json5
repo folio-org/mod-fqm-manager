@@ -7,7 +7,7 @@
     "orders.po-lines.item.get",
     "orders.item.get",
     "acquisitions-units.units.collection.get",
-    "organizations.organizations.item.get",
+    "organizations.organizations.collection.get",
     "users.collection.get",
     "finance.exchange-rate.item.get",
     "configuration.entries.collection.get"

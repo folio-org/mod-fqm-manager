@@ -155,7 +155,7 @@ public class IntegrationTestBase {
       if (recordedRequest.getPath().matches("/perms/users/[-0-9a-f]+/permissions\\?expanded=true&indexField=userId")) {
         return new MockResponse().setBody("""
           {
-            "permissionNames": [ "organizations.organizations.item.get",
+            "permissionNames": [ "organizations.organizations.collection.get",
                                  "organizations-storage.organization-types.collection.get",
                                  "acquisitions-units.units.collection.get"
             ],

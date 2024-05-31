@@ -11,7 +11,6 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -91,10 +90,12 @@ public class EntityTypeService {
    */
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
     return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
-      .map(entityType -> {
-        sortColumnsInEntityType(entityType);
-        return entityType;
-      });
+      .map(entityType ->
+        entityType.columns(entityType.getColumns().stream()
+          .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+          .toList()
+        )
+      );
   }
 
   /**
@@ -201,10 +202,4 @@ public class EntityTypeService {
     return allValues.get(fieldName).toString();
   }
 
-  private void sortColumnsInEntityType(EntityType entityType) {
-    List<EntityTypeColumn> sortedColumns = entityType.getColumns().stream()
-      .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-      .toList();
-    entityType.setColumns(sortedColumns);
-  }
 }

@@ -62,23 +62,6 @@ public class IdStreamer {
     return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
 
-  /**
-   * Streams the result Ids of the given queryId
-   */
-  public int streamIdsInBatch(UUID queryId,
-                              boolean sortResults,
-                              int batchSize,
-                              Consumer<IdsWithCancelCallback> idsConsumer) {
-    UUID entityTypeId = queryDetailsRepository.getEntityTypeId(queryId);
-    EntityType entityType = getEntityType(entityTypeId);
-    Condition condition = field("\"source1\".id").in(
-      select(RESULT_ID_FIELD)
-        .from(table("query_results"))
-        .where(field("query_id").eq(queryId))
-    );
-    return streamIdsInBatch(entityType, sortResults, condition, batchSize, idsConsumer); // TODO: fix this
-  }
-
   public List<List<String>> getSortedIds(String derivedTableName,
                                          int offset, int batchSize, UUID queryId) {
     // THIS DOES NOT PROVIDE SORTED IDs! This is a temporary workaround to address performance issues until we

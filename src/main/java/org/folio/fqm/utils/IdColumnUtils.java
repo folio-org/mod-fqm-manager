@@ -47,21 +47,6 @@ public class IdColumnUtils {
       .stream()
       .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
       .map(EntityTypeColumn::getValueGetter)
-//      .map(valueGetter -> {
-//        EntityTypeSource source = entityType.getSources()
-//          .stream()
-//          .filter(currentSource -> valueGetter.contains(":" + currentSource.getAlias()))
-//          .findFirst()
-//          .orElseThrow(() -> new IllegalStateException("FAILED TO GET VALUE GETTER"));
-//
-//        String toReplace = ":" + source.getAlias();
-//        System.out.println("Replacing string " + toReplace);
-//        String alias = "\"" + source.getAlias() + "\"";
-//        System.out.println("Before: " + valueGetter);
-//        String afterValueGetter = valueGetter.replace(toReplace, alias);
-//        System.out.println("After: " + afterValueGetter);
-//        return afterValueGetter;
-//      })
       .toList();
   }
 

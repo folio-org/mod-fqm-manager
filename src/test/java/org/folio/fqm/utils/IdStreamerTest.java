@@ -74,28 +74,6 @@ class IdStreamerTest {
   }
 
   @Test
-  void shouldFetchIdStreamForQueryId() {
-    UUID queryId = UUID.randomUUID();
-    List<List<String>> expectedIds = new ArrayList<>();
-    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    int idsCount = idStreamer.streamIdsInBatch(
-      queryId,
-      true,
-      2,
-      idsConsumer
-    );
-    assertEquals(expectedIds, actualIds);
-    assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
-  }
-
-  @Test
   void shouldFetchIdStreamForFql() {
     Fql fql = new Fql(new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();

@@ -59,12 +59,12 @@ public class LocalizationService {
       }
     } else {
       // column has been previously translated, so just append source translations to it
-      String sourceTranslation = getSourceTranslation(entityType, column.getName());
+      String sourceTranslation = getSourceTranslationPrefix(entityType, column.getName());
       column.setLabelAlias(sourceTranslation + column.getLabelAlias());
     }
   }
 
-  private String getSourceTranslation(EntityType entityType, String columnName) {
+  private String getSourceTranslationPrefix(EntityType entityType, String columnName) {
     int currentSourceIndex = columnName.indexOf(".");
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);

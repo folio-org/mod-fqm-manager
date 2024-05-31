@@ -1,10 +1,11 @@
 package org.folio.fqm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kotlin.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Log4j2
 public class EntityTypeFlatteningService {
+  private final String DB_TYPE = "db";
   private final EntityTypeRepository entityTypeRepository;
   private final ObjectMapper objectMapper;
   private final LocalizationService localizationService;
@@ -50,10 +52,10 @@ public class EntityTypeFlatteningService {
 
     List<EntityTypeColumn> finalColumns = new ArrayList<>();
     for (EntityTypeSource source : originalEntityType.getSources()) {
-      if (source.getType().equals("db")) {
+      if (source.getType().equals(DB_TYPE)) {
         Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = getConvertedSourceAndColumns(originalEntityType, source, null, false); // TODO: think about this, may not be able to hardcode false here
-        flattenedEntityType.addSourcesItem(updatePair.component1());
-        finalColumns.addAll(updatePair.component2());
+        flattenedEntityType.addSourcesItem(updatePair.getLeft());
+        finalColumns.addAll(updatePair.getRight());
       } else {
         UUID sourceEntityTypeId = UUID.fromString(source.getId());
         EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, false)
@@ -67,12 +69,12 @@ public class EntityTypeFlatteningService {
         for (EntityTypeSource subSource : flattenedSourceDefinition.getSources()) {
           String oldAlias = subSource.getAlias();
           Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = getConvertedSourceAndColumns(flattenedSourceDefinition, subSource, source, keepOriginalAlias);
-          String newAlias = updatePair.component1().getAlias();
+          String newAlias = updatePair.getLeft().getAlias();
           if (!oldAlias.equals(newAlias)) {
             updateOtherSources(oldAlias, newAlias, flattenedSourceDefinition.getSources());
           }
-          flattenedEntityType.addSourcesItem(updatePair.component1());
-          finalColumns.addAll(updatePair.component2());
+          flattenedEntityType.addSourcesItem(updatePair.getLeft());
+          finalColumns.addAll(updatePair.getRight());
         }
       }
     }
@@ -96,7 +98,7 @@ public class EntityTypeFlatteningService {
       .count();
     if (sourceWithoutJoinCount != 1) {
       log.error("ERROR: number of sources without joins must be exactly 1, but was {}", sourceWithoutJoinCount);
-      return ""; // TODO: handle this better
+      throw new InvalidEntityTypeDefinitionException("Flattened entity type should have 1 source without joins, but has " + sourceWithoutJoinCount, flattenedEntityType);
     }
 
     // Order sources so that JOIN clause makes sense
@@ -139,21 +141,22 @@ public class EntityTypeFlatteningService {
 
     List<EntityTypeSource> orderedList = new ArrayList<>();
     Set<String> visited = new HashSet<>();
-
     for (EntityTypeSource source : entityType.getSources()) {
-      if (!visited.contains(source.getAlias())) {
-        dfs(source, sourceMap, visited, orderedList);
-      }
+      getSourcesRecursively(source, sourceMap, visited, orderedList);
     }
+
     return orderedList;
   }
 
-  private static void dfs(EntityTypeSource source, Map<String, EntityTypeSource> sourceMap, Set<String> visited, List<EntityTypeSource> orderedList) {
-    visited.add(source.getAlias());
+  private static void getSourcesRecursively(EntityTypeSource source, Map<String, EntityTypeSource> sourceMap, Set<String> visited, List<EntityTypeSource> orderedList) {
+    // Depth-first/post-order traversal
+    if (!visited.add(source.getAlias())) {
+      return;
+    }
     if (source.getJoin() != null) {
       EntityTypeSource joinToSource = sourceMap.get(source.getJoin().getJoinTo());
       if (!visited.contains(joinToSource.getAlias())) {
-        dfs(joinToSource, sourceMap, visited, orderedList);
+        getSourcesRecursively(joinToSource, sourceMap, visited, orderedList);
       }
     }
     orderedList.add(source);
@@ -191,7 +194,7 @@ public class EntityTypeFlatteningService {
     }
 
     for (EntityTypeColumn oldColumn : originalEntityType.getColumns()) {
-      EntityTypeColumn column = copyColumn(oldColumn);
+      EntityTypeColumn column = copyColumn(oldColumn, originalEntityType);
       if (column.getSourceAlias().equals(nestedAlias)) {
         if (outerSource != null) { // temporary, need a better way to do this
           column.name(outerSource.getAlias() + "." + column.getName());
@@ -212,7 +215,7 @@ public class EntityTypeFlatteningService {
         newSource.flattened(true);
       }
     }
-    return new Pair<>(newSource, updatedColumns);
+    return Pair.of(newSource, updatedColumns);
   }
 
   private List<EntityTypeColumn> finalColumnConversion(EntityType flattenedEntityType) {
@@ -228,18 +231,17 @@ public class EntityTypeFlatteningService {
       }
       column.valueGetter(valueGetter);
       column.filterValueGetter(filterValueGetter);
-//      column.name(column.getSourceAlias() + "." + column.getName());
       finalColumns.add(column);
     }
     return finalColumns;
   }
 
-  private EntityTypeColumn copyColumn(EntityTypeColumn column) {
+  private EntityTypeColumn copyColumn(EntityTypeColumn column, EntityType entityType) {
     try {
       String json = objectMapper.writeValueAsString(column);
       return objectMapper.readValue(json, EntityTypeColumn.class);
     } catch (Exception e) {
-      return new EntityTypeColumn(); // TODO: do something better here
+      throw new InvalidEntityTypeDefinitionException("Encountered an error while copying entity type column \"" + column.getName() + "\"", e, entityType);
     }
   }
 
@@ -247,7 +249,7 @@ public class EntityTypeFlatteningService {
     return entityType
       .getSources()
       .stream()
-      .filter(source -> !Boolean.TRUE.equals(source.getFlattened()) && source.getType().equals("db"))
+      .filter(source -> !Boolean.TRUE.equals(source.getFlattened()) && DB_TYPE.equals(source.getType()))
       .count();
   }
 }

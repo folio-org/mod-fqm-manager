@@ -7,7 +7,7 @@
     {
       name: 'party_id',
       dataType: {
-        dataType: 'openUUIDType',
+        dataType: 'stringType',
       },
       isIdColumn: true,
       queryable: true,

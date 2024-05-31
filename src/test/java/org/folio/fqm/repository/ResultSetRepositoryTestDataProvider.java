@@ -34,7 +34,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value5", "key2", "value6")
   );
 
-  private static final EntityType ENTITY_TYPE = new EntityType()
+  public static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
       new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(":sourceAlias." + ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
       new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter(":sourceAlias.key1").sourceAlias("source1"),

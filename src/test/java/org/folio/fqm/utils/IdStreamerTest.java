@@ -3,6 +3,7 @@ package org.folio.fqm.utils;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.QueryDetailsRepository;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
+import org.folio.querytool.domain.dto.EntityType;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -40,6 +42,8 @@ class IdStreamerTest {
   private static final UUID ENTITY_TYPE_ID = UUID.randomUUID();
 
   private IdStreamer idStreamer;
+  private LocalizationService localizationService;
+
   EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
@@ -58,7 +62,7 @@ class IdStreamerTest {
       context,
       new ObjectMapper()
     );
-    LocalizationService localizationService = mock(LocalizationService.class);
+    localizationService = mock(LocalizationService.class);
     entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     this.idStreamer =
       new IdStreamer(
@@ -79,6 +83,8 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
     int idsCount = idStreamer.streamIdsInBatch(
       queryId,
       true,
@@ -91,7 +97,7 @@ class IdStreamerTest {
 
   @Test
   void shouldFetchIdStreamForFql() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("source1_field1"), "value1"));
+    Fql fql = new Fql(new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     List<List<String>> actualIds = new ArrayList<>();
@@ -99,6 +105,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     int idsCount = idStreamer.streamIdsInBatch(
       ENTITY_TYPE_ID,
       true,

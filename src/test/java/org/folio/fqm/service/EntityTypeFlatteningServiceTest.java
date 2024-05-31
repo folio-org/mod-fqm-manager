@@ -8,11 +8,9 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceJoin;
 import org.folio.querytool.domain.dto.StringType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +29,7 @@ class EntityTypeFlatteningServiceTest {
   private EntityTypeRepository entityTypeRepository;
   @Mock
   private LocalizationService localizationService;
+
   private EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
@@ -261,7 +260,7 @@ class EntityTypeFlatteningServiceTest {
       ));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(SIMPLE_ENTITY_TYPE_ID));
     assertEquals(expectedEntityType, actualEntityType);
@@ -274,25 +273,25 @@ class EntityTypeFlatteningServiceTest {
       .id(COMPLEX_ENTITY_TYPE_ID.toString())
       .columns(List.of(
         new EntityTypeColumn()
-          .name("source3_field5")
+          .name("field5")
           .valueGetter("\"source3\".field5")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("source3")
           .isIdColumn(true),
         new EntityTypeColumn()
-          .name("source3_field6")
+          .name("field6")
           .valueGetter("\"source3\".field6")
           .filterValueGetter("lower(\"source3\".field6)")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("source3"),
         new EntityTypeColumn()
-          .name("source2_field3")
+          .name("field3")
           .valueGetter("\"source2\".field3")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("source2")
           .isIdColumn(true),
         new EntityTypeColumn()
-          .name("source2_field4")
+          .name("field4")
           .valueGetter("\"source2\".field4")
           .filterValueGetter("lower(\"source2\".field4)")
           .dataType(new StringType().dataType("stringType"))
@@ -367,14 +366,13 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
     assertEquals(expectedEntityType, actualEntityType);
   }
 
-  // TODO: current problem: we can join to an entity-type source, but what if that entity-type source consists of multiple db sources?
-  //  How can we know which source to join to?
   @Test
   void shouldFlattenTripleNestedEntityType() {
     EntityType expectedEntityType = new EntityType()
@@ -382,64 +380,64 @@ class EntityTypeFlatteningServiceTest {
       .id(TRIPLE_NESTED_ENTITY_TYPE_ID.toString())
       .columns(List.of(
         new EntityTypeColumn()
-          .name("source4_field7")
+          .name("field7")
           .valueGetter("\"source4\".field7")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("source4")
           .isIdColumn(true),
         new EntityTypeColumn()
-          .name("source4_field8")
+          .name("field8")
           .valueGetter("\"source4\".field8")
           .filterValueGetter("lower(\"source4\".field8)")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("source4"),
         new EntityTypeColumn()
-          .name("complex_entity_type_source3_field5")
-          .valueGetter("\"complex_entity_type_source3\".field5")
+          .name("complex_entity_type.field5")
+          .valueGetter("\"complex_entity_type.source3\".field5")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type_source3")
+          .sourceAlias("complex_entity_type.source3")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type_source3_field6")
-          .valueGetter("\"complex_entity_type_source3\".field6")
-          .filterValueGetter("lower(\"complex_entity_type_source3\".field6)")
+          .name("complex_entity_type.field6")
+          .valueGetter("\"complex_entity_type.source3\".field6")
+          .filterValueGetter("lower(\"complex_entity_type.source3\".field6)")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type_source3")
+          .sourceAlias("complex_entity_type.source3")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type_source2_field3")
-          .valueGetter("\"complex_entity_type_source2\".field3")
+          .name("complex_entity_type.field3")
+          .valueGetter("\"complex_entity_type.source2\".field3")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type_source2")
+          .sourceAlias("complex_entity_type.source2")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type_source2_field4")
-          .valueGetter("\"complex_entity_type_source2\".field4")
-          .filterValueGetter("lower(\"complex_entity_type_source2\".field4)")
+          .name("complex_entity_type.field4")
+          .valueGetter("\"complex_entity_type.source2\".field4")
+          .filterValueGetter("lower(\"complex_entity_type.source2\".field4)")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type_source2")
+          .sourceAlias("complex_entity_type.source2")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("simple_entity_type1_field1")
+          .name("complex_entity_type.simple_entity_type1.field1")
           .valueGetter("\"simple_entity_type1\".field1")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("simple_entity_type1")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("simple_entity_type1_field2")
+          .name("complex_entity_type.simple_entity_type1.field2")
           .valueGetter("\"simple_entity_type1\".field2")
           .filterValueGetter("lower(\"simple_entity_type1\".field2)")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("simple_entity_type1")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("simple_entity_type2_field1")
+          .name("complex_entity_type.simple_entity_type2.field1")
           .valueGetter("\"simple_entity_type2\".field1")
           .dataType(new StringType().dataType("stringType"))
           .sourceAlias("simple_entity_type2")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("simple_entity_type2_field2")
+          .name("complex_entity_type.simple_entity_type2.field2")
           .valueGetter("\"simple_entity_type2\".field2")
           .filterValueGetter("lower(\"simple_entity_type2\".field2)")
           .dataType(new StringType().dataType("stringType"))
@@ -454,19 +452,18 @@ class EntityTypeFlatteningServiceTest {
           .useIdColumns(true),
         new EntityTypeSource()
           .type("db")
-          .alias("complex_entity_type_source3")
+          .alias("complex_entity_type.source3")
           .target("source3_target")
           .useIdColumns(false)
-          .flattened(true)
           .join(
             new EntityTypeSourceJoin()
               .type("LEFT JOIN")
-              .joinTo("complex_entity_type_source2")
+              .joinTo("complex_entity_type.source2")
               .condition(":this.field5 = :that.field3")
           ),
         new EntityTypeSource()
           .type("db")
-          .alias("complex_entity_type_source2")
+          .alias("complex_entity_type.source2")
           .target("source2_target")
           .useIdColumns(false)
           .flattened(true)
@@ -483,7 +480,7 @@ class EntityTypeFlatteningServiceTest {
           .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
-            .joinTo("complex_entity_type_source2")
+            .joinTo("complex_entity_type.source2")
             .condition(":this.field1 = :that.field3")
           )
           .flattened(true),
@@ -495,7 +492,7 @@ class EntityTypeFlatteningServiceTest {
           .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
-            .joinTo("complex_entity_type_source2")
+            .joinTo("complex_entity_type.source2")
             .condition(":this.field1 = :that.field4")
           )
           .flattened(true)
@@ -504,6 +501,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(TRIPLE_NESTED_ENTITY_TYPE_ID));
@@ -517,6 +515,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
@@ -531,6 +530,7 @@ class EntityTypeFlatteningServiceTest {
 
 
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true)
       .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));

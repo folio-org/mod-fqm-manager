@@ -10,6 +10,9 @@
       target: 'src_circulation_loan',
     },
   ],
+  requiredPermissions:[
+    'circulation.loans.collection.get'
+  ],
   columns: [
     {
       name: 'id',

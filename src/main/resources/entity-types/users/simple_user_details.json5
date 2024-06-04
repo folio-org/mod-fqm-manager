@@ -1,6 +1,6 @@
 {
   id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
-  name: 'drv_simple_user_details',
+  name: 'simple_user_details',
   root: false,
   private: false,
   sources: [
@@ -9,6 +9,9 @@
       target: 'src_users_users',
       alias: 'user',
     },
+  ],
+  requiredPermissions: [
+    'users.item.get'
   ],
   columns: [
     {

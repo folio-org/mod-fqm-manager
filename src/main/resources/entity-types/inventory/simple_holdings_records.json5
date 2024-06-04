@@ -10,6 +10,9 @@
       target: 'src_inventory_holdings_record',
     },
   ],
+  requiredPermissions: [
+    'inventory-storage.holdings.item.get'
+  ],
   columns: [
     {
       name: 'id',

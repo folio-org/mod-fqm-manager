@@ -10,6 +10,9 @@
       target: 'src_inventory_instance',
     },
   ],
+  requiredPermissions: [
+    'inventory-storage.instances.item.get'
+  ],
   columns: [
     {
       name: 'id',

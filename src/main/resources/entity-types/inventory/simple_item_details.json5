@@ -8,6 +8,9 @@
       target: 'src_inventory_item',
     },
   ],
+  requiredPermissions: [
+    'inventory-storage.items.item.get'
+  ],
   columns: [
     {
       name: 'id',

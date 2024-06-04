@@ -1,6 +1,6 @@
 {
   id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
-  name: 'drv_material_type_details',
+  name: 'simple_material_type_details',
   private: false,
   sources: [
     {
@@ -8,6 +8,9 @@
       alias: 'material_type',
       target: 'src_inventory_material_type',
     },
+  ],
+  requiredPermissions: [
+    'inventory-storage.material-types.collection.get'
   ],
   columns: [
     {

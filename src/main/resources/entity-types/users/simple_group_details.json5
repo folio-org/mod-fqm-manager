@@ -1,6 +1,6 @@
 {
   id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
-  name: 'drv_group_details',
+  name: 'simple_group_details',
   root: false,
   private: false,
   sources: [
@@ -9,6 +9,9 @@
       target: 'src_users_groups',
       alias: 'groups',
     },
+  ],
+  requiredPermissions: [
+    'usergroups.collection.get'
   ],
   columns: [
     {

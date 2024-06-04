@@ -10,6 +10,9 @@
       target: 'src_circulation_loan_policy',
     },
   ],
+  requiredPermissions: [
+    'circulation-storage.loan-policies.collection.get'
+  ],
   columns: [
     {
       name: 'id',

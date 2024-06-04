@@ -308,6 +308,10 @@
     {
       "id": "circulation",
       "version": "14.2"
+    },
+    {
+      "id": "orders",
+      "version": "12.0"
     }
   ],
   "launchDescriptor": {

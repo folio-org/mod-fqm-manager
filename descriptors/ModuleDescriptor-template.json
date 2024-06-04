@@ -304,6 +304,18 @@
     {
       "id": "finance.exchange-rate",
       "version": "1.0"
+    },
+    {
+      "id": "circulation",
+      "version": "14.2"
+    },
+    {
+      "id": "orders",
+      "version": "12.0"
+    },
+    {
+      "id": "organizations.organizations",
+      "version": "1.2"
     }
   ],
   "launchDescriptor": {

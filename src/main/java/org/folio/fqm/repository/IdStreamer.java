@@ -2,7 +2,6 @@ package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
@@ -34,7 +33,6 @@ import java.util.stream.Stream;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.table;
 
 @Repository
@@ -44,7 +42,6 @@ public class IdStreamer {
 
   @Qualifier("readerJooqContext")
   private final DSLContext jooqContext;
-  private final QueryDetailsRepository queryDetailsRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
 
   /**
@@ -56,8 +53,7 @@ public class IdStreamer {
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     EntityType entityType = entityTypeFlatteningService
-      .getFlattenedEntityType(entityTypeId, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+      .getFlattenedEntityType(entityTypeId, true);
     Condition sqlWhereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }
@@ -150,10 +146,5 @@ public class IdStreamer {
   private static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
     Field<Object> field = field(entityTypeDefaultSort.getColumnName());
     return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
-  }
-
-  private EntityType getEntityType(UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 }

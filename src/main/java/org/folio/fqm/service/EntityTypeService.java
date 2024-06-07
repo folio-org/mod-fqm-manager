@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -58,27 +57,24 @@ public class EntityTypeService {
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeSummaries(entityTypeIds)
-      .stream()
-      .filter(entityTypeSummary -> includeInaccessible || userPermissions.containsAll(entityTypeSummary.requiredPermissions()))
-      .map(rawEntityTypeSummary -> {
+      .getEntityTypeDefinitions(entityTypeIds)
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getPrivate()))
+      .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
+      .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
-          .id(rawEntityTypeSummary.id())
-          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()));
-
+          .id(UUID.fromString(entityType.getId()))
+          .label(localizationService.getEntityTypeLabel(entityType.getName()));
         if (includeInaccessible) {
           return result.missingPermissions(
-            rawEntityTypeSummary
-              .requiredPermissions()
+            permissionsService.getRequiredPermissions(entityType)
               .stream()
               .filter(permission -> !userPermissions.contains(permission))
               .toList()
           );
         }
-
         return result;
       })
-      .sorted(Comparator.comparing(EntityTypeSummary::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .sorted(comparing(EntityTypeSummary::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
   }
 
@@ -88,14 +84,12 @@ public class EntityTypeService {
    * @param entityTypeId the ID to search for
    * @return the entity type definition if found, empty otherwise
    */
-  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
-      .map(entityType ->
-        entityType.columns(entityType.getColumns().stream()
-          .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-          .toList()
-        )
-      );
+  public EntityType getEntityTypeDefinition(UUID entityTypeId) {
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    entityType.columns(entityType.getColumns().stream()
+      .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+      .toList());
+    return entityType;
   }
 
   /**

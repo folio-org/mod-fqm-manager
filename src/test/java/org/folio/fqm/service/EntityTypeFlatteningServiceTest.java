@@ -1,7 +1,6 @@
 package org.folio.fqm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -64,7 +63,8 @@ class EntityTypeFlatteningServiceTest {
         .type("db")
         .alias("source1")
         .target("source1_target")
-    ));
+    ))
+    .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
   private static final EntityType COMPLEX_ENTITY_TYPE = new EntityType()
     .name("complex_entity_type")
@@ -128,7 +128,8 @@ class EntityTypeFlatteningServiceTest {
           .joinTo("source2")
           .condition(":this.field1 = :that.field4")
         )
-    ));
+    ))
+    .requiredPermissions(List.of("complex_permission1", "complex_permission2"));
 
   private static final EntityType TRIPLE_NESTED_ENTITY_TYPE = new EntityType()
     .name("triple_nested_entity_type")
@@ -257,12 +258,12 @@ class EntityTypeFlatteningServiceTest {
           .alias("source1")
           .target("source1_target")
           .useIdColumns(true)
-      ));
+      ))
+      .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(SIMPLE_ENTITY_TYPE_ID));
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -362,14 +363,14 @@ class EntityTypeFlatteningServiceTest {
           )
           .flattened(true)
           .useIdColumns(false)
-      ));
+      ))
+      .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -496,15 +497,15 @@ class EntityTypeFlatteningServiceTest {
             .condition(":this.field1 = :that.field4")
           )
           .flattened(true)
-      ));
+      ))
+      .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(TRIPLE_NESTED_ENTITY_TYPE_ID));
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, true);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -517,8 +518,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
 
@@ -532,8 +532,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(COMPLEX_ENTITY_TYPE_ID));
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
   }

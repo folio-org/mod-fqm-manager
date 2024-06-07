@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -46,7 +45,7 @@ class ResultSetRepositoryArrayTest {
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
-      .thenReturn(Optional.ofNullable(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE));
+      .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds);

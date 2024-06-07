@@ -32,10 +32,14 @@ public class EntityTypeFlatteningService {
   private final LocalizationService localizationService;
 
   // TODO: clean up
-  public Optional<EntityType> getFlattenedEntityType(UUID entityTypeId, boolean doFinalRenames) {
+  public EntityType getFlattenedEntityType(UUID entityTypeId, boolean doFinalRenames) {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    // TODO: Remove this if-block after all entity types have been converted from the "fromClause" model to the "sources" model
+    if (originalEntityType.getFromClause() != null && originalEntityType.getSources() == null) {
+      return originalEntityType;
+    }
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
       .name(originalEntityType.getName())
@@ -51,6 +55,7 @@ public class EntityTypeFlatteningService {
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor()); // Possibly unneeded
 
     List<EntityTypeColumn> finalColumns = new ArrayList<>();
+    Set<String> finalPermissions = new HashSet<>(originalEntityType.getRequiredPermissions());
     for (EntityTypeSource source : originalEntityType.getSources()) {
       if (source.getType().equals(DB_TYPE)) {
         Pair<EntityTypeSource, List<EntityTypeColumn>> updatePair = getConvertedSourceAndColumns(originalEntityType, source, null, false); // TODO: think about this, may not be able to hardcode false here
@@ -58,8 +63,8 @@ public class EntityTypeFlatteningService {
         finalColumns.addAll(updatePair.getRight());
       } else {
         UUID sourceEntityTypeId = UUID.fromString(source.getId());
-        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, false)
-          .orElseThrow(() -> new EntityTypeNotFoundException(sourceEntityTypeId));
+        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, false);
+        finalPermissions.addAll(flattenedSourceDefinition.getRequiredPermissions());
 
         // If an entity type source contains multiple db sources, then we need to keep the original alias in order to
         // distinguish the different targets. Frequently, it will likely only have one db source. In this case we
@@ -80,11 +85,12 @@ public class EntityTypeFlatteningService {
     }
 
     flattenedEntityType.columns(finalColumns);
+    flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
     if (doFinalRenames) {
       List<EntityTypeColumn> convertedColumns = finalColumnConversion(flattenedEntityType);
       flattenedEntityType.columns(convertedColumns);
     }
-    return Optional.of(localizationService.localizeEntityType(flattenedEntityType));
+    return localizationService.localizeEntityType(flattenedEntityType);
   }
 
   public String getJoinClause(EntityType flattenedEntityType) {

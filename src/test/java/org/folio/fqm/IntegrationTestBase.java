@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -102,6 +103,8 @@ public class IntegrationTestBase {
            """ + body.substring(1);
     postTenant(body);
 
+    createDummyViews();
+
     // Test: smoke test the /entity-types endpoint to verify DB interactions are working
     smokeTest();
   }
@@ -128,6 +131,12 @@ public class IntegrationTestBase {
       .post("/_/tenant")
       .then()
       .statusCode(204);
+  }
+
+  private static void createDummyViews() {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
+    // Create a src_user_custom_fields view, since the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
+    jdbcTemplate.execute("CREATE VIEW src_user_custom_fields AS SELECT '{}'::jsonb AS jsonb LIMIT 1");
   }
 
   private static void smokeTest() {

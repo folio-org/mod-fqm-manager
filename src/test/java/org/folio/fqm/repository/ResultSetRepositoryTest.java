@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -78,7 +77,7 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
-      .thenReturn(Optional.ofNullable(ResultSetRepositoryTestDataProvider.ENTITY_TYPE));
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds);
@@ -100,7 +99,7 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
-      .thenReturn(Optional.ofNullable(ResultSetRepositoryTestDataProvider.ENTITY_TYPE));
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
@@ -137,7 +136,7 @@ class ResultSetRepositoryTest {
     Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
-      .thenReturn(Optional.ofNullable(ResultSetRepositoryTestDataProvider.ENTITY_TYPE));
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, null, limit);

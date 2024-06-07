@@ -162,8 +162,7 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
   }
 
   private boolean hasIdColumn(EntityType entityType) {

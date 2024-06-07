@@ -17,10 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,28 +39,6 @@ class EntityTypeRepositoryTest {
 
   @Mock
   @Qualifier("readerJooqContext") private DSLContext jooqContext;
-
-
-  @Test
-  void shouldFetchAllPublicEntityTypes() {
-    List<RawEntityTypeSummary> expectedSummary = List.of(
-      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL, List.of()),
-      new RawEntityTypeSummary(ENTITY_TYPE_02_ID, ENTITY_TYPE_02_LABEL, List.of())
-    );
-
-    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummaries(Set.of());
-    assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
-  }
-
-  @Test
-  void shouldFetchEntityTypesOfGivenIds() {
-    Set<UUID> ids = Set.of(ENTITY_TYPE_01_ID);
-    List<RawEntityTypeSummary> expectedSummary = List.of(
-      new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL, List.of()));
-
-    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummaries(ids);
-    assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
-  }
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {

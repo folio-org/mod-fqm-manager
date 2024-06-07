@@ -1,6 +1,5 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.IdColumnUtils;
 import org.folio.querytool.domain.dto.EntityType;
@@ -34,8 +33,7 @@ public class ResultSetService {
   }
 
   private List<Map<String, Object>> getSortedContents(UUID entityTypeId, List<List<String>> contentIds, List<Map<String, Object>> unsortedResults) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
     List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
     Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> {

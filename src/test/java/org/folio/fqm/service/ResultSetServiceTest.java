@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 
 import java.util.*;
 
-import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.EntityType;
@@ -48,24 +47,22 @@ class ResultSetServiceTest {
       entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
     )
       .thenReturn(
-        Optional.of(
-          new EntityType()
-            .name("test_entity")
-            .id(entityTypeId.toString())
-            .columns(
-              List.of(
-                new EntityTypeColumn().name("id").isIdColumn(true),
-                new EntityTypeColumn().name("key1"),
-                new EntityTypeColumn().name("key2")
-              )
+        new EntityType()
+          .name("test_entity")
+          .id(entityTypeId.toString())
+          .columns(
+            List.of(
+              new EntityTypeColumn().name("id").isIdColumn(true),
+              new EntityTypeColumn().name("key1"),
+              new EntityTypeColumn().name("key2")
             )
-            .sources(List.of(
-              new EntityTypeSource()
-                .type("db")
-                .alias("source1")
-                .target("target1")
-            ))
-        )
+          )
+          .sources(List.of(
+            new EntityTypeSource()
+              .type("db")
+              .alias("source1")
+              .target("target1")
+          ))
       );
     when(
       resultSetRepository.getResultSet(entityTypeId, fields, listIds)

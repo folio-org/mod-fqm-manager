@@ -44,7 +44,7 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
       .target("target1"))
     );
 
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
+  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID IN .*";
   private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
   private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";

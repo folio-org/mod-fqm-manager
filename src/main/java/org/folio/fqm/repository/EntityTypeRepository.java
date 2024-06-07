@@ -18,10 +18,8 @@ import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
@@ -51,15 +49,20 @@ public class EntityTypeRepository {
   private final ObjectMapper objectMapper;
 
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    log.info("Getting definition name for entity type ID: {}", entityTypeId);
+    return getEntityTypeDefinitions(Collections.singleton(entityTypeId)).findFirst();
+  }
+
+  public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds) {
+    log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
     Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
-
+    Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
     return readerJooqContext
       .select(definitionField)
       .from(table(TABLE_NAME))
-      .where(field(ID_FIELD_NAME).eq(entityTypeId))
-      .fetchOptional(definitionField)
+      .where(entityTypeIdCondition)
+      .fetch(definitionField)
+      .stream()
       .map(this::unmarshallEntityType)
       .map(entityType -> {
         String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
@@ -68,25 +71,6 @@ public class EntityTypeRepository {
         }
         return entityType;
       });
-  }
-
-  public List<RawEntityTypeSummary> getEntityTypeSummaries(Set<UUID> entityTypeIds) {
-    log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
-    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
-
-    Field<Boolean> privateEntityField = field("(definition ->> 'private')::boolean", Boolean.class);
-
-    Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
-    Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
-    return readerJooqContext
-      .select(definitionField)
-      .from(table(TABLE_NAME))
-      .where(entityTypeIdCondition.and(publicEntityCondition))
-      .fetch(definitionField)
-      .stream()
-      .map(this::unmarshallEntityType)
-      .map(entityType -> new RawEntityTypeSummary(UUID.fromString(entityType.getId()), entityType.getName(), entityType.getRequiredPermissions()))
-      .toList();
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {

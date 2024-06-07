@@ -51,7 +51,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(Optional.of(mockDefinition));
+    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -65,18 +65,6 @@ class EntityTypeControllerTest {
       .andExpect(jsonPath("$.columns[0].dataType.dataType", is(col.getDataType().getDataType())))
       .andExpect(jsonPath("$.columns[0].labelAlias", is(col.getLabelAlias())))
       .andExpect(jsonPath("$.columns[0].visibleByDefault", is(col.getVisibleByDefault())));
-  }
-
-  @Test
-  void shouldReturnNotFoundErrorWhenEntityNotFound() throws Exception {
-    UUID id = UUID.randomUUID();
-    when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(UUID.randomUUID())).thenReturn(Optional.empty());
-    RequestBuilder builder = MockMvcRequestBuilders
-      .get(GET_DEFINITION_URL, id)
-      .accept(MediaType.APPLICATION_JSON)
-      .header(XOkapiHeaders.TENANT, "tenant_01");
-    mockMvc.perform(builder).andExpect(status().isNotFound());
   }
 
   @Test

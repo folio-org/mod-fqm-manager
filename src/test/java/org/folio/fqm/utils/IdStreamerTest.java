@@ -23,7 +23,6 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
-import org.folio.fqm.repository.QueryDetailsRepository;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.querytool.domain.dto.EntityType;
@@ -68,7 +67,6 @@ class IdStreamerTest {
       new IdStreamer(
 
         context,
-        new QueryDetailsRepository(context),
         entityTypeFlatteningService
       );
   }
@@ -127,7 +125,7 @@ class IdStreamerTest {
 
     entityTypeFlatteningService = new EntityTypeFlatteningService(mockRepository, new ObjectMapper(), localizationService);
 
-    IdStreamer idStreamerWithMockRepo = new IdStreamer(null,null, entityTypeFlatteningService);
+    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, entityTypeFlatteningService);
 
     assertThrows(
       EntityTypeNotFoundException.class,

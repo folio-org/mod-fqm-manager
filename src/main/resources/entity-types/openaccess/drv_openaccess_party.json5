@@ -19,7 +19,9 @@
       dataType: {
         dataType: 'integerType',
       },
+      isIdColumn: false,
       queryable: true,
+      visibleByDefault: false,
       valueGetter: 'party.version',
     },
     {
@@ -48,10 +50,112 @@
       visibleByDefault: true,
       valueGetter: 'party.p_given_names',
     },
+    {
+      name: 'party_full_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'party.p_full_name',
+    },
+    {
+      name: 'party_orcid_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'party.p_orcid_id',
+    },
+    {
+      name: 'party_main_email',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'party.p_main_email',
+    },
+    {
+      name: 'party_alternate_email',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'alternate_email_address.aea_email',
+    },
+    {
+      name: 'party_alternate_email_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: 'alternate_email_address.aea_id',
+    },
+    {
+      name: 'party_alternate_email_version',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: 'alternate_email_address.aea_version',
+    },
+    {
+      name: 'party_alternate_email_owner_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: 'alternate_email_address.aea_owner_fk',
+    },
+    {
+      name: 'party_phone',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'party.p_phone',
+    },
+    {
+      name: 'party_mobile',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'party.p_mobile',
+    },
+    {
+      name: 'party_institution_level_1_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: 'p_institution_level_1.rdv_value',
+    },
+    {
+      name: 'party_institution_level_1_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: 'p_institution_level_1.rdv_label',
+    },
+    {
+      name: 'party_institution_level_2',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: 'party.p_institution_level_2',
+    },
   ],
   defaultSort: [
     {
-      columnName: 'party_id',
+      columnName: 'party_family_name',
       direction: 'ASC',
     },
   ],

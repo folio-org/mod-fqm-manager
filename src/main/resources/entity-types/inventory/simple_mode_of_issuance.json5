@@ -1,18 +1,21 @@
 {
-  id: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
-  name: 'drv_instance_status_details',
+  id: '073b554a-5b5c-4552-a51c-01448a1643b0',
+  name: 'simple_mode_of_issuance',
   private: false,
   sources: [
     {
       type: 'db',
-      alias: 'instance_status',
-      target: 'src_inventory_instance_status',
+      alias: 'mode_of_issuance',
+      target: 'src_inventory_mode_of_issuance',
     },
+  ],
+  requiredPermissions: [
+    "inventory-storage.modes-of-issuance.collection.get"
   ],
   columns: [
     {
       name: 'id',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -23,7 +26,7 @@
     },
     {
       name: 'name',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'stringType',
       },
@@ -36,22 +39,8 @@
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
     },
     {
-      name: 'code',
-      sourceAlias: 'instance_status',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'name'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-    },
-    {
       name: 'source',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'stringType',
       },
@@ -61,7 +50,7 @@
     },
     {
       name: 'created_date',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'dateType',
       },
@@ -71,7 +60,7 @@
     },
     {
       name: 'updated_date',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'dateType',
       },
@@ -81,7 +70,7 @@
     },
     {
       name: 'created_by_user_id',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -91,7 +80,7 @@
     },
     {
       name: 'updated_by_user_id',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -101,7 +90,7 @@
     },
     {
       name: 'created_by_username',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'stringType',
       },
@@ -111,7 +100,7 @@
     },
     {
       name: 'updated_by_username',
-      sourceAlias: 'instance_status',
+      sourceAlias: 'mode_of_issuance',
       dataType: {
         dataType: 'stringType',
       },

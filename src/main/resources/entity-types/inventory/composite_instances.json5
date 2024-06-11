@@ -1,0 +1,39 @@
+{
+  id: '6b08439b-4f8e-4468-8046-ea620f5cfb74',
+  name: 'composite_instances',
+  private: false,
+  sources: [
+    {
+      alias: 'instance',
+      type: 'entity-type',
+      id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      useIdColumns: true
+    },
+    {
+      alias: 'inst_stat',
+      type: 'entity-type',
+      id: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
+      join: {
+        type: 'left join',
+        joinTo: 'instance',
+        condition: ":this.id = (:that.jsonb ->> 'statusId')::uuid"
+      }
+    },
+    {
+      alias: 'mode_of_issuance',
+      type: 'entity-type',
+      id: '073b554a-5b5c-4552-a51c-01448a1643b0', // simple_mode_of_issuance
+      join: {
+        type: 'left join',
+        joinTo: 'instance',
+        condition: ":this.id = (:that.jsonb ->> 'modeOfIssuanceId')::uuid"
+      }
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

@@ -1,6 +1,6 @@
 {
   id: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-  name: 'simple_instances',
+  name: 'simple_instance',
   root: true,
   private: false,
   sources: [
@@ -11,7 +11,11 @@
     },
   ],
   requiredPermissions: [
-    'inventory-storage.instances.item.get'
+    'inventory-storage.instances.item.get',
+    "inventory-storage.contributor-name-types.collection.get",
+    "inventory-storage.contributor-types.collection.get",
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get"
   ],
   columns: [
     {
@@ -68,6 +72,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+      filterValueGetter: "\"left\"(lower((:sourceAlias.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
+      valueFunction: '"left"(lower(:value), 600)'
     },
     {
       name: 'complete_updated_date',
@@ -123,6 +129,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
     },
     {
       name: 'match_key',
@@ -156,6 +164,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'title'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> \'title\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'index_title',
@@ -717,6 +727,10 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'languages') AS elems\
       )",
+      source: {
+        entityTypeId: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
+        columnName: 'languages',
+      }
     },
     {
       name: 'notes',
@@ -865,6 +879,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
+      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'discoverySuppress\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
       values: [
         {
           value: 'true',
@@ -902,6 +918,24 @@
       )",
     },
     {
+      name: 'statistical_codes',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'statistical_code_ids',
+      queryable: false,
+      visibleByDefault: true,
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceView.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      source: {
+        entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+        columnName: 'statistical_code',
+      },
+    },
+    {
       name: 'status_id',
       sourceAlias: 'inst',
       dataType: {
@@ -911,6 +945,28 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
+    },
+    {
+      name: 'status',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'status_id',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "inst_stat.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'status',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
+      valueSourceApi: {
+        path: 'instance-statuses',
+        valueJsonPath: '$.instanceStatuses.*.id',
+        labelJsonPath: '$.instanceStatuses.*.name',
+      },
     },
     {
       name: 'status_updated_date',

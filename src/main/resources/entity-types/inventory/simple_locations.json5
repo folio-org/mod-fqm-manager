@@ -22,7 +22,16 @@
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
-      valueGetter: ":sourceAlias.id"
+      valueGetter: ":sourceAlias.id",
+      source: {
+        columnName: 'id',
+        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+      },
+      valueSourceApi: {
+        path: 'locations',
+        valueJsonPath: '$.locations.*.id',
+        labelJsonPath: '$.locations.*.id',
+      }
     },
     {
       name: 'code',
@@ -30,11 +39,21 @@
         dataType: 'stringType',
       },
       sourceAlias: 'location',
+      idColumnName: 'id',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'code'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'code',
+        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+      },
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.code',
+      }
     },
     {
       name: 'name',
@@ -46,7 +65,17 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      idColumnName: 'id',
+      source: {
+        columnName: 'name',
+        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+      },
+      valueSourceApi: {
+        path: 'locations',
+        valueJsonPath: '$.locations.*.id',
+        labelJsonPath: '$.locations.*.name',
+      }
     },
     {
       name: 'description',

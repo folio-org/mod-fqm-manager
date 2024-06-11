@@ -11,7 +11,9 @@
     },
   ],
   requiredPermissions: [
-    'inventory-storage.holdings.item.get'
+    'inventory-storage.holdings.item.get',
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get"
   ],
   columns: [
     {
@@ -90,6 +92,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
     },
     {
       name: 'call_number_type_id',
@@ -285,6 +289,26 @@
           jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds'::text) el (value)\
       )",
       valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'statistical_codes',
+      sourceAlias: 'hrd',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'statistical_code_ids',
+      queryable: false,
+      visibleByDefault: true,
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+        columnName: 'statistical_code',
+      },
     },
     {
       name: 'holdings_statements',

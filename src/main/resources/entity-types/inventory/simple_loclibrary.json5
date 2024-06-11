@@ -24,6 +24,15 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.id',
+      }
     },
     {
       name: 'created_by',
@@ -53,10 +62,20 @@
       dataType: {
         dataType: 'stringType',
       },
+      idColumnName: 'id',
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        columnName: 'name',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.name',
+      }
     },
     {
       name: 'code',

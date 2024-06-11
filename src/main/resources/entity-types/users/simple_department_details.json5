@@ -1,6 +1,6 @@
 {
   id: 'f067beda-cbeb-4423-9a0d-3b59fb329ce2',
-  name: 'drv_department_details',
+  name: 'simple_department_details',
   private: false,
   sources: [
     {
@@ -8,6 +8,9 @@
       alias: 'department',
       target: 'src_users_departments',
     },
+  ],
+  requiredPermissions: [
+    "departments.collection.get"
   ],
   columns: [
     {

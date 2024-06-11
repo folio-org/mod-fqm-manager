@@ -10,6 +10,9 @@
       target: 'src_users_addresstype',
     },
   ],
+  requiredPermissions: [
+    "addresstypes.collection.get"
+  ],
   columns: [
     {
       name: 'id',

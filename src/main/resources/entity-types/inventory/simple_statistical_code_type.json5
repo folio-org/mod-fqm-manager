@@ -1,6 +1,6 @@
 {
   id: '70809254-8cae-43ad-9864-81db9bbbdd67',
-  name: 'drv_statistical_code_type_details',
+  name: 'simple_statistical_code_type',
   private: false,
   sources: [
     {
@@ -8,6 +8,9 @@
       alias: 'statistical_code_type',
       target: 'src_inventory_statistical_code_type',
     },
+  ],
+  requiredPermissions: [
+    "inventory-storage.statistical-code-types.collection.get"
   ],
   columns: [
     {

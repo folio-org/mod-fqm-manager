@@ -1,7 +1,17 @@
 {
   id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-  name: 'drv_location_details',
+  name: 'simple_locations',
   private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'location',
+      target: 'src_inventory_location'
+    }
+  ],
+  requiredPermissions: [
+    "inventory-storage.locations.collection.get"
+  ],
   columns: [
     {
       name: 'id',
@@ -135,14 +145,7 @@
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'primaryServicePoint'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
     }
-  ],
-  sources: [
-    {
-      type: 'db',
-      alias: 'location',
-      target: 'src_inventory_location'
-    }
-  ],
+    ],
   defaultSort: [
     {
       columnName: 'id',

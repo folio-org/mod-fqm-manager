@@ -10,6 +10,9 @@
       target: 'src_inventory_loclibrary',
     },
   ],
+  requiredPermissions: [
+    "inventory-storage.location-units.libraries.collection.get"
+  ],
   columns: [
     {
       name: 'id',

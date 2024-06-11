@@ -1,18 +1,21 @@
 {
-  id: 'd3833db6-a50c-4d47-aaa3-23b69c2ac7ce',
-  name: 'drv_statistical_code_details',
+  id: 'd9338ced-3e71-4f24-b605-7912d590f005',
+  name: 'simple_call_number_type',
   private: false,
   sources: [
     {
       type: 'db',
-      alias: 'statistical_code',
-      target: 'src_inventory_statistical_code',
+      alias: 'call_number_type',
+      target: 'src_inventory_call_number_type',
     },
+  ],
+  requiredPermissions: [
+    "inventory-storage.call-number-types.collection.get"
   ],
   columns: [
     {
       name: 'id',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -23,7 +26,7 @@
     },
     {
       name: 'name',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'stringType',
       },
@@ -36,22 +39,8 @@
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
     },
     {
-      name: 'code',
-      sourceAlias: 'statistical_code',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'code'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-    },
-    {
       name: 'source',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'stringType',
       },
@@ -60,18 +49,8 @@
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },
     {
-      name: 'statistical_code_type_id',
-      sourceAlias: 'statistical_code',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'statisticalCodeTypeId'",
-    },
-    {
       name: 'created_date',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'dateType',
       },
@@ -81,7 +60,7 @@
     },
     {
       name: 'updated_date',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'dateType',
       },
@@ -91,7 +70,7 @@
     },
     {
       name: 'created_by_user_id',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -101,7 +80,7 @@
     },
     {
       name: 'updated_by_user_id',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -111,7 +90,7 @@
     },
     {
       name: 'created_by_username',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'stringType',
       },
@@ -121,7 +100,7 @@
     },
     {
       name: 'updated_by_username',
-      sourceAlias: 'statistical_code',
+      sourceAlias: 'call_number_type',
       dataType: {
         dataType: 'stringType',
       },

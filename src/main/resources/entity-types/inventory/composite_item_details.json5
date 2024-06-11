@@ -5,23 +5,23 @@
     {
       alias: 'items',
       type: 'entity-type',
-      id: '372e025a-9444-473a-9ffd-fa0f63db1674',
+      id: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item_details
       useIdColumns: true,
     },
     {
       alias: 'effective_location',
       type: 'entity-type',
+      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
       join: {
         type: 'left join',
         joinTo: 'items',
         condition: "(:that.jsonb ->> 'effectivelocationid')::uuid =:this.id",
       },
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
     },
     {
       alias: 'effective_call_number',
       type: 'entity-type',
-      id: 'd9338ced-3e71-4f24-b605-7912d590f005',
+      id: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
       join: {
         type: 'left join',
         joinTo: 'items',
@@ -31,7 +31,7 @@
     {
       alias: 'item_level_call_number',
       type: 'entity-type',
-      id: 'd9338ced-3e71-4f24-b605-7912d590f005',
+      id: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
       join: {
         condition: "(:that.jsonb ->> 'itemLevelCallNumberTypeId')::uuid =:this.id",
         type: 'left join',
@@ -41,17 +41,17 @@
     {
       alias: 'loclibrary',
       type: 'entity-type',
+      id: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary
       join: {
         type: 'left join',
         joinTo: 'effective_location',
         condition: "(:that.jsonb ->> 'libraryid')::uuid =:this.id",
       },
-      id: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
     },
     {
       alias: 'permanent_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
       join: {
         joinTo: 'items',
         type: 'left join',
@@ -61,7 +61,7 @@
     {
       alias: 'mtypes',
       type: 'entity-type',
-      id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe', // simple_material_type_details
       join: {
         joinTo: 'items',
         type: 'left join',
@@ -71,17 +71,17 @@
     {
       alias: 'temporary_location',
       type: 'entity-type',
+      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
       join: {
         type: 'left join',
         joinTo: 'items',
-        condition: "(:that.jsonb ->> 'temporarylocationid')::uuid =:this.id",
-      },
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+        condition: "(:that.jsonb ->> 'temporarylocationid')::uuid =:this.id"
+      }
     },
     {
       alias: 'holdings',
       type: 'entity-type',
-      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
       join: {
         joinTo: 'items',
         type: 'join',
@@ -91,7 +91,7 @@
     {
       alias: 'instances',
       type: 'entity-type',
-      id: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instances
       join: {
         type: 'join',
         condition: "(:that.jsonb ->> 'instanceid')::uuid =:this.id",

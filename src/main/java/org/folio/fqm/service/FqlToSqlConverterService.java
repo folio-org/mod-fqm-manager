@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiFunction;
 
 import static org.jooq.impl.DSL.and;
@@ -63,32 +64,33 @@ public class FqlToSqlConverterService {
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String STRING_TYPE = "stringType";
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
+  private static final String STRING_UUID_TYPE = "stringUUIDType";
   private static final String OPEN_UUID_TYPE = "openUUIDType";
   private static final String DATE_TYPE = "dateType";
   public static final String ALL_NULLS = """
-          true = ALL(
-            SELECT(
-              unnest(
-                cast(
-                  %s
-                  as varchar[]
-                )
-              )
-            ) IS NULL
+    true = ALL(
+      SELECT(
+        unnest(
+          cast(
+            %s
+            as varchar[]
           )
-          """;
+        )
+      ) IS NULL
+    )
+    """;
   public static final String NOT_ALL_NULLS = """
-          false = ANY(
-            SELECT(
-              unnest(
-                cast(
-                  %s
-                  as varchar[]
-                )
-              )
-            ) IS NULL
+    false = ANY(
+      SELECT(
+        unnest(
+          cast(
+            %s
+            as varchar[]
           )
-          """;
+        )
+      ) IS NULL
+    )
+    """;
 
 
   private final FqlService fqlService;
@@ -135,7 +137,12 @@ public class FqlToSqlConverterService {
       return handleDate(equalsCondition, field);
     }
     String dataType = getFieldDataType(entityType, equalsCondition);
-    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType))  {
+    String filterFieldDataType = getFieldForFiltering(equalsCondition, entityType).getDataType().getDataType();
+    if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+      String value = (String) equalsCondition.value();
+      return cast(field, UUID.class).eq(cast(value, UUID.class));
+    }
+    if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
       return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
     }
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
@@ -146,7 +153,12 @@ public class FqlToSqlConverterService {
       return handleDate(notEqualsCondition, field);
     }
     String dataType = getFieldDataType(entityType, notEqualsCondition);
-    if (STRING_TYPE.equals(dataType) || RANGED_UUID_TYPE.equals(dataType) || OPEN_UUID_TYPE.equals(dataType) || DATE_TYPE.equals(dataType)) {
+    String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
+    if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+      String value = (String) notEqualsCondition.value();
+      return cast(field, UUID.class).ne(cast(value, UUID.class));
+    }
+    if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
       return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne);
     }
     return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
@@ -198,17 +210,21 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    List<Condition> conditionList = inCondition
-      .value().stream()
+    List<Condition> conditionList = inCondition.value().stream()
       .map(val -> {
+        String filterFieldDataType = getFieldForFiltering(inCondition, entityType).getDataType().getDataType();
+        if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+          if (val instanceof String value) {
+            return cast(field, UUID.class).eq(cast(value, UUID.class));
+          }
+          return field.eq(val);
+        }
         if (val instanceof String value) {
           return caseInsensitiveComparison(inCondition, entityType, field, value, org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
-        } else {
-          return field.eq(valueField(val, inCondition, entityType));
         }
+        return field.eq(valueField(val, inCondition, entityType));
       })
       .toList();
-
     return or(conditionList);
   }
 
@@ -216,11 +232,17 @@ public class FqlToSqlConverterService {
     List<Condition> conditionList = notInCondition
       .value().stream()
       .map(val -> {
+        String filterFieldDataType = getFieldForFiltering(notInCondition, entityType).getDataType().getDataType();
+        if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+          if (val instanceof String value) {
+            return cast(field, UUID.class).notEqual(cast(value, UUID.class));
+          }
+          return field.notEqual(val);
+        }
         if (val instanceof String value) {
           return caseInsensitiveComparison(notInCondition, entityType, field, value, org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::notEqual);
-        } else {
-          return field.notEqual(valueField(val, notInCondition, entityType));
         }
+        return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
     return and(conditionList);
@@ -265,6 +287,7 @@ public class FqlToSqlConverterService {
     return cast(field, String[].class).contains(valueArray);
   }
 
+
   private static Condition handleNotContainsAll(NotContainsAllCondition notContainsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
     var valueList = notContainsAllCondition
       .value()
@@ -301,7 +324,8 @@ public class FqlToSqlConverterService {
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
 
     return switch (fieldType) {
-      case STRING_TYPE -> isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
+      case STRING_TYPE ->
+        isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
       case "arrayType" -> {
         var cardinality = cardinality(cast(field, String[].class));
         if (isEmpty) {

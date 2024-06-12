@@ -10,6 +10,12 @@
       target: 'src_organizations',
     },
   ],
+  requiredPermissions: [
+    "organizations.organizations.collection.get",
+    "organizations-storage.organization-types.collection.get",
+    "organizations-storage.categories.collection.get",
+    "acquisitions-units.units.collection.get"
+  ],
   columns: [
     {
       name: 'id',
@@ -76,6 +82,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))'
     },
     {
       name: 'code',
@@ -87,6 +95,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))'
     },
     {
       name: 'description',
@@ -98,6 +108,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'description'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'description'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))'
     },
     {
       name: 'export_to_accounting',
@@ -130,6 +142,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'status'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'status'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
       values: [
         {
           value: 'Active',
@@ -146,7 +160,7 @@
       ],
     },
     {
-      name: 'types',
+      name: 'type_ids',
       sourceAlias: 'org',
       dataType: {
         dataType: 'arrayType',
@@ -169,6 +183,24 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'organizationTypes') AS elems\
       )",
+    },
+    {
+      name: 'type_names',
+      sourceAlias: 'org',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'type_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
+      source: {
+        entityTypeId: '6b335e41-2654-4e2a-9b4e-c6930b330ccc',
+        columnName: 'organization_types_name',
+      },
     },
     {
       name: 'language',
@@ -783,7 +815,7 @@
       valueGetter: ":sourceAlias.jsonb->>'agreements'",
     },
     {
-      name: 'erp_code',
+      name: 'accounting_code',
       sourceAlias: 'org',
       dataType: {
         dataType: 'stringType',
@@ -792,6 +824,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'erpCode'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'erpCode'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))'
     },
     {
       name: 'payment_method',
@@ -803,6 +837,28 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'paymentMethod'",
+      values: [
+        {
+          label: 'Credit Card',
+          value: 'Credit Card',
+        },
+        {
+          label: 'Cash',
+          value: 'Cash',
+        },
+        {
+          label: 'Physical Check',
+          value: 'Physical Check',
+        },
+        {
+          label: 'EFT',
+          value: 'EFT',
+        },
+        {
+          label: 'Deposit Account',
+          value: 'Deposit Account',
+        },
+      ]
     },
     {
       name: 'access_provider',
@@ -922,7 +978,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'claimingInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'claimingInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'discount_percent',
@@ -933,7 +990,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'discountPercent'",
+      valueGetter: "(:sourceAlias.jsonb->'discountPercent')::float",
+      valueFunction: '(:value)::float'
     },
     {
       name: 'expected_activation_interval',
@@ -944,7 +1002,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'expectedActivationInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'expectedActivationInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'expected_invoice_interval',
@@ -955,7 +1014,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'expectedInvoiceInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'expectedInvoiceInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'renewal_activation_interval',
@@ -966,7 +1026,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'renewalActivationInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'renewalActivationInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'subscription_interval',
@@ -977,7 +1038,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'subscriptionInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'subscriptionInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'expected_receipt_interval',
@@ -988,7 +1050,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'expectedReceiptInterval'",
+      valueGetter: "(:sourceAlias.jsonb->'expectedReceiptInterval')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'tax_id',
@@ -1000,6 +1063,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'taxId'",
+      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'taxId'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))'
     },
     {
       name: 'liable_for_vat',
@@ -1031,7 +1096,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'taxPercentage'",
+      valueGetter: "(:sourceAlias.jsonb->'taxPercentage')::float",
+      valueFunction: '(:value)::float'
     },
     {
       name: 'interfaces',
@@ -1347,6 +1413,26 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
+    },
+    {
+      name: 'acq_unit_names',
+      sourceAlias: 'org',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'acq_unit_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
+        columnName: 'acquisitions_name',
+      },
     },
     {
       name: 'edi_vendor_edi_code',

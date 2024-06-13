@@ -188,7 +188,7 @@
     {
       name: 'po_created_by_id',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringUUIDType',
       },
       queryable: true,
       visibleByDefault: false,

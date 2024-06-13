@@ -10,6 +10,10 @@
       target: 'src_purchase_order',
     },
   ],
+  requiredPermissions: [
+    "orders.item.get",
+    "acquisitions-units.units.collection.get", // For API access to retrieve acq unit names
+  ],
   columns: [
     {
       name: 'id',
@@ -42,7 +46,9 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.creation_date',
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'approved',
@@ -54,6 +60,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'approved'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'approved\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'true',
@@ -165,6 +173,7 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems\
       )",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'po_number',
@@ -209,6 +218,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'orderType'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'orderType\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'One-Time',
@@ -275,6 +286,32 @@
       valueGetter: ":sourceAlias.jsonb->>'vendor'",
     },
     {
+      name: 'workflow_status',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'workflowStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'workflowStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
+      values: [
+        {
+          value: 'closed',
+          label: 'Closed',
+        },
+        {
+          value: 'open',
+          label: 'Open',
+        },
+        {
+          value: 'pending',
+          label: 'Pending',
+        },
+      ],
+    },
+    {
       name: 'acq_unit_ids',
       sourceAlias: 'po',
       dataType: {
@@ -298,6 +335,31 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
+    },
+    {
+      name: 'acquisition_unit',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'acq_unit_ids',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: '90403847-8c47-4f58-b117-9a807b052808',
+        columnName: 'acquisition_unit',
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name',
+      },
     },
     {
       name: 'next_pol_number',

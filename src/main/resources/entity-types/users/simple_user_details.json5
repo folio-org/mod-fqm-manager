@@ -124,6 +124,17 @@
       valueGetter: ":sourceAlias.jsonb->'personal'->>'firstName'",
     },
     {
+      name: 'last_name_full_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
+    },
+    {
       name: 'preferred_contact_type_id',
       sourceAlias: 'user',
       dataType: {

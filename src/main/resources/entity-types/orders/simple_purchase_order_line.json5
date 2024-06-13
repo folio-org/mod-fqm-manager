@@ -10,6 +10,9 @@
       target: 'src_purchase_order_line',
     },
   ],
+  requiredPermissions: [
+    "orders.po-lines.item.get"
+  ],
   columns: [
     {
       name: 'id',
@@ -42,7 +45,9 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.creation_date',
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'created_by',
@@ -371,6 +376,12 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'cost'->>'currency'",
+      filterValueGetter: "lower(:sourceAlias.jsonb -> 'cost' ->> 'currency')",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: '58148257-bfb0-4687-8c42-d2833d772f3e',
+        columnName: 'cost_currency',
+      }
     },
     {
       name: 'cost_additional_cost',
@@ -1120,6 +1131,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'paymentStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'paymentStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'Awaiting Payment',
@@ -1270,6 +1283,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'poLineNumber'",
+      filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'poLineNumber'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))'
     },
     {
       name: 'publication_date',
@@ -1314,6 +1329,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'receiptStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'receiptStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'Awaiting Receipt',

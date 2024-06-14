@@ -36,10 +36,6 @@ public class EntityTypeFlatteningService {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-    // TODO: Remove this if-block after all entity types have been converted from the "fromClause" model to the "sources" model
-    if (originalEntityType.getFromClause() != null && originalEntityType.getSources() == null) {
-      return originalEntityType;
-    }
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
       .name(originalEntityType.getName())

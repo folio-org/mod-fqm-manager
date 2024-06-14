@@ -218,8 +218,8 @@
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
       source: {
-        entityTypeId: '6b335e41-2654-4e2a-9b4e-c6930b330ccc',
-        columnName: 'organization_types_name',
+        entityTypeId: '85a2b008-af8d-4890-9490-421cabcb7bad',
+        columnName: 'name',
       },
     },
     {

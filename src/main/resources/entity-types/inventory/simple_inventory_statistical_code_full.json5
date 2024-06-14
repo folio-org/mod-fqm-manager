@@ -1,0 +1,38 @@
+{
+  id: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+  name: 'simple_inventory_statistical_code_full',
+  root: false,
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'statistical_code_full',
+      target: 'drv_inventory_statistical_code_full', // materialized
+    }
+  ],
+  requiredPermissions: [
+    "inventory-storage.statistical-codes.collection.get",
+    "inventory-storage.statistical-code-types.collection.get"
+
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'statistical_code_full',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'statistical_code',
+      sourceAlias: 'statistical_code_full',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.statistical_code',
+    },
+  ],
+}

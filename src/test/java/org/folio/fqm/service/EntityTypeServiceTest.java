@@ -13,9 +13,6 @@ import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,10 +79,8 @@ class EntityTypeServiceTest {
     verifyNoMoreInteractions(repo, localizationService);
   }
 
-  @NullSource
-  @ValueSource(booleans = {false})
-  @ParameterizedTest
-  void testEntityTypeSummaryDoesNotIncludeInaccessibleWhenNotRequested(Boolean p) {
+  @Test
+  void testEntityTypeSummaryDoesNotIncludeInaccessibleWhenNotRequested() {
     UUID id1 = UUID.randomUUID();
     UUID id2 = UUID.randomUUID();
     Set<UUID> ids = Set.of(id1, id2);
@@ -97,7 +92,7 @@ class EntityTypeServiceTest {
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, p);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 

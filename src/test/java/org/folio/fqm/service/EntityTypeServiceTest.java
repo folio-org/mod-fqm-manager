@@ -91,9 +91,9 @@ class EntityTypeServiceTest {
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
 
-      when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
-        new RawEntityTypeSummary(id1, "translation_label_01", List.of("perm1")),
-        new RawEntityTypeSummary(id2, "translation_label_02", List.of("perm2"))));
+    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
+      new RawEntityTypeSummary(id1, "translation_label_01", List.of("perm1")),
+      new RawEntityTypeSummary(id2, "translation_label_02", List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 

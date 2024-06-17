@@ -33,7 +33,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   public ResponseEntity<List<EntityTypeSummary>> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
     // Permissions are handled in the service layer
-    return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet, includeInaccessible));
+    return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible)));
   }
 
   @EntityTypePermissionsRequired

@@ -56,20 +56,18 @@ public class EntityTypeService {
    * @param entityTypeIds If provided, only the entity types having the provided Ids will be included in the results
    */
   @Transactional(readOnly = true)
-  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, Boolean includeInaccessible) {
+  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
       .getEntityTypeSummaries(entityTypeIds)
       .stream()
-      .filter(entityTypeSummary ->
-        Boolean.TRUE.equals(includeInaccessible) || userPermissions.containsAll(entityTypeSummary.requiredPermissions())
-      )
+      .filter(entityTypeSummary -> includeInaccessible || userPermissions.containsAll(entityTypeSummary.requiredPermissions()))
       .map(rawEntityTypeSummary -> {
         EntityTypeSummary result = new EntityTypeSummary()
           .id(rawEntityTypeSummary.id())
           .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()));
 
-        if (Boolean.TRUE.equals(includeInaccessible)) {
+        if (includeInaccessible) {
           return result.missingPermissions(
             rawEntityTypeSummary
               .requiredPermissions()

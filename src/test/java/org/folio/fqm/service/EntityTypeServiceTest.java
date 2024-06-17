@@ -80,6 +80,34 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void testEntityTypeSummaryIncludesMissingPermissions() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    Set<UUID> ids = Set.of(id1, id2);
+    List<EntityTypeSummary> expectedSummary = List.of(
+      new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
+      new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
+
+    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
+      new RawEntityTypeSummary(id1, "translation_label_01", List.of("perm1")),
+      new RawEntityTypeSummary(id2, "translation_label_02", List.of("perm2"))));
+    when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
+    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, true);
+
+    assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+
+    verify(repo, times(1)).getEntityTypeSummaries(ids);
+
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+
+    verifyNoMoreInteractions(repo, localizationService);
+  }
+
+  @Test
   void shouldGetValueWithLabel() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";

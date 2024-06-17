@@ -16,6 +16,7 @@ paths:
       description: Get names for a list of entity type ids.
       parameters:
         - $ref: '#/components/parameters/entity-type-ids'
+        - $ref: '#/components/parameters/include-inaccessible'
       responses:
         '200':
           description: 'Entity type summaries'
@@ -79,6 +80,13 @@ components:
         items:
           type: string
           format: UUID
+    include-inaccessible:
+      name: includeInaccessible
+      in: query
+      required: false
+      description: Include inaccessible entity types in the result
+      schema:
+        type: boolean
   schemas:
     errorResponse:
       $ref: schemas/errors.json

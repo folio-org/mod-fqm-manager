@@ -1,6 +1,5 @@
 package org.folio.fqm.controller;
 
-
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
@@ -15,11 +14,9 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -82,7 +79,7 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
-    when(entityTypeService.getEntityTypeSummary(ids)).thenReturn(expectedSummary);
+    when(entityTypeService.getEntityTypeSummary(ids, null)).thenReturn(expectedSummary);
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.[0].id", is(expectedSummary.get(0).getId().toString())))
@@ -100,7 +97,7 @@ class EntityTypeControllerTest {
     RequestBuilder requestBuilder = MockMvcRequestBuilders.get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
-    when(entityTypeService.getEntityTypeSummary(ids)).thenReturn(expectedSummary);
+    when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
     mockMvc.perform(requestBuilder)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$", is(expectedSummary)));

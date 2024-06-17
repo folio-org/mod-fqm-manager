@@ -69,7 +69,7 @@ public class EntityTypeRepository {
       });
   }
 
-  public List<RawEntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
+  public List<RawEntityTypeSummary> getEntityTypeSummaries(Set<UUID> entityTypeIds) {
     log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
     Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
 

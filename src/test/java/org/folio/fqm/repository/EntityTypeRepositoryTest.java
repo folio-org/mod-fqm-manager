@@ -49,7 +49,7 @@ class EntityTypeRepositoryTest {
       new RawEntityTypeSummary(ENTITY_TYPE_02_ID, ENTITY_TYPE_02_LABEL, List.of())
     );
 
-    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(Set.of());
+    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummaries(Set.of());
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
   }
 
@@ -59,7 +59,7 @@ class EntityTypeRepositoryTest {
     List<RawEntityTypeSummary> expectedSummary = List.of(
       new RawEntityTypeSummary(ENTITY_TYPE_01_ID, ENTITY_TYPE_01_LABEL, List.of()));
 
-    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummary(ids);
+    List<RawEntityTypeSummary> actualSummary = repo.getEntityTypeSummaries(ids);
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
   }
 

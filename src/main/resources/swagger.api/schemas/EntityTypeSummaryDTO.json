@@ -11,6 +11,13 @@
     "label" : {
       "description": "Entity type label",
       "type": "string"
+    },
+    "missingPermissions": {
+      "description": "List of missing permissions",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false,

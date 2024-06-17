@@ -61,17 +61,17 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeSummary(ids)).thenReturn(List.of(
+    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
       new RawEntityTypeSummary(id1, "translation_label_01", List.of()),
       new RawEntityTypeSummary(id2, "translation_label_02", List.of())));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeSummary(ids);
+    verify(repo, times(1)).getEntityTypeSummaries(ids);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");

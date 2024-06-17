@@ -56,17 +56,31 @@ public class EntityTypeService {
    * @param entityTypeIds If provided, only the entity types having the provided Ids will be included in the results
    */
   @Transactional(readOnly = true)
-  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds) {
+  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, Boolean includeInaccessible) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeSummary(entityTypeIds)
+      .getEntityTypeSummaries(entityTypeIds)
       .stream()
-      .filter(entityTypeSummary -> userPermissions.containsAll(entityTypeSummary.requiredPermissions()))
-      .map(rawEntityTypeSummary ->
-        new EntityTypeSummary()
-          .id(rawEntityTypeSummary.id())
-          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()))
+      .filter(entityTypeSummary ->
+        Boolean.TRUE.equals(includeInaccessible) || userPermissions.containsAll(entityTypeSummary.requiredPermissions())
       )
+      .map(rawEntityTypeSummary -> {
+        EntityTypeSummary result = new EntityTypeSummary()
+          .id(rawEntityTypeSummary.id())
+          .label(localizationService.getEntityTypeLabel(rawEntityTypeSummary.name()));
+
+        if (Boolean.TRUE.equals(includeInaccessible)) {
+          return result.missingPermissions(
+            rawEntityTypeSummary
+              .requiredPermissions()
+              .stream()
+              .filter(permission -> !userPermissions.contains(permission))
+              .toList()
+          );
+        }
+
+        return result;
+      })
       .sorted(Comparator.comparing(EntityTypeSummary::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
   }

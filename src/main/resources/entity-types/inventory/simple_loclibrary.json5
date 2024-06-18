@@ -2,7 +2,7 @@
   id: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
   name: 'simple_loclibrary',
   root: true,
-  private: false,
+  private: true,
   sources: [
     {
       alias: 'loclib',

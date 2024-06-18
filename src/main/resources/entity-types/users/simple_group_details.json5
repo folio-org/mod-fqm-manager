@@ -2,7 +2,7 @@
   id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
   name: 'simple_group_details',
   root: false,
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

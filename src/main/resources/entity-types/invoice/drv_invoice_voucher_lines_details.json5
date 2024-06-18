@@ -1,7 +1,7 @@
 {
   id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
   name: 'drv_voucher_lines_details',
-  private: false,
+  private: true,
   columns: [
     {
       name: 'id',

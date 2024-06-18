@@ -1,7 +1,7 @@
 {
   id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
   name: 'drv_invoice_lines_details',
-  private: false,
+  private: true,
   columns: [
     {
       name: 'id',

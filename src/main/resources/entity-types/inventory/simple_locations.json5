@@ -1,7 +1,7 @@
 {
   id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
   name: 'simple_locations',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

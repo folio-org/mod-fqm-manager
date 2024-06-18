@@ -1,7 +1,7 @@
 {
   id: 'f067beda-cbeb-4423-9a0d-3b59fb329ce2',
   name: 'simple_department_details',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

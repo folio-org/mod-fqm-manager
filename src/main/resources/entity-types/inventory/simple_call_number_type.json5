@@ -1,7 +1,7 @@
 {
   id: 'd9338ced-3e71-4f24-b605-7912d590f005',
   name: 'simple_call_number_type',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

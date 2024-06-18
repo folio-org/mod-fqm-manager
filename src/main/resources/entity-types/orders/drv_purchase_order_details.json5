@@ -1,6 +1,7 @@
 {
   id: '230b18b1-ee3b-4382-9236-db44e5f30121',
   name: 'drv_purchase_order_details',
+  private: true,
   columns: [
     {
       name: 'id',

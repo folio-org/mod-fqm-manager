@@ -2,7 +2,7 @@
   id: '9176c676-0485-4f6c-b1fc-585355bac679',
   name: 'simple_address_types',
   root: true,
-  private: false,
+  private: true,
   sources: [
     {
       alias: 'atype',

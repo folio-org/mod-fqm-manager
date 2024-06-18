@@ -1,7 +1,7 @@
 {
   id: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
   name: 'drv_contributor_name_type_details',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

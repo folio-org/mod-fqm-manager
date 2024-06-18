@@ -1,6 +1,7 @@
 {
   id: 'd0213d22-32cf-490f-9196-d81c3c66e53f',
   name: 'composite_item_details',
+  private: false,
   sources: [
     {
       alias: 'items',

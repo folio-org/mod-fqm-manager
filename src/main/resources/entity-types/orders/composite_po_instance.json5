@@ -1,7 +1,7 @@
 {
   id: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf',
   name: 'composite_po_instance',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

@@ -2,7 +2,7 @@
 {
   id: '8ddd1e32-5c85-46ab-8bf3-1ec9a76c18cf',
   name: 'composite_invoice__voucher_line__ledger_fund__organization',
-  private: false,
+  private: true,
   sources: [
     {
       id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',

@@ -149,8 +149,8 @@ export default function EntityTypeFieldEditor({
                 label="Is ID column"
                 control={
                   <Checkbox
-                    checked={field.visibleByDefault}
-                    onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
+                    checked={field.isIdColumn}
+                    onChange={(e) => onChange({ ...field, isIdColumn: e.target.checked })}
                   />
                 }
               />

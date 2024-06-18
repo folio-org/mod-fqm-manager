@@ -1,0 +1,194 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="create_view_publication_request" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="publication_request" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_publication_request">
+      SELECT * FROM ${tenant_id}_mod_oa.publication_request
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_refdata_value" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="refdata_value" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_refdata_value">
+      SELECT * FROM ${tenant_id}_mod_oa.refdata_value
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_request_party" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="request_party" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_request_party">
+      SELECT * FROM ${tenant_id}_mod_oa.request_party
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_party" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="party" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_party">
+      SELECT * FROM ${tenant_id}_mod_oa.party
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_work" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="work" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_work">
+      SELECT * FROM ${tenant_id}_mod_oa.work
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_title_instance" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="title_instance" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_title_instance">
+      SELECT * FROM ${tenant_id}_mod_oa.title_instance
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_identifier_occurrence" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="identifier_occurrence" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_identifier_occurrence">
+      SELECT * FROM ${tenant_id}_mod_oa.identifier_occurrence
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_identifier" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="identifier" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_identifier">
+      SELECT * FROM ${tenant_id}_mod_oa.identifier
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_identifier_namespace" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="identifier_namespace" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_identifier_namespace">
+      SELECT * FROM ${tenant_id}_mod_oa.identifier_namespace
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_charge" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="charge" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_charge">
+      SELECT * FROM ${tenant_id}_mod_oa.charge
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_monetary_value" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="monetary_value" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_monetary_value">
+      SELECT * FROM ${tenant_id}_mod_oa.monetary_value
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_exchange_rate" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="exchange_rate" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_exchange_rate">
+      SELECT * FROM ${tenant_id}_mod_oa.exchange_rate
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_alternate_email_address" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="alternate_email_address" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_alternate_email_address">
+      SELECT * FROM ${tenant_id}_mod_oa.alternate_email_address
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_checklist_item" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="checklist_item" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_checklist_item">
+      SELECT * FROM ${tenant_id}_mod_oa.checklist_item
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_checklist_item_definition" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="checklist_item_definition" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_checklist_item_definition">
+      SELECT * FROM ${tenant_id}_mod_oa.checklist_item_definition
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_payer" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="payer" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_payer">
+      SELECT * FROM ${tenant_id}_mod_oa.payer
+    </createView>
+  </changeSet>
+
+    <changeSet id="create_view_publication_status" author="your_author_name_here">
+    <preConditions onFail="CONTINUE">
+        <tableExists tableName="publication_status" schemaName="${tenant_id}_mod_oa"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_oa_publication_status">
+      SELECT * FROM ${tenant_id}_mod_oa.publication_status
+    </createView>
+  </changeSet>
+
+</databaseChangeLog>

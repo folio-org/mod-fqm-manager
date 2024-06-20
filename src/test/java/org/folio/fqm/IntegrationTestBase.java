@@ -144,7 +144,7 @@ public class IntegrationTestBase {
       .headers(getOkapiHeaders())
       .contentType("application/json")
       .when()
-      .get("/entity-types")
+      .get("/entity-types?includeInaccessible=true")
       .then()
       .statusCode(200)
       .body("$.size()", greaterThan(0));

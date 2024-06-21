@@ -47,6 +47,7 @@ import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
+import static org.jooq.impl.DSL.trueCondition;
 
 /**
  * Class responsible for converting an FQL query to SQL query
@@ -155,8 +156,12 @@ public class FqlToSqlConverterService {
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
-      String value = (String) notEqualsCondition.value();
-      return cast(field, UUID.class).ne(cast(value, UUID.class));
+      try {
+        UUID uuidValue = UUID.fromString((String) notEqualsCondition.value());
+        return cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
+      } catch (IllegalArgumentException e) {
+        return trueCondition();
+      }
     }
     if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
       return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne);
@@ -235,7 +240,12 @@ public class FqlToSqlConverterService {
         String filterFieldDataType = getFieldForFiltering(notInCondition, entityType).getDataType().getDataType();
         if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
           if (val instanceof String value) {
-            return cast(field, UUID.class).notEqual(cast(value, UUID.class));
+            try {
+              UUID uuidValue = UUID.fromString(value);
+              return cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
+            } catch (IllegalArgumentException e) {
+              return trueCondition();
+            }
           }
           return field.notEqual(val);
         }

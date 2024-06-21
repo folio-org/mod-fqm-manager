@@ -32,6 +32,7 @@ import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
+import static org.jooq.impl.DSL.trueCondition;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FqlToSqlConverterServiceTest {
@@ -72,7 +73,7 @@ class FqlToSqlConverterServiceTest {
         )
       );
   }
-
+  static Condition trueCondition = trueCondition();
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
     return Arrays.asList(
@@ -121,7 +122,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not equals ranged UUID",
         "{\"rangedUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
-        cast(field("rangedUUIDField"), UUID.class).ne(cast(null, UUID.class))
+        trueCondition
       ),
       Arguments.of(
         "equals open UUID",
@@ -131,7 +132,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not equals open UUID",
         "{\"openUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
-        cast(field("openUUIDField"), UUID.class).ne(cast(null, UUID.class))
+        trueCondition
       ),
       Arguments.of(
         "equals open UUID",
@@ -313,17 +314,13 @@ class FqlToSqlConverterServiceTest {
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        cast(field("openUUIDField"), UUID.class)
-          .ne(cast(null, UUID.class))
-          .and(cast(field("openUUIDField"), UUID.class).ne(cast(null, UUID.class)))
+        DSL.trueCondition().and(DSL.trueCondition())
       ),
       Arguments.of(
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        cast(field("rangedUUIDField"), UUID.class)
-          .ne(cast(null, UUID.class))
-          .and(cast(field("rangedUUIDField"), UUID.class).ne(cast(null, UUID.class)))
+        DSL.trueCondition().and(DSL.trueCondition())
       ),
       Arguments.of(
         "in list ranged UUID",
@@ -342,16 +339,16 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not in list ranged UUID",
         """
-          {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
-        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
-          .and(cast(field("rangedUUIDField"), UUID.class).ne(cast(null, UUID.class)))
+          {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
+        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
+        and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
       ),
       Arguments.of(
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
         cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
-          .and(cast(field("openUUIDField"), UUID.class).ne(cast(null, UUID.class)))
+          .and(trueCondition)
       ),
       Arguments.of(
         "complex condition",

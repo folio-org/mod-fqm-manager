@@ -9,25 +9,25 @@ import com.google.common.collect.Lists;
 
 import java.util.*;
 
-import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ResultSetServiceTest {
 
   private ResultSetRepository resultSetRepository;
-  private EntityTypeRepository entityTypeRepository;
+  private EntityTypeFlatteningService entityTypeFlatteningService;
   private ResultSetService service;
 
   @BeforeEach
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
-    this.entityTypeRepository = mock(EntityTypeRepository.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeRepository);
+    this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService);
   }
 
   @Test
@@ -44,22 +44,26 @@ class ResultSetServiceTest {
     );
 
     when(
-      entityTypeRepository.getEntityTypeDefinition(entityTypeId)
+      entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
     )
-    .thenReturn(
-      Optional.of(
+      .thenReturn(
         new EntityType()
-        .name("test_entity")
-        .id(entityTypeId.toString())
-        .columns(
-          List.of(
-            new EntityTypeColumn().name("id").isIdColumn(true),
-            new EntityTypeColumn().name("key1"),
-            new EntityTypeColumn().name("key2")
+          .name("test_entity")
+          .id(entityTypeId.toString())
+          .columns(
+            List.of(
+              new EntityTypeColumn().name("id").isIdColumn(true),
+              new EntityTypeColumn().name("key1"),
+              new EntityTypeColumn().name("key2")
+            )
           )
-        )
-      )
-    );
+          .sources(List.of(
+            new EntityTypeSource()
+              .type("db")
+              .alias("source1")
+              .target("target1")
+          ))
+      );
     when(
       resultSetRepository.getResultSet(entityTypeId, fields, listIds)
     )

@@ -6,6 +6,7 @@ import lombok.SneakyThrows;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.jooq.*;
 import org.jooq.Record;
@@ -37,13 +38,29 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
   public static final List<Map<String, Object>> TEST_ENTITY_WITH_ARRAY_CONTENTS = List.of(
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "testField", getPgArray()));
 
-  private static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
+  public static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(ID_FIELD_NAME).isIdColumn(true),
-      new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
+      new EntityTypeColumn()
+        .name(ID_FIELD_NAME)
+        .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
+        .valueGetter(ID_FIELD_NAME)
+        .isIdColumn(true)
+        .sourceAlias("source1"),
+      new EntityTypeColumn()
+        .name("testField")
+        .dataType(new EntityDataType().dataType("arrayType"))
+        .sourceAlias("source1")
+        .valueGetter(":sourceAlias.testField")
     ))
     .name("TEST_ARRAY_ENTITY_TYPE")
-    .fromClause("TEST_ARRAY_ENTITY_TYPE");
+    .fromClause("TEST_ARRAY_ENTITY_TYPE")
+    .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source1")
+        .target("target1")
+      )
+    );
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_IDS_WITH_ARRAY_REGEX = "SELECT .* FROM .* WHERE ID IN .*";

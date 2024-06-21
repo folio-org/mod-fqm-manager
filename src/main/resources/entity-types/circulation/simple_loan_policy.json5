@@ -1,0 +1,858 @@
+{
+  id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+  name: 'simple_loan_policy',
+  root: true,
+  private: true,
+  sources: [
+    {
+      alias: 'lp',
+      type: 'db',
+      target: 'src_circulation_loan_policy',
+    },
+  ],
+  requiredPermissions: [
+    'circulation-storage.loan-policies.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'fixed_due_date_schedule_id',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.loanspolicy_fixedduedatescheduleid',
+    },
+    {
+      name: 'renewals_policy_alternate_fixed_due_date_schedule_id',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.renewalspolicy_alternatefixedduedatescheduleid',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'description',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+    },
+    {
+      name: 'loanable',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'loanable'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'loan_profile',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'profileId'",
+    },
+    {
+      name: 'closed_library_due_date_management',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
+    },
+    {
+      name: 'item_limit',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'itemLimit'",
+    },
+    {
+      name: 'renewable',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'renewable'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'renewals_unlimited',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'unlimited'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'renewals_number_allowed',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'numberAllowed'",
+    },
+    {
+      name: 'renewals_policy_renew_from',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'renewFromId'",
+    },
+    {
+      name: 'renewals_policy_different_period',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'differentPeriod'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'loans_policy_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'period'->>'duration'",
+    },
+    {
+      name: 'loans_policy_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'period'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'loans_policy_closed_library_due_date_management_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
+    },
+    {
+      name: 'loans_policy_grace_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'duration'",
+    },
+    {
+      name: 'loans_policy_grace_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'loans_policy_opening_time_offset_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'duration'",
+    },
+    {
+      name: 'loans_policy_opening_time_offset_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'loans_policy_fixed_due_date_schedule_id',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'fixedDueDateScheduleId'",
+    },
+    {
+      name: 'loans_policy_item_limit',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'itemLimit'",
+    },
+    {
+      name: 'renewals_policy_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->'period'->>'duration'",
+    },
+    {
+      name: 'renewals_policy_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->'period'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_recalls_alternate_grace_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_recalls_alternate_grace_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_recalls_minimum_guaranteed_loan_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_recalls_minimum_guaranteed_loan_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_recalls_recall_return_interval_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'duration'",
+    },
+    {
+      name: 'request_management_recalls_recall_return_interval_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_recalls_allow_recalls_to_extend_overdue_loans',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->>'allowRecallsToExtendOverdueLoans'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'request_management_recalls_alternate_recall_return_interval_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'duration'",
+    },
+    {
+      name: 'request_management_recalls_alternate_recall_return_interval_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_holds_alternate_checkout_loan_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_holds_alternate_checkout_loan_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_holds_renew_items_with_request',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->>'renewItemsWithRequest'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'request_management_holds_alternate_renewal_loan_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_holds_alternate_renewal_loan_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_pages_alternate_checkout_loan_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_pages_alternate_checkout_loan_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+    {
+      name: 'request_management_pages_renew_items_with_request',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->>'renewItemsWithRequest'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'request_management_pages_alternate_renewal_loan_period_duration',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'duration'",
+    },
+    {
+      name: 'request_management_pages_alternate_renewal_loan_period_interval_type',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'intervalId'",
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+      ],
+    },
+  ],
+}

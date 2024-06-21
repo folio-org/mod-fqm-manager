@@ -1,6 +1,6 @@
 package org.folio.fqm.repository;
 
-import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 import java.sql.SQLException;
@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.IdColumnUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
@@ -22,6 +23,7 @@ import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -42,7 +44,7 @@ import lombok.extern.log4j.Log4j2;
 public class ResultSetRepository {
 
   @Qualifier("readerJooqContext") private final DSLContext jooqContext;
-  private final EntityTypeRepository entityTypeRepository;
+  private final EntityTypeFlatteningService entityTypeFlatteningService;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -74,20 +76,38 @@ public class ResultSetRepository {
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()
-          .map(UUID::fromString)
+          // TODO: the below check keeps things just-about working, but still leads to records being counted as "deleted" if one of their id columns is null. Need to handle this better.
+          .map(val -> val != null ? UUID.fromString(val) : null)
           .toList();
         whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
       } else {
         whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
       }
     }
-    var result = jooqContext.select(fieldsToSelect)
-      .from(entityType.getFromClause())
-      .where(whereClause)
-      .fetch();
+
+    String fromClause = entityTypeFlatteningService.getJoinClause(entityType);
+    var query = jooqContext.select(fieldsToSelect)
+      .from(fromClause)
+      .where(whereClause);
+
+    Result<Record> result;
+    if (isEmpty(entityType.getGroupByFields())) {
+      result = query.fetch();
+    } else {
+      Field<?>[] groupByFields = entityType
+        .getColumns()
+        .stream()
+        .filter(col -> entityType.getGroupByFields().contains(col.getName()))
+        .map(org.folio.querytool.domain.dto.Field::getValueGetter)
+        .map(DSL::field)
+        .toArray(Field[]::new);
+      result = query.groupBy(groupByFields).fetch();
+    }
+
     return recordToMap(result);
   }
 
+  // TODO: update for GROUP BY functionality
   public List<Map<String, Object>> getResultSet(UUID entityTypeId, Fql fql, List<String> fields, List<String> afterId, int limit) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
@@ -104,11 +124,26 @@ public class ResultSetRepository {
     }
 
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
+    // TODO: might want to put next 5 lines in its own method in EntityTypeFlatteningService
+    String finalWhereClause = condition.toString();
+    for (EntityTypeSource source : entityType.getSources()) {
+      String toReplace = ":" + source.getAlias();
+      String alias = "\"" + source.getAlias() + "\"";
+      finalWhereClause = finalWhereClause.replace(toReplace, alias);
+    }
     var fieldsToSelect = getSqlFields(entityType, fields);
-    var sortCriteria = hasIdColumn(entityType) ? field(ID_FIELD_NAME) : DSL.noField();
+    String idColumnName = entityType
+      .getColumns()
+      .stream()
+      .filter(EntityTypeColumn::getIsIdColumn)
+      .findFirst()
+      .orElseThrow()
+      .getName();
+    var sortCriteria = hasIdColumn(entityType) ? field(idColumnName) : DSL.noField(); // TODO: new changes break sorting
+    String fromClause = entityTypeFlatteningService.getJoinClause(entityType);
     var result = jooqContext.select(fieldsToSelect)
-      .from(entityType.getFromClause())
-      .where(condition)
+      .from(fromClause)
+      .where(finalWhereClause)
       .and(afterIdCondition)
       .orderBy(sortCriteria)
       .limit(limit)
@@ -121,18 +156,18 @@ public class ResultSetRepository {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldSet.contains(col.getName()))
+      .filter(col -> !Boolean.TRUE.equals(col.getQueryOnly()))
       .map(col -> SqlFieldIdentificationUtils.getSqlResultsField(col).as(col.getName()))
       .toList();
   }
 
   private EntityType getEntityType(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
   }
 
   private boolean hasIdColumn(EntityType entityType) {
     return entityType.getColumns().stream()
-      .anyMatch(col -> ID_FIELD_NAME.equals(col.getName()));
+      .anyMatch(col -> col.getIsIdColumn());
   }
 
   private List<Map<String, Object>> recordToMap(Result<Record> result) {

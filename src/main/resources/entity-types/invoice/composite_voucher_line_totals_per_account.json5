@@ -1,0 +1,114 @@
+// Corresponds to MCR120
+{
+  id: '0013c960-d08b-4266-b7d3-5b1bea68e2dc',
+  name: 'composite_voucher_line_totals_per_account',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'voucher',
+      target: 'src_invoice_vouchers',
+    },
+    {
+      type: 'db',
+      alias: 'voucher_line',
+      target: 'src_invoice_voucher_lines',
+      join: {
+        type: 'LEFT JOIN',
+        joinTo: 'voucher',
+        condition: "(:this.jsonb ->> 'voucherId')::uuid = :that.id",
+      },
+    },
+    {
+      type: 'db',
+      alias: 'invoice',
+      target: 'src_invoice_invoices',
+      join: {
+        type: 'LEFT JOIN',
+        joinTo: 'voucher',
+        condition: "(:that.jsonb ->> 'invoiceId')::uuid = :this.id",
+      },
+    },
+    {
+      join: {
+        type: 'left join',
+        joinTo: 'voucher_line',
+        condition: "(:that.jsonb ->> 'externalAccountNumber') = :this.jsonb ->> 'externalAccountNo'",
+      },
+      type: 'db',
+      alias: 'fund',
+      target: 'src_finance_fund',
+    },
+    {
+      type: 'db',
+      alias: 'ledger',
+      target: 'src_finance_ledger',
+      join: {
+        type: 'left join',
+        joinTo: 'fund',
+        condition: "(:that.jsonb ->> 'ledgerId')::uuid = :this.id",
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'ledger_id',
+      sourceAlias: 'ledger',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: 'true',
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'ledger_name',
+      sourceAlias: 'ledger',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+    },
+    {
+      name: 'external_account_number',
+      sourceAlias: 'fund',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.jsonb->>'externalAccountNo'",
+    },
+    {
+      name: 'total_amount_spent_per_account_number',
+      sourceAlias: 'voucher_line',
+      dataType: {
+        dataType: 'numberType',
+      },
+      valueGetter: "SUM((:sourceAlias.jsonb->'amount')::float)",
+      valueFunction: "(:value)::float"
+    },
+    {
+      name: 'voucher_date',
+      sourceAlias: 'voucher',
+      dataType: {
+        dataType: 'dateType',
+      },
+      valueGetter: ":sourceAlias.jsonb->>'voucherDate'",
+      queryOnly: true
+    },
+  ],
+  groupByFields: [
+    "external_account_number",
+    "ledger_id",
+    "ledger_name"
+  ],
+  defaultSort: [
+    {
+      columnName: 'ledger_name',
+      direction: 'ASC',
+    },
+    {
+      columnName: 'external_account_number',
+      direction: 'ASC',
+    },
+  ],
+}

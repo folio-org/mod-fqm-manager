@@ -3,6 +3,7 @@ package org.folio.fqm.repository;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
+import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -10,30 +11,30 @@ import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link ResultSetRepositoryTestDataProvider} class
  */
 class ResultSetRepositoryTest {
 
+  EntityTypeFlatteningService entityTypeFlatteningService;
+
   private ResultSetRepository repo;
 
   @BeforeEach
   void setup() {
-    DSLContext readerContext = DSL.using(new MockConnection(
-      new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
-    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(readerContext, context, new ObjectMapper());
-    this.repo = new ResultSetRepository(context, entityTypeRepository);
+    entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
   }
 
   @Test
@@ -61,6 +62,7 @@ class ResultSetRepositoryTest {
 
   @Test
   void getResultSetShouldReturnResultsWithRequestedFields() {
+    UUID entityTypeId = UUID.randomUUID();
     List<List<String>> listIds = List.of(
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString()),
@@ -74,7 +76,11 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, listIds);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
+      .thenReturn("TEST_ENTITY_TYPE");
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds);
     assertEquals(expectedList, actualList);
   }
 
@@ -92,6 +98,10 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
+      .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
     assertEquals(expectedList, actualList);
   }
@@ -125,6 +135,10 @@ class ResultSetRepositoryTest {
     int limit = 100;
     Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
+      .thenReturn("TEST_ENTITY_TYPE");
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, null, limit);
     assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);
   }

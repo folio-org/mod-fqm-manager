@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.IntegrationTestBase;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -38,21 +39,28 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
           .dataType(new RangedUUIDType())
           .labelAlias("id alias")
           .visibleByDefault(true)
-          .valueGetter("id"),
+          .valueGetter(":sourceAlias.id")
+          .sourceAlias("t")
+          .isIdColumn(true),
         new EntityTypeColumn()
           .name("some_column")
           .dataType(new StringType())
           .labelAlias("some column")
           .visibleByDefault(true)
-          .valueGetter("some_column")
-          .filterValueGetter("lower(\"left\"(some_column, 10))")
+          .valueGetter(":sourceAlias.some_column")
+          .filterValueGetter("lower(\"left\"(:sourceAlias.some_column, 10))")
           .valueFunction("lower(\"left\"(:value, 10))")
-      ))
-      .fromClause("""
-        (values
-          ('2af997b6-2655-459e-bdca-decbf54795ae'::uuid, 'AbCdEfGhIjKlMnOpQrStUvWxYz', 456),
-          ('e0e4233e-fea0-4834-96ac-78739a1856d3'::uuid, 'blah blah blah', 789)
-        ) as t (id, some_column, unused_column)""");
+          .sourceAlias("t")
+      )).sources(List.of(
+        new EntityTypeSource("db", "t")
+          .target("""
+              (select id, some_column, unused_column
+              from (values
+                     ('2af997b6-2655-459e-bdca-decbf54795ae'::uuid, 'AbCdEfGhIjKlMnOpQrStUvWxYz', 456),
+                     ('e0e4233e-fea0-4834-96ac-78739a1856d3'::uuid, 'blah blah blah', 789)
+                   ) as t (id, some_column, unused_column)
+              )"""))
+      );
 
     var json = new ObjectMapper().writeValueAsString(entityType);
     var sql = """

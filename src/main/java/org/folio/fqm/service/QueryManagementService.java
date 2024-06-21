@@ -1,12 +1,10 @@
 package org.folio.fqm.service;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.repository.QueryRepository;
@@ -49,7 +47,6 @@ public class QueryManagementService {
   private final QueryResultsSorterService queryResultsSorterService;
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
-  private final FqlService fqlService;
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
   @Setter
@@ -64,8 +61,7 @@ public class QueryManagementService {
    */
   public QueryIdentifier runFqlQueryAsync(SubmitQuery submitQuery) {
     EntityType entityType = entityTypeService
-      .getEntityTypeDefinition(submitQuery.getEntityTypeId())
-      .orElseThrow(() -> new EntityTypeNotFoundException(submitQuery.getEntityTypeId()));
+      .getEntityTypeDefinition(submitQuery.getEntityTypeId());
     List<String> fields = CollectionUtils.isEmpty(submitQuery.getFields()) ?
       getFieldsFromEntityType(entityType) : new ArrayList<>(submitQuery.getFields());
     List<String> idColumns = IdColumnUtils.getIdColumnNames(entityType);
@@ -102,9 +98,7 @@ public class QueryManagementService {
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
     }
-    List<String> idColumns = entityTypeService.getEntityTypeDefinition(entityTypeId)
-      .map(IdColumnUtils::getIdColumnNames)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    List<String> idColumns = IdColumnUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId));
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
         fields.add(idColumn);
@@ -169,8 +163,7 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId);
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType, fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);
@@ -182,22 +175,19 @@ public class QueryManagementService {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getEntityTypeDefinition(query.entityTypeId())
-      .orElseThrow(() -> new EntityTypeNotFoundException(query.entityTypeId()));
+    entityTypeService.getEntityTypeDefinition(query.entityTypeId());
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
-    entityTypeService
-      .getEntityTypeDefinition(entityTypeId)
-      .map(IdColumnUtils::getIdColumnNames)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId))
+    IdColumnUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .forEach(colName -> {
         if (!fields.contains(colName)) {
           fields.add(colName);
         }
       });
+
     return resultSetService.getResultSet(entityTypeId, fields, ids);
   }
 

@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
@@ -17,11 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
@@ -49,6 +45,9 @@ class EntityTypeServiceTest {
   @Mock
   private PermissionsService permissionsService;
 
+  @Mock
+  private EntityTypeFlatteningService entityTypeFlatteningService;
+
   @InjectMocks
   private EntityTypeService entityTypeService;
 
@@ -61,9 +60,9 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
-      new RawEntityTypeSummary(id1, "translation_label_01", List.of()),
-      new RawEntityTypeSummary(id2, "translation_label_02", List.of())));
+    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+      new EntityType(id1.toString(), "translation_label_01", true, false),
+      new EntityType(id2.toString(), "translation_label_02", true, false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
@@ -71,7 +70,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeSummaries(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
@@ -86,17 +85,19 @@ class EntityTypeServiceTest {
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
-      new RawEntityTypeSummary(id1, "translation_label_01", List.of("perm1")),
-      new RawEntityTypeSummary(id2, "translation_label_02", List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
+    when(permissionsService.getRequiredPermissions(any(EntityType.class)))
+      .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeSummaries(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
 
@@ -112,10 +113,12 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
 
-    when(repo.getEntityTypeSummaries(ids)).thenReturn(List.of(
-      new RawEntityTypeSummary(id1, "translation_label_01", List.of("perm1")),
-      new RawEntityTypeSummary(id2, "translation_label_02", List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
+    when(permissionsService.getRequiredPermissions(any(EntityType.class)))
+      .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
@@ -123,7 +126,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeSummaries(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
@@ -297,14 +300,11 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(repo.getEntityTypeDefinition(entityTypeId))
-      .thenReturn(Optional.of(expectedEntityType));
-    when(localizationService.localizeEntityType(expectedEntityType))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
-      .getEntityTypeDefinition(entityTypeId)
-      .get();
+      .getEntityTypeDefinition(entityTypeId);
 
     assertEquals(expectedEntityType, actualDefinition);
   }

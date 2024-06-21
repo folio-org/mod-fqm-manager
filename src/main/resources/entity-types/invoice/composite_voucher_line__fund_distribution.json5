@@ -1,0 +1,105 @@
+{
+  id: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab',
+  name: 'composite_voucher_line__fund_distribution',
+  private: true,
+  sources: [
+    {
+      id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
+      type: 'entity-type',
+      alias: 'voucher_line',
+      useIdColumns: true,
+    },
+    {
+      type: 'db',
+      alias: 'fund_distribution',
+      target: "jsonb_array_elements(voucher_line.jsonb -> 'fundDistributions')",
+      join: {
+        type: 'CROSS JOIN LATERAL',
+        joinTo: 'voucher_line',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'fund_id',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:sourceAlias.jsonb->>'fundId')::UUID",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'fundId')::UUID",
+      valueFunction: 'lower(:value)::UUID',
+    },
+    {
+      name: 'invoice_line_id',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:sourceAlias.jsonb->>'invoiceLineId')::UUID",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'invoiceLineId')::UUID",
+      valueFunction: 'lower(:value)::UUID',
+    },
+    {
+      name: 'code',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'code')",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'value',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'numberType',
+      },
+      valueGetter: "(:sourceAlias.jsonb->>'value')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'encumbrance',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: "(:sourceAlias.jsonb->>'encumbrance')",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'encumbrance')",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'distribution_type',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: ":sourceAlias.jsonb->>'distributionType'",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'distributionType')",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'expense_class_id',
+      sourceAlias: 'fund_distribution',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: "(:sourceAlias.jsonb->>'expenseClassId')",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'expenseClassId')",
+      valueFunction: 'lower(:value)',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'voucher_line.id',
+      direction: 'ASC',
+    },
+    {
+      columnName: 'fund_id',
+      direction: 'ASC',
+    },
+  ],
+}

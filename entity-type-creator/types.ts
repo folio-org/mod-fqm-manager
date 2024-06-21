@@ -34,7 +34,9 @@ export interface DataType {
 
 export interface EntityTypeField {
   name: string;
+  property?: string;
   dataType: DataType;
+  sourceAlias?: string;
   isIdColumn?: boolean;
   idColumnName?: string;
   queryable?: boolean;
@@ -53,6 +55,22 @@ export interface EntityTypeField {
   };
   values?: { value: string; label: string }[];
 }
+
+export interface EntityTypeSource {
+  type: 'db' | 'entity-type';
+  target?: string;
+  alias: string;
+  id?: string;
+  join?: EntityTypeSourceJoin;
+  useIdColumns?: boolean;
+}
+
+export interface EntityTypeSourceJoin {
+  type: string;
+  joinTo: string;
+  condition: string;
+}
+
 export interface EntityType {
   id: string;
   name: string;
@@ -60,6 +78,7 @@ export interface EntityType {
   private?: boolean;
   customFieldEntityTypeId?: string;
   fromClause?: string;
+  sources?: EntityTypeSource[];
   columns?: EntityTypeField[];
   defaultSort?: { columnName: string; direction: string }[];
   sourceView?: string;

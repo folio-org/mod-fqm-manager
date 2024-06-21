@@ -1,0 +1,558 @@
+{
+  id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
+  name: 'drv_invoices_details',
+  private: true,
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'accounting_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
+    },
+    {
+      name: 'adjustments_total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'approved_by',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'approvedBy'",
+    },
+    {
+      name: 'approval_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'approvalDate'",
+    },
+    {
+      name: 'batch_group_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'batchGroupId'",
+    },
+    {
+      name: 'bill_to',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'billTo'",
+    },
+    {
+      name: 'chk_subscription_overlap',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'chkSubscriptionOverlap'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'cancellation_note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'cancellationNote'",
+    },
+    {
+      name: 'currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'currency'",
+    },
+    {
+      name: 'enclosure_needed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'enclosureNeeded'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'exchange_rate',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "(:sourceAlias.jsonb->>'exchangeRate')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'export_to_accounting',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'exportToAccounting'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'folio_invoice_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'folioInvoiceNo'",
+    },
+    {
+      name: 'invoice_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'invoiceDate'",
+    },
+    {
+      name: 'lock_total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'lockTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'note'",
+    },
+    {
+      name: 'payment_due',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentDue'",
+    },
+    {
+      name: 'payment_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentDate'",
+    },
+    {
+      name: 'payment_terms',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentTerms'",
+    },
+    {
+      name: 'payment_method',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentMethod'",
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'status'",
+      values: [
+        {
+          label: 'Open',
+          value: 'Open',
+        },
+        {
+          label: 'Reviewed',
+          value: 'Reviewed',
+        },
+        {
+          label: 'Paid',
+          value: 'Paid',
+        },
+        {
+          label: 'Approved',
+          value: 'Approved',
+        },
+        {
+          label: 'Cancelled',
+          value: 'Cancelled',
+        },
+      ],
+    },
+    {
+      name: 'source',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+      values: [
+        {
+          label: 'User',
+          value: 'User',
+        },
+        {
+          label: 'API',
+          value: 'API',
+        },
+        {
+          label: 'EDI',
+          value: 'EDI',
+        },
+      ],
+    },
+    {
+      name: 'sub_total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'total')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'vendor_invoice_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'vendorInvoiceNo'",
+    },
+    {
+      name: 'disbursement_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'disbursementNumber'",
+    },
+    {
+      name: 'voucher_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'voucherNumber'",
+    },
+    {
+      name: 'payment_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'paymentId'",
+    },
+    {
+      name: 'disbursement_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'disbursement_date'",
+    },
+    {
+      name: 'po_numbers',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(alc_id.value::text) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(alc_id.value::text)) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'vendor_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'vendorId'",
+    },
+    {
+      name: 'fiscal_year_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'fiscalYearId'",
+    },
+    {
+      name: 'account_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'accountNo'",
+    },
+    {
+      name: 'manual_payment',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'manualPayment'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'invoice',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'next_invoice_line_number',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'nextInvoiceLineNumber')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'tag_list',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'invoice',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      valueFunction: 'lower(:value)',
+    },
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'invoice',
+      target: 'src_invoice_invoices'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

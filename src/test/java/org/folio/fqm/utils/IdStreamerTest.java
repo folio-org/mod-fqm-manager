@@ -3,6 +3,7 @@ package org.folio.fqm.utils;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +23,9 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
-import org.folio.fqm.repository.QueryDetailsRepository;
+import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.LocalizationService;
+import org.folio.querytool.domain.dto.EntityType;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -38,6 +41,9 @@ class IdStreamerTest {
   private static final UUID ENTITY_TYPE_ID = UUID.randomUUID();
 
   private IdStreamer idStreamer;
+  private LocalizationService localizationService;
+
+  EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
   void setup() {
@@ -55,32 +61,14 @@ class IdStreamerTest {
       context,
       new ObjectMapper()
     );
+    localizationService = mock(LocalizationService.class);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
     this.idStreamer =
       new IdStreamer(
-        readerContext,
-        entityTypeRepository,
-        new QueryDetailsRepository(readerContext)
-      );
-  }
 
-  @Test
-  void shouldFetchIdStreamForQueryId() {
-    UUID queryId = UUID.randomUUID();
-    List<List<String>> expectedIds = new ArrayList<>();
-    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
-    int idsCount = idStreamer.streamIdsInBatch(
-      queryId,
-      true,
-      2,
-      idsConsumer
-    );
-    assertEquals(expectedIds, actualIds);
-    assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
+        context,
+        entityTypeFlatteningService
+      );
   }
 
   @Test
@@ -93,6 +81,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     int idsCount = idStreamer.streamIdsInBatch(
       ENTITY_TYPE_ID,
       true,
@@ -121,16 +110,22 @@ class IdStreamerTest {
     assertEquals(expectedIds, actualIds);
   }
 
+  // TODO: this test is kind of butchered. Clean up if possible
   @Test
   void shouldThrowExceptionWhenEntityTypeNotFound() {
     Fql fql = new Fql(new EqualsCondition(new FqlField("field"), "value"));
     Consumer<IdsWithCancelCallback> noop = idsWithCancelCallback -> {
     };
     EntityTypeRepository mockRepository = mock(EntityTypeRepository.class);
-    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, mockRepository, null);
+    LocalizationService localizationService = mock(LocalizationService.class);
+
 
     when(mockRepository.getEntityTypeDefinition(ENTITY_TYPE_ID))
       .thenReturn(Optional.empty());
+
+    entityTypeFlatteningService = new EntityTypeFlatteningService(mockRepository, new ObjectMapper(), localizationService);
+
+    IdStreamer idStreamerWithMockRepo = new IdStreamer(null, entityTypeFlatteningService);
 
     assertThrows(
       EntityTypeNotFoundException.class,

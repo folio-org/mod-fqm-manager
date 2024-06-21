@@ -1,0 +1,504 @@
+{
+  id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
+  name: 'drv_invoice_lines_details',
+  private: true,
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice_lines',
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'accounting_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
+    },
+    {
+      name: 'account_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'accountNumber'",
+    },
+    {
+      name: 'adjustments_total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'comment',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'comment'",
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+    },
+    {
+      name: 'fund_distribution',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'distribution_type',
+              property: 'distributionType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              values: [
+                {
+                  label: 'percentage',
+                  value: 'percentage',
+                },
+                {
+                  label: 'amount',
+                  value: 'amount',
+                },
+              ],
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'encumbrance',
+              property: 'encumbrance',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'invoice_line_id',
+              property: 'invoiceLineId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_id',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+            },
+          ],
+        },
+      },
+      sourceAlias: 'invoice_lines',
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
+    },
+    {
+      name: 'invoice_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'invoiceId'",
+    },
+    {
+      name: 'invoice_line_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'invoiceLineNumber'",
+    },
+    {
+      name: 'invoice_line_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'invoiceLineStatus'",
+      values: [
+        {
+          label: 'Open',
+          value: 'Open',
+        },
+        {
+          label: 'Reviewed',
+          value: 'Reviewed',
+        },
+        {
+          label: 'Approved',
+          value: 'Approved',
+        },
+        {
+          label: 'Paid',
+          value: 'Paid',
+        },
+        {
+          label: 'Cancelled',
+          value: 'Cancelled',
+        },
+        {
+          label: 'Error',
+          value: 'Error',
+        },
+      ],
+    },
+    {
+      name: 'po_line_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'poLineId'",
+    },
+    {
+      name: 'product_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'productId'",
+    },
+    {
+      name: 'product_id_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'productIdType'",
+    },
+    {
+      name: 'quantity',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'quantity')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'release_encumbrance',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'releaseEncumbrance'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'subscription_info',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'subscriptionInfo'",
+    },
+    {
+      name: 'subscription_start',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'subscriptionStart'",
+    },
+    {
+      name: 'subscription_end',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'subscriptionEnd'",
+    },
+    {
+      name: 'sub_total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'total',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'total')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'tag_list',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'invoice_lines',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'reference_numbers',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'ref_number',
+              property: 'refNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'refNumber') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'refNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'ref_number_type',
+              property: 'refNumberType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              values: [
+                {
+                  label: 'Vendor continuation reference number',
+                  value: 'Vendor continuation reference number',
+                },
+                {
+                  label: 'Vendor order reference number',
+                  value: 'Vendor order reference number',
+                },
+                {
+                  label: 'Vendor subscription reference number',
+                  value: 'Vendor subscription reference number',
+                },
+                {
+                  label: 'Vendor internal number',
+                  value: 'Vendor internal number',
+                },
+                {
+                  label: 'Vendor title number',
+                  value: 'Vendor title number',
+                },
+              ],
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'refNumberType') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'refNumberType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'vendor_details_source',
+              property: 'vendorDetailsSource',
+              dataType: {
+                dataType: 'stringType',
+              },
+              values: [
+                {
+                  label: 'OrderLine',
+                  value: 'OrderLine',
+                },
+                {
+                  label: 'InvoiceLine',
+                  value: 'InvoiceLine',
+                },
+              ],
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'vendorDetailsSource') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'vendorDetailsSource')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      sourceAlias: 'invoice_lines',
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'referenceNumbers'",
+    },
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'invoice_lines',
+      target: 'src_invoice_lines'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

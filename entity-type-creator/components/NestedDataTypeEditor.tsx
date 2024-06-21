@@ -1,4 +1,4 @@
-import { DataType, DataTypeValue, EntityType, EntityTypeField } from '@/types';
+import { DataType, DataTypeValue, EntityType, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
 import { Button, FormControl, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
@@ -9,6 +9,7 @@ export default function NestedDataTypeEditor({
   onChange,
   ...rest
 }: Readonly<{
+  sources: EntityTypeSource[];
   parentName: string;
   dataType: DataType;
   onChange: (newDataType: DataType) => void;
@@ -65,7 +66,7 @@ export default function NestedDataTypeEditor({
 
           {dataType.properties?.map((property, i) => (
             <EntityTypeFieldEditor
-              key={property.name}
+              key={i}
               parentName={parentName}
               field={property}
               onChange={(newProperty) =>
@@ -76,6 +77,12 @@ export default function NestedDataTypeEditor({
               }
               first={i === 0}
               last={i === dataType.properties!.length - 1}
+              onDuplicate={() =>
+                onChange({
+                  ...dataType,
+                  properties: [...dataType.properties!, { ...property, name: `${property.name}_copy` }],
+                })
+              }
               onMoveUp={() => {
                 const newProperties = dataType.properties!;
                 newProperties[i] = dataType.properties![i - 1];

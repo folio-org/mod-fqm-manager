@@ -1,0 +1,125 @@
+{
+  id: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+  name: 'simple_loclibrary',
+  root: true,
+  private: true,
+  sources: [
+    {
+      alias: 'loclib',
+      type: 'db',
+      target: 'src_inventory_loclibrary',
+    },
+  ],
+  requiredPermissions: [
+    "inventory-storage.location-units.libraries.collection.get"
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.id',
+      }
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'id',
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        columnName: 'name',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.name',
+      }
+    },
+    {
+      name: 'code',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+    },
+    {
+      name: 'campus_id',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'campusId'",
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'loclib',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+  ],
+}

@@ -955,7 +955,7 @@
       idColumnName: 'status_id',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "inst_stat.jsonb ->> 'name'",
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {

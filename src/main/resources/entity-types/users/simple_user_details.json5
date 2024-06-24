@@ -11,7 +11,8 @@
     },
   ],
   requiredPermissions: [
-    'users.item.get'
+    'users.collection.get',
+    'users.item.get',
   ],
   columns: [
     {

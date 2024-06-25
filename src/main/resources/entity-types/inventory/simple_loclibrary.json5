@@ -67,6 +67,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
       source: {
         columnName: 'name',
         entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
@@ -87,6 +89,16 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'code'",
+      source: {
+        columnName: 'code',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      idColumnName: 'id',
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.code',
+      }
     },
     {
       name: 'campus_id',
@@ -98,6 +110,16 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'campusId'",
+      source: {
+        columnName: 'campus_id',
+        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
+      },
+      idColumnName: 'id',
+      valueSourceApi: {
+        path: 'location-units/libraries',
+        valueJsonPath: '$.loclibs.*.id',
+        labelJsonPath: '$.loclibs.*.campusId',
+      }
     },
     {
       name: 'updated_at',

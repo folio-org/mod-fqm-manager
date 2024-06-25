@@ -1131,6 +1131,7 @@
   "entityType.simple_instance.source": "Source",
   "entityType.simple_instance.staff_suppress": "Staff suppress",
   "entityType.simple_instance.statistical_code_ids": "Statistical code UUIDs",
+  "entityType.simple_instance.statistical_code_names": "Statistical code names",
   "entityType.simple_instance.status_id": "Status UUID",
   "entityType.simple_instance.status": "Status",
   "entityType.simple_instance.status_updated_date": "Status updated date",

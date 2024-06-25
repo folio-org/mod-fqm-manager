@@ -918,7 +918,7 @@
       )",
     },
     {
-      name: 'statistical_codes',
+      name: 'statistical_code_names',
       sourceAlias: 'inst',
       dataType: {
         dataType: 'arrayType',

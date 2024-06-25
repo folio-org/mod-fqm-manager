@@ -62,7 +62,6 @@
       dataType: {
         dataType: 'stringType',
       },
-      idColumnName: 'id',
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
@@ -75,7 +74,7 @@
       },
       valueSourceApi: {
         path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.id',
+        valueJsonPath: '$.loclibs.*.name',
         labelJsonPath: '$.loclibs.*.name',
       }
     },
@@ -93,10 +92,9 @@
         columnName: 'code',
         entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
       },
-      idColumnName: 'id',
       valueSourceApi: {
         path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.id',
+        valueJsonPath: '$.loclibs.*.code',
         labelJsonPath: '$.loclibs.*.code',
       }
     },
@@ -114,10 +112,9 @@
         columnName: 'campus_id',
         entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
       },
-      idColumnName: 'id',
       valueSourceApi: {
         path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.id',
+        valueJsonPath: '$.loclibs.*.campusId',
         labelJsonPath: '$.loclibs.*.campusId',
       }
     },

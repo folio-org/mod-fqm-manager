@@ -1044,6 +1044,7 @@
   "entityType.simple_holdings_records.shelving_title": "Shelving title",
   "entityType.simple_holdings_records.source_id": "Source UUID",
   "entityType.simple_holdings_records.statistical_code_ids": "Statistical code UUIDs",
+  "entityType.simple_holdings_records.statistical_code_names": "Statistical code UUIDs",
   "entityType.simple_holdings_records.tags": "Tags",
   "entityType.simple_holdings_records.temporary_location_id": "Temporary location UUID",
   "entityType.simple_holdings_records.temporary_location_id_copy": "Temporary location UUID",

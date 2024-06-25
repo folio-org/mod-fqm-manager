@@ -16,7 +16,7 @@
       join: {
         type: 'left join',
         joinTo: 'items',
-        condition: "(:that.jsonb ->> 'effectivelocationid')::uuid =:this.id",
+        condition: ":that.effectivelocationid = :this.id",
       },
     },
     {
@@ -26,7 +26,7 @@
       join: {
         type: 'left join',
         joinTo: 'items',
-        condition: "(:that.jsonb ->> 'effectiveCallNumberComponents')::uuid =:this.id",
+        condition: "(:that.jsonb -> 'effectiveCallNumberComponents' ->> 'typeId')::uuid = :this.id",
       },
     },
     {
@@ -34,7 +34,7 @@
       type: 'entity-type',
       id: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
       join: {
-        condition: "(:that.jsonb ->> 'itemLevelCallNumberTypeId')::uuid =:this.id",
+        condition: "(:that.jsonb ->> 'itemLevelCallNumberTypeId')::uuid = :this.id",
         type: 'left join',
         joinTo: 'items',
       },
@@ -46,7 +46,7 @@
       join: {
         type: 'left join',
         joinTo: 'effective_location',
-        condition: "(:that.jsonb ->> 'libraryid')::uuid =:this.id",
+        condition: ":that.libraryid = :this.id",
       },
     },
     {
@@ -56,7 +56,7 @@
       join: {
         joinTo: 'items',
         type: 'left join',
-        condition: "(:that.jsonb ->> 'permanentlocationid')::uuid =:this.id",
+        condition: ":that.permanentlocationid = :this.id",
       },
     },
     {
@@ -66,7 +66,7 @@
       join: {
         joinTo: 'items',
         type: 'left join',
-        condition: "(:that.jsonb ->> 'materialtypeid ')::uuid =:this.id",
+        condition: ":that.materialtypeid  = :this.id",
       },
     },
     {
@@ -76,7 +76,7 @@
       join: {
         type: 'left join',
         joinTo: 'items',
-        condition: "(:that.jsonb ->> 'temporarylocationid')::uuid =:this.id"
+        condition: ":that.temporarylocationid = :this.id"
       }
     },
     {
@@ -86,7 +86,7 @@
       join: {
         joinTo: 'items',
         type: 'join',
-        condition: "(:that.jsonb ->> 'holdingsrecordid')::uuid =:this.id",
+        condition: ":that.holdingsrecordid = :this.id",
       },
     },
     {
@@ -95,7 +95,7 @@
       id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instances
       join: {
         type: 'join',
-        condition: "(:that.jsonb ->> 'instanceid')::uuid =:this.id",
+        condition: ":that.instanceid = :this.id",
         joinTo: 'holdings',
       },
     },

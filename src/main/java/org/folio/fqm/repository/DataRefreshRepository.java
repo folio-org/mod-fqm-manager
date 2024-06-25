@@ -28,24 +28,17 @@ public class DataRefreshRepository {
 
   public static final Field<String> CURRENCY_FIELD = field("currency", String.class);
   public static final Field<Double> EXCHANGE_RATE_FIELD = field("exchange_rate", Double.class);
+  public static final String EXCHANGE_RATE_TABLE = "currency_exchange_rates";
 
-  private static final String REFRESH_MATERIALIZED_VIEW_SQL = "REFRESH MATERIALIZED VIEW CONCURRENTLY ";
+  private static final String REFRESH_MATERIALIZED_VIEW_CONCURRENTLY_SQL = "REFRESH MATERIALIZED VIEW CONCURRENTLY ";
+  private static final String REFRESH_MATERIALIZED_VIEW_SQL = "REFRESH MATERIALIZED VIEW ";
   private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
   private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
     "query", "(module==ORG and configName==localeSettings)"
   );
 
-  private static final List<String> MATERIALIZED_VIEW_NAMES = List.of(
-    "drv_circulation_loan_status",
-    "drv_inventory_item_status",
-    "drv_pol_payment_status",
-    "drv_pol_receipt_status",
-    "drv_inventory_statistical_code_full",
-    "drv_languages"
-  );
-
-  static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
+  private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
     "EUR",
     "JPY",
@@ -85,21 +78,47 @@ public class DataRefreshRepository {
 
   private final SimpleHttpClient simpleHttpClient;
 
-  public void refreshMaterializedViews(String tenantId) {
-    for (String matViewName : MATERIALIZED_VIEW_NAMES) {
+  /**
+   * Refresh a list of materialized views
+   *
+   * @param tenantId              Tenant ID
+   * @param viewsToRefresh        List of materialized views to refresh
+   * @param refreshConcurrently   Whether to execute a concurrent refresh
+   * @return                      List of all materialized views that failed to refresh
+   */
+  public List<String> refreshMaterializedViews(String tenantId, List<String> viewsToRefresh, boolean refreshConcurrently) {
+    List<String> failedRefreshes = new ArrayList<>();
+    String refreshType = refreshConcurrently ? "concurrently" : "non-concurrently";
+    for (String matViewName : viewsToRefresh) {
       String fullName = tenantId + "_mod_fqm_manager." + matViewName;
-      log.info("Refreshing materialized view {}", fullName);
-      jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
+      log.info("Refreshing materialized view {} {}", fullName, refreshType);
+      try {
+        if (refreshConcurrently) {
+          jooqContext.execute(REFRESH_MATERIALIZED_VIEW_CONCURRENTLY_SQL + fullName);
+        } else {
+          jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
+        }
+      } catch (Exception e) {
+        log.info("Failed to refresh materialized view {} {}.", matViewName, refreshType);
+        failedRefreshes.add(matViewName);
+      }
     }
+    return failedRefreshes;
   }
 
-  public void refreshExchangeRates(String tenantId) {
+  /**
+   * Refresh the currency exchange rates for a tenant, based on the tenant's default system currency.
+   *
+   * @param tenantId    Tenant ID
+   * @return            True if refresh successful, false otherwise
+   */
+  public boolean refreshExchangeRates(String tenantId) {
     log.info("Refreshing exchange rates");
-    String fullTableName = tenantId + "_mod_fqm_manager.currency_exchange_rates";
+    String fullTableName = tenantId + "_mod_fqm_manager." + EXCHANGE_RATE_TABLE;
     String systemCurrency = getSystemCurrencyCode();
     if (!SYSTEM_SUPPORTED_CURRENCIES.contains(systemCurrency)) {
       log.info("System currency does not support automatic exchange rate calculation");
-      return;
+      return false;
     }
 
     List<Record2<String, Double>> exchangeRates = new ArrayList<>();
@@ -120,6 +139,7 @@ public class DataRefreshRepository {
       .doUpdate()
       .set(EXCHANGE_RATE_FIELD, DSL.field("EXCLUDED." + EXCHANGE_RATE_FIELD.getName(), Double.class))
       .execute();
+    return true;
   }
 
   private String getSystemCurrencyCode() {

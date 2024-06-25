@@ -23,6 +23,15 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      },
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.id',
+        labelJsonPath: '$.mtypes.*.id',
+      },
     },
     {
       name: 'name',
@@ -37,6 +46,16 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        columnName: 'id',
+        entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      },
+      idColumnName: 'id',
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.id',
+        labelJsonPath: '$.mtypes.*.name',
+      },
     },
     {
       name: 'source',

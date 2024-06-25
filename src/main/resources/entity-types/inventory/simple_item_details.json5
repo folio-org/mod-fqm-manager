@@ -33,7 +33,9 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'hrid'",
+      valueGetter: ":sourceAlias.jsonb ->> 'hrid'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
     },
     {
       name: 'notes',
@@ -214,6 +216,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
+      filterValueGetter: "lower(:sourceAlias.jsonb ->> 'barcode'::text)",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'version',
@@ -231,7 +235,7 @@
       name: 'created_date',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'dateType',
       },
       isIdColumn: false,
       queryable: true,
@@ -242,7 +246,7 @@
       name: 'updated_date',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'dateType',
       },
       isIdColumn: false,
       queryable: true,
@@ -341,7 +345,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'materialTypeId'",
+      valueGetter: ":sourceAlias.materialtypeid",
     },
     {
       name: 'circulation_notes',
@@ -366,7 +370,7 @@
               name: 'date',
               property: 'date',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'dateType',
               },
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'date') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
@@ -541,7 +545,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'holdingsRecordId'",
+      valueGetter: ":sourceAlias.holdingsrecordid",
     },
     {
       name: 'statistical_code_ids',
@@ -549,7 +553,7 @@
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'stringType',
+          dataType: 'rangedUUIDType',
         },
       },
       isIdColumn: false,
@@ -567,6 +571,28 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'statisticalCodeIds') AS elems\
       )",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'statistical_codes',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'statistical_code_ids',
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+        columnName: 'statistical_code',
+      },
     },
     {
       name: 'administrative_notes',
@@ -602,7 +628,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'effectiveLocationId'",
+      valueGetter: ":sourceAlias.effectivelocationid",
     },
     {
       name: 'permanent_loan_type_id',
@@ -625,6 +651,16 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberTypeId'",
+    },
+    {
+      name: 'effective_call_number',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(:sourceAlias.jsonb ->> 'copyNumber'::text, ''::text))",
     },
     {
       name: 'effective_call_number_components_prefix',
@@ -712,7 +748,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'",
+      valueGetter: ":sourceAlias.temporarylocationid",
     },
     {
       name: 'permanent_location_id',
@@ -723,7 +759,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'permanentLocationId'",
+      valueGetter: ":sourceAlias.permanentlocationid",
     },
     {
       name: 'last_check_in_date_time',

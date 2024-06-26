@@ -297,7 +297,7 @@
       name: 'date_of_birth',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'dateType',
       },
       isIdColumn: false,
       queryable: true,

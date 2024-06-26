@@ -642,12 +642,13 @@
       name: 'number_of_items',
       sourceAlias: 'hrd',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'numberType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'numberOfItems'",
+      valueGetter: ":sourceAlias.jsonb->>'numberOfItems'::float",
+      valueFunction: '(:value)::float'
     },
     {
       name: 'receiving_history_display_type',

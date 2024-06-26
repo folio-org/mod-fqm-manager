@@ -647,7 +647,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'numberOfItems'::float",
+      valueGetter: "(:sourceAlias.jsonb->>'numberOfItems')::float",
       valueFunction: '(:value)::float'
     },
     {

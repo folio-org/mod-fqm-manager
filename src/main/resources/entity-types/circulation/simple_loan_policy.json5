@@ -294,7 +294,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'loans_policy_grace_period_interval_type',
@@ -338,7 +339,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'loans_policy_opening_time_offset_interval_type',
@@ -448,7 +450,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_recalls_alternate_grace_period_interval_type',
@@ -492,7 +495,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_recalls_minimum_guaranteed_loan_period_interval_type',
@@ -536,7 +540,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_recalls_recall_return_interval_interval_type',
@@ -601,7 +606,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_recalls_alternate_recall_return_interval_interval_type',
@@ -645,7 +651,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_holds_alternate_checkout_loan_period_interval_type',
@@ -710,7 +717,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_holds_alternate_renewal_loan_period_interval_type',
@@ -754,7 +762,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_pages_alternate_checkout_loan_period_interval_type',
@@ -819,7 +828,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'duration'",
+      valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'duration')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'request_management_pages_alternate_renewal_loan_period_interval_type',

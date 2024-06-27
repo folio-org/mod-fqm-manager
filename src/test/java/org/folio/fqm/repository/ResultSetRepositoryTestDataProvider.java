@@ -37,12 +37,6 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
   public static final List<Map<String, Object>> TEST_ENTITY_WITH_ARRAY_CONTENTS = List.of(
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "testField", getPgArray()));
 
-  private static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
-    .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME),
-      new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
-    ));
-
   private static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
       new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(ID_FIELD_NAME).isIdColumn(true),

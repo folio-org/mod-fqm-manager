@@ -28,13 +28,13 @@ import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(EntityTypeController.class)
 class EntityTypeControllerTest {
-  private final static String GET_DEFINITION_URL = "/entity-types/{entity-type-id}";
   @Autowired
   private MockMvc mockMvc;
   @MockBean
   private EntityTypeService entityTypeService;
   @MockBean
   private FolioExecutionContext folioExecutionContext;
+  private final static String GET_DEFINITION_URL = "/entity-types/{entity-type-id}";
 
   @Test
   void shouldReturnEntityTypeDefinition() throws Exception {

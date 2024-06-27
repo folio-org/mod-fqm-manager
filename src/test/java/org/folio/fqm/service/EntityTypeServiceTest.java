@@ -84,7 +84,6 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("whatever")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
-    List<String> fields = List.of("id", valueColumnName);
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
       .content(

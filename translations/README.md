@@ -18,8 +18,9 @@ When possible, please use the following guidelines when translating field names:
   - _Example_: **avoid** using `Acq. unit` in lieu of `Acquisition unit`
 - Do not refer to arrays as 'lists' directly; instead, use plurals
   - _Example_: `Statistical codes` instead of `Statistical code list`, `Country IDs` instead of `Country ID list`
-- For fields that build on another field's ID, disambiguate each with 'ID' and a unique description
-  - _Example_: `Material type name` and `Material type ID`
-  - **Incorrect**: `Material type` and `Material type ID`
+- For fields that build on another field's UUID, disambiguate each with 'UUID' and a unique description
+  - _Example_: `Material type name` and `Material type UUID`
+  - **Incorrect**: `Material type` and `Material type UUID`
 - The same applies for lists
-  - _Example_: `Acquisition unit IDs` and `Acquisition unit names`
+  - _Example_: `Acquisition unit UUIDs` and `Acquisition unit names`
+- To represent hierarchy in names (for example, a outer entity type name + an inner field name), an em-dash should be used (`—`).

@@ -163,7 +163,7 @@
         },
       },
       sourceAlias: 'location',
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT array_agg(sp_id.value::text) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(sp_id.value::text)) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",

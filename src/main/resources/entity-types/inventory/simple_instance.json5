@@ -117,7 +117,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'_version'",
+      valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'hrid',

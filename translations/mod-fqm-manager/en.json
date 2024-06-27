@@ -837,7 +837,7 @@
   "entityType.simple_user_details.mobile_phone": "Mobile phone",
   "entityType.simple_user_details.patron_group": "Patron group",
   "entityType.simple_user_details.phone": "Phone",
-  "entityType.simple_user_details.preferred_contact_type_id": "Preferred contact type ID",
+  "entityType.simple_user_details.preferred_contact_type": "Preferred contact type",
   "entityType.simple_user_details.preferred_first_name": "Preferred first name",
   "entityType.simple_user_details.proxy_for": "Proxy for",
   "entityType.simple_user_details.tags_tag_list": "Tags tag list",

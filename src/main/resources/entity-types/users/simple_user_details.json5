@@ -136,7 +136,7 @@
       valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
     },
     {
-      name: 'preferred_contact_type_id',
+      name: 'preferred_contact_type',
       sourceAlias: 'user',
       dataType: {
         dataType: 'stringType',
@@ -144,7 +144,21 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'personal'->>'preferredContactTypeId'",
+      valueGetter: "CASE (:sourceAlias.jsonb -> 'personal'::text) ->> 'preferredContactTypeId'::text WHEN '001'::text THEN 'Mail (Primary Address)'::text WHEN '002'::text THEN 'Email'::text WHEN '003'::text THEN 'Text Message'::text ELSE 'unknown'::text END",
+      values: [
+        {
+          value: 'Email',
+          label: 'Email',
+        },
+        {
+          value: 'Mail (Primary Address)',
+          label: 'Mail (Primary Address)',
+        },
+        {
+          value: 'Text Message',
+          label: 'Text Message',
+        },
+      ],
     },
     {
       name: 'phone',

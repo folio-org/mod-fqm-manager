@@ -395,7 +395,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'itemLimit'",
+      valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->>'itemLimit')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'renewals_policy_period_duration',

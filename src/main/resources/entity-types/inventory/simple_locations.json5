@@ -49,9 +49,9 @@
         entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
       },
       valueSourceApi: {
-        path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.code',
-        labelJsonPath: '$.loclibs.*.code',
+        path: 'locations',
+        valueJsonPath: '$.locations.*.code',
+        labelJsonPath: '$.locations.*.code',
       }
     },
     {
@@ -99,9 +99,9 @@
         entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
       },
       valueSourceApi: {
-        path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.discoveryDisplayName',
-        labelJsonPath: '$.loclibs.*.discoveryDisplayName',
+        path: 'locations',
+        valueJsonPath: '$.locations.*.discoveryDisplayName',
+        labelJsonPath: '$.locations.*.discoveryDisplayName',
       },
     },
     {

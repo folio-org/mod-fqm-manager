@@ -7,10 +7,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceJoin;
+import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -221,21 +224,61 @@ public class EntityTypeFlatteningService {
   }
 
   private List<EntityTypeColumn> finalColumnConversion(EntityType flattenedEntityType) {
-    List<EntityTypeColumn> finalColumns = new ArrayList<>();
-    String toReplace = ":sourceAlias";
-    for (EntityTypeColumn column : flattenedEntityType.getColumns()) {
-      String sourceAlias = "\"" + column.getSourceAlias() + "\"";
-      String valueGetter = column.getValueGetter();
-      String filterValueGetter = column.getFilterValueGetter();
-      valueGetter = valueGetter.replace(toReplace, sourceAlias);
-      if (filterValueGetter != null) {
-        filterValueGetter = filterValueGetter.replace(toReplace, sourceAlias);
-      }
-      column.valueGetter(valueGetter);
-      column.filterValueGetter(filterValueGetter);
-      finalColumns.add(column);
+    return flattenedEntityType.getColumns()
+      .stream()
+      .map(column -> injectSourceAlias(column, column.getSourceAlias()))
+      .toList();
+  }
+
+  /**
+ * This method injects the source alias into the column's value getter and filter value getter.
+ * It also recursively injects the source alias into nested object types and array types.
+ *
+ * @param <T> The type of the column, which must extend the Field interface.
+ * @param column The column to inject the source alias into.
+ * @param sourceAlias The source alias to be injected.
+ * @return The column with the injected source alias.
+ */
+private static <T extends Field> T injectSourceAlias(T column, String sourceAlias) {
+    String quotedSourceAlias = "\"" + sourceAlias + "\"";
+    String valueGetter = column.getValueGetter();
+    String filterValueGetter = column.getFilterValueGetter();
+
+    valueGetter = valueGetter.replace(":sourceAlias", quotedSourceAlias);
+
+    if (filterValueGetter != null) {
+        filterValueGetter = filterValueGetter.replace(":sourceAlias", quotedSourceAlias);
     }
-    return finalColumns;
+
+    column.valueGetter(valueGetter);
+    column.filterValueGetter(filterValueGetter);
+
+    if (column.getDataType() instanceof ObjectType objectType) {
+        injectSourceAliasForObjectType(objectType, sourceAlias);
+    }
+
+    if (column.getDataType() instanceof ArrayType arrayType) {
+        injectSourceAliasForArrayType(arrayType, sourceAlias);
+    }
+
+    return column;
+}
+
+  private static void injectSourceAliasForObjectType(ObjectType objectType, String sourceAlias) {
+    List<NestedObjectProperty> convertedProperties = objectType.getProperties()
+      .stream()
+      .map(nestedField -> injectSourceAlias(nestedField, sourceAlias))
+      .toList();
+    objectType.properties(convertedProperties);
+  }
+
+  private static void injectSourceAliasForArrayType(ArrayType arrayType, String sourceAlias) {
+    if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
+      injectSourceAliasForArrayType(nestedArrayType, sourceAlias);
+    }
+    else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
+      injectSourceAliasForObjectType(objectType, sourceAlias);
+    }
   }
 
   private EntityTypeColumn copyColumn(EntityTypeColumn column, EntityType entityType) {

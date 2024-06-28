@@ -158,6 +158,10 @@
           value: 'Text Message',
           label: 'Text Message',
         },
+        {
+          value: 'unknown',
+          label: 'Unknown',
+        },
       ],
     },
     {

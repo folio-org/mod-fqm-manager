@@ -135,17 +135,6 @@
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
     },
     {
-      name: 'item_limit',
-      sourceAlias: 'lp',
-      dataType: {
-        dataType: 'integerType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'itemLimit'",
-    },
-    {
       name: 'renewable',
       sourceAlias: 'lp',
       dataType: {

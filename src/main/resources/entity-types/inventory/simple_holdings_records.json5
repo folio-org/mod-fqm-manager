@@ -657,7 +657,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'displayType'",
     },

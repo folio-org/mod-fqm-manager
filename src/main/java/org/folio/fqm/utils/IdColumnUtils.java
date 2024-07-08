@@ -40,8 +40,10 @@ public class IdColumnUtils {
    * @return List of value getters for the id columns of the entity type
    */
   public static List<String> getIdColumnValueGetters(EntityType entityType) {
-    return entityType
-      .getColumns()
+    var columns = entityType
+      .getColumns();
+
+      return columns
       .stream()
       .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
       .map(EntityTypeColumn::getValueGetter)

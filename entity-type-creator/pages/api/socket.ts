@@ -5,8 +5,9 @@ import {
   persistEntityType,
   verifyPostgresConnection,
 } from '@/socket/postgres';
-import { EntityType, FqmConnection, PostgresConnection } from '@/types';
-import formatEntityType from '@/utils/formatter';
+import { DataTypeValue, EntityType, FqmConnection, PostgresConnection } from '@/types';
+import formatEntityType, { fancyIndent } from '@/utils/formatter';
+import dotenv from 'dotenv';
 import json5 from 'json5';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -23,12 +24,25 @@ let pg: postgres.Sql | null = null;
 export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<any>) {
   const socket = res.socket as any;
 
+  dotenv.config({ path: '../.env' });
+
   console.log('Socket server is initializing');
   const io = new Server(socket?.server);
   socket.server.io = io;
 
   io.on('connection', (socket) => {
     console.log('connected!');
+
+    if ('DB_HOST' in process.env) {
+      console.log('Found DB credentials in .env, sending up');
+      socket.emit('db-credentials', {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        database: process.env.DB_DATABASE,
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+      });
+    }
 
     async function findEntityTypes() {
       console.log('Looking for entity types in', ENTITY_TYPE_FILE_PATH);
@@ -105,33 +119,99 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('save-entity-type', async ({ file, entityType }: { file: string; entityType: EntityType }) => {
       console.log('Saving entity type', file, entityType);
 
-      await writeFile(ENTITY_TYPE_FILE_PATH + file, json5.stringify(formatEntityType(entityType), null, 2) + '\n');
+      await writeFile(
+        ENTITY_TYPE_FILE_PATH + file,
+        fancyIndent(json5.stringify(formatEntityType(entityType), null, 2)) + '\n',
+      );
 
       socket.emit('saved-entity-type');
 
       findEntityTypes();
     });
 
-    socket.on('update-translations', async (newTranslations: Record<string, string>) => {
-      if (Object.keys(newTranslations).length === 0) return;
-
-      const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
-
-      const updatedTranslationSet = { ...curTranslations, ...newTranslations };
-      const sorted = Object.keys(updatedTranslationSet)
-        .toSorted()
-        .reduce(
-          (acc, key) => {
-            acc[key] = updatedTranslationSet[key];
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-      await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
-      console.log('Updated translations');
-      socket.emit('translations', sorted);
+    socket.on('refresh-entity-types', async () => {
+      findEntityTypes();
+      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
     });
+
+    socket.on(
+      'update-translations',
+      async ({ entityType, newTranslations }: { entityType: EntityType; newTranslations: Record<string, string> }) => {
+        const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
+
+        const updatedTranslationSet = { ...curTranslations, ...newTranslations };
+
+        const keysForThisEntity = Object.keys(updatedTranslationSet).filter((k) =>
+          k.startsWith(`entityType.${entityType.name}`),
+        );
+        const expectedKeysForThisEntity = [`entityType.${entityType.name}`];
+        const fieldsToHandle =
+          entityType.columns?.map((c) => ({ prop: false, field: c, prefix: `entityType.${entityType.name}` })) ?? [];
+
+        while (fieldsToHandle.length) {
+          console.log(fieldsToHandle);
+          const { prop, field, prefix } = fieldsToHandle.pop()!;
+          expectedKeysForThisEntity.push(`${prefix}.${field.name}`);
+          if (prop) {
+            expectedKeysForThisEntity.push(`${prefix}.${field.name}._qualified`);
+          }
+          if (
+            field.dataType?.dataType === DataTypeValue.arrayType &&
+            field.dataType.itemDataType?.dataType === DataTypeValue.objectType
+          ) {
+            fieldsToHandle.push(
+              ...(field.dataType.itemDataType.properties?.map((p) => ({
+                prop: true,
+                field: p,
+                prefix: `${prefix}.${field.name}`,
+              })) ?? []),
+            );
+          }
+          if (field.dataType?.dataType === DataTypeValue.objectType) {
+            fieldsToHandle.push(
+              ...(field.dataType.properties?.map((p) => ({
+                prop: true,
+                field: p,
+                prefix: `${prefix}.${field.name}`,
+              })) ?? []),
+            );
+          }
+        }
+
+        const keysToRemove = keysForThisEntity.filter((k) => !expectedKeysForThisEntity.includes(k));
+        const missingKeys = expectedKeysForThisEntity.filter((k) => !keysForThisEntity.includes(k));
+        console.log('Found keys to remove', keysToRemove);
+        console.log('Found missing keys', missingKeys);
+
+        if (keysToRemove.length) {
+          socket.emit(
+            'warning',
+            `Entity type ${entityType.name} had the following extra translations, which were stripped:\n${keysToRemove.join('\n')}`,
+          );
+        }
+        if (missingKeys.length) {
+          socket.emit(
+            'warning',
+            `Entity type ${entityType.name} is missing the following translations:\n${missingKeys.join('\n')}`,
+          );
+        }
+
+        const sorted = Object.keys(updatedTranslationSet)
+          .filter((k) => !keysToRemove.includes(k))
+          .toSorted()
+          .reduce(
+            (acc, key) => {
+              acc[key] = updatedTranslationSet[key];
+              return acc;
+            },
+            {} as Record<string, string>,
+          );
+
+        await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
+        console.log('Updated translations');
+        socket.emit('translations', sorted);
+      },
+    );
 
     socket.on('check-entity-type-validity', async (entityType: EntityType) => {
       console.log('Checking entity type validity', entityType);
@@ -223,6 +303,11 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
     socket.on('install-module', async () => socket.emit('install-module-result', await install(fqmConnection)));
     socket.on('uninstall-module', async () => socket.emit('uninstall-module-result', await uninstall(fqmConnection)));
+
+    // ping-pong right back
+    socket.on('add-column-from-db-inspector', (newColumn) =>
+      socket.emit('add-column-from-db-inspector-pong', newColumn),
+    );
   });
 
   res.end();

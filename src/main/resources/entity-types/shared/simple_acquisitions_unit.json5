@@ -1,0 +1,34 @@
+{
+  id: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
+  name: 'simple_acquisitions_unit',
+  root: true,
+  private: true,
+  sources: [
+    {
+      alias: 'acqunit',
+      type: 'db',
+      target: 'src_acquisitions_unit',
+    }
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'acqunit',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'acquisitions_name',
+      sourceAlias: 'acqunit',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+    },
+  ],
+}

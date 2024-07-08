@@ -4,6 +4,7 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
   const keys = useMemo(() => {
     const keys = new Set<string>();
     for (const row of data) {
+      if (row === null || row === undefined) continue;
       for (const key of Object.keys(row)) {
         keys.add(key);
       }
@@ -17,7 +18,7 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
     }
     for (const key of Object.keys(jsonKeys)) {
       for (const row of data) {
-        if (!row[key]) continue;
+        if (row[key] === undefined || row[key] === null) continue;
 
         if (typeof row[key] !== 'string' || !(row[key] as string).startsWith('[')) {
           jsonKeys[key] = false;
@@ -72,7 +73,7 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
                     return (row[key] as string[]).join('\n');
                   } else if (jsonKeys[key]) {
                     return <JSONTable data={JSON.parse(row[key] as string)} />;
-                  } else if (typeof row[key] === 'object') {
+                  } else if (typeof row[key] === 'object' || row[key] === true || row[key] === false) {
                     return JSON.stringify(row[key], null, 2);
                   } else {
                     return row[key] as string | number;

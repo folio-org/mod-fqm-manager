@@ -54,6 +54,16 @@ mvn clean install
 | task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks  |
 | task.execution.pool.queue-capacity                | 1000          | Size of the task queue                |
 
+### Resource requirements
+
+Most operations in the mod-fqm-module use very little memory. However, more memory is required when running queries
+that return large amounts of data. Since mod-fqm-manager iterates over results in batches, sufficient memory is necessary
+for good and consistent performance.With the default settings, you should allocate at least 1 gigabyte of heap space
+to mod-fqm-manager to ensure optimal performance and query handling. For larger instances where mod-fqm-manager is heavily
+used, allocate at least 2 gigabytes. In extreme cases with extremely large responses and concurrent usage, 5 gigabytes of
+heap space should be sufficient to maintain performance and stability.
+
+
 ## Installing the module
 Follow the guide of Deploying Modules sections of the [Okapi Guide](https://github.com/folio-org/okapi/blob/master/doc/guide.md#example-1-deploying-and-using-a-simple-module) and Reference, which describe the process in detail.
 

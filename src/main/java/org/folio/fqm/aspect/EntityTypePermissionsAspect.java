@@ -16,7 +16,10 @@ import org.folio.querytool.domain.dto.SubmitQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @Aspect
@@ -28,7 +31,7 @@ public class EntityTypePermissionsAspect {
   private final QueryRepository queryRepository;
   private final PermissionsService permissionsService;
 
-  private final Map<MethodSignature, Integer> indexCache = new HashMap<>();
+  private final Map<MethodSignature, Integer> indexCache = new ConcurrentHashMap<>();
 
   /**
    * Handle methods that accept an entity type or query ID

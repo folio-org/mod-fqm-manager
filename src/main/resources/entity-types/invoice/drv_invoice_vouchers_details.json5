@@ -1,0 +1,382 @@
+{
+  id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
+  name: 'drv_vouchers_details',
+  private: true,
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'type'",
+      values: [
+        {
+          label: 'Payment',
+          value: 'Payment',
+        },
+        {
+          label: 'Pre-payment',
+          value: 'Pre-payment',
+        },
+        {
+          label: 'Credit',
+          value: 'Credit',
+        },
+        {
+          label: 'Voucher',
+          value: 'Voucher',
+        },
+      ]
+    },
+    {
+      name: 'amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'amount'"
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'status'",
+      values: [
+        {
+          label: 'Awaiting payment',
+          value: 'Awaiting payment',
+        },
+        {
+          label: 'Paid',
+          value: 'Paid',
+        },
+        {
+          label: 'Cancelled',
+          value: 'Cancelled',
+        },
+      ]
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'"
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'"
+    },
+    {
+      name: 'vendor_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'vendorId'"
+    },
+    {
+      name: 'account_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'accountNo'"
+    },
+    {
+      name: 'invoice_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'invoiceId'"
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'voucher_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'voucherDate'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:sourceAlias.jsonb ->> 'voucherDate'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'batch_group_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'batchGroupId'"
+    },
+    {
+      name: 'exchange_rate',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'exchangeRate'"
+    },
+    {
+      name: 'voucher_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'voucherNumber'"
+    },
+    {
+      name: 'accounting_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'accountingCode'"
+    },
+    {
+      name: 'system_currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'systemCurrency'"
+    },
+    {
+      name: 'enclosure_needed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'enclosureNeeded'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ]
+    },
+    {
+      name: 'invoice_currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCurrency'"
+    },
+    {
+      name: 'export_to_accounting',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'exportToAccounting'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      filterValueGetter: "lower(${tenant_id}_mod_invoice_storage.f_unaccent(:sourceAlias.jsonb ->> 'exportToAccounting'::text))::float",
+      valueFunction: 'lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value))::float',
+    },
+    {
+      name: 'disbursement_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementNumber'"
+    },
+    {
+      name: 'disbursement_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementDate'"
+    },
+    {
+      name: 'disbursement_amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementAmount'"
+    },
+    {
+      name: 'address_line1',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine1'"
+    },
+    {
+      name: 'address_line2',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine2'"
+    },
+    {
+      name: 'city',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'city'"
+    },
+    {
+      name: 'state_region',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'stateRegion'"
+    },
+    {
+      name: 'zip_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'zipCode'"
+    },
+    {
+      name: 'country',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'vouchers',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'country'"
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'vouchers',
+      target: 'src_invoice_vouchers'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

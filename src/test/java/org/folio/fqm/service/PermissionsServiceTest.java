@@ -5,16 +5,16 @@ import org.folio.fqm.client.ModPermissionsClient;
 import org.folio.fqm.client.ModPermissionsClient.UserPermissions;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,8 @@ class PermissionsServiceTest {
 
   private final FolioExecutionContext context = mock(FolioExecutionContext.class);
   private final ModPermissionsClient modPermissionsClient = mock(ModPermissionsClient.class);
-  private final PermissionsService permissionsService = new PermissionsService(context, modPermissionsClient);
+  private final EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+  private final PermissionsService permissionsService = new PermissionsService(context, modPermissionsClient, entityTypeFlatteningService);
 
   @BeforeEach
   void setUp() {
@@ -35,6 +36,13 @@ class PermissionsServiceTest {
     when(modPermissionsClient.getPermissionsForUser(userId.toString())).thenReturn(new UserPermissions(List.of(permissions), permissions.length));
   }
 
+  private EntityType getTestEntityType() {
+    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false)
+      .sources(List.of(new EntityTypeSource("db", "source_alias")));
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyBoolean())).thenReturn(entityType);
+    return entityType;
+  }
+
   @Test
   void thePermissionsServiceShouldUseTheModPermissionsClientByDefault() {
     setUpMocks("permission1", "permission2");
@@ -44,7 +52,7 @@ class PermissionsServiceTest {
   @Test
   void userWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
     setUpMocks(); // User has no permissions
-    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false);
+    EntityType entityType = getTestEntityType();
     assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "No permissions are required");
 
     entityType.requiredPermissions(List.of("permission1"));
@@ -63,7 +71,7 @@ class PermissionsServiceTest {
         List.of("permission1", "permission2"), "Both of the user's permissions are required"
       )
       .forEach((permissions, message) -> {
-        EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false).requiredPermissions(permissions);
+        EntityType entityType = getTestEntityType().requiredPermissions(permissions);
         // Then the user should be able to perform the operation
         assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), message);
       });
@@ -72,7 +80,7 @@ class PermissionsServiceTest {
   @Test
   void userDoesNotHaveNecessaryPermissions() {
     setUpMocks("permission1", "permission2");
-    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false);
+    EntityType entityType = getTestEntityType();
 
     entityType.requiredPermissions(List.of("permission3"));
     assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "The user does not have the required permission");

@@ -1,0 +1,191 @@
+{
+  id: 'abb28bac-e090-48c1-a48b-3fe805638041',
+  name: 'drv_config_data_details',
+  private: true,
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'module',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'module'"
+    },
+    {
+      name: 'config_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'configName'"
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'code'"
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'description'"
+    },
+    {
+      name: 'default',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'default'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ]
+    },
+    {
+      name: 'enabled',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'enabled'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ]
+    },
+    {
+      name: 'value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'value'"
+    },
+    {
+      name: 'user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'userId'"
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'config',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'config',
+      target: 'src_configuration_config_data'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

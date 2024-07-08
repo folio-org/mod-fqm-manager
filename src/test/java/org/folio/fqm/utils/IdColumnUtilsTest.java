@@ -21,14 +21,14 @@ class IdColumnUtilsTest {
 
   @Test
   void shouldGetIdColumnValueGetters() {
-    List<String> expectedIdColumnValueGetters = List.of("id");
+    List<String> expectedIdColumnValueGetters = List.of(":sourceAlias.id");
     List<String> actualIdColumnValueGetters = IdColumnUtils.getIdColumnValueGetters(TEST_ENTITY_TYPE_DEFINITION);
     assertEquals(expectedIdColumnValueGetters, actualIdColumnValueGetters);
   }
 
   @Test
   void shouldGetResultIdValueGetter() {
-    Field<String[]> expectedField = DSL.cast(DSL.array(new Field[] {DSL.field("id")}), String[].class);
+    Field<String[]> expectedField = DSL.cast(DSL.array(DSL.field(":sourceAlias.id")), String[].class);
     Field<String[]> actualField = IdColumnUtils.getResultIdValueGetter(TEST_ENTITY_TYPE_DEFINITION);
     assertEquals(expectedField, actualField);
   }

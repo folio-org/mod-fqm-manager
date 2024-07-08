@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -34,6 +31,7 @@ public class PermissionsService {
   private final FolioExecutionContext context;
   private final ModPermissionsClient modPermissionsClient;
   private final Cache<UUID, Set<String>> cache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
+  private final EntityTypeFlatteningService entityTypeFlatteningService;
 
   public Set<String> getUserPermissions() {
     var userId = context.getUserId();
@@ -48,8 +46,13 @@ public class PermissionsService {
     throw new NotImplementedException("Not implemented yet");
   }
 
+  public Set<String> getRequiredPermissions(EntityType entityType) {
+    EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), false);
+    return new HashSet<>(flattenedEntityType.getRequiredPermissions());
+  }
+
   public void verifyUserHasNecessaryPermissionsForEntityType(EntityType entityType) {
-    List<String> requiredPermissions = entityType.getRequiredPermissions();
+    Set<String> requiredPermissions = getRequiredPermissions(entityType);
     Set<String> userPermissions = getUserPermissions();
 
     Set<String> missingPermissions = new HashSet<>();

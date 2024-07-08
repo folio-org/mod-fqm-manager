@@ -24,16 +24,14 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @EntityTypePermissionsRequired
   @Override
   public ResponseEntity<EntityType> getEntityType(UUID entityTypeId) {
-    return entityTypeService.getEntityTypeDefinition(entityTypeId)
-      .map(ResponseEntity::ok)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+    return ResponseEntity.ok(entityTypeService.getEntityTypeDefinition(entityTypeId));
   }
 
   @Override
-  public ResponseEntity<List<EntityTypeSummary>> getEntityTypeSummary(List<UUID> entityTypeIds) {
+  public ResponseEntity<List<EntityTypeSummary>> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
     // Permissions are handled in the service layer
-    return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet));
+    return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible)));
   }
 
   @EntityTypePermissionsRequired

@@ -20,6 +20,7 @@
     "@mui/material-nextjs": "^5.15.11",
     "@uiw/react-codemirror": "^4.21.25",
     "change-case": "^5.4.4",
+    "dotenv": "^16.4.5",
     "genson-js": "^0.0.8",
     "json-schema-to-typescript": "^13.1.2",
     "json5": "^2.2.3",

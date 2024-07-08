@@ -24,6 +24,7 @@ const desiredRootKeyOrder = [
   'root',
   'private',
   'customFieldEntityTypeId',
+  'sources',
   'fromClause',
   'columns',
   'defaultSort',
@@ -33,6 +34,7 @@ const desiredRootKeyOrder = [
 const desiredDefaultSortKeyOrder = ['columnName', 'direction'] as (keyof Required<EntityType>['defaultSort'][0])[];
 const desiredFieldKeyOrder = [
   'name',
+  'sourceAlias',
   'dataType',
   'isIdColumn',
   'idColumnName',
@@ -63,11 +65,26 @@ function fixField(field: EntityTypeField) {
 
 export default function formatEntityType(data: EntityType) {
   data.columns = data.columns?.map(fixField);
-  data.fromClause = serializeSqlForTenantTemplating(data.fromClause);
+  data.fromClause = data.fromClause ? serializeSqlForTenantTemplating(data.fromClause) : undefined;
   if (data.defaultSort) {
     data.defaultSort = data.defaultSort.map((s) => preferredOrder(s, desiredDefaultSortKeyOrder));
   }
   data = preferredOrder(data, desiredRootKeyOrder);
 
   return data;
+}
+
+export function fancyIndent(blob: string): string {
+  return blob
+    .split('\n')
+    .map((line) => {
+      // replace \n in the file with indented real newlines
+      if (line.includes('\\n')) {
+        const indentation = line.match(/^\s*/)?.[0] || '';
+        return line.replaceAll('\\n', `\\\n${indentation}`);
+      } else {
+        return line;
+      }
+    })
+    .join('\n');
 }

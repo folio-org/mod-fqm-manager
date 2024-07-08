@@ -1,0 +1,101 @@
+{
+  id: 'a4ab7592-fb09-4feb-8e88-b91b456ff251',
+  name: 'drv_categories_details',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'categories',
+      target: 'src_organization_categories',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'value',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'value'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_username',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      sourceAlias: 'categories',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

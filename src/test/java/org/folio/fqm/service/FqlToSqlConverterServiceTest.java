@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.UUID;
 
 import static org.folio.fqm.service.FqlToSqlConverterService.ALL_NULLS;
 import static org.folio.fqm.service.FqlToSqlConverterService.NOT_ALL_NULLS;
@@ -26,11 +26,13 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.val;
+import static org.jooq.impl.DSL.trueCondition;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FqlToSqlConverterServiceTest {
@@ -50,6 +52,7 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("field4").dataType(new DateType().dataType("dateType")),
           new EntityTypeColumn().name("field5").dataType(new EntityDataType().dataType("integerType")),
           new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
+          new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("StringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("arrayFieldWithValueFunction")
@@ -70,7 +73,7 @@ class FqlToSqlConverterServiceTest {
         )
       );
   }
-
+  static Condition trueCondition = trueCondition();
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
     return Arrays.asList(
@@ -109,20 +112,51 @@ class FqlToSqlConverterServiceTest {
         "equals ranged UUID",
         """
           {"rangedUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("rangedUUIDField").equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("rangedUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+      ),
+      Arguments.of(
+        "equals ranged UUID",
+        "{\"rangedUUIDField\": {\"$eq\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class))
+      ),
+      Arguments.of(
+        "not equals ranged UUID",
+        "{\"rangedUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        trueCondition
+      ),
+      Arguments.of(
+        "equals open UUID",
+        "{\"openUUIDField\": {\"$eq\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class))
+      ),
+      Arguments.of(
+        "not equals open UUID",
+        "{\"openUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        trueCondition
       ),
       Arguments.of(
         "equals open UUID",
         """
           {"openUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("openUUIDField").equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("openUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
       ),
-
+      Arguments.of(
+        "equals string UUID",
+        """
+          {"stringUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("stringUUIDField").eq("69939c9a-aa96-440a-a873-3b48f3f4f608")
+      ),
       Arguments.of(
         "not equals string",
         """
           {"field1": {"$ne": "some value"}}""",
         field("field1").notEqualIgnoreCase("some value")
+      ),
+      Arguments.of(
+        "not equals string UUID",
+        """
+          {"stringUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        field("stringUUIDField").ne("69939c9a-aa96-440a-a873-3b48f3f4f608")
       ),
       Arguments.of(
         "not equals numeric",
@@ -149,19 +183,19 @@ class FqlToSqlConverterServiceTest {
         field("field4").greaterOrEqual("2023-06-03")
           .or(field("field4").lessThan("2023-06-02"))
       ),
+
       Arguments.of(
         "not equals ranged UUID",
         """
           {"rangedUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("rangedUUIDField").notEqualIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
       ),
       Arguments.of(
         "not equals open UUID",
         """
           {"openUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("openUUIDField").notEqualIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
       ),
-
       Arguments.of(
         "greater than string",
         """
@@ -259,6 +293,126 @@ class FqlToSqlConverterServiceTest {
           field("field1").eq(2),
           field("field1").eq(true)
         )
+      ),
+      Arguments.of(
+        "in list open UUID",
+        """
+          {"openUUIDField": {"$in": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+        cast(field("openUUIDField"), UUID.class)
+          .eq(cast(null, UUID.class))
+          .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+      ),
+      Arguments.of(
+        "in list ranged UUID",
+        """
+          {"rangedUUIDField": {"$in": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+        cast(field("rangedUUIDField"), UUID.class)
+          .eq(cast(null, UUID.class))
+          .or(cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+      ),
+      Arguments.of(
+        "not in list open UUID",
+        """
+          {"openUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+        DSL.trueCondition().and(DSL.trueCondition())
+      ),
+      Arguments.of(
+        "not in list ranged UUID",
+        """
+          {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+        DSL.trueCondition().and(DSL.trueCondition())
+      ),
+      Arguments.of(
+        "in list ranged UUID",
+        """
+          {"rangedUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+        cast(field("rangedUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+          .or(cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+      ),
+      Arguments.of(
+        "in list open UUID",
+        """
+          {"openUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+        cast(field("openUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+          .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+      ),
+      Arguments.of(
+        "not in list ranged UUID",
+        """
+          {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
+        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
+        and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+      ),
+      Arguments.of(
+        "not in list open UUID",
+        """
+          {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+        cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+          .and(trueCondition)
+      ),
+      Arguments.of(
+        "complex condition",
+        """
+          {
+            "$and": [
+              {"rangedUUIDField": {"$eq": "69939c9a-aa96-440a-a87"}},
+              {"field2": {"$eq": true}},
+              {"field5": {"$lte": 3}},
+              {"field2": {"$in": [false, true]}},
+              {"field5": {"$ne": 5}},
+              {"field5": {"$gt": 9}},
+              {"field3": {"$nin": ["value1", "value2"]}}
+            ]
+          }""",
+        (cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+          .and(field("field2").eq(true))
+          .and(field("field5").lessOrEqual(3))
+          .and(
+            or(
+              field("field2").eq(false),
+              field("field2").eq(true)
+            )
+          )
+          .and(field("field5").notEqual(5))
+          .and(field("field5").greaterThan(9))
+          .and(
+            and(
+              field("field3").notEqualIgnoreCase("value1"),
+              field("field3").notEqualIgnoreCase("value2")
+            )
+          )
+      ),
+      Arguments.of(
+        "complex condition",
+        """
+          {
+            "$and": [
+              {"openUUIDField": {"$eq": "69939c9a-aa96-440a-a87"}},
+              {"field2": {"$eq": true}},
+              {"field5": {"$lte": 3}},
+              {"field2": {"$in": [false, true]}},
+              {"field5": {"$ne": 5}},
+              {"field5": {"$gt": 9}},
+              {"field3": {"$nin": ["value1", "value2"]}}
+            ]
+          }""",
+        (cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
+          .and(field("field2").eq(true))
+          .and(field("field5").lessOrEqual(3))
+          .and(
+            or(
+              field("field2").eq(false),
+              field("field2").eq(true)
+            )
+          )
+          .and(field("field5").notEqual(5))
+          .and(field("field5").greaterThan(9))
+          .and(
+            and(
+              field("field3").notEqualIgnoreCase("value1"),
+              field("field3").notEqualIgnoreCase("value2")
+            )
+          )
       ),
       Arguments.of(
         "not in list",
@@ -366,12 +520,12 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "condition on a field with a filter value getter and a value function",
         """
-         {
-            "$and": [
-              {"fieldWithFilterValueGetterAndValueFunction": {"$eq": "Test value"}},
-              {"fieldWithAValueFunction": {"$eq": "Test value2"}}
-            ]
-          }""",
+          {
+             "$and": [
+               {"fieldWithFilterValueGetterAndValueFunction": {"$eq": "Test value"}},
+               {"fieldWithAValueFunction": {"$eq": "Test value2"}}
+             ]
+           }""",
         field("thisIsAFilterValueGetter").eq(field("lower(:value)", param("value", "Test value".toLowerCase())))
           .and(field("fieldWithAValueFunction").equalIgnoreCase(field("upper(:value)", String.class, param("value", "Test value2"))))
       ),
@@ -400,8 +554,8 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "contains_all condition on a field with a filter value getter and a value function",
         """
-         {    "arrayFieldWithValueFunction": {"$contains_all": ["value1", "value2"]}}
-         }""",
+          {    "arrayFieldWithValueFunction": {"$contains_all": ["value1", "value2"]}}
+          }""",
         DSL
           .cast(
             field("foo(valueGetter)"),
@@ -410,7 +564,7 @@ class FqlToSqlConverterServiceTest {
           .contains(
             cast(
               array(
-                field("foo(:value1)",  String.class, param("value", "value1")),
+                field("foo(:value1)", String.class, param("value", "value1")),
                 field("foo(:value)", String.class, param("value", "value2"))
               ),
               String[].class
@@ -421,8 +575,8 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not_contains_all condition on a field with a filter value getter and a value function",
         """
-         {    "arrayFieldWithValueFunction": {"$not_contains_all": [10, 20]}}
-         }""",
+          {    "arrayFieldWithValueFunction": {"$not_contains_all": [10, 20]}}
+          }""",
         DSL
           .cast(
             field("foo(valueGetter)"),
@@ -431,7 +585,7 @@ class FqlToSqlConverterServiceTest {
           .notContains(
             cast(
               array(
-                field("foo(:value)",  Integer.class, param("value", 10)),
+                field("foo(:value)", Integer.class, param("value", 10)),
                 field("foo(:value)", Integer.class, param("value", 20))
               ),
               String[].class

@@ -1,7 +1,8 @@
-import { DataTypeValue, EntityType, EntityTypeField } from '@/types';
+import { DataTypeValue, EntityType, EntityTypeField, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
-import { ArrowDownward, ArrowUpward, Clear } from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward, Clear, CopyAll } from '@mui/icons-material';
 import {
+  Autocomplete,
   Button,
   Checkbox,
   FormControl,
@@ -12,15 +13,18 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from '@mui/material';
-import CodeMirror from '@uiw/react-codemirror';
-import { useMemo } from 'react';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import { ReactNode, useMemo } from 'react';
 import NestedDataTypeEditor from './NestedDataTypeEditor';
 
 export default function EntityTypeFieldEditor({
   parentName,
+  labelDecoration = null,
   entityType,
   entityTypes,
+  sources,
   codeMirrorExtension,
   field,
   onChange,
@@ -28,14 +32,17 @@ export default function EntityTypeFieldEditor({
   setTranslation,
   first,
   last,
+  onDuplicate,
   onMoveDown,
   onMoveUp,
   onDelete,
   isNested = false,
-}: {
+}: Readonly<{
+  labelDecoration?: ReactNode;
   parentName: string;
   entityType: EntityType;
   entityTypes: EntityType[];
+  sources: EntityTypeSource[];
   codeMirrorExtension: LanguageSupport;
   field: EntityTypeField;
   onChange: (newColumn: EntityTypeField) => void;
@@ -43,19 +50,21 @@ export default function EntityTypeFieldEditor({
   setTranslation: (key: string, value: string) => void;
   first: boolean;
   last: boolean;
+  onDuplicate: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
   onDelete: () => void;
   isNested?: boolean;
-}) {
+}>) {
   return (
     <fieldset>
       <legend style={{ margin: '1em 0' }}>
+        {labelDecoration}
         <code>{field.name}</code>
       </legend>
 
       <Grid container spacing={2}>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <TextField
             label="Name"
             required
@@ -65,11 +74,51 @@ export default function EntityTypeFieldEditor({
             inputProps={{ style: { fontFamily: 'monospace' } }}
           />
         </Grid>
-        <Grid item xs={5} container sx={{ justifyContent: 'space-around' }}>
+        {!isNested ? (
+          <Grid item xs={3}>
+            <Autocomplete
+              freeSolo
+              options={sources.map((s) => s.alias)}
+              value={field.sourceAlias ?? ''}
+              onChange={(_e, nv) =>
+                onChange({
+                  ...field,
+                  sourceAlias: nv ?? undefined,
+                })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Source"
+                  value={field.sourceAlias ?? ''}
+                  onChange={(e) =>
+                    onChange({
+                      ...field,
+                      sourceAlias: e.target.value,
+                    })
+                  }
+                />
+              )}
+            />
+          </Grid>
+        ) : (
+          <Grid item xs={2}>
+            <TextField
+              label="Property"
+              required
+              fullWidth
+              value={field.property}
+              onChange={(e) => onChange({ ...field, property: e.target.value })}
+              inputProps={{ style: { fontFamily: 'monospace' } }}
+            />
+          </Grid>
+        )}
+        <Grid item xs={4} container sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
           <FormControlLabel
             label="Queryable"
             control={
               <Checkbox
+                indeterminate={field.queryable === undefined}
                 checked={field.queryable}
                 onChange={(e) => onChange({ ...field, queryable: e.target.checked })}
               />
@@ -80,6 +129,7 @@ export default function EntityTypeFieldEditor({
               label="Visible by default"
               control={
                 <Checkbox
+                  indeterminate={field.visibleByDefault === undefined}
                   checked={field.visibleByDefault}
                   onChange={(e) => onChange({ ...field, visibleByDefault: e.target.checked })}
                 />
@@ -87,15 +137,18 @@ export default function EntityTypeFieldEditor({
             />
           )}
         </Grid>
-        <Grid item container xs={2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
+        <Grid item container xs={isNested ? 3 : 2} sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
+          <IconButton onClick={onDuplicate}>
+            <CopyAll fontSize="small" />
+          </IconButton>
           <IconButton disabled={first} onClick={onMoveUp}>
-            <ArrowUpward />
+            <ArrowUpward fontSize="small" />
           </IconButton>
           <IconButton disabled={last} onClick={onMoveDown}>
-            <ArrowDownward />
+            <ArrowDownward fontSize="small" />
           </IconButton>
           <IconButton onClick={onDelete}>
-            <Clear />
+            <Clear fontSize="small" />
           </IconButton>
         </Grid>
 
@@ -144,11 +197,12 @@ export default function EntityTypeFieldEditor({
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={2} container sx={{ justifyContent: 'space-around' }}>
+            <Grid item xs={2} container sx={{ alignItems: 'flex-start', justifyContent: 'space-around' }}>
               <FormControlLabel
                 label="Is ID column"
                 control={
                   <Checkbox
+                    indeterminate={field.isIdColumn === undefined}
                     checked={field.isIdColumn}
                     onChange={(e) => onChange({ ...field, isIdColumn: e.target.checked })}
                   />
@@ -234,7 +288,7 @@ export default function EntityTypeFieldEditor({
               </FormControl>
             </Grid>
           ),
-          [field.valueSourceApi, field.source, field.values, entityType, onChange, parentName],
+          [field.valueSourceApi, field.source, field.values, entityType, parentName],
         )}
 
         {useMemo(
@@ -346,7 +400,7 @@ export default function EntityTypeFieldEditor({
                 </>
               )
             ),
-          [field.source, field.valueSourceApi, onChange, parentName, entityTypes],
+          [field.source, field.valueSourceApi, parentName, entityTypes],
         )}
 
         {useMemo(
@@ -426,7 +480,7 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, valueGetter: value })
                       : onChange({ ...field, valueGetter: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>
@@ -449,7 +503,7 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, filterValueGetter: value })
                       : onChange({ ...field, filterValueGetter: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>
@@ -472,15 +526,24 @@ export default function EntityTypeFieldEditor({
                       ? onChange({ ...field, valueFunction: value })
                       : onChange({ ...field, valueFunction: undefined })
                   }
-                  extensions={[codeMirrorExtension]}
+                  extensions={[codeMirrorExtension, EditorView.lineWrapping]}
                 />
               </Grid>
             </>
           ),
           [field],
         )}
+        <Grid item xs={2} />
+        <Grid item xs={10}>
+          <Typography variant="subtitle2" sx={{ mt: 0 }}>
+            <i>
+              Use <code>:sourceAlias</code> to refer to the selected source <code>{field.sourceAlias}</code>
+            </i>
+          </Typography>
+        </Grid>
 
         <NestedDataTypeEditor
+          sources={sources}
           parentName={`${parentName}.${field.name}`}
           dataType={field.dataType}
           onChange={(newDataType) => onChange({ ...field, dataType: newDataType })}

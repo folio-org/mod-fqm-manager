@@ -31,6 +31,8 @@ export default function EntryPoint() {
           setSchema(schema);
         });
 
+        newSocket.on('warning', (msg) => alert(msg));
+
         setSocket(newSocket);
       }
     })();
@@ -69,7 +71,7 @@ export default function EntryPoint() {
           variant="permanent"
           anchor="bottom"
         >
-          <Container>
+          <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 'inherit' }}>
             <Tabs
               value={selectedTab}
               onChange={(_e, n) => {
@@ -89,19 +91,21 @@ export default function EntryPoint() {
               <Tab label={expandedBottom ? 'Collapse' : 'Expand'} />
             </Tabs>
 
-            <Box sx={{ display: selectedTab === 1 ? 'block' : 'none', p: 2 }}>
-              <ModuleInstaller socket={socket} />
+            <Box sx={{ overflowY: 'scroll' }}>
+              <Box sx={{ display: selectedTab === 1 ? 'block' : 'none', p: 2 }}>
+                <ModuleInstaller socket={socket} />
+              </Box>
+              <Box sx={{ display: selectedTab === 2 ? 'block' : 'none', p: 2 }}>
+                <CheckValidity socket={socket} entityType={currentEntityType} />
+              </Box>
+              <Box sx={{ display: selectedTab === 3 ? 'block' : 'none', p: 2 }}>
+                <QueryTool socket={socket} entityType={currentEntityType} />
+              </Box>
+              <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
+                <DBInspector socket={socket} schema={schema} entityType={currentEntityType} />
+              </Box>
             </Box>
-            <Box sx={{ display: selectedTab === 2 ? 'block' : 'none', p: 2 }}>
-              <CheckValidity socket={socket} entityType={currentEntityType} />
-            </Box>
-            <Box sx={{ display: selectedTab === 3 ? 'block' : 'none', p: 2 }}>
-              <QueryTool socket={socket} entityType={currentEntityType} />
-            </Box>
-            <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
-              <DBInspector socket={socket} schema={schema} />
-            </Box>
-          </Container>
+          </Box>
         </Drawer>
       </Container>
     )

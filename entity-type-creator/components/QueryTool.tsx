@@ -1,10 +1,10 @@
+import { json } from '@codemirror/lang-json';
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Button, Typography } from '@mui/material';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { useCallback, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../types';
-import { json } from '@codemirror/lang-json';
-import CodeMirror from '@uiw/react-codemirror';
 import JSONTable from './JSONTable';
 
 enum State {
@@ -23,11 +23,13 @@ export default function QueryTool({
   socket: Socket;
   entityType: EntityType | null;
 }>) {
+  const [started, setStarted] = useState(new Date().getTime());
+  const [ended, setEnded] = useState(new Date().getTime());
   const [state, setState] = useState<{ state: State; result?: string | Record<string, string>[] }>({
     state: State.NOT_STARTED,
   });
 
-  const [query, setQuery] = useState<string>('{"id":{"$ne":"zzz"}}');
+  const [query, setQuery] = useState<string>('{"id":{"$empty":false}}');
 
   const codeMirrorExtension = useMemo(() => json(), []);
 
@@ -49,8 +51,11 @@ export default function QueryTool({
             setState({ state: State.ERROR_PERSIST, result: result.persistError });
           } else if (result.queryResults) {
             setState({ state: State.DONE, result: result.queryResults });
+            console.log(result.queryResults);
+            setEnded(new Date().getTime());
           } else {
             setState({ state: State.PERSISTED });
+            setStarted(new Date().getTime());
           }
         },
       );
@@ -66,7 +71,7 @@ export default function QueryTool({
     <>
       <Typography>Runs a query against the entity type.</Typography>
 
-      <CodeMirror value={query} onChange={setQuery} extensions={[codeMirrorExtension]} />
+      <CodeMirror value={query} onChange={setQuery} extensions={[codeMirrorExtension, EditorView.lineWrapping]} />
 
       <Button variant="outlined" onClick={() => run(entityType, query)}>
         Run
@@ -93,7 +98,7 @@ export default function QueryTool({
         ) : (
           <Done color="success" />
         )}{' '}
-        Run query
+        Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
       </Typography>
       {!!state.result &&
         (typeof state.result === 'string' ? <pre>{state.result}</pre> : <JSONTable data={state.result} />)}

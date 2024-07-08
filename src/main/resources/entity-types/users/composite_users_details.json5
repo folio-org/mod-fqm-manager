@@ -1,0 +1,30 @@
+{
+  id: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf',
+  name: 'composite_user_details',
+  private: false,
+  customFieldEntityTypeId: 'ffb91f00-eb1c-4936-a637-f8708c967c73', // src_user_custom_fields
+  sources: [
+    {
+      alias: 'users',
+      type: 'entity-type',
+      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      useIdColumns: true,
+    },
+    {
+      alias: 'groups',
+      type: 'entity-type',
+      id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group_details
+      join: {
+        type: 'left join',
+        joinTo: 'users',
+        condition: "(:that.jsonb ->> 'patronGroup')::uuid = :this.id",
+      },
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'users.id',
+      direction: 'ASC',
+    },
+  ],
+}

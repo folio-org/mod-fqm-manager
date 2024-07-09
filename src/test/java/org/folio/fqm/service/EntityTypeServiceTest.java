@@ -158,7 +158,7 @@ class EntityTypeServiceTest {
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -180,7 +180,7 @@ class EntityTypeServiceTest {
           Map.of(valueColumnName, "value_02")
         )
       );
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
     ColumnValues expectedColumnValues = new ColumnValues().content(
       List.of(
@@ -204,7 +204,7 @@ class EntityTypeServiceTest {
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
 
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
@@ -220,7 +220,7 @@ class EntityTypeServiceTest {
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
@@ -239,7 +239,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
@@ -262,7 +262,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
     when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
            {
              "what": {
@@ -320,7 +320,7 @@ class EntityTypeServiceTest {
         .name("pol_currency")
       ));
 
-    when(repo.getEntityTypeDefinition(entityTypeId)).thenReturn(Optional.of(entityType));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
 
 
     List<ValueWithLabel> actualColumnValues = entityTypeService

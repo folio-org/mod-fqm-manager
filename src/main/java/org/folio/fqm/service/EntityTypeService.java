@@ -104,9 +104,7 @@ public class EntityTypeService {
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
 
-    EntityType entityType = entityTypeRepository
-      .getEntityTypeDefinition(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)

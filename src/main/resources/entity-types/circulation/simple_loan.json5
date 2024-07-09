@@ -101,6 +101,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'status'->>'name'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_circulation_storage.f_unaccent((:sourceAlias.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'loan_date',
@@ -123,6 +125,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'dueDate'",
+      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'dueDate\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)'
     },
     {
       name: 'return_date',

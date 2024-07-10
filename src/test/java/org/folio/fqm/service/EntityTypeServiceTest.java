@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -307,6 +308,11 @@ class EntityTypeServiceTest {
       .getEntityTypeDefinition(entityTypeId);
 
     assertEquals(expectedEntityType, actualDefinition);
+  }
+
+  @Test
+  void shouldIncludeEcsFieldsWhenEcsEnabled() {
+    fail();
   }
 
   @Test

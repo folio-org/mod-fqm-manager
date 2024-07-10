@@ -123,7 +123,8 @@ public class TestDataFixture {
     .name("key2")
     .dataType(new StringType().dataType("stringType"))
     .labelAlias("key2_label")
-    .visibleByDefault(false);
+    .visibleByDefault(false)
+    .ecsOnly(true);
 
   private static final EntityTypeDefaultSort sort = new EntityTypeDefaultSort()
     .columnName(col1.getName());
@@ -140,7 +141,8 @@ public class TestDataFixture {
   }
 
   public static EntityType getEntityDefinition() {
-    return mockDefinition;
+    EntityType returnValue = mockDefinition;
+    return returnValue;
   }
 
   public static EntityType getEntityTypeDefinition(

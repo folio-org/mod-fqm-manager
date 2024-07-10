@@ -8,6 +8,7 @@ import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,13 +41,13 @@ class QueryProcessorServiceTest {
     Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
-    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType();
     Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
     IntConsumer totalCountConsumer = mock(IntConsumer.class);
     Consumer<Throwable> errorConsumer = mock(Consumer.class);
 
     when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityTypeId, fqlCriteria, true);
+    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
     service.getIdsInBatch(fqlQueryWithContext,
       DEFAULT_BATCH_SIZE,
       idsConsumer,
@@ -56,7 +57,7 @@ class QueryProcessorServiceTest {
 
     verify(idStreamer, times(1))
       .streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         DEFAULT_BATCH_SIZE,
@@ -69,7 +70,7 @@ class QueryProcessorServiceTest {
     Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
-    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType();
     Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
     IntConsumer totalCountConsumer = mock(IntConsumer.class);
     AtomicInteger actualErrorCount = new AtomicInteger(0);
@@ -77,12 +78,12 @@ class QueryProcessorServiceTest {
     int expectedErrorCount = 1;
 
     when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityTypeId, fqlCriteria, true);
+    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
 
     doThrow(new RuntimeException("something went wrong"))
       .when(idStreamer)
       .streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         1000,

@@ -47,13 +47,11 @@ public class IdStreamer {
   /**
    * Executes the given Fql Query and stream the result Ids back.
    */
-  public int streamIdsInBatch(UUID entityTypeId,
+  public int streamIdsInBatch(EntityType entityType,
                               boolean sortResults,
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    EntityType entityType = entityTypeFlatteningService
-      .getFlattenedEntityType(entityTypeId, true);
     Condition sqlWhereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
     return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
   }

@@ -109,7 +109,7 @@ class QueryManagementServiceTest {
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(maxQuerySize));
+    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(entityType), eq(maxQuerySize));
   }
 
   @Test
@@ -134,7 +134,7 @@ class QueryManagementServiceTest {
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(maxConfiguredQuerySize));
+    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(entityType), eq(maxConfiguredQuerySize));
   }
 
   @Test
@@ -167,7 +167,7 @@ class QueryManagementServiceTest {
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
 
-    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(maxConfiguredQuerySize));
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(entityType), eq(maxConfiguredQuerySize));
     assertEquals(expectedFields, queryCaptor.getValue().fields());
   }
 
@@ -185,7 +185,7 @@ class QueryManagementServiceTest {
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
-    verify(queryExecutionService, times(0)).executeQueryAsync(any(), eq(maxQuerySize));
+    verify(queryExecutionService, times(0)).executeQueryAsync(any(), eq(entityType), eq(maxQuerySize));
   }
 
   @Test
@@ -399,7 +399,6 @@ class QueryManagementServiceTest {
     assertThrows(QueryNotFoundException.class, () -> queryManagementService.deleteQuery(queryId));
   }
 
-  // TODO: remove commented lines
   @Test
   void shouldGetSortedIds() {
     Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);

@@ -48,7 +48,7 @@ public class QueryProcessorService {
     try {
       Fql fql = fqlService.getFql(fqlQueryWithContext.fqlQuery());
       int idsCount = idStreamer.streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         batchSize,

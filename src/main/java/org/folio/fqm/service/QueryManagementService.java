@@ -77,7 +77,7 @@ public class QueryManagementService {
     int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
-    queryExecutionService.executeQueryAsync(query, maxQuerySize);
+    queryExecutionService.executeQueryAsync(query, entityType, maxQuerySize);
     return queryIdentifier;
   }
 

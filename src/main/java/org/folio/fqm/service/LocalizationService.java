@@ -65,15 +65,31 @@ public class LocalizationService {
   }
 
   private String getSourceTranslationPrefix(EntityType entityType, String columnName) {
+    String entityTypeName = entityType.getName();
+    String formattedKey;
+
     int currentSourceIndex = columnName.indexOf(".");
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
-      String formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource);
-      return  translationService.format(formattedKey) + " — ";
+      formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityTypeName, currentSource);
     } else {
-      return "";
+      formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityTypeName, columnName);
     }
+
+    return translationService.format(formattedKey) + " — ";
   }
+
+
+//  private String getSourceTranslationPrefix(EntityType entityType, String columnName) {
+//    int currentSourceIndex = columnName.indexOf(".");
+//    if (currentSourceIndex > 0) {
+//      String currentSource = columnName.substring(0, currentSourceIndex);
+//      String formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource);
+//      return  translationService.format(formattedKey) + " — ";
+//    } else {
+//      return "";
+//    }
+//  }
 
   protected void localizeObjectColumn(EntityType entityType, EntityTypeColumn column, ObjectType objectColumn) {
     objectColumn

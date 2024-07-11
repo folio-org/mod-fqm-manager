@@ -16,7 +16,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance',
-        condition: ":this.id = (:that.jsonb ->> 'statusId')::uuid"
+        condition: ":this.id = :that.instanceStatusId"
       }
     },
     {
@@ -26,7 +26,17 @@
       join: {
         type: 'left join',
         joinTo: 'instance',
-        condition: ":this.id = (:that.jsonb ->> 'modeOfIssuanceId')::uuid"
+        condition: ":this.id = :that.modeOfIssuanceId"
+      }
+    },
+    {
+      alias: 'instance_type',
+      type: 'entity-type',
+      id: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
+      join: {
+        type: 'left join',
+        joinTo: 'instance',
+        condition: ":this.id = :that.instanceTypeId"
       }
     }
   ],

@@ -30,12 +30,12 @@ public class PermissionsService {
 
   private final FolioExecutionContext context;
   private final ModPermissionsClient modPermissionsClient;
-  private final Cache<UUID, Set<String>> cache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
+  private final Cache<TenantUserPair, Set<String>> cache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   private final EntityTypeFlatteningService entityTypeFlatteningService;
 
   public Set<String> getUserPermissions() {
-    var userId = context.getUserId();
-    return cache.get(userId, id -> isEureka ? getUserPermissionsFromRolesKeycloak(id) : getUserPermissionsFromModPermissions(id));
+    TenantUserPair key = new TenantUserPair(context.getTenantId(), context.getUserId());
+    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(k.userId()));
   }
 
   private Set<String> getUserPermissionsFromModPermissions(UUID userId) {
@@ -67,4 +67,6 @@ public class PermissionsService {
       throw new MissingPermissionsException(missingPermissions);
     }
   }
+
+  private record TenantUserPair(String tenant, UUID userId) {}
 }

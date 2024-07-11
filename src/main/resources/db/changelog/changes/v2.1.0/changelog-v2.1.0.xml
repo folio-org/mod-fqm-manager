@@ -156,4 +156,15 @@
     </sql>
   </changeSet>
 
+  <changeSet id="create_instance_type_view" runOnChange="true" author="mweaver@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

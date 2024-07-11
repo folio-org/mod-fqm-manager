@@ -69,7 +69,7 @@ public class LocalizationService {
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
       String formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource);
-      return  translationService.format(formattedKey) + " - ";
+      return  translationService.format(formattedKey) + " — ";
     } else {
       return "";
     }

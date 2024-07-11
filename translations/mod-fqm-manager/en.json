@@ -1618,7 +1618,7 @@
   "entityType.src_inventory_contributor_type": "Contributor type",
   "entityType.src_inventory_contributor_type.contributor_type": "Contributor type",
   "entityType.src_inventory_contributor_type.id": "Id",
-  "entityType.simple_instance_status": "Instance status",
+  "entityType.simple_instance_status": "Instance status name",
   "entityType.simple_instance_status.id": "UUID",
   "entityType.simple_instance_status.name": "Name",
   "entityType.simple_instance_status.code": "Code",

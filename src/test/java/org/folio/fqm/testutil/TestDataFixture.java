@@ -141,8 +141,7 @@ public class TestDataFixture {
   }
 
   public static EntityType getEntityDefinition() {
-    EntityType returnValue = mockDefinition;
-    return returnValue;
+    return mockDefinition;
   }
 
   public static EntityType getEntityTypeDefinition(

@@ -1064,7 +1064,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      isIdColumn: true, // probably needs to be
+      isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
       valueGetter: "CASE \
@@ -1079,6 +1079,5 @@
                     END",
       ecsOnly: true
     }
-    // TODO: add source_tenant_name
   ],
 }

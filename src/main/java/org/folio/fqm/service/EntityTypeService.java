@@ -3,7 +3,6 @@ package org.folio.fqm.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -32,7 +31,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
@@ -46,7 +44,7 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
-  private final SimpleHttpClient folioApiClient;
+  private final SimpleHttpClient fieldValueClient;
   private final PermissionsService permissionsService;
 
   /**
@@ -86,16 +84,10 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId) {
-    boolean ecsEnabled = ecsEnabled();
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
-    entityType.columns(
-      entityType
-        .getColumns()
-        .stream()
-        .filter(column -> ecsEnabled || !Boolean.TRUE.equals(column.getEcsOnly()))
-        .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-        .toList()
-    );
+    entityType.columns(entityType.getColumns().stream()
+      .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+      .toList());
     return entityType;
   }
 
@@ -143,7 +135,7 @@ public class EntityTypeService {
   }
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    String rawJson = folioApiClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
+    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
@@ -177,7 +169,7 @@ public class EntityTypeService {
   }
 
   private static ColumnValues getCurrencyValues() {
-    List<ValueWithLabel> currencies =
+     List<ValueWithLabel> currencies =
       new ArrayList<>(Currency
         .getAvailableCurrencies()
         .stream()
@@ -201,18 +193,4 @@ public class EntityTypeService {
     return allValues.get(fieldName).toString();
   }
 
-  private boolean ecsEnabled() {
-    try {
-      String rawJson = folioApiClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)));
-      // TODO: remove next 4 lines when done testing
-      log.info("Got raw json: {}", rawJson);
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      String centralTenantId = parsedJson.read("centralTenantId");
-      log.info("Central tenant ID: {}", centralTenantId);
-      return true;
-    } catch (Exception e) {
-      log.info("Exception: {}", e.getMessage());
-      return false;
-    }
-  }
 }

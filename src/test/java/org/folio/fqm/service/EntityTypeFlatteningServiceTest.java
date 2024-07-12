@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,13 +33,15 @@ class EntityTypeFlatteningServiceTest {
   private EntityTypeRepository entityTypeRepository;
   @Mock
   private LocalizationService localizationService;
+  @Mock
+  private SimpleHttpClient ecsClient;
 
   private EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
   void setup() {
     ObjectMapper objectMapper = new ObjectMapper();
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper, localizationService);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper, localizationService, ecsClient);
   }
 
   private static final UUID SIMPLE_ENTITY_TYPE_ID = UUID.fromString("0686b9e4-accd-46f8-9e35-792c735733bb");
@@ -108,7 +112,14 @@ class EntityTypeFlatteningServiceTest {
               .dataType(new StringType().dataType("stringType"))
               .valueGetter(":sourceAlias.array_object.array_object_field2")
               .filterValueGetter(":sourceAlias.array_object.object_field2"))))
+        .sourceAlias("source1"),
+      new EntityTypeColumn()
+        .name("ecs_field")
+        .valueGetter(":sourceAlias.ecs_field")
+        .dataType(new StringType().dataType("stringType"))
+        .isIdColumn(true)
         .sourceAlias("source1")
+        .ecsOnly(true)
     ))
     .sources(List.of(
       new EntityTypeSource()
@@ -848,6 +859,97 @@ class EntityTypeFlatteningServiceTest {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
+  }
+
+  @Test
+  void shouldIncludeEcsColumnsWhenEcsIsEnabled() {
+    EntityType expectedEntityType = new EntityType()
+      .name("simple_entity_type")
+      .id(SIMPLE_ENTITY_TYPE_ID.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("field1")
+          .valueGetter("\"source1\".field1")
+          .dataType(new StringType().dataType("stringType"))
+          .sourceAlias("source1")
+          .isIdColumn(true),
+        new EntityTypeColumn()
+          .name("field2")
+          .valueGetter("\"source1\".field2")
+          .filterValueGetter("lower(\"source1\".field2)")
+          .dataType(new StringType().dataType("stringType"))
+          .sourceAlias("source1"),
+        new EntityTypeColumn()
+          .name("object")
+          .valueGetter("\"source1\".field2")
+          .filterValueGetter("lower(\"source1\".field2)")
+          .dataType(new ObjectType().dataType("objectType")
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("object_field1")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter("\"source1\".object.object_field1")
+              .filterValueGetter("\"source1\".object.object_field1"))
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("object_field2")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter("\"source1\".object.object_field2")
+              .filterValueGetter("\"source1\".object.object_field2"))
+          )
+          .sourceAlias("source1"),
+        new EntityTypeColumn()
+          .name("string_array_field")
+          .valueGetter("\"source1\".string_array_field")
+          .filterValueGetter("lower(\"source1\".string_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new StringType().dataType("stringType")))
+          .sourceAlias("source1"),
+        new EntityTypeColumn()
+          .name("nested_string_array_field")
+          .valueGetter("\"source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"source1\".nested_string_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new ArrayType().dataType("arrayType")
+              .itemDataType(new StringType().dataType("stringType"))))
+          .sourceAlias("source1"),
+        new EntityTypeColumn()
+          .name("object_array_field")
+          .valueGetter("\"source1\".object_array_field")
+          .filterValueGetter("lower(\"source1\".object_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new ObjectType().dataType("objectType")
+              .addPropertiesItem(new NestedObjectProperty()
+                .name("array_object_field1")
+                .dataType(new StringType().dataType("stringType"))
+                .valueGetter("\"source1\".array_object.array_object_field1")
+                .filterValueGetter("\"source1\".array_object.array_object_field1"))
+              .addPropertiesItem(new NestedObjectProperty()
+                .name("array_object_field2")
+                .dataType(new StringType().dataType("stringType"))
+                .valueGetter("\"source1\".array_object.array_object_field2")
+                .filterValueGetter("\"source1\".array_object.object_field2"))))
+          .sourceAlias("source1"),
+        new EntityTypeColumn()
+          .name("ecs_field")
+          .valueGetter("\"source1\".ecs_field")
+          .dataType(new StringType().dataType("stringType"))
+          .isIdColumn(true)
+          .sourceAlias("source1")
+          .ecsOnly(true)
+      ))
+      .sources(List.of(
+        new EntityTypeSource()
+          .type("db")
+          .alias("source1")
+          .target("source1_target")
+          .useIdColumns(true)
+      ))
+      .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
+
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn("{'centralTenantId': 'consortium'}");
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true);
+    assertEquals(expectedEntityType, actualEntityType);
   }
 
   private EntityType copyEntityType(EntityType originalEntityType) {

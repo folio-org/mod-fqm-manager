@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.IdStreamer;
@@ -57,7 +58,8 @@ class IdStreamerTest {
       new ObjectMapper()
     );
     localizationService = mock(LocalizationService.class);
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService);
+    SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
     this.idStreamer =
       new IdStreamer(
         context,

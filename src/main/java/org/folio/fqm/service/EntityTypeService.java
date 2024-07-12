@@ -7,7 +7,6 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;

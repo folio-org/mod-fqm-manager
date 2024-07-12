@@ -1037,5 +1037,47 @@
           jsonb_array_elements(:sourceAlias.jsonb->'natureOfContentTermIds') AS elems\
       )",
     },
+    {
+      name: 'share_type',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "CASE \
+                      WHEN (SELECT central_tenant_id from ${tenant_id}_mod_consortia.consortia_configuration) = '${tenant_id}' \
+                        THEN 'Shared'\
+                      ELSE \
+                        CASE \
+                          WHEN \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-folio' OR \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-marc' \
+                            THEN 'Shared' \
+                          ELSE 'Local' \
+                        END \
+                    END",
+      ecsOnly: true
+    },
+    {
+      name: 'source_tenant_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "CASE \
+                      WHEN (SELECT central_tenant_id from ${tenant_id}_mod_consortia.consortia_configuration) = '${tenant_id}' \
+                        THEN '${tenant_id}' \
+                      ELSE \
+                        CASE \
+                          WHEN \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-folio' OR \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-marc' \
+                            THEN (SELECT central_tenant_id FROM ${tenant_id}_mod_consortia.consortia_configuration) \
+                          ELSE '${tenant_id}' \
+                        END \
+                    END",
+      ecsOnly: true
+    }
   ],
 }

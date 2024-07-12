@@ -1,9 +1,12 @@
 package org.folio.fqm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -33,6 +36,7 @@ public class EntityTypeFlatteningService {
   private final EntityTypeRepository entityTypeRepository;
   private final ObjectMapper objectMapper;
   private final LocalizationService localizationService;
+  private final SimpleHttpClient ecsClient;
 
   // TODO: clean up
   public EntityType getFlattenedEntityType(UUID entityTypeId, boolean doFinalRenames) {
@@ -224,7 +228,7 @@ public class EntityTypeFlatteningService {
   }
 
   private List<EntityTypeColumn> finalColumnConversion(EntityType flattenedEntityType) {
-    return flattenedEntityType.getColumns()
+    return getFilteredColumns(flattenedEntityType.getColumns())
       .stream()
       .map(column -> injectSourceAlias(column, column.getSourceAlias()))
       .toList();
@@ -296,5 +300,25 @@ private static <T extends Field> T injectSourceAlias(T column, String sourceAlia
       .stream()
       .filter(source -> !Boolean.TRUE.equals(source.getFlattened()) && DB_TYPE.equals(source.getType()))
       .count();
+  }
+
+  private List<EntityTypeColumn> getFilteredColumns(List<EntityTypeColumn> unfilteredColumns) {
+    boolean ecsEnabled = ecsEnabled();
+    return unfilteredColumns
+      .stream()
+      .filter(column -> ecsEnabled || !Boolean.TRUE.equals(column.getEcsOnly()))
+      .toList();
+  }
+
+  private boolean ecsEnabled() {
+    try {
+      String rawJson = ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)));
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      // The value isn't needed here, this just provides an easy way to tell if ECS is enabled
+      parsedJson.read("centralTenantId");
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

@@ -1177,7 +1177,6 @@
     "entityType.simple_instance.updated_by": "Atualizado por usuário de UUID",
     "entityType.simple_instance.version": "Versão do registro",
     "entityType.simple_loan_policy": "Políticas de empréstimos",
-    "entityType.simple_loan_policy.closed_library_due_date_management": "Gestão da data de vencimento da biblioteca fechada",
     "entityType.simple_loan_policy.created_at": "Criado em",
     "entityType.simple_loan_policy.created_by": "Criado por usuário de UUID",
     "entityType.simple_loan_policy.description": "Descrição",

@@ -1152,7 +1152,6 @@
   "entityType.simple_instance_type.code": "Code",
   "entityType.simple_instance_type.id": "Type UUID",
   "entityType.simple_loan_policy": "Loan policies",
-  "entityType.simple_loan_policy.closed_library_due_date_management": "Closed library due date management",
   "entityType.simple_loan_policy.created_at": "Created at",
   "entityType.simple_loan_policy.created_by": "Created by user UUID",
   "entityType.simple_loan_policy.description": "Description",

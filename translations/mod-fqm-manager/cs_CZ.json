@@ -1177,7 +1177,6 @@
     "entityType.simple_instance.updated_by": "Aktualizováno uživatelem UUID",
     "entityType.simple_instance.version": "Verze záznamu",
     "entityType.simple_loan_policy": "Pravidla pro výpůjčky",
-    "entityType.simple_loan_policy.closed_library_due_date_management": "Určení termínu vrácení v době uzavření knihovny",
     "entityType.simple_loan_policy.created_at": "Vytvořeno v",
     "entityType.simple_loan_policy.created_by": "Vytvořeno uživatelem UUID",
     "entityType.simple_loan_policy.description": "Popis",

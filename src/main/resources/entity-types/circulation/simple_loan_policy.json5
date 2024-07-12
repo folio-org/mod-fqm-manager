@@ -124,17 +124,6 @@
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'profileId'",
     },
     {
-      name: 'closed_library_due_date_management',
-      sourceAlias: 'lp',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
-    },
-    {
       name: 'renewable',
       sourceAlias: 'lp',
       dataType: {
@@ -273,6 +262,32 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
+      values: [ // From https://github.com/folio-org/mod-circulation/blob/master/src/main/java/org/folio/circulation/domain/policy/DueDateManagement.java
+        {
+          label: 'CURRENT_DUE_DATE',
+          value: 'CURRENT_DUE_DATE',
+        },
+        {
+          label: 'END_OF_THE_PREVIOUS_OPEN_DAY',
+          value: 'END_OF_THE_PREVIOUS_OPEN_DAY',
+        },
+        {
+          label: 'END_OF_THE_NEXT_OPEN_DAY',
+          value: 'END_OF_THE_NEXT_OPEN_DAY',
+        },
+        {
+          label: 'CURRENT_DUE_DATE_TIME',
+          value: 'CURRENT_DUE_DATE_TIME',
+        },
+        {
+          label: 'END_OF_THE_CURRENT_SERVICE_POINT_HOURS',
+          value: 'END_OF_THE_CURRENT_SERVICE_POINT_HOURS',
+        },
+        {
+          label: 'BEGINNING_OF_THE_NEXT_OPEN_SERVICE_POINT_HOURS',
+          value: 'BEGINNING_OF_THE_NEXT_OPEN_SERVICE_POINT_HOURS',
+        },
+      ],
     },
     {
       name: 'loans_policy_grace_period_duration',

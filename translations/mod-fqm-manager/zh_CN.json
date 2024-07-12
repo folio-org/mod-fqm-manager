@@ -1177,7 +1177,6 @@
     "entityType.simple_instance.updated_by": "由用户UUID更新",
     "entityType.simple_instance.version": "记录版本",
     "entityType.simple_loan_policy": "借阅政策",
-    "entityType.simple_loan_policy.closed_library_due_date_management": "闭馆到期日管理",
     "entityType.simple_loan_policy.created_at": "创建于",
     "entityType.simple_loan_policy.created_by": "由用户UUID创建",
     "entityType.simple_loan_policy.description": "描述",

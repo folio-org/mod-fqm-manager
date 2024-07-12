@@ -438,6 +438,9 @@ Fields prefixed with an underscore are reserved for use by FQM.
 #### _deleted
 The field name "_deleted" can be used to indicate that the record corresponding to a particular content ID has been deleted.
 
+#### _version
+The name "_version" can be used to indicate the version number of the query.
+
 ## Additional information
 
 ### Issue tracker

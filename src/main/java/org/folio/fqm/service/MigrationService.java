@@ -1,11 +1,16 @@
 package org.folio.fqm.service;
 
 import java.util.List;
-import org.apache.commons.lang3.NotImplementedException;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
 public class MigrationService {
 
-  public int getLatestVersion() {
+  public String getLatestVersion() {
     // return 1;
     throw new NotImplementedException();
   }

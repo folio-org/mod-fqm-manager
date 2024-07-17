@@ -247,6 +247,29 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void shouldRemoveDuplicatePredefinedValues() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "column_name";
+    List<ValueWithLabel> values = List.of(
+      new ValueWithLabel().value("value_01").label("value_01"),
+      new ValueWithLabel().value("value_01").label("value_01")
+    );
+    List<ValueWithLabel> expectedValues = List.of(
+      new ValueWithLabel().value("value_01").label("value_01")
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+
+    assertEquals(new ColumnValues().content(expectedValues), actualColumnValueLabel);
+  }
+
+  @Test
   void shouldReturnValuesFromApi() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";

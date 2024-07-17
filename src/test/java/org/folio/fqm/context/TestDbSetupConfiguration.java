@@ -2,9 +2,11 @@ package org.folio.fqm.context;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Map;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.IntegrationTestBase;
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.spring.FolioExecutionContext;
@@ -14,6 +16,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.ResourcePatternResolver;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * This class is responsible for inserting test data into a PostgreSQL test container database.
@@ -47,6 +52,8 @@ public class TestDbSetupConfiguration {
 
     @PostConstruct
     public void populateEntityTypes() throws IOException {
+      SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
+      when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn("{\"centralTenantId\": \"tenant_01\"}");
       new EntityTypeInitializationService(
         entityTypeRepository,
         new FolioExecutionContext() {
@@ -55,7 +62,8 @@ public class TestDbSetupConfiguration {
             return IntegrationTestBase.TENANT_ID;
           }
         },
-        resourceResolver
+        resourceResolver,
+        ecsClient
       )
         .initializeEntityTypes();
     }

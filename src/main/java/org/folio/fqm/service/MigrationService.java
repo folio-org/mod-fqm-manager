@@ -5,8 +5,8 @@ import org.apache.commons.lang3.NotImplementedException;
 
 public class MigrationService {
 
-  public int getLatestVersion() {
-    // return 1;
+  public String getLatestVersion() {
+    // return "1";
     throw new NotImplementedException();
   }
 

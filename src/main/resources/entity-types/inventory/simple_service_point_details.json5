@@ -237,7 +237,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb",
+      valueGetter: ":sourceAlias.jsonb::text",
     }
   ],
 }

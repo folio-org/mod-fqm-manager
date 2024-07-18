@@ -825,5 +825,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'notes'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'hrd',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
 }

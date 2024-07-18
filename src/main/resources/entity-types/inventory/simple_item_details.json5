@@ -961,5 +961,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'purchaseOrderLineIdentifier'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
 }

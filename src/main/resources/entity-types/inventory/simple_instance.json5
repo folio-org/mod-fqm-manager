@@ -1098,6 +1098,17 @@
         },
       ],
       ecsOnly: true,
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
     }
   ],
 }

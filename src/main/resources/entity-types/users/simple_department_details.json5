@@ -133,6 +133,16 @@
       valueGetter: "(:sourceAlias.jsonb->>'usageNumber')::integer",
       valueFunction: '(:value)::integer',
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'department',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
   defaultSort: [
     {

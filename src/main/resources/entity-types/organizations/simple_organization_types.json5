@@ -118,7 +118,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb",
+      valueGetter: ":sourceAlias.jsonb::text",
     }
   ],
 }

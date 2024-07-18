@@ -131,7 +131,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      valueGetter: ":sourceAlias.jsonb",
+      valueGetter: ":sourceAlias.jsonb::text",
     }
   ],
   defaultSort: [

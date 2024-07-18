@@ -122,6 +122,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'instance_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
   defaultSort: [
     {

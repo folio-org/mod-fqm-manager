@@ -109,5 +109,16 @@
         },
       ],
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
 }

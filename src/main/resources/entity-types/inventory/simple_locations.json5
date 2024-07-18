@@ -180,8 +180,18 @@
       valueGetter: ":sourceAlias.jsonb->>'primaryServicePoint'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'primaryServicePoint'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'location',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
     }
-    ],
+  ],
   defaultSort: [
     {
       columnName: 'id',

@@ -2076,5 +2076,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'edi'->'ediJob'->>'schedulingNotes'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'org',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
 }

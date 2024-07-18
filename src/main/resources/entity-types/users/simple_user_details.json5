@@ -562,6 +562,17 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'enrollmentDate'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb",
+    }
   ],
   defaultSort: [
     {

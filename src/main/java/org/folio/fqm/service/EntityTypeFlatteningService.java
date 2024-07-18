@@ -307,6 +307,7 @@ private static <T extends Field> T injectSourceAlias(T column, String sourceAlia
     return unfilteredColumns
       .stream()
       .filter(column -> ecsEnabled || !Boolean.TRUE.equals(column.getEcsOnly()))
+      .map(column -> column.getValues() == null ? column : column.values(column.getValues().stream().distinct().toList()))
       .toList();
   }
 

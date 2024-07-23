@@ -39,6 +39,15 @@ private static final UUID ${newName} = UUID.fromString("${newEntityType?.id}");
 `;
     }
 
+    const columnMapName = oldNameUnqualified + '_COLUMN_MAPPING';
+    result += `
+private static final Map<String, String> ${columnMapName} = Map.ofEntries(
+  ${Object.entries(columnMapping)
+    .map(([oldName, newName]) => `Map.entry("${oldName}", "${newName}")`)
+    .join(',\n  ')}
+);
+`.trimStart();
+
     if (oldAndNewAreSame) {
       result += `
 @Override
@@ -61,14 +70,7 @@ protected Map<UUID, UUID> getEntityTypeChanges() {
 @Override
 protected Map<UUID, Map<String, String>> getFieldChanges() {
   return Map.ofEntries(
-    Map.entry(
-      ${oldName},
-      Map.ofEntries(
-        ${Object.entries(columnMapping)
-          .map(([oldName, newName]) => `Map.entry("${oldName}", "${newName}")`)
-          .join(',\n        ')}
-      )
-    )
+    Map.entry(${oldName}, ${columnMapName})
   );
 }
 `;

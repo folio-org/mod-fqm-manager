@@ -1,7 +1,8 @@
 package org.folio.fqm.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.repository.ResultSetRepository;
-import org.folio.fqm.utils.IdColumnUtils;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Log4j2
 public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
@@ -26,15 +28,16 @@ public class ResultSetService {
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
-                                                List<List<String>> ids) {
-    List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(entityTypeId, fields, ids);
+                                                List<List<String>> ids, List<String> tenantsToQuery) {
+    List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
+
     // Sort the contents in Java code as sorting in DB views run very slow intermittently
     return getSortedContents(entityTypeId, ids, unsortedResults);
   }
 
   private List<Map<String, Object>> getSortedContents(UUID entityTypeId, List<List<String>> contentIds, List<Map<String, Object>> unsortedResults) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
-    List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(entityType);
     Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> {
             List<String> keys = new ArrayList<>();

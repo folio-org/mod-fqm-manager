@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.testutil.TestDataFixture;
-import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
@@ -75,6 +74,9 @@ class QueryManagementServiceTest {
 
   @Mock
   private FqlValidationService fqlValidationService;
+
+  @Mock
+  private CrossTenantQueryService crossTenantQueryService;
 
   private final int maxConfiguredQuerySize = 1000;
 
@@ -222,6 +224,7 @@ class QueryManagementServiceTest {
       Map.of("id", resultIds.get(0), "field1", "value1", "field2", "value2"),
       Map.of("id", resultIds.get(1), "field1", "value1", "field2", "value2")
     );
+    List<String> tenantIds = List.of("tenant_01");
     Query expectedQuery = TestDataFixture.getMockQuery();
     Optional<QueryDetails> expectedDetails = Optional.of(new QueryDetails()
       .queryId(expectedQuery.queryId())
@@ -235,7 +238,8 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedQuery.fields(), resultIds)).thenReturn(contents);
+    when(crossTenantQueryService.getTenantsToQuery(expectedQuery.entityTypeId())).thenReturn(tenantIds);
+    when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedQuery.fields(), resultIds, tenantIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
@@ -452,13 +456,15 @@ class QueryManagementServiceTest {
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString())
     );
+    List<String> tenantIds = List.of("tenant_01");
     List<String> fields = List.of("id", "field1", "field2");
     List<Map<String, Object>> expectedContents = List.of(
       Map.of("id", UUID.randomUUID(), "field1", "value1", "field2", "value2"),
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(entityType);
-    when(resultSetService.getResultSet(entityTypeId, fields, ids)).thenReturn(expectedContents);
+    when(crossTenantQueryService.getTenantsToQuery(entityTypeId)).thenReturn(tenantIds);
+    when(resultSetService.getResultSet(entityTypeId, fields, ids, tenantIds)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids);
     assertEquals(expectedContents, actualContents);
   }
@@ -475,6 +481,7 @@ class QueryManagementServiceTest {
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString())
     );
+    List<String> tenantIds = List.of("tenant_01");
     List<String> providedFields = new ArrayList<>(List.of("field1", "field2"));
     List<String> expectedFields = List.of("field1", "field2", "id");
     List<Map<String, Object>> expectedContents = List.of(
@@ -482,7 +489,8 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
     when(entityTypeService.getEntityTypeDefinition(entityTypeId)).thenReturn(entityType);
-    when(resultSetService.getResultSet(entityTypeId, expectedFields, ids)).thenReturn(expectedContents);
+    when(crossTenantQueryService.getTenantsToQuery(entityTypeId)).thenReturn(tenantIds);
+    when(resultSetService.getResultSet(entityTypeId, expectedFields, ids, tenantIds)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, providedFields, ids);
     assertEquals(expectedContents, actualContents);
   }

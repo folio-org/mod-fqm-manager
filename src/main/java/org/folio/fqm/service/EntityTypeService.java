@@ -46,6 +46,7 @@ public class EntityTypeService {
   private final QueryProcessorService queryService;
   private final SimpleHttpClient fieldValueClient;
   private final PermissionsService permissionsService;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   /**
    * Returns the list of all entity types.
@@ -56,7 +57,7 @@ public class EntityTypeService {
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeDefinitions(entityTypeIds)
+      .getEntityTypeDefinitions(entityTypeIds, null)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .map(entityType -> {
@@ -84,7 +85,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
     entityType.columns(entityType.getColumns().stream()
       .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList());
@@ -102,12 +103,42 @@ public class EntityTypeService {
   @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
-
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName));
+
+    if (field.getName().equals("tenant_id")) {
+      // Hackish way to get tenant values for cross-tenant instance queries. Can be removed after completion of MODFQMMGR-335.
+      List<String> tenants = crossTenantQueryService.getTenantsToQuery(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"));
+      List<ValueWithLabel> tenantValues = tenants
+        .stream()
+        .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
+        .toList();
+      return new ColumnValues().content(tenantValues);
+    }
+
+    if (field.getName().equals("source_tenant_id")) {
+      // Hackish way to get tenant values for cross-tenant instance queries. Can be removed after completion of MODFQMMGR-335.
+      List<String> tenants = crossTenantQueryService.getTenantsToQuery(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"));
+      if (tenants.size() > 1) {
+        List<ValueWithLabel> tenantValues = tenants
+          .stream()
+          .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
+          .toList();
+        return new ColumnValues().content(tenantValues);
+      } else {
+        // tenant is not central tenant, but we need to provide central tenant id as an available value
+        String centralTenantId = crossTenantQueryService.getCentralTenantId();
+        List<ValueWithLabel> tenantList = new ArrayList<>();
+        if (centralTenantId != null && !centralTenantId.equals(tenants.get(0))) {
+          tenantList.add(new ValueWithLabel().value(centralTenantId).label(centralTenantId));
+        }
+        tenantList.add(new ValueWithLabel().value(tenants.get(0)).label(tenants.get(0)));
+        return new ColumnValues().content(tenantList);
+      }
+    }
 
     if (field.getValues() != null) {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
@@ -170,7 +201,7 @@ public class EntityTypeService {
   }
 
   private static ColumnValues getCurrencyValues() {
-     List<ValueWithLabel> currencies =
+    List<ValueWithLabel> currencies =
       new ArrayList<>(Currency
         .getAvailableCurrencies()
         .stream()

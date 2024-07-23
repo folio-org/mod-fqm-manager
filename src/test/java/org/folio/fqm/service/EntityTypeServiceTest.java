@@ -60,7 +60,7 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
       new EntityType(id1.toString(), "translation_label_01", true, false),
       new EntityType(id2.toString(), "translation_label_02", true, false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
@@ -70,7 +70,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeDefinitions(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
@@ -85,7 +85,7 @@ class EntityTypeServiceTest {
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
       new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
       new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
@@ -97,7 +97,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeDefinitions(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
 
@@ -113,7 +113,7 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
 
-    when(repo.getEntityTypeDefinitions(ids)).thenReturn(Stream.of(
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
       new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
       new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
@@ -126,7 +126,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
-    verify(repo, times(1)).getEntityTypeDefinitions(ids);
+    verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
@@ -158,7 +158,7 @@ class EntityTypeServiceTest {
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -180,7 +180,7 @@ class EntityTypeServiceTest {
           Map.of(valueColumnName, "value_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
 
     ColumnValues expectedColumnValues = new ColumnValues().content(
       List.of(
@@ -203,9 +203,7 @@ class EntityTypeServiceTest {
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
-
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
-
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
@@ -220,8 +218,7 @@ class EntityTypeServiceTest {
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
-
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
   }
@@ -239,10 +236,9 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-
     assertEquals(new ColumnValues().content(values), actualColumnValueLabel);
   }
 
@@ -262,10 +258,9 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-
     assertEquals(new ColumnValues().content(expectedValues), actualColumnValueLabel);
   }
 
@@ -285,7 +280,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
            {
              "what": {
@@ -323,7 +318,7 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
@@ -343,8 +338,7 @@ class EntityTypeServiceTest {
         .name("pol_currency")
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
-
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")

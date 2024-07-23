@@ -3,19 +3,22 @@ package org.folio.fqm.utils;
 import lombok.experimental.UtilityClass;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.jooq.Field;
+import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 /**
  * Class responsible for retrieving information related to the ID columns of an entity type.
  */
 @UtilityClass
-public class IdColumnUtils {
+public class EntityTypeUtils {
 
   public static final Field<String[]> RESULT_ID_FIELD = field("result_id", String[].class);
 
@@ -26,7 +29,7 @@ public class IdColumnUtils {
    * @return List of id column names for the entity type
    */
   public static List<String> getIdColumnNames(EntityType entityType) {
-    return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
+    return (!isEmpty(entityType.getColumns()) ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
         .stream()
         .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
         .map(EntityTypeColumn::getName)
@@ -65,5 +68,21 @@ public class IdColumnUtils {
       DSL.array(idColumnValueGetters.toArray(new Field[0])),
       String[].class
     );
+  }
+
+  public static List<SortField<Object>> getSortFields(EntityType entityType, boolean sortResults) {
+    if (sortResults && !isEmpty(entityType.getDefaultSort())) {
+      return entityType
+        .getDefaultSort()
+        .stream()
+        .map(EntityTypeUtils::toSortField)
+        .toList();
+    }
+    return List.of();
+  }
+
+  public static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
+    Field<Object> field = field(entityTypeDefaultSort.getColumnName());
+    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
   }
 }

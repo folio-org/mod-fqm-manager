@@ -26,6 +26,7 @@ public class QueryProcessorService {
   private final ResultSetRepository resultSetRepository;
   private final IdStreamer idStreamer;
   private final FqlService fqlService;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   /**
    * Process the FQL query and return the result IDs in batches.
@@ -73,6 +74,7 @@ public class QueryProcessorService {
    */
   public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
-    return resultSetRepository.getResultSet(entityTypeId, fql, fields, afterId, limit);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
+    return resultSetRepository.getResultSetSync(entityTypeId, fql, fields, afterId, limit, tenantsToQuery);
   }
 }

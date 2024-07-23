@@ -1,6 +1,5 @@
 package org.folio.fqm.repository;
 
-import org.folio.fqm.repository.EntityTypeRepository.RawEntityTypeSummary;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -18,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,7 +39,7 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {
-    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID);
+    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID, null);
     assertTrue(actualEntityTypeDefinition.isPresent());
   }
 
@@ -97,7 +94,7 @@ class EntityTypeRepositoryTest {
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
       .columns(expectedColumns)
       .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
-    EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID).orElseThrow();
+    EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, null).orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }
 }

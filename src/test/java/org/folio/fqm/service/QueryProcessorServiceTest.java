@@ -27,13 +27,15 @@ class QueryProcessorServiceTest {
   private ResultSetRepository resultSetRepository;
   private IdStreamer idStreamer;
   private FqlService fqlService;
+  private CrossTenantQueryService crossTenantQueryService;
 
   @BeforeEach
   public void setup() {
     resultSetRepository = mock(ResultSetRepository.class);
     idStreamer = mock(IdStreamer.class);
     fqlService = mock(FqlService.class);
-    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService);
+    crossTenantQueryService = mock(CrossTenantQueryService.class);
+    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService, crossTenantQueryService);
   }
 
   @Test
@@ -104,6 +106,7 @@ class QueryProcessorServiceTest {
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;
+    List<String> tenantIds = List.of("tenant_01");
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
     Fql expectedFql = new Fql("", new EqualsCondition(new FqlField("status"), "value1"));
@@ -113,7 +116,8 @@ class QueryProcessorServiceTest {
       Map.of("field1", "value1", "field2", "value4")
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
-    when(resultSetRepository.getResultSet(entityTypeId, expectedFql, fields, afterId, limit)).thenReturn(expectedContent);
+    when(crossTenantQueryService.getTenantsToQuery(entityTypeId)).thenReturn(tenantIds);
+    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds)).thenReturn(expectedContent);
     List<Map<String, Object>> actualContent = service.processQuery(entityTypeId, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
   }

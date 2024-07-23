@@ -3,18 +3,19 @@ package org.folio.fqm.repository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.model.IdsWithCancelCallback;
+import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
-import org.folio.fqm.utils.IdColumnUtils;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.ResultQuery;
-import org.jooq.SortField;
+import org.jooq.Select;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
+import static org.folio.fqm.utils.EntityTypeUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
@@ -42,6 +43,8 @@ public class IdStreamer {
   @Qualifier("readerJooqContext")
   private final DSLContext jooqContext;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final CrossTenantQueryService crossTenantQueryService;
+  private final FolioExecutionContext executionContext;
 
   /**
    * Executes the given Fql Query and stream the result Ids back.
@@ -51,8 +54,8 @@ public class IdStreamer {
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    Condition sqlWhereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
-    return this.streamIdsInBatch(entityType, sortResults, sqlWhereClause, batchSize, idsConsumer);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(UUID.fromString(entityType.getId()));
+    return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery);
   }
 
   public List<List<String>> getSortedIds(String derivedTableName,
@@ -76,40 +79,40 @@ public class IdStreamer {
 
   private int streamIdsInBatch(EntityType entityType,
                                boolean sortResults,
-                               Condition sqlWhereClause,
-                               int batchSize,
-                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    String finalJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
-    Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
-    ResultQuery<Record1<String[]>> query = null;
-    if (!isEmpty(entityType.getGroupByFields())) {
-      Field<?>[] groupByFields = entityType
-        .getColumns()
-        .stream()
-        .filter(col -> entityType.getGroupByFields().contains(col.getName()))
-        .map(col -> col.getFilterValueGetter() == null ? col.getValueGetter() : col.getFilterValueGetter())
-        .map(DSL::field)
-        .toArray(Field[]::new);
-      query = jooqContext.dsl()
-        .select(field(idValueGetter))
-        .from(finalJoinClause)
-        .where(sqlWhereClause)
-        .groupBy(groupByFields)
-        .orderBy(getSortFields(entityType, sortResults))
-        .fetchSize(batchSize);
-    } else {
-      query = jooqContext.dsl()
-        .select(field(idValueGetter))
-        .from(finalJoinClause)
-        .where(sqlWhereClause)
-        .orderBy(getSortFields(entityType, sortResults))
-        .fetchSize(batchSize);
+                               Fql fql, int batchSize,
+                               Consumer<IdsWithCancelCallback> idsConsumer, List<String> tenantsToQuery) {
+    UUID entityTypeId = UUID.fromString(entityType.getId());
+    log.debug("List of tenants to query: {}", tenantsToQuery);
+    Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
+    Select<Record1<String[]>> fullQuery = null;
+    for (String tenantId : tenantsToQuery) {
+      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
+        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
+      var currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
+      String innerJoinClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+      Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
+      ResultQuery<Record1<String[]>> innerQuery = buildQuery(
+        entityTypeDefinition,
+        currentIdValueGetter,
+        innerJoinClause,
+        whereClause,
+        sortResults,
+        batchSize
+      );
+      if (fullQuery == null) {
+        fullQuery = (Select<Record1<String[]>>) innerQuery;
+      } else {
+        fullQuery = fullQuery.unionAll((Select<Record1<String[]>>) innerQuery);
+      }
     }
+    log.debug("Full query: {}", fullQuery);
 
     try (
-      Cursor<Record1<String[]>> idsCursor = query.fetchLazy();
+      Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
       Stream<String[]> idStream = idsCursor
         .stream()
+        // This is something we may want to revisit. This implementation is a bit hackish for cross-tenant queries,
+        // though it does work
         .map(row -> row.getValue(idValueGetter));
       Stream<List<String[]>> idsStream = StreamHelper.chunk(idStream, batchSize)
     ) {
@@ -123,19 +126,29 @@ public class IdStreamer {
     }
   }
 
-  private List<SortField<Object>> getSortFields(EntityType entityType, boolean sortResults) {
-    if (sortResults && !isEmpty(entityType.getDefaultSort())) {
-      return entityType
-        .getDefaultSort()
+  private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize) {
+    if (!isEmpty(entityType.getGroupByFields())) {
+      Field<?>[] groupByFields = entityType
+        .getColumns()
         .stream()
-        .map(IdStreamer::toSortField)
-        .toList();
+        .filter(col -> entityType.getGroupByFields().contains(col.getName()))
+        .map(col -> col.getFilterValueGetter() == null ? col.getValueGetter() : col.getFilterValueGetter())
+        .map(DSL::field)
+        .toArray(Field[]::new);
+      return jooqContext.dsl()
+        .select(field(idValueGetter))
+        .from(finalJoinClause)
+        .where(sqlWhereClause)
+        .groupBy(groupByFields)
+        .orderBy(EntityTypeUtils.getSortFields(entityType, sortResults))
+        .fetchSize(batchSize);
+    } else {
+      return jooqContext.dsl()
+        .select(field(idValueGetter))
+        .from(finalJoinClause)
+        .where(sqlWhereClause)
+        .orderBy(EntityTypeUtils.getSortFields(entityType, sortResults))
+        .fetchSize(batchSize);
     }
-    return List.of();
-  }
-
-  private static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
-    Field<Object> field = field(entityTypeDefaultSort.getColumnName());
-    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
   }
 }

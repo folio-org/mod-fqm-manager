@@ -33,13 +33,14 @@ public class EntityTypeFlatteningService {
   private final LocalizationService localizationService;
   private final SimpleHttpClient ecsClient;
 
-  public EntityType getFlattenedEntityType(UUID entityTypeId) {
-    return getFlattenedEntityType(entityTypeId, null);
+  public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId) {
+    return getFlattenedEntityType(entityTypeId, null, tenantId);
   }
 
-  private EntityType getFlattenedEntityType(UUID entityTypeId, EntityTypeSource sourceFromParent) {
+  private EntityType getFlattenedEntityType(UUID entityTypeId, EntityTypeSource sourceFromParent, String tenantId) {
+  // TODO: clean up
     EntityType originalEntityType = entityTypeRepository
-      .getEntityTypeDefinition(entityTypeId)
+      .getEntityTypeDefinition(entityTypeId, tenantId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
@@ -74,7 +75,7 @@ public class EntityTypeFlatteningService {
       else {
         UUID sourceEntityTypeId = UUID.fromString(source.getId());
         // Recursively flatten the source and add it to the flattened entity type
-        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, source);
+        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, source, tenantId);
         finalPermissions.addAll(flattenedSourceDefinition.getRequiredPermissions());
         // Add a prefix to each column's name and idColumnName, then add em to the flattened entity type
         columns.add(
@@ -120,7 +121,8 @@ public class EntityTypeFlatteningService {
       });
   }
 
-  public String getJoinClause(EntityType flattenedEntityType) {
+  public String getJoinClause(EntityType flattenedEntityType, String tenantId) {
+    String tablePrefix = tenantId != null ? tenantId + "_mod_fqm_manager." : "";
     StringBuilder finalJoinClause = new StringBuilder();
     List<EntityTypeSource> sources = flattenedEntityType.getSources();
 
@@ -142,7 +144,7 @@ public class EntityTypeFlatteningService {
       String alias = "\"" + source.getAlias() + "\"";
       String target = source.getTarget();
       if (join != null) {
-        String joinClause = " " + join.getType() + " " + target + " " + alias; // NEW
+        String joinClause = " " + join.getType() + " " + tablePrefix + target + " " + alias;
         if (join.getCondition() != null) {
           joinClause += " ON " + join.getCondition();
         }
@@ -151,7 +153,7 @@ public class EntityTypeFlatteningService {
         log.info("Join clause: " + joinClause);
         finalJoinClause.append(joinClause);
       } else {
-        finalJoinClause.append(target).append(" ").append(alias); // NEW
+        finalJoinClause.append(tablePrefix).append(target).append(" ").append(alias);
       }
     }
 

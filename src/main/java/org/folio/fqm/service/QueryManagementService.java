@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.service.FqlValidationService;
+import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
@@ -9,7 +10,7 @@ import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
-import org.folio.fqm.utils.IdColumnUtils;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
@@ -47,6 +48,8 @@ public class QueryManagementService {
   private final QueryResultsSorterService queryResultsSorterService;
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
+  private final CrossTenantQueryService crossTenantQueryService;
+  private final SimpleHttpClient ecsClient;
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
   @Setter
@@ -64,7 +67,7 @@ public class QueryManagementService {
       .getEntityTypeDefinition(submitQuery.getEntityTypeId());
     List<String> fields = CollectionUtils.isEmpty(submitQuery.getFields()) ?
       getFieldsFromEntityType(entityType) : new ArrayList<>(submitQuery.getFields());
-    List<String> idColumns = IdColumnUtils.getIdColumnNames(entityType);
+    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
         fields.add(idColumn);
@@ -98,7 +101,7 @@ public class QueryManagementService {
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
     }
-    List<String> idColumns = IdColumnUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId));
+    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId));
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
         fields.add(idColumn);
@@ -181,20 +184,21 @@ public class QueryManagementService {
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
-    IdColumnUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId))
+    EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId))
       .forEach(colName -> {
         if (!fields.contains(colName)) {
           fields.add(colName);
         }
       });
-
-    return resultSetService.getResultSet(entityTypeId, fields, ids);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
+    return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
     if (includeResults) {
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
-      return resultSetService.getResultSet(entityTypeId, fields, resultIds);
+      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
+      return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery);
     }
     return List.of();
   }

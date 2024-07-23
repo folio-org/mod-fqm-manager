@@ -103,7 +103,8 @@ class EntityTypePermissionsAspectTest {
     // No permission checking is performed, so we can just verify that the permission check would hav happened and that the aspect calls proceed()
     EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService);
     EntityType entityType = new EntityType(UUID.randomUUID().toString(), "name", true, false);
-    when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class))).thenReturn(Optional.of(entityType));
+    when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), any(String.class))).thenReturn(Optional.of(entityType));
+    when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), eq(null))).thenReturn(Optional.of(entityType));
     ProceedingJoinPoint joinPoint = mockJoinPoint(this.getClass().getDeclaredMethod(methodName, paramTypes), paramsConverter.apply(entityType));
     methodHandler.accept(aspect, joinPoint);
     verify(permissionsService).verifyUserHasNecessaryPermissionsForEntityType(any(EntityType.class));

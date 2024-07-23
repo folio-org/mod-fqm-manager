@@ -14,6 +14,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +39,7 @@ class PermissionsServiceTest {
   private EntityType getTestEntityType() {
     EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false)
       .sources(List.of(new EntityTypeSource("db", "source_alias")));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class))).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(null))).thenReturn(entityType);
     return entityType;
   }
 

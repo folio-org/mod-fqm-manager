@@ -1038,7 +1038,7 @@
       )",
     },
     {
-      name: 'share_type',
+      name: 'shared',
       sourceAlias: 'inst',
       dataType: {
         dataType: 'stringType',
@@ -1074,7 +1074,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      isIdColumn: true,
+      isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
       valueGetter: "CASE \
@@ -1087,16 +1087,26 @@
                           ELSE '${tenant_id}' \
                         END \
                     END",
-      values: [
-        {
-          value: '${tenant_id}',
-          label: '${tenant_id}',
-        },
-        {
-          value: '${central_tenant_id}',
-          label: '${central_tenant_id}',
-        },
-      ],
+      source: {
+        columnName: 'source_tenant_id',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
+      ecsOnly: true,
+    },
+    {
+      name: 'tenant_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "'${tenant_id}'",
+      source: {
+        columnName: 'tenant_id',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
       ecsOnly: true,
     },
     {

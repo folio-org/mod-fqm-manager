@@ -8,14 +8,17 @@ public interface MigrationStrategy
   /** For logging purposes */
   String getLabel();
 
+  /**
+   * Determine if a query should be migrated by this strategy (if this strategy "applies" to a query)
+   */
   boolean applies(FqlService fqlService, MigratableQueryInformation migratableQueryInformation);
 
-  // respecified to add docblock
   /**
    * Migrate the query. This method will be called iff {@link #applies(FqlService, MigratableQueryInformation)} returns true.
    *
    * After this method is called, {@link #applies(FqlService, MigratableQueryInformation)} MUST return false. Otherwise, an infinite
    * loop will occur.
    */
+  @Override // respecified to add docblock
   MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation migratableQueryInformation);
 }

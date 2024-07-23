@@ -26,18 +26,45 @@ public class DataRefreshService {
 
   public DataRefreshResponse refreshData(String tenantId) {
     List<String> failedConcurrentRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, MATERIALIZED_VIEW_NAMES, true);
-    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, failedConcurrentRefreshes, false);
+
+    List<String> failedRefreshes = new ArrayList<>();
+    if (!failedConcurrentRefreshes.isEmpty()) {
+      failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, failedConcurrentRefreshes, false);
+    }
+
+    List<String> finalFailedRefreshes = failedRefreshes;
     List<String> successRefreshes = new ArrayList<>(MATERIALIZED_VIEW_NAMES
       .stream()
-      .filter(matView -> !failedRefreshes.contains(matView))
+      .filter(matView -> !finalFailedRefreshes.contains(matView))
+      .filter(matView -> !failedConcurrentRefreshes.contains(matView))
       .toList());
+
     if (dataRefreshRepository.refreshExchangeRates(tenantId)) {
       successRefreshes.add(EXCHANGE_RATE_TABLE);
     } else {
       failedRefreshes.add(EXCHANGE_RATE_TABLE);
     }
+
     return new DataRefreshResponse()
       .successfulRefresh(successRefreshes)
       .failedRefresh(failedRefreshes);
   }
+
+
+//  public DataRefreshResponse refreshData(String tenantId) {
+//    List<String> failedConcurrentRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, MATERIALIZED_VIEW_NAMES, true);
+//    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, failedConcurrentRefreshes, false);
+//    List<String> successRefreshes = new ArrayList<>(MATERIALIZED_VIEW_NAMES
+//      .stream()
+//      .filter(matView -> !failedRefreshes.contains(matView))
+//      .toList());
+//    if (dataRefreshRepository.refreshExchangeRates(tenantId)) {
+//      successRefreshes.add(EXCHANGE_RATE_TABLE);
+//    } else {
+//      failedRefreshes.add(EXCHANGE_RATE_TABLE);
+//    }
+//    return new DataRefreshResponse()
+//      .successfulRefresh(successRefreshes)
+//      .failedRefresh(failedRefreshes);
+//  }
 }

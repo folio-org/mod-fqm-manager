@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 export default function MigrationHelper() {
   const [oldEntityType, setOldEntityType] = useState<EntityType | null>(null);
   const [newEntityType, setNewEntityType] = useState<EntityType | null>(null);
-  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({ id: 'status_name' });
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
 
   const canvasRef = useRef<HTMLCanvasElement>();
 
@@ -43,6 +43,7 @@ private static final UUID ${newName} = UUID.fromString("${newEntityType?.id}");
     result += `
 private static final Map<String, String> ${columnMapName} = Map.ofEntries(
   ${Object.entries(columnMapping)
+    .toSorted(([a], [b]) => a.localeCompare(b))
     .map(([oldName, newName]) => `Map.entry("${oldName}", "${newName}")`)
     .join(',\n  ')}
 );
@@ -93,6 +94,11 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
       newColumns = newColumns.filter((c) => !Object.values(columnMapping).includes(c.name));
     }
 
+    oldColumns = oldColumns.toSorted((a, b) => a.name.localeCompare(b.name));
+    newColumns = newColumns.toSorted((a, b) => a.name.localeCompare(b.name));
+
+    const clickedColumn = oldColumns.find((c) => c.name === clicked);
+
     const canvasWidth = canvas.getBoundingClientRect().width;
     context.canvas.width = canvasWidth;
 
@@ -109,27 +115,36 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     context.font = 'bold 16px monospace';
     context.fillText(oldEntityType?.name ?? 'Old Entity Type', columnWidth, 16, columnWidth);
 
-    context.font = '16px monospace';
     for (let i = 0; i < oldColumns.length; i++) {
       const column = oldColumns[i];
+
+      context.font = '16px monospace';
       if (columnMapping[column.name]) {
         context.fillStyle = 'grey';
+      } else if (column.dataType.dataType === clickedColumn?.dataType.dataType) {
+        context.font = 'bold 16px monospace';
+        context.fillStyle = 'green';
       } else {
         context.fillStyle = 'black';
       }
+
       context.fillText(column.name, columnWidth, (i + 2) * 24, columnWidth);
       context.strokeRect(1, (i + 2) * 24 - 16, columnWidth + 4, 24);
     }
 
     context.textAlign = 'left';
     context.font = 'bold 16px monospace';
-    context.fillText(oldEntityType?.name ?? 'New Entity Type', canvasWidth - columnWidth, 16, columnWidth);
+    context.fillText(newEntityType?.name ?? 'New Entity Type', canvasWidth - columnWidth, 16, columnWidth);
 
-    context.font = '16px monospace';
     for (let i = 0; i < newColumns.length; i++) {
       const column = newColumns[i];
+
+      context.font = '16px monospace';
       if (Object.values(columnMapping).includes(column.name)) {
         context.fillStyle = 'grey';
+      } else if (column.dataType.dataType === clickedColumn?.dataType.dataType) {
+        context.font = 'bold 16px monospace';
+        context.fillStyle = 'green';
       } else {
         context.fillStyle = 'black';
       }

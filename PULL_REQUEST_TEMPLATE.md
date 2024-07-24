@@ -19,3 +19,6 @@ If you are adding entity type(s), have you:
 - [ ] Added views to liquibase, as applicable?
 - [ ] Added required interfaces to the module descriptor?
 - [ ] Checked that querying fields works correctly and all SQL is valid?
+
+If you are changing/removing entity type(s), have you:
+- [ ] Added migration code for any changes?

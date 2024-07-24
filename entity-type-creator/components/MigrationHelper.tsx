@@ -44,6 +44,7 @@ private static final UUID ${newName} = UUID.fromString("${newEntityType?.id}");
 private static final Map<String, String> ${columnMapName} = Map.ofEntries(
   ${Object.entries(columnMapping)
     .toSorted(([a], [b]) => a.localeCompare(b))
+    .filter(([a, b]) => a !== b)
     .map(([oldName, newName]) => `Map.entry("${oldName}", "${newName}")`)
     .join(',\n  ')}
 );
@@ -136,15 +137,12 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     context.font = 'bold 16px monospace';
     context.fillText(newEntityType?.name ?? 'New Entity Type', canvasWidth - columnWidth, 16, columnWidth);
 
+    context.font = '16px monospace';
     for (let i = 0; i < newColumns.length; i++) {
       const column = newColumns[i];
 
-      context.font = '16px monospace';
       if (Object.values(columnMapping).includes(column.name)) {
         context.fillStyle = 'grey';
-      } else if (column.dataType.dataType === clickedColumn?.dataType.dataType) {
-        context.font = 'bold 16px monospace';
-        context.fillStyle = 'green';
       } else {
         context.fillStyle = 'black';
       }

@@ -9,8 +9,10 @@ import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Log4j2
+@Service
 @AllArgsConstructor(onConstructor_ = @Autowired)
 public class MigrationService {
 
@@ -38,9 +40,9 @@ public class MigrationService {
   public MigratableQueryInformation migrate(MigratableQueryInformation migratableQueryInformation) {
     while (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (strategy.applies(migratableQueryInformation)) {
+        if (strategy.applies(fqlService, migratableQueryInformation)) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
-          migratableQueryInformation = strategy.apply(migratableQueryInformation);
+          migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
         }
       }
     }

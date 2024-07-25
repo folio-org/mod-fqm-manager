@@ -15,6 +15,7 @@ export default function MigrationHelper() {
   const canvasRef = useRef<HTMLCanvasElement>();
 
   const [showMatched, setShowMatched] = useState(true);
+  const [showOnlyMatchingDataTypes, setShowOnlyMatchingDataTypes] = useState(false);
   const [clicked, setClicked] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -99,6 +100,9 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     newColumns = newColumns.toSorted((a, b) => a.name.localeCompare(b.name));
 
     const clickedColumn = oldColumns.find((c) => c.name === clicked);
+    if (showOnlyMatchingDataTypes && clickedColumn) {
+      newColumns = newColumns.filter((column) => column.dataType.dataType === clickedColumn?.dataType.dataType);
+    }
 
     const canvasWidth = canvas.getBoundingClientRect().width;
     context.canvas.width = canvasWidth;
@@ -116,15 +120,12 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     context.font = 'bold 16px monospace';
     context.fillText(oldEntityType?.name ?? 'Old Entity Type', columnWidth, 16, columnWidth);
 
+    context.font = '16px monospace';
     for (let i = 0; i < oldColumns.length; i++) {
       const column = oldColumns[i];
 
-      context.font = '16px monospace';
       if (columnMapping[column.name]) {
         context.fillStyle = 'grey';
-      } else if (column.dataType.dataType === clickedColumn?.dataType.dataType) {
-        context.font = 'bold 16px monospace';
-        context.fillStyle = 'green';
       } else {
         context.fillStyle = 'black';
       }
@@ -137,12 +138,15 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     context.font = 'bold 16px monospace';
     context.fillText(newEntityType?.name ?? 'New Entity Type', canvasWidth - columnWidth, 16, columnWidth);
 
-    context.font = '16px monospace';
     for (let i = 0; i < newColumns.length; i++) {
       const column = newColumns[i];
 
+      context.font = '16px monospace';
       if (Object.values(columnMapping).includes(column.name)) {
         context.fillStyle = 'grey';
+      } else if (column.dataType.dataType === clickedColumn?.dataType.dataType) {
+        context.font = 'bold 16px monospace';
+        context.fillStyle = 'green';
       } else {
         context.fillStyle = 'black';
       }
@@ -194,7 +198,7 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
         }
       }
     };
-  }, [oldEntityType, newEntityType, columnMapping, mousePosition, clicked, showMatched]);
+  }, [oldEntityType, newEntityType, columnMapping, mousePosition, clicked, showMatched, showOnlyMatchingDataTypes]);
 
   return (
     <Grid container spacing={2}>
@@ -227,7 +231,7 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
       <Grid item xs={12}>
         <Container>
           <Grid container>
-            <Grid item xs={12}>
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 color="error"
                 variant="outlined"
@@ -240,6 +244,15 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
               <FormControlLabel
                 control={<Switch checked={showMatched} onChange={(e) => setShowMatched(e.target.checked)} />}
                 label="Show matched columns"
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showOnlyMatchingDataTypes}
+                    onChange={(e) => setShowOnlyMatchingDataTypes(e.target.checked)}
+                  />
+                }
+                label="Show only matching data types when matching"
               />
             </Grid>
             <Grid item xs={12}>

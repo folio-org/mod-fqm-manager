@@ -88,5 +88,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'lt',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

@@ -431,5 +431,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'assignedTo'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'po',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

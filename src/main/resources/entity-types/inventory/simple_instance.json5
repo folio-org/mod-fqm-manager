@@ -1047,7 +1047,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "CASE \
-                      WHEN (SELECT central_tenant_id from ${tenant_id}_mod_consortia.consortia_configuration) = '${tenant_id}' \
+                      WHEN '${central_tenant_id}' = '${tenant_id}' \
                         THEN 'Shared'\
                       ELSE \
                         CASE \
@@ -1056,7 +1056,17 @@
                           ELSE 'Local' \
                         END \
                     END",
-      ecsOnly: true
+      values: [
+        {
+          value: 'Shared',
+          label: 'Shared',
+        },
+        {
+          value: 'Local',
+          label: 'Local',
+        },
+      ],
+      ecsOnly: true,
     },
     {
       name: 'source_tenant_id',
@@ -1068,16 +1078,37 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: "CASE \
-                      WHEN (SELECT central_tenant_id from ${tenant_id}_mod_consortia.consortia_configuration) = '${tenant_id}' \
+                      WHEN '${central_tenant_id}' = '${tenant_id}' \
                         THEN '${tenant_id}' \
                       ELSE \
                         CASE \
                           WHEN \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-folio' OR \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-marc' \
-                            THEN (SELECT central_tenant_id FROM ${tenant_id}_mod_consortia.consortia_configuration) \
+                            THEN '${central_tenant_id}' \
                           ELSE '${tenant_id}' \
                         END \
                     END",
-      ecsOnly: true
+      values: [
+        {
+          value: '${tenant_id}',
+          label: '${tenant_id}',
+        },
+        {
+          value: '${central_tenant_id}',
+          label: '${central_tenant_id}',
+        },
+      ],
+      ecsOnly: true,
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
     }
   ],
 }

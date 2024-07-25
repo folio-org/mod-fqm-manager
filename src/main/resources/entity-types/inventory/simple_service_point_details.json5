@@ -228,5 +228,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'holdShelfClosedLibraryDateManagement'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'service_point',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

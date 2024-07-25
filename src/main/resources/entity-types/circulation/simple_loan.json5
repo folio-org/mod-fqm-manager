@@ -368,5 +368,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'reminders'->'lastFeeBilled'->>'date'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'loan',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

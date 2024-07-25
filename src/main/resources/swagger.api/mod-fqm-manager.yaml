@@ -62,7 +62,23 @@ paths:
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
-
+  /fqm/version:
+    get:
+      operationId: getFqmVersion
+      tags:
+        - fqmVersion
+      description: Get version of the fqm.
+      responses:
+        '200':
+          description: 'Version of the fqm'
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
 
 components:
   parameters:

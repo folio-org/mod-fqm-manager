@@ -341,5 +341,16 @@
         },
       ],
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'custom_fields',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

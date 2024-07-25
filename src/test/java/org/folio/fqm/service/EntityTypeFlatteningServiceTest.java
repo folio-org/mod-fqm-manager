@@ -11,6 +11,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceJoin;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
+import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,6 +117,10 @@ class EntityTypeFlatteningServiceTest {
       new EntityTypeColumn()
         .name("ecs_field")
         .valueGetter(":sourceAlias.ecs_field")
+        .values(List.of(
+          new ValueWithLabel().value("value1").label("label1"),
+          new ValueWithLabel().value("value1").label("label1")
+        ))
         .dataType(new StringType().dataType("stringType"))
         .isIdColumn(true)
         .sourceAlias("source1")
@@ -931,6 +936,9 @@ class EntityTypeFlatteningServiceTest {
         new EntityTypeColumn()
           .name("ecs_field")
           .valueGetter("\"source1\".ecs_field")
+          .values(List.of(
+            new ValueWithLabel().value("value1").label("label1")
+          ))
           .dataType(new StringType().dataType("stringType"))
           .isIdColumn(true)
           .sourceAlias("source1")

@@ -118,6 +118,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'call_number_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
   defaultSort: [
     {

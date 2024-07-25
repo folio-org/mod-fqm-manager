@@ -869,5 +869,16 @@
         },
       ],
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'lp',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

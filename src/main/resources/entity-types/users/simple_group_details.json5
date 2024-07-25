@@ -125,6 +125,14 @@
       },
       valueGetter: ":sourceAlias.jsonb->>'desc'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'groups',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
   defaultSort: [
     {

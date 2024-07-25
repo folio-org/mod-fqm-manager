@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.FieldNotFoundException;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.IdColumnUtils;
@@ -23,7 +22,6 @@ import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -124,13 +122,6 @@ public class ResultSetRepository {
     }
 
     Condition condition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityType);
-    // TODO: might want to put next 5 lines in its own method in EntityTypeFlatteningService
-    String finalWhereClause = condition.toString();
-    for (EntityTypeSource source : entityType.getSources()) {
-      String toReplace = ":" + source.getAlias();
-      String alias = "\"" + source.getAlias() + "\"";
-      finalWhereClause = finalWhereClause.replace(toReplace, alias);
-    }
     var fieldsToSelect = getSqlFields(entityType, fields);
     String idColumnName = entityType
       .getColumns()
@@ -143,7 +134,7 @@ public class ResultSetRepository {
     String fromClause = entityTypeFlatteningService.getJoinClause(entityType);
     var result = jooqContext.select(fieldsToSelect)
       .from(fromClause)
-      .where(finalWhereClause)
+      .where(condition)
       .and(afterIdCondition)
       .orderBy(sortCriteria)
       .limit(limit)

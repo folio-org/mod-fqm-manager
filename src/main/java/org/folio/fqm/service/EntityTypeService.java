@@ -129,6 +129,7 @@ public class EntityTypeService {
       .getValues()
       .stream()
       .filter(valueWithLabel -> valueWithLabel.getLabel().contains(searchText))
+      .distinct()
       .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(filteredValues);

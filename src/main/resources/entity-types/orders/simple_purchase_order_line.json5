@@ -1646,5 +1646,16 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'vendorDetail'->>'referenceNumbers'",
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
 }

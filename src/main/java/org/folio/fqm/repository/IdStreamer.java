@@ -10,7 +10,6 @@ import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
@@ -82,12 +81,6 @@ public class IdStreamer {
                                Consumer<IdsWithCancelCallback> idsConsumer) {
     String finalJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     Field<String[]> idValueGetter = IdColumnUtils.getResultIdValueGetter(entityType);
-    String finalWhereClause = sqlWhereClause.toString();
-    for (EntityTypeSource source : entityType.getSources()) {
-      String toReplace = ":" + source.getAlias();
-      String alias = "\"" + source.getAlias() + "\"";
-      finalWhereClause = finalWhereClause.replace(toReplace, alias);
-    }
     ResultQuery<Record1<String[]>> query = null;
     if (!isEmpty(entityType.getGroupByFields())) {
       Field<?>[] groupByFields = entityType
@@ -100,7 +93,7 @@ public class IdStreamer {
       query = jooqContext.dsl()
         .select(field(idValueGetter))
         .from(finalJoinClause)
-        .where(finalWhereClause)
+        .where(sqlWhereClause)
         .groupBy(groupByFields)
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize);
@@ -108,7 +101,7 @@ public class IdStreamer {
       query = jooqContext.dsl()
         .select(field(idValueGetter))
         .from(finalJoinClause)
-        .where(finalWhereClause)
+        .where(sqlWhereClause)
         .orderBy(getSortFields(entityType, sortResults))
         .fetchSize(batchSize);
     }

@@ -3,6 +3,7 @@ package org.folio.fqm.migration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
 import java.util.Map;
@@ -16,6 +17,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
 
   // TODO: replace this with current version in the future?
   protected static final String DEFAULT_VERSION = "0";
+  protected static final String VERSION_KEY = "_version";
 
   protected final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,7 +47,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       return this.getSourceVersion()
         .equals(
           Optional
-            .ofNullable(((ObjectNode) objectMapper.readTree(src.fqlQuery())).get("_version"))
+            .ofNullable(((ObjectNode) objectMapper.readTree(src.fqlQuery())).get(VERSION_KEY))
             .map(JsonNode::asText)
             .orElse(DEFAULT_VERSION)
         );
@@ -60,24 +62,58 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       MigratableQueryInformation result = src;
 
       if (src.fqlQuery() == null) {
-        result = result.withFqlQuery(objectMapper.writeValueAsString(Map.of("_version", this.getTargetVersion())));
+        result = result.withFqlQuery(objectMapper.writeValueAsString(Map.of(VERSION_KEY, this.getTargetVersion())));
       }
 
-      if (this.getFieldChanges().containsKey(src.entityTypeId())) {
-        Map<String, String> fieldChanges = this.getFieldChanges().get(src.entityTypeId());
+      result =
+        result.withEntityTypeId(this.getEntityTypeChanges().getOrDefault(src.entityTypeId(), src.entityTypeId()));
 
-        if (fieldChanges.containsKey("*")) {
-          String template = fieldChanges.get("*");
-          result = result.withFields(src.fields().stream().map(template::formatted).toList());
-        } else {
-          result = result.withFields(src.fields().stream().map(f -> fieldChanges.getOrDefault(f, f)).toList());
-        }
+      ObjectNode fql = (ObjectNode) objectMapper.readTree(result.fqlQuery());
+      fql.set(VERSION_KEY, objectMapper.valueToTree(this.getTargetVersion()));
+
+      Map<String, String> fieldChanges = this.getFieldChanges().get(src.entityTypeId());
+      if (fieldChanges != null) {
+        // map query fields
+        fql = migrateFqlTree(fieldChanges, fql);
+        // map fields list
+        result = result.withFields(src.fields().stream().map(f -> getNewFieldName(fieldChanges, f)).toList());
       }
+
+      result = result.withFqlQuery(objectMapper.writeValueAsString(fql));
 
       return result;
     } catch (JsonProcessingException e) {
       log.error("Failed to serialize FQL query", e);
       throw new UncheckedIOException(e);
     }
+  }
+
+  protected static String getNewFieldName(Map<String, String> fieldChanges, String oldFieldName) {
+    if (VERSION_KEY.equals(oldFieldName)) {
+      return oldFieldName;
+    } else if (fieldChanges.containsKey("*")) {
+      return fieldChanges.get("*").formatted(oldFieldName);
+    } else {
+      return fieldChanges.getOrDefault(oldFieldName, oldFieldName);
+    }
+  }
+
+  protected static ObjectNode migrateFqlTree(Map<String, String> fieldChanges, ObjectNode fql) {
+    ObjectNode result = new ObjectMapper().createObjectNode();
+    // iterate through fields in source
+    fql
+      .fields()
+      .forEachRemaining(entry -> {
+        if ("$and".equals(entry.getKey())) {
+          ArrayNode resultContents = new ObjectMapper().createArrayNode();
+          ((ArrayNode) entry.getValue()).elements()
+            .forEachRemaining(node -> resultContents.add(migrateFqlTree(fieldChanges, (ObjectNode) node)));
+          result.set("$and", resultContents);
+        } else {
+          result.set(getNewFieldName(fieldChanges, entry.getKey()), entry.getValue());
+        }
+      });
+
+    return result;
   }
 }

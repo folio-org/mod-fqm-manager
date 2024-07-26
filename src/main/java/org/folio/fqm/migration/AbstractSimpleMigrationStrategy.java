@@ -1,16 +1,23 @@
 package org.folio.fqm.migration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fql.model.Fql;
 import org.folio.fql.service.FqlService;
 
 @Log4j2
 public abstract class AbstractSimpleMigrationStrategy implements MigrationStrategy {
+
+  // TODO: replace this with current version in the future?
+  protected static final String DEFAULT_VERSION = "0";
+
+  protected final ObjectMapper objectMapper = new ObjectMapper();
 
   /** The version migrating FROM */
   public abstract String getSourceVersion();
@@ -31,15 +38,20 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
 
   @Override
   public boolean applies(FqlService fqlService, MigratableQueryInformation src) {
-    String srcVersion = "0";
-    if (src.fqlQuery() != null) {
-      Fql query = fqlService.getFql(src.fqlQuery());
-      if (query._version() != null) {
-        srcVersion = query._version();
-      }
+    if (src.fqlQuery() == null) {
+      return this.getSourceVersion().equals(DEFAULT_VERSION);
     }
-
-    return this.getSourceVersion().equals(srcVersion);
+    try {
+      return this.getSourceVersion()
+        .equals(
+          Optional
+            .ofNullable(((ObjectNode) objectMapper.readTree(src.fqlQuery())).get("_version"))
+            .map(JsonNode::asText)
+            .orElse(DEFAULT_VERSION)
+        );
+    } catch (JsonProcessingException e) {
+      return false;
+    }
   }
 
   @Override
@@ -48,8 +60,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       MigratableQueryInformation result = src;
 
       if (src.fqlQuery() == null) {
-        result =
-          result.withFqlQuery(new ObjectMapper().writeValueAsString(Map.of("_version", this.getTargetVersion())));
+        result = result.withFqlQuery(objectMapper.writeValueAsString(Map.of("_version", this.getTargetVersion())));
       }
 
       if (this.getFieldChanges().containsKey(src.entityTypeId())) {

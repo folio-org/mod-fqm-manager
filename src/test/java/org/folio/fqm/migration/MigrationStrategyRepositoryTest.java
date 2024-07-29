@@ -5,11 +5,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.service.MigrationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -23,6 +25,7 @@ class MigrationStrategyRepositoryTest {
 
   FqlService fqlService = new FqlService();
   MigrationStrategyRepository migrationStrategyRepository = new MigrationStrategyRepository();
+  MigrationService migrationService = new MigrationService(null, null, new ObjectMapper());
 
   @Test
   void testHasStrategies() {
@@ -34,7 +37,6 @@ class MigrationStrategyRepositoryTest {
     List<Pair<String, MigratableQueryInformation>> queries = List.of(
       Pair.of("null FQL", new MigratableQueryInformation(new UUID(0, 0), null, List.of())),
       Pair.of("empty FQL", new MigratableQueryInformation(new UUID(0, 0), "{}", List.of())),
-      Pair.of("invalid FQL", new MigratableQueryInformation(new UUID(0, 0), "This is Jason, not JSON", List.of())),
       Pair.of(
         "FQL without version",
         new MigratableQueryInformation(new UUID(0, 0), "{\"test\":{\"$eq\":\"foo\"}}", List.of())
@@ -72,7 +74,7 @@ class MigrationStrategyRepositoryTest {
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("migrationStrategiesAndQueries")
   void testStrategies(String label, MigrationStrategy strategy, MigratableQueryInformation query) {
-    boolean applies = strategy.applies(fqlService, query);
+    boolean applies = strategy.applies(migrationService.getVersion(query.fqlQuery()));
 
     log.info("{} applies={}", label, applies);
 

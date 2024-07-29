@@ -1,5 +1,6 @@
 package org.folio.fqm.migration;
 
+import jakarta.annotation.Nonnull;
 import java.util.function.BiFunction;
 import org.folio.fql.service.FqlService;
 
@@ -11,7 +12,7 @@ public interface MigrationStrategy
   /**
    * Determine if a query should be migrated by this strategy (if this strategy "applies" to a query)
    */
-  boolean applies(FqlService fqlService, MigratableQueryInformation migratableQueryInformation);
+  boolean applies(@Nonnull String version);
 
   /**
    * Migrate the query. This method will be called iff {@link #applies(FqlService, MigratableQueryInformation)} returns true.

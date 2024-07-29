@@ -1,23 +1,18 @@
 package org.folio.fqm.migration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.service.MigrationService;
 
 @Log4j2
 public abstract class AbstractSimpleMigrationStrategy implements MigrationStrategy {
-
-  // TODO: replace this with current version in the future?
-  protected static final String DEFAULT_VERSION = "0";
-  protected static final String VERSION_KEY = "_version";
 
   protected final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,21 +34,8 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
   protected abstract Map<UUID, Map<String, String>> getFieldChanges();
 
   @Override
-  public boolean applies(FqlService fqlService, MigratableQueryInformation src) {
-    if (src.fqlQuery() == null) {
-      return this.getSourceVersion().equals(DEFAULT_VERSION);
-    }
-    try {
-      return this.getSourceVersion()
-        .equals(
-          Optional
-            .ofNullable(((ObjectNode) objectMapper.readTree(src.fqlQuery())).get(VERSION_KEY))
-            .map(JsonNode::asText)
-            .orElse(DEFAULT_VERSION)
-        );
-    } catch (JsonProcessingException e) {
-      return false;
-    }
+  public boolean applies(String version) {
+    return this.getSourceVersion().equals(version);
   }
 
   @Override
@@ -62,14 +44,17 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       MigratableQueryInformation result = src;
 
       if (src.fqlQuery() == null) {
-        result = result.withFqlQuery(objectMapper.writeValueAsString(Map.of(VERSION_KEY, this.getTargetVersion())));
+        result =
+          result.withFqlQuery(
+            objectMapper.writeValueAsString(Map.of(MigrationService.VERSION_KEY, this.getTargetVersion()))
+          );
       }
 
       result =
         result.withEntityTypeId(this.getEntityTypeChanges().getOrDefault(src.entityTypeId(), src.entityTypeId()));
 
       ObjectNode fql = (ObjectNode) objectMapper.readTree(result.fqlQuery());
-      fql.set(VERSION_KEY, objectMapper.valueToTree(this.getTargetVersion()));
+      fql.set(MigrationService.VERSION_KEY, objectMapper.valueToTree(this.getTargetVersion()));
 
       Map<String, String> fieldChanges = this.getFieldChanges().get(src.entityTypeId());
       if (fieldChanges != null) {
@@ -89,7 +74,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
   }
 
   protected static String getNewFieldName(Map<String, String> fieldChanges, String oldFieldName) {
-    if (VERSION_KEY.equals(oldFieldName)) {
+    if (MigrationService.VERSION_KEY.equals(oldFieldName)) {
       return oldFieldName;
     } else if (fieldChanges.containsKey("*")) {
       return fieldChanges.get("*").formatted(oldFieldName);

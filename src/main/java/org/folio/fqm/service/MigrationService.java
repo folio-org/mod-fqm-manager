@@ -1,7 +1,13 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.model.Fql;
 import org.folio.fql.service.FqlService;
@@ -16,21 +22,22 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor(onConstructor_ = @Autowired)
 public class MigrationService {
 
-  private static final String CURRENT_VERSION = "1";
+  public static final String VERSION_KEY = "_version";
+
+  protected static final String CURRENT_VERSION = "1";
+  // TODO: replace this with current version in the future?
+  protected static final String DEFAULT_VERSION = "0";
 
   private final FqlService fqlService;
   private final MigrationStrategyRepository migrationStrategyRepository;
+  private final ObjectMapper objectMapper;
 
   public String getLatestVersion() {
     return CURRENT_VERSION;
   }
 
   public boolean isMigrationNeeded(@CheckForNull String fqlQuery) {
-    if (fqlQuery == null) {
-      return true;
-    }
-    Fql fql = fqlService.getFql(fqlQuery);
-    return !this.getLatestVersion().equals(fql._version());
+    return !this.getLatestVersion().equals(getVersion(fqlQuery));
   }
 
   public boolean isMigrationNeeded(MigratableQueryInformation migratableQueryInformation) {
@@ -40,7 +47,7 @@ public class MigrationService {
   public MigratableQueryInformation migrate(MigratableQueryInformation migratableQueryInformation) {
     while (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (strategy.applies(fqlService, migratableQueryInformation)) {
+        if (strategy.applies(getVersion(migratableQueryInformation.fqlQuery()))) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
           migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
         }
@@ -48,5 +55,19 @@ public class MigrationService {
     }
 
     return migratableQueryInformation;
+  }
+
+  public String getVersion(@CheckForNull String fqlQuery) {
+    if (fqlQuery == null) {
+      return DEFAULT_VERSION;
+    }
+    try {
+      return Optional
+        .ofNullable(((ObjectNode) objectMapper.readTree(fqlQuery)).get(VERSION_KEY))
+        .map(JsonNode::asText)
+        .orElse(DEFAULT_VERSION);
+    } catch (JsonProcessingException e) {
+      return DEFAULT_VERSION;
+    }
   }
 }

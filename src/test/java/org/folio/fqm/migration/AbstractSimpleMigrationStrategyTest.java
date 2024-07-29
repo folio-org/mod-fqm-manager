@@ -65,25 +65,18 @@ class AbstractSimpleMigrationStrategyTest {
 
   static List<Arguments> sourcesWithShouldApply() {
     return List.of(
-      Arguments.of(null, false),
-      Arguments.of("{}", false),
-      Arguments.of("This is Jason, not JSON", false),
-      Arguments.of("{\"test\":{\"$eq\":\"foo\"}}", false),
-      Arguments.of("{\"test\":{\"$i_am_invalid\":[]}}", false),
-      Arguments.of("{\"_version\":\"0\"}", false),
-      Arguments.of("{\"_version\":\"-1\"}", false),
-      Arguments.of("{\"_version\":\"sauce\"}", false),
-      Arguments.of("{\"_version\":\"source-2\"}", false),
-      Arguments.of("{\"_version\":\"target\"}", false),
-      Arguments.of("{\"_version\":\"source\"}", true),
-      Arguments.of("{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}", true)
+      Arguments.of("", false),
+      Arguments.of("0", false),
+      Arguments.of("1", false),
+      Arguments.of("-1", false),
+      Arguments.of("source", true)
     );
   }
 
   @ParameterizedTest(name = "{0} applies={1}")
   @MethodSource("sourcesWithShouldApply")
-  void testAppliesToMatchingVersions(String fql, boolean shouldApply) {
-    assertThat(new Impl().applies(fqlService, new MigratableQueryInformation(UUID_A, fql, List.of())), is(shouldApply));
+  void testAppliesToMatchingVersions(String version, boolean shouldApply) {
+    assertThat(new Impl().applies(version), is(shouldApply));
   }
 
   static List<Arguments> sourcesForMigrationResults() {

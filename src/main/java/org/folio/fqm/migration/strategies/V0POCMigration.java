@@ -11,9 +11,9 @@ import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 @SuppressWarnings("java:S1192") // allow constant string duplication
 public class V0POCMigration extends AbstractSimpleMigrationStrategy {
 
-  private static final UUID OLD_DRV_LOAN_DETAILS = UUID.fromString("4e09d89a-44ed-418e-a9cc-820dfb27bf3a");
-  private static final UUID NEW_COMPOSITE_LOAN_DETAILS = UUID.fromString("d6729885-f2fb-4dc7-b7d0-a865a7f461e4");
-  private static final Map<String, String> DRV_LOAN_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_DRV_LOAN_DETAILS = UUID.fromString("4e09d89a-44ed-418e-a9cc-820dfb27bf3a");
+  public static final UUID NEW_COMPOSITE_LOAN_DETAILS = UUID.fromString("d6729885-f2fb-4dc7-b7d0-a865a7f461e4");
+  public static final Map<String, String> DRV_LOAN_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("holdings_id", "holdings.id"),
     Map.entry("instance_id", "instance.id"),
     // iffy on this. old one gets the first one of these, whereas this is array/object
@@ -44,18 +44,20 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("loan_due_date", "loans.due_date"),
     Map.entry("user_last_name", "users.last_name"),
     Map.entry("user_patron_group", "groups.group"),
-    Map.entry("user_patron_group_id", "groups.id")
+    Map.entry("user_patron_group_id", "groups.id"),
+    // this column did not exist in the actual entity type, but it is (incorrectly) referenced by a canned list; we should fix that:
+    Map.entry("item_holdingsrecord_id", "items.hrid")
   );
 
-  private static final UUID OLD_SRC_CIRCULATION_LOAN_POLICY = UUID.fromString("5e7de445-bcc6-4008-8032-8d9602b854d7");
-  private static final UUID NEW_SIMPLE_LOAN_POLICY = UUID.fromString("64d7b5fb-2ead-444c-a9bd-b9db831f4132");
-  private static final Map<String, String> SRC_CIRCULATION_LOAN_POLICY_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_CIRCULATION_LOAN_POLICY = UUID.fromString("5e7de445-bcc6-4008-8032-8d9602b854d7");
+  public static final UUID NEW_SIMPLE_LOAN_POLICY = UUID.fromString("64d7b5fb-2ead-444c-a9bd-b9db831f4132");
+  public static final Map<String, String> SRC_CIRCULATION_LOAN_POLICY_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("policy_name", "name")
   );
 
   // drv_holdings_record_details was renamed to composite_holdings_record; same ID
-  private static final UUID DRV_HOLDINGS_RECORD_DETAILS = UUID.fromString("8418e512-feac-4a6a-a56d-9006aab31e33");
-  private static final Map<String, String> DRV_HOLDINGS_RECORD_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID DRV_HOLDINGS_RECORD_DETAILS = UUID.fromString("8418e512-feac-4a6a-a56d-9006aab31e33");
+  public static final Map<String, String> DRV_HOLDINGS_RECORD_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("holdings_effective_location", "effective_location.name"),
     Map.entry("holdings_effective_location_id", "effective_location.id"),
     Map.entry("holdings_effective_library_code", "effective_library.code"),
@@ -74,8 +76,8 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   );
 
   // drv_instances was renamed to composite_instances; same ID
-  private static final UUID DRV_INSTANCES = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
-  private static final Map<String, String> DRV_INSTANCES_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID DRV_INSTANCES = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
+  public static final Map<String, String> DRV_INSTANCES_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("instance_cataloged_date", "instance.cataloged_date"),
     Map.entry("instance_metadata_created_date", "instance.created_at"),
     Map.entry("instance_hrid", "instance.hrid"),
@@ -97,9 +99,9 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("instance_language", "instance.languages")
   );
 
-  private static final UUID OLD_DRV_ITEM_DETAILS = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
-  private static final UUID NEW_COMPOSITE_ITEM_DETAILS = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
-  private static final Map<String, String> DRV_ITEM_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_DRV_ITEM_DETAILS = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
+  public static final UUID NEW_COMPOSITE_ITEM_DETAILS = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
+  public static final Map<String, String> DRV_ITEM_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("holdings_id", "holdings.id"),
     Map.entry("id", "items.id"),
     Map.entry("instance_created_date", "instances.created_at"),
@@ -132,79 +134,75 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("item_status", "items.status_name"),
     Map.entry("item_temporary_location_id", "temporary_location.id"),
     Map.entry("item_temporary_location_name", "temporary_location.name"),
-    Map.entry("item_updated_date", "items.updated_date")
+    Map.entry("item_updated_date", "items.updated_date"),
+    // this column did not exist in the actual entity type, but it is (incorrectly) referenced by a canned list; we should fix that:
+    Map.entry("item_holdings_record_id", "items.hrid")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_CALL_NUMBER_TYPE = UUID.fromString(
-    "5c8315be-13f5-4df5-ae8b-086bae83484d"
-  );
-  private static final UUID NEW_SIMPLE_CALL_NUMBER_TYPE = UUID.fromString("d9338ced-3e71-4f24-b605-7912d590f005");
-  private static final Map<String, String> SRC_INVENTORY_CALL_NUMBER_TYPE_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_CALL_NUMBER_TYPE = UUID.fromString("5c8315be-13f5-4df5-ae8b-086bae83484d");
+  public static final UUID NEW_SIMPLE_CALL_NUMBER_TYPE = UUID.fromString("d9338ced-3e71-4f24-b605-7912d590f005");
+  public static final Map<String, String> SRC_INVENTORY_CALL_NUMBER_TYPE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("call_number_type_name", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_CONTRIBUTOR_NAME_TYPE = UUID.fromString(
+  public static final UUID OLD_SRC_INVENTORY_CONTRIBUTOR_NAME_TYPE = UUID.fromString(
     "9c24a719-679b-4cca-9146-42a46d721df5"
   );
-  private static final UUID NEW_DRV_CONTRIBUTOR_NAME_TYPE_DETAILS = UUID.fromString(
+  public static final UUID NEW_DRV_CONTRIBUTOR_NAME_TYPE_DETAILS = UUID.fromString(
     "6cd60e0e-f862-413a-9857-1d1ef1ca34ea"
   );
-  private static final Map<String, String> SRC_INVENTORY_CONTRIBUTOR_NAME_TYPE_COLUMN_MAPPING = Map.ofEntries(
+  public static final Map<String, String> SRC_INVENTORY_CONTRIBUTOR_NAME_TYPE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("contributor_name_type", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_CONTRIBUTOR_TYPE = UUID.fromString(
-    "3553ca38-d522-439b-9f91-1512275a43b9"
-  );
-  private static final UUID NEW_DRV_CONTRIBUTOR_TYPE_DETAILS = UUID.fromString("a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2");
-  private static final Map<String, String> SRC_INVENTORY_CONTRIBUTOR_TYPE_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_CONTRIBUTOR_TYPE = UUID.fromString("3553ca38-d522-439b-9f91-1512275a43b9");
+  public static final UUID NEW_DRV_CONTRIBUTOR_TYPE_DETAILS = UUID.fromString("a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2");
+  public static final Map<String, String> SRC_INVENTORY_CONTRIBUTOR_TYPE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("contributor_type", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_INSTANCE_STATUS = UUID.fromString("bc03686c-657e-4f74-9d89-91eac5ea86a4");
-  private static final UUID NEW_SIMPLE_INSTANCE_STATUS = UUID.fromString("9c239bfd-198f-4013-bbc4-4551c0cbdeaa");
-  private static final Map<String, String> SRC_INVENTORY_INSTANCE_STATUS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_INSTANCE_STATUS = UUID.fromString("bc03686c-657e-4f74-9d89-91eac5ea86a4");
+  public static final UUID NEW_SIMPLE_INSTANCE_STATUS = UUID.fromString("9c239bfd-198f-4013-bbc4-4551c0cbdeaa");
+  public static final Map<String, String> SRC_INVENTORY_INSTANCE_STATUS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("status", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_LOCATION = UUID.fromString("a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b");
-  private static final UUID NEW_SIMPLE_LOCATIONS = UUID.fromString("74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4");
-  private static final Map<String, String> SRC_INVENTORY_LOCATION_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_LOCATION = UUID.fromString("a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b");
+  public static final UUID NEW_SIMPLE_LOCATIONS = UUID.fromString("74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4");
+  public static final Map<String, String> SRC_INVENTORY_LOCATION_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("location_code", "code"),
     Map.entry("location_name", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_LOCLIBRARY = UUID.fromString("cf9f5c11-e943-483c-913b-81d1e338accc");
-  private static final UUID NEW_SIMPLE_LOCLIBRARY = UUID.fromString("32f58888-1a7b-4840-98f8-cc69ca93fc67");
-  private static final Map<String, String> SRC_INVENTORY_LOCLIBRARY_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_LOCLIBRARY = UUID.fromString("cf9f5c11-e943-483c-913b-81d1e338accc");
+  public static final UUID NEW_SIMPLE_LOCLIBRARY = UUID.fromString("32f58888-1a7b-4840-98f8-cc69ca93fc67");
+  public static final Map<String, String> SRC_INVENTORY_LOCLIBRARY_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("loclibrary_code", "code"),
     Map.entry("loclibrary_name", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_MATERIAL_TYPE = UUID.fromString("917ea5c8-cafe-4fa6-a942-e2388a88c6f6");
-  private static final UUID NEW_SIMPLE_MATERIAL_TYPE_DETAILS = UUID.fromString("8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe");
-  private static final Map<String, String> SRC_INVENTORY_MATERIAL_TYPE_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_MATERIAL_TYPE = UUID.fromString("917ea5c8-cafe-4fa6-a942-e2388a88c6f6");
+  public static final UUID NEW_SIMPLE_MATERIAL_TYPE_DETAILS = UUID.fromString("8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe");
+  public static final Map<String, String> SRC_INVENTORY_MATERIAL_TYPE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("material_type_name", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_MODE_OF_ISSUANCE = UUID.fromString(
-    "60e315d6-db28-4077-9277-b946411fe7d9"
-  );
-  private static final UUID NEW_SIMPLE_MODE_OF_ISSUANCE = UUID.fromString("073b554a-5b5c-4552-a51c-01448a1643b0");
-  private static final Map<String, String> SRC_INVENTORY_MODE_OF_ISSUANCE_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_MODE_OF_ISSUANCE = UUID.fromString("60e315d6-db28-4077-9277-b946411fe7d9");
+  public static final UUID NEW_SIMPLE_MODE_OF_ISSUANCE = UUID.fromString("073b554a-5b5c-4552-a51c-01448a1643b0");
+  public static final Map<String, String> SRC_INVENTORY_MODE_OF_ISSUANCE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("mode_of_issuance", "name")
   );
 
-  private static final UUID OLD_SRC_INVENTORY_SERVICE_POINT = UUID.fromString("89cdeac4-9582-4388-800b-9ccffd8d7691");
-  private static final UUID NEW_SIMPLE_SERVICE_POINT_DETAIL = UUID.fromString("1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5");
-  private static final Map<String, String> SRC_INVENTORY_SERVICE_POINT_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_INVENTORY_SERVICE_POINT = UUID.fromString("89cdeac4-9582-4388-800b-9ccffd8d7691");
+  public static final UUID NEW_SIMPLE_SERVICE_POINT_DETAIL = UUID.fromString("1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5");
+  public static final Map<String, String> SRC_INVENTORY_SERVICE_POINT_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("service_point_code", "code"),
     Map.entry("service_point_name", "name")
   );
 
-  private static final UUID OLD_DRV_ORGANIZATION_CONTACTS = UUID.fromString("7a7860cd-e939-504f-b51f-ed3e1e6b12b9");
-  private static final UUID NEW_SIMPLE_ORGANIZATION = UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503");
-  private static final Map<String, String> DRV_ORGANIZATION_CONTACTS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_DRV_ORGANIZATION_CONTACTS = UUID.fromString("7a7860cd-e939-504f-b51f-ed3e1e6b12b9");
+  public static final UUID NEW_SIMPLE_ORGANIZATION = UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503");
+  public static final Map<String, String> DRV_ORGANIZATION_CONTACTS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("acquisition_unit_id", "acq_unit_ids"),
     Map.entry("acquisition_unit_name", "acq_unit_names"),
     Map.entry("address", "addresses"),
@@ -218,8 +216,8 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("url", "urls")
   );
 
-  private static final UUID OLD_DRV_ORGANIZATION_DETAILS = UUID.fromString("837f262e-2073-4a00-8bcc-4e4ce6e669b3");
-  private static final Map<String, String> DRV_ORGANIZATION_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_DRV_ORGANIZATION_DETAILS = UUID.fromString("837f262e-2073-4a00-8bcc-4e4ce6e669b3");
+  public static final Map<String, String> DRV_ORGANIZATION_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("acquisition_unit", "acq_unit_names"),
     Map.entry("acqunit_ids", "acq_unit_ids"),
     Map.entry("alias", "aliases"),
@@ -229,25 +227,23 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("organization_type_name", "type_names")
   );
 
-  private static final UUID OLD_SRC_ORGANIZATION_TYPES = UUID.fromString("6b335e41-2654-4e2a-9b4e-c6930b330ccc");
-  private static final UUID NEW_SIMPLE_ORGANIZATION_TYPES = UUID.fromString("85a2b008-af8d-4890-9490-421cabcb7bad");
-  private static final Map<String, String> SRC_ORGANIZATION_TYPES_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_ORGANIZATION_TYPES = UUID.fromString("6b335e41-2654-4e2a-9b4e-c6930b330ccc");
+  public static final UUID NEW_SIMPLE_ORGANIZATION_TYPES = UUID.fromString("85a2b008-af8d-4890-9490-421cabcb7bad");
+  public static final Map<String, String> SRC_ORGANIZATION_TYPES_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("organization_types_name", "name")
   );
 
-  private static final UUID OLD_SRC_ORGANIZATIONS = UUID.fromString("489234a9-8703-48cd-85e3-7f84011bafa3");
-  private static final Map<String, String> SRC_ORGANIZATIONS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_ORGANIZATIONS = UUID.fromString("489234a9-8703-48cd-85e3-7f84011bafa3");
+  public static final Map<String, String> SRC_ORGANIZATIONS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("vendor_code", "code"),
     Map.entry("vendor_name", "name")
   );
 
-  private static final UUID OLD_DRV_PURCHASE_ORDER_LINE_DETAILS = UUID.fromString(
+  public static final UUID OLD_DRV_PURCHASE_ORDER_LINE_DETAILS = UUID.fromString(
     "90403847-8c47-4f58-b117-9a807b052808"
   );
-  private static final UUID NEW_COMPOSITE_PURCHASE_ORDER_LINES = UUID.fromString(
-    "abc777d3-2a45-43e6-82cb-71e8c96d13d2"
-  );
-  private static final Map<String, String> DRV_PURCHASE_ORDER_LINE_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID NEW_COMPOSITE_PURCHASE_ORDER_LINES = UUID.fromString("abc777d3-2a45-43e6-82cb-71e8c96d13d2");
+  public static final Map<String, String> DRV_PURCHASE_ORDER_LINE_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("acquisition_unit", "po.acquisition_unit"),
     Map.entry("acqunit_ids", "po.acq_unit_ids"),
     Map.entry("fund_distribution", "pol.fund_distribution"),
@@ -284,9 +280,9 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("vendor_name", "vendor_organization.name")
   );
 
-  private static final UUID OLD_DRV_USER_DETAILS = UUID.fromString("0069cf6f-2833-46db-8a51-8934769b8289");
-  private static final UUID NEW_COMPOSITE_USER_DETAILS = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
-  private static final Map<String, String> DRV_USER_DETAILS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_DRV_USER_DETAILS = UUID.fromString("0069cf6f-2833-46db-8a51-8934769b8289");
+  public static final UUID NEW_COMPOSITE_USER_DETAILS = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
+  public static final Map<String, String> DRV_USER_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("id", "users.id"),
     Map.entry("user_active", "users.active"),
     Map.entry("user_address_ids", "users.addresses[*]->address_id"),
@@ -320,21 +316,21 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("username", "users.username")
   );
 
-  private static final UUID OLD_SRC_USERS_ADDRESSTYPE = UUID.fromString("e627a89b-682b-41fe-b532-f4262020a451");
-  private static final UUID NEW_SIMPLE_ADDRESS_TYPES = UUID.fromString("9176c676-0485-4f6c-b1fc-585355bac679");
-  private static final Map<String, String> SRC_USERS_ADDRESSTYPE_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_USERS_ADDRESSTYPE = UUID.fromString("e627a89b-682b-41fe-b532-f4262020a451");
+  public static final UUID NEW_SIMPLE_ADDRESS_TYPES = UUID.fromString("9176c676-0485-4f6c-b1fc-585355bac679");
+  public static final Map<String, String> SRC_USERS_ADDRESSTYPE_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("addressType", "type")
   );
 
-  private static final UUID OLD_SRC_USERS_DEPARTMENTS = UUID.fromString("c8364551-7e51-475d-8473-88951181452d");
-  private static final UUID NEW_SIMPLE_DEPARTMENT_DETAILS = UUID.fromString("f067beda-cbeb-4423-9a0d-3b59fb329ce2");
-  private static final Map<String, String> SRC_USERS_DEPARTMENTS_COLUMN_MAPPING = Map.ofEntries(
+  public static final UUID OLD_SRC_USERS_DEPARTMENTS = UUID.fromString("c8364551-7e51-475d-8473-88951181452d");
+  public static final UUID NEW_SIMPLE_DEPARTMENT_DETAILS = UUID.fromString("f067beda-cbeb-4423-9a0d-3b59fb329ce2");
+  public static final Map<String, String> SRC_USERS_DEPARTMENTS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("department", "name")
   );
 
   // no column changes
-  private static final UUID OLD_SRC_USERS_GROUPS = UUID.fromString("e611264d-377e-4d87-a93f-f1ca327d3db0");
-  private static final UUID NEW_SIMPLE_GROUP_DETAILS = UUID.fromString("e7717b38-4ff3-4fb9-ae09-b3d0c8400710");
+  public static final UUID OLD_SRC_USERS_GROUPS = UUID.fromString("e611264d-377e-4d87-a93f-f1ca327d3db0");
+  public static final UUID NEW_SIMPLE_GROUP_DETAILS = UUID.fromString("e7717b38-4ff3-4fb9-ae09-b3d0c8400710");
 
   @Override
   public String getLabel() {

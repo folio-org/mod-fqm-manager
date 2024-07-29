@@ -173,15 +173,15 @@ public class EntityTypeFlatteningService {
   }
 
   /**
- * This method injects the source alias into the column's value getter and filter value getter.
- * It also recursively injects the source alias into nested object types and array types.
- *
- * @param <T> The type of the column, which must extend the Field interface.
- * @param column The column to inject the source alias into.
- * @param entityType The entity type containing the column.
- * @param renamedAliases The map of old aliases to new aliases.
- * @return The column with the injected source alias.
- */
+   * This method injects the source alias into the column's value getter and filter value getter.
+   * It also recursively injects the source alias into nested object types and array types.
+   *
+   * @param <T>            The type of the column, which must extend the Field interface.
+   * @param column         The column to inject the source alias into.
+   * @param entityType     The entity type containing the column.
+   * @param renamedAliases The map of old aliases to new aliases.
+   * @return The column with the injected source alias.
+   */
 private static <T extends Field> T injectSourceAlias(T column, EntityType entityType, Map<String, String> renamedAliases, String sourceAlias) {
   Stream.concat(
       Stream.of("sourceAlias"), // Simple hack to maintain backward compatibility by shimming the source alias in
@@ -196,9 +196,6 @@ private static <T extends Field> T injectSourceAlias(T column, EntityType entity
       }
       if (column.getValueFunction() != null) {
         column.valueFunction(column.getValueFunction().replaceAll(oldAliasReference, newAliasReference));
-      }
-      if (column.getIdColumnName() != null) {
-        column.idColumnName(column.getIdColumnName().replaceAll(oldAliasReference, newAliasReference));
       }
       if (column.getDataType() instanceof ObjectType objectType) {
         injectSourceAliasForObjectType(objectType, entityType, renamedAliases, sourceAlias);
@@ -234,6 +231,7 @@ private static <T extends Field> T injectSourceAlias(T column, EntityType entity
       newColumn.name(aliasPrefix + newColumn.getName());
       // Only treat newColumn as idColumn if outer source specifies to do so
       newColumn.isIdColumn(newColumn.getIsIdColumn() == null ? null : Boolean.TRUE.equals(newColumn.getIsIdColumn()) && (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns())));
+      newColumn.idColumnName(newColumn.getIdColumnName() == null ? null : aliasPrefix + newColumn.getIdColumnName());
       injectSourceAlias(newColumn, originalEntityType, renamedAliases, column.getSourceAlias());
       column.setSourceAlias(null);
       copies.add(newColumn);

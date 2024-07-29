@@ -3,14 +3,17 @@ package org.folio.fqm.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
@@ -88,30 +91,7 @@ class MigrationServiceTest {
   void testMigrationWorks() {
     String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
 
-    MigrationStrategy migrationStrategy = spy(
-      new MigrationStrategy() {
-        @Override
-        public boolean applies(String version) {
-          return true;
-        }
-
-        @Override
-        public MigratableQueryInformation apply(
-          FqlService fqlService,
-          MigratableQueryInformation migratableQueryInformation
-        ) {
-          return MigratableQueryInformation
-            .builder()
-            .fqlQuery(migratableQueryInformation.fqlQuery().replace("source", migrationService.getLatestVersion()))
-            .build();
-        }
-
-        @Override
-        public String getLabel() {
-          return "Test";
-        }
-      }
-    );
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -132,35 +112,7 @@ class MigrationServiceTest {
   void testMigrationWorksWithMultipleIterations() {
     String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
 
-    MigrationStrategy migrationStrategy = spy(
-      new MigrationStrategy() {
-        private int count = 0;
-
-        @Override
-        public boolean applies(String version) {
-          return true;
-        }
-
-        @Override
-        public MigratableQueryInformation apply(
-          FqlService fqlService,
-          MigratableQueryInformation migratableQueryInformation
-        ) {
-          if (++count != 3) {
-            return migratableQueryInformation;
-          }
-          return MigratableQueryInformation
-            .builder()
-            .fqlQuery(migratableQueryInformation.fqlQuery().replace("source", migrationService.getLatestVersion()))
-            .build();
-        }
-
-        @Override
-        public String getLabel() {
-          return "Test";
-        }
-      }
-    );
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 3));
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -175,5 +127,66 @@ class MigrationServiceTest {
       )
     );
     verify(migrationStrategy, times(3)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).build());
+  }
+
+  @Test
+  void testMigrationOnlyAppliesApplicable() {
+    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
+
+    MigrationStrategy migrationStrategyApplicable = spy(new TestMigrationStrategy(true, 1));
+    MigrationStrategy migrationStrategyInapplicable = spy(new TestMigrationStrategy(false, 0));
+
+    when(migrationStrategyRepository.getMigrationStrategies())
+      .thenReturn(List.of(migrationStrategyInapplicable, migrationStrategyApplicable, migrationStrategyInapplicable));
+
+    assertThat(
+      migrationService.migrate(MigratableQueryInformation.builder().fqlQuery(fql).build()).fqlQuery(),
+      is(
+        MigratableQueryInformation
+          .builder()
+          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
+          .build()
+          .fqlQuery()
+      )
+    );
+    verify(migrationStrategyApplicable, times(1))
+      .apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).build());
+    verify(migrationStrategyApplicable, times(1)).getLabel();
+    verify(migrationStrategyApplicable, times(1)).applies(anyString());
+    verify(migrationStrategyInapplicable, times(2)).applies(anyString());
+
+    verifyNoMoreInteractions(migrationStrategyApplicable, migrationStrategyInapplicable);
+  }
+
+  @RequiredArgsConstructor
+  private class TestMigrationStrategy implements MigrationStrategy {
+
+    final boolean applies;
+    final int requiredCount;
+    int count = 0;
+
+    @Override
+    public boolean applies(String version) {
+      return applies;
+    }
+
+    @Override
+    public MigratableQueryInformation apply(
+      FqlService fqlService,
+      MigratableQueryInformation migratableQueryInformation
+    ) {
+      if (++count != requiredCount) {
+        return migratableQueryInformation;
+      }
+      return MigratableQueryInformation
+        .builder()
+        .fqlQuery(migratableQueryInformation.fqlQuery().replace("source", migrationService.getLatestVersion()))
+        .build();
+    }
+
+    @Override
+    public String getLabel() {
+      return "Test";
+    }
   }
 }

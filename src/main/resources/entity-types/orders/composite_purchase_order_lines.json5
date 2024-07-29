@@ -15,7 +15,7 @@
       id: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
       join: {
         type: 'join',
-        joinTo: 'pol',
+        joinTo: 'pol.pol',
         condition: "(:that.jsonb ->>'purchaseOrderId')::uuid = :this.id",
       },
     },
@@ -25,7 +25,7 @@
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details,
       join: {
         type: 'left join',
-        joinTo: 'po',
+        joinTo: 'po.po',
         condition: "(:that.jsonb ->'metadata'->> 'createdByUserId'::text)::uuid = :this.id"
       }
     },
@@ -35,7 +35,7 @@
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
       join: {
         type: 'left join',
-        joinTo: 'po',
+        joinTo: 'po.po',
         condition: "(:that.jsonb ->'metadata'->> 'updatedByUserId'::text)::uuid = :this.id",
       },
     },
@@ -45,7 +45,7 @@
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
       join: {
         type: 'left join',
-        joinTo: 'pol',
+        joinTo: 'pol.pol',
         condition: "(:that.jsonb ->'metadata'->> 'createdByUserId'::text)::uuid = :this.id"
       }
     },
@@ -54,7 +54,7 @@
       type: 'entity-type',
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
       join: {
-        joinTo: 'pol',
+        joinTo: 'pol.pol',
         type: 'left join',
         condition: "(:that.jsonb ->'metadata'->> 'updatedByUserId'::text)::uuid = :this.id"
       }
@@ -66,7 +66,7 @@
       join: {
         type: 'left join',
         condition: "(:that.jsonb ->> 'vendor')::uuid = :this.id",
-        joinTo: 'po',
+        joinTo: 'po.po',
       },
     },
     {
@@ -75,7 +75,7 @@
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
       join: {
         type: 'left join',
-        joinTo: 'po',
+        joinTo: 'po.po',
         condition: "(:that.jsonb ->> 'assignedTo')::uuid = :this.id",
       },
     },
@@ -85,7 +85,7 @@
       id: '770a383e-c6cb-412b-abc3-6fa3c8a8795c', // simple_user_details
       join: {
         type: 'left join',
-        joinTo: 'pol',
+        joinTo: 'pol.pol',
         condition: ":this.currency = :that.jsonb -> 'cost' ->> 'currency'",
       },
     },

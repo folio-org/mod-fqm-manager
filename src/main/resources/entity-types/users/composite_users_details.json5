@@ -16,7 +16,7 @@
       id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group_details
       join: {
         type: 'left join',
-        joinTo: 'users',
+        joinTo: 'users.user',
         condition: "(:that.jsonb ->> 'patronGroup')::uuid = :this.id",
       },
     },

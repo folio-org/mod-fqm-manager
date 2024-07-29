@@ -15,7 +15,7 @@
       id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
       join: {
         type: 'left join',
-        joinTo: 'holdings',
+        joinTo: 'holdings.hrd',
         condition: ":this.id = :that.effectivelocationid"
       }
     },
@@ -25,7 +25,7 @@
       id: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary
       join: {
         type: 'left join',
-        joinTo: 'effective_location',
+        joinTo: 'effective_location.location',
         condition: ":this.id = :that.libraryid"
       }
     },
@@ -35,7 +35,7 @@
       id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
       join: {
         type: 'left join',
-        joinTo: 'holdings',
+        joinTo: 'holdings.hrd',
         condition: ":this.id = :that.permanentlocationid"
       }
     },
@@ -45,7 +45,7 @@
       id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
       join: {
         type: 'left join',
-        joinTo: 'holdings',
+        joinTo: 'holdings.hrd',
         condition: ":this.id = :that.temporarylocationid"
       }
     }

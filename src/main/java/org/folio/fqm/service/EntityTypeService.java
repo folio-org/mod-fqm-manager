@@ -84,7 +84,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
     entityType.columns(entityType.getColumns().stream()
       .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList());
@@ -103,7 +103,7 @@ public class EntityTypeService {
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)

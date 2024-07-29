@@ -172,6 +172,9 @@ public class IntegrationTestBase {
           }
           """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
+      if (recordedRequest.getPath().matches("/consortia-configuration.*")) {
+        return new MockResponse().setBody("").setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+      }
       throw new RuntimeException("Unexpected request: " + recordedRequest.getPath());
     }
   }

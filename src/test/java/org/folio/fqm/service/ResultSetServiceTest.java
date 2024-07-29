@@ -44,7 +44,7 @@ class ResultSetServiceTest {
     );
 
     when(
-      entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)
+      entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)
     )
       .thenReturn(
         new EntityType()

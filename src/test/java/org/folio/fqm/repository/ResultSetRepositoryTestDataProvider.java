@@ -2,9 +2,12 @@ package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.folio.querytool.domain.dto.*;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.RangedUUIDType;
+import org.folio.querytool.domain.dto.StringType;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Result;
@@ -13,8 +16,6 @@ import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
-import org.mockito.Mockito;
-import org.postgresql.jdbc.PgArray;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,6 @@ import java.util.UUID;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.jooq.impl.DSL.field;
-import static org.mockito.Mockito.when;
 
 /**
  * Mock data provider that returns query results for Repository tests.
@@ -36,9 +36,9 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
 
   public static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(":sourceAlias." + ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
-      new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter(":sourceAlias.key1").sourceAlias("source1"),
-      new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter(":sourceAlias.key2").sourceAlias("source1")
+      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(":source1." + ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+      new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key1"),
+      new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key2")
     ))
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE")

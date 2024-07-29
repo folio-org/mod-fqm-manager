@@ -158,7 +158,7 @@ class EntityTypeServiceTest {
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -180,7 +180,7 @@ class EntityTypeServiceTest {
           Map.of(valueColumnName, "value_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     ColumnValues expectedColumnValues = new ColumnValues().content(
       List.of(
@@ -204,7 +204,7 @@ class EntityTypeServiceTest {
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
@@ -220,7 +220,7 @@ class EntityTypeServiceTest {
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
@@ -239,7 +239,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
@@ -262,7 +262,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
@@ -285,7 +285,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
     when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
            {
              "what": {
@@ -323,7 +323,7 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
@@ -343,7 +343,7 @@ class EntityTypeServiceTest {
         .name("pol_currency")
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)).thenReturn(entityType);
 
 
     List<ValueWithLabel> actualColumnValues = entityTypeService

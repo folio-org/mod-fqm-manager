@@ -47,7 +47,7 @@ public class PermissionsService {
   }
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
-    EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), false);
+    EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()));
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
   }
 

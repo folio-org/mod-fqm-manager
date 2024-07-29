@@ -55,75 +55,68 @@ class EntityTypeFlatteningServiceTest {
     .columns(List.of(
       new EntityTypeColumn()
         .name("field1")
-        .valueGetter(":sourceAlias.field1")
+        .valueGetter(":source1.field1")
         .dataType(new StringType().dataType("stringType"))
-        .isIdColumn(true)
-        .sourceAlias("source1"),
+        .isIdColumn(true),
       new EntityTypeColumn()
         .name("field2")
-        .valueGetter(":sourceAlias.field2")
-        .filterValueGetter("lower(:sourceAlias.field2)")
-        .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source1"),
+        .valueGetter(":source1.field2")
+        .filterValueGetter("lower(:source1.field2)")
+        .dataType(new StringType().dataType("stringType")),
       new EntityTypeColumn()
         .name("object")
-        .valueGetter(":sourceAlias.field2")
-        .filterValueGetter("lower(:sourceAlias.field2)")
+        .valueGetter(":source1.field2")
+        .filterValueGetter("lower(:source1.field2)")
         .dataType(new ObjectType().dataType("objectType")
           .addPropertiesItem(new NestedObjectProperty()
             .name("object_field1")
             .dataType(new StringType().dataType("stringType"))
-            .valueGetter(":sourceAlias.object.object_field1")
-            .filterValueGetter(":sourceAlias.object.object_field1"))
+            .valueGetter(":source1.object.object_field1")
+            .filterValueGetter(":source1.object.object_field1"))
           .addPropertiesItem(new NestedObjectProperty()
             .name("object_field2")
             .dataType(new StringType().dataType("stringType"))
-            .valueGetter(":sourceAlias.object.object_field2")
-            .filterValueGetter(":sourceAlias.object.object_field2"))
-        )
-        .sourceAlias("source1"),
+            .valueGetter(":source1.object.object_field2")
+            .filterValueGetter(":source1.object.object_field2"))
+        ),
       new EntityTypeColumn()
         .name("string_array_field")
-        .valueGetter(":sourceAlias.string_array_field")
-        .filterValueGetter("lower(:sourceAlias.string_array_field)")
+        .valueGetter(":source1.string_array_field")
+        .filterValueGetter("lower(:source1.string_array_field)")
         .dataType(new ArrayType().dataType("arrayType")
-          .itemDataType(new StringType().dataType("stringType")))
-        .sourceAlias("source1"),
+          .itemDataType(new StringType().dataType("stringType"))),
       new EntityTypeColumn()
         .name("nested_string_array_field")
-        .valueGetter(":sourceAlias.nested_string_array_field")
-        .filterValueGetter("lower(:sourceAlias.nested_string_array_field)")
+        .valueGetter(":source1.nested_string_array_field")
+        .filterValueGetter("lower(:source1.nested_string_array_field)")
         .dataType(new ArrayType().dataType("arrayType")
           .itemDataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType"))))
-        .sourceAlias("source1"),
+            .itemDataType(new StringType().dataType("stringType")))),
       new EntityTypeColumn()
         .name("object_array_field")
-        .valueGetter(":sourceAlias.object_array_field")
-        .filterValueGetter("lower(:sourceAlias.object_array_field)")
+        .valueGetter(":source1.object_array_field")
+        .filterValueGetter("lower(:source1.object_array_field)")
         .dataType(new ArrayType().dataType("arrayType")
           .itemDataType(new ObjectType().dataType("objectType")
             .addPropertiesItem(new NestedObjectProperty()
               .name("array_object_field1")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter(":sourceAlias.array_object.array_object_field1")
-              .filterValueGetter(":sourceAlias.array_object.array_object_field1"))
+              .valueGetter(":source1.array_object.array_object_field1")
+              .filterValueGetter(":source1.array_object.array_object_field1"))
             .addPropertiesItem(new NestedObjectProperty()
               .name("array_object_field2")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter(":sourceAlias.array_object.array_object_field2")
-              .filterValueGetter(":sourceAlias.array_object.object_field2"))))
-        .sourceAlias("source1"),
+              .valueGetter(":source1.array_object.array_object_field2")
+              .filterValueGetter(":source1.array_object.object_field2")))),
       new EntityTypeColumn()
         .name("ecs_field")
-        .valueGetter(":sourceAlias.ecs_field")
+        .valueGetter(":source1.ecs_field")
         .values(List.of(
           new ValueWithLabel().value("value1").label("label1"),
           new ValueWithLabel().value("value1").label("label1")
         ))
         .dataType(new StringType().dataType("stringType"))
         .isIdColumn(true)
-        .sourceAlias("source1")
         .ecsOnly(true)
     ))
     .sources(List.of(
@@ -140,30 +133,30 @@ class EntityTypeFlatteningServiceTest {
     .columns(List.of(
       new EntityTypeColumn()
         .name("field3")
-        .valueGetter(":sourceAlias.field3")
+        .valueGetter(":source2.field3")
         .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source2")
         .isIdColumn(true),
       new EntityTypeColumn()
         .name("field4")
-        .valueGetter(":sourceAlias.field4")
-        .filterValueGetter("lower(:sourceAlias.field4)")
-        .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source2"),
+        .valueGetter(":source2.field4")
+        .filterValueGetter("lower(:source2.field4)")
+        .dataType(new StringType().dataType("stringType")),
       new EntityTypeColumn()
         .name("field5")
-        .valueGetter(":sourceAlias.field5")
+        .valueGetter(":source3.field5")
         .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source3")
         .isIdColumn(true),
       new EntityTypeColumn()
         .name("field6")
-        .valueGetter(":sourceAlias.field6")
-        .filterValueGetter("lower(:sourceAlias.field6)")
+        .valueGetter(":source3.field6")
+        .filterValueGetter("lower(:source3.field6)")
         .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source3")
     ))
     .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source2")
+        .target("source2_target"),
       new EntityTypeSource()
         .type("db")
         .alias("source3")
@@ -174,10 +167,6 @@ class EntityTypeFlatteningServiceTest {
             .joinTo("source2")
             .condition(":this.field5 = :that.field3")
         ),
-      new EntityTypeSource()
-        .type("db")
-        .alias("source2")
-        .target("source2_target"),
       new EntityTypeSource()
         .type("entity-type")
         .alias("simple_entity_type1")
@@ -205,16 +194,14 @@ class EntityTypeFlatteningServiceTest {
     .columns(List.of(
       new EntityTypeColumn()
         .name("field7")
-        .valueGetter(":sourceAlias.field7")
+        .valueGetter(":source4.field7")
         .dataType(new StringType().dataType("stringType"))
-        .isIdColumn(true)
-        .sourceAlias("source4"),
+        .isIdColumn(true),
       new EntityTypeColumn()
         .name("field8")
-        .valueGetter(":sourceAlias.field8")
-        .filterValueGetter("lower(:sourceAlias.field8)")
+        .valueGetter(":source4.field8")
+        .filterValueGetter("lower(:source4.field8)")
         .dataType(new StringType().dataType("stringType"))
-        .sourceAlias("source4")
     ))
     .sources(List.of(
       new EntityTypeSource()
@@ -238,10 +225,9 @@ class EntityTypeFlatteningServiceTest {
     .columns(List.of(
         new EntityTypeColumn()
           .name("field1")
-          .valueGetter(":sourceAlias.field1")
+          .valueGetter(":source1.field1")
           .dataType(new StringType().dataType("stringType"))
           .isIdColumn(true)
-          .sourceAlias("source1")
       )
     )
     .sources(List.of(
@@ -311,14 +297,12 @@ class EntityTypeFlatteningServiceTest {
           .name("field1")
           .valueGetter("\"source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source1")
           .isIdColumn(true),
         new EntityTypeColumn()
           .name("field2")
           .valueGetter("\"source1\".field2")
           .filterValueGetter("lower(\"source1\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source1"),
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("object")
           .valueGetter("\"source1\".field2")
@@ -334,23 +318,20 @@ class EntityTypeFlatteningServiceTest {
               .dataType(new StringType().dataType("stringType"))
               .valueGetter("\"source1\".object.object_field2")
               .filterValueGetter("\"source1\".object.object_field2"))
-          )
-          .sourceAlias("source1"),
+          ),
         new EntityTypeColumn()
           .name("string_array_field")
           .valueGetter("\"source1\".string_array_field")
           .filterValueGetter("lower(\"source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("source1"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
           .name("nested_string_array_field")
           .valueGetter("\"source1\".nested_string_array_field")
           .filterValueGetter("lower(\"source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("source1"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
           .name("object_array_field")
           .valueGetter("\"source1\".object_array_field")
@@ -367,7 +348,6 @@ class EntityTypeFlatteningServiceTest {
                 .dataType(new StringType().dataType("stringType"))
                 .valueGetter("\"source1\".array_object.array_object_field2")
                 .filterValueGetter("\"source1\".array_object.object_field2"))))
-          .sourceAlias("source1")
       ))
       .sources(List.of(
         new EntityTypeSource()
@@ -380,7 +360,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -391,163 +371,142 @@ class EntityTypeFlatteningServiceTest {
       .id(COMPLEX_ENTITY_TYPE_ID.toString())
       .columns(List.of(
         new EntityTypeColumn()
-          .name("field5")
-          .valueGetter("\"source3\".field5")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source3")
-          .isIdColumn(true),
-        new EntityTypeColumn()
-          .name("field6")
-          .valueGetter("\"source3\".field6")
-          .filterValueGetter("lower(\"source3\".field6)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source3"),
-        new EntityTypeColumn()
           .name("field3")
           .valueGetter("\"source2\".field3")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source2")
           .isIdColumn(true),
         new EntityTypeColumn()
           .name("field4")
           .valueGetter("\"source2\".field4")
           .filterValueGetter("lower(\"source2\".field4)")
+          .dataType(new StringType().dataType("stringType")),
+        new EntityTypeColumn()
+          .name("field5")
+          .valueGetter("\"source3\".field5")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source2"),
+          .isIdColumn(true),
+        new EntityTypeColumn()
+          .name("field6")
+          .valueGetter("\"source3\".field6")
+          .filterValueGetter("lower(\"source3\".field6)")
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("simple_entity_type1.field1")
-          .valueGetter("\"simple_entity_type1\".field1")
+          .valueGetter("\"simple_entity_type1.source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type1")
           .isIdColumn(false),
         new EntityTypeColumn()
           .name("simple_entity_type1.field2")
-          .valueGetter("\"simple_entity_type1\".field2")
-          .filterValueGetter("lower(\"simple_entity_type1\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type1")
-          .isIdColumn(false),
+          .valueGetter("\"simple_entity_type1.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".field2)")
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("simple_entity_type1.object")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".field2")
-          .filterValueGetter("lower(\"simple_entity_type1\".field2)")
+          .valueGetter("\"simple_entity_type1.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".field2)")
           .dataType(new ObjectType().dataType("objectType")
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field1")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type1\".object.object_field1")
-              .filterValueGetter("\"simple_entity_type1\".object.object_field1"))
+              .valueGetter("\"simple_entity_type1.source1\".object.object_field1")
+              .filterValueGetter("\"simple_entity_type1.source1\".object.object_field1"))
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field2")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type1\".object.object_field2")
-              .filterValueGetter("\"simple_entity_type1\".object.object_field2"))
-          )
-          .sourceAlias("simple_entity_type1"),
+              .valueGetter("\"simple_entity_type1.source1\".object.object_field2")
+              .filterValueGetter("\"simple_entity_type1.source1\".object.object_field2"))
+          ),
         new EntityTypeColumn()
           .name("simple_entity_type1.string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".string_array_field)")
+          .valueGetter("\"simple_entity_type1.source1\".string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("simple_entity_type1"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
           .name("simple_entity_type1.nested_string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".nested_string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".nested_string_array_field)")
+          .valueGetter("\"simple_entity_type1.source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("simple_entity_type1"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
           .name("simple_entity_type1.object_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".object_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".object_array_field)")
+          .valueGetter("\"simple_entity_type1.source1\".object_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".object_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ObjectType().dataType("objectType")
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field1")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type1\".array_object.array_object_field1")
-                .filterValueGetter("\"simple_entity_type1\".array_object.array_object_field1"))
+                .valueGetter("\"simple_entity_type1.source1\".array_object.array_object_field1")
+                .filterValueGetter("\"simple_entity_type1.source1\".array_object.array_object_field1"))
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field2")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type1\".array_object.array_object_field2")
-                .filterValueGetter("\"simple_entity_type1\".array_object.object_field2"))))
-          .sourceAlias("simple_entity_type1"),
+                .valueGetter("\"simple_entity_type1.source1\".array_object.array_object_field2")
+                .filterValueGetter("\"simple_entity_type1.source1\".array_object.object_field2")))),
         new EntityTypeColumn()
           .name("simple_entity_type2.field1")
-          .valueGetter("\"simple_entity_type2\".field1")
+          .valueGetter("\"simple_entity_type2.source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type2")
           .isIdColumn(false),
         new EntityTypeColumn()
           .name("simple_entity_type2.field2")
-          .valueGetter("\"simple_entity_type2\".field2")
-          .filterValueGetter("lower(\"simple_entity_type2\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type2")
-          .isIdColumn(false),
+          .valueGetter("\"simple_entity_type2.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".field2)")
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("simple_entity_type2.object")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".field2")
-          .filterValueGetter("lower(\"simple_entity_type2\".field2)")
+          .valueGetter("\"simple_entity_type2.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".field2)")
           .dataType(new ObjectType().dataType("objectType")
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field1")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type2\".object.object_field1")
-              .filterValueGetter("\"simple_entity_type2\".object.object_field1"))
+              .valueGetter("\"simple_entity_type2.source1\".object.object_field1")
+              .filterValueGetter("\"simple_entity_type2.source1\".object.object_field1"))
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field2")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type2\".object.object_field2")
-              .filterValueGetter("\"simple_entity_type2\".object.object_field2"))
-          )
-          .sourceAlias("simple_entity_type2"),
+              .valueGetter("\"simple_entity_type2.source1\".object.object_field2")
+              .filterValueGetter("\"simple_entity_type2.source1\".object.object_field2"))
+          ),
         new EntityTypeColumn()
           .name("simple_entity_type2.string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".string_array_field)")
+          .valueGetter("\"simple_entity_type2.source1\".string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("simple_entity_type2"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
           .name("simple_entity_type2.nested_string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".nested_string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".nested_string_array_field)")
+          .valueGetter("\"simple_entity_type2.source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("simple_entity_type2"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
           .name("simple_entity_type2.object_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".object_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".object_array_field)")
+          .valueGetter("\"simple_entity_type2.source1\".object_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".object_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ObjectType().dataType("objectType")
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field1")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type2\".array_object.array_object_field1")
-                .filterValueGetter("\"simple_entity_type2\".array_object.array_object_field1"))
+                .valueGetter("\"simple_entity_type2.source1\".array_object.array_object_field1")
+                .filterValueGetter("\"simple_entity_type2.source1\".array_object.array_object_field1"))
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field2")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type2\".array_object.array_object_field2")
-                .filterValueGetter("\"simple_entity_type2\".array_object.object_field2"))))
-          .sourceAlias("simple_entity_type2")
+                .valueGetter("\"simple_entity_type2.source1\".array_object.array_object_field2")
+                .filterValueGetter("\"simple_entity_type2.source1\".array_object.object_field2"))))
       ))
       .sources(List.of(
+        new EntityTypeSource()
+          .type("db")
+          .alias("source2")
+          .target("source2_target")
+          .useIdColumns(true),
         new EntityTypeSource()
           .type("db")
           .alias("source3")
@@ -561,30 +520,23 @@ class EntityTypeFlatteningServiceTest {
           .useIdColumns(true),  // TODO: think about if this is right
         new EntityTypeSource()
           .type("db")
-          .alias("source2")
-          .target("source2_target")
-          .useIdColumns(true),
-        new EntityTypeSource()
-          .type("db")
-          .alias("simple_entity_type1")
+          .alias("simple_entity_type1.source1")
           .target("source1_target")
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
             .joinTo("source2")
             .condition(":this.field1 = :that.field3")
           )
-          .flattened(true)
           .useIdColumns(false),
         new EntityTypeSource()
           .type("db")
-          .alias("simple_entity_type2")
+          .alias("simple_entity_type2.source1")
           .target("source1_target")
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
             .joinTo("source2")
             .condition(":this.field1 = :that.field4")
           )
-          .flattened(true)
           .useIdColumns(false)
       ))
       .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
@@ -593,7 +545,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -607,172 +559,142 @@ class EntityTypeFlatteningServiceTest {
           .name("field7")
           .valueGetter("\"source4\".field7")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source4")
           .isIdColumn(true),
         new EntityTypeColumn()
           .name("field8")
           .valueGetter("\"source4\".field8")
           .filterValueGetter("lower(\"source4\".field8)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source4"),
-        new EntityTypeColumn()
-          .name("complex_entity_type.field5")
-          .valueGetter("\"complex_entity_type.source3\".field5")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type.source3")
-          .isIdColumn(false),
-        new EntityTypeColumn()
-          .name("complex_entity_type.field6")
-          .valueGetter("\"complex_entity_type.source3\".field6")
-          .filterValueGetter("lower(\"complex_entity_type.source3\".field6)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type.source3")
-          .isIdColumn(false),
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("complex_entity_type.field3")
           .valueGetter("\"complex_entity_type.source2\".field3")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type.source2")
           .isIdColumn(false),
         new EntityTypeColumn()
           .name("complex_entity_type.field4")
           .valueGetter("\"complex_entity_type.source2\".field4")
           .filterValueGetter("lower(\"complex_entity_type.source2\".field4)")
+          .dataType(new StringType().dataType("stringType")),
+        new EntityTypeColumn()
+          .name("complex_entity_type.field5")
+          .valueGetter("\"complex_entity_type.source3\".field5")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("complex_entity_type.source2")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.field1")
-          .valueGetter("\"simple_entity_type1\".field1")
+          .name("complex_entity_type.field6")
+          .valueGetter("\"complex_entity_type.source3\".field6")
+          .filterValueGetter("lower(\"complex_entity_type.source3\".field6)")
+          .dataType(new StringType().dataType("stringType")),
+        new EntityTypeColumn()
+          .name("simple_entity_type1.field1")
+          .valueGetter("\"simple_entity_type1.source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type1")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.field2")
-          .valueGetter("\"simple_entity_type1\".field2")
-          .filterValueGetter("lower(\"simple_entity_type1\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type1")
-          .isIdColumn(false),
+          .name("simple_entity_type1.field2")
+          .valueGetter("\"simple_entity_type1.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".field2)")
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.object")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".field2")
-          .filterValueGetter("lower(\"simple_entity_type1\".field2)")
+          .name("simple_entity_type1.object")
+          .valueGetter("\"simple_entity_type1.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".field2)")
           .dataType(new ObjectType().dataType("objectType")
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field1")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type1\".object.object_field1")
-              .filterValueGetter("\"simple_entity_type1\".object.object_field1"))
+              .valueGetter("\"simple_entity_type1.source1\".object.object_field1")
+              .filterValueGetter("\"simple_entity_type1.source1\".object.object_field1"))
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field2")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type1\".object.object_field2")
-              .filterValueGetter("\"simple_entity_type1\".object.object_field2"))
-          )
-          .sourceAlias("simple_entity_type1"),
+              .valueGetter("\"simple_entity_type1.source1\".object.object_field2")
+              .filterValueGetter("\"simple_entity_type1.source1\".object.object_field2"))
+          ),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".string_array_field)")
+          .name("simple_entity_type1.string_array_field")
+          .valueGetter("\"simple_entity_type1.source1\".string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("simple_entity_type1"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.nested_string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".nested_string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".nested_string_array_field)")
+          .name("simple_entity_type1.nested_string_array_field")
+          .valueGetter("\"simple_entity_type1.source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("simple_entity_type1"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type1.object_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type1\".object_array_field")
-          .filterValueGetter("lower(\"simple_entity_type1\".object_array_field)")
+          .name("simple_entity_type1.object_array_field")
+          .valueGetter("\"simple_entity_type1.source1\".object_array_field")
+          .filterValueGetter("lower(\"simple_entity_type1.source1\".object_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ObjectType().dataType("objectType")
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field1")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type1\".array_object.array_object_field1")
-                .filterValueGetter("\"simple_entity_type1\".array_object.array_object_field1"))
+                .valueGetter("\"simple_entity_type1.source1\".array_object.array_object_field1")
+                .filterValueGetter("\"simple_entity_type1.source1\".array_object.array_object_field1"))
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field2")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type1\".array_object.array_object_field2")
-                .filterValueGetter("\"simple_entity_type1\".array_object.object_field2"))))
-          .sourceAlias("simple_entity_type1"),
+                .valueGetter("\"simple_entity_type1.source1\".array_object.array_object_field2")
+                .filterValueGetter("\"simple_entity_type1.source1\".array_object.object_field2")))),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.field1")
-          .valueGetter("\"simple_entity_type2\".field1")
+          .name("simple_entity_type2.field1")
+          .valueGetter("\"simple_entity_type2.source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type2")
           .isIdColumn(false),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.field2")
-          .valueGetter("\"simple_entity_type2\".field2")
-          .filterValueGetter("lower(\"simple_entity_type2\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("simple_entity_type2")
-          .isIdColumn(false),
+          .name("simple_entity_type2.field2")
+          .valueGetter("\"simple_entity_type2.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".field2)")
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.object")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".field2")
-          .filterValueGetter("lower(\"simple_entity_type2\".field2)")
+          .name("simple_entity_type2.object")
+          .valueGetter("\"simple_entity_type2.source1\".field2")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".field2)")
           .dataType(new ObjectType().dataType("objectType")
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field1")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type2\".object.object_field1")
-              .filterValueGetter("\"simple_entity_type2\".object.object_field1"))
+              .valueGetter("\"simple_entity_type2.source1\".object.object_field1")
+              .filterValueGetter("\"simple_entity_type2.source1\".object.object_field1"))
             .addPropertiesItem(new NestedObjectProperty()
               .name("object_field2")
               .dataType(new StringType().dataType("stringType"))
-              .valueGetter("\"simple_entity_type2\".object.object_field2")
-              .filterValueGetter("\"simple_entity_type2\".object.object_field2"))
-          )
-          .sourceAlias("simple_entity_type2"),
+              .valueGetter("\"simple_entity_type2.source1\".object.object_field2")
+              .filterValueGetter("\"simple_entity_type2.source1\".object.object_field2"))
+          ),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".string_array_field)")
+          .name("simple_entity_type2.string_array_field")
+          .valueGetter("\"simple_entity_type2.source1\".string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("simple_entity_type2"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.nested_string_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".nested_string_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".nested_string_array_field)")
+          .name("simple_entity_type2.nested_string_array_field")
+          .valueGetter("\"simple_entity_type2.source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("simple_entity_type2"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
-          .name("complex_entity_type.simple_entity_type2.object_array_field")
-          .isIdColumn(false)
-          .valueGetter("\"simple_entity_type2\".object_array_field")
-          .filterValueGetter("lower(\"simple_entity_type2\".object_array_field)")
+          .name("simple_entity_type2.object_array_field")
+          .valueGetter("\"simple_entity_type2.source1\".object_array_field")
+          .filterValueGetter("lower(\"simple_entity_type2.source1\".object_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ObjectType().dataType("objectType")
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field1")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type2\".array_object.array_object_field1")
-                .filterValueGetter("\"simple_entity_type2\".array_object.array_object_field1"))
+                .valueGetter("\"simple_entity_type2.source1\".array_object.array_object_field1")
+                .filterValueGetter("\"simple_entity_type2.source1\".array_object.array_object_field1"))
               .addPropertiesItem(new NestedObjectProperty()
                 .name("array_object_field2")
                 .dataType(new StringType().dataType("stringType"))
-                .valueGetter("\"simple_entity_type2\".array_object.array_object_field2")
-                .filterValueGetter("\"simple_entity_type2\".array_object.object_field2"))))
-          .sourceAlias("simple_entity_type2")
+                .valueGetter("\"simple_entity_type2.source1\".array_object.array_object_field2")
+                .filterValueGetter("\"simple_entity_type2.source1\".array_object.object_field2"))))
       ))
       .sources(List.of(
         new EntityTypeSource()
@@ -780,6 +702,16 @@ class EntityTypeFlatteningServiceTest {
           .alias("source4")
           .target("source4_target")
           .useIdColumns(true),
+        new EntityTypeSource()
+          .type("db")
+          .alias("complex_entity_type.source2")
+          .target("source2_target")
+          .useIdColumns(false)
+          .join(new EntityTypeSourceJoin()
+            .type("LEFT JOIN")
+            .joinTo("source4")
+            .condition(":this.field6 = :that.field7")
+          ),
         new EntityTypeSource()
           .type("db")
           .alias("complex_entity_type.source3")
@@ -793,39 +725,25 @@ class EntityTypeFlatteningServiceTest {
           ),
         new EntityTypeSource()
           .type("db")
-          .alias("complex_entity_type.source2")
-          .target("source2_target")
-          .useIdColumns(false)
-          .flattened(true)
-          .join(new EntityTypeSourceJoin()
-            .type("LEFT JOIN")
-            .joinTo("source4")
-            .condition(":this.field6 = :that.field7")
-          ),
-        new EntityTypeSource()
-          .type("db")
-          .alias("simple_entity_type1")
+          .alias("simple_entity_type1.source1")
           .target("source1_target")
           .useIdColumns(false)
-          .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
             .joinTo("complex_entity_type.source2")
             .condition(":this.field1 = :that.field3")
-          )
-          .flattened(true),
+          ),
         new EntityTypeSource()
           .type("db")
-          .alias("simple_entity_type2")
+          .alias("simple_entity_type2.source1")
           .target("source1_target")
           .useIdColumns(false)
-          .flattened(true)
           .join(new EntityTypeSourceJoin()
             .type("LEFT JOIN")
             .joinTo("complex_entity_type.source2")
             .condition(":this.field1 = :that.field4")
           )
-          .flattened(true)
+
       ))
       .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
 
@@ -834,20 +752,20 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, true);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
   @Test
   void shouldGetJoinClause() {
-    String expectedJoinClause = "source2_target \"source2\" LEFT JOIN source3_target \"source3\" ON \"source3\".field5 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type1\" ON \"simple_entity_type1\".field1 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type2\" ON \"simple_entity_type2\".field1 = \"source2\".field4";
+    String expectedJoinClause = "source2_target \"source2\" LEFT JOIN source3_target \"source3\" ON \"source3\".field5 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type1.source1\" ON \"simple_entity_type1.source1\".field1 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type2.source1\" ON \"simple_entity_type2.source1\".field1 = \"source2\".field4";
 
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
 
@@ -861,7 +779,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
     assertEquals(expectedJoinClause, actualJoinClause);
   }
@@ -876,14 +794,12 @@ class EntityTypeFlatteningServiceTest {
           .name("field1")
           .valueGetter("\"source1\".field1")
           .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source1")
           .isIdColumn(true),
         new EntityTypeColumn()
           .name("field2")
           .valueGetter("\"source1\".field2")
           .filterValueGetter("lower(\"source1\".field2)")
-          .dataType(new StringType().dataType("stringType"))
-          .sourceAlias("source1"),
+          .dataType(new StringType().dataType("stringType")),
         new EntityTypeColumn()
           .name("object")
           .valueGetter("\"source1\".field2")
@@ -899,23 +815,20 @@ class EntityTypeFlatteningServiceTest {
               .dataType(new StringType().dataType("stringType"))
               .valueGetter("\"source1\".object.object_field2")
               .filterValueGetter("\"source1\".object.object_field2"))
-          )
-          .sourceAlias("source1"),
+          ),
         new EntityTypeColumn()
           .name("string_array_field")
           .valueGetter("\"source1\".string_array_field")
           .filterValueGetter("lower(\"source1\".string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
-            .itemDataType(new StringType().dataType("stringType")))
-          .sourceAlias("source1"),
+            .itemDataType(new StringType().dataType("stringType"))),
         new EntityTypeColumn()
           .name("nested_string_array_field")
           .valueGetter("\"source1\".nested_string_array_field")
           .filterValueGetter("lower(\"source1\".nested_string_array_field)")
           .dataType(new ArrayType().dataType("arrayType")
             .itemDataType(new ArrayType().dataType("arrayType")
-              .itemDataType(new StringType().dataType("stringType"))))
-          .sourceAlias("source1"),
+              .itemDataType(new StringType().dataType("stringType")))),
         new EntityTypeColumn()
           .name("object_array_field")
           .valueGetter("\"source1\".object_array_field")
@@ -931,8 +844,7 @@ class EntityTypeFlatteningServiceTest {
                 .name("array_object_field2")
                 .dataType(new StringType().dataType("stringType"))
                 .valueGetter("\"source1\".array_object.array_object_field2")
-                .filterValueGetter("\"source1\".array_object.object_field2"))))
-          .sourceAlias("source1"),
+                .filterValueGetter("\"source1\".array_object.object_field2")))),
         new EntityTypeColumn()
           .name("ecs_field")
           .valueGetter("\"source1\".ecs_field")
@@ -941,7 +853,6 @@ class EntityTypeFlatteningServiceTest {
           ))
           .dataType(new StringType().dataType("stringType"))
           .isIdColumn(true)
-          .sourceAlias("source1")
           .ecsOnly(true)
       ))
       .sources(List.of(
@@ -956,7 +867,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn("{'centralTenantId': 'consortium'}");
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, true);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID);
     assertEquals(expectedEntityType, actualEntityType);
   }
 

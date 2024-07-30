@@ -45,7 +45,6 @@ public class EntityTypeFlatteningService {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-    String aliasPrefix = sourceFromParent == null ? "" : sourceFromParent.getAlias() + ".";
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
       .name(originalEntityType.getName())
@@ -59,8 +58,8 @@ public class EntityTypeFlatteningService {
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor());
 
-
     Map<String, String> renamedAliases = new HashMap<>(); // <oldName, newName>
+    String aliasPrefix = sourceFromParent == null ? "" : sourceFromParent.getAlias() + ".";
     for (EntityTypeSource source : originalEntityType.getSources()) {
       // Update alias
       String oldAlias = source.getAlias();
@@ -69,7 +68,7 @@ public class EntityTypeFlatteningService {
     }
 
     Set<String> finalPermissions = new HashSet<>(originalEntityType.getRequiredPermissions());
-    List<EntityTypeColumn> finalColumns = new ArrayList<>(copyColumns(sourceFromParent, originalEntityType, aliasPrefix, renamedAliases));
+    List<EntityTypeColumn> finalColumns = new ArrayList<>(copyColumns(sourceFromParent, originalEntityType, renamedAliases));
 
     for (EntityTypeSource source : originalEntityType.getSources()) {
       if (source.getType().equals("db")) {
@@ -80,7 +79,15 @@ public class EntityTypeFlatteningService {
         // Recursively flatten the source and add it to the flattened entity type
         EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, source);
         finalPermissions.addAll(flattenedSourceDefinition.getRequiredPermissions());
-        finalColumns.addAll(flattenedSourceDefinition.getColumns());
+        // Add a prefix to each column's name and idColumnName, then add em to the flattened entity type
+        finalColumns.addAll(
+          flattenedSourceDefinition.getColumns()
+            .stream()
+            .map(col -> col
+              .name(aliasPrefix + source.getAlias() + '.' + col.getName())
+              .idColumnName(col.getIdColumnName() == null ? null : aliasPrefix + source.getAlias() + '.' + col.getIdColumnName()))
+            .toList()
+        );
         // Copy each sub-source into the flattened entity type
         for (EntityTypeSource subSource : flattenedSourceDefinition.getSources()) {
           // For this, we don't want to rename aliases, since they have already been renamed (in the recursive call to getFlattenedEntityType())
@@ -224,14 +231,12 @@ private static <T extends Field> T injectSourceAlias(T column, EntityType entity
     }
   }
 
-  private List<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, String aliasPrefix, Map<String, String> renamedAliases) {
+  private List<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, Map<String, String> renamedAliases) {
     List<EntityTypeColumn> copies = new ArrayList<>(originalEntityType.getColumns().size());
     for (var column : originalEntityType.getColumns()) {
       EntityTypeColumn newColumn = copyColumn(column, originalEntityType);
-      newColumn.name(aliasPrefix + newColumn.getName());
       // Only treat newColumn as idColumn if outer source specifies to do so
       newColumn.isIdColumn(newColumn.getIsIdColumn() == null ? null : Boolean.TRUE.equals(newColumn.getIsIdColumn()) && (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns())));
-      newColumn.idColumnName(newColumn.getIdColumnName() == null ? null : aliasPrefix + newColumn.getIdColumnName());
       injectSourceAlias(newColumn, originalEntityType, renamedAliases, column.getSourceAlias());
       column.setSourceAlias(null);
       copies.add(newColumn);

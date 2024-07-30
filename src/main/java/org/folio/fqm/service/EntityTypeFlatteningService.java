@@ -38,7 +38,7 @@ public class EntityTypeFlatteningService {
   private final SimpleHttpClient ecsClient;
 
   public EntityType getFlattenedEntityType(UUID entityTypeId) {
-    return localizationService.localizeEntityType(getFlattenedEntityType(entityTypeId, null));
+    return getFlattenedEntityType(entityTypeId, null);
   }
 
   private EntityType getFlattenedEntityType(UUID entityTypeId, EntityTypeSource sourceFromParent) {
@@ -100,7 +100,7 @@ public class EntityTypeFlatteningService {
 
     flattenedEntityType.columns(getFilteredColumns(finalColumns));
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
-    return flattenedEntityType;
+    return localizationService.localizeEntityType(flattenedEntityType);
   }
 
   public String getJoinClause(EntityType flattenedEntityType) {

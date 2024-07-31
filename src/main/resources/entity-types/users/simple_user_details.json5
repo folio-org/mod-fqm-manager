@@ -539,8 +539,8 @@
         }
       },
       sourceAlias: "user",
-      queryable: false,
-      idColumnName: "user_department_ids",
+      queryable: true,
+      idColumnName: "department_ids",
       valueSourceApi: {
         path: "departments",
         labelJsonPath: "$.departments.*.name",

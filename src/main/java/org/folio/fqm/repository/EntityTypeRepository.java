@@ -67,7 +67,7 @@ public class EntityTypeRepository {
       .map(entityType -> {
         String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
         if (customFieldsEntityTypeId != null) {
-          entityType.getColumns().addAll(fetchColumnNamesForCustomFields(UUID.fromString(customFieldsEntityTypeId)));
+          entityType.getColumns().addAll(fetchColumnNamesForCustomFields(UUID.fromString(customFieldsEntityTypeId), entityType));
         }
         return entityType;
       });
@@ -97,9 +97,9 @@ public class EntityTypeRepository {
     });
   }
 
-  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId) {
+  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId, EntityType entityType) {
     log.info("Getting columns for entity type ID: {}", entityTypeId);
-    EntityType entityTypeDefinition = getEntityTypeDefinition(entityTypeId)
+    EntityType entityTypeDefinition = entityTypeId.toString().equals(entityType.getId()) ? entityType : getEntityTypeDefinition(entityTypeId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
@@ -114,10 +114,10 @@ public class EntityTypeRepository {
       .fetch()
       .stream()
       .map(row -> {
-        Object value = row.get(REQUIRED_FIELD_NAME);
-        Object extractedRefId = row.get(REF_ID);
-        assert value != null : "The value is marked as non-nullable in the database";
-        return handleSingleCheckBox(value.toString(), extractedRefId.toString(), sourceViewExtractor);
+        String name = row.get(REQUIRED_FIELD_NAME, String.class);
+        String refId = row.get(REF_ID, String.class);
+        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
+        return handleSingleCheckBox(name, refId, sourceViewExtractor);
       })
       .toList();
   }

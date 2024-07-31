@@ -2,7 +2,6 @@
   id: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf',
   name: 'composite_user_details',
   private: false,
-  customFieldEntityTypeId: 'ffb91f00-eb1c-4936-a637-f8708c967c73', // src_user_custom_fields
   sources: [
     {
       alias: 'users',

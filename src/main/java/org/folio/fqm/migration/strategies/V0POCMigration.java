@@ -417,7 +417,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
         fql -> new RemovedEntityTypeWarning("drv_item_callnumber_location", null, fql)
       ),
       Map.entry(
-        UUID.fromString("097a6f96-edd0-11ed-a05b-0242ac120003"),
+        UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0293"),
         fql -> new RemovedEntityTypeWarning("drv_item_holdingsrecord_instance", "composite_item_details", fql)
       ),
       Map.entry(

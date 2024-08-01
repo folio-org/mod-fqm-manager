@@ -49,9 +49,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
   /**
    * Entity types that were removed or deprecated. Removed ones will automatically be mapped to the `removed` entity type.
    */
-  public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
-    return Map.of();
-  }
+  public abstract Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings();
 
   /**
    * The fields that were deprecated, removed, etc.
@@ -61,9 +59,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
    *
    * The function will be given the field's name and FQL (if applicable), as a string
    */
-  public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
-    return Map.of();
-  }
+  public abstract Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings();
 
   @Override
   public boolean applies(String version) {

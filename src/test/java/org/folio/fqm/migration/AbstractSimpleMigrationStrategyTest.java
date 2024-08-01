@@ -1,11 +1,7 @@
 package org.folio.fqm.migration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,8 +21,6 @@ import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.service.MigrationService;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;

@@ -19,15 +19,10 @@ import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +54,7 @@ public class EntityTypeFlatteningService {
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor());
 
-    Map<String, String> renamedAliases = new HashMap<>(); // <oldName, newName>
+    Map<String, String> renamedAliases = new LinkedHashMap<>(); // <oldName, newName>
     String aliasPrefix = sourceFromParent == null ? "" : sourceFromParent.getAlias() + ".";
     for (EntityTypeSource source : originalEntityType.getSources()) {
       // Update alias
@@ -69,11 +64,12 @@ public class EntityTypeFlatteningService {
     }
 
     Set<String> finalPermissions = new HashSet<>(originalEntityType.getRequiredPermissions());
-    Stream.Builder<Stream<EntityTypeColumn>> columns = Stream.<Stream<EntityTypeColumn>>builder();
+    Stream.Builder<Stream<EntityTypeColumn>> columns = Stream.builder();
 
     for (EntityTypeSource source : originalEntityType.getSources()) {
       if (source.getType().equals("db")) {
-        flattenedEntityType.addSourcesItem(copySource(sourceFromParent, source, renamedAliases, true));
+        EntityTypeSource newSource = copySource(sourceFromParent, source, renamedAliases, true);
+        flattenedEntityType.addSourcesItem(newSource);
       }
       else {
         UUID sourceEntityTypeId = UUID.fromString(source.getId());
@@ -99,7 +95,7 @@ public class EntityTypeFlatteningService {
     }
 
     Stream<EntityTypeColumn> childSourceColumns = columns.build().flatMap(Function.identity());
-    Stream<EntityTypeColumn> allColumns = Stream.concat(copyColumns(sourceFromParent, originalEntityType, flattenedEntityType, renamedAliases), childSourceColumns);
+    Stream<EntityTypeColumn> allColumns = Stream.concat(copyColumns(sourceFromParent, originalEntityType, renamedAliases), childSourceColumns);
 
     flattenedEntityType.columns(getFilteredColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
@@ -199,14 +195,16 @@ public class EntityTypeFlatteningService {
    *
    * @param <T>            The type of the column, which must extend the Field interface.
    * @param column         The column to inject the source alias into.
-   * @param entityType     The entity type containing the column.
    * @param renamedAliases The map of old aliases to new aliases.
    * @return The column with the injected source alias.
    */
-private static <T extends Field> T injectSourceAlias(T column, EntityType entityType, Map<String, String> renamedAliases, String sourceAlias) {
+private static <T extends Field> T injectSourceAlias(T column, Map<String, String> renamedAliases, String sourceAlias) {
+  // Reverse the aliases, since the map was created in prefix order and we want to use the most recently added aliases first
+  // If we don't do this, then we might replace with "abc" before "abc.def" when handling an alias reference like ":abc.def"
+  Stream<String> aliases = StreamSupport.stream(Spliterators.spliteratorUnknownSize(new LinkedList<>(renamedAliases.keySet()).descendingIterator(), Spliterator.ORDERED), false);
   Stream.concat(
       Stream.of("sourceAlias"), // Simple hack to maintain backward compatibility by shimming the source alias in
-      entityType.getSources().stream().map(EntityTypeSource::getAlias)
+      aliases
     )
     .forEach(alias -> {
       String oldAliasReference = ':' + alias;
@@ -219,40 +217,40 @@ private static <T extends Field> T injectSourceAlias(T column, EntityType entity
         column.valueFunction(column.getValueFunction().replaceAll(oldAliasReference, newAliasReference));
       }
       if (column.getDataType() instanceof ObjectType objectType) {
-        injectSourceAliasForObjectType(objectType, entityType, renamedAliases, sourceAlias);
+        injectSourceAliasForObjectType(objectType, renamedAliases, sourceAlias);
       }
       if (column.getDataType() instanceof ArrayType arrayType) {
-        injectSourceAliasForArrayType(arrayType, entityType, renamedAliases, sourceAlias);
+        injectSourceAliasForArrayType(arrayType, renamedAliases, sourceAlias);
       }
     });
   return column;
 }
 
-  private static void injectSourceAliasForObjectType(ObjectType objectType, EntityType entityType, Map<String, String> renamedAliases, String sourceAlias) {
+  private static void injectSourceAliasForObjectType(ObjectType objectType, Map<String, String> renamedAliases, String sourceAlias) {
     List<NestedObjectProperty> convertedProperties = objectType.getProperties()
       .stream()
-      .map(nestedField -> injectSourceAlias(nestedField, entityType, renamedAliases, sourceAlias))
+      .map(nestedField -> injectSourceAlias(nestedField, renamedAliases, sourceAlias))
       .toList();
     objectType.properties(convertedProperties);
   }
 
-  private static void injectSourceAliasForArrayType(ArrayType arrayType, EntityType entityType, Map<String, String> renamedAliases, String sourceAlias) {
+  private static void injectSourceAliasForArrayType(ArrayType arrayType, Map<String, String> renamedAliases, String sourceAlias) {
     if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
-      injectSourceAliasForArrayType(nestedArrayType, entityType, renamedAliases, sourceAlias);
+      injectSourceAliasForArrayType(nestedArrayType, renamedAliases, sourceAlias);
     }
     else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
-      injectSourceAliasForObjectType(objectType, entityType, renamedAliases, sourceAlias);
+      injectSourceAliasForObjectType(objectType, renamedAliases, sourceAlias);
     }
   }
 
-  private Stream<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, EntityType flattenedEntityType, Map<String, String> renamedAliases) {
+  private Stream<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, Map<String, String> renamedAliases) {
     return originalEntityType.getColumns()
       .stream()
       .map(column -> {
         EntityTypeColumn newColumn = copyColumn(column, originalEntityType);
         // Only treat newColumn as idColumn if outer source specifies to do so
         newColumn.isIdColumn(newColumn.getIsIdColumn() == null ? null : Boolean.TRUE.equals(newColumn.getIsIdColumn()) && (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns())));
-        injectSourceAlias(newColumn, flattenedEntityType, renamedAliases, newColumn.getSourceAlias());
+        injectSourceAlias(newColumn, renamedAliases, newColumn.getSourceAlias());
         newColumn.setSourceAlias(null);
         return newColumn;
       });

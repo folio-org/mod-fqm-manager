@@ -8,6 +8,7 @@ import org.jooq.InsertOnDuplicateSetStep;
 import org.jooq.InsertValuesStep2;
 import org.jooq.Record;
 import org.jooq.Record2;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +18,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static org.folio.fqm.repository.DataRefreshRepository.CURRENCY_FIELD;
 import static org.folio.fqm.repository.DataRefreshRepository.EXCHANGE_RATE_FIELD;
 import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -41,14 +45,44 @@ class DataRefreshRepositoryTest {
   private SimpleHttpClient simpleHttpClient;
 
   @Test
+  void refreshMaterializedViewsConcurrentlyTest() {
+    String tenantId = "tenant_01";
+    List<String> viewsToRefresh = List.of("matview1", "matview2");
+    String expectedMatViewSql1 = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.matview1";
+    String expectedMatViewSql2 = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.matview2";
+    when(jooqContext.execute(anyString())).thenReturn(1);
+    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, viewsToRefresh, true);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql1);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql2);
+    assertTrue(failedRefreshes.isEmpty());
+  }
+
+  @Test
   void refreshMaterializedViewsTest() {
     String tenantId = "tenant_01";
-    String expectedItemStatusSql = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.drv_inventory_item_status";
-    String expectedLoanStatusSql = "REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_01_mod_fqm_manager.drv_circulation_loan_status";
+    List<String> viewsToRefresh = List.of("matview1", "matview2");
+    String expectedMatViewSql1 = "REFRESH MATERIALIZED VIEW tenant_01_mod_fqm_manager.matview1";
+    String expectedMatViewSql2 = "REFRESH MATERIALIZED VIEW tenant_01_mod_fqm_manager.matview2";
     when(jooqContext.execute(anyString())).thenReturn(1);
-    dataRefreshRepository.refreshMaterializedViews(tenantId);
-    verify(jooqContext, times(1)).execute(expectedItemStatusSql);
-    verify(jooqContext, times(1)).execute(expectedLoanStatusSql);
+    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, viewsToRefresh, false);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql1);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql2);
+    assertTrue(failedRefreshes.isEmpty());
+  }
+
+  @Test
+  void shouldCatchExceptionWhenRefreshingMaterializedViews() {
+    String tenantId = "tenant_01";
+    List<String> viewsToRefresh = List.of("matview1", "matview2");
+    String expectedMatViewSql1 = "REFRESH MATERIALIZED VIEW tenant_01_mod_fqm_manager.matview1";
+    String expectedMatViewSql2 = "REFRESH MATERIALIZED VIEW tenant_01_mod_fqm_manager.matview2";
+    when(jooqContext.execute(expectedMatViewSql1)).thenReturn(1);
+    when(jooqContext.execute(expectedMatViewSql2)).thenThrow(DataAccessException.class);
+    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, viewsToRefresh, false);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql1);
+    verify(jooqContext, times(1)).execute(expectedMatViewSql2);
+    assertFalse(failedRefreshes.contains("matview1"));
+    assertTrue(failedRefreshes.contains("matview2"));
   }
 
   @Test

@@ -51,8 +51,12 @@ paths:
         - materializedViews
       description: Refresh all materialized views and similar data for a tenant.
       responses:
-        '204':
+        '200':
           description: 'Data refreshed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataRefreshResponse'
         '400':
           $ref: '#/components/responses/badRequestResponse'
         '500':
@@ -98,6 +102,17 @@ components:
       $ref: schemas/EntityTypeSummaryDTO.json
     purgedQueries:
       $ref: schemas/PurgedQueries.json
+    dataRefreshResponse:
+      type: object
+      properties:
+        successfulRefresh:
+          type: array
+          items:
+            type: string
+        failedRefresh:
+          type: array
+          items:
+            type: string
 
   responses:
     badRequestResponse:

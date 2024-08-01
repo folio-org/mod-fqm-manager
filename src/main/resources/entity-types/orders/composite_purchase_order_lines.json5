@@ -99,7 +99,7 @@
   columns: [
     {
       name: 'pol_exchange_rate',
-      sourceAlias: 'pol',
+      sourceAlias: 'pol.pol',
       dataType: {
         dataType: 'numberType',
       },

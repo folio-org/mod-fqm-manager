@@ -36,7 +36,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
   public abstract String getTargetVersion();
 
   /** The entity types that got a new UUID */
-  protected abstract Map<UUID, UUID> getEntityTypeChanges();
+  public abstract Map<UUID, UUID> getEntityTypeChanges();
 
   /**
    * The fields that were renamed. Keys should use their OLD entity type ID, if applicable.
@@ -44,12 +44,12 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
    * The special key "*" on the field map can be used to apply a template to all fields. This value
    * should be a string with a %s placeholder, which will be filled in with the original field name.
    */
-  protected abstract Map<UUID, Map<String, String>> getFieldChanges();
+  public abstract Map<UUID, Map<String, String>> getFieldChanges();
 
   /**
    * Entity types that were removed or deprecated. Removed ones will automatically be mapped to the `removed` entity type.
    */
-  protected Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
+  public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
     return Map.of();
   }
 
@@ -61,7 +61,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
    *
    * The function will be given the field's name and FQL (if applicable), as a string
    */
-  protected Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
+  public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
     return Map.of();
   }
 

@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -80,6 +81,25 @@ class MigrationStrategyRepositoryTest {
 
     if (applies) {
       strategy.apply(fqlService, query);
+    }
+
+    // migration application is thoroughly tested for this shared logic
+    // these test the maps/etc all are set up correctly
+    if (strategy instanceof AbstractSimpleMigrationStrategy abstractStrategy) {
+      abstractStrategy.getEntityTypeChanges();
+      abstractStrategy.getFieldChanges();
+      abstractStrategy
+        .getEntityTypeWarnings()
+        .forEach((k, v) -> {
+          assertThat(v.apply("{}"), is(notNullValue()));
+        });
+      abstractStrategy
+        .getFieldWarnings()
+        .forEach((k, v) ->
+          v.forEach((k2, v2) -> {
+            assertThat(v2.apply("field", "{}"), is(notNullValue()));
+          })
+        );
     }
   }
 }

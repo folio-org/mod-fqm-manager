@@ -351,7 +351,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  protected Map<UUID, UUID> getEntityTypeChanges() {
+  public Map<UUID, UUID> getEntityTypeChanges() {
     return Map.ofEntries(
       Map.entry(OLD_DRV_LOAN_DETAILS, NEW_COMPOSITE_LOAN_DETAILS),
       Map.entry(OLD_SRC_CIRCULATION_LOAN_POLICY, NEW_SIMPLE_LOAN_POLICY),
@@ -378,7 +378,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  protected Map<UUID, Map<String, String>> getFieldChanges() {
+  public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.ofEntries(
       Map.entry(OLD_DRV_LOAN_DETAILS, DRV_LOAN_DETAILS_COLUMN_MAPPING),
       Map.entry(OLD_SRC_CIRCULATION_LOAN_POLICY, SRC_CIRCULATION_LOAN_POLICY_COLUMN_MAPPING),
@@ -406,7 +406,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  protected Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
+  public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
     return Map.ofEntries(
       Map.entry(
         UUID.fromString("146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2"),
@@ -436,7 +436,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  protected Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
+  public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
     return Map.ofEntries(
       Map.entry(
         OLD_DRV_LOAN_DETAILS,

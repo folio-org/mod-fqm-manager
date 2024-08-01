@@ -49,12 +49,12 @@ class AbstractSimpleMigrationStrategyTest {
     }
 
     @Override
-    protected Map<UUID, UUID> getEntityTypeChanges() {
+    public Map<UUID, UUID> getEntityTypeChanges() {
       return Map.ofEntries(Map.entry(UUID_A, UUID_B), Map.entry(UUID_C, UUID_D));
     }
 
     @Override
-    protected Map<UUID, Map<String, String>> getFieldChanges() {
+    public Map<UUID, Map<String, String>> getFieldChanges() {
       return Map.ofEntries(
         Map.entry(UUID_A, Map.of("foo", "bar")),
         Map.entry(UUID_E, Map.of("foo", "bar")),

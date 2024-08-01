@@ -6,7 +6,7 @@ import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
 @RequiredArgsConstructor
-public class RemovedEntityTypeWarning implements EntityTypeWarning {
+public class RemovedEntityWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_ENTITY;
 

@@ -19,7 +19,7 @@ import org.folio.fql.service.FqlService;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
 import org.folio.fqm.migration.warnings.QueryBreakingWarning;
-import org.folio.fqm.migration.warnings.RemovedEntityTypeWarning;
+import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.service.MigrationService;
@@ -79,7 +79,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       Optional<EntityTypeWarning> entityTypeWarning = Optional
         .ofNullable(getEntityTypeWarnings().get(src.entityTypeId()))
         .map(f -> f.apply(src.fqlQuery()));
-      if (entityTypeWarning.isPresent() && entityTypeWarning.get() instanceof RemovedEntityTypeWarning) {
+      if (entityTypeWarning.isPresent() && entityTypeWarning.get() instanceof RemovedEntityWarning) {
         return MigratableQueryInformation
           .builder()
           .entityTypeId(MigrationService.REMOVED_ENTITY_TYPE_ID)

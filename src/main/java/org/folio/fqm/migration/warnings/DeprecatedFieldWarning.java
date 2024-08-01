@@ -24,6 +24,8 @@ public class DeprecatedFieldWarning implements FieldWarning {
   public String getDescription(TranslationService translationService) {
     if (fql != null) {
       return translationService.format(
+        // we do not share the query itself here since the field is not removed from the query.
+        // the use of the `fql` parameter is just for a more informative warning, e.g. "in your query" vs "in your field list"
         LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(this.getType().toString()) + ".query",
         "field",
         field

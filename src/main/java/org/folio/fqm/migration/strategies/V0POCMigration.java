@@ -8,7 +8,7 @@ import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
 import org.folio.fqm.migration.warnings.QueryBreakingWarning;
-import org.folio.fqm.migration.warnings.RemovedEntityTypeWarning;
+import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 
 /**
  * Version 0 -> 1, original proof-of-concept changes (creation of complex entity types, etc).
@@ -410,27 +410,27 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     return Map.ofEntries(
       Map.entry(
         UUID.fromString("146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2"),
-        fql -> new RemovedEntityTypeWarning("drv_loan_status", "simple_loans", fql)
+        fql -> new RemovedEntityWarning("drv_loan_status", "simple_loans", fql)
       ),
       Map.entry(
         UUID.fromString("097a6f96-edd0-11ed-a05b-0242ac120003"),
-        fql -> new RemovedEntityTypeWarning("drv_item_callnumber_location", null, fql)
+        fql -> new RemovedEntityWarning("drv_item_callnumber_location", null, fql)
       ),
       Map.entry(
         UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0293"),
-        fql -> new RemovedEntityTypeWarning("drv_item_holdingsrecord_instance", "composite_item_details", fql)
+        fql -> new RemovedEntityWarning("drv_item_holdingsrecord_instance", "composite_item_details", fql)
       ),
       Map.entry(
         UUID.fromString("a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d"),
-        fql -> new RemovedEntityTypeWarning("drv_item_status", null, fql)
+        fql -> new RemovedEntityWarning("drv_item_status", null, fql)
       ),
       Map.entry(
         UUID.fromString("5fefec2a-9d6c-474c-8698-b0ea77186c12"),
-        fql -> new RemovedEntityTypeWarning("drv_pol_receipt_status", null, fql)
+        fql -> new RemovedEntityWarning("drv_pol_receipt_status", null, fql)
       ),
       Map.entry(
         UUID.fromString("2168014f-9316-4760-9d82-d0306d5f59e4"),
-        fql -> new RemovedEntityTypeWarning("drv_pol_payment_status", null, fql)
+        fql -> new RemovedEntityWarning("drv_pol_payment_status", null, fql)
       )
     );
   }

@@ -1,6 +1,9 @@
 # 2.0.x
 
-# 2.0.4
+## 2.0.5
+- [MODFQMMGR-381](https://folio-org.atlassian.net/browse/MODFQMMGR-381) Automatically recover when materialized view refreshes fail to initially populate
+
+## 2.0.4
 - [MODFQMMGR-289](https://folio-org.atlassian.net/browse/MODFQMMGR-289) Fix bug where custom fields were not queryable
 - [MODFQMMGR-290](https://folio-org.atlassian.net/browse/MODFQMMGR-290) Fix bug in the Instances entity type where data was incorrectly filtered out in some cases
 

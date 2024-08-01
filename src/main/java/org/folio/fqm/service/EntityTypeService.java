@@ -86,6 +86,7 @@ public class EntityTypeService {
   public EntityType getEntityTypeDefinition(UUID entityTypeId) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
     entityType.columns(entityType.getColumns().stream()
+      .filter(column -> !column.getHidden())
       .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList());
     return entityType;

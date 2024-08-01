@@ -1489,5 +1489,7 @@
   "entityType.composite_purchase_order_lines.vendor_organization": "Vendor organization",
   "entityType.composite_purchase_order_lines.assigned_to_user": "Assigned to user",
   "entityType.composite_purchase_order_lines.rates": "Exchange rate",
-  "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate"
+  "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate",
+
+  "entityType.removed": "Removed"
 }

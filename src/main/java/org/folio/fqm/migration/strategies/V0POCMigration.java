@@ -2,7 +2,13 @@ package org.folio.fqm.migration.strategies;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
+import org.folio.fqm.migration.warnings.EntityTypeWarning;
+import org.folio.fqm.migration.warnings.FieldWarning;
+import org.folio.fqm.migration.warnings.QueryBreakingWarning;
+import org.folio.fqm.migration.warnings.RemovedEntityTypeWarning;
 
 /**
  * Version 0 -> 1, original proof-of-concept changes (creation of complex entity types, etc).
@@ -16,7 +22,6 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   public static final Map<String, String> DRV_LOAN_DETAILS_COLUMN_MAPPING = Map.ofEntries(
     Map.entry("holdings_id", "holdings.id"),
     Map.entry("instance_id", "instance.id"),
-    // iffy on this. old one gets the first one of these, whereas this is array/object
     Map.entry("instance_primary_contributor", "instance.contributors"),
     Map.entry("instance_title", "instance.title"),
     Map.entry("item_barcode", "items.barcode"),
@@ -106,7 +111,6 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("id", "items.id"),
     Map.entry("instance_created_date", "instances.created_at"),
     Map.entry("instance_id", "instances.id"),
-    // same deal
     Map.entry("instance_primary_contributor", "instances.contributors"),
     Map.entry("instance_title", "instances.title"),
     Map.entry("instance_updated_date", "instances.updated_at"),
@@ -309,7 +313,6 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("user_postal_codes", "users.addresses[*]->postal_code"),
     Map.entry("user_preferred_contact_type", "users.preferred_contact_type"),
     Map.entry("user_preferred_first_name", "users.preferred_first_name"),
-    // same issue as primary contributor on the other types
     Map.entry("user_primary_address", "users.addresses"),
     Map.entry("user_regions", "users.addresses[*]->region"),
     Map.entry("user_updated_date", "users.updated_date"),
@@ -399,6 +402,63 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
       Map.entry(OLD_DRV_USER_DETAILS, DRV_USER_DETAILS_COLUMN_MAPPING),
       Map.entry(OLD_SRC_USERS_ADDRESSTYPE, SRC_USERS_ADDRESSTYPE_COLUMN_MAPPING),
       Map.entry(OLD_SRC_USERS_DEPARTMENTS, SRC_USERS_DEPARTMENTS_COLUMN_MAPPING)
+    );
+  }
+
+  @Override
+  protected Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
+    return Map.ofEntries(
+      Map.entry(
+        UUID.fromString("146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2"),
+        fql -> new RemovedEntityTypeWarning("drv_loan_status", "simple_loans", fql)
+      ),
+      Map.entry(
+        UUID.fromString("097a6f96-edd0-11ed-a05b-0242ac120003"),
+        fql -> new RemovedEntityTypeWarning("drv_item_callnumber_location", null, fql)
+      ),
+      Map.entry(
+        UUID.fromString("097a6f96-edd0-11ed-a05b-0242ac120003"),
+        fql -> new RemovedEntityTypeWarning("drv_item_holdingsrecord_instance", "composite_item_details", fql)
+      ),
+      Map.entry(
+        UUID.fromString("a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d"),
+        fql -> new RemovedEntityTypeWarning("drv_item_status", null, fql)
+      ),
+      Map.entry(
+        UUID.fromString("5fefec2a-9d6c-474c-8698-b0ea77186c12"),
+        fql -> new RemovedEntityTypeWarning("drv_pol_receipt_status", null, fql)
+      ),
+      Map.entry(
+        UUID.fromString("2168014f-9316-4760-9d82-d0306d5f59e4"),
+        fql -> new RemovedEntityTypeWarning("drv_pol_payment_status", null, fql)
+      )
+    );
+  }
+
+  @Override
+  protected Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
+    return Map.ofEntries(
+      Map.entry(
+        OLD_DRV_LOAN_DETAILS,
+        Map.of(
+          "instance_primary_contributor",
+          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
+        )
+      ),
+      Map.entry(
+        OLD_DRV_ITEM_DETAILS,
+        Map.of(
+          "instance_primary_contributor",
+          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
+        )
+      ),
+      Map.entry(
+        OLD_DRV_USER_DETAILS,
+        Map.of(
+          "user_primary_address",
+          (String field, String fql) -> new QueryBreakingWarning(field, "users.addresses", fql)
+        )
+      )
     );
   }
 }

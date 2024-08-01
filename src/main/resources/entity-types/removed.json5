@@ -1,0 +1,14 @@
+{
+  id: 'deadbeef-dead-dead-dead-deaddeadbeef',
+  name: 'removed',
+  root: true,
+  private: true,
+  sources: [
+    {
+      alias: 'not-used',
+      type: 'db',
+      target: '(select 1)',
+    },
+  ],
+  columns: [],
+}

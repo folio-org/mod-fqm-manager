@@ -33,6 +33,9 @@ public class LocalizationService {
   // the translation parameter for custom fields
   private static final String CUSTOM_FIELD_PARAMETER = "customField";
 
+  // translation logic happens in Warning classes
+  public static final String MIGRATION_WARNING_TRANSLATION_TEMPLATE = "mod-fqm-manager.migration.warning.%s";
+
   private TranslationService translationService;
 
   public EntityType localizeEntityType(EntityType entityType) {
@@ -69,7 +72,7 @@ public class LocalizationService {
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
       String formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource);
-      return  translationService.format(formattedKey) + " — ";
+      return translationService.format(formattedKey) + " — ";
     } else {
       return "";
     }

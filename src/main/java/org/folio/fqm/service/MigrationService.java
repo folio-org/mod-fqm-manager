@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 public class MigrationService {
 
   public static final String VERSION_KEY = "_version";
+
+  public static final UUID REMOVED_ENTITY_TYPE_ID = UUID.fromString("deadbeef-dead-dead-dead-deaddeadbeef");
 
   protected static final String CURRENT_VERSION = "1";
   // TODO: replace this with current version in the future?

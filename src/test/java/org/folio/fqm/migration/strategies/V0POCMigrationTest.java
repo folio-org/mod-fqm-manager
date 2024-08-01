@@ -74,7 +74,6 @@ class V0POCMigrationTest extends TestTemplate {
               "items.effective_call_number",
               "effective_call_number.id",
               "effective_call_number.name",
-              "items.hrid",
               "items.status_name",
               "items.copy_number",
               "items.barcode",

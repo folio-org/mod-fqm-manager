@@ -8,7 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
+import org.folio.fqm.migration.warnings.EntityTypeWarning;
+import org.folio.fqm.migration.warnings.RemovedEntityWarning;
+import org.folio.fqm.service.MigrationService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -30,6 +35,11 @@ class AbstractSimpleMigrationStrategyTest {
   static final UUID UUID_F = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
   // 0 has no changes
   static final UUID UUID_0 = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+  // deprecated ET
+  static final UUID UUID_0A = UUID.fromString("00000000-0000-0000-0000-aaaaaaaaaaaa");
+  // removed ET
+  static final UUID UUID_0B = UUID.fromString("00000000-0000-0000-0000-bbbbbbbbbbbb");
 
   static class Impl extends AbstractSimpleMigrationStrategy {
 
@@ -59,6 +69,14 @@ class AbstractSimpleMigrationStrategyTest {
         Map.entry(UUID_A, Map.of("foo", "bar")),
         Map.entry(UUID_E, Map.of("foo", "bar")),
         Map.entry(UUID_F, Map.of("*", "bar.%s"))
+      );
+    }
+
+    @Override
+    public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
+      return Map.ofEntries(
+        Map.entry(UUID_0A, fql -> new DeprecatedEntityWarning("0a", null)),
+        Map.entry(UUID_0B, fql -> new RemovedEntityWarning("0b", null, fql))
       );
     }
   }
@@ -211,6 +229,34 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_0,
           "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
+        )
+      ),
+      // Deprecated ET
+      Arguments.of(
+        new MigratableQueryInformation(
+          UUID_0A,
+          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          List.of("field1", "foo", "field2")
+        ),
+        new MigratableQueryInformation(
+          UUID_0A,
+          "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
+          List.of("field1", "foo", "field2"),
+          List.of(new DeprecatedEntityWarning("0a", null))
+        )
+      ),
+      // Removed ET
+      Arguments.of(
+        new MigratableQueryInformation(
+          UUID_0B,
+          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          List.of("field1", "foo", "field2")
+        ),
+        new MigratableQueryInformation(
+          MigrationService.REMOVED_ENTITY_TYPE_ID,
+          "{\"_version\":\"target\"}",
+          List.of(),
+          List.of(new RemovedEntityWarning("0b", null, "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}"))
         )
       )
     );

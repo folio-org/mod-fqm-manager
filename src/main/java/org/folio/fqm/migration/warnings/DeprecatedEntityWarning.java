@@ -26,7 +26,7 @@ public class DeprecatedEntityWarning implements EntityTypeWarning {
       return translationService.format(
         LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(this.getType().toString()) +
         ".withAlternative",
-        "entityType",
+        "name",
         entityType,
         "alternative",
         alternative
@@ -35,7 +35,7 @@ public class DeprecatedEntityWarning implements EntityTypeWarning {
       return translationService.format(
         LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(this.getType().toString()) +
         ".withoutAlternative",
-        "entityType",
+        "name",
         entityType
       );
     }

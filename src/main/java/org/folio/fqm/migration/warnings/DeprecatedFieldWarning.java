@@ -27,13 +27,13 @@ public class DeprecatedFieldWarning implements FieldWarning {
         // we do not share the query itself here since the field is not removed from the query.
         // the use of the `fql` parameter is just for a more informative warning, e.g. "in your query" vs "in your field list"
         LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(this.getType().toString()) + ".query",
-        "field",
+        "name",
         field
       );
     } else {
       return translationService.format(
         LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(this.getType().toString()) + ".field",
-        "field",
+        "name",
         field
       );
     }

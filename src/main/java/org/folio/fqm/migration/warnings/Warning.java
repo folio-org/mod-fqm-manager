@@ -1,11 +1,41 @@
 package org.folio.fqm.migration.warnings;
 
+import javax.annotation.CheckForNull;
 import lombok.RequiredArgsConstructor;
+import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
 public interface Warning {
   WarningType getType();
   String getDescription(TranslationService translationService);
+
+  public static String getDescriptionByAlternativeAndFql(
+    TranslationService translationService,
+    WarningType type,
+    String name,
+    String fql,
+    @CheckForNull String alternative
+  ) {
+    if (alternative != null) {
+      return translationService.format(
+        LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(type.toString()) + ".withAlternative",
+        "name",
+        name,
+        "alternative",
+        alternative,
+        "fql",
+        fql
+      );
+    } else {
+      return translationService.format(
+        LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(type.toString()) + ".withoutAlternative",
+        "name",
+        name,
+        "fql",
+        fql
+      );
+    }
+  }
 
   @RequiredArgsConstructor
   public enum WarningType {

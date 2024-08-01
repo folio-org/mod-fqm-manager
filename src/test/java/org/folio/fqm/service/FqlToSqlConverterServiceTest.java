@@ -44,6 +44,7 @@ class FqlToSqlConverterServiceTest {
   void setup() {
     fqlToSqlConverter = new FqlToSqlConverterService(new FqlService());
     entityType = new EntityType()
+      .sources(List.of())
       .columns(
         List.of(
           new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),

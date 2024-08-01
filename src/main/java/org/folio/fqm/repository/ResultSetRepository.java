@@ -22,11 +22,8 @@ import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.*;
 import org.jooq.Record;
-import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,10 +123,10 @@ public class ResultSetRepository {
     String idColumnName = entityType
       .getColumns()
       .stream()
-      .filter(EntityTypeColumn::getIsIdColumn)
+      .filter(entityTypeColumn -> Boolean.TRUE.equals(entityTypeColumn.getIsIdColumn()))
       .findFirst()
-      .orElseThrow()
-      .getName();
+      .map(entityTypeColumn -> '"' + entityTypeColumn.getName() + '"')
+      .orElseThrow();
     var sortCriteria = hasIdColumn(entityType) ? field(idColumnName) : DSL.noField(); // TODO: new changes break sorting
     String fromClause = entityTypeFlatteningService.getJoinClause(entityType);
     var result = jooqContext.select(fieldsToSelect)
@@ -153,12 +150,12 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
   }
 
   private boolean hasIdColumn(EntityType entityType) {
     return entityType.getColumns().stream()
-      .anyMatch(col -> col.getIsIdColumn());
+      .anyMatch(col -> Boolean.TRUE.equals(col.getIsIdColumn()));
   }
 
   private List<Map<String, Object>> recordToMap(Result<Record> result) {

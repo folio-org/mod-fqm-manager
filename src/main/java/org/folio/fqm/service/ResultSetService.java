@@ -33,7 +33,7 @@ public class ResultSetService {
   }
 
   private List<Map<String, Object>> getSortedContents(UUID entityTypeId, List<List<String>> contentIds, List<Map<String, Object>> unsortedResults) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId);
     List<String> idColumnNames = IdColumnUtils.getIdColumnNames(entityType);
     Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> {

@@ -1,9 +1,11 @@
 package org.folio.fqm.migration.warnings;
 
 import javax.annotation.CheckForNull;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
+@RequiredArgsConstructor
 public class RemovedEntityTypeWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_ENTITY;
@@ -15,12 +17,6 @@ public class RemovedEntityTypeWarning implements EntityTypeWarning {
 
   @CheckForNull
   private final String fql;
-
-  public RemovedEntityTypeWarning(String entityType, String alternative, String fql) {
-    this.entityType = entityType;
-    this.alternative = alternative;
-    this.fql = fql;
-  }
 
   @Override
   public WarningType getType() {

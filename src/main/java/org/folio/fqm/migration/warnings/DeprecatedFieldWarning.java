@@ -1,9 +1,11 @@
 package org.folio.fqm.migration.warnings;
 
 import javax.annotation.CheckForNull;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
+@RequiredArgsConstructor
 public class DeprecatedFieldWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.DEPRECATED_FIELD;
@@ -12,11 +14,6 @@ public class DeprecatedFieldWarning implements FieldWarning {
 
   @CheckForNull
   private final String fql;
-
-  public DeprecatedFieldWarning(String field, String fql) {
-    this.field = field;
-    this.fql = fql;
-  }
 
   @Override
   public WarningType getType() {

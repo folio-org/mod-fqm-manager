@@ -1,19 +1,19 @@
 package org.folio.fqm.migration.warnings;
 
+import javax.annotation.CheckForNull;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
+@RequiredArgsConstructor
 public class DeprecatedEntityWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.DEPRECATED_ENTITY;
 
   private final String entityType;
-  private final String alternative;
 
-  public DeprecatedEntityWarning(String entityType, String alternative) {
-    this.entityType = entityType;
-    this.alternative = alternative;
-  }
+  @CheckForNull
+  private final String alternative;
 
   @Override
   public WarningType getType() {

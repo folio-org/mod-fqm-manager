@@ -44,7 +44,7 @@ class ResultSetRepositoryArrayTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");

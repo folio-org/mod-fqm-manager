@@ -15,7 +15,7 @@
       id: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
       join: {
         type: 'left join',
-        joinTo: 'instance',
+        joinTo: 'instance.inst',
         condition: ":this.id = :that.instanceStatusId"
       }
     },
@@ -25,7 +25,7 @@
       id: '073b554a-5b5c-4552-a51c-01448a1643b0', // simple_mode_of_issuance
       join: {
         type: 'left join',
-        joinTo: 'instance',
+        joinTo: 'instance.inst',
         condition: ":this.id = :that.modeOfIssuanceId"
       }
     },
@@ -35,7 +35,7 @@
       id: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
       join: {
         type: 'left join',
-        joinTo: 'instance',
+        joinTo: 'instance.inst',
         condition: ":this.id = :that.instanceTypeId"
       }
     }

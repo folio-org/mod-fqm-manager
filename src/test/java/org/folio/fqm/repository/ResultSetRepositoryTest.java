@@ -76,7 +76,7 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
@@ -98,7 +98,7 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");
@@ -135,7 +135,7 @@ class ResultSetRepositoryTest {
     int limit = 100;
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, true))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE))
       .thenReturn("TEST_ENTITY_TYPE");

@@ -104,11 +104,10 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       ObjectNode fql = (ObjectNode) objectMapper.readTree(result.fqlQuery());
       fql.set(MigrationService.VERSION_KEY, objectMapper.valueToTree(this.getTargetVersion()));
 
-      Map<String, String> fieldChanges = this.getFieldChanges().get(src.entityTypeId());
-      if (fieldChanges != null) {
-        Map<String, BiFunction<String, String, FieldWarning>> fieldWarnings =
-          this.getFieldWarnings().getOrDefault(src.entityTypeId(), Map.of());
-
+      Map<String, String> fieldChanges = this.getFieldChanges().getOrDefault(src.entityTypeId(), Map.of());
+      Map<String, BiFunction<String, String, FieldWarning>> fieldWarnings =
+        this.getFieldWarnings().getOrDefault(src.entityTypeId(), Map.of());
+      if (!fieldChanges.isEmpty() || !fieldWarnings.isEmpty()) {
         // map query fields
         fql = migrateFqlTree(fieldChanges, fieldWarnings, fql, warnings);
 
@@ -121,7 +120,9 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
               .map(f -> {
                 if (fieldWarnings.containsKey(f)) {
                   Warning warning = fieldWarnings.get(f).apply(f, null);
-                  warnings.add(warning);
+                  if (!(warning instanceof QueryBreakingWarning)) {
+                    warnings.add(warning);
+                  }
                   if (warning instanceof RemovedFieldWarning) {
                     return null;
                   }
@@ -167,9 +168,13 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
         if ("$and".equals(entry.getKey())) {
           ArrayNode resultContents = new ObjectMapper().createArrayNode();
           ((ArrayNode) entry.getValue()).elements()
-            .forEachRemaining(node ->
-              resultContents.add(migrateFqlTree(fieldChanges, fieldWarnings, (ObjectNode) node, warnings))
-            );
+            .forEachRemaining(node -> {
+              ObjectNode innerResult = migrateFqlTree(fieldChanges, fieldWarnings, (ObjectNode) node, warnings);
+              // handle removed fields
+              if (!innerResult.isEmpty()) {
+                resultContents.add(innerResult);
+              }
+            });
           result.set("$and", resultContents);
         } else {
           if (fieldWarnings.containsKey(entry.getKey())) {

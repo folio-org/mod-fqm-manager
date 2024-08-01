@@ -1,9 +1,13 @@
 package org.folio.fqm.migration.warnings;
 
 import javax.annotation.CheckForNull;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.folio.spring.i18n.service.TranslationService;
 
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class RemovedFieldWarning implements FieldWarning {
 

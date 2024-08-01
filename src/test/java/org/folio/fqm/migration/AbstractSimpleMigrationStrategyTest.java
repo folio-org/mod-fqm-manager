@@ -1,6 +1,11 @@
 package org.folio.fqm.migration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,12 +13,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
+import org.folio.fqm.migration.warnings.DeprecatedFieldWarning;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
+import org.folio.fqm.migration.warnings.FieldWarning;
+import org.folio.fqm.migration.warnings.QueryBreakingWarning;
 import org.folio.fqm.migration.warnings.RemovedEntityWarning;
+import org.folio.fqm.migration.warnings.RemovedFieldWarning;
+import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.service.MigrationService;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,6 +53,8 @@ class AbstractSimpleMigrationStrategyTest {
   static final UUID UUID_0A = UUID.fromString("00000000-0000-0000-0000-aaaaaaaaaaaa");
   // removed ET
   static final UUID UUID_0B = UUID.fromString("00000000-0000-0000-0000-bbbbbbbbbbbb");
+  // field warnings
+  static final UUID UUID_0C = UUID.fromString("00000000-0000-0000-0000-cccccccccccc");
 
   static class Impl extends AbstractSimpleMigrationStrategy {
 
@@ -77,6 +92,20 @@ class AbstractSimpleMigrationStrategyTest {
       return Map.ofEntries(
         Map.entry(UUID_0A, fql -> new DeprecatedEntityWarning("0a", null)),
         Map.entry(UUID_0B, fql -> new RemovedEntityWarning("0b", null, fql))
+      );
+    }
+
+    @Override
+    public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
+      return Map.ofEntries(
+        Map.entry(
+          UUID_0C,
+          Map.ofEntries(
+            Map.entry("deprecated", DeprecatedFieldWarning::new),
+            Map.entry("query_breaking", (field, fql) -> new QueryBreakingWarning(field, "alt", fql)),
+            Map.entry("removed", (field, fql) -> new RemovedFieldWarning(field, "alt", fql))
+          )
+        )
       );
     }
   }
@@ -258,6 +287,57 @@ class AbstractSimpleMigrationStrategyTest {
           List.of(),
           List.of(new RemovedEntityWarning("0b", null, "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}"))
         )
+      ),
+      // field-level warnings
+      Arguments.of(
+        new MigratableQueryInformation(
+          UUID_0C,
+          """
+          {"_version":"source","$and":[
+            {"unrelated": {"$eq": true}},
+            {"removed": {"$lte": 3}},
+            {"deprecated": {"$lte": 2}},
+            {"query_breaking": {"$ne": 2}}
+          ]}
+          """,
+          List.of("unrelated", "removed", "deprecated", "query_breaking")
+        ),
+        new MigratableQueryInformation(
+          UUID_0C,
+          """
+          {"_version":"target","$and":[
+            {"unrelated": {"$eq": true}},
+            {"deprecated": {"$lte": 2}}
+          ]}
+          """,
+          List.of("unrelated", "deprecated", "query_breaking"),
+          List.of(
+            new DeprecatedFieldWarning("deprecated", "{\n  \"$lte\" : 2\n}"),
+            new DeprecatedFieldWarning("deprecated", null),
+            new QueryBreakingWarning("query_breaking", "alt", "{\n  \"$ne\" : 2\n}"),
+            new RemovedFieldWarning("removed", "alt", "{\n  \"$lte\" : 3\n}"),
+            new RemovedFieldWarning("removed", "alt", null)
+          )
+        )
+      ),
+      // removed top-level query field
+      Arguments.of(
+        new MigratableQueryInformation(
+          UUID_0C,
+          """
+          {
+            "_version":"source",
+            "query_breaking": {"$ne": 2}
+          }
+          """,
+          List.of("query_breaking")
+        ),
+        new MigratableQueryInformation(
+          UUID_0C,
+          "{\"_version\":\"target\"}",
+          List.of("query_breaking"),
+          List.of(new QueryBreakingWarning("query_breaking", "alt", "{\n  \"$ne\" : 2\n}"))
+        )
       )
     );
   }
@@ -272,5 +352,9 @@ class AbstractSimpleMigrationStrategyTest {
     // deserialize to help prevent whitespace/etc breaking the test
     assertThat(objectMapper.readTree(result.fqlQuery()), is(objectMapper.readTree(expected.fqlQuery())));
     assertThat(result.fields(), is(expected.fields()));
+    for (Warning warning : result.warnings()) {
+      assertThat(warning.toString() + " is expected", expected.warnings().stream().anyMatch(warning::equals), is(true));
+    }
+    assertThat(result.warnings(), hasSize(expected.warnings().size()));
   }
 }

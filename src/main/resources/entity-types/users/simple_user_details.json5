@@ -3,9 +3,6 @@
   name: 'simple_user_details',
   root: false,
   private: true,
-  customFieldEntityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // This entity type
-  sourceView: 'src_user_custom_fields',
-  sourceViewExtractor: ":user.jsonb -> 'customFields'",
   sources: [
     {
       type: 'db',

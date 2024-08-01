@@ -69,8 +69,7 @@ public class EntityTypeFlatteningService {
     }
 
     Set<String> finalPermissions = new HashSet<>(originalEntityType.getRequiredPermissions());
-    Stream.Builder<Stream<EntityTypeColumn>> columns = Stream.<Stream<EntityTypeColumn>>builder()
-      .add(copyColumns(sourceFromParent, originalEntityType, renamedAliases));
+    Stream.Builder<Stream<EntityTypeColumn>> columns = Stream.<Stream<EntityTypeColumn>>builder();
 
     for (EntityTypeSource source : originalEntityType.getSources()) {
       if (source.getType().equals("db")) {
@@ -92,12 +91,17 @@ public class EntityTypeFlatteningService {
         );
         // Copy each sub-source into the flattened entity type
         copySubSources(source, flattenedSourceDefinition, renamedAliases, aliasPrefix)
-          .forEach(flattenedEntityType::addSourcesItem);
+          .forEach(subSource -> {
+            flattenedEntityType.addSourcesItem(subSource);
+            renamedAliases.put(aliasPrefix + subSource.getAlias(), subSource.getAlias());
+          });
       }
     }
 
-    Stream<EntityTypeColumn> finalColumns = columns.build().flatMap(Function.identity());
-    flattenedEntityType.columns(getFilteredColumns(finalColumns).toList());
+    Stream<EntityTypeColumn> childSourceColumns = columns.build().flatMap(Function.identity());
+    Stream<EntityTypeColumn> allColumns = Stream.concat(copyColumns(sourceFromParent, originalEntityType, flattenedEntityType, renamedAliases), childSourceColumns);
+
+    flattenedEntityType.columns(getFilteredColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
     return localizationService.localizeEntityType(flattenedEntityType);
   }
@@ -241,14 +245,14 @@ private static <T extends Field> T injectSourceAlias(T column, EntityType entity
     }
   }
 
-  private Stream<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, Map<String, String> renamedAliases) {
+  private Stream<EntityTypeColumn> copyColumns(EntityTypeSource sourceFromParent, EntityType originalEntityType, EntityType flattenedEntityType, Map<String, String> renamedAliases) {
     return originalEntityType.getColumns()
       .stream()
       .map(column -> {
         EntityTypeColumn newColumn = copyColumn(column, originalEntityType);
         // Only treat newColumn as idColumn if outer source specifies to do so
         newColumn.isIdColumn(newColumn.getIsIdColumn() == null ? null : Boolean.TRUE.equals(newColumn.getIsIdColumn()) && (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns())));
-        injectSourceAlias(newColumn, originalEntityType, renamedAliases, newColumn.getSourceAlias());
+        injectSourceAlias(newColumn, flattenedEntityType, renamedAliases, newColumn.getSourceAlias());
         newColumn.setSourceAlias(null);
         return newColumn;
       });

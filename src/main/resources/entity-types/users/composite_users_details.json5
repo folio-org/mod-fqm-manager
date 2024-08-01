@@ -2,6 +2,9 @@
   id: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf',
   name: 'composite_user_details',
   private: false,
+  customFieldEntityTypeId: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf', // This entity type
+  sourceView: 'src_user_custom_fields',
+  sourceViewExtractor: ":users.user.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'users',

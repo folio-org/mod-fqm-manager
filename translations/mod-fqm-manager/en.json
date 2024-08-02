@@ -1491,5 +1491,16 @@
   "entityType.composite_purchase_order_lines.rates": "Exchange rate",
   "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate",
 
-  "entityType.removed": "Removed"
+  "entityType.removed": "Removed",
+
+  "migration.warning.DEPRECATED_ENTITY.withAlternative": "Record type {name} is deprecated and will no longer be available in a future release. You may be able to use {alternative} instead.",
+  "migration.warning.DEPRECATED_ENTITY.withoutAlternative": "Record type {name} is deprecated and will no longer be available in a future release.",
+  "migration.warning.DEPRECATED_FIELD.field": "Field {name} is deprecated and will no longer be available in a future release.",
+  "migration.warning.DEPRECATED_FIELD.query": "Field {name}, used in your query, is deprecated and will no longer be available in a future release.",
+  "migration.warning.QUERY_BREAKING.withAlternative": "Field {name} is no longer supported in your query. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
+  "migration.warning.QUERY_BREAKING.withoutAlternative": "Field {name} is no longer supported in your query. For reference, your original query was {fql}.",
+  "migration.warning.REMOVED_ENTITY.withAlternative": "Record type {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
+  "migration.warning.REMOVED_ENTITY.withoutAlternative": "Record type {name} is no longer available. For reference, your original query was {fql}.",
+  "migration.warning.REMOVED_FIELD.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
+  "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}."
 }

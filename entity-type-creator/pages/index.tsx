@@ -2,6 +2,7 @@ import CheckValidity from '@/components/CheckValidity';
 import DBInspector from '@/components/DBInspector';
 import EntityTypeManager from '@/components/EntityTypeManager';
 import FqmConnector from '@/components/FqmConnector';
+import MigrationHelper from '@/components/MigrationHelper';
 import ModuleInstaller from '@/components/ModuleInstaller';
 import PostgresConnector from '@/components/PostgresConnector';
 import QueryTool from '@/components/QueryTool';
@@ -75,7 +76,7 @@ export default function EntryPoint() {
             <Tabs
               value={selectedTab}
               onChange={(_e, n) => {
-                if (n === 5) {
+                if (n === 6) {
                   setExpandedBottom((e) => !e);
                 } else {
                   setSelectedTab(n);
@@ -88,6 +89,7 @@ export default function EntryPoint() {
               <Tab label="Check Validity" />
               <Tab label="Query Tool" />
               <Tab label="DB Inspector" />
+              <Tab label="Migration Helper" />
               <Tab label={expandedBottom ? 'Collapse' : 'Expand'} />
             </Tabs>
 
@@ -103,6 +105,9 @@ export default function EntryPoint() {
               </Box>
               <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
                 <DBInspector socket={socket} schema={schema} entityType={currentEntityType} />
+              </Box>
+              <Box sx={{ display: selectedTab === 5 ? 'block' : 'none', p: 2 }}>
+                <MigrationHelper />
               </Box>
             </Box>
           </Box>

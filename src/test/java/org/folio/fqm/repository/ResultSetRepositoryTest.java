@@ -89,7 +89,7 @@ class ResultSetRepositoryTest {
     UUID entityTypeId = UUID.randomUUID();
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
     // Since we are only asking for "id" and "key1" fields, create expected list without key2 included
@@ -111,7 +111,7 @@ class ResultSetRepositoryTest {
     UUID entityTypeId = UUID.randomUUID();
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, fields, afterId, limit);
@@ -123,7 +123,7 @@ class ResultSetRepositoryTest {
     UUID entityTypeId = UUID.randomUUID();
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fql, null, afterId, limit);
     assertEquals(expectedList, actualList);
@@ -133,7 +133,7 @@ class ResultSetRepositoryTest {
   void shouldRunSynchronousQueryAndHandleNullAfterIdParameter() {
     UUID entityTypeId = UUID.randomUUID();
     int limit = 100;
-    Fql fql = new Fql(new EqualsCondition(new FqlField("key1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);

@@ -38,7 +38,7 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldGetIdsInBatch() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
     EntityType entityType = new EntityType();
@@ -67,7 +67,7 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldConsumeButNotThrowError() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
     EntityType entityType = new EntityType();
@@ -106,7 +106,7 @@ class QueryProcessorServiceTest {
       """;
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql expectedFql = new Fql(new EqualsCondition(new FqlField("status"), "value1"));
+    Fql expectedFql = new Fql("", new EqualsCondition(new FqlField("status"), "value1"));
     List<String> fields = List.of("field1", "field2");
     List<Map<String, Object>> expectedContent = List.of(
       Map.of("field1", "value1", "field2", "value2"),

@@ -69,7 +69,7 @@ class IdStreamerTest {
 
   @Test
   void shouldFetchIdStreamForFql() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("field1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     List<List<String>> actualIds = new ArrayList<>();

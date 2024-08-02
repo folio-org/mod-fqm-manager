@@ -71,6 +71,12 @@
           "modulePermissions": ["perms.users.get"]
         },
         {
+          "methods": ["GET"],
+          "pathPattern": "/fqm/version",
+          "permissionsRequired": ["fqm.version.get"],
+          "modulePermissions": ["perms.users.get"]
+        },
+        {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
           "permissionsRequired": ["fqm.query.async.results.get"],
@@ -171,6 +177,12 @@
       "visible":  true
     },
     {
+      "permissionName": "fqm.version.get",
+      "displayName": "FQM - Get version of fqm",
+      "description": "Get the version of fqm",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.materializedViews.post",
       "displayName": "FQM - Refresh materialized views",
       "description": "Refresh FQM materialized views",
@@ -191,7 +203,8 @@
         "fqm.query.async.post",
         "fqm.query.async.results.get",
         "fqm.query.async.delete",
-        "fqm.query.sync.get"
+        "fqm.query.sync.get",
+        "fqm.version.get"
       ],
       "visible": true
     }

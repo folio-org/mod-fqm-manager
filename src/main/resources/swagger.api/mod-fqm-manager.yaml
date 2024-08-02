@@ -72,7 +72,7 @@ paths:
         '200':
           description: 'Version of the fqm'
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
         '400':

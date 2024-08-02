@@ -38,41 +38,36 @@ class ResultSetServiceTest {
     List<Map<String, Object>> reversedContent = new ArrayList<>(Lists.reverse(expectedResult));
     expectedResult.add(Map.of("id", deletedContentId.toString(), "_deleted", true));
     List<String> fields = List.of("id", "key1", "key2");
+    List<String> tenantIds = List.of("tenant_01");
     List<List<String>> listIds = new ArrayList<>();
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(
+        List.of(
+          new EntityTypeColumn().name("id").isIdColumn(true),
+          new EntityTypeColumn().name("key1"),
+          new EntityTypeColumn().name("key2")
+        )
+      )
+      .sources(List.of(
+          new EntityTypeSource()
+            .type("db")
+            .alias("source1")
+            .target("target1")
+        )
+      );
     expectedResult.forEach(content ->
       listIds.add(List.of(content.get(ID_FIELD_NAME).toString()))
     );
-
-    when(
-      entityTypeFlatteningService.getFlattenedEntityType(entityTypeId)
-    )
-      .thenReturn(
-        new EntityType()
-          .name("test_entity")
-          .id(entityTypeId.toString())
-          .columns(
-            List.of(
-              new EntityTypeColumn().name("id").isIdColumn(true),
-              new EntityTypeColumn().name("key1"),
-              new EntityTypeColumn().name("key2")
-            )
-          )
-          .sources(List.of(
-            new EntityTypeSource()
-              .type("db")
-              .alias("source1")
-              .target("target1")
-          ))
-      );
-    when(
-      resultSetRepository.getResultSet(entityTypeId, fields, listIds)
-    )
-      .thenReturn(reversedContent);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01")).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(reversedContent);
     List<Map<String, Object>> actualResult = service.getResultSet(
       entityTypeId,
       fields,
-      listIds
-    );
+      listIds,
+      tenantIds);
     assertEquals(expectedResult, actualResult);
   }
 }

@@ -48,18 +48,19 @@ public class EntityTypeRepository {
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
 
-  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    return getEntityTypeDefinitions(Collections.singleton(entityTypeId)).findFirst();
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId, String tenantId) {
+    return getEntityTypeDefinitions(Collections.singleton(entityTypeId), tenantId).findFirst();
   }
 
-  public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds) {
+  public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
+    String tableName = tenantId == null ? TABLE_NAME : tenantId + "_mod_fqm_manager." + TABLE_NAME;
     log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
     Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
     Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
     return readerJooqContext
       .select(definitionField)
-      .from(table(TABLE_NAME))
+      .from(table(tableName))
       .where(entityTypeIdCondition)
       .fetch(definitionField)
       .stream()
@@ -99,8 +100,8 @@ public class EntityTypeRepository {
 
   private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId, EntityType entityType) {
     log.info("Getting columns for entity type ID: {}", entityTypeId);
-    EntityType entityTypeDefinition = entityTypeId.toString().equals(entityType.getId()) ? entityType : getEntityTypeDefinition(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityType entityTypeDefinition = entityTypeId.toString().equals(entityType.getId()) ? entityType :
+      getEntityTypeDefinition(entityTypeId, null).orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 

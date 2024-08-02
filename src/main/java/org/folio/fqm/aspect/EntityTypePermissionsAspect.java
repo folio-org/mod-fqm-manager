@@ -81,7 +81,7 @@ public class EntityTypePermissionsAspect {
   }
 
   private EntityType getEntityTypeFromId(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId)
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, null)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 

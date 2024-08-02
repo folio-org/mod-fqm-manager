@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -30,7 +31,8 @@ class ResultSetRepositoryArrayTest {
   void setup() {
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
-    entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);    this.repo = new ResultSetRepository(context, entityTypeFlatteningService);
+    entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class));
   }
 
   @Test
@@ -44,11 +46,15 @@ class ResultSetRepositoryArrayTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE))
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, null))
       .thenReturn("TEST_ENTITY_TYPE");
-    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+      .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, "tenant_01"))
+      .thenReturn("TEST_ENTITY_TYPE");
+    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds, List.of("tenant_01"));
     assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
     assertEquals(expectedList.get(0).get("arrayField"), actualList.get(0).get("arrayField"));
   }

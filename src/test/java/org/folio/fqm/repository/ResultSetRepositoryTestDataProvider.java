@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
@@ -40,6 +41,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
       new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key1"),
       new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key2")
     ))
+    .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE")
     .sources(
@@ -49,7 +51,15 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
           .alias("source1")
           .target("target1")
       )
+    )
+    .defaultSort(
+      List.of(
+        new EntityTypeDefaultSort()
+          .direction(EntityTypeDefaultSort.DirectionEnum.ASC)
+          .columnName("key1")
+      )
     );
+
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
   private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE .*.ID IN .*";

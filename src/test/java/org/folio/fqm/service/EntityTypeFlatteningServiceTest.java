@@ -358,9 +358,9 @@ class EntityTypeFlatteningServiceTest {
       ))
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -517,7 +517,7 @@ class EntityTypeFlatteningServiceTest {
               .joinTo("source2")
               .condition(":this.field5 = :that.field3")
           )
-          .useIdColumns(true),  // TODO: think about if this is right
+          .useIdColumns(true),
         new EntityTypeSource()
           .type("db")
           .alias("simple_entity_type1.source1")
@@ -541,11 +541,11 @@ class EntityTypeFlatteningServiceTest {
       ))
       .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -747,12 +747,12 @@ class EntityTypeFlatteningServiceTest {
       ))
       .requiredPermissions(List.of("complex_permission2", "simple_permission1", "complex_permission1", "simple_permission2"));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
-    when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID);
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
 
@@ -760,13 +760,12 @@ class EntityTypeFlatteningServiceTest {
   void shouldGetJoinClause() {
     String expectedJoinClause = "source2_target \"source2\" LEFT JOIN source3_target \"source3\" ON \"source3\".field5 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type1.source1\" ON \"simple_entity_type1.source1\".field1 = \"source2\".field3 LEFT JOIN source1_target \"simple_entity_type2.source1\" ON \"simple_entity_type2.source1\".field1 = \"source2\".field4";
 
-
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID);
-    String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
+    String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
     assertEquals(expectedJoinClause, actualJoinClause);
 
   }
@@ -775,12 +774,11 @@ class EntityTypeFlatteningServiceTest {
   void shouldReorderSourcesToMakeValidJoinClause() {
     String expectedJoinClause = "source1_target \"source1\" JOIN source2_target \"source2\" ON \"source2\".field = \"source1\".field JOIN source3_target \"source3\" ON \"source3\".field = \"source2\".field JOIN source7_target \"source7\" ON \"source7\".field = \"source3\".field JOIN source4_target \"source4\" ON \"source4\".field = \"source3\".field JOIN source6_target \"source6\" ON \"source6\".field = \"source1\".field JOIN source5_target \"source5\" ON \"source5\".field = \"source4\".field";
 
-
-    when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID);
-    String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, null);
+    String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
     assertEquals(expectedJoinClause, actualJoinClause);
   }
 
@@ -864,10 +862,11 @@ class EntityTypeFlatteningServiceTest {
       ))
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
-    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn("{'centralTenantId': 'consortium'}");
-    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID);
+
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
 

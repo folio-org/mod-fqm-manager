@@ -27,10 +27,11 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
 
   public static final List<UUID> TEST_CONTENT_IDS = List.of(UUID.randomUUID(), UUID.randomUUID());
   public static final EntityType TEST_ENTITY_TYPE_DEFINITION = new EntityType()
-    .id(UUID.randomUUID().toString())
+//    .id(UUID.randomUUID().toString())
+    .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .columns(
       List.of(
-        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).valueGetter(":sourceAlias." + EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias." + EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
         new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias.field1").sourceAlias("source1")
       )
     )
@@ -43,8 +44,29 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
       .alias("source1")
       .target("target1"))
     );
+  public static final EntityType TEST_GROUP_BY_ENTITY_TYPE_DEFINITION = new EntityType()
+    .id(UUID.randomUUID().toString())
+    .columns(
+      List.of(
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias." + EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+        new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias.field1").sourceAlias("source1")
+      )
+    )
+    .name("TEST_GROUP_BY_ENTITY_TYPE")
+    .groupByFields(
+      List.of(
+        "id", "field1"
+      )
+    )
+    .fromClause("TEST_GROUP_BY_ENTITY_TYPE")
+    .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source1")
+        .target("target1"))
+    );
 
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID IN .*";
+  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*ENTITY_TYPE_DEFINITION WHERE ID IN .*";
   private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
   private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";

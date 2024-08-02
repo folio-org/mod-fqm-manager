@@ -37,7 +37,7 @@ spring:
         format_sql: true
         jdbc:
           batch_size: 50
-    show-sql: false
+    show-sql: true
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.xml
@@ -97,4 +97,4 @@ management:
       enabled: false
     readinessstate:
       enabled: true
-debug: false
+debug: true

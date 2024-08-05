@@ -236,6 +236,7 @@
       },
       isIdColumn: false,
       queryable: false,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

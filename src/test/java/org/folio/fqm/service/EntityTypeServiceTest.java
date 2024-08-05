@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -50,6 +52,32 @@ class EntityTypeServiceTest {
 
   @InjectMocks
   private EntityTypeService entityTypeService;
+
+  @Test
+  void shouldGetEntityTypeDefinitionIncludingHidden() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
+      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
+      new EntityTypeColumn().name("C").labelAlias("C").hidden(true)
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(columns);
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
+    List<EntityTypeColumn> expectedColumns = columns.stream()
+      .sorted(nullsLast(comparing(EntityTypeColumn::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+      .toList();
+
+    assertEquals(expectedColumns, result.getColumns(), "Columns should include hidden ones and be sorted");
+
+    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null);
+    verifyNoMoreInteractions(entityTypeFlatteningService);
+  }
+
 
   @Test
   void shouldGetEntityTypeSummaryForValidIds() {
@@ -103,6 +131,7 @@ class EntityTypeServiceTest {
 
     verifyNoMoreInteractions(repo, localizationService);
   }
+
 
   @Test
   void testEntityTypeSummaryIncludesInaccessible() {
@@ -322,7 +351,7 @@ class EntityTypeServiceTest {
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
-      .getEntityTypeDefinition(entityTypeId);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualDefinition);
   }

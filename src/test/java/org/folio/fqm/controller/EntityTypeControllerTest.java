@@ -51,7 +51,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(mockDefinition);
+    when(entityTypeService.getEntityTypeDefinition(id,false)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -65,6 +65,27 @@ class EntityTypeControllerTest {
       .andExpect(jsonPath("$.columns[0].dataType.dataType", is(col.getDataType().getDataType())))
       .andExpect(jsonPath("$.columns[0].labelAlias", is(col.getLabelAlias())))
       .andExpect(jsonPath("$.columns[0].visibleByDefault", is(col.getVisibleByDefault())));
+  }
+  @Test
+  void shouldReturnEntityTypeDefinitionWithHiddenColumn() throws Exception {
+    UUID id = UUID.randomUUID();
+    String derivedTableName = "derived_table_01";
+    EntityTypeColumn col = getHiddenEntityTypeColumn();
+    EntityType mockDefinition = getEntityType(col);
+    when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
+    when(entityTypeService.getEntityTypeDefinition(id,true)).thenReturn(mockDefinition);
+    RequestBuilder builder = MockMvcRequestBuilders
+      .get(GET_DEFINITION_URL, id)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .queryParam("includeHidden", String.valueOf(true));
+    mockMvc
+      .perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name", is(derivedTableName)))
+      .andExpect(jsonPath("$.labelAlias", is(mockDefinition.getLabelAlias())))
+      .andExpect(jsonPath("$.columns[0].name", is(col.getName())))
+      .andExpect(jsonPath("$.columns[0].hidden", is(col.getHidden())));
   }
 
   @Test
@@ -258,5 +279,14 @@ class EntityTypeControllerTest {
       .dataType(new StringType().dataType("stringType"))
       .labelAlias("derived_column_alias_01")
       .visibleByDefault(false);
+  }
+
+  private static EntityTypeColumn getHiddenEntityTypeColumn() {
+    return new EntityTypeColumn()
+      .name("derived_column_name_01")
+      .dataType(new StringType().dataType("stringType"))
+      .labelAlias("derived_column_alias_01")
+      .visibleByDefault(false)
+      .hidden(false);
   }
 }

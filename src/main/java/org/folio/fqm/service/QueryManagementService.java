@@ -64,7 +64,7 @@ public class QueryManagementService {
    */
   public QueryIdentifier runFqlQueryAsync(SubmitQuery submitQuery) {
     EntityType entityType = entityTypeService
-      .getEntityTypeDefinition(submitQuery.getEntityTypeId());
+      .getEntityTypeDefinition(submitQuery.getEntityTypeId(), true);
     List<String> fields = CollectionUtils.isEmpty(submitQuery.getFields()) ?
       getFieldsFromEntityType(entityType) : new ArrayList<>(submitQuery.getFields());
     List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);
@@ -101,7 +101,7 @@ public class QueryManagementService {
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
     }
-    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId));
+    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId, true));
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
         fields.add(idColumn);
@@ -166,7 +166,7 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId);
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType, fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);
@@ -178,13 +178,13 @@ public class QueryManagementService {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getEntityTypeDefinition(query.entityTypeId());
+    entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
-    EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId))
+    EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId, true))
       .forEach(colName -> {
         if (!fields.contains(colName)) {
           fields.add(colName);

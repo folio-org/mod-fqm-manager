@@ -82,11 +82,14 @@ public class EntityTypeService {
    * Returns the definition of a given entity type.
    *
    * @param entityTypeId the ID to search for
+   * @param includeHidden Indicates whether the hidden column should be displayed.
+   *                      If set to true, the hidden column will be included in the output
    * @return the entity type definition if found, empty otherwise
    */
-  public EntityType getEntityTypeDefinition(UUID entityTypeId) {
+  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
     entityType.columns(entityType.getColumns().stream()
+      .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
       .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList());
     return entityType;

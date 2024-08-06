@@ -129,6 +129,7 @@
         dataType: 'stringType',
       },
       queryable: false,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

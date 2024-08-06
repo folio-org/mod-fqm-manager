@@ -131,6 +131,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],

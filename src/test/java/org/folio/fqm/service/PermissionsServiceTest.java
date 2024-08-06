@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.folio.fqm.client.ModPermissionsClient;
-import org.folio.fqm.client.ModPermissionsClient.UserPermissions;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -24,6 +23,7 @@ class PermissionsServiceTest {
   private final ModPermissionsClient modPermissionsClient = mock(ModPermissionsClient.class);
   private final EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
   private final PermissionsService permissionsService = new PermissionsService(context, modPermissionsClient, entityTypeFlatteningService);
+  private static final String TENANT_ID = "tenant_01";
 
   @BeforeEach
   void setUp() {
@@ -33,7 +33,8 @@ class PermissionsServiceTest {
   void setUpMocks(String... permissions) {
     var userId = UUID.randomUUID();
     when(context.getUserId()).thenReturn(userId);
-    when(modPermissionsClient.getPermissionsForUser(userId.toString())).thenReturn(new UserPermissions(List.of(permissions), permissions.length));
+    when(context.getTenantId()).thenReturn(TENANT_ID);
+    when(modPermissionsClient.getPermissionsForUser(TENANT_ID, userId.toString())).thenReturn(new ModPermissionsClient.UserPermissions(List.of(permissions), permissions.length));
   }
 
   private EntityType getTestEntityType() {
@@ -46,17 +47,18 @@ class PermissionsServiceTest {
   @Test
   void thePermissionsServiceShouldUseTheModPermissionsClientByDefault() {
     setUpMocks("permission1", "permission2");
-    assertEquals(2, permissionsService.getUserPermissions().size());
+    assertEquals(2, permissionsService.getUserPermissions(TENANT_ID).size());
   }
 
   @Test
   void userWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
     setUpMocks(); // User has no permissions
     EntityType entityType = getTestEntityType();
-    assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "No permissions are required");
+    when(context.getTenantId()).thenReturn(TENANT_ID);
+    assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(null, entityType, false), "No permissions are required");
 
     entityType.requiredPermissions(List.of("permission1"));
-    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "The does not have the required permission");
+    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissions(null, entityType, false), "The does not have the required permission");
   }
 
   @Test
@@ -73,7 +75,7 @@ class PermissionsServiceTest {
       .forEach((permissions, message) -> {
         EntityType entityType = getTestEntityType().requiredPermissions(permissions);
         // Then the user should be able to perform the operation
-        assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), message);
+        assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false), message);
       });
   }
 
@@ -83,10 +85,13 @@ class PermissionsServiceTest {
     EntityType entityType = getTestEntityType();
 
     entityType.requiredPermissions(List.of("permission3"));
-    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "The user does not have the required permission");
+    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false), "The user does not have the required permission");
 
     entityType.requiredPermissions(List.of("permission1", "permission3"));
-    MissingPermissionsException exception = assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType), "The only has some of the required permissions");
+    MissingPermissionsException exception = assertThrows(
+      MissingPermissionsException.class,
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false)
+    );
 
     assertEquals(Set.of("permission3"), exception.getMissingPermissions());
     assertTrue(exception.getMessage().contains("permission3"));
@@ -94,9 +99,27 @@ class PermissionsServiceTest {
   }
 
   @Test
+  void shouldCheckFqmPermissionsIfRequested() {
+    setUpMocks("permission1", "permission2", "fqm.entityTypes.item.get");
+    EntityType entityType = getTestEntityType();
+    entityType.requiredPermissions(List.of("permission1"));
+    Set<String> expectedMissingPermissions = Set.of(
+      "fqm.query.async.results.get",
+      "fqm.query.async.post"
+    );
+
+    MissingPermissionsException exception = assertThrows(
+      MissingPermissionsException.class,
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, true)
+    );
+
+    assertEquals(expectedMissingPermissions, exception.getMissingPermissions());
+  }
+
+  @Test
   void eurekaSupportIsNotImplementedYet() {
     permissionsService.isEureka = true; // Force the service to use mod-roles-keycloak
     setUpMocks();
-    assertThrows(NotImplementedException.class, permissionsService::getUserPermissions);
+    assertThrows(NotImplementedException.class, () -> permissionsService.getUserPermissions(TENANT_ID));
   }
 }

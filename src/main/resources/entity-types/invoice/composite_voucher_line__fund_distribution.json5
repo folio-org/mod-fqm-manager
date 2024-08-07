@@ -15,7 +15,7 @@
       target: "jsonb_array_elements(voucher_line.jsonb -> 'fundDistributions')",
       join: {
         type: 'CROSS JOIN LATERAL',
-        joinTo: 'voucher_line',
+        joinTo: 'voucher_line.voucher_lines',
       },
     },
   ],
@@ -94,7 +94,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'voucher_line.id',
+      columnName: '"voucher_line.voucher_lines".id',
       direction: 'ASC',
     },
     {

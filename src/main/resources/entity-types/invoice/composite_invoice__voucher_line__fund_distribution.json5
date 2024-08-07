@@ -25,7 +25,7 @@
       alias: 'fund_type',
       join: {
         type: 'LEFT JOIN',
-        joinTo: 'fund',
+        joinTo: 'fund.fund',
         condition: "(:that.jsonb ->> 'fundTypeId')::uuid = :this.id",
       },
     },
@@ -52,7 +52,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'voucher_line__fund_distribution.voucher_line.id',
+      columnName: '"voucher_line".id',
       direction: 'ASC',
     },
   ],

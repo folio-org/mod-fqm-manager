@@ -25,7 +25,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'users.id',
+      columnName: '"users.user".id',
       direction: 'ASC',
     },
   ],

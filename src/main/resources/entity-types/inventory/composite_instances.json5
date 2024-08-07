@@ -42,7 +42,7 @@
   ],
   defaultSort: [
     {
-      columnName: '"instance.id"',
+      columnName: '"instance.inst".id',
       direction: 'ASC',
     },
   ],

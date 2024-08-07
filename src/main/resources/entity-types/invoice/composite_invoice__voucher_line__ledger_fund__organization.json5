@@ -54,11 +54,11 @@
   ],
   defaultSort: [
     {
-      columnName: 'ledger_fund.fund.name',
+      columnName: '"ledger_fund.fund".name',
       direction: 'ASC',
     },
     {
-      columnName: 'voucher_line.external_account_number',
+      columnName: '"voucher_line.voucher_lines".external_account_number',
       direction: 'ASC',
     },
   ],

@@ -63,7 +63,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'po_instance.organization.vendor_name',
+      columnName: '"po_instance.organization".vendor_name',
       direction: 'ASC',
     },
   ],

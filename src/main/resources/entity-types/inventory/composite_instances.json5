@@ -16,7 +16,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance.inst',
-        condition: ":this.id = :that.instancestatusid"
+        condition:"(:that.instancestatusid)::uuid = :this.id",
       }
     },
     {

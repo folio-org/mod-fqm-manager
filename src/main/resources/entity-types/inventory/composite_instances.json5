@@ -16,7 +16,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance.inst',
-        condition:"(:that.instancestatusid)::uuid = :this.id",
+        condition:":that.instancestatusid = :this.id",
       }
     },
     {
@@ -26,7 +26,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance.inst',
-        condition: ":this.id = :that.modeOfIssuanceId"
+        condition:":that.modeOfIssuanceId = :this.id",
       }
     },
     {
@@ -36,7 +36,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance.inst',
-        condition: ":this.id = :that.instanceTypeId"
+        condition:":that.instanceTypeId = :this.id"
       }
     }
   ],

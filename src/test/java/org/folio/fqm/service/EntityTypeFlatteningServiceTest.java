@@ -127,6 +127,7 @@ class EntityTypeFlatteningServiceTest {
     ))
     .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
+
   private static final EntityType COMPLEX_ENTITY_TYPE = new EntityType()
     .name("complex_entity_type")
     .id(COMPLEX_ENTITY_TYPE_ID.toString())

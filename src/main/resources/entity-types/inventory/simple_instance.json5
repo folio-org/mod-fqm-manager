@@ -30,6 +30,17 @@
       valueGetter: ':sourceAlias.id',
     },
     {
+      name: 'status_id',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.instancestatusid",
+    },
+    {
       name: 'created_by',
       sourceAlias: 'inst',
       dataType: {
@@ -935,50 +946,6 @@
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
         columnName: 'statistical_code',
       },
-    },
-    {
-      name: 'status_id',
-      sourceAlias: 'inst',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'statusId'",
-    },
-    {
-      name: 'status',
-      sourceAlias: 'inst',
-      dataType: {
-        dataType: 'stringType',
-      },
-      idColumnName: 'status_id',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'name'",
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      source: {
-        columnName: 'status',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
-      valueSourceApi: {
-        path: 'instance-statuses',
-        valueJsonPath: '$.instanceStatuses.*.id',
-        labelJsonPath: '$.instanceStatuses.*.name',
-      },
-    },
-    {
-      name: 'status_updated_date',
-      sourceAlias: 'inst',
-      dataType: {
-        dataType: 'dateType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
     },
     {
       name: 'tags',

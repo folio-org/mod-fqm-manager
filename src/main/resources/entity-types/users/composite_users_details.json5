@@ -10,6 +10,7 @@
       alias: 'users',
       type: 'entity-type',
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      essentialOnly: true,
       useIdColumns: true,
     },
     {

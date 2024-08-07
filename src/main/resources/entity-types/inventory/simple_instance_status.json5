@@ -23,6 +23,15 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
+      },
+      valueSourceApi: {
+        path: 'instance-statuses',
+        valueJsonPath: '$.instanceStatuses.*.id',
+        labelJsonPath: '$.instanceStatuses.*.id',
+      }
     },
     {
       name: 'name',
@@ -33,10 +42,17 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        columnName: 'name',
+        entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
+      },
+      valueSourceApi: {
+        path: 'instance-statuses',
+        valueJsonPath: '$.instanceStatuses.*.name',
+        labelJsonPath: '$.instanceStatuses.*.name',
+      }
     },
     {
       name: 'code',
@@ -48,7 +64,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
+        ${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'code'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
     },

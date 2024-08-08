@@ -34,7 +34,7 @@
       }
     },
     {
-      name: 'name',
+      name: 'term',
       sourceAlias: 'instance_status',
       dataType: {
         dataType: 'stringType',

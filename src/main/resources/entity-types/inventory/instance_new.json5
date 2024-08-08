@@ -1,0 +1,137 @@
+{
+  id: '26c1f02f-beaa-487e-a409-01a3d839913e',
+  name: 'instance_new',
+  root: false,
+  private: true,
+  sources: [
+    {
+      alias: 'instance',
+      type: 'db',
+      target: 'src_inventory_instance',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'instancestatusid',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.instancestatusid',
+    },
+    {
+      name: 'instancetypeid',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.instancetypeid',
+    },
+    {
+      name: 'modeofissuanceid',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.modeofissuanceid',
+    },
+    {
+      name: 'hrid',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'hrid'",
+    },
+    {
+      name: 'title',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'title'",
+    },
+    {
+      name: 'source',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'version',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'status_id',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'statusId'",
+    },
+    {
+      name: 'instance_type_id',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'instanceTypeId'",
+    },
+    {
+      name: 'mode_of_issuance_id',
+      sourceAlias: 'instance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'modeOfIssuanceId'",
+    },
+  ],
+}

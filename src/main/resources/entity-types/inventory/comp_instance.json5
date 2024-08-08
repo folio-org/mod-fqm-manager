@@ -1,0 +1,25 @@
+{
+  id: '024a6b3f-cdc5-4a4b-bbaf-a8ad12197ee5',
+  name: 'comp_instance',
+  root: false,
+  private: false,
+  sources: [
+    {
+      alias: 'instances',
+      type: 'entity-type',
+      id: '26c1f02f-beaa-487e-a409-01a3d839913e',
+      useIdColumns: true,
+    },
+    {
+      alias: 'inst_status',
+      type: 'entity-type',
+      id: '79420138-76a7-4c31-a920-32d32dfb0423',
+      join: {
+        condition: "(:that.jsonb ->> 'statusId')::uuid = :this.id",
+        joinTo: 'instances.instance',
+        type: 'left join',
+      },
+      useIdColumns: false,
+    },
+  ],
+}

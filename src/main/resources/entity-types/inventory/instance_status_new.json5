@@ -1,0 +1,65 @@
+{
+  id: '79420138-76a7-4c31-a920-32d32dfb0423',
+  name: 'Instance_status_example',
+  root: false,
+  private: false,
+  sources: [
+    {
+      alias: 'inst_stat',
+      type: 'db',
+      target: 'src_inventory_instance_status',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'inst_stat',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'code',
+      sourceAlias: 'inst_stat',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'inst_stat',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: '79420138-76a7-4c31-a920-32d32dfb0423',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        labelJsonPath: '$.instanceStatuses.*.name',
+        valueJsonPath: '$.instanceStatuses.*.name',
+        path: 'instance-statuses',
+      },
+    },
+  ],
+}

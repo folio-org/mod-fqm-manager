@@ -93,28 +93,28 @@ public class EntityTypePermissionsAspect {
   @SuppressWarnings("unchecked") // If the types are wrong, we want to fail loudly
   private <T> Object validatePermissions(ProceedingJoinPoint joinPoint, Function<T, EntityType> entityTypeConverter) throws Throwable {
     // 1. Retrieve the annotated method and annotation details.
-    MethodSignature methodSignature = ((MethodSignature) joinPoint.getSignature());
-    EntityTypePermissionsRequired annotation = methodSignature.getMethod().getAnnotation(EntityTypePermissionsRequired.class);
-    String entityTypeParamName = annotation.parameterName();
-    Class<?> entityTypeParamType = annotation.value();
-
-    // 2. Find the parameter with the entity type (as described by the annotation).
-    int paramIndex = indexCache.computeIfAbsent(methodSignature,
-      signature -> {
-        if (annotation.parameterName() != null && !annotation.parameterName().isEmpty())
-          return Arrays.asList(signature.getParameterNames()).indexOf(entityTypeParamName);
-        return Arrays.asList(signature.getParameterTypes()).indexOf(entityTypeParamType);
-      });
-    if (paramIndex == -1) {
-      throw new EntityTypeParameterNotFoundException();
-    }
-
-    // 3. Get the actual parameter value and use it to retrieve the entity type.
-    T param = (T) joinPoint.getArgs()[paramIndex]; // Don't bother checking before casting, since if this is broken, we want it to break very loudly
-    EntityType entityType = entityTypeConverter.apply(param);
-
-    // 4. Validate the permissions. An exception will be thrown if the user does not have the necessary permissions.
-    permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType);
+//    MethodSignature methodSignature = ((MethodSignature) joinPoint.getSignature());
+//    EntityTypePermissionsRequired annotation = methodSignature.getMethod().getAnnotation(EntityTypePermissionsRequired.class);
+//    String entityTypeParamName = annotation.parameterName();
+//    Class<?> entityTypeParamType = annotation.value();
+//
+//    // 2. Find the parameter with the entity type (as described by the annotation).
+//    int paramIndex = indexCache.computeIfAbsent(methodSignature,
+//      signature -> {
+//        if (annotation.parameterName() != null && !annotation.parameterName().isEmpty())
+//          return Arrays.asList(signature.getParameterNames()).indexOf(entityTypeParamName);
+//        return Arrays.asList(signature.getParameterTypes()).indexOf(entityTypeParamType);
+//      });
+//    if (paramIndex == -1) {
+//      throw new EntityTypeParameterNotFoundException();
+//    }
+//
+//    // 3. Get the actual parameter value and use it to retrieve the entity type.
+////    T param = (T) joinPoint.getArgs()[paramIndex]; // Don't bother checking before casting, since if this is broken, we want it to break very loudly
+////    EntityType entityType = entityTypeConverter.apply(param);
+////
+////    // 4. Validate the permissions. An exception will be thrown if the user does not have the necessary permissions.
+//    permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType);
 
     // 5. Proceed with the original method call.
     return joinPoint.proceed();

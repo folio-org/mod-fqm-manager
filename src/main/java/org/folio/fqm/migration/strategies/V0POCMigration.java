@@ -93,7 +93,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("instance_statistical_code_ids", "instance.statistical_code_ids"),
     Map.entry("instance_statistical_codes", "instance.statistical_code_names"),
     Map.entry("instance_status_id", "instance.status_id"),
-    Map.entry("instance_status", "instance.status"),
+    Map.entry("instance_status", "inst_stat.term"),
     Map.entry("mode_of_issuance_id", "mode_of_issuance.id"),
     Map.entry("mode_of_issuance", "mode_of_issuance.name"),
     Map.entry("instance_source", "instance.source"),

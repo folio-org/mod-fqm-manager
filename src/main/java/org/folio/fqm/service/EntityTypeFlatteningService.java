@@ -81,6 +81,7 @@ public class EntityTypeFlatteningService {
         columns.add(
           flattenedSourceDefinition.getColumns()
             .stream()
+            .filter(col -> !Boolean.TRUE.equals(source.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
             .map(col -> col
               .name(aliasPrefix + source.getAlias() + '.' + col.getName())
               .idColumnName(col.getIdColumnName() == null ? null : aliasPrefix + source.getAlias() + '.' + col.getIdColumnName())
@@ -279,6 +280,7 @@ private static <T extends Field> T injectSourceAlias(T column, Map<String, Strin
         .condition(source.getJoin().getCondition())
         .joinTo(renameAliases ? renamedAliases.get(source.getJoin().getJoinTo()) : source.getJoin().getJoinTo())
       )
+      .essentialOnly(source.getEssentialOnly())
       .useIdColumns(sourceFromParent == null || Boolean.TRUE.equals(source.getUseIdColumns()));
   }
 

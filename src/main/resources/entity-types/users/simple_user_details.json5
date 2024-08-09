@@ -24,6 +24,7 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -35,6 +36,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'active'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'active'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
@@ -116,6 +118,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'lastName'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
@@ -129,6 +132,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'firstName'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
@@ -410,6 +414,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'expirationDate'",
       filterValueGetter: '"left"(:sourceAlias.jsonb ->> \'expirationDate\'::text, 600)',
       valueFunction: '"left"(:value, 600)'
@@ -423,6 +428,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'barcode'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'

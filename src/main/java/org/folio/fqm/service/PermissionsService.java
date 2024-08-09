@@ -32,18 +32,19 @@ public class PermissionsService {
   private final ModPermissionsClient modPermissionsClient;
   private final Cache<TenantUserPair, Set<String>> cache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private static final List<String> CROSS_TENANT_FQM_PERMISSIONS = List.of(
+    "fqm.entityTypes.item.get",
+    "fqm.query.async.results.get",
+    "fqm.query.async.post"
+  );
 
   public Set<String> getUserPermissions() {
-    TenantUserPair key = new TenantUserPair(context.getTenantId(), context.getUserId());
-    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(k.userId()));
+    return getUserPermissions(context.getTenantId());
   }
 
-  private Set<String> getUserPermissionsFromModPermissions(UUID userId) {
-    return modPermissionsClient.getPermissionsForUser(userId.toString()).getPermissionNames();
-  }
-
-  private Set<String> getUserPermissionsFromRolesKeycloak(UUID userId) {
-    throw new NotImplementedException("Not implemented yet");
+  public Set<String> getUserPermissions(String tenantId) {
+    TenantUserPair key = new TenantUserPair(tenantId, context.getUserId());
+    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(tenantId, k.userId()));
   }
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
@@ -51,11 +52,23 @@ public class PermissionsService {
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
   }
 
-  public void verifyUserHasNecessaryPermissionsForEntityType(EntityType entityType) {
+  public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
+    verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, checkFqmPermissions);
+  }
+
+  public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, boolean checkFqmPermissions) {
     Set<String> requiredPermissions = getRequiredPermissions(entityType);
-    Set<String> userPermissions = getUserPermissions();
+    Set<String> userPermissions = getUserPermissions(tenantId);
 
     Set<String> missingPermissions = new HashSet<>();
+    if (checkFqmPermissions) {
+      for (String requiredPermission : CROSS_TENANT_FQM_PERMISSIONS) {
+        if (!userPermissions.contains(requiredPermission)) {
+          missingPermissions.add(requiredPermission);
+        }
+      }
+    }
+
     for (String requiredPermission : requiredPermissions) {
       if (!userPermissions.contains(requiredPermission)) {
         missingPermissions.add(requiredPermission);
@@ -68,5 +81,16 @@ public class PermissionsService {
     }
   }
 
-  private record TenantUserPair(String tenant, UUID userId) {}
+  private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
+    return modPermissionsClient
+      .getPermissionsForUser(tenantId, userId.toString())
+      .getPermissionNames();
+  }
+
+  private Set<String> getUserPermissionsFromRolesKeycloak(UUID userId) {
+    throw new NotImplementedException("Not implemented yet");
+  }
+
+  private record TenantUserPair(String tenant, UUID userId) {
+  }
 }

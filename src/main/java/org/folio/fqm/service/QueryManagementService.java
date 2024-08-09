@@ -49,7 +49,7 @@ public class QueryManagementService {
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
   private final CrossTenantQueryService crossTenantQueryService;
-  private final SimpleHttpClient ecsClient;
+
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
   @Setter

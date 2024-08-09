@@ -114,7 +114,7 @@ public class EntityTypePermissionsAspect {
     EntityType entityType = entityTypeConverter.apply(param);
 
     // 4. Validate the permissions. An exception will be thrown if the user does not have the necessary permissions.
-    permissionsService.verifyUserHasNecessaryPermissionsForEntityType(entityType);
+    permissionsService.verifyUserHasNecessaryPermissions(entityType, false);
 
     // 5. Proceed with the original method call.
     return joinPoint.proceed();

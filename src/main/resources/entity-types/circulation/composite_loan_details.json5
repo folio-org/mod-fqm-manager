@@ -62,6 +62,7 @@
       alias: 'users',
       type: 'entity-type',
       id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'loans.loan',

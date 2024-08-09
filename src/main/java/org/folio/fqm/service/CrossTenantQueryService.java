@@ -5,8 +5,8 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.SimpleHttpClient;
-import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -22,22 +22,16 @@ public class CrossTenantQueryService {
 
   private final SimpleHttpClient ecsClient;
   private final FolioExecutionContext executionContext;
-  private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final PermissionsService permissionsService;
 
-  public List<String> getTenantsToQuery(UUID entityTypeId) {
-    String centralTenantId;
-    String consortiumId;
-    // List of shadow users associated with this user and the ECS tenants that those users exist in
-    List<Map<String, String>> userTenantMaps;
-    // Below if-block is necessary to limit cross-tenant querying to instance entity type until we have a way to
-    // configure cross-tenant queries by entity type. This can be removed after completion of MODFQMMGR-335.
-    if (!entityTypeId.equals(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"))) {
+  public List<String> getTenantsToQuery(EntityType entityType) {
+    if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
-
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
-
+    // List of shadow users associated with this user and the ECS tenants that those users exist in
+    List<Map<String, String>> userTenantMaps;
+    String centralTenantId;
+    String consortiumId;
     try {
       String configurationJson = ecsClient.get("consortia-configuration", Map.of());
       centralTenantId = JsonPath

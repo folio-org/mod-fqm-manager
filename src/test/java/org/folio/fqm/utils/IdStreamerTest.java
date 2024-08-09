@@ -68,7 +68,7 @@ class IdStreamerTest {
     ecsClient = mock(SimpleHttpClient.class);
     executionContext = mock(FolioExecutionContext.class);
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
-    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, entityTypeFlatteningService, null);
+    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, null);
     this.idStreamer =
       new IdStreamer(
         context,

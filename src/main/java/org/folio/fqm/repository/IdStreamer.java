@@ -54,7 +54,7 @@ public class IdStreamer {
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(UUID.fromString(entityType.getId()));
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
     return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery);
   }
 

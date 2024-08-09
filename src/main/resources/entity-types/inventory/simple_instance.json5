@@ -1110,6 +1110,8 @@
       source: {
         columnName: 'source_tenant_id',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        type: 'fqm',
+        name: 'source_tenant_id',
       },
       ecsOnly: true,
     },
@@ -1127,6 +1129,8 @@
       source: {
         columnName: 'tenant_id',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        type: 'fqm',
+        name: 'tenant_id'
       },
       ecsOnly: true,
     },

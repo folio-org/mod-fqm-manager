@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.service.FqlValidationService;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
@@ -101,13 +100,14 @@ public class QueryManagementService {
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
     }
-    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId, true));
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
+    List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
         fields.add(idColumn);
       }
     }
-    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityTypeId, query, fields, afterId, limit);
+    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, afterId, limit);
     return new ResultsetPage().content(queryResults);
   }
 
@@ -184,20 +184,22 @@ public class QueryManagementService {
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
-    EntityTypeUtils.getIdColumnNames(entityTypeService.getEntityTypeDefinition(entityTypeId, true))
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
+    EntityTypeUtils.getIdColumnNames(entityType)
       .forEach(colName -> {
         if (!fields.contains(colName)) {
           fields.add(colName);
         }
       });
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
     return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
     if (includeResults) {
+      EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
-      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
+      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
       return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery);
     }
     return List.of();

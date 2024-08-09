@@ -2,6 +2,7 @@
   id: '6b08439b-4f8e-4468-8046-ea620f5cfb74',
   name: 'composite_instances',
   private: false,
+  crossTenantQueriesEnabled: true,
   sources: [
     {
       alias: 'instance',

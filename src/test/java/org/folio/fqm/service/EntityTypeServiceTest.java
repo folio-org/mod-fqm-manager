@@ -120,7 +120,7 @@ class EntityTypeServiceTest {
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
       new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
       new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
-    when(permissionsService.getUserPermissions(null)).thenReturn(Set.of("perm2"));
+    when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
@@ -149,7 +149,7 @@ class EntityTypeServiceTest {
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
       new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
       new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
-    when(permissionsService.getUserPermissions(null)).thenReturn(Set.of("perm2"));
+    when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");

@@ -13,7 +13,6 @@ import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +47,6 @@ public class EntityTypeService {
   private final SimpleHttpClient fieldValueClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
-  private final FolioExecutionContext executionContext;
 
   /**
    * Returns the list of all entity types.
@@ -57,7 +55,7 @@ public class EntityTypeService {
    */
   @Transactional(readOnly = true)
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible) {
-    Set<String> userPermissions = permissionsService.getUserPermissions(executionContext.getTenantId());
+    Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
       .getEntityTypeDefinitions(entityTypeIds, null)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getPrivate()))

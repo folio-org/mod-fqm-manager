@@ -13,6 +13,7 @@ import org.folio.fqm.service.PermissionsService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -114,7 +115,7 @@ public class EntityTypePermissionsAspect {
     EntityType entityType = entityTypeConverter.apply(param);
 
     // 4. Validate the permissions. An exception will be thrown if the user does not have the necessary permissions.
-    permissionsService.verifyUserHasNecessaryPermissions(null, entityType, false);
+    permissionsService.verifyUserHasNecessaryPermissions(entityType, false);
 
     // 5. Proceed with the original method call.
     return joinPoint.proceed();

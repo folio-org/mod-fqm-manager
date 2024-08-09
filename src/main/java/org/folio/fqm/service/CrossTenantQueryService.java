@@ -11,7 +11,6 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +28,8 @@ public class CrossTenantQueryService {
   public List<String> getTenantsToQuery(UUID entityTypeId) {
     String centralTenantId;
     String consortiumId;
-    List<HashMap<String, String>> userTenantHashMaps;
+    // List of ECS tenants and shadow users corresponding to this user in those tenants
+    List<Map<String, String>> userTenantMaps;
     // Below if-block is necessary to limit cross-tenant querying to instance entity type until we have a way to
     // configure cross-tenant queries by entity type. This can be removed after completion of MODFQMMGR-335.
     if (!entityTypeId.equals(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"))) {
@@ -57,7 +57,7 @@ public class CrossTenantQueryService {
         "consortia/" + consortiumId + "/user-tenants",
         Map.of("userId", userId.toString())
       );
-      userTenantHashMaps = JsonPath
+      userTenantMaps = JsonPath
         .parse(userTenantResponse)
         .read("$.userTenants", List.class);
     } catch (Exception e) {
@@ -67,7 +67,7 @@ public class CrossTenantQueryService {
 
     List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
-    for (var userMap : userTenantHashMaps) {
+    for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
       String userId = userMap.get("userId");
       if (!tenantId.equals(centralTenantId)) {

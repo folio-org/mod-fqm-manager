@@ -55,10 +55,10 @@ class PermissionsServiceTest {
     setUpMocks(); // User has no permissions
     EntityType entityType = getTestEntityType();
     when(context.getTenantId()).thenReturn(TENANT_ID);
-    assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(null, entityType, false), "No permissions are required");
+    assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false), "No permissions are required");
 
     entityType.requiredPermissions(List.of("permission1"));
-    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissions(null, entityType, false), "The does not have the required permission");
+    assertThrows(MissingPermissionsException.class, () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false), "The does not have the required permission");
   }
 
   @Test

@@ -38,10 +38,17 @@ public class PermissionsService {
     "fqm.query.async.post"
   );
 
+  public Set<String> getUserPermissions() {
+    return getUserPermissions(context.getTenantId());
+  }
+
   public Set<String> getUserPermissions(String tenantId) {
-    String tenantIdForQuery = tenantId != null ? tenantId : context.getTenantId();
-    TenantUserPair key = new TenantUserPair(tenantIdForQuery, context.getUserId());
-    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(tenantIdForQuery, k.userId()));
+    TenantUserPair key = new TenantUserPair(tenantId, context.getUserId());
+    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(tenantId, k.userId()));
+  }
+
+  public String myMethod(String argument) {
+    return argument != null ? argument : "NOT FOUND";
   }
 
   private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
@@ -57,6 +64,10 @@ public class PermissionsService {
   public Set<String> getRequiredPermissions(EntityType entityType) {
     EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), null);
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
+  }
+
+  public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
+    verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, checkFqmPermissions);
   }
 
   public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, boolean checkFqmPermissions) {

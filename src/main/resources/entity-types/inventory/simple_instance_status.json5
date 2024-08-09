@@ -23,6 +23,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      essential: true,
       source: {
         entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
         columnName: 'id',
@@ -39,6 +40,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
@@ -66,6 +68,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      essential: true,
       filterValueGetter: "lower(\
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
       )",
@@ -78,6 +81,7 @@
         dataType: 'stringType',
       },
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },

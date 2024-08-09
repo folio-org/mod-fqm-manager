@@ -39,6 +39,7 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
+          "permissionsDesired": ["consortia.user-tenants.collection.get"],
           "modulePermissions": ["perms.users.get"]
         },
         {
@@ -56,12 +57,14 @@
           "methods": ["GET"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.sync.get"],
+          "permissionsDesired": ["consortia.user-tenants.collection.get"],
           "modulePermissions": ["perms.users.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.results.get"],
+          "permissionsDesired": ["consortia.user-tenants.collection.get"],
           "modulePermissions": ["perms.users.get"]
         },
         {
@@ -86,6 +89,7 @@
           "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"],
+          "permissionsDesired": ["consortia.user-tenants.collection.get"],
           "modulePermissions": ["perms.users.get"]
         },
         {

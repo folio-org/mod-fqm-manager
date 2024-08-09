@@ -107,7 +107,7 @@ class EntityTypePermissionsAspectTest {
     when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), eq(null))).thenReturn(Optional.of(entityType));
     ProceedingJoinPoint joinPoint = mockJoinPoint(this.getClass().getDeclaredMethod(methodName, paramTypes), paramsConverter.apply(entityType));
     methodHandler.accept(aspect, joinPoint);
-    verify(permissionsService).verifyUserHasNecessaryPermissionsForEntityType(any(EntityType.class));
+    verify(permissionsService).verifyUserHasNecessaryPermissions(any(EntityType.class), eq(false));
     verify(joinPoint).proceed();
   }
 

@@ -47,9 +47,6 @@ class IdStreamerTest {
   private LocalizationService localizationService;
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
-  private CrossTenantQueryService crossTenantQueryService;
-
-  EntityTypeFlatteningService entityTypeFlatteningService;
 
   @BeforeEach
   void setup() {
@@ -70,8 +67,8 @@ class IdStreamerTest {
     localizationService = mock(LocalizationService.class);
     ecsClient = mock(SimpleHttpClient.class);
     executionContext = mock(FolioExecutionContext.class);
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
-    crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext);
+    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
+    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, entityTypeFlatteningService, null);
     this.idStreamer =
       new IdStreamer(
         context,

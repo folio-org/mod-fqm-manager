@@ -28,7 +28,7 @@ public class CrossTenantQueryService {
   public List<String> getTenantsToQuery(UUID entityTypeId) {
     String centralTenantId;
     String consortiumId;
-    // List of ECS tenants and shadow users corresponding to this user in those tenants
+    // List of shadow users associated with this user and the ECS tenants that those users exist in
     List<Map<String, String>> userTenantMaps;
     // Below if-block is necessary to limit cross-tenant querying to instance entity type until we have a way to
     // configure cross-tenant queries by entity type. This can be removed after completion of MODFQMMGR-335.

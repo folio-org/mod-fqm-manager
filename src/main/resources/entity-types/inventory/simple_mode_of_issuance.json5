@@ -114,6 +114,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      hidden: true,
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",

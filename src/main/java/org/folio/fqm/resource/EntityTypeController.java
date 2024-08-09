@@ -23,7 +23,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   @EntityTypePermissionsRequired
   @Override
-  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId) {
+  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId, Boolean includeHidden) {
     return entityTypeService.getEntityTypeDefinition(entityTypeId)
       .map(ResponseEntity::ok)
       .orElseGet(() -> ResponseEntity.notFound().build());

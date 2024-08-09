@@ -47,20 +47,6 @@ public class PermissionsService {
     return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(tenantId, k.userId()));
   }
 
-  public String myMethod(String argument) {
-    return argument != null ? argument : "NOT FOUND";
-  }
-
-  private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
-    return modPermissionsClient
-      .getPermissionsForUser(tenantId, userId.toString())
-      .getPermissionNames();
-  }
-
-  private Set<String> getUserPermissionsFromRolesKeycloak(UUID userId) {
-    throw new NotImplementedException("Not implemented yet");
-  }
-
   public Set<String> getRequiredPermissions(EntityType entityType) {
     EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), null);
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
@@ -93,6 +79,16 @@ public class PermissionsService {
       log.warn("User {} is missing permissions that are required for this operation: [{}]", context.getUserId(), missingPermissions);
       throw new MissingPermissionsException(missingPermissions);
     }
+  }
+
+  private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
+    return modPermissionsClient
+      .getPermissionsForUser(tenantId, userId.toString())
+      .getPermissionNames();
+  }
+
+  private Set<String> getUserPermissionsFromRolesKeycloak(UUID userId) {
+    throw new NotImplementedException("Not implemented yet");
   }
 
   private record TenantUserPair(String tenant, UUID userId) {

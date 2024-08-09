@@ -9,7 +9,6 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,9 +49,6 @@ class EntityTypeServiceTest {
 
   @Mock
   private EntityTypeFlatteningService entityTypeFlatteningService;
-
-  @Mock
-  private FolioExecutionContext executionContext;
 
   @InjectMocks
   private EntityTypeService entityTypeService;

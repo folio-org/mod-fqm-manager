@@ -47,7 +47,7 @@ class PermissionsServiceTest {
   @Test
   void thePermissionsServiceShouldUseTheModPermissionsClientByDefault() {
     setUpMocks("permission1", "permission2");
-    assertEquals(2, permissionsService.getUserPermissions(TENANT_ID).size());
+    assertEquals(2, permissionsService.getUserPermissions().size());
   }
 
   @Test
@@ -75,7 +75,7 @@ class PermissionsServiceTest {
       .forEach((permissions, message) -> {
         EntityType entityType = getTestEntityType().requiredPermissions(permissions);
         // Then the user should be able to perform the operation
-        assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false), message);
+        assertDoesNotThrow(() -> permissionsService.verifyUserHasNecessaryPermissions(entityType, false), message);
       });
   }
 

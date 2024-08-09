@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,12 @@ public class CrossTenantQueryService {
   private final SimpleHttpClient ecsClient;
   private final FolioExecutionContext executionContext;
 
-  public List<String> getTenantsToQuery(UUID entityTypeId) {
-    String centralTenantId;
-    String consortiumId;
-    // Below if-block is necessary to limit cross-tenant querying to instance entity type until we have a way to
-    // configure cross-tenant queries by entity type. This can be removed after completion of MODFQMMGR-335.
-    if (!entityTypeId.equals(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"))) {
+  public List<String> getTenantsToQuery(EntityType entityType) {
+    if (!Boolean.TRUE.equals(entityType.getCrossTqenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
+    String centralTenantId;
+    String consortiumId;
     try {
       String rawJson = ecsClient.get("consortia-configuration", Map.of());
       DocumentContext parsedJson = JsonPath.parse(rawJson);

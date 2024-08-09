@@ -8,10 +8,12 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.FieldNotFoundException;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Currency;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +94,6 @@ public class EntityTypeService {
   /**
    * Return top 1000 values of an entity type field, matching the given search text
    *
-   * @param entityTypeId ID of the entity type
    * @param fieldName    Name of the field for which values have to be returned
    * @param searchText   Nullable search text. If a search text is provided, the returned values will include only those
    *                     that contain the specified searchText.
@@ -112,34 +107,24 @@ public class EntityTypeService {
       .findFieldDefinition(new FqlField(fieldName), entityType)
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName));
 
-    if (field.getName().equals("tenant_id")) {
-      // Hackish way to get tenant values for cross-tenant instance queries. Can be removed after completion of MODFQMMGR-335.
-      List<String> tenants = crossTenantQueryService.getTenantsToQuery(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"));
-      List<ValueWithLabel> tenantValues = tenants
-        .stream()
-        .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
-        .toList();
-      return new ColumnValues().content(tenantValues);
-    }
-
-    if (field.getName().equals("source_tenant_id")) {
-      // Hackish way to get tenant values for cross-tenant instance queries. Can be removed after completion of MODFQMMGR-335.
-      List<String> tenants = crossTenantQueryService.getTenantsToQuery(UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74"));
-      if (tenants.size() > 1) {
-        List<ValueWithLabel> tenantValues = tenants
-          .stream()
-          .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
-          .toList();
-        return new ColumnValues().content(tenantValues);
-      } else {
-        // tenant is not central tenant, but we need to provide central tenant id as an available value
-        String centralTenantId = crossTenantQueryService.getCentralTenantId();
-        List<ValueWithLabel> tenantList = new ArrayList<>();
-        if (centralTenantId != null && !centralTenantId.equals(tenants.get(0))) {
-          tenantList.add(new ValueWithLabel().value(centralTenantId).label(centralTenantId));
+    if (field.getSource() != null) {
+      if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
+        return getFieldValuesFromEntityType(entityType, fieldName, searchText);
+      } else if (field.getSource().getType() == SourceColumn.TypeEnum.FQM) {
+        switch (Objects.requireNonNull(field.getSource().getName(), "Value sources with the FQM type require the source name to be configured")) {
+          case "currency" -> {
+            return getCurrencyValues();
+          }
+          case "tenant_id" -> {
+            return getTenantIds(entityType);
+          }
+          case "source_tenant_id" -> {
+            return getSourceTenantIds(entityType);
+          }
+          default -> {
+            throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
+          }
         }
-        tenantList.add(new ValueWithLabel().value(tenants.get(0)).label(tenants.get(0)));
-        return new ColumnValues().content(tenantList);
       }
     }
 
@@ -151,11 +136,36 @@ public class EntityTypeService {
       return getFieldValuesFromApi(field, searchText);
     }
 
-    if (field.getName().equals("pol_currency")) {
-      return getCurrencyValues();
-    }
+    throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);
+  }
 
-    return getFieldValuesFromEntityType(entityTypeId, fieldName, searchText);
+  private ColumnValues getSourceTenantIds(EntityType entityType) {
+    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    if (tenants.size() > 1) {
+      List<ValueWithLabel> tenantValues = tenants
+        .stream()
+        .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
+        .toList();
+      return new ColumnValues().content(tenantValues);
+    } else {
+      // tenant is not central tenant, but we need to provide central tenant id as an available value
+      String centralTenantId = crossTenantQueryService.getCentralTenantId();
+      List<ValueWithLabel> tenantList = new ArrayList<>();
+      if (centralTenantId != null && !centralTenantId.equals(tenants.get(0))) {
+        tenantList.add(new ValueWithLabel().value(centralTenantId).label(centralTenantId));
+      }
+      tenantList.add(new ValueWithLabel().value(tenants.get(0)).label(tenants.get(0)));
+      return new ColumnValues().content(tenantList);
+    }
+  }
+
+  private ColumnValues getTenantIds(EntityType entityType) {
+    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<ValueWithLabel> tenantValues = tenants
+      .stream()
+      .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
+      .toList();
+    return new ColumnValues().content(tenantValues);
   }
 
   private ColumnValues getFieldValuesFromEntityTypeDefinition(Field field, String searchText) {
@@ -164,7 +174,7 @@ public class EntityTypeService {
       .stream()
       .filter(valueWithLabel -> valueWithLabel.getLabel().contains(searchText))
       .distinct()
-      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(filteredValues);
   }
@@ -186,10 +196,10 @@ public class EntityTypeService {
     return new ColumnValues().content(results);
   }
 
-  private ColumnValues getFieldValuesFromEntityType(UUID entityTypeId, String fieldName, String searchText) {
+  private ColumnValues getFieldValuesFromEntityType(EntityType entityType, String fieldName, String searchText) {
     String fql = "{\"%s\": {\"$regex\": \"%s\"}}".formatted(fieldName, searchText);
     List<Map<String, Object>> results = queryService.processQuery(
-      entityTypeId,
+      entityType,
       fql,
       List.of(ID_FIELD_NAME, fieldName),
       null,
@@ -198,7 +208,7 @@ public class EntityTypeService {
     List<ValueWithLabel> valueWithLabels = results
       .stream()
       .map(result -> toValueWithLabel(result, fieldName))
-      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
     return new ColumnValues().content(valueWithLabels);
   }

@@ -53,7 +53,8 @@ public class EntityTypeFlatteningService {
       .root(originalEntityType.getRoot())
       .groupByFields(originalEntityType.getGroupByFields())
       .sourceView(originalEntityType.getSourceView())
-      .sourceViewExtractor(originalEntityType.getSourceViewExtractor());
+      .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
+      .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled());
 
     Map<String, String> renamedAliases = new LinkedHashMap<>(); // <oldName, newName>
     String aliasPrefix = sourceFromParent == null ? "" : sourceFromParent.getAlias() + ".";
@@ -76,6 +77,11 @@ public class EntityTypeFlatteningService {
         UUID sourceEntityTypeId = UUID.fromString(source.getId());
         // Recursively flatten the source and add it to the flattened entity type
         EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, source, tenantId);
+        // If the original entity type already supports cross-tenant queries, we can skip this. Otherwise, copy the nested source's setting
+        // This effectively means that if any nested source supports cross-tenant queries, the flattened entity type will too
+        if (!Boolean.TRUE.equals(flattenedEntityType.getCrossTenantQueriesEnabled())) {
+          flattenedEntityType.crossTenantQueriesEnabled(flattenedSourceDefinition.getCrossTenantQueriesEnabled());
+        }
         finalPermissions.addAll(flattenedSourceDefinition.getRequiredPermissions());
         // Add a prefix to each column's name and idColumnName, then add em to the flattened entity type
         columns.add(

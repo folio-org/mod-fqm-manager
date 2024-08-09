@@ -6,6 +6,7 @@ import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,7 @@ public class QueryProcessorService {
   /**
    * Process the FQL query and return the results.
    *
-   * @param entityTypeId Entity type ID
+   * @param entityType Entity type
    * @param fqlQuery     FQL query
    * @param fields       fields to return in query results
    * @param afterId      A cursor used for pagination. 'afterId' is the ID representing your place in the paginated list.
@@ -72,9 +73,9 @@ public class QueryProcessorService {
    * @param limit        Count of records to be returned.
    * @return Results matching the query
    */
-  public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
+  public List<Map<String, Object>> processQuery(EntityType entityType, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityTypeId);
-    return resultSetRepository.getResultSetSync(entityTypeId, fql, fields, afterId, limit, tenantsToQuery);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+    return resultSetRepository.getResultSetSync(UUID.fromString(entityType.getId()), fql, fields, afterId, limit, tenantsToQuery);
   }
 }

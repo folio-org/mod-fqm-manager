@@ -103,6 +103,7 @@ class QueryProcessorServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnPaginatedResults() {
     UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true, false);
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;
@@ -116,9 +117,9 @@ class QueryProcessorServiceTest {
       Map.of("field1", "value1", "field2", "value4")
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
-    when(crossTenantQueryService.getTenantsToQuery(entityTypeId)).thenReturn(tenantIds);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantIds);
     when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds)).thenReturn(expectedContent);
-    List<Map<String, Object>> actualContent = service.processQuery(entityTypeId, fqlQuery, fields, afterId, limit);
+    List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
   }
 }

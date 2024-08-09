@@ -7,6 +7,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.junit.jupiter.api.Test;
@@ -170,7 +171,9 @@ class EntityTypeServiceTest {
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("whatever")
-      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
       .content(
@@ -200,9 +203,11 @@ class EntityTypeServiceTest {
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("the entity type")
-      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
 
-    when(queryProcessorService.processQuery(eq(entityTypeId), any(), any(), any(), any()))
+    when(queryProcessorService.processQuery(any(EntityType.class), any(), any(), any(), any()))
       .thenReturn(
         List.of(
           Map.of(valueColumnName, "value_01"),
@@ -229,12 +234,14 @@ class EntityTypeServiceTest {
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("this is a thing")
-      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
-    verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
+    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
 
   @Test
@@ -244,12 +251,14 @@ class EntityTypeServiceTest {
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("yep")
-      .columns(List.of(new EntityTypeColumn().name(valueColumnName)));
+      .columns(List.of(new EntityTypeColumn().name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
-    verify(queryProcessorService).processQuery(entityTypeId, expectedFql, fields, null, 1000);
+    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
 
   @Test
@@ -364,7 +373,10 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("currency-test")
       .columns(List.of(new EntityTypeColumn()
-        .name("pol_currency")
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .name("currency")  // The special FQM source uses "currency" as the name of the currency value source
+          .type(SourceColumn.TypeEnum.FQM))
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);

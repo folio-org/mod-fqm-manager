@@ -130,6 +130,7 @@ class EntityTypeFlatteningServiceTest {
   private static final EntityType COMPLEX_ENTITY_TYPE = new EntityType()
     .name("complex_entity_type")
     .id(COMPLEX_ENTITY_TYPE_ID.toString())
+    .crossTenantQueriesEnabled(true)
     .columns(List.of(
       new EntityTypeColumn()
         .name("field3")
@@ -369,6 +370,7 @@ class EntityTypeFlatteningServiceTest {
     EntityType expectedEntityType = new EntityType()
       .name("complex_entity_type")
       .id(COMPLEX_ENTITY_TYPE_ID.toString())
+      .crossTenantQueriesEnabled(true)
       .columns(List.of(
         new EntityTypeColumn()
           .name("field3")
@@ -554,6 +556,7 @@ class EntityTypeFlatteningServiceTest {
     EntityType expectedEntityType = new EntityType()
       .name("triple_nested_entity_type")
       .id(TRIPLE_NESTED_ENTITY_TYPE_ID.toString())
+      .crossTenantQueriesEnabled(true)
       .columns(List.of(
         new EntityTypeColumn()
           .name("field7")

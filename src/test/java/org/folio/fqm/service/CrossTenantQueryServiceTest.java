@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CrossTenantQueryServiceTest {
 
-  private static final EntityType entityType = new EntityType("6b08439b-4f8e-4468-8046-ea620f5cfb74", "test_entity_type", true, false)
+  private static final EntityType entityType = new EntityType()
     .crossTenantQueriesEnabled(true);
 
   @Mock
@@ -158,5 +158,18 @@ class CrossTenantQueryServiceTest {
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, true);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
     assertEquals(expectedTenants, actualTenants);
+  }
+
+  @Test
+  void shouldGetCentralTenantId() {
+    when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
+    String expectedId = "tenant_01";
+    String actualId = crossTenantQueryService.getCentralTenantId();
+    assertEquals(expectedId, actualId);
+  }
+
+  @Test
+  void shouldHandleErrorWhenGettingCentralTenantId() {
+    assertNull(crossTenantQueryService.getCentralTenantId());
   }
 }

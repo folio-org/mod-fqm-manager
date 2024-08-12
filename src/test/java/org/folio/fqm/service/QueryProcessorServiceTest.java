@@ -118,7 +118,7 @@ class QueryProcessorServiceTest {
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantIds);
-    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds)).thenReturn(expectedContent);
+    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds, false)).thenReturn(expectedContent);
     List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
   }

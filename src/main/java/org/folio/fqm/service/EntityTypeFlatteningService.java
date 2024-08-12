@@ -54,7 +54,8 @@ public class EntityTypeFlatteningService {
       .groupByFields(originalEntityType.getGroupByFields())
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
-      .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled());
+      .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
+      .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions());
 
     Map<String, String> renamedAliases = new LinkedHashMap<>(); // <oldName, newName>
     String aliasPrefix = sourceFromParent == null ? "" : sourceFromParent.getAlias() + ".";

@@ -49,4 +49,7 @@
       direction: 'ASC',
     },
   ],
+  additionalEcsConditions: [
+    "\"left\"(lower(\"instance.inst\".jsonb ->> 'source'::text), 600) != 'consortium-folio' AND \"left\"(lower(\"instance.inst\".jsonb ->> 'source'::text), 600) != 'consortium-marc'"
+  ]
 }

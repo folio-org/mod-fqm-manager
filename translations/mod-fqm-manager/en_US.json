@@ -1640,7 +1640,7 @@
     "entityType.simple_call_number_type.updated_by_username": "Updated by username",
     "entityType.simple_instance_status": "Instance status name",
     "entityType.simple_instance_status.id": "UUID",
-    "entityType.simple_instance_status.term": "Term",
+    "entityType.simple_instance_status.name": "Term",
     "entityType.simple_instance_status.code": "Code",
     "entityType.simple_instance_status.source": "Source",
     "entityType.simple_instance_status.created_date": "Created date",

@@ -732,18 +732,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
-      )"
+      valueGetter: ":sourceAlias.jsonb->>'administrativeNotes'",
     },
     {
       name: 'tags',

@@ -67,7 +67,7 @@ paths:
       operationId: getFqmVersion
       tags:
         - fqmVersion
-      description: Get version of the fqm.
+      description: Get version of the fqm
       responses:
         '200':
           description: 'Version of the fqm'
@@ -79,7 +79,23 @@ paths:
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
-
+  /fqm/migrate:
+    post:
+      operationId: fqmMigrate
+      tags:
+        - fqmVersion
+      description: perform a migration of the FQM from the legacy version to the updated version.
+      responses:
+        '200':
+          description: 'FQM version updated successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fqmMigrateResponse'
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
 components:
   parameters:
     entity-type-id:
@@ -137,6 +153,8 @@ components:
           type: array
           items:
             type: string
+    fqmMigrateResponse:
+      $ref: schemas/FqmMigrate.json
 
   responses:
     badRequestResponse:

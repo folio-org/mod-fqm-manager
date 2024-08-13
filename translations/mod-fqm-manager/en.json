@@ -1317,7 +1317,7 @@
   "entityType.src_inventory_contributor_type.id": "Id",
   "entityType.simple_instance_status": "Instance status name",
   "entityType.simple_instance_status.id": "UUID",
-  "entityType.simple_instance_status.term": "Term",
+  "entityType.simple_instance_status.name": "Term",
   "entityType.simple_instance_status.jsonb": "JSONB",
   "entityType.simple_instance_status.code": "Code",
   "entityType.simple_instance_status.source": "Source",

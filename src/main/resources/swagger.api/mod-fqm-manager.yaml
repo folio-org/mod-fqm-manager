@@ -154,17 +154,7 @@ components:
           items:
             type: string
     fqmMigrateResponse:
-      type: object
-      properties:
-        entityTypeId:
-          type: string
-          format: uuid
-        fqlQuery:
-          type: string
-        fields:
-          type: array
-          items:
-            type: string
+      $ref: schemas/FqmMigrate.json
 
   responses:
     badRequestResponse:

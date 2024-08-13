@@ -36,7 +36,6 @@ public class MigrationService {
   public String getLatestVersion() {
     return CURRENT_VERSION;
   }
-
   public boolean isMigrationNeeded(@CheckForNull String fqlQuery) {
     return !this.getLatestVersion().equals(getVersion(fqlQuery));
   }

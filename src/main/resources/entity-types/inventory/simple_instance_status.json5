@@ -81,7 +81,6 @@
         dataType: 'stringType',
       },
       queryable: true,
-      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },

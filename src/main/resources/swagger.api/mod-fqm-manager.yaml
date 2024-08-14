@@ -79,6 +79,30 @@ paths:
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
+  /fqm/migrate:
+    post:
+      summary: fqm migrate request
+      operationId: fqmMigrate
+      tags:
+        - fqmVersion
+      requestBody:
+        description: 'Request for FQM version submitted successfully'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fqmMigrateRequest'
+      responses:
+        '200':
+          description:  'FQM version updated successfully'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fqmMigrateResponse'
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
 
 components:
   parameters:
@@ -133,6 +157,10 @@ components:
           type: array
           items:
             type: string
+    fqmMigrateRequest:
+      $ref: schemas/FqmMigrateRequest.json
+    fqmMigrateResponse:
+      $ref: schemas/FqmMigrateResponse.json
 
   responses:
     badRequestResponse:
@@ -155,4 +183,3 @@ components:
                 code: unexpected.error
           schema:
             $ref: "#/components/schemas/errorResponse"
-

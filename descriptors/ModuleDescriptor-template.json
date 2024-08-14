@@ -79,6 +79,12 @@
         },
         {
           "methods": ["POST"],
+          "pathPattern": "/fqm/migrate",
+          "permissionsRequired": ["fqm.migrate.post"],
+          "modulePermissions": ["perms.users.get"]
+        },
+        {
+          "methods": ["POST"],
           "pathPattern": "/query/contents",
           "permissionsRequired": ["fqm.query.async.results.get"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
@@ -184,6 +190,12 @@
       "visible":  true
     },
     {
+      "permissionName": "fqm.migrate.post",
+      "displayName": "FQM - Submit FQM Migration",
+      "description": "Submit FQM Migration and get results",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.materializedViews.post",
       "displayName": "FQM - Refresh materialized views",
       "description": "Refresh FQM materialized views",
@@ -205,7 +217,8 @@
         "fqm.query.async.results.get",
         "fqm.query.async.delete",
         "fqm.query.sync.get",
-        "fqm.version.get"
+        "fqm.version.get",
+        "fqm.migrate.post"
       ],
       "visible": true
     }

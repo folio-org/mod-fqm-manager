@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity Upgrade Response",
+  "description": "Schema for a response to upgrade FQM",
+  "type": "object",
+  "properties": {
+    "entityTypeId": {
+      "description": "ID of the entity type upgraded successfully",
+      "type": "string",
+      "format": "UUID"
+    },
+    "fqlQuery": {
+      "description": "FQL query string upgraded successfully",
+      "type": "string"
+    },
+    "fields": {
+      "description": "List of fields upgraded successfully",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+  "warnings": {
+    "description": "List of warnings issued during the upgrade",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "Description of the warning",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type of warning",
+          "type": "string"
+        }
+      },
+      "required": [
+      ]
+    }
+  }
+},
+  "required": [
+    "entityTypeId"
+  ]
+}

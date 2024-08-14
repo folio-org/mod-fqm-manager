@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity Upgrade Request",
+  "description": "Schema for a request to upgrade an entity payload, including an entity type ID, FQL query, and list of fields.",
+  "type": "object",
+  "properties": {
+    "entityTypeId": {
+      "description": "ID of the entity type to be upgraded",
+      "type": "string",
+      "format": "UUID"
+    },
+    "fqlQuery": {
+      "description": "FQL query string to be used for the upgrade",
+      "type": "string"
+    },
+    "fields": {
+      "description": "List of fields to be included in the upgrade",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "entityTypeId"
+  ]
+}

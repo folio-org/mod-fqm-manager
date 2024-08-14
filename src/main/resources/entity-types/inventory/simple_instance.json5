@@ -1132,7 +1132,7 @@
         type: 'fqm',
         name: 'tenant_id'
       },
-      ecsOnly: true,
+      ecsOnly: false,
     },
     {
       name: 'jsonb',

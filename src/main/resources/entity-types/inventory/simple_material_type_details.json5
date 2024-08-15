@@ -50,7 +50,6 @@
         columnName: 'name',
         entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
       },
-      idColumnName: 'id',
       valueSourceApi: {
         path: 'material-types',
         valueJsonPath: '$.mtypes.*.id',

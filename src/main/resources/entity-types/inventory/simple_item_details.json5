@@ -582,7 +582,6 @@
           dataType: 'stringType',
         },
       },
-      idColumnName: 'statistical_code_ids',
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,

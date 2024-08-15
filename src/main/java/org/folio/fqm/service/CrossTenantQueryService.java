@@ -28,8 +28,8 @@ public class CrossTenantQueryService {
   private static final String CONSORTIA_CONFIGURATION_PATH = "consortia-configuration";
   private static final String CENTRAL_TENANT_ID = "centralTenantId";
 
-  public List<String> getTenantsToQuery(EntityType entityType) {
-    if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
+  public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
+    if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
     // List of shadow users associated with this user and the ECS tenants that those users exist in

@@ -24,8 +24,12 @@ public class CrossTenantQueryService {
   private final FolioExecutionContext executionContext;
   private final PermissionsService permissionsService;
 
-  public List<String> getTenantsToQuery(EntityType entityType) {
-    if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
+  private static final String CROSS_TENANT_QUERY_ERROR = "Error retrieving tenants for cross-tenant query. Tenant may not be in an ECS environment.";
+  private static final String CONSORTIA_CONFIGURATION_PATH = "consortia-configuration";
+  private static final String CENTRAL_TENANT_ID = "centralTenantId";
+
+  public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
+    if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
     // List of shadow users associated with this user and the ECS tenants that those users exist in
@@ -33,10 +37,10 @@ public class CrossTenantQueryService {
     String centralTenantId;
     String consortiumId;
     try {
-      String configurationJson = ecsClient.get("consortia-configuration", Map.of());
+      String configurationJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
       centralTenantId = JsonPath
         .parse(configurationJson)
-        .read("centralTenantId");
+        .read(CENTRAL_TENANT_ID);
       if (centralTenantId.equals(executionContext.getTenantId())) {
         String consortiumIdJson = ecsClient.get("consortia", Map.of());
         consortiumId =  JsonPath
@@ -79,12 +83,24 @@ public class CrossTenantQueryService {
 
   public String getCentralTenantId() {
     try {
-      String rawJson = ecsClient.get("consortia-configuration", Map.of());
+      String rawJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
       DocumentContext parsedJson = JsonPath.parse(rawJson);
-      return parsedJson.read("centralTenantId");
+      return parsedJson.read(CENTRAL_TENANT_ID);
     } catch (Exception e) {
-      log.debug("Error retrieving tenants for cross-tenant query. Tenant may not be in an ECS environment.");
+      log.debug(CROSS_TENANT_QUERY_ERROR);
       return null;
+    }
+  }
+
+  public boolean ecsEnabled() {
+    try {
+      String rawJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      parsedJson.read(CENTRAL_TENANT_ID);
+      return true;
+    } catch (Exception e) {
+      log.debug(CROSS_TENANT_QUERY_ERROR);
+      return false;
     }
   }
 }

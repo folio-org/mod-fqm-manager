@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CrossTenantQueryServiceTest {
 
-  private static final EntityType entityType = new EntityType("6b08439b-4f8e-4468-8046-ea620f5cfb74", "test_entity_type", true, false)
+  private static final EntityType entityType = new EntityType()
     .crossTenantQueriesEnabled(true);
 
   @Mock
@@ -90,7 +90,7 @@ class CrossTenantQueryServiceTest {
     when(ecsClient.get("consortia", Map.of())).thenReturn(CONSORTIA_JSON);
     when(ecsClient.get("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants", Map.of("userId", userId.toString()))).thenReturn(USER_TENANT_JSON);
 
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -100,7 +100,7 @@ class CrossTenantQueryServiceTest {
 
     List<String> expectedTenants = List.of("tenant_01");
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(nonEcsEntityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(nonEcsEntityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -114,7 +114,7 @@ class CrossTenantQueryServiceTest {
       """;
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(configurationJson);
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -123,7 +123,7 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01");
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(ecsClient.get("consortia-configuration", Map.of())).thenThrow(NotFoundException.class);
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -139,7 +139,7 @@ class CrossTenantQueryServiceTest {
     when(ecsClient.get("consortia", Map.of())).thenReturn(CONSORTIA_JSON);
     when(ecsClient.get("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants", Map.of("userId", userId.toString()))).thenThrow(FeignException.NotFound.class);
 
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -156,7 +156,20 @@ class CrossTenantQueryServiceTest {
     when(ecsClient.get("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants", Map.of("userId", userId.toString()))).thenReturn(USER_TENANT_JSON);
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions("tenant_02", entityType, true);
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, true);
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
+  }
+
+  @Test
+  void shouldGetCentralTenantId() {
+    when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
+    String expectedId = "tenant_01";
+    String actualId = crossTenantQueryService.getCentralTenantId();
+    assertEquals(expectedId, actualId);
+  }
+
+  @Test
+  void shouldHandleErrorWhenGettingCentralTenantId() {
+    assertNull(crossTenantQueryService.getCentralTenantId());
   }
 }

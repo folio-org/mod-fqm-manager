@@ -2,6 +2,7 @@ package org.folio.fqm.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
@@ -54,8 +55,9 @@ public class IdStreamer {
                               Fql fql,
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
-    return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery);
+    boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
+    return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery, ecsEnabled);
   }
 
   public List<List<String>> getSortedIds(String derivedTableName,
@@ -80,7 +82,7 @@ public class IdStreamer {
   private int streamIdsInBatch(EntityType entityType,
                                boolean sortResults,
                                Fql fql, int batchSize,
-                               Consumer<IdsWithCancelCallback> idsConsumer, List<String> tenantsToQuery) {
+                               Consumer<IdsWithCancelCallback> idsConsumer, List<String> tenantsToQuery, boolean ecsEnabled) {
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
@@ -91,6 +93,12 @@ public class IdStreamer {
       var currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
       String innerJoinClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
+
+      if (ecsEnabled && !CollectionUtils.isEmpty(entityType.getAdditionalEcsConditions())) {
+        for (String condition : entityType.getAdditionalEcsConditions()) {
+          whereClause = whereClause.and(condition);
+        }
+      }
       ResultQuery<Record1<String[]>> innerQuery = buildQuery(
         entityTypeDefinition,
         currentIdValueGetter,

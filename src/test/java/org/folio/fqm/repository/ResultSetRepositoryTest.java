@@ -117,7 +117,7 @@ class ResultSetRepositoryTest {
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
       .thenReturn("TEST_ENTITY_TYPE");
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, List.of("tenant_01"));
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, List.of("tenant_01"), false);
     assertEquals(expectedList, actualList);
   }
 
@@ -129,7 +129,7 @@ class ResultSetRepositoryTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, null);
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, null, false);
     assertEquals(expectedList, actualList);
   }
 
@@ -140,7 +140,7 @@ class ResultSetRepositoryTest {
     int limit = 100;
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, null, afterId, limit, null);
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, null, afterId, limit, null, false);
     assertEquals(expectedList, actualList);
   }
 
@@ -159,7 +159,7 @@ class ResultSetRepositoryTest {
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
       .thenReturn("TEST_ENTITY_TYPE");
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds);
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, false);
     assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);
   }
 
@@ -178,7 +178,7 @@ class ResultSetRepositoryTest {
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION, "tenant_01"))
       .thenReturn("TEST_GROUP_BY_ENTITY_TYPE");
-    assertThrows(IllegalArgumentException.class, () -> repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds));
+    assertThrows(IllegalArgumentException.class, () -> repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, false));
   }
 
   @Test
@@ -196,8 +196,33 @@ class ResultSetRepositoryTest {
     when(entityTypeFlatteningService.getJoinClause(eq(ENTITY_TYPE), any(String.class)))
       .thenReturn("TEST_ENTITY_TYPE");
 
-    List<Map<String, Object>> actualResults = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds);
+    List<Map<String, Object>> actualResults = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, true);
     assertEquals(expectedResults, actualResults);
+  }
+
+  @Test
+  void shouldHandleAdditionalEcsConditionsForSynchronousQuery() {
+    UUID entityTypeId = UUID.randomUUID();
+    int limit = 100;
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
+    List<String> fields = List.of("id", "key1");
+    List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
+    // Since we are only asking for "id" and "key1" fields, create expected list without key2 included
+    List<Map<String, Object>> expectedList = List.of(
+      Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
+      Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
+      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+    );
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, null))
+      .thenReturn("TEST_ENTITY_TYPE");
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
+      .thenReturn("TEST_ENTITY_TYPE");
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, List.of("tenant_01"), true);
+    assertEquals(expectedList, actualList);
   }
 
   @Test

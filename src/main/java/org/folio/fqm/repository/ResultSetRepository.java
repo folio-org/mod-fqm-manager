@@ -44,13 +44,16 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResultSetRepository {
 
-  @Qualifier("readerJooqContext") private final DSLContext jooqContext;
+  @Qualifier("readerJooqContext")
+  private final DSLContext jooqContext;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final FolioExecutionContext executionContext;
 
+
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
-                                                List<List<String>> ids, List<String> tenantsToQuery) {
+                                                List<List<String>> ids,
+                                                List<String> tenantsToQuery) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
@@ -98,7 +101,13 @@ public class ResultSetRepository {
   }
 
   // TODO: update for GROUP BY functionality
-  public List<Map<String, Object>> getResultSetSync(UUID entityTypeId, Fql fql, List<String> fields, List<String> afterId, int limit, List<String> tenantsToQuery) {
+  public List<Map<String, Object>> getResultSetSync(UUID entityTypeId,
+                                                    Fql fql,
+                                                    List<String> fields,
+                                                    List<String> afterId,
+                                                    int limit,
+                                                    List<String> tenantsToQuery,
+                                                    boolean ecsEnabled) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
@@ -128,6 +137,11 @@ public class ResultSetRepository {
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
       log.debug("idColumnValueGetters: {}", idColumnValueGetters);
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
+      if (ecsEnabled && !CollectionUtils.isEmpty(baseEntityType.getAdditionalEcsConditions())) {
+        for (String condition : baseEntityType.getAdditionalEcsConditions()) {
+          currentCondition = currentCondition.and(condition);
+        }
+      }
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
       var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
       if (i == 0) {
@@ -169,7 +183,7 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId,  tenantId);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
   }
 
   private List<Map<String, Object>> recordToMap(Result<Record> result) {

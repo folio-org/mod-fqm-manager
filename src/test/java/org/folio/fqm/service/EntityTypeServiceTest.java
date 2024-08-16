@@ -410,7 +410,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(List.of("tenant1", "tenant2"));
+    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1", "tenant2"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -436,7 +436,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(List.of("central", "tenant1", "tenant2"));
+    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("central", "tenant1", "tenant2"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -462,7 +462,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(List.of("tenant1"));
+    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1"));
     when(crossTenantQueryService.getCentralTenantId()).thenReturn("central");
 
     List<ValueWithLabel> actualColumnValues = entityTypeService

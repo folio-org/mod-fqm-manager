@@ -58,7 +58,8 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
           .direction(EntityTypeDefaultSort.DirectionEnum.ASC)
           .columnName("key1")
       )
-    );
+    )
+    .additionalEcsConditions(List.of("condition 1"));
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";

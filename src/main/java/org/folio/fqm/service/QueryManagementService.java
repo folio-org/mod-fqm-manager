@@ -191,7 +191,7 @@ public class QueryManagementService {
           fields.add(colName);
         }
       });
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
     return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
   }
 
@@ -199,7 +199,7 @@ public class QueryManagementService {
     if (includeResults) {
       EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
-      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
       return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery);
     }
     return List.of();

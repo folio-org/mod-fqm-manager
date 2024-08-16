@@ -115,11 +115,8 @@ public class EntityTypeService {
           case "currency" -> {
             return getCurrencyValues();
           }
-          case "tenant_id" -> {
+          case "tenant_id", "source_tenant_id" -> {
             return getTenantIds(entityType);
-          }
-          case "source_tenant_id" -> {
-            return getSourceTenantIds(entityType);
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -139,8 +136,8 @@ public class EntityTypeService {
     throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);
   }
 
-  private ColumnValues getSourceTenantIds(EntityType entityType) {
-    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType);
+  private ColumnValues getTenantIds(EntityType entityType) {
+    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType, true);
     if (tenants.size() > 1) {
       List<ValueWithLabel> tenantValues = tenants
         .stream()
@@ -157,15 +154,6 @@ public class EntityTypeService {
       tenantList.add(new ValueWithLabel().value(tenants.get(0)).label(tenants.get(0)));
       return new ColumnValues().content(tenantList);
     }
-  }
-
-  private ColumnValues getTenantIds(EntityType entityType) {
-    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType);
-    List<ValueWithLabel> tenantValues = tenants
-      .stream()
-      .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
-      .toList();
-    return new ColumnValues().content(tenantValues);
   }
 
   private ColumnValues getFieldValuesFromEntityTypeDefinition(Field field, String searchText) {

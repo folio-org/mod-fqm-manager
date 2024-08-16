@@ -48,6 +48,12 @@ class IdStreamerTest {
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
 
+  private static final String CONFIGURATION_JSON = """
+        {
+          "centralTenantId": "tenant_01"
+        }
+      """;
+
   @BeforeEach
   void setup() {
     DSLContext readerContext = DSL.using(
@@ -102,12 +108,31 @@ class IdStreamerTest {
   }
 
   @Test
+  void shouldUseAdditionalEcsConditionsInEcsEnvironment() {
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
+    List<List<String>> expectedIds = List.of(
+      List.of("ecsValue")
+    );
+    List<List<String>> actualIds = new ArrayList<>();
+    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
+      List<String[]> ids = idsWithCancelCallback.ids();
+      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
+    };
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    idStreamer.streamIdsInBatch(
+      new EntityType().additionalEcsConditions(List.of("condition 1")).id("6b08439b-4f8e-4468-8046-ea620f5cfb74"),
+      true,
+      fql,
+      2,
+      idsConsumer
+    );
+    assertEquals(expectedIds, actualIds);
+  }
+
+  @Test
   void shouldUseUnionAllForCrossTenantQuery() {
-    String configurationJson = """
-        {
-          "centralTenantId": "tenant_01"
-        }
-      """;
     String consortiaJson = """
         {
           "consortia": [
@@ -133,7 +158,7 @@ class IdStreamerTest {
       }
       """;
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-    when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn(configurationJson);
+    when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn(CONFIGURATION_JSON);
     when(ecsClient.get("consortia", Map.of("limit", String.valueOf(100)))).thenReturn(consortiaJson);
     when(ecsClient.get("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/tenants", Map.of("limit", String.valueOf(100)))).thenReturn(tenantJson);
     Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));

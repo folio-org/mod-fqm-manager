@@ -1,0 +1,33 @@
+{
+  "name": "fqm-speed-comparison",
+  "version": "1.0.0",
+  "main": "benchmark.ts",
+  "repository": "https://github.com/ncovercash/fqm-speed-comparison",
+  "author": "Noah Overcash <novercash@ebsco.com>",
+  "license": "Apache-2.0",
+  "private": false,
+  "type": "module",
+  "devDependencies": {
+    "@types/fast-stats": "^0.0.35",
+    "@types/node": "^22.1.0",
+    "typescript": "^5.5.4",
+    "@types/bun": "latest"
+  },
+  "scripts": {
+    "benchmark": "benchmark.ts",
+    "chart": "chart.ts"
+  },
+  "dependencies": {
+    "@sgratzl/chartjs-chart-boxplot": "^4.4.1",
+    "chart.js": "^4.4.3",
+    "chartjs-chart-error-bars": "^4.4.1",
+    "chartjs-to-image": "^1.2.2",
+    "fast-stats": "^0.0.7",
+    "iso8601-duration": "^2.1.2",
+    "json5": "^2.2.3",
+    "ky": "^1.5.0",
+    "ky-universal": "^0.12.0",
+    "postgres": "^3.4.4",
+    "table": "^6.8.2"
+  }
+}

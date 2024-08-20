@@ -27,6 +27,7 @@ public class CrossTenantQueryService {
   private static final String CROSS_TENANT_QUERY_ERROR = "Error retrieving tenants for cross-tenant query. Tenant may not be in an ECS environment.";
   private static final String CONSORTIA_CONFIGURATION_PATH = "consortia-configuration";
   private static final String CENTRAL_TENANT_ID = "centralTenantId";
+  private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
     if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
@@ -48,6 +49,12 @@ public class CrossTenantQueryService {
           .read("consortia[0].id");
       } else {
         log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+        // The Instances entity type is required to retrieve shared instances from the central tenant when
+        // running queries from member tenants. This means that if we are running a query for Instances, we need to
+        // query the current tenant (for local records) as well as the central tenant (for shared records).
+        if (COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+          return List.of(executionContext.getTenantId(), centralTenantId);
+        }
         return List.of(executionContext.getTenantId());
       }
       UUID userId = executionContext.getUserId();

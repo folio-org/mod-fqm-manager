@@ -68,7 +68,8 @@ class IdStreamerTest {
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
       readerContext,
       context,
-      new ObjectMapper()
+      new ObjectMapper(),
+      0
     );
     localizationService = mock(LocalizationService.class);
     ecsClient = mock(SimpleHttpClient.class);

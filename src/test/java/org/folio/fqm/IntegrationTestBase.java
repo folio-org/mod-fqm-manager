@@ -69,6 +69,7 @@ public class IntegrationTestBase {
       .withEnv("DB_PASSWORD", "mypassword")
       .withEnv("DB_DATABASE", "mypostgres")
       .withEnv("okapi_url", "http://host.testcontainers.internal:" + mokapi.getPort())
+      .withEnv("mod-fqm-manager.entity-type-cache-timeout-seconds", "0")
       .withStartupTimeout(Duration.ofMinutes(3))
       .dependsOn(postgres);
 

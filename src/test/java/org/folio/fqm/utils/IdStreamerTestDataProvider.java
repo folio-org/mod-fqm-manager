@@ -66,7 +66,7 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
         .target("target1"))
     );
 
-  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*ENTITY_TYPE_DEFINITION WHERE ID IN .*";
+  private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*ENTITY_TYPE_DEFINITION";
   private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
   private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";
@@ -86,7 +86,8 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
       var definitionField = field("definition");
       Result<Record1<Object>> result = create.newResult(definitionField);
       result.add(create.newRecord(definitionField).values(writeValueAsString(TEST_ENTITY_TYPE_DEFINITION)));
-      mockResult = new MockResult(1, result);
+      result.add(create.newRecord(definitionField).values(writeValueAsString(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION)));
+      mockResult = new MockResult(2, result);
     } else if (sql.matches(ADDITIONAL_ECS_REGEX)) {
       Result<Record1<String[]>> result = create.newResult(DSL.cast(DSL.field(EntityTypeRepository.ID_FIELD_NAME), String[].class));
       result.add(create.newRecord(DSL.cast(DSL.field(EntityTypeRepository.ID_FIELD_NAME), String[].class)).values(new String[]{"ecsValue"}));

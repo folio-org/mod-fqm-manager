@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -48,6 +49,7 @@ public class EntityTypeFlatteningService {
       ._private(originalEntityType.getPrivate())
       .defaultSort(originalEntityType.getDefaultSort())
       .idView(originalEntityType.getIdView())
+      .columns(originalEntityType.getColumns())
       .customFieldEntityTypeId(originalEntityType.getCustomFieldEntityTypeId())
       .labelAlias(originalEntityType.getLabelAlias())
       .root(originalEntityType.getRoot())
@@ -89,10 +91,16 @@ public class EntityTypeFlatteningService {
           flattenedSourceDefinition.getColumns()
             .stream()
             .filter(col -> !Boolean.TRUE.equals(source.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
-            .map(col -> col
-              .name(aliasPrefix + source.getAlias() + '.' + col.getName())
-              .idColumnName(col.getIdColumnName() == null ? null : aliasPrefix + source.getAlias() + '.' + col.getIdColumnName())
-            )
+            .map(col -> {
+              String name = aliasPrefix + source.getAlias() + '.' + col.getName();
+              String idColumnName = col.getIdColumnName() == null ? null : aliasPrefix + source.getAlias() + '.' + col.getIdColumnName();
+              System.out.println(" printing name " +name);
+              System.out.println(" printing idColumnname " +idColumnName);
+              return col
+                .idColumnName(idColumnName)
+                .name(name);
+            })
+
         );
         // Copy each sub-source into the flattened entity type
         copySubSources(source, flattenedSourceDefinition, renamedAliases, aliasPrefix)

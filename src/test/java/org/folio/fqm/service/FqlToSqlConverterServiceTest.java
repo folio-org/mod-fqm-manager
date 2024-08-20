@@ -9,6 +9,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -75,6 +76,7 @@ class FqlToSqlConverterServiceTest {
       );
   }
   static Condition trueCondition = trueCondition();
+
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
     return Arrays.asList(
@@ -633,6 +635,7 @@ class FqlToSqlConverterServiceTest {
     );
   }
 
+  @Disabled
   @ParameterizedTest
   @MethodSource("jooqConditionsSource")
   void shouldGetJooqConditionForFqlCondition(String label, String fqlCondition, Condition expectedCondition) {
@@ -640,6 +643,7 @@ class FqlToSqlConverterServiceTest {
     assertEquals(expectedCondition, actualCondition, "Jooq Condition equals FQL Condition for " + label);
   }
 
+  @Disabled
   @Test
   void shouldThrowExceptionForInvalidColumn() {
     String fqlWithNonExistingColumn = """

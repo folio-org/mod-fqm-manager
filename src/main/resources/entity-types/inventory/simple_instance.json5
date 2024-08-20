@@ -975,15 +975,14 @@
     {
       name: 'status_id',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
-      hidden: true,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'statusId'",
+      valueGetter: ':sourceAlias.instancestatusid',
     },
     {
       name: 'status_updated_date',

@@ -19,7 +19,7 @@
       join: {
         type: 'left join',
         joinTo: 'instance.inst',
-        condition: ":this.id = (:that.jsonb ->> 'statusId')::uuid"
+        condition: ":this.id = :that.instancestatusid"
       }
     },
     {

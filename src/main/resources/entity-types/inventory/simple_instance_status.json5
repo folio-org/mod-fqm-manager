@@ -45,7 +45,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'id'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
       source: {

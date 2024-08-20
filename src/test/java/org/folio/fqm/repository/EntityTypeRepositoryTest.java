@@ -28,8 +28,6 @@ class EntityTypeRepositoryTest {
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
   private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0294");
-  private static final String ENTITY_TYPE_01_LABEL = "entity_type-01";
-  private static final String ENTITY_TYPE_02_LABEL = "entity_type-02";
 
   @Autowired
   private EntityTypeRepository repo;
@@ -39,7 +37,7 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {
-    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID, null);
+    Optional<EntityType> actualEntityTypeDefinition = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID, "");
     assertTrue(actualEntityTypeDefinition.isPresent());
   }
 
@@ -94,7 +92,7 @@ class EntityTypeRepositoryTest {
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
       .columns(expectedColumns)
       .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
-    EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, null).orElseThrow();
+    EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }
 }

@@ -10,6 +10,7 @@ import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.jooq.Record;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class EntityTypeRepository {
   private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
+  private final FolioExecutionContext executionContext;
 
   private final Cache<String, Map<UUID, EntityType>> entityTypeCache;
 
@@ -52,10 +54,12 @@ public class EntityTypeRepository {
   public EntityTypeRepository(@Qualifier("readerJooqContext") DSLContext readerJooqContext,
                               DSLContext jooqContext,
                               ObjectMapper objectMapper,
+                              FolioExecutionContext executionContext,
                               @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:3600}") long cacheDurationSeconds) {
     this.readerJooqContext = readerJooqContext;
     this.jooqContext = jooqContext;
     this.objectMapper = objectMapper;
+    this.executionContext = executionContext;
     this.entityTypeCache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
@@ -66,7 +70,7 @@ public class EntityTypeRepository {
   public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
     log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
-    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId == null ? "" : tenantId, tenantIdKey -> {
+    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId != null ? tenantId : executionContext.getTenantId(), tenantIdKey -> {
         String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
         Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
       Map<String, EntityType> rawEntityTypes = readerJooqContext

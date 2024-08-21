@@ -1379,7 +1379,7 @@
     "entityType.composite_purchase_order_lines.rates": "Exchange rate",
     "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate",
     "entityType.simple_item_details.effective_call_number": "Effective call number",
-    "entityType.simple_item_details.statistical_code_names": "Statistical code",
+    "entityType.simple_item_details.statistical_code_names": "Statistical code names",
     "entityType.simple_holdings_records.statistical_code_names": "Statistical code names",
     "entityType.simple_instance.statistical_code_names": "Statistical code names",
     "entityType.simple_organization.acq_unit_names": "Acquisition unit names",

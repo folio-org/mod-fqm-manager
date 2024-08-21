@@ -42,15 +42,12 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      filterValueGetter: ":sourceAlias.id::text",
+      valueFunction: 'lower(:value)',
       source: {
         columnName: 'name',
         entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
       },
-      idColumnName: 'id',
       valueSourceApi: {
         path: 'material-types',
         valueJsonPath: '$.mtypes.*.id',

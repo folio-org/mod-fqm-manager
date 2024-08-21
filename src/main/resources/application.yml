@@ -98,4 +98,4 @@ management:
       enabled: false
     readinessstate:
       enabled: true
-debug: true
+debug: false

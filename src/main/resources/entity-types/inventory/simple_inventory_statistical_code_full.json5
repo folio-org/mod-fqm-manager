@@ -34,6 +34,11 @@
       },
       visibleByDefault: true,
       valueGetter: ':sourceAlias.statistical_code',
+      source: {
+        entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
+        columnName: 'statistical_code',
+        type: 'entity-type'
+      }
     },
   ],
 }

@@ -962,6 +962,24 @@
       valueGetter: ":sourceAlias.jsonb->>'purchaseOrderLineIdentifier'",
     },
     {
+      name: 'tenant_id',
+      essential: true,
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "'${tenant_id}'",
+      source: {
+        columnName: 'tenant_id',
+        entityTypeId: '372e025a-9444-473a-9ffd-fa0f63db1674',
+        type: 'fqm',
+        name: 'tenant_id'
+      },
+      ecsOnly: false,
+    },
+    {
       name: 'jsonb',
       sourceAlias: 'item',
       dataType: {

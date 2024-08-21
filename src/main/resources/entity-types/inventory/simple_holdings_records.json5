@@ -837,6 +837,24 @@
       valueGetter: ":sourceAlias.jsonb->>'notes'",
     },
     {
+      name: 'tenant_id',
+      essential: true,
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "'${tenant_id}'",
+      source: {
+        columnName: 'tenant_id',
+        entityTypeId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+        type: 'fqm',
+        name: 'tenant_id'
+      },
+      ecsOnly: false,
+    },
+    {
       name: 'jsonb',
       sourceAlias: 'hrd',
       dataType: {

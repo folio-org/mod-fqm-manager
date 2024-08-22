@@ -84,7 +84,8 @@ public class IdStreamer {
                                Fql fql, int batchSize,
                                Consumer<IdsWithCancelCallback> idsConsumer, List<String> tenantsToQuery, boolean ecsEnabled) {
     UUID entityTypeId = UUID.fromString(entityType.getId());
-    log.debug("List of tenants to query: {}", tenantsToQuery);
+    log.info("Tenant id: {}", executionContext.getTenantId());
+    log.info("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {

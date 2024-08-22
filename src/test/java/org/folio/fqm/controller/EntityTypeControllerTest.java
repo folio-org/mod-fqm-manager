@@ -51,7 +51,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id,false)).thenReturn(mockDefinition);
+    when(entityTypeService.getEntityTypeDefinition(id,false, true)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -73,7 +73,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getHiddenEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id,true)).thenReturn(mockDefinition);
+    when(entityTypeService.getEntityTypeDefinition(id,true, true)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)

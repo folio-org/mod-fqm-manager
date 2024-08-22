@@ -12,6 +12,7 @@ import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -77,18 +78,25 @@ public class EntityTypeService {
   /**
    * Returns the definition of a given entity type.
    *
-   * @param entityTypeId the ID to search for
+   * @param entityTypeId  the ID to search for
    * @param includeHidden Indicates whether the hidden column should be displayed.
    *                      If set to true, the hidden column will be included in the output
+   * @param sortColumns   If true, columns will be alphabetically sorted by their translations
    * @return the entity type definition if found, empty otherwise
    */
-  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
+  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
-    entityType.columns(entityType.getColumns().stream()
+    List<EntityTypeColumn> columns  = entityType
+      .getColumns()
+      .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
-      .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-      .toList());
-    return entityType;
+      .toList();
+    if (sortColumns) {
+      columns = columns.stream()
+        .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
+        .toList();
+    }
+    return entityType.columns(columns);
   }
 
   /**

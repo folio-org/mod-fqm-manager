@@ -63,8 +63,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'name'",
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: ":sourceAlias.id::text",
+      valueFunction: 'lower(:value)',
       source: {
         columnName: 'name',
         entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',

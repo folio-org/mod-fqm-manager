@@ -71,7 +71,7 @@ class EntityTypeServiceTest {
       .columns(columns);
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true, true);
     List<EntityTypeColumn> expectedColumns = columns.stream()
       .sorted(nullsLast(comparing(EntityTypeColumn::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList();

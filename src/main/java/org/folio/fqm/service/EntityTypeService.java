@@ -115,6 +115,14 @@ public class EntityTypeService {
       .findFieldDefinition(new FqlField(fieldName), entityType)
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName));
 
+    if (field.getValues() != null) {
+      return getFieldValuesFromEntityTypeDefinition(field, searchText);
+    }
+
+    if (field.getValueSourceApi() != null) {
+      return getFieldValuesFromApi(field, searchText);
+    }
+
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
         return getFieldValuesFromEntityType(entityType, fieldName, searchText);
@@ -131,14 +139,6 @@ public class EntityTypeService {
           }
         }
       }
-    }
-
-    if (field.getValues() != null) {
-      return getFieldValuesFromEntityTypeDefinition(field, searchText);
-    }
-
-    if (field.getValueSourceApi() != null) {
-      return getFieldValuesFromApi(field, searchText);
     }
 
     throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);

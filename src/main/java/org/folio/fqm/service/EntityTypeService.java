@@ -12,6 +12,7 @@ import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -85,13 +86,17 @@ public class EntityTypeService {
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    List<EntityTypeColumn> columns  = entityType
+      .getColumns()
+      .stream()
+      .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
+      .toList();
     if (sortColumns) {
-      entityType.columns(entityType.getColumns().stream()
-        .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
+      columns = columns.stream()
         .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-        .toList());
+        .toList();
     }
-    return entityType;
+    return entityType.columns(columns);
   }
 
   /**

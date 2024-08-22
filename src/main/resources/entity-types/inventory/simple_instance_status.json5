@@ -52,6 +52,7 @@
         entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
         columnName: 'name',
       },
+      idColumnName: 'id',
       valueSourceApi: {
         labelJsonPath: '$.instanceStatuses.*.name',
         valueJsonPath: '$.instanceStatuses.*.id',

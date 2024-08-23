@@ -114,7 +114,8 @@ public class IdStreamer {
         fullQuery = fullQuery.unionAll((Select<Record1<String[]>>) innerQuery);
       }
     }
-    log.debug("Full query: {}", fullQuery);
+    log.info("Full query: {}", fullQuery);
+    log.info("YYZ");
 
     try (
       Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
@@ -122,7 +123,12 @@ public class IdStreamer {
         .stream()
         // This is something we may want to revisit. This implementation is a bit hackish for cross-tenant queries,
         // though it does work
-        .map(row -> row.getValue(idValueGetter));
+        .map(row -> {
+          // This may be problem area
+          String[] rowValue = row.getValue(idValueGetter);
+//          log.info("Row value: {}", (Object) rowValue);
+          return rowValue;
+        });
       Stream<List<String[]>> idsStream = StreamHelper.chunk(idStream, batchSize)
     ) {
       var total = new AtomicInteger();

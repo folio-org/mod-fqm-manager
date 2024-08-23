@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
+import static org.jooq.impl.DSL.trueCondition;
 
 @Repository
 @Log4j2
@@ -64,35 +65,54 @@ public class EntityTypeRepository {
   }
 
   public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
+//    log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
+    String tableName = tenantId == null ? TABLE_NAME : tenantId + "_mod_fqm_manager." + TABLE_NAME;
     log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
-    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId == null ? "" : tenantId, tenantIdKey -> {
-        String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
-        Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
-      Map<String, EntityType> rawEntityTypes = readerJooqContext
-        .select(definitionField)
-        .from(table(tableName))
-        .fetch(definitionField)
-        .stream()
-        .map(this::unmarshallEntityType)
-        .collect(Collectors.toMap(EntityType::getId, Function.identity()));
+    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
+    Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
+    return readerJooqContext
+      .select(definitionField)
+      .from(table(tableName))
+      .where(entityTypeIdCondition)
+      .fetch(definitionField)
+      .stream()
+      .map(this::unmarshallEntityType);
+//      .map(entityType -> {
+//        String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
+//        if (customFieldsEntityTypeId != null) {
+//          entityType.getColumns().addAll(fetchColumnNamesForCustomFields(UUID.fromString(customFieldsEntityTypeId, entityType));
+//        }
+//        return entityType;
+//      });
 
-      return rawEntityTypes.values().stream()
-        .map(entityType -> {
-          String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
-          if (customFieldsEntityTypeId != null) {
-            entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
-          }
-          return entityType;
-        })
-        .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
-      }
-    );
-
-    if (isEmpty(entityTypeIds)) {
-      return entityTypes.values().stream();
-    }
-    return entityTypeIds.stream().filter(entityTypes::containsKey).map(entityTypes::get);
+//    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId == null ? "" : tenantId, tenantIdKey -> {
+//        String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
+//        Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
+//      Map<String, EntityType> rawEntityTypes = readerJooqContext
+//        .select(definitionField)
+//        .from(table(tableName))
+//        .fetch(definitionField)
+//        .stream()
+//        .map(this::unmarshallEntityType)
+//        .collect(Collectors.toMap(EntityType::getId, Function.identity()));
+//
+//      return rawEntityTypes.values().stream()
+//        .map(entityType -> {
+//          String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
+//          if (customFieldsEntityTypeId != null) {
+//            entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
+//          }
+//          return entityType;
+//        })
+//        .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
+//      }
+//    );
+//
+//    if (isEmpty(entityTypeIds)) {
+//      return entityTypes.values().stream();
+//    }
+//    return entityTypeIds.stream().filter(entityTypes::containsKey).map(entityTypes::get);
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {

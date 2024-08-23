@@ -65,15 +65,16 @@ class IdStreamerTest {
       SQLDialect.POSTGRES
     );
 
+    executionContext = mock(FolioExecutionContext.class);
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
       readerContext,
       context,
       new ObjectMapper(),
-      0
-    );
+      executionContext,
+      0);
     localizationService = mock(LocalizationService.class);
     ecsClient = mock(SimpleHttpClient.class);
-    executionContext = mock(FolioExecutionContext.class);
+
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
     CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, null);
     this.idStreamer =

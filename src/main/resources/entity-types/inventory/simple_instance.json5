@@ -985,17 +985,17 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
     },
-    {
-      name: 'status_updated_date',
-      sourceAlias: 'inst',
-      dataType: {
-        dataType: 'dateType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
-    },
+//    {
+//      name: 'status_updated_date',
+//      sourceAlias: 'inst',
+//      dataType: {
+//        dataType: 'dateType',
+//      },
+//      isIdColumn: false,
+//      queryable: true,
+//      visibleByDefault: false,
+//      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
+//    },
     {
       name: 'tags',
       sourceAlias: 'inst',

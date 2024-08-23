@@ -161,6 +161,21 @@ class CrossTenantQueryServiceTest {
   }
 
   @Test
+  void shouldQueryCentralTenantForSharedCompositeInstances() {
+    String tenantId = "tenant_03";
+    List<String> expectedTenants = List.of("tenant_03", "tenant_01");
+    EntityType instanceEntityType = new EntityType()
+      .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
+      .crossTenantQueriesEnabled(true);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
+
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(instanceEntityType, false);
+    assertEquals(expectedTenants, actualTenants);
+  }
+
+  @Test
   void shouldGetCentralTenantId() {
     when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
     String expectedId = "tenant_01";

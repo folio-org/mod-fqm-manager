@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.folio.fqm.service.EntityTypeService.SIMPLE_INSTANCES_ID;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceTest {
@@ -422,7 +423,33 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnSourceTenantIdIn() {
+  void shouldIncludeCentralTenantIdInResponseForSimpleInstanceEntityType() {
+    UUID entityTypeId = UUID.fromString(SIMPLE_INSTANCES_ID);
+    String valueColumnName = "this_is_a_tenant_id_column";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("tenant-id-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+          .name("tenant_id")  // The special FQM source uses "tenant_id" as the name of the currency value source
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1"));
+    when(crossTenantQueryService.getCentralTenantId()).thenReturn("central");
+
+    List<ValueWithLabel> actualColumnValues = entityTypeService
+      .getFieldValues(entityTypeId, valueColumnName, "")
+      .getContent();
+
+    // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
+    assertEquals(actualColumnValues, List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("central").label("central")));
+  }
+
+  @Test
+  void shouldReturnSourceTenantId() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "this_is_a_source_tenant_id_column";
     EntityType entityType = new EntityType()
@@ -463,14 +490,12 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1"));
-    when(crossTenantQueryService.getCentralTenantId()).thenReturn("central");
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
       .getContent();
 
-
-    // Check the that the response contains both the central and member tenant
-    assertEquals(actualColumnValues, List.of(new ValueWithLabel("central").label("central"), new ValueWithLabel("tenant1").label("tenant1")));
+    // For entity types other than simple_instances, response should contain only current tenant id
+    assertEquals(actualColumnValues, List.of(new ValueWithLabel("tenant1").label("tenant1")));
   }
 }

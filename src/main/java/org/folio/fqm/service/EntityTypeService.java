@@ -30,6 +30,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class EntityTypeService {
 
+  static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
@@ -153,13 +154,15 @@ public class EntityTypeService {
         .toList();
       return new ColumnValues().content(tenantValues);
     } else {
-      // tenant is not central tenant, but we need to provide central tenant id as an available value
-      String centralTenantId = crossTenantQueryService.getCentralTenantId();
       List<ValueWithLabel> tenantList = new ArrayList<>();
-      if (centralTenantId != null && !centralTenantId.equals(tenants.get(0))) {
-        tenantList.add(new ValueWithLabel().value(centralTenantId).label(centralTenantId));
-      }
       tenantList.add(new ValueWithLabel().value(tenants.get(0)).label(tenants.get(0)));
+      if (SIMPLE_INSTANCES_ID.equals(entityType.getId())) {
+        // tenant is not central tenant, but we need to provide central tenant id as an available value
+        String centralTenantId = crossTenantQueryService.getCentralTenantId();
+        if (centralTenantId != null && !centralTenantId.equals(tenants.get(0))) {
+          tenantList.add(new ValueWithLabel().value(centralTenantId).label(centralTenantId));
+        }
+      }
       return new ColumnValues().content(tenantList);
     }
   }

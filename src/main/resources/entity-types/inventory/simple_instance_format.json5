@@ -1,0 +1,98 @@
+{
+  id: 'c44d8ed5-1e4a-4017-9975-1ea275573fe4',
+  name: 'Simple instance format details',
+  sources: [
+    {
+      alias: 'instance_format',
+      type: 'db',
+      target: 'src_inventory_instance_format',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+      source: {
+        entityTypeId: 'c44d8ed5-1e4a-4017-9975-1ea275573fe4',
+        columnName: 'id',
+      },
+      valueSourceApi: {
+        path: 'instance-formats',
+        valueJsonPath: '$.instanceFormats.id',
+        labelJsonPath: '$.instanceFormats.id',
+      },
+    },
+    {
+      name: 'code',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+    },
+    {
+      name: 'name',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      idColumnName: 'id',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        entityTypeId: 'c44d8ed5-1e4a-4017-9975-1ea275573fe4',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'instance-formats',
+        valueJsonPath: '$.instanceFormats.id',
+        labelJsonPath: '$.instanceFormats.*.name',
+      },
+    },
+    {
+      name: 'source',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'metadata_created_date',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_updated_date',
+      sourceAlias: 'instance_format',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+  ],
+}

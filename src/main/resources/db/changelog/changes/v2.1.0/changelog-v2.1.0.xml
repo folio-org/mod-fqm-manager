@@ -167,4 +167,16 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_instance_format" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_format" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_format">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_format
+    </createView>
+  </changeSet>
+
+
 </databaseChangeLog>

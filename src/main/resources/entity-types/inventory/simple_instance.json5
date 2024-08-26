@@ -10,13 +10,6 @@
       target: 'src_inventory_instance',
     },
   ],
-  requiredPermissions: [
-    'inventory-storage.instances.item.get',
-    "inventory-storage.contributor-name-types.collection.get",
-    "inventory-storage.contributor-types.collection.get",
-    "inventory-storage.statistical-codes.collection.get",
-    "inventory-storage.statistical-code-types.collection.get"
-  ],
   columns: [
     {
       name: 'id',
@@ -27,7 +20,6 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
-      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -39,7 +31,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       valueGetter: ':sourceAlias.created_by',
     },
     {
@@ -51,7 +42,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
-      essential: true,
       valueGetter: ':sourceAlias.creation_date',
     },
     {
@@ -63,7 +53,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
     {
@@ -76,9 +65,13 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
-      essential: true,
-      filterValueGetter: "\"left\"(lower((:sourceAlias.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
-      valueFunction: '"left"(lower(:value), 600)'
+      filterValueGetter: "\"left\" (\
+        lower(\
+          (:sourceAlias.jsonb->'metadata'::text)->>'updatedDate'::text\
+        ),\
+        600\
+      )",
+      valueFunction: '"left" (lower(:value), 600)',
     },
     {
       name: 'complete_updated_date',
@@ -89,7 +82,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       valueGetter: ':sourceAlias.complete_updated_date',
     },
     {
@@ -100,7 +92,6 @@
       },
       isIdColumn: false,
       queryable: true,
-      essential: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.instancetypeid',
     },
@@ -112,7 +103,6 @@
       },
       isIdColumn: false,
       queryable: true,
-      essential: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.modeofissuanceid',
     },
@@ -125,9 +115,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
-      valueFunction: '(:value)::integer'
+      valueFunction: '(:value)::integer',
     },
     {
       name: 'hrid',
@@ -139,9 +128,10 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
-      essential: true,
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'hrid'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
     },
     {
       name: 'match_key',
@@ -152,7 +142,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'matchKey'",
     },
     {
@@ -164,7 +153,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
-      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },
     {
@@ -176,10 +164,17 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
-      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'title'",
-      filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> \'title\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
+      filterValueGetter: '"left" (\
+        lower(\
+          ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>\'title\'::text)\
+        ),\
+        600\
+      )',
+      valueFunction: '"left" (\
+        lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value)),\
+        600\
+      )',
     },
     {
       name: 'index_title',
@@ -228,7 +223,6 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'alternativeTitles'",
     },
     {
@@ -242,7 +236,6 @@
       },
       isIdColumn: false,
       queryable: false,
-      essential: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -267,7 +260,6 @@
         },
       },
       isIdColumn: false,
-      essential: true,
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(\
@@ -287,7 +279,6 @@
     {
       name: 'identifiers',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -400,7 +391,6 @@
         },
       },
       isIdColumn: false,
-      essential: true,
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'contributors'",
@@ -416,7 +406,6 @@
       },
       isIdColumn: false,
       queryable: false,
-      essential: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -435,7 +424,6 @@
     {
       name: 'classifications',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -474,7 +462,6 @@
     {
       name: 'publication',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -560,7 +547,6 @@
     {
       name: 'publication_range',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -586,7 +572,6 @@
     {
       name: 'publication_period_start',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'integerType',
       },
@@ -598,7 +583,6 @@
     {
       name: 'publication_period_end',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'integerType',
       },
@@ -610,7 +594,6 @@
     {
       name: 'electronic_access',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -682,7 +665,6 @@
     {
       name: 'instance_format_ids',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -708,7 +690,6 @@
     {
       name: 'physical_descriptions',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -734,7 +715,6 @@
     {
       name: 'languages',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -759,12 +739,11 @@
       source: {
         entityTypeId: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
         columnName: 'languages',
-      }
+      },
     },
     {
       name: 'notes',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -824,7 +803,6 @@
     {
       name: 'administrative_notes',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -850,7 +828,6 @@
     {
       name: 'cataloged_date',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'dateType',
       },
@@ -862,7 +839,6 @@
     {
       name: 'previously_held',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'booleanType',
       },
@@ -884,7 +860,6 @@
     {
       name: 'staff_suppress',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'booleanType',
       },
@@ -906,7 +881,6 @@
     {
       name: 'discovery_suppress',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'booleanType',
       },
@@ -914,8 +888,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
-      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'discoverySuppress\'::text), 600)',
-      valueFunction: '"left"(lower(:value), 600)',
+      filterValueGetter: '"left" (lower(:sourceAlias.jsonb->>\'discoverySuppress\'::text), 600)',
+      valueFunction: '"left" (lower(:value), 600)',
       values: [
         {
           value: 'true',
@@ -930,7 +904,6 @@
     {
       name: 'statistical_code_ids',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -956,7 +929,6 @@
     {
       name: 'statistical_code_names',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -966,7 +938,16 @@
       idColumnName: 'statistical_code_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
+      valueGetter: "(\
+        SELECT\
+          array_agg(statcode.statistical_code) FILTER (\
+            WHERE\
+              (statcode.statistical_code) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text((:sourceAlias.jsonb->'statisticalCodeIds'::text)) record (value)\
+          JOIN drv_inventory_statistical_code_full statcode ON (record.value::text)=statcode.id::text\
+      )",
       source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
         columnName: 'statistical_code',
@@ -975,27 +956,14 @@
     {
       name: 'status_id',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
-      hidden: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
     },
-//    {
-//      name: 'status_updated_date',
-//      sourceAlias: 'inst',
-//      dataType: {
-//        dataType: 'dateType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
-//    },
     {
       name: 'tags',
       sourceAlias: 'inst',
@@ -1008,7 +976,6 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      essential: true,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text) FILTER (\
@@ -1032,7 +999,6 @@
     {
       name: 'nature_of_content_term_ids',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -1058,23 +1024,20 @@
     {
       name: 'shared',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "CASE \
-                      WHEN '${central_tenant_id}' = '${tenant_id}' \
-                        THEN 'Shared'\
-                      ELSE \
-                        CASE \
-                          WHEN \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-folio' OR \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-marc' \
-                            THEN 'Shared' \
-                          ELSE 'Local' \
-                        END \
-                    END",
+      valueGetter: "CASE\
+        WHEN '${central_tenant_id}'='TENANT' THEN 'Shared'\
+        ELSE CASE\
+          WHEN \"left\" (lower(:sourceAlias.jsonb->>'source'::text), 600)='consortium-folio'\
+          OR \"left\" (lower(:sourceAlias.jsonb->>'source'::text), 600)='consortium-marc' THEN 'Shared'\
+          ELSE 'Local'\
+        END\
+      END",
       values: [
         {
           value: 'Shared',
@@ -1085,54 +1048,47 @@
           label: 'Local',
         },
       ],
-      ecsOnly: true,
     },
     {
       name: 'source_tenant_id',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "CASE \
-                      WHEN '${central_tenant_id}' = '${tenant_id}' \
-                        THEN '${tenant_id}' \
-                      ELSE \
-                        CASE \
-                          WHEN \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-folio' OR \"left\"(lower(:sourceAlias.jsonb ->> 'source'::text), 600) = 'consortium-marc' \
-                            THEN '${central_tenant_id}' \
-                          ELSE '${tenant_id}' \
-                        END \
-                    END",
+      valueGetter: "CASE\
+        WHEN '${central_tenant_id}'='TENANT' THEN 'TENANT'\
+        ELSE CASE\
+          WHEN \"left\" (lower(:sourceAlias.jsonb->>'source'::text), 600)='consortium-folio'\
+          OR \"left\" (lower(:sourceAlias.jsonb->>'source'::text), 600)='consortium-marc' THEN '${central_tenant_id}'\
+          ELSE 'TENANT'\
+        END\
+      END",
       source: {
         columnName: 'source_tenant_id',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         type: 'fqm',
         name: 'source_tenant_id',
       },
-      ecsOnly: true,
     },
     {
       name: 'tenant_id',
       sourceAlias: 'inst',
-      essential: true,
       dataType: {
         dataType: 'stringType',
       },
       isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "'${tenant_id}'",
+      valueGetter: "'TENANT'",
       source: {
         columnName: 'tenant_id',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         type: 'fqm',
-        name: 'tenant_id'
+        name: 'tenant_id',
       },
-      ecsOnly: false,
     },
     {
       name: 'jsonb',
@@ -1142,9 +1098,8 @@
       },
       isIdColumn: false,
       queryable: false,
-      hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

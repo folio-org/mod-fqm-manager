@@ -696,14 +696,39 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
       )",
+    },
+    {
+      name: "format_names",
+      source: {
+        columnName: "format_names",
+        entityTypeId: "8fc4a9d2-7ccf-4233-afb8-796911839862"
+      },
+      dataType: {
+        dataType: "arrayType",
+        itemDataType: {
+          dataType: "stringType"
+        }
+      },
+      sourceAlias: "inst",
+      queryable: true,
+      idColumnName: "instance_format_ids",
+      valueSourceApi: {
+        path: 'instance-formats',
+        valueJsonPath: '$.instanceFormats.*.id',
+        labelJsonPath: '$.instanceFormats.*.name',
+      },
+      visibleByDefault: false,
+      valueFunction: "lower(:value)",
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)"
     },
     {
       name: 'physical_descriptions',

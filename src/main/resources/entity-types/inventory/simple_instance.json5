@@ -493,8 +493,8 @@
                 "dataType": "stringType"
               },
               "queryable": false,
-              "valueGetter": "(SELECT array_agg(ctype.name) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON elems.value->>'classificationTypeId' = ctype.id)",
-              "filterValueGetter": "(SELECT array_agg(lower(ctype.name)) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON elems.value->>'classificationTypeId' = ctype.id)",
+              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'classifications'->> 'classificationTypeId'::text)) record(value) JOIN src_inventory_classification_type a ON (record.value::text) = a.id::text)",
+              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'classifications'->> 'classificationTypeId'::text)) record(value) JOIN src_inventory_classification_type a ON (record.value::text) = a.id::text)",
               "valueFunction": "lower(:value)"
             }
           ],

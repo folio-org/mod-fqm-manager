@@ -498,8 +498,8 @@
                 "columnName": "type_name"
               },
               "queryable": false,
-              "valueGetter": "(SELECT array_agg(ctype.name) FROM jsonb_array_elements_text(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems.value->>'classificationTypeId') = ctype.id::text)",
-              "filterValueGetter": "(SELECT array_agg(lower(ctype.name)) FROM jsonb_array_elements_text(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems.value->>'classificationTypeId') = ctype.id::text)",
+              "valueGetter": "(SELECT array_agg(ctype.jsonb ->> 'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems->>'classificationTypeId') = ctype.id::text)",
+              "filterValueGetter": "(SELECT array_agg(lower(ctype.jsonb ->> 'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems->>'classificationTypeId') = ctype.id::text)",
               "valueFunction": "lower(:value)"
             }
           ],

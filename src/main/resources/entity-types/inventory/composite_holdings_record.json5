@@ -2,6 +2,7 @@
   id: '8418e512-feac-4a6a-a56d-9006aab31e33',
   name: 'composite_holdings_record',
   private: false,
+  crossTenantQueriesEnabled: true,
   sources: [
     {
       alias: 'holdings',

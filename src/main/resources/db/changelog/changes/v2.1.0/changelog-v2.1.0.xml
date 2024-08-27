@@ -152,6 +152,7 @@
                   , 'c8364551-7e51-475d-8473-88951181452d' -- src_users_departments
                   , 'e627a89b-682b-41fe-b532-f4262020a451' -- src_users_addresstype
                   , 'e611264d-377e-4d87-a93f-f1ca327d3db0' -- src_users_groups
+                  , '073b554a-5b5c-4552-a51c-01448a1643b0' -- simple_mode_of_issuance (removed post-poc, as part of MODFQMMGR-427)
                   )
     </sql>
   </changeSet>

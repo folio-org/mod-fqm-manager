@@ -9,13 +9,23 @@
       type: 'db',
       target: 'src_inventory_instance',
     },
+    {
+      type: 'db',
+      alias: 'mode_of_issuance',
+      target: 'src_inventory_mode_of_issuance',
+      join: {
+        type: 'left join',
+        joinTo: 'inst',
+        condition: ':this.id = :that.modeOfIssuanceId',
+      },
+    },
   ],
   requiredPermissions: [
     'inventory-storage.instances.item.get',
-    "inventory-storage.contributor-name-types.collection.get",
-    "inventory-storage.contributor-types.collection.get",
-    "inventory-storage.statistical-codes.collection.get",
-    "inventory-storage.statistical-code-types.collection.get"
+    'inventory-storage.contributor-name-types.collection.get',
+    'inventory-storage.contributor-types.collection.get',
+    'inventory-storage.statistical-codes.collection.get',
+    'inventory-storage.statistical-code-types.collection.get',
   ],
   columns: [
     {
@@ -78,7 +88,7 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
       essential: true,
       filterValueGetter: "\"left\"(lower((:sourceAlias.jsonb -> 'metadata'::text) ->> 'updatedDate'::text), 600)",
-      valueFunction: '"left"(lower(:value), 600)'
+      valueFunction: '"left"(lower(:value), 600)',
     },
     {
       name: 'complete_updated_date',
@@ -112,9 +122,22 @@
       },
       isIdColumn: false,
       queryable: true,
-      essential: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.modeofissuanceid',
+    },
+    {
+      name: 'mode_of_issuance_name',
+      sourceAlias: 'mode_of_issuance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'version',
@@ -127,7 +150,7 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
-      valueFunction: '(:value)::integer'
+      valueFunction: '(:value)::integer',
     },
     {
       name: 'hrid',
@@ -141,7 +164,7 @@
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
       essential: true,
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'match_key',
@@ -179,7 +202,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'title'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> \'title\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'index_title',
@@ -706,29 +729,29 @@
       )",
     },
     {
-      name: "format_names",
+      name: 'format_names',
       source: {
-        columnName: "format_names",
-        entityTypeId: "8fc4a9d2-7ccf-4233-afb8-796911839862"
+        columnName: 'format_names',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
       },
       dataType: {
-        dataType: "arrayType",
+        dataType: 'arrayType',
         itemDataType: {
-          dataType: "stringType"
-        }
+          dataType: 'stringType',
+        },
       },
-      sourceAlias: "inst",
+      sourceAlias: 'inst',
       queryable: true,
-      idColumnName: "instance_format_ids",
+      idColumnName: 'instance_format_ids',
       valueSourceApi: {
         path: 'instance-formats',
         valueJsonPath: '$.instanceFormats.*.id',
         labelJsonPath: '$.instanceFormats.*.name',
       },
       visibleByDefault: false,
-      valueFunction: "lower(:value)",
+      valueFunction: 'lower(:value)',
       valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)"
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
     },
     {
       name: 'physical_descriptions',
@@ -784,7 +807,7 @@
       source: {
         entityTypeId: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
         columnName: 'languages',
-      }
+      },
     },
     {
       name: 'notes',
@@ -1010,17 +1033,17 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
     },
-//    {
-//      name: 'status_updated_date',
-//      sourceAlias: 'inst',
-//      dataType: {
-//        dataType: 'dateType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
-//    },
+    //    {
+    //      name: 'status_updated_date',
+    //      sourceAlias: 'inst',
+    //      dataType: {
+    //        dataType: 'dateType',
+    //      },
+    //      isIdColumn: false,
+    //      queryable: true,
+    //      visibleByDefault: false,
+    //      valueGetter: ":sourceAlias.jsonb->>'statusUpdatedDate'",
+    //    },
     {
       name: 'tags',
       sourceAlias: 'inst',
@@ -1155,7 +1178,7 @@
         columnName: 'tenant_id',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         type: 'fqm',
-        name: 'tenant_id'
+        name: 'tenant_id',
       },
       ecsOnly: false,
     },
@@ -1169,7 +1192,7 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

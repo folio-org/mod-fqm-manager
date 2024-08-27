@@ -455,65 +455,14 @@
       )",
       valueFunction: 'lower(:value)',
     },
-//    {
-//      name: 'classifications',
-//      sourceAlias: 'inst',
-//      essential: true,
-//      dataType: {
-//        dataType: 'arrayType',
-//        itemDataType: {
-//          dataType: 'objectType',
-//          properties: [
-//            {
-//              name: 'number',
-//              property: 'classificationNumber',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'classificationNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
-//            {
-//              name: 'type_id',
-//              property: 'classificationTypeId',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
-//            {
-//              "name": "type_name",
-//              "property": "name",
-//              "dataType": {
-//                "dataType": "stringType"
-//              },
-//              "queryable": false,
-//              "valueGetter": "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'classifications'->> 'classificationTypeId'::text)) record(value) JOIN src_inventory_classification_type a ON (record.value::text) = a.id::text)",
-//              "filterValueGetter": "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'classifications'->> 'classificationTypeId'::text)) record(value) JOIN src_inventory_classification_type a ON (record.value::text) = a.id::text)",
-//              "valueFunction": "lower(:value)"
-//            }
-//          ],
-//        },
-//      },
-//      isIdColumn: false,
-//      queryable: false,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->>'classifications'",
-//    },
-
     {
-      name: "classifications",
+      name: 'classifications',
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: "arrayType",
+        dataType: 'arrayType',
         itemDataType: {
-          dataType: "objectType",
+          dataType: 'objectType',
           properties: [
             {
               name: 'number',
@@ -527,29 +476,33 @@
               valueFunction: 'lower(:value)',
             },
             {
-              name: "type_id",
-              property: "classificationTypeId",
+              name: 'type_id',
+              property: 'classificationTypeId',
               dataType: {
-                dataType: "rangedUUIDType"
-              },
-              "queryable": false,
-              "filterValueGetter": "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS acc_obj, jsonb_array_elements(acc_obj->'classificationTypeId') as elems )"
-            },
-            {
-              name: "type_name",
-              property: "typeName",
-              dataType: {
-                dataType: "stringType"
+                dataType: 'rangedUUIDType'
               },
               queryable: false,
-              filterValueGetter: "( SELECT array_agg(lower(au.jsonb->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') as acc, jsonb_array_elements(acc->'classificationTypeId') as acdId JOIN src_inventory_classification_type au ON au.id = (acdId#>>''{}'')::uuid )"
+              valueGetter: "( SELECT array_agg(elems#>>'{}') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS acc_obj, jsonb_array_elements(acc_obj->'classificationTypeId') as elems )",
+              filterValueGetter: "( SELECT array_agg(lower(elems#>>'{}')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS acc_obj, jsonb_array_elements(acc_obj->'classificationTypeId') as elems )",
+              valueFunction: 'lower(:value)'
+            },
+            {
+              name: 'type_name',
+              property: 'typeName',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(au.jsonb->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') as acc, jsonb_array_elements(acc->'classificationTypeId') as acdId JOIN src_inventory_classification_type au ON au.id = (acdId#>>'{}')::uuid )",
+              filterValueGetter: "( SELECT array_agg(lower(au.jsonb->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') as acc, jsonb_array_elements(acc->'classificationTypeId') as acdId JOIN src_inventory_classification_type au ON au.id = (acdId#>>'{}')::uuid )",
+              valueFunction: 'lower(:value)'
             }
           ]
         }
       },
       queryable: false,
       isIdColumn: false,
-      valueGetter: "(SELECT jsonb_agg(cl || jsonb_build_object('typeName', COALESCE(( SELECT array_agg(au.jsonb->>'name') FROM jsonb_array_elements(cl->'classificationTypeId') as acdId JOIN src_inventory_classification_type au on au.id = (acdId#>>''{}'')::uuid ), array []::text[])))::text FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') as cl)",
+      valueGetter: "(SELECT jsonb_agg(cl || jsonb_build_object('typeName', COALESCE(( SELECT array_agg(au.jsonb->>'name') FROM jsonb_array_elements(cl->'classificationTypeId') as acdId JOIN src_inventory_classification_type au on au.id = (acdId#>>'{}')::uuid ), array []::text[])))::text FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') as cl)",
       visibleByDefault: false
     },
     {

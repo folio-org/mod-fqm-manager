@@ -482,8 +482,8 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements_text(:sourceAlias.jsonb->'classifications') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements_text(:sourceAlias.jsonb->'classifications') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
@@ -492,14 +492,9 @@
               "dataType": {
                 "dataType": "stringType"
               },
-              "idColumnName": "type_id",
-              "source": {
-                "entityTypeId": "8fc4a9d2-7ccf-4233-afb8-796911839862",
-                "columnName": "type_name"
-              },
               "queryable": false,
-              "valueGetter": "(SELECT array_agg(ctype.jsonb ->> 'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems->>'classificationTypeId') = ctype.id::text)",
-              "filterValueGetter": "(SELECT array_agg(lower(ctype.jsonb ->> 'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON lower(elems->>'classificationTypeId') = ctype.id::text)",
+              "valueGetter": "(SELECT array_agg(ctype.name) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON elems.value->>'classificationTypeId' = ctype.id)",
+              "filterValueGetter": "(SELECT array_agg(lower(ctype.name)) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems JOIN src_inventory_classification_type ctype ON elems.value->>'classificationTypeId' = ctype.id)",
               "valueFunction": "lower(:value)"
             }
           ],

@@ -17,7 +17,6 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
 
   public static final UUID REMOVED_SIMPLE_MODE_OF_ISSUANCE = UUID.fromString("073b554a-5b5c-4552-a51c-01448a1643b0");
   public static final UUID COMPOSITE_INSTANCES = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
-  public static final UUID SIMPLE_INSTANCE = UUID.fromString("8fc4a9d2-7ccf-4233-afb8-796911839862");
 
   @Override
   public String getLabel() {

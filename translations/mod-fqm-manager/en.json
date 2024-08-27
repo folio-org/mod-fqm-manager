@@ -775,6 +775,7 @@
   "entityType.simple_instance.identifiers.value._qualified": "Identifiers value",
   "entityType.simple_instance.index_title": "Index title",
   "entityType.simple_instance.instance_format_ids": "Instance format UUIDs",
+  "entityType.simple_instance.format_names": "Format names",
   "entityType.simple_instance.instance_type_id": "Instance type UUID",
   "entityType.simple_instance.languages": "Languages",
   "entityType.simple_instance.match_key": "Match key",

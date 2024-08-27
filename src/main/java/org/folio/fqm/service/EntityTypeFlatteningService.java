@@ -90,16 +90,14 @@ public class EntityTypeFlatteningService {
             .stream()
             .filter(col -> !Boolean.TRUE.equals(source.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
             .map(col -> col
-              .name(aliasPrefix + source.getAlias() + '.' + col.getName())
-              .idColumnName(col.getIdColumnName() == null ? null : aliasPrefix + source.getAlias() + '.' + col.getIdColumnName())
+              // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source aliass in flattenedSourceDefinition
+              .name(source.getAlias() + '.' + col.getName())
+              .idColumnName(col.getIdColumnName() == null ? null : source.getAlias() + '.' + col.getIdColumnName())
             )
         );
         // Copy each sub-source into the flattened entity type
         copySubSources(source, flattenedSourceDefinition, renamedAliases, aliasPrefix)
-          .forEach(subSource -> {
-            flattenedEntityType.addSourcesItem(subSource);
-            renamedAliases.put(aliasPrefix + subSource.getAlias(), subSource.getAlias());
-          });
+          .forEach(flattenedEntityType::addSourcesItem);
       }
     }
 

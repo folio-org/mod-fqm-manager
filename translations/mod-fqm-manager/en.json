@@ -779,7 +779,7 @@
   "entityType.simple_instance.languages": "Languages",
   "entityType.simple_instance.match_key": "Match key",
   "entityType.simple_instance.mode_of_issuance_id": "Mode of issuance UUID",
-  "entityType.simple_instance.mode_of_issuance": "Mode of issuance",
+  "entityType.simple_instance.mode_of_issuance_name": "Mode of issuance",
   "entityType.simple_instance.nature_of_content_term_ids": "Nature of content term UUIDs",
   "entityType.simple_instance.notes": "Notes",
   "entityType.simple_instance.notes.instance_note_type_id": "Type UUID",

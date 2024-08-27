@@ -25,7 +25,8 @@ public class MigrationService {
 
   public static final UUID REMOVED_ENTITY_TYPE_ID = UUID.fromString("deadbeef-dead-dead-dead-deaddeadbeef");
 
-  protected static final String CURRENT_VERSION = "1";
+  protected static final String CURRENT_VERSION = "2";
+
   // TODO: replace this with current version in the future?
   protected static final String DEFAULT_VERSION = "0";
 

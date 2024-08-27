@@ -37,12 +37,30 @@ export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId
   return await response.text();
 }
 
+export async function getColumns(fqmConnection: FqmConnection, entityType: EntityType): Promise<string[]> {
+  console.log('Getting columns for', entityType.name, entityType.id);
+  const columns = entityType.columns?.map((column) => column.name) ?? [];
+
+  for (const source of entityType.sources ?? []) {
+    if (source.type === 'entity-type') {
+      const sourceEntityType = await fetchEntityType(fqmConnection, source.id!);
+      const sourceEntity = JSON.parse(sourceEntityType) as EntityType;
+      columns.push(...(await getColumns(fqmConnection, sourceEntity)).map((c) => `${source.alias}.${c}`));
+    }
+  }
+
+  return columns;
+}
+
 export async function runQuery(fqmConnection: FqmConnection, entityType: EntityType, query: string) {
+  const fields = await getColumns(fqmConnection, entityType);
+  console.log('Resolved fields for', entityType.name, ':', fields);
+
   const response = await fetch(
     `http://${fqmConnection.host}:${fqmConnection.port}/query?${new URLSearchParams({
       query,
       entityTypeId: entityType.id,
-      fields: entityType.columns?.map((column) => column.name).join(',') ?? '',
+      fields: fields.join(','),
       limit: `${fqmConnection.limit}`,
     })}`,
     {

@@ -132,7 +132,7 @@ public class EntityTypeService {
           case "currency" -> {
             return getCurrencyValues();
           }
-          case "tenant_id", "source_tenant_id" -> {
+          case "tenant_id" -> {
             return getTenantIds(entityType);
           }
           default -> {

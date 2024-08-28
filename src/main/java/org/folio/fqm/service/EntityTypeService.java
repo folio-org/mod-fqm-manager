@@ -192,6 +192,7 @@ public class EntityTypeService {
         results.add(new ValueWithLabel().value(value).label(label));
       }
     }
+    results.sort(Comparator.comparing(ValueWithLabel::getLabel));
     return new ColumnValues().content(results);
   }
 

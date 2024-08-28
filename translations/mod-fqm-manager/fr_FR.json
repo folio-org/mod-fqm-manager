@@ -1397,8 +1397,6 @@
     "entityType.simple_instance_type.name": "Nom",
     "entityType.simple_instance_type.code": "Code",
     "entityType.simple_instance_type.id": "Type UUID",
-    "entityType.simple_instance.source_tenant_id": "Source tenant ID",
-    "entityType.simple_instance.source_tenant_name": "Source tenant name",
     "entityType.simple_group_details.jsonb": "JSONB",
     "entityType.simple_material_type_details.jsonb": "JSONB",
     "entityType.simple_service_point_detail.jsonb": "JSONB",

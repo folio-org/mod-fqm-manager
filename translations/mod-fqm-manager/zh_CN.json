@@ -1397,8 +1397,6 @@
     "entityType.simple_instance_type.name": "名称",
     "entityType.simple_instance_type.code": "代码",
     "entityType.simple_instance_type.id": "类型 UUID",
-    "entityType.simple_instance.source_tenant_id": "源租户ID",
-    "entityType.simple_instance.source_tenant_name": "源租户名称",
     "entityType.simple_group_details.jsonb": "JSONB",
     "entityType.simple_material_type_details.jsonb": "JSONB",
     "entityType.simple_service_point_detail.jsonb": "JSONB",

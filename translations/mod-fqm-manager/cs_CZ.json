@@ -1397,8 +1397,6 @@
     "entityType.simple_instance_type.name": "Jméno",
     "entityType.simple_instance_type.code": "Kód",
     "entityType.simple_instance_type.id": "UUID typu",
-    "entityType.simple_instance.source_tenant_id": "ID zdroje nájemce",
-    "entityType.simple_instance.source_tenant_name": "Název zdroje nájemce",
     "entityType.simple_group_details.jsonb": "JSONB",
     "entityType.simple_material_type_details.jsonb": "JSONB",
     "entityType.simple_service_point_detail.jsonb": "JSONB",

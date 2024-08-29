@@ -126,7 +126,11 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        return getFieldValuesFromEntityType(entityType, fieldName, searchText);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null);
+
+        permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
+
+        return getFieldValuesFromEntityType(sourceEntityType, field.getSource().getColumnName(), searchText);
       } else if (field.getSource().getType() == SourceColumn.TypeEnum.FQM) {
         switch (Objects.requireNonNull(field.getSource().getName(), "Value sources with the FQM type require the source name to be configured")) {
           case "currency" -> {

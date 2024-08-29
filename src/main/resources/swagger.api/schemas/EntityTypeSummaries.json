@@ -4,6 +4,7 @@
   "type": "object",
   "properties": {
     "entityTypes": {
+      "description": "Entity type list",
       "type": "array",
       "items": {
         "$ref": "./EntityTypeSummary.json"

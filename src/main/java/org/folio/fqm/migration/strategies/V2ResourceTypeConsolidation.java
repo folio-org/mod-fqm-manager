@@ -9,26 +9,26 @@ import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
 
 /**
- * Version 1 -> 2, decouples simple_mode_of_issuance entity type from simple_instances
- * @see https://folio-org.atlassian.net/browse/MODFQMMGR-427
+ * Version 2 -> 3, decouples simple_mode_of_issuance entity type from composite_instances
+ * @see https://folio-org.atlassian.net/browse/MODFQMMGR-429
  */
-public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrategy {
+public class V2ResourceTypeConsolidation extends AbstractSimpleMigrationStrategy {
 
   public static final UUID COMPOSITE_INSTANCES = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
 
   @Override
   public String getLabel() {
-    return "V1 -> V2 Removed simple_mode_of_issuance (MODFQMMGR-427)";
+    return "V2 -> V3 Exposing resource_type directly in composite_instances (MODFQMMGR-429)";
   }
 
   @Override
   public String getSourceVersion() {
-    return "1";
+    return "2";
   }
 
   @Override
   public String getTargetVersion() {
-    return "2";
+    return "3";
   }
 
   @Override
@@ -42,8 +42,8 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
       Map.entry(
         COMPOSITE_INSTANCES,
         Map.ofEntries(
-          Map.entry("mode_of_issuance.id", "instance.mode_of_issuance_id"),
-          Map.entry("mode_of_issuance.name", "instance.mode_of_issuance_name")
+          Map.entry("instance_type.id", "instance.instance_type_id"),
+          Map.entry("instance_type.name", "instance.instance_type_name")
         )
       )
     );

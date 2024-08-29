@@ -6,6 +6,7 @@ import MigrationHelper from '@/components/MigrationHelper';
 import ModuleInstaller from '@/components/ModuleInstaller';
 import PostgresConnector from '@/components/PostgresConnector';
 import QueryTool from '@/components/QueryTool';
+import QueryValues from '@/components/QueryValues';
 import { EntityType, Schema } from '@/types';
 import { Box, Container, Drawer, Tab, Tabs } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -76,7 +77,7 @@ export default function EntryPoint() {
             <Tabs
               value={selectedTab}
               onChange={(_e, n) => {
-                if (n === 6) {
+                if (n === 7) {
                   setExpandedBottom((e) => !e);
                 } else {
                   setSelectedTab(n);
@@ -86,8 +87,9 @@ export default function EntryPoint() {
             >
               <Tab label="Hide" disabled={selectedTab === 0} />
               <Tab label="Module Installer" />
-              <Tab label="Check Validity" />
+              <Tab label="Check Flattening" />
               <Tab label="Query Tool" />
+              <Tab label="Column Values" />
               <Tab label="DB Inspector" />
               <Tab label="Migration Helper" />
               <Tab label={expandedBottom ? 'Collapse' : 'Expand'} />
@@ -104,9 +106,12 @@ export default function EntryPoint() {
                 <QueryTool socket={socket} entityType={currentEntityType} />
               </Box>
               <Box sx={{ display: selectedTab === 4 ? 'block' : 'none', p: 2 }}>
-                <DBInspector socket={socket} schema={schema} entityType={currentEntityType} />
+                <QueryValues socket={socket} entityType={currentEntityType} />
               </Box>
               <Box sx={{ display: selectedTab === 5 ? 'block' : 'none', p: 2 }}>
+                <DBInspector socket={socket} schema={schema} entityType={currentEntityType} />
+              </Box>
+              <Box sx={{ display: selectedTab === 6 ? 'block' : 'none', p: 2 }}>
                 <MigrationHelper />
               </Box>
             </Box>

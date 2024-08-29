@@ -78,6 +78,24 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
   return ((await response.json()).content as Record<string, string>[]) ?? [];
 }
 
+export async function runQueryForValues(fqmConnection: FqmConnection, entityType: EntityType, field: string) {
+  const response = await fetch(
+    `http://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityType.id}/columns/${field}/values`,
+    {
+      method: 'GET',
+      headers: {
+        'x-okapi-tenant': fqmConnection.tenant,
+      },
+    },
+  );
+
+  if (response.status !== 200) {
+    throw new Error(`Got ${response.status} ${response.statusText}\n${JSON.stringify(await response.json(), null, 2)}`);
+  }
+
+  return ((await response.json()).content as { value: string; label?: string }[]) ?? [];
+}
+
 export async function install(fqmConnection: FqmConnection) {
   const response = await fetch(`http://${fqmConnection.host}:${fqmConnection.port}/_/tenant`, {
     method: 'POST',

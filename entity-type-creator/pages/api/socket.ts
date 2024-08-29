@@ -1,4 +1,4 @@
-import { fetchEntityType, install, runQuery, uninstall, verifyFqmConnection } from '@/socket/fqm';
+import { fetchEntityType, install, runQuery, runQueryForValues, uninstall, verifyFqmConnection } from '@/socket/fqm';
 import {
   aggregateSchemaForAutocompletion,
   analyzeJsonb,
@@ -290,6 +290,46 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       } catch (e: any) {
         console.error('Error querying entity type', e);
         socket.emit('run-query-result', {
+          persisted: true,
+          queried: false,
+          queryError: e.message,
+        });
+      }
+    });
+
+    socket.on('run-query-values', async ({ entityType, field }: { entityType: EntityType; field: string }) => {
+      console.log('Running query for values of field', field, 'on', entityType.name);
+
+      if (!pg) {
+        socket.emit('run-query-values-result', {
+          persisted: false,
+          persistError: 'No Postgres connection',
+        });
+        return;
+      }
+
+      try {
+        await persistEntityType(pg, fqmConnection.tenant, entityType);
+        socket.emit('run-query-values-result', {
+          persisted: true,
+        });
+      } catch (e: any) {
+        console.error('Error persisting entity type', e);
+        socket.emit('run-query-values-result', {
+          persisted: false,
+          persistError: e.message,
+        });
+        return;
+      }
+
+      try {
+        socket.emit('run-query-values-result', {
+          persisted: true,
+          queryResults: await runQueryForValues(fqmConnection, entityType, field),
+        });
+      } catch (e: any) {
+        console.error('Error querying entity type', e);
+        socket.emit('run-query-values-result', {
           persisted: true,
           queried: false,
           queryError: e.message,

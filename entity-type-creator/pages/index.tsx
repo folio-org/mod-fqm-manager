@@ -86,7 +86,7 @@ export default function EntryPoint() {
             >
               <Tab label="Hide" disabled={selectedTab === 0} />
               <Tab label="Module Installer" />
-              <Tab label="Check Flattening" />
+              <Tab label="Check Validity" />
               <Tab label="Query Tool" />
               <Tab label="DB Inspector" />
               <Tab label="Migration Helper" />

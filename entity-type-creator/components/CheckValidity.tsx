@@ -62,8 +62,8 @@ export default function CheckValidity({
   return (
     <>
       <Typography>
-        Checks that <code>mod-fqm-manager</code> can successfully parse and flatten the JSON representation of the entity
-        type. Note that translations will not be updated here until the entity type is saved and the module is restarted.
+        Checks that <code>mod-fqm-manager</code> can successfully parse and handle the JSON representation of the entity
+        type.
       </Typography>
 
       <Button variant="outlined" onClick={() => run(entityType)}>

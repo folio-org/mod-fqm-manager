@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Entity Type Summary List",
+  "type": "object",
+  "properties": {
+    "entityTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "./EntityTypeSummary.json"
+      }
+    },
+    "_version": {
+      "description": "Current FQL version (same as /fqm/version returns)",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["entityTypes", "_version"]
+}

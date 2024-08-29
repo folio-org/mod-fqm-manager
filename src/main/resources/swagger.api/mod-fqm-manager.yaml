@@ -119,11 +119,7 @@ components:
       additionalProperties:
         type: object
     entityTypeSummaries:
-      type: array
-      items:
-        $ref: '#/components/schemas/entityTypeSummary'
-    entityTypeSummary:
-      $ref: schemas/EntityTypeSummaryDTO.json
+      $ref: schemas/EntityTypeSummaries.json
     purgedQueries:
       $ref: schemas/PurgedQueries.json
     dataRefreshResponse:

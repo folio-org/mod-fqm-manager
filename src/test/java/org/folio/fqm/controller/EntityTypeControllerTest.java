@@ -14,6 +14,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeService;
+import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -40,6 +41,9 @@ class EntityTypeControllerTest {
 
   @MockBean
   private EntityTypeService entityTypeService;
+
+  @MockBean
+  private MigrationService migrationService;
 
   @MockBean
   private FolioExecutionContext folioExecutionContext;
@@ -101,16 +105,20 @@ class EntityTypeControllerTest {
       .get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
+
     when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
+    when(migrationService.getLatestVersion()).thenReturn("newest coolest version");
+
     mockMvc
       .perform(requestBuilder)
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[0].id", is(expectedSummary.get(0).getId().toString())))
-      .andExpect(jsonPath("$.[0].label", is(expectedSummary.get(0).getLabel())))
-      .andExpect(jsonPath("$.[0].missingPermissions").doesNotExist())
-      .andExpect(jsonPath("$.[1].id", is(expectedSummary.get(1).getId().toString())))
-      .andExpect(jsonPath("$.[1].label", is(expectedSummary.get(1).getLabel())))
-      .andExpect(jsonPath("$.[1].missingPermissions").doesNotExist());
+      .andExpect(jsonPath("$.entityTypes.[0].id", is(expectedSummary.get(0).getId().toString())))
+      .andExpect(jsonPath("$.entityTypes.[0].label", is(expectedSummary.get(0).getLabel())))
+      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[1].id", is(expectedSummary.get(1).getId().toString())))
+      .andExpect(jsonPath("$.entityTypes.[1].label", is(expectedSummary.get(1).getLabel())))
+      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$._version", is("newest coolest version")));
 
     verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false);
     verifyNoMoreInteractions(entityTypeService);
@@ -143,8 +151,10 @@ class EntityTypeControllerTest {
       .get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
+
     when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
-    mockMvc.perform(requestBuilder).andExpect(status().isOk()).andExpect(jsonPath("$", is(expectedSummary)));
+
+    mockMvc.perform(requestBuilder).andExpect(status().isOk()).andExpect(jsonPath("$.entityTypes", is(expectedSummary)));
   }
 
   @Test

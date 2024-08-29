@@ -7,15 +7,13 @@ import java.util.function.Function;
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
-import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 
 /**
- * Version 1 -> 2, removes simple_mode_of_issuance entity type
+ * Version 1 -> 2, decouples simple_mode_of_issuance entity type from simple_instances
  * @see https://folio-org.atlassian.net/browse/MODFQMMGR-427
  */
 public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrategy {
 
-  public static final UUID REMOVED_SIMPLE_MODE_OF_ISSUANCE = UUID.fromString("073b554a-5b5c-4552-a51c-01448a1643b0");
   public static final UUID COMPOSITE_INSTANCES = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
 
   @Override
@@ -53,10 +51,7 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
 
   @Override
   public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
-    return Map.of(
-      REMOVED_SIMPLE_MODE_OF_ISSUANCE,
-      fql -> new RemovedEntityWarning("simple_mode_of_issuance", "simple_instance", fql)
-    );
+    return Map.of();
   }
 
   @Override

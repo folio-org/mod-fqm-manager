@@ -139,8 +139,8 @@
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
       source: {
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-        columnName: 'mode_of_issuance_name',
+        entityTypeId: '073b554a-5b5c-4552-a51c-01448a1643b0',
+        columnName: 'name',
       },
     },
     {

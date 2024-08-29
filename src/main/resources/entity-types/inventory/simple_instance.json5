@@ -19,6 +19,16 @@
         condition: ':this.id = :that.modeOfIssuanceId',
       },
     },
+    {
+      type: 'db',
+      alias: 'instance_type',
+      target: 'src_inventory_instance_type',
+      join: {
+        type: 'left join',
+        joinTo: 'inst',
+        condition: ':this.id = :that.instanceTypeId',
+      },
+    },
   ],
   requiredPermissions: [
     'inventory-storage.instances.item.get',
@@ -110,9 +120,29 @@
       },
       isIdColumn: false,
       queryable: true,
-      essential: true,
+      essential: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.instancetypeid',
+    },
+    {
+      name: 'instance_type_name',
+      sourceAlias: 'instance_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c',
+        columnName: 'name',
+      },
     },
     {
       name: 'mode_of_issuance_id',

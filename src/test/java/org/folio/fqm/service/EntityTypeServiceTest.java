@@ -176,7 +176,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("whatever")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
 
     ColumnValues expectedColumnValueLabel = new ColumnValues()
@@ -208,7 +208,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
 
     when(queryProcessorService.processQuery(any(EntityType.class), any(), any(), any(), any()))
@@ -239,7 +239,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("this is a thing")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
@@ -256,7 +256,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .name("yep")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
@@ -378,7 +378,7 @@ class EntityTypeServiceTest {
       .name("currency-test")
       .columns(List.of(new EntityTypeColumn()
         .name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .name("currency")  // The special FQM source uses "currency" as the name of the currency value source
           .type(SourceColumn.TypeEnum.FQM))
       ));
@@ -405,7 +405,7 @@ class EntityTypeServiceTest {
       .name("tenant-id-test")
       .columns(List.of(new EntityTypeColumn()
         .name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .name("tenant_id")  // The special FQM source uses "tenant_id" as the name of the currency value source
           .type(SourceColumn.TypeEnum.FQM))
       ));
@@ -431,7 +431,7 @@ class EntityTypeServiceTest {
       .name("tenant-id-test")
       .columns(List.of(new EntityTypeColumn()
         .name(valueColumnName)
-        .source(new SourceColumn(entityTypeId.toString(), valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
           .name("tenant_id")  // The special FQM source uses "tenant_id" as the name of the currency value source
           .type(SourceColumn.TypeEnum.FQM))
       ));

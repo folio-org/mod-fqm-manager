@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
 
 public class IntegrationTestBase {
 
@@ -149,7 +148,7 @@ public class IntegrationTestBase {
       .get("/entity-types?includeInaccessible=true")
       .then()
       .statusCode(200)
-      .body("entityTypes.size()", hasSize(greaterThan(0)));
+      .body("entityTypes.size()", greaterThan(0));
   }
 
   protected static Map<String, String> getOkapiHeaders() {

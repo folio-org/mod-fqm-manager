@@ -23,7 +23,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-      essential: true,
+      hidden: true,
       source: {
         entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
         columnName: 'id',

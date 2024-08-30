@@ -11,6 +11,9 @@
       target: 'src_inventory_mode_of_issuance',
     },
   ],
+  requiredPermissions: [
+    'inventory-storage.modes-of-issuance.collection.get'
+  ],
   columns: [
     {
       name: 'id',
@@ -36,6 +39,11 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      valueSourceApi: {
+        path: 'mode-of-issuance',
+        valueJsonPath: '$.issuanceModes.*.name',
+        labelJsonPath: '$.issuanceModes.*.name',
+      }
     },
   ],
   defaultSort: [

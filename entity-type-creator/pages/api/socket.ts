@@ -213,49 +213,56 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       },
     );
 
-    socket.on('check-entity-type-validity', async (entityType: EntityType) => {
-      console.log('Checking entity type validity', entityType);
+    socket.on(
+      'check-entity-type-validity',
+      async ({ entityType, includeHidden }: { entityType: EntityType; includeHidden: boolean }) => {
+        console.log('Checking entity type validity', entityType);
 
-      if (!pg) {
-        socket.emit('check-entity-type-validity-result', {
-          persisted: false,
-          queried: false,
-          persistError: 'No Postgres connection',
-        });
-        return;
-      }
+        if (!pg) {
+          socket.emit('check-entity-type-validity-result', {
+            persisted: false,
+            queried: false,
+            persistError: 'No Postgres connection',
+          });
+          return;
+        }
 
-      try {
-        await persistEntityType(pg, fqmConnection.tenant, entityType);
-        socket.emit('check-entity-type-validity-result', {
-          persisted: true,
-          queried: false,
-        });
-      } catch (e: any) {
-        console.error('Error persisting entity type', e);
-        socket.emit('check-entity-type-validity-result', {
-          queried: false,
-          persisted: false,
-          persistError: e.message,
-        });
-        return;
-      }
+        try {
+          await persistEntityType(pg, fqmConnection.tenant, entityType);
+          socket.emit('check-entity-type-validity-result', {
+            persisted: true,
+            queried: false,
+          });
+        } catch (e: any) {
+          console.error('Error persisting entity type', e);
+          socket.emit('check-entity-type-validity-result', {
+            queried: false,
+            persisted: false,
+            persistError: e.message,
+          });
+          return;
+        }
 
-      try {
-        socket.emit('check-entity-type-validity-result', {
-          persisted: true,
-          queried: true,
-          queryResults: JSON.stringify(JSON.parse(await fetchEntityType(fqmConnection, entityType.id)), null, 2),
-        });
-      } catch (e: any) {
-        console.error('Error fetching entity type', e);
-        socket.emit('check-entity-type-validity-result', {
-          persisted: true,
-          queried: false,
-          queryError: e.message,
-        });
-      }
-    });
+        try {
+          socket.emit('check-entity-type-validity-result', {
+            persisted: true,
+            queried: true,
+            queryResults: JSON.stringify(
+              JSON.parse(await fetchEntityType(fqmConnection, entityType.id, includeHidden)),
+              null,
+              2,
+            ),
+          });
+        } catch (e: any) {
+          console.error('Error fetching entity type', e);
+          socket.emit('check-entity-type-validity-result', {
+            persisted: true,
+            queried: false,
+            queryError: e.message,
+          });
+        }
+      },
+    );
 
     socket.on('run-query', async ({ entityType, query }: { entityType: EntityType; query: string }) => {
       console.log('Running query', query, 'on', entityType.name);

@@ -106,7 +106,7 @@ public class EntityTypeFlatteningService {
 
     flattenedEntityType.columns(getFilteredColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
-    return localizationService.localizeEntityType(flattenedEntityType);
+    return localizationService.localizeEntityType(flattenedEntityType, sourceFromParent == null);
   }
 
   private static Stream<EntityTypeSource> copySubSources(EntityTypeSource source, EntityType flattenedSourceDefinition, Map<String, String> renamedAliases, String aliasPrefix) {

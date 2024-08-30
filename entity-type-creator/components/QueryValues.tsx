@@ -83,6 +83,7 @@ export default function QueryValues({
             <TextField
               {...params}
               sx={{ width: '60ch', fontFamily: 'monospace' }}
+              onChange={(e) => setField((e.currentTarget as HTMLInputElement).value)}
               size="small"
               label="Field"
               required

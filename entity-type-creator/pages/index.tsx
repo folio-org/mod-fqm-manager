@@ -1,4 +1,4 @@
-import CheckValidity from '@/components/CheckValidity';
+import CheckFlattening from '@/components/CheckFlattening';
 import DBInspector from '@/components/DBInspector';
 import EntityTypeManager from '@/components/EntityTypeManager';
 import FqmConnector from '@/components/FqmConnector';
@@ -100,7 +100,7 @@ export default function EntryPoint() {
                 <ModuleInstaller socket={socket} />
               </Box>
               <Box sx={{ display: selectedTab === 2 ? 'block' : 'none', p: 2 }}>
-                <CheckValidity socket={socket} entityType={currentEntityType} />
+                <CheckFlattening socket={socket} entityType={currentEntityType} />
               </Box>
               <Box sx={{ display: selectedTab === 3 ? 'block' : 'none', p: 2 }}>
                 <QueryTool socket={socket} entityType={currentEntityType} />

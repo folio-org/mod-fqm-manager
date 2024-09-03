@@ -4,6 +4,7 @@ import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,7 +97,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
@@ -120,7 +121,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     idStreamer.streamIdsInBatch(
@@ -171,7 +172,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
@@ -194,7 +195,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION,

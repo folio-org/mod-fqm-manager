@@ -40,7 +40,7 @@
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
       valueSourceApi: {
-        path: 'mode-of-issuance',
+        path: 'modes-of-issuance',
         valueJsonPath: '$.issuanceModes.*.name',
         labelJsonPath: '$.issuanceModes.*.name',
       }

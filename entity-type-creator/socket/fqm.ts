@@ -23,12 +23,15 @@ export async function verifyFqmConnection(fqmConnection: FqmConnection) {
   }
 }
 
-export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId: string) {
-  const response = await fetch(`http://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityTypeId}`, {
-    headers: {
-      'x-okapi-tenant': fqmConnection.tenant,
+export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId: string, includeHidden = false) {
+  const response = await fetch(
+    `http://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityTypeId}?includeHidden=${includeHidden ? 'true' : 'false'}`,
+    {
+      headers: {
+        'x-okapi-tenant': fqmConnection.tenant,
+      },
     },
-  });
+  );
 
   if (response.status !== 200) {
     throw new Error(`Got ${response.status} ${response.statusText} (${await response.text()})`);

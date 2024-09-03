@@ -1,5 +1,5 @@
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
-import { Alert, Button, Typography } from '@mui/material';
+import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../types';
@@ -13,7 +13,7 @@ enum State {
   ERROR_QUERY,
 }
 
-export default function CheckValidity({
+export default function CheckFlattening({
   socket,
   entityType,
 }: Readonly<{
@@ -21,12 +21,13 @@ export default function CheckValidity({
   entityType: EntityType | null;
 }>) {
   const [state, setState] = useState<{ state: State; result?: string }>({ state: State.NOT_STARTED });
+  const [includeHidden, setIncludeHidden] = useState(false);
 
   const run = useCallback(
     (entityType: EntityType) => {
       setState({ state: State.STARTED });
 
-      socket.emit('check-entity-type-validity', entityType);
+      socket.emit('check-entity-type-validity', { entityType, includeHidden });
       socket.on(
         'check-entity-type-validity-result',
         (result: {
@@ -49,10 +50,10 @@ export default function CheckValidity({
           } else {
             setState({ state: State.PERSISTED });
           }
-        }
+        },
       );
     },
-    [state, socket]
+    [state, socket, includeHidden],
   );
 
   if (entityType === null) {
@@ -62,9 +63,15 @@ export default function CheckValidity({
   return (
     <>
       <Typography>
-        Checks that <code>mod-fqm-manager</code> can successfully parse and flatten the JSON representation of the entity
-        type. Note that translations will not be updated here until the entity type is saved and the module is restarted.
+        Checks that <code>mod-fqm-manager</code> can successfully parse and flatten the JSON representation of the
+        entity type. Note that translations will not be updated here until the entity type is saved and the module is
+        restarted.
       </Typography>
+
+      <FormControlLabel
+        label="Include hidden columns"
+        control={<Checkbox checked={includeHidden} onChange={(e) => setIncludeHidden(e.target.checked)} />}
+      />
 
       <Button variant="outlined" onClick={() => run(entityType)}>
         Run

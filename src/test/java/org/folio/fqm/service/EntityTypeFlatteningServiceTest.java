@@ -128,6 +128,85 @@ class EntityTypeFlatteningServiceTest {
     ))
     .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
+  private static final EntityType SIMPLE_ENTITY_TYPE_WITH_SOURCE_VIEW_EXTRACTOR = new EntityType()
+    .name("simple_entity_type")
+    .id(SIMPLE_ENTITY_TYPE_ID.toString())
+    .columns(List.of(
+      new EntityTypeColumn()
+        .name("field1")
+        .valueGetter(":source1.field1")
+        .dataType(new StringType().dataType("stringType"))
+        .isIdColumn(true),
+      new EntityTypeColumn()
+        .name("field2")
+        .valueGetter(":source1.field2")
+        .filterValueGetter("lower(:source1.field2)")
+        .dataType(new StringType().dataType("stringType")),
+      new EntityTypeColumn()
+        .name("object")
+        .valueGetter(":source1.field2")
+        .filterValueGetter("lower(:source1.field2)")
+        .dataType(new ObjectType().dataType("objectType")
+          .addPropertiesItem(new NestedObjectProperty()
+            .name("object_field1")
+            .dataType(new StringType().dataType("stringType"))
+            .valueGetter(":source1.object.object_field1")
+            .filterValueGetter(":source1.object.object_field1"))
+          .addPropertiesItem(new NestedObjectProperty()
+            .name("object_field2")
+            .dataType(new StringType().dataType("stringType"))
+            .valueGetter(":source1.object.object_field2")
+            .filterValueGetter(":source1.object.object_field2"))
+        ),
+      new EntityTypeColumn()
+        .name("string_array_field")
+        .valueGetter(":source1.string_array_field")
+        .filterValueGetter("lower(:source1.string_array_field)")
+        .dataType(new ArrayType().dataType("arrayType")
+          .itemDataType(new StringType().dataType("stringType"))),
+      new EntityTypeColumn()
+        .name("nested_string_array_field")
+        .valueGetter(":source1.nested_string_array_field")
+        .filterValueGetter("lower(:source1.nested_string_array_field)")
+        .dataType(new ArrayType().dataType("arrayType")
+          .itemDataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new StringType().dataType("stringType")))),
+      new EntityTypeColumn()
+        .name("object_array_field")
+        .valueGetter(":source1.object_array_field")
+        .filterValueGetter("lower(:source1.object_array_field)")
+        .dataType(new ArrayType().dataType("arrayType")
+          .itemDataType(new ObjectType().dataType("objectType")
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("array_object_field1")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter(":source1.array_object.array_object_field1")
+              .filterValueGetter(":source1.array_object.array_object_field1"))
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("array_object_field2")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter(":source1.array_object.array_object_field2")
+              .filterValueGetter(":source1.array_object.object_field2")))),
+      new EntityTypeColumn()
+        .name("ecs_field")
+        .valueGetter(":source1.ecs_field")
+        .values(List.of(
+          new ValueWithLabel().value("value1").label("label1"),
+          new ValueWithLabel().value("value1").label("label1")
+        ))
+        .dataType(new StringType().dataType("stringType"))
+        .isIdColumn(true)
+        .ecsOnly(true)
+    ))
+    .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source1")
+        .target("source1_target")
+    ))
+    .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
+    .sourceViewExtractor("\"source1\".some_view_extractor");
+
   private static final EntityType COMPLEX_ENTITY_TYPE = new EntityType()
     .name("complex_entity_type")
     .id(COMPLEX_ENTITY_TYPE_ID.toString())
@@ -368,10 +447,12 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void shouldFlattenComplexEntityType() {
+    String expectedSourceViewExtractor = "expected_source_view_extractor";
     EntityType expectedEntityType = new EntityType()
       .name("complex_entity_type")
       .id(COMPLEX_ENTITY_TYPE_ID.toString())
       .crossTenantQueriesEnabled(true)
+      .sourceViewExtractor(expectedSourceViewExtractor)
       .columns(List.of(
         new EntityTypeColumn()
           .name("field3")
@@ -546,8 +627,13 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> {
+      EntityType entityType = invocation.getArgument(0);
+      if (entityType.getSourceViewExtractor() == null) {
+        entityType.sourceViewExtractor(expectedSourceViewExtractor);
+      }
+      return entityType;
+    });
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -873,6 +959,94 @@ class EntityTypeFlatteningServiceTest {
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
+
+  @Test
+  void shouldFlattenSimpleEntityTypeWithSourceViewExtractor() {
+    EntityType expectedEntityType = new EntityType()
+      .name("simple_entity_type")
+      .id(SIMPLE_ENTITY_TYPE_ID.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("field1")
+          .valueGetter("\"source1\".field1")
+          .dataType(new StringType().dataType("stringType"))
+          .isIdColumn(true),
+        new EntityTypeColumn()
+          .name("field2")
+          .valueGetter("\"source1\".field2")
+          .filterValueGetter("lower(\"source1\".field2)")
+          .dataType(new StringType().dataType("stringType")),
+        new EntityTypeColumn()
+          .name("object")
+          .valueGetter("\"source1\".field2")
+          .filterValueGetter("lower(\"source1\".field2)")
+          .dataType(new ObjectType().dataType("objectType")
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("object_field1")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter("\"source1\".object.object_field1")
+              .filterValueGetter("\"source1\".object.object_field1"))
+            .addPropertiesItem(new NestedObjectProperty()
+              .name("object_field2")
+              .dataType(new StringType().dataType("stringType"))
+              .valueGetter("\"source1\".object.object_field2")
+              .filterValueGetter("\"source1\".object.object_field2"))
+          ),
+        new EntityTypeColumn()
+          .name("string_array_field")
+          .valueGetter("\"source1\".string_array_field")
+          .filterValueGetter("lower(\"source1\".string_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new StringType().dataType("stringType"))),
+        new EntityTypeColumn()
+          .name("nested_string_array_field")
+          .valueGetter("\"source1\".nested_string_array_field")
+          .filterValueGetter("lower(\"source1\".nested_string_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new ArrayType().dataType("arrayType")
+              .itemDataType(new StringType().dataType("stringType")))),
+        new EntityTypeColumn()
+          .name("object_array_field")
+          .valueGetter("\"source1\".object_array_field")
+          .filterValueGetter("lower(\"source1\".object_array_field)")
+          .dataType(new ArrayType().dataType("arrayType")
+            .itemDataType(new ObjectType().dataType("objectType")
+              .addPropertiesItem(new NestedObjectProperty()
+                .name("array_object_field1")
+                .dataType(new StringType().dataType("stringType"))
+                .valueGetter("\"source1\".array_object.array_object_field1")
+                .filterValueGetter("\"source1\".array_object.array_object_field1"))
+              .addPropertiesItem(new NestedObjectProperty()
+                .name("array_object_field2")
+                .dataType(new StringType().dataType("stringType"))
+                .valueGetter("\"source1\".array_object.array_object_field2")
+                .filterValueGetter("\"source1\".array_object.object_field2"))))
+      ))
+      .sources(List.of(
+        new EntityTypeSource()
+          .type("db")
+          .alias("source1")
+          .target("source1_target")
+          .useIdColumns(true)
+      ))
+      .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
+      .sourceViewExtractor("some_view_extractor");
+
+    when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null))
+      .thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE_WITH_SOURCE_VIEW_EXTRACTOR)));
+
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean()))
+      .thenAnswer(invocation -> invocation.getArgument(0));
+
+    EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
+
+    String expectedSourceViewExtractor = "\"source1\".some_view_extractor";
+    expectedEntityType.sourceViewExtractor(expectedSourceViewExtractor);
+
+    assertEquals(expectedEntityType, actualEntityType);
+    assertEquals(expectedSourceViewExtractor, actualEntityType.getSourceViewExtractor());
+  }
+
 
   private EntityType copyEntityType(EntityType originalEntityType) {
     try {

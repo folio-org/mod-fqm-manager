@@ -455,6 +455,28 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'type'",
+      values: [
+        {
+          value: 'patron',
+          label: 'Patron',
+        },
+        {
+          value: 'staff',
+          label: 'Staff',
+        },
+        {
+          value: 'shadow',
+          label: 'Shadow',
+        },
+        {
+          value: 'system',
+          label: 'System',
+        },
+        {
+          value: 'DCB',
+          label: 'DCB',
+        }
+      ]
     },
     {
       name: 'tags_tag_list',

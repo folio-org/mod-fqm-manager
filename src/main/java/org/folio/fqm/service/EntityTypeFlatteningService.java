@@ -297,14 +297,10 @@ private static <T extends Field> T injectSourceAlias(T column, Map<String, Strin
   }
 
   private boolean ecsEnabled() {
-    try {
-      String rawJson = ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)));
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      // The value isn't needed here, this just provides an easy way to tell if ECS is enabled
-      parsedJson.read("centralTenantId");
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
+    String rawJson = ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)));
+    DocumentContext parsedJson = JsonPath.parse(rawJson);
+    // The value isn't needed here, this just provides an easy way to tell if ECS is enabled
+    int totalRecords = parsedJson.read("totalRecords", Integer.class);
+    return totalRecords > 0;
   }
 }

@@ -2,14 +2,17 @@ package org.folio.fqm.context;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.Map;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.IntegrationTestBase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeInitializationService;
+import org.folio.fqm.service.PermissionsService;
 import org.folio.spring.FolioExecutionContext;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,10 +55,28 @@ public class TestDbSetupConfiguration {
     @Autowired
     private ResourcePatternResolver resourceResolver;
 
+    @Autowired
+    private FolioExecutionContext executionContext;
+
+    @Autowired
+    private PermissionsService permissionsService;
+
     @PostConstruct
     public void populateEntityTypes() throws IOException {
       SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
-      when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn("{\"centralTenantId\": \"tenant_01\"}");
+      when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("""
+      {
+          "userTenants": [
+              {
+                  "id": "06192681-0df7-4f33-a38f-48e017648d69",
+                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
+                  "tenantId": "tenant_01",
+                  "centralTenantId": "tenant_01"
+              }
+          ],
+          "totalRecords": 1
+      }
+      """);
       new EntityTypeInitializationService(
         entityTypeRepository,
         new FolioExecutionContext() {
@@ -63,7 +86,7 @@ public class TestDbSetupConfiguration {
           }
         },
         resourceResolver,
-        ecsClient
+        new CrossTenantQueryService(ecsClient, executionContext, permissionsService)
       )
         .initializeEntityTypes();
     }

@@ -196,7 +196,7 @@ public class EntityTypeService {
         results.add(new ValueWithLabel().value(value).label(label));
       }
     }
-    results.sort(Comparator.comparing(ValueWithLabel::getLabel));
+    results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }
 
@@ -226,7 +226,7 @@ public class EntityTypeService {
         .map(currency -> new ValueWithLabel()
           .value(currency.getCurrencyCode())
           .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
-        .sorted(comparing(ValueWithLabel::getLabel))
+        .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
         .toList());
     return new ColumnValues().content(currencies);
   }

@@ -745,7 +745,7 @@
     "entityType.simple_instance.identifiers.value._qualified": "Valor dos identificadores",
     "entityType.simple_instance.index_title": "Título do índice",
     "entityType.simple_instance.instance_format_ids": "UUIDs do formato da instância",
-    "entityType.simple_instance.instance_type_id": "UUID do tipo de instância",
+    "entityType.simple_instance.instance_type_id": "UUID do tipo de recurso",
     "entityType.simple_instance.languages": "Idiomas",
     "entityType.simple_instance.match_key": "Chave de correspondência",
     "entityType.simple_instance.mode_of_issuance_id": "UUID do modo de emissão",
@@ -1482,5 +1482,7 @@
     "entityType.simple_mode_of_issuance": "Modo de emissão",
     "entityType.simple_mode_of_issuance.id": "UUID",
     "entityType.simple_mode_of_issuance.name": "Nome",
-    "entityType.simple_instance.instance_type_name": "Resource type"
+    "entityType.simple_instance.instance_type_name": "Tipo de recurso",
+    "entityType.composite_purchase_order_lines._shortened": "Linha do Pedido de Compra",
+    "entityType.simple_organization._shortened": "Orgs"
 }

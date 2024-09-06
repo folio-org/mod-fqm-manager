@@ -745,7 +745,7 @@
     "entityType.simple_instance.identifiers.value._qualified": "Hodnota identifikátorů",
     "entityType.simple_instance.index_title": "Název indexu",
     "entityType.simple_instance.instance_format_ids": "UUID formátu titulů",
-    "entityType.simple_instance.instance_type_id": "UUID typu titulu",
+    "entityType.simple_instance.instance_type_id": "UUID typu zdroje",
     "entityType.simple_instance.languages": "Jazyky",
     "entityType.simple_instance.match_key": "Klíč shody",
     "entityType.simple_instance.mode_of_issuance_id": "UUID způsobu vydání",
@@ -1479,8 +1479,10 @@
     "entityType.simple_holdings_records.tenant_id": "ID nájemce",
     "entityType.simple_instance.format_names": "Názvy formátů",
     "entityType.simple_instance.mode_of_issuance_name": "Způsob vydání",
-    "entityType.simple_mode_of_issuance": "Mode of issuance",
+    "entityType.simple_mode_of_issuance": "Způsob vydání",
     "entityType.simple_mode_of_issuance.id": "UUID",
-    "entityType.simple_mode_of_issuance.name": "Name",
-    "entityType.simple_instance.instance_type_name": "Resource type"
+    "entityType.simple_mode_of_issuance.name": "Jméno",
+    "entityType.simple_instance.instance_type_name": "Typ zdroje",
+    "entityType.composite_purchase_order_lines._shortened": "ŘNO",
+    "entityType.simple_organization._shortened": "Org."
 }

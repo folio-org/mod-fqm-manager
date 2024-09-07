@@ -3,7 +3,8 @@ package org.folio.fqm.utils;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -48,36 +49,10 @@ class IdStreamerTest {
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
 
-  private static final String USER_TENANT_JSON = """
-      {
-          "userTenants": [
-              {
-                  "id": "06192681-0df7-4f33-a38f-48e017648d69",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_01",
-                  "centralTenantId": "tenant_01"
-              },
-              {
-                  "id": "3c1bfbe9-7d64-41fe-a358-cdaced6a631f",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_02",
-                  "centralTenantId": "tenant_01"
-              },
-              {
-                  "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_03",
-                  "centralTenantId": "tenant_01"
-              }
-          ],
-          "totalRecords": 3
-      }
-      """;
-  private static final String NON_ECS_USER_TENANT_JSON = """
-      {
-          "userTenants": [],
-          "totalRecords": 0
-      }
+  private static final String CONFIGURATION_JSON = """
+        {
+          "centralTenantId": "tenant_01"
+        }
       """;
 
   @BeforeEach
@@ -124,7 +99,6 @@ class IdStreamerTest {
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
@@ -148,7 +122,7 @@ class IdStreamerTest {
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
+    when(ecsClient.get("consortia-configuration", Map.of())).thenReturn(CONFIGURATION_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     idStreamer.streamIdsInBatch(
       new EntityType().additionalEcsConditions(List.of("condition 1")).id("6b08439b-4f8e-4468-8046-ea620f5cfb74"),
@@ -162,7 +136,34 @@ class IdStreamerTest {
 
   @Test
   void shouldUseUnionAllForCrossTenantQuery() {
+    String consortiaJson = """
+        {
+          "consortia": [
+            {
+              "id": "bdaa4720-5e11-4632-bc10-d4455cf252df"
+            }
+          ]
+        }
+      """;
+    String tenantJson = """
+      {
+        "tenants": [
+          {
+            "id": "tenant_01"
+          },
+          {
+            "id": "tenant_02"
+          },
+          {
+            "id": "tenant_03"
+          },
+        ]
+      }
+      """;
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)))).thenReturn(CONFIGURATION_JSON);
+    when(ecsClient.get("consortia", Map.of("limit", String.valueOf(100)))).thenReturn(consortiaJson);
+    when(ecsClient.get("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/tenants", Map.of("limit", String.valueOf(100)))).thenReturn(tenantJson);
     Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
@@ -173,7 +174,6 @@ class IdStreamerTest {
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
@@ -197,7 +197,6 @@ class IdStreamerTest {
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION,
       true,

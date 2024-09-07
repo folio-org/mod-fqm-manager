@@ -125,8 +125,7 @@ public class IntegrationTestBase {
 
   private static void postTenant(String body) {
     given()
-//      .header(XOkapiHeaders.TENANT, TENANT_ID)
-      .headers(getOkapiHeaders())
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType("application/json")
       .body(body)
       .when()
@@ -174,8 +173,8 @@ public class IntegrationTestBase {
           }
           """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
-      if (recordedRequest.getPath().matches("/user-tenants.*")) {
-        return new MockResponse().setBody("{\"userTenants\": [], \"totalRecords\": 0}").setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+      if (recordedRequest.getPath().matches("/consortia-configuration.*")) {
+        return new MockResponse().setBody("").setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
       throw new RuntimeException("Unexpected request: " + recordedRequest.getPath());
     }

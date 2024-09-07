@@ -2,7 +2,6 @@ package org.folio.fqm.repository;
 
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,6 +1,5 @@
 package org.folio.fqm.service;
 
-import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,49 +23,23 @@ public class CrossTenantQueryService {
   private final FolioExecutionContext executionContext;
   private final PermissionsService permissionsService;
 
-  private static final String CROSS_TENANT_QUERY_ERROR = "Error retrieving tenants for cross-tenant query. Tenant may not be in an ECS environment.";
-  private static final String CONSORTIA_CONFIGURATION_PATH = "consortia-configuration";
-  private static final String CENTRAL_TENANT_ID = "centralTenantId";
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
     if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
-    // List of shadow users associated with this user and the ECS tenants that those users exist in
-    List<Map<String, String>> userTenantMaps;
-    String centralTenantId;
-    String consortiumId;
-    try {
-      String configurationJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
-      centralTenantId = JsonPath
-        .parse(configurationJson)
-        .read(CENTRAL_TENANT_ID);
-      if (centralTenantId.equals(executionContext.getTenantId())) {
-        String consortiumIdJson = ecsClient.get("consortia", Map.of());
-        consortiumId =  JsonPath
-          .parse(consortiumIdJson)
-          .read("consortia[0].id");
-      } else {
-        log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
-        // The Instances entity type is required to retrieve shared instances from the central tenant when
-        // running queries from member tenants. This means that if we are running a query for Instances, we need to
-        // query the current tenant (for local records) as well as the central tenant (for shared records).
-        if (COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
-          return List.of(executionContext.getTenantId(), centralTenantId);
-        }
-        return List.of(executionContext.getTenantId());
+    List<Map<String, String>> userTenantMaps = getUserTenants();
+    String centralTenantId = getCentralTenantId(userTenantMaps); // null if non-ECS environment; non-null otherwise
+
+    if (!executionContext.getTenantId().equals(centralTenantId)) {
+      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+      // The Instances entity type is required to retrieve shared instances from the central tenant when
+      // running queries from member tenants. This means that if we are running a query for Instances, we need to
+      // query the current tenant (for local records) as well as the central tenant (for shared records).
+      if (COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+        return List.of(executionContext.getTenantId(), centralTenantId);
       }
-      UUID userId = executionContext.getUserId();
-      String userTenantResponse = ecsClient.get(
-        "consortia/" + consortiumId + "/user-tenants",
-        Map.of("userId", userId.toString())
-      );
-      userTenantMaps = JsonPath
-        .parse(userTenantResponse)
-        .read("$.userTenants", List.class);
-    } catch (Exception e) {
-      log.debug("Error retrieving tenants for cross-tenant query. Running intra-tenant query.");
       return List.of(executionContext.getTenantId());
     }
 
@@ -88,26 +61,35 @@ public class CrossTenantQueryService {
     return tenantsToQuery;
   }
 
+  @SuppressWarnings("unchecked")
+  // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
+  private List<Map<String, String>> getUserTenants() {
+    String userTenantsResponse = ecsClient.get("user-tenants", Map.of("limit", "1000"));
+    List<Map<String, String>> userTenants = JsonPath
+      .parse(userTenantsResponse)
+      .read("$.userTenants", List.class);
+
+    // Get the first entry for each tenant
+    return userTenants.stream().collect(Collectors.groupingBy(m -> m.get("tenantId")))
+      .values()
+      .stream()
+      .filter(l -> !l.isEmpty()) // Just to be safe...
+      .map(m -> m.get(0))
+      .toList();
+  }
+
+  private String getCentralTenantId(List<Map<String, String>> userTenants) {
+    return userTenants.stream()
+       .map(map -> map.get("centralTenantId"))
+       .findFirst()
+       .orElse(null);
+  }
+
   public String getCentralTenantId() {
-    try {
-      String rawJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      return parsedJson.read(CENTRAL_TENANT_ID);
-    } catch (Exception e) {
-      log.debug(CROSS_TENANT_QUERY_ERROR);
-      return null;
-    }
+    return getCentralTenantId(getUserTenants());
   }
 
   public boolean ecsEnabled() {
-    try {
-      String rawJson = ecsClient.get(CONSORTIA_CONFIGURATION_PATH, Map.of());
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      parsedJson.read(CENTRAL_TENANT_ID);
-      return true;
-    } catch (Exception e) {
-      log.debug(CROSS_TENANT_QUERY_ERROR);
-      return false;
-    }
+    return !getUserTenants().isEmpty();
   }
 }

@@ -8,14 +8,9 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
@@ -34,19 +29,19 @@ public class EntityTypeInitializationService {
 
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
-  private final SimpleHttpClient ecsClient;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   @Autowired
   public EntityTypeInitializationService(
     EntityTypeRepository entityTypeRepository,
     FolioExecutionContext folioExecutionContext,
     ResourcePatternResolver resourceResolver,
-    SimpleHttpClient ecsClient
+    CrossTenantQueryService crossTenantQueryService
   ) {
     this.entityTypeRepository = entityTypeRepository;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
-    this.ecsClient = ecsClient;
+    this.crossTenantQueryService = crossTenantQueryService;
 
     // this enables all JSON5 features, except for numeric ones (hex, starting/trailing
     // decimal points, use of NaN, etc), as those are not relevant for our use
@@ -71,16 +66,15 @@ public class EntityTypeInitializationService {
   // called as part of tenant install/upgrade (see FqmTenantService)
   public void initializeEntityTypes() throws IOException {
     log.info("Initializing entity types");
-    String centralTenantId = "${central_tenant_id}";
-    try {
-      String rawJson = ecsClient.get("consortia-configuration", Map.of("limit", String.valueOf(100)));
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      centralTenantId = parsedJson.read("centralTenantId");
+    String centralTenantId = crossTenantQueryService.getCentralTenantId();
+    if (centralTenantId != null) {
       log.info("ECS central tenant ID: {}", centralTenantId);
-    } catch (FeignException.NotFound | IllegalArgumentException e) {
-      log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
     }
-    String finalCentralTenantId = centralTenantId;
+    else {
+      log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
+      centralTenantId = "${central_tenant_id}";
+    }
+    String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
     List<EntityType> desiredEntityTypes = Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),

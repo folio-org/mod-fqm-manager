@@ -10,7 +10,8 @@
         {
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
-          "permissionsRequired": []
+          "permissionsRequired": [],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
         },
         {
           "methods": ["GET", "DELETE"],

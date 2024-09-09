@@ -91,16 +91,23 @@ public class EntityTypeFlatteningService {
             .filter(col -> !Boolean.TRUE.equals(source.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
             .map(col -> col
               // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source aliass in flattenedSourceDefinition
-              .name(source.getAlias() + '.' + col.getName())
-              .idColumnName(col.getIdColumnName() == null ? null : source.getAlias() + '.' + col.getIdColumnName())
+                .name(source.getAlias() + '.' + col.getName())
+                .idColumnName(col.getIdColumnName() == null ? null : source.getAlias() + '.' + col.getIdColumnName())
             )
         );
         // Copy each sub-source into the flattened entity type
         copySubSources(source, flattenedSourceDefinition, renamedAliases, aliasPrefix)
-          .forEach(flattenedEntityType::addSourcesItem);
+          .forEach(subSource -> {
+            flattenedEntityType.addSourcesItem(subSource);
+            renamedAliases.put(aliasPrefix + subSource.getAlias(), subSource.getAlias());
+          });
       }
     }
-
+    if (flattenedEntityType.getSourceViewExtractor() != null) {
+      flattenedEntityType.sourceViewExtractor(
+        injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
+      );
+    }
     Stream<EntityTypeColumn> childSourceColumns = columns.build().flatMap(Function.identity());
     Stream<EntityTypeColumn> allColumns = Stream.concat(copyColumns(sourceFromParent, originalEntityType, renamedAliases), childSourceColumns);
 
@@ -108,6 +115,19 @@ public class EntityTypeFlatteningService {
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
     return localizationService.localizeEntityType(flattenedEntityType, sourceFromParent == null);
   }
+
+  private String injectSourceAliasIntoViewExtractor(String sourceViewExtractor, Map<String, String> renamedAliases) {
+    List<String> aliases = new ArrayList<>(renamedAliases.keySet());
+    Collections.reverse(aliases);  // Reverse the list
+
+    for (String alias : aliases) {
+      String oldAliasReference = ':' + alias;
+      String newAliasReference = '"' + renamedAliases.get(alias) + '"';
+      sourceViewExtractor = sourceViewExtractor.replaceAll(oldAliasReference, newAliasReference);
+    }
+    return sourceViewExtractor;
+  }
+
 
   private static Stream<EntityTypeSource> copySubSources(EntityTypeSource source, EntityType flattenedSourceDefinition, Map<String, String> renamedAliases, String aliasPrefix) {
     return flattenedSourceDefinition.getSources()

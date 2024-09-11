@@ -37,7 +37,7 @@ public class CrossTenantQueryService {
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
-      if (COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+      if (centralTenantId != null && COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
         return List.of(executionContext.getTenantId(), centralTenantId);
       }
       return List.of(executionContext.getTenantId());

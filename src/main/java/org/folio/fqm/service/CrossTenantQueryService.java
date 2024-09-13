@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import com.jayway.jsonpath.JsonPath;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -54,6 +55,9 @@ public class CrossTenantQueryService {
           tenantsToQuery.add(tenantId);
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", userId, tenantId);
+        } catch (FeignException e) {
+          log.error("Error retrieving permissions for user ID %s in tenant %s".formatted(userId, tenantId), e);
+          throw e;
         }
       }
     }

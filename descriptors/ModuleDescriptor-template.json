@@ -104,7 +104,7 @@
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
         }
       ]
     },

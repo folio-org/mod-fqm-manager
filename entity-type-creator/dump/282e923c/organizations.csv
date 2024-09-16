@@ -1,0 +1,132 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,access_provider,Orgs — Access provider,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounting_code,Orgs — Accounting code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts,Orgs — Accounts,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->name,Accounts name,Orgs — Accounts > Name,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->account_no,Accounts account number,Orgs — Accounts > Account number,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->description,Accounts description,Orgs — Accounts > Description,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->app_system_no,Accounts app system number,Orgs — Accounts > App system number,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->payment_method,Accounts payment method,Orgs — Accounts > Payment method,string,"dropdown hardcoded (Cash, Credit card, Eft, Deposit account, Physical check, Bank draft, Internal transfer, Other)",not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->account_status,Accounts status,Orgs — Accounts > Status,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->contact_info,Accounts contact info,Orgs — Accounts > Contact info,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->library_code,Accounts library code,Orgs — Accounts > Library code,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->library_edi_code,Accounts library EDI code,Orgs — Accounts > Library EDI code,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->notes,Accounts notes,Orgs — Accounts > Notes,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,accounts[*]->acq_unit_ids,Accounts acquisition unit UUIDs,Orgs — Accounts > Acquisition unit UUIDs,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,acq_unit_names,Orgs — Acquisition unit names,,string[],dropdown from entity (simple_acquisitions_unit -> acquisitions_name),not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,acq_unit_ids,Orgs — Acquisition unit UUIDs,,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses,Orgs — Addresses,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->id,Addresses UUID,Orgs — Addresses > UUID,uuid,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->address_line1,Addresses line1,Orgs — Addresses > Address line 1,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->address_line2,Addresses line 2,Orgs — Addresses > Address line 2,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->city,Addresses city,Orgs — Addresses > City,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->state_region,Addresses state/region,Orgs — Addresses > State/region,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->zip_code,Addresses zip code,Orgs — Addresses > Zip code,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->country,Addresses country,Orgs — Addresses > Country,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->is_primary,Addresses is primary,Orgs — Addresses > Is primary,boolean,true-false,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->categories,Addresses category UUIDs,Orgs — Addresses > Category UUIDs,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,addresses[*]->language,Addresses language,Orgs — Addresses > Language,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,agreements,Orgs — Agreements,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,agreements[*]->name,Agreements name,Orgs — Agreements > Name,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,agreements[*]->discount,Agreements discount,Orgs — Agreements > Discount,number,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,agreements[*]->reference_url,Agreements reference URL,Orgs — Agreements > Reference URL,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,agreements[*]->notes,Agreements notes,Orgs — Agreements > Notes,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,aliases,Orgs — Aliases,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,aliases[*]->value,Aliases value,Orgs — Aliases > Alias,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,aliases[*]->description,Aliases description,Orgs — Aliases > Description,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,changelogs,Orgs — Changelogs,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,changelogs[*]->description,Changelogs description,Orgs — Changelogs > Description,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,changelogs[*]->timestamp,Changelogs timestamp,Orgs — Changelogs > Timestamp,date,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,claiming_interval,Orgs — Claiming interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,code,Orgs — Code,,string,dropdown from API(organizations/organizations),"=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,contacts,Orgs — Contacts,,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,created_at,Orgs — Created at,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,created_by,Orgs — Created by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,description,Orgs — Description,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,discount_percent,Orgs — Discount percent,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_conn_mode,Orgs — EDI FTP connection mode,,string,"dropdown hardcoded (Active, Passive)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_format,Orgs — EDI FTP format,,string,"dropdown hardcoded (SFTP, FTP)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_invoice_directory,Orgs — EDI FTP invoice directory,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_mode,Orgs — EDI FTP mode,,string,"dropdown hardcoded (ASCII, Binary)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_notes,Orgs — EDI FTP notes,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_order_directory,Orgs — EDI FTP order directory,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_password,Orgs — EDI FTP password,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_port,Orgs — EDI FTP port,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_server_address,Orgs — EDI FTP server address,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_ftp_username,Orgs — EDI FTP username,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_friday,Orgs — EDI job is scheduled for friday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_monday,Orgs — EDI job is scheduled for monday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_saturday,Orgs — EDI job is scheduled for saturday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_sunday,Orgs — EDI job is scheduled for sunday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_thursday,Orgs — EDI job is scheduled for thursday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_tuesday,Orgs — EDI job is scheduled for tuesday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_is_wednesday,Orgs — EDI job is scheduled for wednesday,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_notify_all_edi,Orgs — EDI job notify all,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_notify_error_only,Orgs — EDI job notify on error only,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_notify_invoice_only,Orgs — EDI job notify on invoice only,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_schedule_edi,Orgs — EDI job schedule enabled,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_scheduling_date,Orgs — EDI job scheduling date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_scheduling_notes,Orgs — EDI job scheduling notes,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_send_to_emails,Orgs — EDI job send to emails,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_job_time,Orgs — EDI job time,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_naming_convention,Orgs — EDI naming convention,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_notes,Orgs — EDI notes,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_lib_edi_code,Orgs — EDI organization code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_lib_edi_type,Orgs — EDI organization type,,string,"dropdown hardcoded (014 ean, 31 b us san, 091 vendor assigned, 092 customer assigned)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_prorate_fees,Orgs — EDI prorate fees,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_prorate_tax,Orgs — EDI prorate tax,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_send_acct_num,Orgs — EDI send account number,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_support_invoice,Orgs — EDI support invoice,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_support_order,Orgs — EDI support order,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_vendor_edi_code,Orgs — EDI vendor code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,edi_vendor_edi_type,Orgs — EDI vendor type,,string,"dropdown hardcoded (014/EAN, 31B/US-SAN, 091/Vendor-assigned, 092/Customer-assigned)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails,Orgs — Emails,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->id,Emails UUID,Orgs — Emails > UUID,uuid,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->value,Emails,Orgs — Emails > Email,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->description,Emails description,Orgs — Emails > Description,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->is_primary,Emails is primary,Orgs — Emails > Primary,boolean,true-false,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->categories,Emails category UUIDs,Orgs — Emails > Category UUIDs,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,emails[*]->language,Emails language,Orgs — Emails > Language,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,expected_activation_interval,Orgs — Expected activation interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,expected_invoice_interval,Orgs — Expected invoice interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,expected_receipt_interval,Orgs — Expected receipt interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,export_to_accounting,Orgs — Export to accounting,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,governmental,Orgs — Governmental,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,interfaces,Orgs — Interfaces,,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,is_donor,Orgs — Is donor,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,is_vendor,Orgs — Is vendor,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,jsonb,Orgs — JSONB,,string,,not queryable,false,true,true,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,language,Orgs — Language,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,liable_for_vat,Orgs — Liable for VAT,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,licensor,Orgs — Licensor,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,material_supplier,Orgs — Material supplier,,boolean,true-false,"=, ≠, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,name,Orgs — Name,,string,dropdown from API(organizations/organizations),"=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,payment_method,Orgs — Payment method,,string,"dropdown hardcoded (Credit Card, Cash, Physical Check, EFT, Deposit Account)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers,Orgs — Phone numbers,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->id,Phone numbers UUID,Orgs — Phone numbers > UUID,uuid,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->phone_number,Phone numbers,Orgs — Phone numbers > Phone number,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->categories,Phone numbers category UUIDs,Orgs — Phone numbers > Category UUIDs,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->type,Phone numbers type,Orgs — Phone numbers > Type,string,"dropdown hardcoded (Office, Mobile, Fax, Other)",not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->is_primary,Phone numbers is primary,Orgs — Phone numbers > Is primary,boolean,true-false,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,phone_numbers[*]->language,Phone numbers language,Orgs — Phone numbers > Language,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,privileged_contacts,Orgs — Privileged contacts,,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,renewal_activation_interval,Orgs — Renewal activation interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,san_code,Orgs — SAN code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,status,Orgs — Status,,string,"dropdown hardcoded (Active, Inactive, Pending)","=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,subscription_interval,Orgs — Subscription interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,tax_id,Orgs — Tax ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,tax_percentage,Orgs — Tax percentage,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,type_names,Orgs — Type names,,string[],dropdown from entity (simple_organization_types -> name),not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,type_ids,Orgs — Type UUIDs,,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,updated_at,Orgs — Updated at,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,updated_by,Orgs — Updated by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls,Orgs — URLs,,object[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->id,URLs UUID,Orgs — URLs > UUID,uuid,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->value,URLs,Orgs — URLs > URL,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->description,URLs description,Orgs — URLs > Description,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->language,URLs language,Orgs — URLs > Language,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->is_primary,URLs is primary,Orgs — URLs > Primary,boolean,true-false,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->categories,URLs category UUIDs,Orgs — URLs > Category UUIDs,uuid[],,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,urls[*]->notes,URLs notes,Orgs — URLs > Notes,string,,not queryable,false,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,id,Orgs — UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+b5ffa2e9-8080-471a-8003-a8c5a1274503,simple_organization,,vendor_currencies,Orgs — Vendor currencies,,string[],,not queryable,false,true,false,false

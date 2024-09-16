@@ -1,0 +1,33 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_active,User active,,boolean,true-false,"=, ≠, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_address_ids,User address ID list,,uuid[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_address_line1,User address list (line 1),,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_address_line2,User address list (line 2),,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_address_type_names,User address type list,,string[],dropdown from entity (src_users_addresstype -> addressType),not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_barcode,User barcode,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_cities,User city list,,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_country_ids,User country ID list,,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_created_date,User created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_date_of_birth,User date of birth,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_department_ids,User department ID list,,uuid[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_department_names,User department list,,string[],dropdown from entity (src_users_departments -> department),not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_email,User email,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_enrollment_date,User enrollment date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_expiration_date,User expiration date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_external_system_id,User external system ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_first_name,User first name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,id,User ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_last_name,User last name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_middle_name,User middle name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_mobile_phone,User mobile phone,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_patron_group,User patron group,,string,dropdown from entity (src_users_groups -> group),"=, ≠, in, not in, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_patron_group_id,User patron group ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_phone,User phone,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_postal_codes,User postal code list,,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_preferred_contact_type,User preferred contact type,,string,"dropdown hardcoded (Email, Mail (Primary Address), Text Message)","=, ≠, in, not in, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_preferred_first_name,User preferred first name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_primary_address,User primary address,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_regions,User region list,,string[],,not queryable,false,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,user_updated_date,User updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,Is a community patron,User's Is a community patron,,boolean,true-false,"=, ≠, empty",true,true,false,false
+0069cf6f-2833-46db-8a51-8934769b8289,drv_user_details,,username,Username,,string,,"=, ≠, contains, starts, empty",true,true,false,false

@@ -1,0 +1,73 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,inst_stat,inst_stat.code,Instances — Instance status — Code,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,inst_stat,inst_stat.jsonb,Instances — Instance status — JSONB,,string,,not queryable,false,true,true,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,inst_stat,inst_stat.name,Instances — Instance status — Term,,string,dropdown from API(instance-statuses),"=, ≠, in, not in, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,inst_stat,inst_stat.id,Instances — Instance status — UUID,,uuid,dropdown from API(instance-statuses),"=, ≠, in, not in, empty",true,true,true,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.administrative_notes,Instances — Instance — Administrative notes,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.alternative_titles,Instances — Instance — Alternative titles,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.alternative_titles[*]->type_id,Alternative titles type UUID,Instances — Instance — Alternative titles > Type UUID,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.alternative_titles[*]->title,Alternative titles title,Instances — Instance — Alternative titles > Title,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.cataloged_date,Instances — Instance — Cataloged date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.classifications,Instances — Instance — Classifications,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.classifications[*]->number,Classification number,Instances — Instance — Classifications > Number,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.classifications[*]->type_id,Classification type UUID,Instances — Instance — Classifications > Type UUID,uuid,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors,Instances — Instance — Contributors,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors[*]->name,Contributors name,Instances — Instance — Contributors > Name,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors[*]->contributor_type_id,Contributors contributor type UUID,Instances — Instance — Contributors > Contributor type UUID,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors[*]->contributor_type_text,Contributors contributor type text,Instances — Instance — Contributors > Contributor type text,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors[*]->contributor_name_type_id,Contributors contributor name type UUID,Instances — Instance — Contributors > Contributor name type UUID,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.contributors[*]->primary,Contributors primary,Instances — Instance — Contributors > Primary,boolean,true-false,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.created_by,Instances — Instance — Created by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,true,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.created_at,Instances — Instance — Created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.discovery_suppress,Instances — Instance — Discovery suppress,,boolean,true-false,"=, ≠, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.editions,Instances — Instance — Editions,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access,Instances — Instance — Electronic access,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access[*]->uri,Electronic access URI,Instances — Instance — Electronic access > URI,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access[*]->link_text,Electronic access link text,Instances — Instance — Electronic access > Link text,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access[*]->materials_specification,Electronic access materials specification,Instances — Instance — Electronic access > Materials specification,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access[*]->public_note,Electronic access public note,Instances — Instance — Electronic access > Public note,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.electronic_access[*]->relationship_id,Electronic access relationship UUID,Instances — Instance — Electronic access > Relationship UUID,uuid,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.format_names,Instances — Instance — Format names,,string[],dropdown from API(instance-formats),"contains all/any, not contains all/any, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.identifiers,Instances — Instance — Identifiers,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.identifiers[*]->value,Identifiers value,Instances — Instance — Identifiers > Value,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.identifiers[*]->identifier_type_id,Identifiers type UUID,Instances — Instance — Identifiers > Type UUID,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.index_title,Instances — Instance — Index title,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.instance_format_ids,Instances — Instance — Instance format UUIDs,,uuid[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.hrid,Instances — Instance — Instance HRID,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.id,Instances — Instance — Instance UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.jsonb,Instances — Instance — JSONB,,string,,not queryable,false,true,true,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.languages,Instances — Instance — Languages,,string[],dropdown from entity (simple_languages -> languages),not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.match_key,Instances — Instance — Match key,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.mode_of_issuance_name,Instances — Instance — Mode of issuance,,string,dropdown from entity (simple_mode_of_issuance -> name),"=, ≠, in, not in, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.mode_of_issuance_id,Instances — Instance — Mode of issuance UUID,,uuid,,"=, ≠, in, not in, empty",true,true,true,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.nature_of_content_term_ids,Instances — Instance — Nature of content term UUIDs,,uuid[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.notes,Instances — Instance — Notes,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.notes[*]->instance_note_type_id,Notes type UUID,Instances — Instance — Notes > Type UUID,uuid,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.notes[*]->note,Notes contents,Instances — Instance — Notes > Content,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.notes[*]->staff_only,Notes staff only,Instances — Instance — Notes > Staff only,boolean,true-false,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.physical_descriptions,Instances — Instance — Physical descriptions,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.previously_held,Instances — Instance — Previously held,,boolean,true-false,"=, ≠, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication,Instances — Instance — Publication,,object[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication[*]->publisher,Publication publisher,Instances — Instance — Publication > Publisher,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication[*]->place,Publication place,Instances — Instance — Publication > Place,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication[*]->date_of_publication,Publication date,Instances — Instance — Publication > Date,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication[*]->role,Publication role,Instances — Instance — Publication > Role,string,,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication_period_end,Instances — Instance — Publication end year,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication_frequency,Instances — Instance — Publication frequency,,string[],,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication_range,Instances — Instance — Publication range,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.publication_period_start,Instances — Instance — Publication start year,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.version,Instances — Instance — Record version,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.instance_type_name,Instances — Instance — Resource type,,string,dropdown from entity (simple_instance_type -> name),"=, ≠, in, not in, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.instance_type_id,Instances — Instance — Resource type UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.series,Instances — Instance — Series,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.source,Instances — Instance — Source,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.staff_suppress,Instances — Instance — Staff suppress,,boolean,true-false,"=, ≠, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.statistical_code_names,Instances — Instance — Statistical code names,,string[],dropdown from entity (simple_inventory_statistical_code_full -> statistical_code),"contains all/any, not contains all/any, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.statistical_code_ids,Instances — Instance — Statistical code UUIDs,,uuid[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.subjects,Instances — Instance — Subject headings,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.tags,Instances — Instance — Tags,,string[],,not queryable,false,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.tenant_id,Instances — Instance — Tenant ID,,string,dropdown from entity (simple_instance -> tenant_id),"=, ≠, in, not in, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.title,Instances — Instance — Title,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.updated_by,Instances — Instance — Updated by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,true,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance,instance.updated_at,Instances — Instance — Updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+6b08439b-4f8e-4468-8046-ea620f5cfb74,composite_instances,instance_type,instance_type.jsonb,Instances — Resource type — JSONB,,string,,not queryable,false,true,true,true

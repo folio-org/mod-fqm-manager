@@ -1,0 +1,56 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,,ADA accomodation,Users — ADA accomodation,,boolean,true-false,"=, ≠, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.created_by_user_id,Users — Group — Created by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.created_by_username,Users — Group — Created by username,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.created_date,Users — Group — Created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.desc,Users — Group — Desc,,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.expiration_off_set_in_days,Users — Group — Expiration off set in days,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.group,Users — Group — Group,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.jsonb,Users — Group — JSONB,,string,,not queryable,false,true,true,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.source,Users — Group — Source,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.updated_by_user_id,Users — Group — Updated by user UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.updated_by_username,Users — Group — Updated by username,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.updated_date,Users — Group — Updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,groups,groups.id,Users — Group — UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,,Is a community patron,Users — Is a community patron,,boolean,true-false,"=, ≠, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,,PC-Pool-Nutzer,Users — PC-Pool-Nutzer,,boolean,true-false,"=, ≠, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.active,Users — User — Active,,boolean,true-false,"=, ≠, empty",true,true,false,true
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses,Users — User — Address,,object[],,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->address_id,Address UUID,Users — User — Address > Address UUID,uuid,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->city,City,Users — User — Address > City,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->region,Region,Users — User — Address > Region,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->country_id,Country UUID,Users — User — Address > Country UUID,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->postal_code,Postal Code,Users — User — Address > Postal code,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->address_line1,Address line 1,Users — User — Address > Address line 1,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->address_type_id,Address type UUID,Users — User — Address > Address type UUID,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->primary_address,Primary address,Users — User — Address > Primary address,boolean,true-false,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.addresses[*]->address_line2,Address line 2,Users — User — Address > Address line 2,string,,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.barcode,Users — User — Barcode,,string,,"=, ≠, contains, starts, empty",true,true,false,true
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.created_by_user_id,Users — User — Created by user UUID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.created_date,Users — User — Created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.date_of_birth,Users — User — Date of birth,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.departments,Users — User — Department names,,string[],dropdown from API(departments),"contains all/any, not contains all/any, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.department_ids,Users — User — Department UUIDs,,string[],,"contains all/any, not contains all/any, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.email,Users — User — Email,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.enrollment_date,Users — User — Enrollment date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.expiration_date,Users — User — Expiration date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,true
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.external_system_id,Users — User — External system ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.first_name,Users — User — First name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.jsonb,Users — User — JSONB,,string,,not queryable,false,true,true,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.last_name,Users — User — Last name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.last_name_first_name,"Users — User — Last name, first name",,string,,"=, ≠, contains, starts, empty",true,true,false,true
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.middle_name,Users — User — Middle name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.mobile_phone,Users — User — Mobile phone,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.patron_group,Users — User — Patron group,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.phone,Users — User — Phone,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.preferred_contact_type,Users — User — Preferred contact type,,string,"dropdown hardcoded (Email, Mail (Primary Address), Text Message, Unknown)","=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.preferred_first_name,Users — User — Preferred first name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.proxy_for,Users — User — Proxy for,,string[],,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.tags_tag_list,Users — User — Tags tag list,,string[],,not queryable,false,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.type,Users — User — Type,,string,"dropdown hardcoded (Patron, Staff, Shadow, System, DCB)","=, ≠, in, not in, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.updated_by_user_id,Users — User — Updated by user UUID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.updated_date,Users — User — Updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.user_created_date,Users — User — User created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.user_updated_date,Users — User — User updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.id,Users — User — User UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,true
+ddc93926-d15a-4a45-9d9c-93eadc3d9bbf,composite_user_details,users,users.username,Users — User — Username,,string,,"=, ≠, contains, starts, empty",true,true,false,false

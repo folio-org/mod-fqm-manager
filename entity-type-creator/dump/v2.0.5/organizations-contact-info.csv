@@ -1,0 +1,39 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,acquisition_unit_id,Acquisition unit IDs,,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,acquisition_unit_name,Acquisition units,,string[],dropdown from entity (src_acquisitions_unit -> acquisitions_name),not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address,Contact addresses,,object[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->address_line_1,Contact address line 1,Contact addresses > Line 1,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->address_line_2,Contact address line 2,Contact addresses > Line 2,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->city,Contact address city,Contact addresses > City,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->state_region,Contact address state/province,Contact addresses > State/province,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->postal_code,Contact address postal code,Contact addresses > Postal code,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->country,Contact address country,Contact addresses > Country,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->category_ids,Address category IDs,Contact addresses > Category IDs,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,address[*]->category_names,Address category names,Contact addresses > Categories,string[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,email,Contact email addresses,,object[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,email[*]->email,Contact email address,Contact email addresses > Email address,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,email[*]->description,Contact email description,Contact email addresses > Description,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,email[*]->category_ids,Email category IDs,Contact email addresses > Category IDs,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,email[*]->category_names,Email category names,Contact email addresses > Categories,string[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,phone_number,Contact phone numbers,,object[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,phone_number[*]->phone_number,Contact phone number,Contact phone numbers > Phone number,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,phone_number[*]->type,Contact phone number type,Contact phone numbers > Type,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,phone_number[*]->category_ids,Phone number category IDs,Contact phone numbers > Category IDs,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,phone_number[*]->category_names,Phone number category names,Contact phone numbers > Categories,string[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,url,Contact URLs,,object[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,url[*]->url,Contact URL,Contact URLs > URL,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,url[*]->description,Contact URL description,Contact URLs > Description,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,url[*]->category_ids,URL category IDs,Contact URLs > Category IDs,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,url[*]->category_names,URL category names,Contact URLs > Categories,string[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,accounting_code,Organization accounting code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,alias,Organization alias,,object[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,alias[*]->value,Alias value,Organization alias > Value,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,alias[*]->description,Alias description,Organization alias > Description,string,,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,code,Organization code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,description,Organization description,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,id,Organization ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,last_updated,Organization last updated,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,name,Organization name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,organization_status,Organization status,,string,"dropdown hardcoded (Active, Inactive, Pending)","=, ≠, in, not in, empty",true,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,organization_type_ids,Organization type IDs,,uuid[],,not queryable,false,true,false,false
+7a7860cd-e939-504f-b51f-ed3e1e6b12b9,drv_organization_contacts,,organization_type_name,Organization type names,,string[],dropdown from entity (src_organization_types -> organization_types_name),not queryable,false,true,false,false

@@ -1,0 +1,20 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_statistical_codes,Instance  statistical code list,,string[],dropdown from entity (drv_inventory_statistical_code_full -> statistical_code),not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_cataloged_date,Instance cataloged date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_contributor_type_name_ids,Instance contributor name type ID list,,uuid[],,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_contributor_name_type,Instance contributor name type list,,string[],dropdown from entity (src_inventory_contributor_name_type -> contributor_name_type),not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_contributor_type_ids,Instance contributor type ID list,,uuid[],,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_contributor_type,Instance contributor type list,,string[],dropdown from entity (src_inventory_contributor_type -> contributor_type),not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_metadata_created_date,Instance created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_hrid,Instance HRID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_language,Instance language,,string[],dropdown from entity (drv_languages -> languages),not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,mode_of_issuance,Instance mode of issuance,,string,dropdown from API(modes-of-issuance),"=, ≠, in, not in, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,mode_of_issuance_id,Instance mode of issuance ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_title,Instance resource title,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_source,Instance source,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_statistical_code_ids,Instance statistical code ID list,,uuid[],,not queryable,false,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_status,Instance status,,string,dropdown from API(instance-statuses),"=, ≠, in, not in, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_status_id,Instance status ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_discovery_suppress,Instance suppress from discovery,,boolean,true-false,"=, ≠, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,instance_metadata_updated_date,Instance updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+6b08439b-4f8e-4468-8046-ea620f5cfb74,drv_instances,,id,Instance UUID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false

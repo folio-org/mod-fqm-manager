@@ -1,0 +1,40 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,acqunit_ids,Acquisition unit ID list,,uuid[],,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,acquisition_unit,Acquisition unit list,,string[],dropdown from entity (src_acquisitions_unit -> acquisitions_name),not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution,Fund distributions,,object[],,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution[*]->code,Fund distribution code,Fund distributions > Code,string,,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution[*]->distribution_type,Fund distribution type,Fund distributions > Distribution type,string,"dropdown hardcoded (percentage, amount)",not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution[*]->encumbrance,Fund distribution encumbrance,Fund distributions > Encumbrance,uuid,,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution[*]->fund_id,Fund distribution fund ID,Fund distributions > Fund ID,uuid,,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,fund_distribution[*]->value,Fund distribution value,Fund distributions > Value,number,,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_approved,PO approved,,boolean,true-false,"=, ≠, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_assigned_to,PO assigned to,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_assigned_to_id,PO assigned to ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_created_by,PO created by,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_created_by_id,PO created by ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_created_date,PO created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_id,PO ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_notes,PO note list,,string[],,not queryable,false,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_number,PO number,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_type,PO type,,string,"dropdown hardcoded (Ongoing, One-Time)","=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_updated_by,PO updated by,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_updated_by_id,PO updated by ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_updated_date,PO updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,po_workflow_status,PO workflow status,,string,"dropdown hardcoded (Closed, Open, Pending)","=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_created_by,POL created by,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_created_by_id,POL created by ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_created_date,POL created date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_currency,POL currency,,string,dropdown from entity (drv_purchase_order_line_details -> pol_currency),"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_description,POL description,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_estimated_price,POL estimated price,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_exchange_rate,POL exchange rate,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,id,POL ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_number,POL number,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_payment_status,POL payment status,,string,dropdown from entity (drv_pol_payment_status -> payment_status),"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_receipt_status,POL receipt status,,string,dropdown from entity (drv_pol_receipt_status -> receipt_status),"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_updated_by,POL updated by,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_updated_by_id,POL updated by ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,pol_updated_date,POL updated date,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,vendor_code,Vendor code,,string,dropdown from entity (src_organizations -> vendor_code),"=, ≠, in, not in, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,vendor_id,Vendor ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+90403847-8c47-4f58-b117-9a807b052808,drv_purchase_order_line_details,,vendor_name,Vendor name,,string,dropdown from entity (src_organizations -> vendor_name),"=, ≠, in, not in, empty",true,true,false,false

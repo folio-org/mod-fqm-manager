@@ -1,0 +1,2747 @@
+[
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_effective_library_code"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "effective_library.code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_effective_library_id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "effective_library.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_effective_library_name"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "effective_library.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_effective_location"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "effective_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_effective_location_id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "effective_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_hrid"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.hrid"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_permanent_location"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "permanent_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_permanent_location_id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "permanent_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_statistical_code_ids"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.statistical_code_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_statistical_codes"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.statistical_code_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_suppress_from_discovery"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.discovery_suppress"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_temporary_location"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "temporary_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings_temporary_location_id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "temporary_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "instance_id"
+    },
+    "dest": {
+      "entityType": "8418e512-feac-4a6a-a56d-9006aab31e33",
+      "column": "holdings.instance_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "acquisition_unit_id"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "acq_unit_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "acquisition_unit_name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "acq_unit_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "addresses"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->address_line_1"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->address_line_1"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->address_line_2"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->address_line_2"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->city"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->city"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->state_region"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->state_region"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->postal_code"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->postal_code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->country"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->country"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->category_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->category_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "address[*]->category_names"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "address[*]->category_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "email"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "emails"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "email[*]->email"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "email[*]->email"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "email[*]->description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "email[*]->description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "email[*]->category_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "email[*]->category_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "email[*]->category_names"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "email[*]->category_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "phone_number"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "phone_numbers"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "phone_number[*]->phone_number"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "phone_number[*]->phone_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "phone_number[*]->type"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "phone_number[*]->type"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "phone_number[*]->category_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "phone_number[*]->category_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "phone_number[*]->category_names"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "phone_number[*]->category_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "url"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "urls"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "url[*]->url"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "url[*]->url"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "url[*]->description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "url[*]->description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "url[*]->category_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "url[*]->category_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "url[*]->category_names"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "url[*]->category_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "accounting_code"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounting_code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "alias"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "aliases"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "alias[*]->value"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "alias[*]->value"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "alias[*]->description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "alias[*]->description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "code"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "last_updated"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "organization_status"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "status"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "organization_type_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "type_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "7a7860cd-e939-504f-b51f-ed3e1e6b12b9",
+      "column": "organization_type_name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "type_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "acqunit_ids"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.acq_unit_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "acquisition_unit"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.acquisition_unit"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.fund_distribution"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution[*]->code"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "fund_distribution[*]->code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution[*]->distribution_type"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "fund_distribution[*]->distribution_type"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution[*]->encumbrance"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "fund_distribution[*]->encumbrance"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution[*]->fund_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "fund_distribution[*]->fund_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "fund_distribution[*]->value"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "fund_distribution[*]->value"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_approved"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.approved"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_assigned_to"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "assigned_to_user.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_assigned_to_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "assigned_to_user.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_created_by"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po_created_by_user.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_created_by_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po_created_by_user.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_created_date"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.created_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_notes"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.notes"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_number"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.po_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_type"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.order_type"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_updated_by"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po_updated_by_user.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_updated_by_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po_updated_by_user.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_updated_date"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "po_workflow_status"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "po.workflow_status"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_created_by"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol_created_by_user.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_created_by_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol_created_by_user.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_created_date"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.created_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_currency"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.cost_currency"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_description"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_estimated_price"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.cost_po_line_estimated_price"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_exchange_rate"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.cost_exchange_rate"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_number"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.po_line_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_payment_status"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.payment_status"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_receipt_status"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.receipt_status"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_updated_by"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol_updated_by_user.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_updated_by_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol_updated_by_user.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "pol_updated_date"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "pol.updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "vendor_code"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "vendor_organization.code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "vendor_id"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "vendor_organization.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "90403847-8c47-4f58-b117-9a807b052808",
+      "column": "vendor_name"
+    },
+    "dest": {
+      "entityType": "abc777d3-2a45-43e6-82cb-71e8c96d13d2",
+      "column": "vendor_organization.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_active"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.active"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_address_ids"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->address_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_address_line1"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->address_line1"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_address_line2"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->address_line2"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_address_type_names"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "user_address_type_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_barcode"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.barcode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_cities"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->city"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_country_ids"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->country_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_created_date"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.created_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_date_of_birth"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.date_of_birth"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_department_ids"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.department_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_department_names"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.departments"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_email"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.email"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_enrollment_date"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.enrollment_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_expiration_date"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.expiration_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_external_system_id"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.external_system_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_first_name"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_last_name"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.last_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_middle_name"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.middle_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_mobile_phone"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.mobile_phone"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_patron_group"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "groups.group"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_patron_group_id"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "groups.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_phone"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.phone"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_postal_codes"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->postal_code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_preferred_contact_type"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.preferred_contact_type"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_preferred_first_name"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.preferred_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_primary_address"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses"
+    },
+    "warnings": [
+      "Field user_primary_address is no longer supported in your query. You may be able to use users.addresses instead. For reference, your original query was { }."
+    ]
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_regions"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.addresses[*]->region"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "user_updated_date"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.updated_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "Is a community patron"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "Is a community patron"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0069cf6f-2833-46db-8a51-8934769b8289",
+      "column": "username"
+    },
+    "dest": {
+      "entityType": "ddc93926-d15a-4a45-9d9c-93eadc3d9bbf",
+      "column": "users.username"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "holdings_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "holdings.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "instance_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "instance.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "instance_primary_contributor"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "instance.contributors"
+    },
+    "warnings": [
+      "Field instance_primary_contributor is no longer supported in your query. You may be able to use instance.contributors instead. For reference, your original query was { }."
+    ]
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "instance_title"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "instance.title"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_barcode"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "items.barcode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_call_number"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "items.effective_call_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "items.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_material_type"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "mtypes.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_material_type_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "mtypes.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "item_status"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "items.status_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_checkin_servicepoint_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "cispi.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_checkin_servicepoint_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "cispi.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_checkout_date"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "loans.loan_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_checkout_servicepoint_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "cospi.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_checkout_servicepoint_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "cospi.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_due_date"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "loans.due_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "loans.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_policy_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "lpolicy.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_policy_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "lpolicy.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_return_date"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "loans.return_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "loan_status"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "loans.status_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_active"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.active"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_barcode"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.barcode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_expiration_date"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.expiration_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_first_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_full_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.last_name_first_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_last_name"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "users.last_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_patron_group"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "groups.group"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "4e09d89a-44ed-418e-a9cc-820dfb27bf3a",
+      "column": "user_patron_group_id"
+    },
+    "dest": {
+      "entityType": "d6729885-f2fb-4dc7-b7d0-a865a7f461e4",
+      "column": "groups.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_statistical_codes"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.statistical_code_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_cataloged_date"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.cataloged_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_contributor_type_name_ids"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.contributors[*]->contributor_name_type_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_contributor_name_type"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.contributors[*]->name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_contributor_type_ids"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.contributors[*]->contributor_type_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_contributor_type"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.contributors[*]->contributor_type_text"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_metadata_created_date"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.created_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_hrid"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.hrid"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_language"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.languages"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "mode_of_issuance"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.mode_of_issuance_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "mode_of_issuance_id"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.mode_of_issuance_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_title"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.title"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_source"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.source"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_statistical_code_ids"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.statistical_code_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_status"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "inst_stat.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_status_id"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.status_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_discovery_suppress"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.discovery_suppress"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance_metadata_updated_date"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "6b08439b-4f8e-4468-8046-ea620f5cfb74",
+      "column": "instance.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "acqunit_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "acq_unit_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "acquisition_unit"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "acq_unit_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->notes"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->notes"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->accountNo"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->accountNo"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->libraryCode"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->libraryCode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->libraryEdiCode"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->libraryEdiCode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->contactInfo"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->contactInfo"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->appSystemNo"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->appSystemNo"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->accountStatus"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->accountStatus"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->paymentMethod"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->paymentMethod"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->acqUnitIds"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->acqUnitIds"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounts[*]->acquisition_unit"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounts[*]->acquisition_unit"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "accounting_code"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "accounting_code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "agreements"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "agreements"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "agreements[*]->name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "agreements[*]->name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "agreements[*]->discount"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "agreements[*]->discount"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "agreements[*]->referenceUrl"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "agreements[*]->referenceUrl"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "agreements[*]->notes"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "agreements[*]->notes"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "alias"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "aliases"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "alias[*]->value"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "alias[*]->value"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "alias[*]->description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "alias[*]->description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "claiming_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "claiming_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "code"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "description"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "description"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "discount_percent"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "discount_percent"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "expected_activation_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "expected_activation_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "expected_invoice_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "expected_invoice_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "expected_receipt_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "expected_receipt_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "export_to_accounting"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "export_to_accounting"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "last_updated"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "payment_method"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "payment_method"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "renewal_activation_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "renewal_activation_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "organization_status"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "status"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "subscription_interval"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "subscription_interval"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "tax_id"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "tax_id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "tax_percentage"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "tax_percentage"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "organization_type_ids"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "type_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "organization_type_name"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "type_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "837f262e-2073-4a00-8bcc-4e4ce6e669b3",
+      "column": "vendor_currencies"
+    },
+    "dest": {
+      "entityType": "b5ffa2e9-8080-471a-8003-a8c5a1274503",
+      "column": "vendor_currencies"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "holdings_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "holdings.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "instance_created_date"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "instances.created_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "instance_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "instances.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "instance_primary_contributor"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "instances.contributors"
+    },
+    "warnings": [
+      "Field instance_primary_contributor is no longer supported in your query. You may be able to use instance.contributors instead. For reference, your original query was { }."
+    ]
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "instance_title"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "instances.title"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "instance_updated_date"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "instances.updated_at"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_barcode"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.barcode"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_level_call_number"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.item_level_call_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_level_call_number_typeid"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "item_level_call_number.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_level_call_number_type_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "item_level_call_number.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_copy_number"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.copy_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_created_date"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.created_date"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_call_number"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.effective_call_number"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_call_number_typeid"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "effective_call_number.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_call_number_type_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "effective_call_number.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_library_code"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "loclibrary.code"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_library_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "loclibrary.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_library_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "loclibrary.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_location_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "effective_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_effective_location_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "effective_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_hrid"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.hrid"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_material_type_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "mtypes.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_material_type"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "mtypes.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_permanent_location_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "permanent_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_permanent_location_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "permanent_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_statistical_code_ids"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.statistical_code_ids"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_statistical_codes"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.statistical_code_names"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_status"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.status_name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_temporary_location_id"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "temporary_location.id"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_temporary_location_name"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "temporary_location.name"
+    },
+    "warnings": []
+  },
+  {
+    "src": {
+      "entityType": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+      "column": "item_updated_date"
+    },
+    "dest": {
+      "entityType": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+      "column": "items.updated_date"
+    },
+    "warnings": []
+  }
+]

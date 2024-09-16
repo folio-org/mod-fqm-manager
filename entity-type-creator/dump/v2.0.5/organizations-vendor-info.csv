@@ -1,0 +1,45 @@
+Entity ID,Base entity,Simple entity,Name,Label,Table (nested),Datatype,Values,Operators,Queryable,Showable in results,API Only,Essential
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,acqunit_ids,Acquisition unit ID list,,uuid[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,acquisition_unit,Acquisition unit list,,string[],dropdown from entity (src_acquisitions_unit -> acquisitions_name),not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts,Organization account,,object[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->name,Account name,Organization account > Name,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->notes,Account notes,Organization account > Notes,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->accountNo,Account number,Organization account > Account number,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->libraryCode,Account library code,Organization account > Library code,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->libraryEdiCode,Account library EDI code,Organization account > Library EDI code,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->contactInfo,Account contact Info,Organization account > Contact Info,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->appSystemNo,Account accounting code,Organization account > Accounting code,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->description,Account description,Organization account > Description,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->accountStatus,Account status,Organization account > Account status,string,"dropdown hardcoded (Active, Inactive, Pending)",not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->paymentMethod,Account payment method,Organization account > Payment method,string,"dropdown hardcoded (Credit Card, Cash, Physical Check, EFT, Deposit Account)",not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->acqUnitIds,Account acquisition unit ID list,Organization account > Acquisition unit ID list,uuid[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounts[*]->acquisition_unit,Account acquisition unit list,Organization account > Acquisition unit list,string[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,accounting_code,Organization accounting code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,agreements,Organization agreements,,object[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,agreements[*]->name,Agreement vendor terms name,Organization agreements > Vendor terms name,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,agreements[*]->discount,Agreement discount percentage,Organization agreements > Discount percentage,number,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,agreements[*]->referenceUrl,Agreement reference URL,Organization agreements > Reference URL,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,agreements[*]->notes,Agreement notes,Organization agreements > Notes,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,alias,Organization alias,,object[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,alias[*]->value,Alias value,Organization alias > Value,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,alias[*]->description,Alias description,Organization alias > Description,string,,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,claiming_interval,Organization claiming interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,code,Organization code,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,description,Organization description,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,discount_percent,Organization discount percent,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,expected_activation_interval,Organization expected activation interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,expected_invoice_interval,Organization expected invoice interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,expected_receipt_interval,Organization expected receipt interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,export_to_accounting,Organization export to accounting,,boolean,true-false,"=, ≠, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,id,Organization ID,,uuid,,"=, ≠, in, not in, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,last_updated,Organization last updated,,date,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,name,Organization name,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,payment_method,Organization payment method,,string,"dropdown hardcoded (Credit Card, Cash, Physical Check, EFT, Deposit Account)","=, ≠, in, not in, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,renewal_activation_interval,Organization renewal activation interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,organization_status,Organization status,,string,"dropdown hardcoded (Active, Inactive, Pending)","=, ≠, in, not in, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,subscription_interval,Organization subscription interval,,integer,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,tax_id,Organization tax ID,,string,,"=, ≠, contains, starts, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,tax_percentage,Organization tax percentage,,number,,"=, ≠, >, ≥, <, ≤, empty",true,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,organization_type_ids,Organization type IDs,,uuid[],,not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,organization_type_name,Organization type names,,string[],dropdown from entity (src_organization_types -> organization_types_name),not queryable,false,true,false,false
+837f262e-2073-4a00-8bcc-4e4ce6e669b3,drv_organization_details,,vendor_currencies,Organization vendor currencies,,string[],,not queryable,false,true,false,false

@@ -6,6 +6,13 @@ export default function Document(props: Readonly<DocumentHeadTagsProps>) {
     <Html lang="en">
       <Head>
         <DocumentHeadTags {...props} />
+        <style>
+          {`.column_resize_table th::before {
+              content: '';
+              display: block;
+              width: var(--column_resize_before_width);
+            }`}
+        </style>
       </Head>
       <body>
         <Main />

@@ -22,6 +22,8 @@
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.id",
       source: {
         columnName: 'id',
@@ -83,7 +85,9 @@
       sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'description'"
+      valueGetter: ":sourceAlias.jsonb ->> 'description'",
+      hidden: true,
+      essential: true
     },
     {
       name: 'discovery_display_name',
@@ -103,6 +107,8 @@
         valueJsonPath: '$.locations.*.discoveryDisplayName',
         labelJsonPath: '$.locations.*.discoveryDisplayName',
       },
+      hidden: true,
+      essential: true
     },
     {
       name: 'is_active',
@@ -112,6 +118,8 @@
       sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'isActive'",
       values: [
         {
@@ -132,6 +140,8 @@
       sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'institutionId'"
     },
     {
@@ -142,6 +152,8 @@
       sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'campusId'"
     },
     {
@@ -153,6 +165,8 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'details'",
+      hidden: true,
+      essential: true
     },
     {
       name: 'service_point_ids',
@@ -167,7 +181,9 @@
       visibleByDefault: false,
       valueGetter: "(SELECT array_agg(sp_id.value::text) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(sp_id.value::text)) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
-      valueFunction: 'lower(:value)'
+      valueFunction: 'lower(:value)',
+      hidden: true,
+      essential: true
     },
     {
       name: 'primary_service_point',
@@ -178,6 +194,8 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'primaryServicePoint'",
+      hidden: true,
+      essential: true,
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'primaryServicePoint'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
     },
@@ -189,6 +207,7 @@
       sourceAlias: 'location',
       queryable: false,
       hidden: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

@@ -49,7 +49,7 @@ class DataBatchCallbackTest {
     );
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
-      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
     dataBatchCallback.accept(queryId, idsWithCancelCallback, maxQuerySize);
     verify(queryResultsRepository, times(1)).saveQueryResults(queryId, resultIds);
@@ -67,7 +67,7 @@ class DataBatchCallbackTest {
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> streamClosed.set(true));
     assertFalse(streamClosed.get());
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
-      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null, false);
     when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
     dataBatchCallback.accept(queryId, idsWithCancelCallback, maxQuerySize);
     assertTrue(streamClosed.get());
@@ -83,7 +83,7 @@ class DataBatchCallbackTest {
     );
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
-      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", queryId, 2, maxQuerySize);
     Error expectedError = new Error().message(expectedMessage);
     when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));

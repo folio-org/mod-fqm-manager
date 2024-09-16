@@ -45,7 +45,7 @@ class QueryExecutionCallbacksTest {
   @Test
   void successHandlerShouldHandleCancelledQuery() {
     Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
-      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null, false);
     int totalCount = 0;
     when(queryRepository.getQuery(query.queryId(), true)).thenReturn(Optional.of(query));
     callbacks.handleSuccess(query, totalCount);

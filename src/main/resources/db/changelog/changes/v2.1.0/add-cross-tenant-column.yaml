@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-cross-tenant-column
+      author: bsharp@ebsco.com
+      preConditions:
+        - tableExists:
+            tableName: query_details
+        - not:
+            - columnExists:
+                tableName: query_details
+                columnName: cross_tenant
+      changes:
+        - addColumn:
+            tableName: query_details
+            columns:
+              - column:
+                  name: cross_tenant
+                  type: BOOLEAN
+                  defaultValueBoolean: false

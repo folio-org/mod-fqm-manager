@@ -72,10 +72,14 @@ public class QueryManagementService {
         fields.add(idColumn);
       }
     }
+
+    boolean crossTenant = entityType.getCrossTenantQueriesEnabled() && crossTenantQueryService.ecsEnabled();
     Query query = Query.newQuery(submitQuery.getEntityTypeId(),
       submitQuery.getFqlQuery(),
       fields,
-      executionContext.getUserId());
+      executionContext.getUserId(),
+      crossTenant
+    );
     int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
@@ -133,6 +137,7 @@ public class QueryManagementService {
         .endDate(offsetDateTimeAsDate(query.endDate()))
         .failureReason(query.failureReason())
         .totalRecords(queryResultsRepository.getQueryResultsCount(queryId))
+        .crossTenant(Boolean.TRUE.equals(query.crossTenant()))
         .content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit)));
   }
 

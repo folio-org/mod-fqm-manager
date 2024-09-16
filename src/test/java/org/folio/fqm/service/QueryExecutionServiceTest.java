@@ -38,7 +38,7 @@ class QueryExecutionServiceTest {
     UUID createdById = UUID.randomUUID();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
-    Query query = Query.newQuery(entityTypeId, fqlQuery, fields, createdById);
+    Query query = Query.newQuery(entityTypeId, fqlQuery, fields, createdById, false);
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
 

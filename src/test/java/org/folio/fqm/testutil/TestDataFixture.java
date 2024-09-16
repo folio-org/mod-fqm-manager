@@ -33,7 +33,8 @@ public class TestDataFixture {
     OffsetDateTime.now(),
     null,
     QueryStatus.IN_PROGRESS,
-    null
+    null,
+    false
   );
 
   public static Query getMockQuery(QueryStatus status) {
@@ -46,7 +47,8 @@ public class TestDataFixture {
       mockQuery.startDate(),
       mockQuery.endDate(),
       status,
-      mockQuery.failureReason()
+      mockQuery.failureReason(),
+      false
     );
   }
 
@@ -60,7 +62,8 @@ public class TestDataFixture {
       mockQuery.startDate(),
       mockQuery.endDate(),
       QueryStatus.IN_PROGRESS,
-      mockQuery.failureReason()
+      mockQuery.failureReason(),
+      false
     );
   }
 

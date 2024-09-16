@@ -47,7 +47,7 @@ class QueryRepositoryTest {
     List<String> fields = List.of("id", "field1", "field2");
 
     Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
-      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
     Query actualQuery = repo.getQuery(queryIdentifier.getQueryId(), false).orElse(null);
     assertEquals(expectedQuery.queryId(), actualQuery.queryId());
@@ -68,11 +68,11 @@ class QueryRepositoryTest {
     UUID entityTypeId = UUID.randomUUID();
     OffsetDateTime endDate = OffsetDateTime.now();
     Query query = new Query(queryId, entityTypeId, fqlQuery, fields,
-      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     repo.saveQuery(query);
     assertFalse(hasText(query.failureReason()));
     Query updatedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
-      createdBy, null, endDate, QueryStatus.FAILED, "something went wrong");
+      createdBy, null, endDate, QueryStatus.FAILED, "something went wrong", false);
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
     assertEquals("FAILED", updatedQuery.status().toString());
     assertEquals("something went wrong", updatedQuery.failureReason());
@@ -86,14 +86,14 @@ class QueryRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     Query queryToDelete = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     repo.saveQuery(queryToDelete);
     Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null);
+      UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null, false);
 
     UUID queryId2 = UUID.randomUUID();
     Query queryToNotDelete = new Query(queryId2, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now().plusHours(1), null, QueryStatus.IN_PROGRESS, null);
+      UUID.randomUUID(), OffsetDateTime.now().plusHours(1), null, QueryStatus.IN_PROGRESS, null, false);
     repo.saveQuery(queryToNotDelete);
 
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
@@ -114,7 +114,7 @@ class QueryRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1");
     Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null, false);
     QueryIdentifier queryIdentifier = repo.saveQuery(query);
     assertFalse(repo.getQuery(queryIdentifier.getQueryId(), false).isEmpty());
     repo.deleteQueries(List.of(queryId));

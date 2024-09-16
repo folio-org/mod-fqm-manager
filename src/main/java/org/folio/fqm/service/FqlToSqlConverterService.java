@@ -31,10 +31,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -65,7 +62,7 @@ public class FqlToSqlConverterService {
    * any record matching the provided date will be retrieved. If datetime is provided in any other form,
    * an exact comparison will be performed.
    */
-  private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}.*$";
+  private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String STRING_TYPE = "stringType";
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String STRING_UUID_TYPE = "stringUUIDType";
@@ -174,14 +171,9 @@ public class FqlToSqlConverterService {
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field) {
     Condition condition = falseCondition();
-//    var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-//    var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
-    ZonedDateTime zonedDateTime = ZonedDateTime.parse((String) fieldCondition.value(), DateTimeFormatter.ISO_DATE_TIME);
-
-    ZonedDateTime utcDateTime = zonedDateTime.withZoneSameInstant(ZoneOffset.UTC);
-    ZonedDateTime utcNextDay = utcDateTime.plusDays(1);
-    Date date = Date.from(utcDateTime.toInstant());
-    Date nextDay = Date.from(utcNextDay.toInstant());
+    var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+    var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
+    LocalDate nextDay = date.plusDays(1);
     if (fieldCondition instanceof EqualsCondition) {
       condition = field.greaterOrEqual(date.toString())
         .and(field.lessThan(nextDay.toString()));

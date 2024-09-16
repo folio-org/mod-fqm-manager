@@ -205,6 +205,7 @@ class QueryManagementServiceTest {
       .status(QueryDetails.StatusEnum.valueOf(expectedQuery.status().toString()))
       .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
       .totalRecords(5)
+      .crossTenant(false)
       .content(List.of()));
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(5);
@@ -235,6 +236,7 @@ class QueryManagementServiceTest {
       .status(QueryDetails.StatusEnum.valueOf(expectedQuery.status().toString()))
       .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
       .totalRecords(2)
+      .crossTenant(false)
       .content(contents));
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);

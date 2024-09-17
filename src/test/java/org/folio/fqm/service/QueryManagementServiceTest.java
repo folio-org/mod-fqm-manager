@@ -132,7 +132,8 @@ class QueryManagementServiceTest {
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
     ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-    SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
+    int maxQuerySize = 100;
+    SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery).maxSize(maxQuerySize);
     QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
     when(executionContext.getUserId()).thenReturn(createdById);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true, false)).thenReturn(entityType);
@@ -141,7 +142,7 @@ class QueryManagementServiceTest {
     when(crossTenantQueryService.ecsEnabled()).thenReturn(true);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(entityType), any());
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(entityType), eq(maxQuerySize));
     Query savedQuery = queryCaptor.getValue();
     assertTrue(savedQuery.crossTenant());
   }

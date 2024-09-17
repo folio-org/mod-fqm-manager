@@ -64,9 +64,11 @@ public class EntityTypeInitializationService {
   }
 
   // called as part of tenant install/upgrade (see FqmTenantService)
-  public void initializeEntityTypes() throws IOException {
+  public void initializeEntityTypes(String centralTenantId) throws IOException {
     log.info("Initializing entity types");
-    String centralTenantId = crossTenantQueryService.getCentralTenantId();
+    if (centralTenantId == null) {
+      centralTenantId = crossTenantQueryService.getCentralTenantId();
+    }
     if (centralTenantId != null) {
       log.info("ECS central tenant ID: {}", centralTenantId);
     }

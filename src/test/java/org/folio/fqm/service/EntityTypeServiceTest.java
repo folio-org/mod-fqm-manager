@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.folio.fqm.service.EntityTypeService.SIMPLE_INSTANCES_ID;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceTest {
@@ -424,7 +423,7 @@ class EntityTypeServiceTest {
 
   @Test
   void shouldIncludeCentralTenantIdInResponseForSimpleInstanceEntityType() {
-    UUID entityTypeId = UUID.fromString(SIMPLE_INSTANCES_ID);
+    UUID entityTypeId = UUID.fromString("8fc4a9d2-7ccf-4233-afb8-796911839862"); // simple_instance
     String valueColumnName = "this_is_a_tenant_id_column";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -437,14 +436,13 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1"));
-    when(crossTenantQueryService.getCentralTenantId()).thenReturn("central");
+    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1", "central"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
       .getContent();
 
     // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
-    assertEquals(actualColumnValues, List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("central").label("central")));
+    assertEquals(List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("central").label("central")), actualColumnValues);
   }
 }

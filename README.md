@@ -111,6 +111,13 @@ Then we need to enable the module for the tenant:
     http://localhost:9130/_/proxy/tenants/<tenant_name>/modules
 ```
 
+> **Note regarding ECS environments:** In ECS environments, FQM needs the central tenant ID when it is enabled, so FQM
+> requests this data from mod-users. However, in new ECS environments, modules are enabled for a tenant before the tenant
+> is added to a consortium, so mod-users is not able to provide this data at enable-time. As a result, in this case, it is
+> necessary to provide the central tenant ID as a parameter, named `centralTenantId`, in the `POST` request to the tenant
+> management API when enabling mod-fqm-manager. After the tenant has been added to the consortium, this parameter is no
+> longer required when enabling mod-fqm-manager (e.g., when updating the module).
+
 
 ## Querying FQM - Step-by-step guide
 

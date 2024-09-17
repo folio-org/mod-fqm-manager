@@ -2,17 +2,15 @@ package org.folio.fqm.context;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.UUID;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.IntegrationTestBase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.PermissionsService;
 import org.folio.spring.FolioExecutionContext;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,9 +54,6 @@ public class TestDbSetupConfiguration {
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    private FolioExecutionContext executionContext;
-
-    @Autowired
     private PermissionsService permissionsService;
 
     @PostConstruct
@@ -77,6 +72,8 @@ public class TestDbSetupConfiguration {
           "totalRecords": 1
       }
       """);
+      FolioExecutionContext executionContext = mock(FolioExecutionContext.class);
+      when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
       new EntityTypeInitializationService(
         entityTypeRepository,
         new FolioExecutionContext() {
@@ -86,9 +83,9 @@ public class TestDbSetupConfiguration {
           }
         },
         resourceResolver,
-        new CrossTenantQueryService(ecsClient, executionContext, permissionsService)
+        null
       )
-        .initializeEntityTypes();
+        .initializeEntityTypes("tenant_01");
     }
   }
 }

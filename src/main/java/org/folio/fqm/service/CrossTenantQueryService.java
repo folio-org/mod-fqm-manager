@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,20 +24,26 @@ public class CrossTenantQueryService {
   private final PermissionsService permissionsService;
 
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
+  private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
     if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
       return List.of(executionContext.getTenantId());
     }
-    List<Map<String, String>> userTenantMaps = getUserTenants();
-    String centralTenantId = getCentralTenantId(userTenantMaps); // null if non-ECS environment; non-null otherwise
+    // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
+    // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
+    Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    if (!ecsEnabled(ecsTenantInfo)) {
+      return List.of(executionContext.getTenantId());
+    }
 
+    String centralTenantId = getCentralTenantId(ecsTenantInfo);
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
-      if (centralTenantId != null && COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+      if (COMPOSITE_INSTANCES_ID.equals(entityType.getId()) || SIMPLE_INSTANCES_ID.equals(entityType.getId())) {
         return List.of(executionContext.getTenantId(), centralTenantId);
       }
       return List.of(executionContext.getTenantId());
@@ -46,6 +51,7 @@ public class CrossTenantQueryService {
 
     List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
+    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), executionContext.getUserId().toString());
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
       String userId = userMap.get("userId");
@@ -67,33 +73,46 @@ public class CrossTenantQueryService {
 
   @SuppressWarnings("unchecked")
   // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
-  private List<Map<String, String>> getUserTenants() {
-    String userTenantsResponse = ecsClient.get("user-tenants", Map.of("limit", "1000"));
+  private List<Map<String, String>> getUserTenants(String consortiumId, String userId) {
+    String userTenantResponse = ecsClient.get(
+      "consortia/" + consortiumId + "/user-tenants",
+      Map.of("userId", userId, "limit", "1000")
+    );
+    return JsonPath
+      .parse(userTenantResponse)
+      .read("$.userTenants", List.class);
+  }
+  /**
+   * Retrieve the primary affiliation for a user.
+   * This retrieves the primary affiliation for an arbitrary user in the tenant.
+   * In ECS environments, this will return data for a user (in member tenants, it's a dummy user, but that works)
+   * In non-ECS environments, this will return null
+   */
+  @SuppressWarnings("unchecked") // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
+  private Map<String, String> getEcsTenantInfo() {
+    String userTenantsResponse = ecsClient.get("user-tenants", Map.of("limit", "1"));
     List<Map<String, String>> userTenants = JsonPath
       .parse(userTenantsResponse)
       .read("$.userTenants", List.class);
 
-    // Get the first entry for each tenant
-    return userTenants.stream().collect(Collectors.groupingBy(m -> m.get("tenantId")))
-      .values()
-      .stream()
-      .filter(l -> !l.isEmpty()) // Just to be safe...
-      .map(m -> m.get(0))
-      .toList();
+    return userTenants.stream()
+      .findAny()
+      .orElse(null);
   }
 
-  private String getCentralTenantId(List<Map<String, String>> userTenants) {
-    return userTenants.stream()
-       .map(map -> map.get("centralTenantId"))
-       .findFirst()
-       .orElse(null);
+  private String getCentralTenantId(Map<String, String> ecsTenantInfo) {
+    return ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
   }
 
   public String getCentralTenantId() {
-    return getCentralTenantId(getUserTenants());
+    return getCentralTenantId(getEcsTenantInfo());
+  }
+
+  private boolean ecsEnabled(Map<String, String> ecsTenantInfo) {
+    return !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
   }
 
   public boolean ecsEnabled() {
-    return !getUserTenants().isEmpty();
+    return ecsEnabled(getEcsTenantInfo());
   }
 }

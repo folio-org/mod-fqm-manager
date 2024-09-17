@@ -6,6 +6,7 @@ import java.util.Map;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
+import org.folio.tenant.domain.dto.Parameter;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -46,8 +47,14 @@ public class FqmTenantService extends TenantService {
 
   @Override
   protected void afterLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    String centralTenantId = tenantAttributes.getParameters()
+      .stream()
+      .filter(param -> "centralTenantId".equals(param.getKey()))
+      .map(Parameter::getValue)
+      .findFirst()
+      .orElse(null);
     try {
-      entityTypeInitializationService.initializeEntityTypes();
+      entityTypeInitializationService.initializeEntityTypes(centralTenantId);
     } catch (IOException e) {
       throw new UncheckedIOException("Failed to initialize entity types", e);
     }

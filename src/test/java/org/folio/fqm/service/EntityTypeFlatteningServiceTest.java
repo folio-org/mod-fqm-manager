@@ -12,6 +12,7 @@ import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +37,8 @@ class EntityTypeFlatteningServiceTest {
   private LocalizationService localizationService;
   @Mock
   private SimpleHttpClient ecsClient;
+  @Mock
+  private FolioExecutionContext executionContext;
 
   private EntityTypeFlatteningService entityTypeFlatteningService;
 
@@ -441,7 +443,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -635,7 +637,7 @@ class EntityTypeFlatteningServiceTest {
       }
       return entityType;
     });
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -844,7 +846,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -857,7 +859,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
@@ -871,7 +873,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, null);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
@@ -960,7 +962,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 1}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 1}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -1038,7 +1040,7 @@ class EntityTypeFlatteningServiceTest {
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
       .sourceViewExtractor("some_view_extractor");
 
-    when(ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)))).thenReturn("{'totalRecords': 0}");
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null))
       .thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE_WITH_SOURCE_VIEW_EXTRACTOR)));

@@ -11,7 +11,7 @@
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
           "permissionsRequired": [],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -28,19 +28,19 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}",
           "permissionsRequired": ["fqm.entityTypes.item.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types",
           "permissionsRequired": ["fqm.entityTypes.collection.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["POST"],
@@ -57,19 +57,19 @@
           "methods": ["GET"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.sync.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
@@ -87,13 +87,13 @@
           "methods": ["POST"],
           "pathPattern": "/query/contents",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["POST"],
@@ -104,7 +104,7 @@
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         }
       ]
     },
@@ -363,6 +363,12 @@
     {
       "id": "voucher-storage.voucher-number",
       "version": "1.1"
+    }
+  ],
+  "optional": [
+    {
+      "id": "consortia",
+      "version": "1.0"
     }
   ],
   "launchDescriptor": {

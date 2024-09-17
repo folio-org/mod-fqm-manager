@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -92,6 +91,7 @@ class IdStreamerTest {
     );
 
     executionContext = mock(FolioExecutionContext.class);
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
       readerContext,
       context,

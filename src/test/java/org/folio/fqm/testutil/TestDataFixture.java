@@ -37,7 +37,7 @@ public class TestDataFixture {
     false
   );
 
-  public static Query getMockQuery(QueryStatus status) {
+  public static Query getMockQuery(QueryStatus status, boolean crossTenant) {
     return new Query(
       mockQuery.queryId(),
       mockQuery.entityTypeId(),
@@ -48,7 +48,7 @@ public class TestDataFixture {
       mockQuery.endDate(),
       status,
       mockQuery.failureReason(),
-      false
+      crossTenant
     );
   }
 

@@ -37,7 +37,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
@@ -99,10 +101,12 @@ class QueryManagementServiceTest {
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
+      .crossTenantQueriesEnabled(true)
       .columns(columns);
     String fqlQuery = """
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
     int maxQuerySize = 100;
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery).maxSize(maxQuerySize);
     QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
@@ -112,7 +116,34 @@ class QueryManagementServiceTest {
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
     QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
     assertEquals(expectedIdentifier, actualIdentifier);
-    verify(queryExecutionService, times(1)).executeQueryAsync(any(), eq(entityType), eq(maxQuerySize));
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(entityType), eq(maxQuerySize));
+    Query savedQuery = queryCaptor.getValue();
+    assertFalse(savedQuery.crossTenant());
+  }
+
+  @Test
+  void shouldSaveCrossTenantQuery() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .crossTenantQueriesEnabled(true);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true, false)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+    when(crossTenantQueryService.ecsEnabled()).thenReturn(true);
+    QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
+    assertEquals(expectedIdentifier, actualIdentifier);
+    verify(queryExecutionService, times(1)).executeQueryAsync(queryCaptor.capture(), eq(entityType), any());
+    Query savedQuery = queryCaptor.getValue();
+    assertTrue(savedQuery.crossTenant());
   }
 
   @Test
@@ -384,7 +415,7 @@ class QueryManagementServiceTest {
 
   @Test
   void deleteQuerySuccessScenario() {
-    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS, false);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     queryManagementService.deleteQuery(query.queryId());
     verify(queryResultsRepository).deleteQueryResults(List.of(query.queryId()));
@@ -393,7 +424,7 @@ class QueryManagementServiceTest {
 
   @Test
   void deleteQueryInProgressScenario() {
-    Query query = TestDataFixture.getMockQuery(QueryStatus.IN_PROGRESS);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.IN_PROGRESS, false);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     queryManagementService.deleteQuery(query.queryId());
     verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.CANCELLED), any(), eq(null));
@@ -408,7 +439,7 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldGetSortedIds() {
-    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS, false);
     int offset = 0;
     int limit = 0;
     List<List<String>> expectedIds = List.of(
@@ -428,7 +459,7 @@ class QueryManagementServiceTest {
   @Test
   @Disabled
   void getSortedIdsShouldThrowErrorIfEntityTypeNotFound() {
-    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS, false);
     UUID queryId = query.queryId();
     int offset = 0;
     int limit = 0;
@@ -439,7 +470,7 @@ class QueryManagementServiceTest {
 
   @Test
   void getSortedIdsShouldThrowErrorIfQueryNotFound() {
-    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.SUCCESS, false);
     UUID queryId = query.queryId();
     int offset = 0;
     int limit = 0;

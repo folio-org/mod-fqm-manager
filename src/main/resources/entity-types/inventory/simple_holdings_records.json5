@@ -109,6 +109,8 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      hidden: true,
+      essential: true,
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,

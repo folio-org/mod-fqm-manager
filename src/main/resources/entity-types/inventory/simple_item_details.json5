@@ -28,7 +28,7 @@
       name: 'hrid',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,

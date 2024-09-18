@@ -372,13 +372,17 @@ class EntityTypeServiceTest {
   @Test
   void shouldReturnCrossTenantDefinitionWhenEcsEnabled() {
     UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .crossTenantQueriesEnabled(true);
     EntityType expectedEntityType = new EntityType()
       .id(entityTypeId.toString())
       .crossTenantQueriesEnabled(true);
 
+
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
-      .thenReturn(expectedEntityType);
-    when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
+      .thenReturn(entityType);
+    when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
     EntityType actualEntityType = entityTypeService
       .getEntityTypeDefinition(entityTypeId, false, false);

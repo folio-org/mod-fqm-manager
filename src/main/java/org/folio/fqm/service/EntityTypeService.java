@@ -87,7 +87,9 @@ public class EntityTypeService {
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
-    List<EntityTypeColumn> columns  = entityType
+    boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+      && crossTenantQueryService.isCentralTenant();
+    List<EntityTypeColumn> columns = entityType
       .getColumns()
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
@@ -99,15 +101,15 @@ public class EntityTypeService {
     }
     return entityType
       .columns(columns)
-      .crossTenantQueriesEnabled(Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled()) && crossTenantQueryService.isCentralTenant());
+      .crossTenantQueriesEnabled(crossTenantEnabled);
   }
 
   /**
    * Return top 1000 values of an entity type field, matching the given search text
    *
-   * @param fieldName    Name of the field for which values have to be returned
-   * @param searchText   Nullable search text. If a search text is provided, the returned values will include only those
-   *                     that contain the specified searchText.
+   * @param fieldName  Name of the field for which values have to be returned
+   * @param searchText Nullable search text. If a search text is provided, the returned values will include only those
+   *                   that contain the specified searchText.
    */
   @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {

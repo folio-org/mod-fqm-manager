@@ -99,7 +99,7 @@ public class EntityTypeService {
     }
     return entityType
       .columns(columns)
-      .crossTenantQueriesEnabled(entityType.getCrossTenantQueriesEnabled() && crossTenantQueryService.isCentralTenant());
+      .crossTenantQueriesEnabled(Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled()) && crossTenantQueryService.isCentralTenant());
   }
 
   /**

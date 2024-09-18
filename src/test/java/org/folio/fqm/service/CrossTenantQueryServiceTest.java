@@ -167,4 +167,12 @@ class CrossTenantQueryServiceTest {
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
     assertNull(crossTenantQueryService.getCentralTenantId());
   }
+
+  @Test
+  void testIsCentralTenant() {
+    String expectedId = "tenant_01";
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
+    when(executionContext.getTenantId()).thenReturn(expectedId);
+    assertTrue(crossTenantQueryService.isCentralTenant());
+  }
 }

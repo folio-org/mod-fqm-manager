@@ -370,6 +370,43 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void shouldReturnCrossTenantDefinitionWhenEcsEnabled() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType expectedEntityType = new EntityType()
+      .id(entityTypeId.toString())
+      .crossTenantQueriesEnabled(true);
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+      .thenReturn(expectedEntityType);
+    when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
+
+    EntityType actualEntityType = entityTypeService
+      .getEntityTypeDefinition(entityTypeId, false, false);
+
+    assertEquals(expectedEntityType, actualEntityType);
+  }
+
+  @Test
+  void shouldReturnNonCrossTenantDefinitionWhenEcsNotEnabled() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .crossTenantQueriesEnabled(true);
+    EntityType expectedEntityType = new EntityType()
+      .id(entityTypeId.toString())
+      .crossTenantQueriesEnabled(false);
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+      .thenReturn(entityType);
+    when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
+
+    EntityType actualEntityType = entityTypeService
+      .getEntityTypeDefinition(entityTypeId, false, false);
+
+    assertEquals(expectedEntityType, actualEntityType);
+  }
+
+  @Test
   void shouldReturnCurrencies() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "pol_currency";

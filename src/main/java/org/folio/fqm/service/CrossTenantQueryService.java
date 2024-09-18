@@ -65,6 +65,18 @@ public class CrossTenantQueryService {
     return tenantsToQuery;
   }
 
+  public String getCentralTenantId() {
+    return getCentralTenantId(getUserTenants());
+  }
+
+  public boolean ecsEnabled() {
+    return !getUserTenants().isEmpty();
+  }
+
+  public boolean isCentralTenant() {
+    return executionContext.getTenantId().equals(getCentralTenantId());
+  }
+
   @SuppressWarnings("unchecked")
   // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private List<Map<String, String>> getUserTenants() {
@@ -87,13 +99,5 @@ public class CrossTenantQueryService {
        .map(map -> map.get("centralTenantId"))
        .findFirst()
        .orElse(null);
-  }
-
-  public String getCentralTenantId() {
-    return getCentralTenantId(getUserTenants());
-  }
-
-  public boolean ecsEnabled() {
-    return !getUserTenants().isEmpty();
   }
 }

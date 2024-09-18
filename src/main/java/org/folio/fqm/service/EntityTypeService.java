@@ -97,7 +97,9 @@ public class EntityTypeService {
         .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
         .toList();
     }
-    return entityType.columns(columns);
+    return entityType
+      .columns(columns)
+      .crossTenantQueriesEnabled(entityType.getCrossTenantQueriesEnabled() && crossTenantQueryService.isCentralTenant());
   }
 
   /**

@@ -27,13 +27,15 @@ public class CrossTenantQueryService {
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
-    if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
+    if (!forceCrossTenantQuery
+      && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+      && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     List<Map<String, String>> userTenantMaps = getUserTenants();
     String centralTenantId = getCentralTenantId(userTenantMaps); // null if non-ECS environment; non-null otherwise
 
-    if (!executionContext.getTenantId().equals(centralTenantId)) {
+    if (!isCentralTenant()) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
@@ -96,8 +98,8 @@ public class CrossTenantQueryService {
 
   private String getCentralTenantId(List<Map<String, String>> userTenants) {
     return userTenants.stream()
-       .map(map -> map.get("centralTenantId"))
-       .findFirst()
-       .orElse(null);
+      .map(map -> map.get("centralTenantId"))
+      .findFirst()
+      .orElse(null);
   }
 }

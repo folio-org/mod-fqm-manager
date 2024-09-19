@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -62,7 +63,10 @@ public class FqlToSqlConverterService {
    * any record matching the provided date will be retrieved. If datetime is provided in any other form,
    * an exact comparison will be performed.
    */
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
+  private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
   private static final String STRING_TYPE = "stringType";
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String STRING_UUID_TYPE = "stringUUIDType";
@@ -170,13 +174,36 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field) {
-    Condition condition = falseCondition();
-    var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-    var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
-    LocalDate nextDay = date.plusDays(1);
+
+//    Condition condition = falseCondition();
+//    var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+//    var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
+//    LocalDate nextDay = date.plusDays(1);
+
+    String dateString = (String) fieldCondition.value();
+    Condition condition = null;
+    LocalDate date = null;
+    LocalDate nextDay = null;
+    LocalDateTime dateTime = null;
+    LocalDateTime nextDayDateTime = null;
+
+    if (dateString.matches(DATE_REGEX)) {
+      System.out.println("Handling date only");
+      date = LocalDate.parse(dateString, DATE_FORMATTER);
+      dateTime = date.atStartOfDay();
+      nextDayDateTime = dateTime.plusDays(1);
+
+    } else if (dateString.matches(DATE_TIME_REGEX)) {
+      System.out.println("Handling date with time");
+    } else {
+      System.out.println("NOT A VALID DATE");
+    }
+
+
+
     if (fieldCondition instanceof EqualsCondition) {
-      condition = field.greaterOrEqual(date.toString())
-        .and(field.lessThan(nextDay.toString()));
+      condition = field.greaterOrEqual(dateTime.format(DATE_TIME_FORMATTER))
+        .and(field.lessThan(nextDayDateTime.format(DATE_TIME_FORMATTER)));
     } else if (fieldCondition instanceof NotEqualsCondition) {
       condition = field.greaterOrEqual(nextDay.toString())
         .or(field.lessThan(date.toString()));
@@ -208,10 +235,11 @@ public class FqlToSqlConverterService {
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
+  // TODO: Can probably remove regex checks from this method and handle in the handleDate method
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
     EntityDataType dataType = getFieldForFiltering(fieldCondition, entityType).getDataType();
     return dataType instanceof DateType
-      && ((String) fieldCondition.value()).matches(DATE_REGEX);
+      && (((String) fieldCondition.value()).matches(DATE_REGEX) || ((String) fieldCondition.value()).matches(DATE_TIME_REGEX));
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {

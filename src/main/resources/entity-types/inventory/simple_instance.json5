@@ -206,7 +206,6 @@
     },
     {
       name: 'source',
-      sourceAlias: 'inst',
       dataType: {
         dataType: 'stringType',
       },
@@ -214,7 +213,9 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'source'",
+      valueGetter: ":inst.jsonb->>'source'",
+      filterValueGetter: "\"left\"(lower(:inst.jsonb ->> 'source'::text), 600)",
+      valueFunction: "\"left\"(lower(:value), 600)",
     },
     {
       name: 'title',

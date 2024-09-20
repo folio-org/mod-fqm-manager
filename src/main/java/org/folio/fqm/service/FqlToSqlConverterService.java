@@ -18,6 +18,7 @@ import org.folio.fql.model.RegexCondition;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -174,50 +175,36 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field) {
-
-//    Condition condition = falseCondition();
-//    var dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-//    var date = LocalDate.parse((String) fieldCondition.value(), dateTimeFormatter);
-//    LocalDate nextDay = date.plusDays(1);
-
     String dateString = (String) fieldCondition.value();
-    Condition condition = null;
-    LocalDate date = null;
-    LocalDate nextDay = null;
-    LocalDateTime dateTime = null;
-    LocalDateTime nextDayDateTime = null;
+    Condition condition = falseCondition();
+    LocalDateTime dateTime;
 
     if (dateString.matches(DATE_REGEX)) {
-      System.out.println("Handling date only");
-      date = LocalDate.parse(dateString, DATE_FORMATTER);
-      dateTime = date.atStartOfDay();
-      nextDayDateTime = dateTime.plusDays(1);
-
+      dateTime = LocalDate.parse(dateString, DATE_FORMATTER).atStartOfDay();
     } else if (dateString.matches(DATE_TIME_REGEX)) {
-      System.out.println("Handling date with time");
+      dateTime = LocalDateTime.parse(dateString, DATE_TIME_FORMATTER);
     } else {
-      System.out.println("NOT A VALID DATE");
+      return falseCondition();
     }
 
-
-
+    LocalDateTime nextDayDateTime = dateTime.plusDays(1);
     if (fieldCondition instanceof EqualsCondition) {
       condition = field.greaterOrEqual(dateTime.format(DATE_TIME_FORMATTER))
         .and(field.lessThan(nextDayDateTime.format(DATE_TIME_FORMATTER)));
     } else if (fieldCondition instanceof NotEqualsCondition) {
-      condition = field.greaterOrEqual(nextDay.toString())
-        .or(field.lessThan(date.toString()));
+      condition = field.greaterOrEqual(nextDayDateTime.format(DATE_TIME_FORMATTER))
+        .or(field.lessThan(dateTime.format(DATE_TIME_FORMATTER)));
     } else if (fieldCondition instanceof GreaterThanCondition greaterThanCondition) {
       if (greaterThanCondition.orEqualTo()) {
-        condition = field.greaterOrEqual(date.toString());
+        condition = field.greaterOrEqual(dateTime.format(DATE_TIME_FORMATTER));
       } else {
-        condition = field.greaterOrEqual(nextDay.toString());
+        condition = field.greaterOrEqual(nextDayDateTime.format(DATE_TIME_FORMATTER));
       }
     } else if (fieldCondition instanceof LessThanCondition lessThanCondition) {
       if (lessThanCondition.orEqualTo()) {
-        condition = field.lessThan(nextDay.toString());
+        condition = field.lessThan(nextDayDateTime.format(DATE_TIME_FORMATTER));
       } else {
-        condition = field.lessThan(date.toString());
+        condition = field.lessThan(dateTime.format(DATE_TIME_FORMATTER));
       }
     }
     return condition;

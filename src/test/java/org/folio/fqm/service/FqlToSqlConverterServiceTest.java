@@ -26,6 +26,7 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.not;
@@ -109,6 +110,12 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$eq": "2024-09-13T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2024-09-13T04:00:00.000")
           .and(field("field4").lessThan("2024-09-14T04:00:00.000"))
+      ),
+      Arguments.of(
+        "equals invalid date",
+        """
+          {"field4": {"$eq": "03-09-2024"}}""",
+        falseCondition()
       ),
       Arguments.of(
         "equals ranged UUID",

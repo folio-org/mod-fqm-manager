@@ -18,7 +18,6 @@ import org.folio.fql.model.RegexCondition;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
-import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -222,11 +221,9 @@ public class FqlToSqlConverterService {
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
-  // TODO: Can probably remove regex checks from this method and handle in the handleDate method
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
     EntityDataType dataType = getFieldForFiltering(fieldCondition, entityType).getDataType();
-    return dataType instanceof DateType
-      && (((String) fieldCondition.value()).matches(DATE_REGEX) || ((String) fieldCondition.value()).matches(DATE_TIME_REGEX));
+    return dataType instanceof DateType;
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {

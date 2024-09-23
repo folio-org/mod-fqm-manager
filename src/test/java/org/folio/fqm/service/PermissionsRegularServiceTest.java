@@ -7,39 +7,42 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
-import org.apache.commons.lang3.NotImplementedException;
 import org.folio.fqm.client.ModPermissionsClient;
+import org.folio.fqm.client.ModRolesKeyClockClient;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PermissionsRegularServiceTest {
 
   private final FolioExecutionContext context = mock(FolioExecutionContext.class);
   private final ModPermissionsClient modPermissionsClient = mock(ModPermissionsClient.class);
+  private final ModRolesKeyClockClient modRolesKeyclockClient = mock(ModRolesKeyClockClient.class);
   private final EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
   private final PermissionsRegularService permissionsService = new PermissionsRegularService(
     context,
     modPermissionsClient,
+    modRolesKeyclockClient,
     entityTypeFlatteningService
   );
   private static final String TENANT_ID = "tenant_01";
-
-  @BeforeEach
-  void setUp() {
-    permissionsService.isEureka = false; // Force the service to use the mod-permissions client
-  }
 
   void setUpMocks(String... permissions) {
     var userId = UUID.randomUUID();
     when(context.getUserId()).thenReturn(userId);
     when(context.getTenantId()).thenReturn(TENANT_ID);
-    when(modPermissionsClient.getPermissionsForUser(TENANT_ID, userId.toString()))
-      .thenReturn(new ModPermissionsClient.UserPermissions(List.of(permissions), permissions.length));
+
+    if (permissionsService.isEureka) {
+      when(modRolesKeyclockClient.getPermissionsUser(TENANT_ID, userId))
+        .thenReturn(new ModRolesKeyClockClient.UserPermissions(List.of(permissions), userId));
+    } else {
+      when(modPermissionsClient.getPermissionsForUser(TENANT_ID, userId.toString()))
+        .thenReturn(new ModPermissionsClient.UserPermissions(List.of(permissions), permissions.length));
+    }
   }
+
 
   private EntityType getTestEntityType() {
     EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false)
@@ -134,9 +137,9 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void eurekaSupportIsNotImplementedYet() {
-    permissionsService.isEureka = true; // Force the service to use mod-roles-keycloak
-    setUpMocks();
-    assertThrows(NotImplementedException.class, () -> permissionsService.getUserPermissions(TENANT_ID));
+  void testingPermissionWithEureka() {
+    permissionsService.isEureka = true;
+    setUpMocks("permission1", "permission2");
+    assertEquals(2, permissionsService.getUserPermissions().size());
   }
 }

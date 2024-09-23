@@ -61,7 +61,8 @@ public class EntityTypeService {
       .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
           .id(UUID.fromString(entityType.getId()))
-          .label(localizationService.getEntityTypeLabel(entityType.getName()));
+          .label(localizationService.getEntityTypeLabel(entityType.getName()))
+          .crossTenantQueriesEnabled(entityType.getCrossTenantQueriesEnabled());
         if (includeInaccessible) {
           return result.missingPermissions(
             permissionsService.getRequiredPermissions(entityType)

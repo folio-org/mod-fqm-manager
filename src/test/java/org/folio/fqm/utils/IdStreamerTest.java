@@ -25,6 +25,7 @@ import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
+import org.folio.fqm.service.PermissionsService;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -46,6 +47,7 @@ class IdStreamerTest {
   private LocalizationService localizationService;
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
+  private PermissionsService permissionsService;
 
   private static final String USER_TENANT_JSON = """
       {
@@ -54,19 +56,22 @@ class IdStreamerTest {
                   "id": "06192681-0df7-4f33-a38f-48e017648d69",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
                   "tenantId": "tenant_01",
-                  "centralTenantId": "tenant_01"
+                  "centralTenantId": "tenant_01",
+                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
               },
               {
                   "id": "3c1bfbe9-7d64-41fe-a358-cdaced6a631f",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
                   "tenantId": "tenant_02",
-                  "centralTenantId": "tenant_01"
+                  "centralTenantId": "tenant_01",
+                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
               },
               {
                   "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
                   "tenantId": "tenant_03",
-                  "centralTenantId": "tenant_01"
+                  "centralTenantId": "tenant_01",
+                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
               }
           ],
           "totalRecords": 3
@@ -100,9 +105,11 @@ class IdStreamerTest {
       0);
     localizationService = mock(LocalizationService.class);
     ecsClient = mock(SimpleHttpClient.class);
+    permissionsService = mock(PermissionsService.class);
+
 
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, ecsClient);
-    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, null);
+    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, permissionsService);
     this.idStreamer =
       new IdStreamer(
         context,
@@ -149,7 +156,9 @@ class IdStreamerTest {
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
+    when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+
     idStreamer.streamIdsInBatch(
       new EntityType().additionalEcsConditions(List.of("condition 1")).id("6b08439b-4f8e-4468-8046-ea620f5cfb74"),
       true,
@@ -174,6 +183,7 @@ class IdStreamerTest {
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
+    when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,

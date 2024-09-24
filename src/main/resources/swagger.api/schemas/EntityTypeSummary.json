@@ -12,6 +12,11 @@
       "description": "Entity type label",
       "type": "string"
     },
+    "crossTenantQueriesEnabled": {
+      "description": "Indicates if this entity type supports cross-tenant queries",
+      "type": "boolean",
+      "default": false
+    },
     "missingPermissions": {
       "description": "List of missing permissions",
       "type": "array",

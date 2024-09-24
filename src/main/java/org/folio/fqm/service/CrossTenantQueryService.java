@@ -27,7 +27,9 @@ public class CrossTenantQueryService {
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
-    if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
+    if (!forceCrossTenantQuery
+      && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+      && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
@@ -82,13 +84,15 @@ public class CrossTenantQueryService {
       .parse(userTenantResponse)
       .read("$.userTenants", List.class);
   }
+
   /**
    * Retrieve the primary affiliation for a user.
    * This retrieves the primary affiliation for an arbitrary user in the tenant.
    * In ECS environments, this will return data for a user (in member tenants, it's a dummy user, but that works)
    * In non-ECS environments, this will return null
    */
-  @SuppressWarnings("unchecked") // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
+  @SuppressWarnings("unchecked")
+  // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private Map<String, String> getEcsTenantInfo() {
     String userTenantsResponse = ecsClient.get("user-tenants", Map.of("limit", "1"));
     List<Map<String, String>> userTenants = JsonPath
@@ -100,19 +104,27 @@ public class CrossTenantQueryService {
       .orElse(null);
   }
 
-  private String getCentralTenantId(Map<String, String> ecsTenantInfo) {
-    return ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
-  }
-
   public String getCentralTenantId() {
     return getCentralTenantId(getEcsTenantInfo());
+  }
+
+  public boolean ecsEnabled() {
+    return ecsEnabled(getEcsTenantInfo());
+  }
+
+  public boolean isCentralTenant() {
+    return isCentralTenant(getEcsTenantInfo());
   }
 
   private boolean ecsEnabled(Map<String, String> ecsTenantInfo) {
     return !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
   }
 
-  public boolean ecsEnabled() {
-    return ecsEnabled(getEcsTenantInfo());
+  private String getCentralTenantId(Map<String, String> ecsTenantInfo) {
+    return ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
+  }
+
+  private boolean isCentralTenant(Map<String, String> ecsTenantInfo) {
+    return executionContext.getTenantId().equals(getCentralTenantId(ecsTenantInfo));
   }
 }

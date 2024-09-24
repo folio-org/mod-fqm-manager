@@ -125,7 +125,8 @@ public class EntityTypeService {
     }
 
     if (field.getValueSourceApi() != null) {
-      return getFieldValuesFromApi(field, searchText);
+      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
+      return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }
 
     if (field.getSource() != null) {
@@ -173,8 +174,8 @@ public class EntityTypeService {
     return new ColumnValues().content(filteredValues);
   }
 
-  private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
+  private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
+    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), );
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());

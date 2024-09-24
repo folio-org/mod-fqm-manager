@@ -94,7 +94,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
+    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams, )).thenReturn("""
            {
              "configs": [
                {
@@ -109,7 +109,7 @@ class DataRefreshRepositoryTest {
              "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
            }
       """);
-    when(simpleHttpClient.get(eq(exchangeRatePath), any())).thenReturn("""
+    when(simpleHttpClient.get(eq(exchangeRatePath), any(), )).thenReturn("""
        {
          "from": "someCurrency",
          "to": "USD",
@@ -145,7 +145,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
+    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams, )).thenReturn("""
            {
              "configs": [
                {
@@ -177,14 +177,14 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
+    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams, )).thenReturn("""
            {
              "configs": [],
              "totalRecords": 0,
              "resultInfo": {"totalRecords":0,"facets":[],"diagnostics":[]}
            }
       """);
-    when(simpleHttpClient.get(exchangeRatePath, exchangeRateParams)).thenReturn("""
+    when(simpleHttpClient.get(exchangeRatePath, exchangeRateParams, )).thenReturn("""
        {
          "from": "ZAR",
          "to": "USD",

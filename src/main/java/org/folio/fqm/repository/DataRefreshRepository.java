@@ -145,7 +145,7 @@ public class DataRefreshRepository {
   private String getSystemCurrencyCode() {
     log.info("Getting system currency");
     try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS, );
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
       String valueString = localeSettingsNode
@@ -168,7 +168,7 @@ public class DataRefreshRepository {
       "to", toCurrency
     );
     try {
-      String exchangeRateResponse = simpleHttpClient.get(GET_EXCHANGE_RATE_PATH, exchangeRateParams);
+      String exchangeRateResponse = simpleHttpClient.get(GET_EXCHANGE_RATE_PATH, exchangeRateParams, );
       DocumentContext exchangeRateInfo = JsonPath.parse(exchangeRateResponse);
       var exchangeRate = exchangeRateInfo.read("exchangeRate");
       if (exchangeRate instanceof BigDecimal bd) {

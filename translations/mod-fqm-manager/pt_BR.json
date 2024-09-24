@@ -699,10 +699,6 @@
     "entityType.simple_instance": "Instâncias",
     "entityType.simple_instance.administrative_notes": "Notas administrativas",
     "entityType.simple_instance.alternative_titles": "Títulos alternativos",
-    "entityType.simple_instance.alternative_titles.title": "Título",
-    "entityType.simple_instance.alternative_titles.title._qualified": "Título de títulos alternativos",
-    "entityType.simple_instance.alternative_titles.type_id": "UUID de tipo",
-    "entityType.simple_instance.alternative_titles.type_id._qualified": "UUID do tipo de títulos alternativos",
     "entityType.simple_instance.cataloged_date": "Data da catalogação",
     "entityType.simple_instance.classifications": "Classificações",
     "entityType.simple_instance.classifications.number": "Número",
@@ -721,7 +717,7 @@
     "entityType.simple_instance.contributors.name._qualified": "Nome dos colaboradores",
     "entityType.simple_instance.contributors.primary": "Primário",
     "entityType.simple_instance.contributors.primary._qualified": "Colaboradores primários",
-    "entityType.simple_instance.created_at": "Criado em",
+    "entityType.simple_instance.created_at": "Data de criação",
     "entityType.simple_instance.created_by": "Criado por usuário de UUID",
     "entityType.simple_instance.discovery_suppress": "Ocultar da descoberta",
     "entityType.simple_instance.editions": "Edições",
@@ -782,7 +778,7 @@
     "entityType.simple_instance.subjects": "Cabeçalhos de assunto",
     "entityType.simple_instance.tags": "Tags",
     "entityType.simple_instance.title": "Título",
-    "entityType.simple_instance.updated_at": "Atualizado em",
+    "entityType.simple_instance.updated_at": "Data de atualização",
     "entityType.simple_instance.updated_by": "Atualizado por usuário de UUID",
     "entityType.simple_instance.version": "Versão do registro",
     "entityType.simple_loan_policy": "Políticas de empréstimos",
@@ -1484,5 +1480,6 @@
     "entityType.simple_mode_of_issuance.name": "Nome",
     "entityType.simple_instance.instance_type_name": "Tipo de recurso",
     "entityType.composite_purchase_order_lines._shortened": "Linha do Pedido de Compra",
-    "entityType.simple_organization._shortened": "Orgs"
+    "entityType.simple_organization._shortened": "Orgs",
+    "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID"
 }

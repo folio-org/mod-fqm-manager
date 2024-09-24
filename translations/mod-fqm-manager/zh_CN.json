@@ -699,10 +699,6 @@
     "entityType.simple_instance": "实例",
     "entityType.simple_instance.administrative_notes": "管理说明",
     "entityType.simple_instance.alternative_titles": "交替题名",
-    "entityType.simple_instance.alternative_titles.title": "题名",
-    "entityType.simple_instance.alternative_titles.title._qualified": "交替题名 题名",
-    "entityType.simple_instance.alternative_titles.type_id": "类型 UUID",
-    "entityType.simple_instance.alternative_titles.type_id._qualified": "交替题名类型UUID",
     "entityType.simple_instance.cataloged_date": "编目日期",
     "entityType.simple_instance.classifications": "分类",
     "entityType.simple_instance.classifications.number": "编号",
@@ -1484,5 +1480,6 @@
     "entityType.simple_mode_of_issuance.name": "Name",
     "entityType.simple_instance.instance_type_name": "Resource type",
     "entityType.composite_purchase_order_lines._shortened": "POL",
-    "entityType.simple_organization._shortened": "Orgs"
+    "entityType.simple_organization._shortened": "Orgs",
+    "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID"
 }

@@ -699,10 +699,6 @@
     "entityType.simple_instance": "インスタンス",
     "entityType.simple_instance.administrative_notes": "Administrative notes",
     "entityType.simple_instance.alternative_titles": "Alternative titles",
-    "entityType.simple_instance.alternative_titles.title": "タイトル",
-    "entityType.simple_instance.alternative_titles.title._qualified": "Alternative titles title",
-    "entityType.simple_instance.alternative_titles.type_id": "タイプ UUID",
-    "entityType.simple_instance.alternative_titles.type_id._qualified": "Alternative titles type UUID",
     "entityType.simple_instance.cataloged_date": "Cataloged date",
     "entityType.simple_instance.classifications": "分類",
     "entityType.simple_instance.classifications.number": "番号",
@@ -721,7 +717,7 @@
     "entityType.simple_instance.contributors.name._qualified": "Contributors name",
     "entityType.simple_instance.contributors.primary": "Primary",
     "entityType.simple_instance.contributors.primary._qualified": "Contributors primary",
-    "entityType.simple_instance.created_at": "Created at",
+    "entityType.simple_instance.created_at": "Created date",
     "entityType.simple_instance.created_by": "ユーザーUUIDによって作成された",
     "entityType.simple_instance.discovery_suppress": "Discovery suppress",
     "entityType.simple_instance.editions": "Editions",
@@ -782,7 +778,7 @@
     "entityType.simple_instance.subjects": "件名標目",
     "entityType.simple_instance.tags": "タグ",
     "entityType.simple_instance.title": "タイトル",
-    "entityType.simple_instance.updated_at": "Updated at",
+    "entityType.simple_instance.updated_at": "Updated date",
     "entityType.simple_instance.updated_by": "ユーザーUUIDによって更新された",
     "entityType.simple_instance.version": "レコードバージョン",
     "entityType.simple_loan_policy": "貸出ポリシー",
@@ -1483,6 +1479,7 @@
     "entityType.simple_mode_of_issuance.id": "UUID",
     "entityType.simple_mode_of_issuance.name": "名称",
     "entityType.simple_instance.instance_type_name": "リソースタイプ",
-    "entityType.composite_purchase_order_lines._shortened": "POL",
-    "entityType.simple_organization._shortened": "Orgs"
+    "entityType.composite_purchase_order_lines._shortened": "発注明細",
+    "entityType.simple_organization._shortened": "Orgs",
+    "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID"
 }

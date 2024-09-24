@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -26,7 +27,6 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
-import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.not;
@@ -75,7 +75,9 @@ class FqlToSqlConverterServiceTest {
         )
       );
   }
+
   static Condition trueCondition = trueCondition();
+
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
     return Arrays.asList(
@@ -110,12 +112,6 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$eq": "2024-09-13T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2024-09-13T04:00:00.000")
           .and(field("field4").lessThan("2024-09-14T04:00:00.000"))
-      ),
-      Arguments.of(
-        "equals invalid date",
-        """
-          {"field4": {"$eq": "03-09-2024"}}""",
-        falseCondition()
       ),
       Arguments.of(
         "equals ranged UUID",
@@ -375,7 +371,7 @@ class FqlToSqlConverterServiceTest {
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
         cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
-        and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
       ),
       Arguments.of(
         "not in list open UUID",
@@ -681,6 +677,16 @@ class FqlToSqlConverterServiceTest {
     assertThrows(
       FieldNotFoundException.class,
       () -> fqlToSqlConverter.getSqlCondition(fqlWithNonExistingColumn, entityType)
+    );
+  }
+
+  @Test
+  void shouldThrowExceptionForInvalidDateValue() {
+    String invalidDateFql = """
+      {"field4": {"$eq": "03-09-2024"}}""";
+    assertThrows(
+      InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition(invalidDateFql, entityType)
     );
   }
 }

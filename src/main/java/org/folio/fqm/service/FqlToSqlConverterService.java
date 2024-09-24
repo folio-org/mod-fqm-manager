@@ -18,6 +18,7 @@ import org.folio.fql.model.RegexCondition;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -34,6 +35,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -183,7 +185,7 @@ public class FqlToSqlConverterService {
     } else if (dateString.matches(DATE_TIME_REGEX)) {
       dateTime = LocalDateTime.parse(dateString, DATE_TIME_FORMATTER);
     } else {
-      return falseCondition();
+      throw new InvalidFqlException(fieldCondition.toString(), Map.of(fieldCondition.field().toString(), dateString));
     }
 
     LocalDateTime nextDayDateTime = dateTime.plusDays(1);

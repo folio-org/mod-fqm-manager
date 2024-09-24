@@ -60,7 +60,8 @@ public class EntityTypeService {
       .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
           .id(UUID.fromString(entityType.getId()))
-          .label(localizationService.getEntityTypeLabel(entityType.getName()));
+          .label(localizationService.getEntityTypeLabel(entityType.getName()))
+          .crossTenantQueriesEnabled(entityType.getCrossTenantQueriesEnabled());
         if (includeInaccessible) {
           return result.missingPermissions(
             permissionsService.getRequiredPermissions(entityType)
@@ -86,6 +87,8 @@ public class EntityTypeService {
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+      && crossTenantQueryService.isCentralTenant();
     List<EntityTypeColumn> columns  = entityType
       .getColumns()
       .stream()
@@ -96,7 +99,9 @@ public class EntityTypeService {
         .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
         .toList();
     }
-    return entityType.columns(columns);
+    return entityType
+      .columns(columns)
+      .crossTenantQueriesEnabled(crossTenantEnabled);
   }
 
   /**

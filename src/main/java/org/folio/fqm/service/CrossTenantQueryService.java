@@ -22,12 +22,15 @@ public class CrossTenantQueryService {
   private final SimpleHttpClient ecsClient;
   private final FolioExecutionContext executionContext;
   private final PermissionsService permissionsService;
+  private final UserTenantService userTenantService;
 
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
-    if (!forceCrossTenantQuery && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())) {
+    if (!forceCrossTenantQuery
+      && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+      && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
@@ -82,6 +85,23 @@ public class CrossTenantQueryService {
       .parse(userTenantResponse)
       .read("$.userTenants", List.class);
   }
+
+  public String getCentralTenantId() {
+    return getCentralTenantId(getEcsTenantInfo());
+  }
+
+  public boolean ecsEnabled() {
+    return ecsEnabled(getEcsTenantInfo());
+  }
+
+  public boolean isCentralTenant() {
+    return isCentralTenant(getEcsTenantInfo());
+  }
+
+  private boolean ecsEnabled(Map<String, String> ecsTenantInfo) {
+    return !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
+  }
+
   /**
    * Retrieve the primary affiliation for a user.
    * This retrieves the primary affiliation for an arbitrary user in the tenant.
@@ -90,7 +110,7 @@ public class CrossTenantQueryService {
    */
   @SuppressWarnings("unchecked") // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private Map<String, String> getEcsTenantInfo() {
-    String userTenantsResponse = ecsClient.get("user-tenants", Map.of("limit", "1"));
+    String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
     List<Map<String, String>> userTenants = JsonPath
       .parse(userTenantsResponse)
       .read("$.userTenants", List.class);
@@ -104,15 +124,7 @@ public class CrossTenantQueryService {
     return ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
   }
 
-  public String getCentralTenantId() {
-    return getCentralTenantId(getEcsTenantInfo());
-  }
-
-  private boolean ecsEnabled(Map<String, String> ecsTenantInfo) {
-    return !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
-  }
-
-  public boolean ecsEnabled() {
-    return ecsEnabled(getEcsTenantInfo());
+  private boolean isCentralTenant(Map<String, String> ecsTenantInfo) {
+    return executionContext.getTenantId().equals(getCentralTenantId(ecsTenantInfo));
   }
 }

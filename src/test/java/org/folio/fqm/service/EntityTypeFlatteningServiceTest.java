@@ -1,7 +1,6 @@
 package org.folio.fqm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,7 +34,7 @@ class EntityTypeFlatteningServiceTest {
   @Mock
   private LocalizationService localizationService;
   @Mock
-  private SimpleHttpClient ecsClient;
+  private UserTenantService userTenantService;
   @Mock
   private FolioExecutionContext executionContext;
 
@@ -45,7 +43,7 @@ class EntityTypeFlatteningServiceTest {
   @BeforeEach
   void setup() {
     ObjectMapper objectMapper = new ObjectMapper();
-    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper, localizationService, ecsClient);
+    entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, objectMapper, localizationService, executionContext, userTenantService);
   }
 
   private static final UUID SIMPLE_ENTITY_TYPE_ID = UUID.fromString("0686b9e4-accd-46f8-9e35-792c735733bb");
@@ -443,7 +441,8 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -637,7 +636,8 @@ class EntityTypeFlatteningServiceTest {
       }
       return entityType;
     });
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -846,7 +846,8 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(TRIPLE_NESTED_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -859,7 +860,8 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(COMPLEX_ENTITY_TYPE_ID, null);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
@@ -873,7 +875,8 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(UNORDERED_ENTITY_TYPE_ID, null);
     String actualJoinClause = entityTypeFlatteningService.getJoinClause(entityType, null);
@@ -962,7 +965,8 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 1}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 1}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
     assertEquals(expectedEntityType, actualEntityType);
@@ -1040,7 +1044,8 @@ class EntityTypeFlatteningServiceTest {
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
       .sourceViewExtractor("some_view_extractor");
 
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("{'totalRecords': 0}");
+    when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null))
       .thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE_WITH_SOURCE_VIEW_EXTRACTOR)));

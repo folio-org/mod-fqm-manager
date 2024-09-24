@@ -699,10 +699,6 @@
     "entityType.simple_instance": "Notices bibliographiques",
     "entityType.simple_instance.administrative_notes": "Notes administratives",
     "entityType.simple_instance.alternative_titles": "Titres alternatifs",
-    "entityType.simple_instance.alternative_titles.title": "Titre",
-    "entityType.simple_instance.alternative_titles.title._qualified": "Titre des titres alternatifs",
-    "entityType.simple_instance.alternative_titles.type_id": "UUID du type",
-    "entityType.simple_instance.alternative_titles.type_id._qualified": "UUID du type de titres alternatifs",
     "entityType.simple_instance.cataloged_date": "Date de catalogage",
     "entityType.simple_instance.classifications": "Classifications",
     "entityType.simple_instance.classifications.number": "Numéro",
@@ -1484,5 +1480,6 @@
     "entityType.simple_mode_of_issuance.name": "Name",
     "entityType.simple_instance.instance_type_name": "Resource type",
     "entityType.composite_purchase_order_lines._shortened": "POL",
-    "entityType.simple_organization._shortened": "Orgs"
+    "entityType.simple_organization._shortened": "Orgs",
+    "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID"
 }

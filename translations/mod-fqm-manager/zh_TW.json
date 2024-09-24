@@ -699,10 +699,6 @@
     "entityType.simple_instance": "實例",
     "entityType.simple_instance.administrative_notes": "Administrative notes",
     "entityType.simple_instance.alternative_titles": "Alternative titles",
-    "entityType.simple_instance.alternative_titles.title": "Title",
-    "entityType.simple_instance.alternative_titles.title._qualified": "Alternative titles title",
-    "entityType.simple_instance.alternative_titles.type_id": "Type UUID",
-    "entityType.simple_instance.alternative_titles.type_id._qualified": "Alternative titles type UUID",
     "entityType.simple_instance.cataloged_date": "Cataloged date",
     "entityType.simple_instance.classifications": "Classifications",
     "entityType.simple_instance.classifications.number": "Number",
@@ -721,7 +717,7 @@
     "entityType.simple_instance.contributors.name._qualified": "Contributors name",
     "entityType.simple_instance.contributors.primary": "Primary",
     "entityType.simple_instance.contributors.primary._qualified": "Contributors primary",
-    "entityType.simple_instance.created_at": "Created at",
+    "entityType.simple_instance.created_at": "Created date",
     "entityType.simple_instance.created_by": "Created by user UUID",
     "entityType.simple_instance.discovery_suppress": "Discovery suppress",
     "entityType.simple_instance.editions": "Editions",
@@ -781,8 +777,8 @@
     "entityType.simple_instance.status_updated_date": "Status updated date",
     "entityType.simple_instance.subjects": "Subject headings",
     "entityType.simple_instance.tags": "Tags",
-    "entityType.simple_instance.title": "Title",
-    "entityType.simple_instance.updated_at": "Updated at",
+    "entityType.simple_instance.title": "Resource title",
+    "entityType.simple_instance.updated_at": "Updated date",
     "entityType.simple_instance.updated_by": "Updated by user UUID",
     "entityType.simple_instance.version": "Record version",
     "entityType.simple_loan_policy": "Loan policies",
@@ -1484,5 +1480,6 @@
     "entityType.simple_mode_of_issuance.name": "Name",
     "entityType.simple_instance.instance_type_name": "Resource type",
     "entityType.composite_purchase_order_lines._shortened": "POL",
-    "entityType.simple_organization._shortened": "Orgs"
+    "entityType.simple_organization._shortened": "Orgs",
+    "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID"
 }

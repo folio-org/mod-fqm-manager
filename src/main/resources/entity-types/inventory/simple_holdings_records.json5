@@ -854,7 +854,7 @@
         type: 'fqm',
         name: 'tenant_id'
       },
-      ecsOnly: false,
+      ecsOnly: true,
     },
     {
       name: 'jsonb',

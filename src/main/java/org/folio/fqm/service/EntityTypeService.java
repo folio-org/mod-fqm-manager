@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -28,6 +29,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
@@ -126,6 +128,7 @@ public class EntityTypeService {
 
     if (field.getValueSourceApi() != null) {
       List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
+      log.info("Tenants to query: {}", tenantsToQuery);
       return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }
 
@@ -175,19 +178,23 @@ public class EntityTypeService {
   }
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
-    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), );
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
-    List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
-    List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
+    Set<ValueWithLabel> resultSet = new HashSet<>();
+    for (String tenant : tenantsToQuery) {
+      String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenant);
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
+      List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
 
-    List<ValueWithLabel> results = new ArrayList<>(values.size());
-    for (int i = 0; i < values.size(); i++) {
-      String value = values.get(i);
-      String label = labels.get(i);
-      if (label.contains(searchText)) {
-        results.add(new ValueWithLabel().value(value).label(label));
+//    List<ValueWithLabel> results = ArrayList<>(values.size());
+      for (int i = 0; i < values.size(); i++) {
+        String value = values.get(i);
+        String label = labels.get(i);
+        if (label.contains(searchText)) {
+          resultSet.add(new ValueWithLabel().value(value).label(label));
+        }
       }
     }
+    List<ValueWithLabel> results = new ArrayList<>(resultSet);
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }

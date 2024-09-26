@@ -59,7 +59,7 @@ public class TestDbSetupConfiguration {
     @PostConstruct
     public void populateEntityTypes() throws IOException {
       SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
-      when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn("""
+      when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("""
       {
           "userTenants": [
               {

@@ -342,7 +342,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(simpleHttpClient.get(eq("fake-path"), anyMap(), )).thenReturn("""
+    when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
            {
              "what": {
                "ever": {

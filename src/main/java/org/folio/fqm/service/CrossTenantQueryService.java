@@ -28,15 +28,18 @@ public class CrossTenantQueryService {
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
+    log.info("GETTING TENANTS TO QUERY");
     if (!forceCrossTenantQuery
       && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+      log.info("Cross tenant queries are not enabled for entity type {}", entityType.getName());
       return List.of(executionContext.getTenantId());
     }
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
     if (!ecsEnabled(ecsTenantInfo)) {
+      log.info("ECS NOT ENABLED FOR TENANT");
       return List.of(executionContext.getTenantId());
     }
 

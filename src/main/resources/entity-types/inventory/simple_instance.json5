@@ -369,86 +369,101 @@
       valueGetter: ":sourceAlias.jsonb->>'identifiers'",
     },
     {
-      name: 'contributors',
+      name: 'contributors_name',
       sourceAlias: 'inst',
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'objectType',
-          properties: [
-            {
-              name: 'name',
-              property: 'name',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'contributor_type_id',
-              property: 'contributorTypeId',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'contributor_type_text',
-              property: 'contributorTypeText',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'contributor_name_type_id',
-              property: 'contributorNameTypeId',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'primary',
-              property: 'primary',
-              dataType: {
-                dataType: 'booleanType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'primary') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'primary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
-              values: [
-                {
-                  value: 'true',
-                  label: 'True',
-                },
-                {
-                  value: 'false',
-                  label: 'False',
-                },
-              ],
-            },
-          ],
+          dataType: 'stringType',
         },
       },
       isIdColumn: false,
+      queryable: true,
       essential: true,
-      queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'contributors'",
+      valueGetter: "( SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: "contributor_type_id",
+      dataType: {
+        dataType: "arrayType",
+        itemDataType: {
+          dataType: "rangedUUIDType"
+        }
+      },
+      sourceAlias: "inst",
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'contributor_type_text',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: "contributor_name_type_id",
+      dataType: {
+        dataType: "arrayType",
+        itemDataType: {
+          dataType: "rangedUUIDType"
+        }
+      },
+      sourceAlias: "inst",
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: "contributor_name_type",
+      dataType: {
+        dataType: "arrayType",
+        itemDataType: {
+          dataType: "stringType"
+        }
+      },
+      sourceAlias: "inst",
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueFunction: "lower(:value)",
+      valueGetter: "(SELECT array_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors') -> 'contributorNameTypeId') AS record(value) JOIN src_inventory_contributor_name_type aON (record.value::text) = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'contributors'::text) ->> 'contributorNameTypeId'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
+    },
+    {
+      name: "instance_primary_contributor",
+      dataType: {
+        dataType: "stringType"
+      },
+      valueGetter: "jsonb_path_query_first(:sourceAlias.jsonb, '$.\"contributors\"[*]?(@.\"primary\" == true).\"name\"'::jsonpath) #>> '{}'::text[]",
+      filterValueGetter: "jsonb_path_query_first(:sourceAlias.jsonb, '$.\"contributors\"[*]?(@.\"primary\" == true).\"name\"'::jsonpath) #>> '{}'::text[]",
+      valueFunction: "lower(:value)",
+      visibleByDefault: false,
+      queryable: false,
+      sourceAlias: "inst",
+      essential: true
     },
     {
       name: 'subjects',

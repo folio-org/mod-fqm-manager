@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
@@ -97,6 +98,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("mode_of_issuance_id", "mode_of_issuance.id"),
     Map.entry("mode_of_issuance", "mode_of_issuance.name"),
     Map.entry("instance_source", "instance.source"),
+    Map.entry("instance_primary_contributor", "instance.instance_primary_contributor"),
     Map.entry("instance_contributor_type_ids", "instance.contributors[*]->contributor_type_id"),
     Map.entry("instance_contributor_type", "instance.contributors[*]->contributor_type_text"),
     Map.entry("instance_contributor_type_name_ids", "instance.contributors[*]->contributor_name_type_id"),
@@ -438,20 +440,6 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   @Override
   public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
     return Map.ofEntries(
-      Map.entry(
-        OLD_DRV_LOAN_DETAILS,
-        Map.of(
-          "instance_primary_contributor",
-          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
-        )
-      ),
-      Map.entry(
-        OLD_DRV_ITEM_DETAILS,
-        Map.of(
-          "instance_primary_contributor",
-          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
-        )
-      ),
       Map.entry(
         OLD_DRV_USER_DETAILS,
         Map.of(

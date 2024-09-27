@@ -2,7 +2,10 @@ package org.folio.fqm.service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
@@ -47,7 +50,8 @@ public class FqmTenantService extends TenantService {
 
   @Override
   protected void afterLiquibaseUpdate(TenantAttributes tenantAttributes) {
-    String centralTenantId = tenantAttributes.getParameters()
+    List<Parameter> params = tenantAttributes.getParameters();
+    String centralTenantId = params == null ? null : tenantAttributes.getParameters()
       .stream()
       .filter(param -> "centralTenantId".equals(param.getKey()))
       .map(Parameter::getValue)

@@ -93,7 +93,7 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false),
+      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
       new EntityType(id2.toString(), "translation_label_02", true, false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
@@ -108,6 +108,26 @@ class EntityTypeServiceTest {
     verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
 
     verifyNoMoreInteractions(repo, localizationService);
+  }
+
+  @Test
+  void shouldIncludeCrossTenantEntityTypesWhenInCentralTenant() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    Set<UUID> ids = Set.of(id1, id2);
+    List<EntityTypeSummary> expectedSummary = List.of(
+      new EntityTypeSummary().id(id1).label("label_01").crossTenantQueriesEnabled(true),
+      new EntityTypeSummary().id(id2).label("label_02"));
+
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
+      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
+      new EntityType(id2.toString(), "translation_label_02", true, false)));
+    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
+
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
+    assertEquals(expectedSummary, actualSummary);
   }
 
   @Test

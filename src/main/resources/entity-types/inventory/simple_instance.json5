@@ -449,7 +449,7 @@
       essential: true,
       visibleByDefault: false,
       valueFunction: "lower(:value)",
-      valueGetter: "(SELECT array_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors') -> 'contributorNameTypeId') AS record(value) JOIN src_inventory_contributor_name_type aON (record.value::text) = a.id::text)",
+      valueGetter: "(SELECT array_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors') -> 'contributorNameTypeId') AS record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'contributors'::text) ->> 'contributorNameTypeId'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
     },
     {

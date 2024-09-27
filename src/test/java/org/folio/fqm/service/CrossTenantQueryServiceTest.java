@@ -35,6 +35,9 @@ class CrossTenantQueryServiceTest {
   @Mock
   private PermissionsService permissionsService;
 
+  @Mock
+  private UserTenantService userTenantService;
+
   @InjectMocks
   private CrossTenantQueryService crossTenantQueryService;
 
@@ -59,17 +62,20 @@ class CrossTenantQueryServiceTest {
               {
                   "id": "06192681-0df7-4f33-a38f-48e017648d69",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_01"
+                  "tenantId": "tenant_01",
+                  "centralTenantId": "tenant_01"
               },
               {
                   "id": "3c1bfbe9-7d64-41fe-a358-cdaced6a631f",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_02"
+                  "tenantId": "tenant_02",
+                  "centralTenantId": "tenant_01"
               },
               {
                   "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
                   "tenantId": "tenant_03",
+                  "centralTenantId": "tenant_01"
               }
           ]
       }
@@ -93,7 +99,7 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
     when(ecsClient.get(eq("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
@@ -112,18 +118,20 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldRunIntraTenantQueryForNonCentralTenant() {
-    List<String> expectedTenants = List.of("tenant_02");
-    when(executionContext.getTenantId()).thenReturn("tenant_02"); // Central is tenant_01
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO);
+    String tenantId = "tenant_02";
+    List<String> expectedTenants = List.of(tenantId);
+    when(executionContext.getTenantId()).thenReturn(tenantId); // Central is tenant_01
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
   @Test
   void shouldRunIntraTenantQueryIfExceptionIsThrown() {
-    List<String> expectedTenants = List.of("tenant_01");
-    when(executionContext.getTenantId()).thenReturn("tenant_01");
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
+    String tenantId = "tenant_01";
+    List<String> expectedTenants = List.of(tenantId);
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
@@ -134,9 +142,22 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
+    assertEquals(expectedTenants, actualTenants);
+  }
+
+  @Test
+  void shouldAttemptCrossTenantQueryIfForceParamIsTrue() {
+    String tenantId = "tenant_01";
+    List<String> expectedTenants = List.of("tenant_01");
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
+
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, true);
+    verify(userTenantService, times(1)).getUserTenantsResponse(tenantId);
     assertEquals(expectedTenants, actualTenants);
   }
 
@@ -146,7 +167,7 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01", "tenant_02");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
     when(ecsClient.get(eq("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions("tenant_02", entityType, true);
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, true);
@@ -163,7 +184,7 @@ class CrossTenantQueryServiceTest {
       .crossTenantQueriesEnabled(true);
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(instanceEntityType, false);
     assertEquals(expectedTenants, actualTenants);
@@ -171,15 +192,26 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldGetCentralTenantId() {
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO);
     String expectedId = "tenant_01";
+    when(executionContext.getTenantId()).thenReturn(expectedId);
+    when(userTenantService.getUserTenantsResponse(expectedId)).thenReturn(ECS_TENANT_INFO);
     String actualId = crossTenantQueryService.getCentralTenantId();
     assertEquals(expectedId, actualId);
   }
 
   @Test
   void shouldHandleErrorWhenGettingCentralTenantId() {
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
+    String tenantId = "tenant_01";
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
     assertNull(crossTenantQueryService.getCentralTenantId());
+  }
+
+  @Test
+  void testIsCentralTenant() {
+    String tenantId = "tenant_01";
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
+    assertTrue(crossTenantQueryService.isCentralTenant());
   }
 }

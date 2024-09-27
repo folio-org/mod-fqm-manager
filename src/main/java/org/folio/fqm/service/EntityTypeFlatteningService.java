@@ -5,7 +5,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -17,6 +16,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceJoin;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -31,7 +31,8 @@ public class EntityTypeFlatteningService {
   private final EntityTypeRepository entityTypeRepository;
   private final ObjectMapper objectMapper;
   private final LocalizationService localizationService;
-  private final SimpleHttpClient ecsClient;
+  private final FolioExecutionContext executionContext;
+  private final UserTenantService userTenantService;
 
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId) {
     return getFlattenedEntityType(entityTypeId, null, tenantId);
@@ -317,8 +318,8 @@ private static <T extends Field> T injectSourceAlias(T column, Map<String, Strin
   }
 
   private boolean ecsEnabled() {
-    String rawJson = ecsClient.get("user-tenants", Map.of("limit", String.valueOf(1)));
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
+    String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
+    DocumentContext parsedJson = JsonPath.parse(userTenantsResponse);
     // The value isn't needed here, this just provides an easy way to tell if ECS is enabled
     int totalRecords = parsedJson.read("totalRecords", Integer.class);
     return totalRecords > 0;

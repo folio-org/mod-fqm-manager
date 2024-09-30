@@ -127,7 +127,7 @@ public class EntityTypeService {
     }
 
     if (field.getValueSourceApi() != null) {
-      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
+      List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQueryForApi(entityType);
       log.info("Tenants to query: {}", tenantsToQuery);
       return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }

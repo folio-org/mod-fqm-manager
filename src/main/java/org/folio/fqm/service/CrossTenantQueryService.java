@@ -26,6 +26,8 @@ public class CrossTenantQueryService {
 
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
+  private static final String SIMPLE_HOLDINGS_ID = "30a5cfad-1868-4f46-86b9-a6ef67e2d9bf";
+  private static final String SIMPLE_ITEMS_ID = "372e025a-9444-473a-9ffd-fa0f63db1674";
 
   public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
     log.info("GETTING TENANTS TO QUERY");
@@ -43,6 +45,18 @@ public class CrossTenantQueryService {
       return List.of(executionContext.getTenantId());
     }
 
+    return getTenants(entityType, ecsTenantInfo);
+  }
+
+  public List<String> getTenantsToQueryForApi(EntityType entityType) {
+    Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    if (SIMPLE_INSTANCES_ID.equals(entityType.getId()) || SIMPLE_HOLDINGS_ID.equals(entityType.getId()) || SIMPLE_ITEMS_ID.equals(entityType.getId())) {
+      return getTenants(entityType, ecsTenantInfo);
+    } return List.of(executionContext.getTenantId());
+  }
+
+  private List<String> getTenants(EntityType entityType, Map<String, String> ecsTenantInfo) {
+    List<String> tenantsToQuery = new ArrayList<>();
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
@@ -55,7 +69,6 @@ public class CrossTenantQueryService {
       return List.of(executionContext.getTenantId());
     }
 
-    List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
     List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), executionContext.getUserId().toString());
     for (var userMap : userTenantMaps) {

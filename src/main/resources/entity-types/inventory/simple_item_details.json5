@@ -748,7 +748,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.temporarylocationid",
+      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'"
     },
     {
       name: 'permanent_location_id',

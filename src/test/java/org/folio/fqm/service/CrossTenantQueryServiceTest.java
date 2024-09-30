@@ -99,16 +99,9 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
     when(ecsClient.get(eq("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
@@ -126,40 +119,24 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldRunIntraTenantQueryForNonCentralTenant() {
-<<<<<<< HEAD
     String tenantId = "tenant_02";
     List<String> expectedTenants = List.of(tenantId);
     when(executionContext.getTenantId()).thenReturn(tenantId); // Central is tenant_01
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
-=======
-    List<String> expectedTenants = List.of("tenant_02");
     when(executionContext.getTenantId()).thenReturn("tenant_02"); // Central is tenant_01
-<<<<<<< HEAD
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
 
   @Test
   void shouldRunIntraTenantQueryIfExceptionIsThrown() {
-<<<<<<< HEAD
     String tenantId = "tenant_01";
     List<String> expectedTenants = List.of(tenantId);
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
-=======
-    List<String> expectedTenants = List.of("tenant_01");
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-<<<<<<< HEAD
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
   }
@@ -170,15 +147,8 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
     assertEquals(expectedTenants, actualTenants);
@@ -203,16 +173,10 @@ class CrossTenantQueryServiceTest {
     List<String> expectedTenants = List.of("tenant_01", "tenant_02");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
     when(ecsClient.get(eq("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions("tenant_02", entityType, true);
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, true);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType, false);
@@ -228,15 +192,8 @@ class CrossTenantQueryServiceTest {
       .crossTenantQueriesEnabled(true);
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(instanceEntityType, false);
     assertEquals(expectedTenants, actualTenants);
@@ -244,14 +201,7 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldGetCentralTenantId() {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
     String expectedId = "tenant_01";
     when(executionContext.getTenantId()).thenReturn(expectedId);
     when(userTenantService.getUserTenantsResponse(expectedId)).thenReturn(ECS_TENANT_INFO);
@@ -261,17 +211,10 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldHandleErrorWhenGettingCentralTenantId() {
-<<<<<<< HEAD
-<<<<<<< HEAD
     String tenantId = "tenant_01";
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+    when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(ECS_TENANT_INFO_FOR_NON_ECS_ENV);
     assertNull(crossTenantQueryService.getCentralTenantId());
   }
 

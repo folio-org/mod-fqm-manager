@@ -132,18 +132,13 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-<<<<<<< HEAD
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
-=======
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-<<<<<<< HEAD
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
@@ -168,16 +163,9 @@ class IdStreamerTest {
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
     when(executionContext.getTenantId()).thenReturn("tenant_01");
 
     idStreamer.streamIdsInBatch(
@@ -202,18 +190,13 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
@@ -236,17 +219,12 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
+
     when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
-<<<<<<< HEAD
-<<<<<<< HEAD
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
-=======
-    when(ecsClient.get(eq("user-tenants"), anyMap(), )).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> 94097470 (MODFQMMGR-468: Aggregate tenant locations across all tenants)
-=======
     when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn(NON_ECS_USER_TENANT_JSON);
->>>>>>> ee98bcd2 (Overload simplehttpclient get with tenant param)
+
     int idsCount = idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION,
       true,

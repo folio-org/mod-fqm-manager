@@ -324,6 +324,10 @@
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
               <generateModelDocumentation>true</generateModelDocumentation>
               <skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
+              <schemaMappings>
+                <schemaMapping>FqmMigrateRequest=org.folio.querytool.domain.dto.FqmMigrateRequest</schemaMapping>
+                <schemaMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</schemaMapping>
+              </schemaMappings>
               <configOptions>
                 <java8>true</java8>
                 <dateLibrary>java</dateLibrary>
@@ -331,16 +335,6 @@
                 <useSpringBoot3>true</useSpringBoot3>
                 <useTags>true</useTags>
               </configOptions>
-            </configuration>
-          </execution>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${mod-fqm-manager.yaml.file}</inputSpec>
-              <output>${project.build.directory}/docs/mod-fqm-manager</output>
-              <generatorName>html2</generatorName>
             </configuration>
           </execution>
         </executions>

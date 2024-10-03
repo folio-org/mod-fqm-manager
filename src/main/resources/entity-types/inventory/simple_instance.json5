@@ -31,6 +31,7 @@
     },
   ],
   requiredPermissions: [
+    'inventory-storage.classification-types.collection.get',
     'inventory-storage.instances.item.get',
     'inventory-storage.contributor-name-types.collection.get',
     'inventory-storage.contributor-types.collection.get',
@@ -493,43 +494,68 @@
       valueFunction: 'lower(:value)',
     },
     {
-      name: 'classifications',
+      name: 'classification_type_ids',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+    },
+    {
+      name: 'classification_type_names',
       sourceAlias: 'inst',
       essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'objectType',
-          properties: [
-            {
-              name: 'number',
-              property: 'classificationNumber',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'classificationNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'type_id',
-              property: 'classificationTypeId',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'classificationTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-          ],
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'classification_type_ids',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter:
+      "(SELECT array_agg(class_type.jsonb ->> 'name') \
+        FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+          JOIN src_inventory_classification_type class_type ON (record.value ->> 'classificationTypeId') = class_type.id::text\
+      )",
+      source: {
+        columnName: 'classification_type_names',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
+      valueSourceApi: {
+        path: 'classification-types',
+        valueJsonPath: '$.classificationTypes.*.id',
+        labelJsonPath: '$.classificationTypes.*.name',
+      }
+    },
+    {
+      name: 'classification_numbers',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'classifications'",
+      essential: true,
+      hidden: false,
+      valueGetter: "( SELECT array_agg(elems.value->>'classificationNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'classificationNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'publication',

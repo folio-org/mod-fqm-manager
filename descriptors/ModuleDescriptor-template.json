@@ -234,7 +234,11 @@
     },
     {
       "id": "instance-storage",
-      "version": "10.0"
+      "version": "10.0 11.0"
+    },
+    {
+      "id": "instance-date-types",
+      "version": "1.0"
     },
     {
       "id": "instance-types",

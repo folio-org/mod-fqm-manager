@@ -670,19 +670,19 @@
       )",
     },
     {
-      name: 'publication_period_start',
+      name: 'instance_date_1',
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'integerType',
+        dataType: 'dateType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'publicationPeriod'->>'start'",
+      valueGetter: ":sourceAlias.jsonb->'dates'->>'date1'",
     },
     {
-      name: 'publication_period_end',
+      name: 'instance_date_2',
       sourceAlias: 'inst',
       essential: true,
       dataType: {
@@ -691,7 +691,20 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'publicationPeriod'->>'end'",
+      valueGetter: ":sourceAlias.jsonb->'dates'->>'date1'",
+    },
+    {
+      name: 'instance_date_type_id',
+      sourceAlias: 'inst',
+      essential: true,
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'date'->>'dateTypeId'",
     },
     {
       name: 'electronic_access',

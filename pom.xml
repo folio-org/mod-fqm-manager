@@ -302,7 +302,7 @@
       <plugin>
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-maven-plugin</artifactId>
-        <version>${openapi-generator.version}</version>
+        <version>7.8.0</version>
         <executions>
           <execution>
             <id>mod-fqm-manager-openapi</id>
@@ -324,10 +324,14 @@
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
               <generateModelDocumentation>true</generateModelDocumentation>
               <skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
-              <schemaMappings>
-                <schemaMapping>FqmMigrateRequest=org.folio.querytool.domain.dto.FqmMigrateRequest</schemaMapping>
-                <schemaMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</schemaMapping>
-              </schemaMappings>
+              <typeMappings>
+                <typeMapping>object+FqmMigrateRequest=FqmMigrateRequest</typeMapping>
+                <typeMapping>object+FqmMigrateResponse=FqmMigrateResponse</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>FqmMigrateRequest=org.folio.querytool.domain.dto.FqmMigrateRequest</importMapping>
+                <importMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</importMapping>
+              </importMappings>
               <configOptions>
                 <java8>true</java8>
                 <dateLibrary>java</dateLibrary>

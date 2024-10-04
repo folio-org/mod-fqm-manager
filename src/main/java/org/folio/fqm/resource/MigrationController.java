@@ -2,7 +2,6 @@ package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
 
-import org.apache.commons.lang3.StringUtils;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.FqmMigrateRequest;
@@ -12,7 +11,6 @@ import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequiredArgsConstructor

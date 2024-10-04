@@ -38,7 +38,7 @@
     <mockwebserver.version>4.11.0</mockwebserver.version>
 
     <!-- plugins -->
-    <openapi-generator.version>6.2.1</openapi-generator.version>
+    <openapi-generator.version>7.4.0</openapi-generator.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <lombok.version>1.18.30</lombok.version>
@@ -324,6 +324,14 @@
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
               <generateModelDocumentation>true</generateModelDocumentation>
               <skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
+              <typeMappings>
+                <typeMapping>object+FqmMigrateRequest=FqmMigrateRequest</typeMapping>
+                <typeMapping>object+FqmMigrateResponse=FqmMigrateResponse</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>FqmMigrateRequest=org.folio.querytool.domain.dto.FqmMigrateRequest</importMapping>
+                <importMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</importMapping>
+              </importMappings>
               <configOptions>
                 <java8>true</java8>
                 <dateLibrary>java</dateLibrary>
@@ -331,16 +339,6 @@
                 <useSpringBoot3>true</useSpringBoot3>
                 <useTags>true</useTags>
               </configOptions>
-            </configuration>
-          </execution>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${mod-fqm-manager.yaml.file}</inputSpec>
-              <output>${project.build.directory}/docs/mod-fqm-manager</output>
-              <generatorName>html2</generatorName>
             </configuration>
           </execution>
         </executions>

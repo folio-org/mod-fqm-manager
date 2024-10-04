@@ -382,8 +382,8 @@
       queryable: true,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueGetter: "( SELECT array_agg(elems.value->>'name') FILTER (WHERE (elems.value->>'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FILTER (WHERE (elems.value->>'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
       valueFunction: 'lower(:value)'
     },
     {
@@ -416,8 +416,8 @@
       queryable: true,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeText') FILTER (WHERE (elems.value->>'contributorTypeText') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText'))  FILTER (WHERE (elems.value->>'contributorTypeText') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
       valueFunction: 'lower(:value)'
     },
     {
@@ -451,7 +451,7 @@
       visibleByDefault: false,
       valueFunction: "lower(:value)",
       valueGetter: "(SELECT array_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors') -> 'contributorNameTypeId') AS record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'contributors'::text) ->> 'contributorNameTypeId'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text))  FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'contributors'::text) ->> 'contributorNameTypeId'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
     },
     {
       name: "instance_primary_contributor",

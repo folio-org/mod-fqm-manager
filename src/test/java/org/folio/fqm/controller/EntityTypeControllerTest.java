@@ -114,10 +114,10 @@ class EntityTypeControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.entityTypes.[0].id", is(expectedSummary.get(0).getId().toString())))
       .andExpect(jsonPath("$.entityTypes.[0].label", is(expectedSummary.get(0).getLabel())))
-      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions").isEmpty())
       .andExpect(jsonPath("$.entityTypes.[1].id", is(expectedSummary.get(1).getId().toString())))
       .andExpect(jsonPath("$.entityTypes.[1].label", is(expectedSummary.get(1).getLabel())))
-      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").isEmpty())
       .andExpect(jsonPath("$._version", is("newest coolest version")));
 
     verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false);

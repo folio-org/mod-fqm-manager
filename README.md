@@ -71,13 +71,14 @@ to mod-fqm-manager to ensure optimal performance and query handling. For larger 
 used, allocate at least 2 gigabytes. In extreme cases with extremely large responses and concurrent usage, 5 gigabytes of
 heap space should be sufficient to maintain performance and stability.
 
-#### Local development only environment variables
+### Local development only environment variables
 
 > [!WARNING]
 >
 > These environment variables are intended for local development only and should not be used in production environments!
 
 | Name                               | Default Value | Description                   |
+|------------------------------------|---------------|-------------------------------|
 | mod-fqm-manager.bypass-permissions | false         | Disable all permission checks |
 
 ## Installing the module

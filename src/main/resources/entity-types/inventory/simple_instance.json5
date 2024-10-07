@@ -866,23 +866,25 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'languages') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'languages') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
       )",
       source: {
-        entityTypeId: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         columnName: 'languages',
+        type: 'fqm',
+        name: 'languages',
       },
     },
     {

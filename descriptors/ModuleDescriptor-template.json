@@ -98,7 +98,7 @@
         {
           "methods": ["POST"],
           "pathPattern": "/query/purge",
-          "permissionsRequired": ["fqm.query.purge"]
+          "permissionsRequired": ["fqm.query.purge.post"]
         },
         {
           "methods": ["DELETE"],
@@ -119,7 +119,7 @@
           "unit": "hour",
           "delay": "1",
           "modulePermissions": [
-            "fqm.query.purge"
+            "fqm.query.purge.post"
           ]
         },
         {
@@ -136,7 +136,8 @@
   ],
   "permissionSets" : [
     {
-      "permissionName": "fqm.query.purge",
+      "permissionName": "fqm.query.purge.post",
+      "replaces":  ["fqm.query.purge"],
       "displayName": "FQM - purge old queries",
       "description": "Purge old queries",
       "visible": true

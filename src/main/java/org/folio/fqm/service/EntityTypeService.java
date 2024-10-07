@@ -124,6 +124,7 @@ public class EntityTypeService {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 
+    // TODO: mod-search permission
     if (field.getValueSourceApi() != null) {
       return getFieldValuesFromApi(field, searchText);
     }

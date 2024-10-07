@@ -853,7 +853,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -870,6 +870,11 @@
       source: {
         entityTypeId: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
         columnName: 'languages',
+      },
+      valueSourceApi: {
+        path: 'search/instances/facets?facet=languages',
+        labelJsonPath: '$.facets.languages.values.*.code',
+        valueJsonPath: '$.facets.languages.values.*.code',
       },
     },
     {

@@ -47,7 +47,6 @@ mvn clean install
 | DB_PASSWORD                                       | postgres      | Postgres password                                         |
 | DB_DATABASE                                       | postgres      | Postgres database name                                    |
 | MAX_QUERY_SIZE                                    | 1250000       | max result count per query                                |
-| mod-fqm-manager.bypass-permissions                | false         | Disable all permission checks, for local development only |
 | mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions                       |
 | mod-fqm-manager.entity-type-cache-timeout-seconds | 3600          | Cache duration for entity type definitions                |
 | server.port                                       | 8081          | Server port                                               |
@@ -72,6 +71,14 @@ to mod-fqm-manager to ensure optimal performance and query handling. For larger 
 used, allocate at least 2 gigabytes. In extreme cases with extremely large responses and concurrent usage, 5 gigabytes of
 heap space should be sufficient to maintain performance and stability.
 
+#### Local development only environment variables
+
+> [!WARNING]
+>
+> These environment variables are intended for local development only and should not be used in production environments!
+
+| Name                               | Default Value | Description                   |
+| mod-fqm-manager.bypass-permissions | false         | Disable all permission checks |
 
 ## Installing the module
 Follow the guide of Deploying Modules sections of the [Okapi Guide](https://github.com/folio-org/okapi/blob/master/doc/guide.md#example-1-deploying-and-using-a-simple-module) and Reference, which describe the process in detail.

@@ -62,13 +62,13 @@
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
-          "permissionsRequired": ["fqm.query.async.results.get"],
+          "permissionsRequired": ["fqm.query.async.results.query.get"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
-          "permissionsRequired": ["fqm.query.async.results.get"],
+          "permissionsRequired": ["fqm.query.async.results.sortedids.get"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
@@ -86,7 +86,7 @@
         {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
-          "permissionsRequired": ["fqm.query.async.results.get"],
+          "permissionsRequired": ["fqm.query.async.results.post"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
         },
         {
@@ -167,6 +167,29 @@
     },
     {
       "permissionName": "fqm.query.async.results.get",
+      "displayName": "FQM - Retrieve results of a submitted query",
+      "description": "Retrieve results of a submitted query",
+      "visible":  true,
+      "subPermissions": [
+        "fqm.query.async.results.post",
+        "fqm.query.async.results.sortedids.get",
+        "fqm.query.async.results.query.get"
+      ]
+    },
+    {
+      "permissionName": "fqm.query.async.results.sortedids.get",
+      "displayName": "FQM - Retrieve results of a submitted query with sorted Ids ",
+      "description": "Retrieve results of a submitted query with sorted Ids",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.results.query.get",
+      "displayName": "FQM - Retrieve results of a submitted query",
+      "description": "Retrieve results of a submitted query",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.results.post",
       "displayName": "FQM - Retrieve results of a submitted query",
       "description": "Retrieve results of a submitted query",
       "visible":  true

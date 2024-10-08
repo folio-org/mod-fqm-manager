@@ -179,8 +179,9 @@ public class EntityTypeService {
   private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
     Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     ValueSourceApi valueSourceApi = field.getValueSourceApi();
-    queryParams.putAll(valueSourceApi.getQueryParams());
-    log.info("Query params: {}", queryParams);
+    if (valueSourceApi.getQueryParams() != null) {
+      queryParams.putAll(valueSourceApi.getQueryParams());
+    }
     String rawJson = fieldValueClient.get(valueSourceApi.getPath(), queryParams);
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());

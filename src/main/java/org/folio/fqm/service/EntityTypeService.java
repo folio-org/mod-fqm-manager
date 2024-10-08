@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -15,6 +16,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
@@ -124,7 +127,6 @@ public class EntityTypeService {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 
-    // TODO: mod-search permission
     if (field.getValueSourceApi() != null) {
       return getFieldValuesFromApi(field, searchText);
     }
@@ -175,11 +177,14 @@ public class EntityTypeService {
   }
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
+    Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
+    ValueSourceApi valueSourceApi = field.getValueSourceApi();
+    queryParams.putAll(valueSourceApi.getQueryParams());
+    log.info("Query params: {}", queryParams);
+    String rawJson = fieldValueClient.get(valueSourceApi.getPath(), queryParams);
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-
     List<ValueWithLabel> results = new ArrayList<>(values.size());
     for (int i = 0; i < values.size(); i++) {
       String value = values.get(i);

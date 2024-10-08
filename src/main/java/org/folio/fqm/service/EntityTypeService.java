@@ -1,5 +1,7 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -176,7 +179,8 @@ public class EntityTypeService {
     return new ColumnValues().content(filteredValues);
   }
 
-  private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
+  // TODO: handle throws exception part better
+  private ColumnValues getFieldValuesFromApi(Field field, String searchText) throws Exception {
     Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     ValueSourceApi valueSourceApi = field.getValueSourceApi();
     if (valueSourceApi.getQueryParams() != null) {
@@ -187,9 +191,22 @@ public class EntityTypeService {
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
     List<ValueWithLabel> results = new ArrayList<>(values.size());
+    // TODO: allow labels to not be specified for valueSourceApi?
+    boolean languageHandling = field.getName().contains("languages");
+    ObjectMapper mapper = new ObjectMapper();
+    List<Map<String, String>> languages = mapper.readValue(
+      new File("languages.json5"),
+      new TypeReference<List<Map<String, String>>>() {});
+    if (languageHandling) {
+      log.info("Handling languages");
+
+    }
     for (int i = 0; i < values.size(); i++) {
       String value = values.get(i);
       String label = labels.get(i);
+      if (languageHandling) {
+        label = languages.get()
+      }
       if (label.contains(searchText)) {
         results.add(new ValueWithLabel().value(value).label(label));
       }

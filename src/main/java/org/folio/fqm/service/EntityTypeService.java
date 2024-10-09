@@ -43,6 +43,7 @@ public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILE_PATH = "./translations/mod-fqm-manager/languages.json5";
+  private static final String LANGUAGE_SOURCE_TYPE = "languages";
   private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
     "query", "(module==ORG and configName==localeSettings)"
   );
@@ -199,9 +200,7 @@ public class EntityTypeService {
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-    // TODO: better condition check?
-    boolean languageHandling = field.getName().contains("languages");
-    if (languageHandling) {
+    if (field.getSource() != null && LANGUAGE_SOURCE_TYPE.equals(field.getSource().getName())) {
       return getLanguages(values, searchText);
     }
     List<ValueWithLabel> results = new ArrayList<>(values.size());

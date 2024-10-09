@@ -232,21 +232,33 @@ public class EntityTypeService {
     try {
       languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {});
     } catch (IOException e) {
+      // TODO: handle exception reading file
       log.error("Failed to read language file. Using language codes for querying");
     }
 
-    Map<String, String> valueToLabelMap = new HashMap<>();
+    // TODO: get this from mod-configuration
+    Locale locale = Locale.GERMAN;
 
-    // Populate the map with data from JSON file
+    Map<String, String> valueToLabelMap = new HashMap<>();
+    Map<String, String> a3ToA2Map = new HashMap<>();
     for (Map<String, String> language : languages) {
       valueToLabelMap.put(language.get("alpha3"), language.get("name"));
+      a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
     }
 
-    for (String value : values) {
-      String label = valueToLabelMap.get(value);
+    // TODO: try to get locale
+    for (String code : values) {
+      String label;
+      String a2Code = a3ToA2Map.get(code);
+      if (a2Code != null) {
+        Locale innerLocale = new Locale(a2Code);
+        label = innerLocale.getDisplayLanguage(locale);
+      } else {
+        label = valueToLabelMap.get(code);
+      }
       log.info("New label: {}", label);
       if (label.contains(searchText)) {
-        results.add(new ValueWithLabel().value(value).label(label));
+        results.add(new ValueWithLabel().value(code).label(label));
       }
     }
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));

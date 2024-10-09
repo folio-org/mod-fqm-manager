@@ -40,7 +40,7 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "search.facets.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "search.facets.collection.get", "configuration.entries.collection.get"]
         },
         {
           "methods": ["POST"],

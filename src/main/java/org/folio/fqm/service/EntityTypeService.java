@@ -24,6 +24,7 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -255,9 +257,11 @@ public class EntityTypeService {
         .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
         .build();
 
+    String classpath = System.getProperty("java.class.path");
+    log.info("Classpath: {}", classpath);
     List<Map<String, String>> languages = List.of();
-    try {
-      languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {
+    try(InputStream input = getClass().getClassLoader().getResourceAsStream("languages.json5")) {
+      languages = mapper.readValue(input, new TypeReference<>() {
       });
     } catch (IOException e) {
       log.error("Failed to read language file. Some language display names may not be properly translated. Exception: {}", e.getMessage());

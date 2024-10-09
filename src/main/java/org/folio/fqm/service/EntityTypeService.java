@@ -24,7 +24,6 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,6 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -44,8 +42,8 @@ import java.util.*;
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private static final String LANGUAGES_FILE_PATH = "./translations/mod-fqm-manager/languages.json5";
   private static final String LANGUAGE_SOURCE_TYPE = "languages";
+  private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
     "query", "(module==ORG and configName==localeSettings)"
@@ -260,7 +258,7 @@ public class EntityTypeService {
     String classpath = System.getProperty("java.class.path");
     log.info("Classpath: {}", classpath);
     List<Map<String, String>> languages = List.of();
-    try(InputStream input = getClass().getClassLoader().getResourceAsStream("languages.json5")) {
+    try(InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
       languages = mapper.readValue(input, new TypeReference<>() {
       });
     } catch (IOException e) {

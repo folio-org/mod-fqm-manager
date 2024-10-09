@@ -226,7 +226,7 @@ public class EntityTypeService {
     String rawJson = simpleHttpClient.get(valueSourceApi.getPath(), queryParams);
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
-    List<ValueWithLabel> results = new ArrayList<>(values.size());
+    List<ValueWithLabel> results = new ArrayList<>();
     ObjectMapper mapper =
       JsonMapper
         .builder()
@@ -240,6 +240,9 @@ public class EntityTypeService {
     } catch (IOException e) {
       // TODO: handle exception reading file
       log.error("Failed to read language file. Using language codes for querying");
+//      values
+//        .stream()
+//        .forEach(val -> results.add(new ValueWithLabel().value(val).label(val)));
     }
 
     Locale locale;
@@ -270,11 +273,14 @@ public class EntityTypeService {
     for (String code : values) {
       String label;
       String a2Code = a3ToA2Map.get(code);
+      String name = valueToLabelMap.get(code);
       if (StringUtils.isNotEmpty(a2Code)) {
         Locale innerLocale = new Locale(a2Code);
         label = innerLocale.getDisplayLanguage(locale);
+      } else if (StringUtils.isNotEmpty(name)) {
+        label = name;
       } else {
-        label = valueToLabelMap.get(code);
+        label = code;
       }
       log.info("New label: {}", label);
       if (label.contains(searchText)) {

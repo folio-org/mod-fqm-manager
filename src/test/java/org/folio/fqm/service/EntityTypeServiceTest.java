@@ -407,6 +407,10 @@ class EntityTypeServiceTest {
                    {
                      "theValue": "fre",
                      "theLabel": "fre"
+                   },
+                   {
+                     "theValue": "xyz",
+                     "theLabel": "xyz"
                    }
                  ]
                }
@@ -419,7 +423,8 @@ class EntityTypeServiceTest {
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("eng").label("English"),
       new ValueWithLabel().value("fre").label("French"),
-      new ValueWithLabel().value("ger").label("German")
+      new ValueWithLabel().value("ger").label("German"),
+      new ValueWithLabel().value("xyz").label("xyz") // non-existent language code should use code as display name
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

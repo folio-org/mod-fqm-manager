@@ -1,7 +1,9 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -37,6 +40,7 @@ import java.util.*;
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
+  private static final String LANGUAGES_FILE_PATH = "./translations/mod-fqm-manager/languages.json5";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -95,7 +99,7 @@ public class EntityTypeService {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
-    List<EntityTypeColumn> columns  = entityType
+    List<EntityTypeColumn> columns = entityType
       .getColumns()
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
@@ -113,9 +117,9 @@ public class EntityTypeService {
   /**
    * Return top 1000 values of an entity type field, matching the given search text
    *
-   * @param fieldName    Name of the field for which values have to be returned
-   * @param searchText   Nullable search text. If a search text is provided, the returned values will include only those
-   *                     that contain the specified searchText.
+   * @param fieldName  Name of the field for which values have to be returned
+   * @param searchText Nullable search text. If a search text is provided, the returned values will include only those
+   *                   that contain the specified searchText.
    */
   @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
@@ -180,7 +184,7 @@ public class EntityTypeService {
   }
 
   // TODO: handle throws exception part better
-  private ColumnValues getFieldValuesFromApi(Field field, String searchText) throws Exception {
+  private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
     Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     ValueSourceApi valueSourceApi = field.getValueSourceApi();
     if (valueSourceApi.getQueryParams() != null) {
@@ -191,22 +195,56 @@ public class EntityTypeService {
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
     List<ValueWithLabel> results = new ArrayList<>(values.size());
-    // TODO: allow labels to not be specified for valueSourceApi?
+    // TODO: better condition check?
     boolean languageHandling = field.getName().contains("languages");
-    ObjectMapper mapper = new ObjectMapper();
-    List<Map<String, String>> languages = mapper.readValue(
-      new File("languages.json5"),
-      new TypeReference<List<Map<String, String>>>() {});
     if (languageHandling) {
-      log.info("Handling languages");
-
+      return getLanguages(field, searchText);
     }
     for (int i = 0; i < values.size(); i++) {
       String value = values.get(i);
       String label = labels.get(i);
-      if (languageHandling) {
-        label = languages.get()
+      if (label.contains(searchText)) {
+        results.add(new ValueWithLabel().value(value).label(label));
       }
+    }
+    results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
+    return new ColumnValues().content(results);
+  }
+
+  private ColumnValues getLanguages(Field field, String searchText) {
+    Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
+    ValueSourceApi valueSourceApi = field.getValueSourceApi();
+    if (valueSourceApi.getQueryParams() != null) {
+      queryParams.putAll(valueSourceApi.getQueryParams());
+    }
+    String rawJson = fieldValueClient.get(valueSourceApi.getPath(), queryParams);
+    DocumentContext parsedJson = JsonPath.parse(rawJson);
+    List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
+    List<ValueWithLabel> results = new ArrayList<>(values.size());
+    ObjectMapper mapper =
+      JsonMapper
+        .builder()
+        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+        .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
+        .build();
+
+    List<Map<String, String>> languages = List.of();
+    try {
+      languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {});
+    } catch (IOException e) {
+      log.error("Failed to read language file. Using language codes for querying");
+    }
+
+    Map<String, String> valueToLabelMap = new HashMap<>();
+
+    // Populate the map with data from JSON file
+    for (Map<String, String> language : languages) {
+      valueToLabelMap.put(language.get("alpha3"), language.get("name"));
+    }
+
+    for (String value : values) {
+      String label = valueToLabelMap.get(value);
+      log.info("New label: {}", label);
       if (label.contains(searchText)) {
         results.add(new ValueWithLabel().value(value).label(label));
       }

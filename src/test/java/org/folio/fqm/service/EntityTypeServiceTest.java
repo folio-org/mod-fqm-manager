@@ -375,6 +375,56 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void shouldReturnLanguagesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .valueSourceApi(new ValueSourceApi()
+          .path("fake-path")
+          .valueJsonPath("$.what.ever.dude.*.theValue")
+          .labelJsonPath("$..theLabel")
+        )
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
+           {
+             "what": {
+               "ever": {
+                 "dude": [
+                   {
+                     "theValue": "eng",
+                     "theLabel": "eng"
+                   },
+                   {
+                     "theValue": "ger",
+                     "theLabel": "ger"
+                   },
+                   {
+                     "theValue": "fre",
+                     "theLabel": "fre"
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("eng").label("English"),
+      new ValueWithLabel().value("fre").label("French"),
+      new ValueWithLabel().value("ger").label("German")
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
   void shouldReturnEntityTypeDefinition() {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();

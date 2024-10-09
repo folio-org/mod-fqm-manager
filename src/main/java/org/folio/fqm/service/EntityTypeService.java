@@ -44,10 +44,10 @@ public class EntityTypeService {
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILE_PATH = "./translations/mod-fqm-manager/languages.json5";
   private static final String LANGUAGE_SOURCE_TYPE = "languages";
+  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
     "query", "(module==ORG and configName==localeSettings)"
   );
-  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -260,7 +260,7 @@ public class EntityTypeService {
       languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {
       });
     } catch (IOException e) {
-      log.error("Failed to read language file. Some language display names may not be properly translated.");
+      log.error("Failed to read language file. Some language display names may not be properly translated. Exception: {}", e.getMessage());
     }
 
     Locale folioLocale;
@@ -317,5 +317,4 @@ public class EntityTypeService {
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
   }
-
 }

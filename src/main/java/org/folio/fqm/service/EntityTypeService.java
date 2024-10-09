@@ -232,7 +232,7 @@ public class EntityTypeService {
       log.error("Failed to read language file. Some language display names may not be properly translated.");
     }
 
-    Locale locale;
+    Locale folioLocale;
     try {
       String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
       ObjectMapper objectMapper = new ObjectMapper();
@@ -243,32 +243,31 @@ public class EntityTypeService {
         .path("value")
         .asText();
       JsonNode valueNode = objectMapper.readTree(valueString);
-      locale = new Locale(valueNode.path("locale").asText());
+      folioLocale = new Locale(valueNode.path("locale").asText());
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");
-      locale = Locale.ENGLISH;
+      folioLocale = Locale.ENGLISH;
     }
 
-    Map<String, String> valueToLabelMap = new HashMap<>();
+    Map<String, String> a3ToNameMap = new HashMap<>();
     Map<String, String> a3ToA2Map = new HashMap<>();
     for (Map<String, String> language : languages) {
-      valueToLabelMap.put(language.get("alpha3"), language.get("name"));
       a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
+      a3ToNameMap.put(language.get("alpha3"), language.get("name"));
     }
 
     for (String code : values) {
       String label;
       String a2Code = a3ToA2Map.get(code);
-      String name = valueToLabelMap.get(code);
+      String name = a3ToNameMap.get(code);
       if (StringUtils.isNotEmpty(a2Code)) {
-        Locale innerLocale = new Locale(a2Code);
-        label = innerLocale.getDisplayLanguage(locale);
+        Locale languageLocale = new Locale(a2Code);
+        label = languageLocale.getDisplayLanguage(folioLocale);
       } else if (StringUtils.isNotEmpty(name)) {
         label = name;
       } else {
         label = code;
       }
-      log.info("New label: {}", label);
       if (label.toLowerCase().contains(searchText.toLowerCase())) {
         results.add(new ValueWithLabel().value(code).label(label));
       }

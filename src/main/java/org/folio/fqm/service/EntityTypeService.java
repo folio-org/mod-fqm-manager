@@ -199,12 +199,12 @@ public class EntityTypeService {
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-    List<ValueWithLabel> results = new ArrayList<>(values.size());
     // TODO: better condition check?
     boolean languageHandling = field.getName().contains("languages");
     if (languageHandling) {
-      return getLanguages(field, searchText);
+      return getLanguages(values, searchText);
     }
+    List<ValueWithLabel> results = new ArrayList<>(values.size());
     for (int i = 0; i < values.size(); i++) {
       String value = values.get(i);
       String label = labels.get(i);
@@ -216,15 +216,7 @@ public class EntityTypeService {
     return new ColumnValues().content(results);
   }
 
-  private ColumnValues getLanguages(Field field, String searchText) {
-    Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
-    ValueSourceApi valueSourceApi = field.getValueSourceApi();
-    if (valueSourceApi.getQueryParams() != null) {
-      queryParams.putAll(valueSourceApi.getQueryParams());
-    }
-    String rawJson = simpleHttpClient.get(valueSourceApi.getPath(), queryParams);
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
-    List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
+  private ColumnValues getLanguages(List<String> values, String searchText) {
     List<ValueWithLabel> results = new ArrayList<>();
     ObjectMapper mapper =
       JsonMapper

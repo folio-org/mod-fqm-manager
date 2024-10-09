@@ -189,7 +189,6 @@ public class EntityTypeService {
     return new ColumnValues().content(filteredValues);
   }
 
-  // TODO: handle throws exception part better
   private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
     Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
     ValueSourceApi valueSourceApi = field.getValueSourceApi();
@@ -236,13 +235,10 @@ public class EntityTypeService {
 
     List<Map<String, String>> languages = List.of();
     try {
-      languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {});
+      languages = mapper.readValue(new File(LANGUAGES_FILE_PATH), new TypeReference<>() {
+      });
     } catch (IOException e) {
-      // TODO: handle exception reading file
-      log.error("Failed to read language file. Using language codes for querying");
-//      values
-//        .stream()
-//        .forEach(val -> results.add(new ValueWithLabel().value(val).label(val)));
+      log.error("Failed to read language file. Some language display names may not be properly translated.");
     }
 
     Locale locale;
@@ -269,7 +265,6 @@ public class EntityTypeService {
       a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
     }
 
-    // TODO: try to get locale
     for (String code : values) {
       String label;
       String a2Code = a3ToA2Map.get(code);
@@ -283,7 +278,7 @@ public class EntityTypeService {
         label = code;
       }
       log.info("New label: {}", label);
-      if (label.contains(searchText)) {
+      if (label.toLowerCase().contains(searchText.toLowerCase())) {
         results.add(new ValueWithLabel().value(code).label(label));
       }
     }

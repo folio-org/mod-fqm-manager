@@ -387,6 +387,7 @@ class EntityTypeServiceTest {
           .path("fake-path")
           .valueJsonPath("$.what.ever.dude.*.theValue")
           .labelJsonPath("$..theLabel")
+          .queryParams(Map.of("someKey", "someValue"))
         )
       ));
 
@@ -409,8 +410,8 @@ class EntityTypeServiceTest {
                      "theLabel": "fre"
                    },
                    {
-                     "theValue": "xyz",
-                     "theLabel": "xyz"
+                     "theValue": "xyze",
+                     "theLabel": "xyze"
                    }
                  ]
                }
@@ -418,13 +419,13 @@ class EntityTypeServiceTest {
            }
       """);
 
-    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
 
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("eng").label("English"),
       new ValueWithLabel().value("fre").label("French"),
       new ValueWithLabel().value("ger").label("German"),
-      new ValueWithLabel().value("xyz").label("xyz") // non-existent language code should use code as display name
+      new ValueWithLabel().value("xyze").label("xyze") // non-existent language code should use code as display name
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

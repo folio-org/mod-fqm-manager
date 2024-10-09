@@ -2,12 +2,14 @@ package org.folio.fqm.service;
 
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -41,6 +43,10 @@ public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILE_PATH = "./translations/mod-fqm-manager/languages.json5";
+  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
+    "query", "(module==ORG and configName==localeSettings)"
+  );
+  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -51,7 +57,7 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
-  private final SimpleHttpClient fieldValueClient;
+  private final SimpleHttpClient simpleHttpClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
 
@@ -190,7 +196,7 @@ public class EntityTypeService {
     if (valueSourceApi.getQueryParams() != null) {
       queryParams.putAll(valueSourceApi.getQueryParams());
     }
-    String rawJson = fieldValueClient.get(valueSourceApi.getPath(), queryParams);
+    String rawJson = simpleHttpClient.get(valueSourceApi.getPath(), queryParams);
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
@@ -217,7 +223,7 @@ public class EntityTypeService {
     if (valueSourceApi.getQueryParams() != null) {
       queryParams.putAll(valueSourceApi.getQueryParams());
     }
-    String rawJson = fieldValueClient.get(valueSourceApi.getPath(), queryParams);
+    String rawJson = simpleHttpClient.get(valueSourceApi.getPath(), queryParams);
     DocumentContext parsedJson = JsonPath.parse(rawJson);
     List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
     List<ValueWithLabel> results = new ArrayList<>(values.size());
@@ -236,8 +242,22 @@ public class EntityTypeService {
       log.error("Failed to read language file. Using language codes for querying");
     }
 
-    // TODO: get this from mod-configuration
-    Locale locale = Locale.GERMAN;
+    Locale locale;
+    try {
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
+      String valueString = localeSettingsNode
+        .path("configs")
+        .get(0)
+        .path("value")
+        .asText();
+      JsonNode valueNode = objectMapper.readTree(valueString);
+      locale = new Locale(valueNode.path("locale").asText());
+    } catch (Exception e) {
+      log.debug("No default locale defined. Defaulting to English for language translations.");
+      locale = Locale.ENGLISH;
+    }
 
     Map<String, String> valueToLabelMap = new HashMap<>();
     Map<String, String> a3ToA2Map = new HashMap<>();
@@ -250,7 +270,7 @@ public class EntityTypeService {
     for (String code : values) {
       String label;
       String a2Code = a3ToA2Map.get(code);
-      if (a2Code != null) {
+      if (StringUtils.isNotEmpty(a2Code)) {
         Locale innerLocale = new Locale(a2Code);
         label = innerLocale.getDisplayLanguage(locale);
       } else {

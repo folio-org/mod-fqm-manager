@@ -215,6 +215,37 @@ public class EntityTypeService {
     return new ColumnValues().content(results);
   }
 
+  private ColumnValues getFieldValuesFromEntityType(EntityType entityType, String fieldName, String searchText) {
+    String fql = "{\"%s\": {\"$regex\": \"%s\"}}".formatted(fieldName, searchText);
+    List<Map<String, Object>> results = queryService.processQuery(
+      entityType,
+      fql,
+      List.of(ID_FIELD_NAME, fieldName),
+      null,
+      COLUMN_VALUE_DEFAULT_PAGE_SIZE
+    );
+    List<ValueWithLabel> valueWithLabels = results
+      .stream()
+      .map(result -> toValueWithLabel(result, fieldName))
+      .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .toList();
+    return new ColumnValues().content(valueWithLabels);
+  }
+
+  private static ColumnValues getCurrencyValues() {
+    List<ValueWithLabel> currencies =
+      new ArrayList<>(Currency
+        .getAvailableCurrencies()
+        .stream()
+        .filter(currency -> !EXCLUDED_CURRENCY_CODES.contains(currency.getCurrencyCode()))
+        .map(currency -> new ValueWithLabel()
+          .value(currency.getCurrencyCode())
+          .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
+        .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+        .toList());
+    return new ColumnValues().content(currencies);
+  }
+
   private ColumnValues getLanguages(List<String> values, String searchText) {
     List<ValueWithLabel> results = new ArrayList<>();
     ObjectMapper mapper =
@@ -274,37 +305,6 @@ public class EntityTypeService {
     }
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
-  }
-
-  private ColumnValues getFieldValuesFromEntityType(EntityType entityType, String fieldName, String searchText) {
-    String fql = "{\"%s\": {\"$regex\": \"%s\"}}".formatted(fieldName, searchText);
-    List<Map<String, Object>> results = queryService.processQuery(
-      entityType,
-      fql,
-      List.of(ID_FIELD_NAME, fieldName),
-      null,
-      COLUMN_VALUE_DEFAULT_PAGE_SIZE
-    );
-    List<ValueWithLabel> valueWithLabels = results
-      .stream()
-      .map(result -> toValueWithLabel(result, fieldName))
-      .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
-      .toList();
-    return new ColumnValues().content(valueWithLabels);
-  }
-
-  private static ColumnValues getCurrencyValues() {
-    List<ValueWithLabel> currencies =
-      new ArrayList<>(Currency
-        .getAvailableCurrencies()
-        .stream()
-        .filter(currency -> !EXCLUDED_CURRENCY_CODES.contains(currency.getCurrencyCode()))
-        .map(currency -> new ValueWithLabel()
-          .value(currency.getCurrencyCode())
-          .label(String.format("%s (%s)", currency.getDisplayName(), currency.getCurrencyCode())))
-        .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
-        .toList());
-    return new ColumnValues().content(currencies);
   }
 
   private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String fieldName) {

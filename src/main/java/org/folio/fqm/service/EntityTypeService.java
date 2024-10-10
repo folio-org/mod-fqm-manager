@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.codehaus.plexus.util.StringUtils;
@@ -22,7 +23,6 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
-import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -140,8 +140,9 @@ public class EntityTypeService {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
     if (field.getValueSourceApi() != null) {
-      return getFieldValuesFromApi(field, searchText);
+      return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }
 
     if (field.getSource() != null) {
@@ -160,7 +161,7 @@ public class EntityTypeService {
             return getTenantIds(entityType);
           }
           case "languages" -> {
-            return getLanguages(searchText);
+            return getLanguages(searchText, tenantsToQuery);
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -173,7 +174,7 @@ public class EntityTypeService {
   }
 
   private ColumnValues getTenantIds(EntityType entityType) {
-    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType, true);
+    List<String> tenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
     List<ValueWithLabel> tenantValues = tenants
       .stream()
       .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
@@ -192,22 +193,28 @@ public class EntityTypeService {
     return new ColumnValues().content(filteredValues);
   }
 
-  private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    Map<String, String> queryParams = new HashMap<>(Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
-    ValueSourceApi valueSourceApi = field.getValueSourceApi();
-    String rawJson = simpleHttpClient.get(valueSourceApi.getPath(), queryParams);
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
-    List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
-    List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-
-    List<ValueWithLabel> results = new ArrayList<>(values.size());
-    for (int i = 0; i < values.size(); i++) {
-      String value = values.get(i);
-      String label = labels.get(i);
-      if (label.contains(searchText)) {
-        results.add(new ValueWithLabel().value(value).label(label));
+  private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
+    Set<ValueWithLabel> resultSet = new HashSet<>();
+    for (String tenantId : tenantsToQuery) {
+      try {
+        String rawJson = simpleHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
+        DocumentContext parsedJson = JsonPath.parse(rawJson);
+        List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
+        List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
+        for (int i = 0; i < values.size(); i++) {
+          String value = values.get(i);
+          String label = labels.get(i);
+          if (label.contains(searchText)) {
+            resultSet.add(new ValueWithLabel().value(value).label(label));
+          }
+        }
+      } catch (FeignException.Unauthorized e) {
+        log.error("Failed to get column values from {} tenant due to exception: {}", tenantId, e.getMessage());
       }
     }
+
+
+    List<ValueWithLabel> results = new ArrayList<>(resultSet);
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }
@@ -243,15 +250,21 @@ public class EntityTypeService {
     return new ColumnValues().content(currencies);
   }
 
-  private ColumnValues getLanguages(String searchText) {
+  private ColumnValues getLanguages(String searchText, List<String> tenantsToQuery) {
     Map<String, String> queryParams = Map.of(
       "facet", "languages",
       "query", "id=*",
       "limit", "1000"
     );
-    String rawJson = simpleHttpClient.get("search/instances/facets", queryParams);
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
-    List<String> values = parsedJson.read("$.facets.languages.values.*.id");
+
+    Set<String> valueSet = new HashSet<>();
+    for (String tenant : tenantsToQuery) {
+      String rawJson = simpleHttpClient.get("search/instances/facets", queryParams, tenant);
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      List<String> values = parsedJson.read("$.facets.languages.values.*.id");
+      valueSet.addAll(values);
+    }
+    List<String> values = new ArrayList<>(valueSet);
 
     List<ValueWithLabel> results = new ArrayList<>();
     ObjectMapper mapper =

@@ -375,6 +375,122 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void shouldReturnLanguagesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+           {
+             "facets": {
+               "languages": {
+                 "values": [
+                   {
+                     "id": "eng",
+                     "value": "eng"
+                   },
+                   {
+                     "id": "ger",
+                     "value": "ger"
+                   },
+                   {
+                     "id": "fre",
+                     "value": "fre"
+                   },
+                   {
+                     "id": "xyze",
+                     "value": "xyze"
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("eng").label("English"),
+      new ValueWithLabel().value("fre").label("French"),
+      new ValueWithLabel().value("ger").label("German"),
+      new ValueWithLabel().value("xyze").label("xyze") // non-existent language code should use code as display name
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldReturnLocalizedLanguagesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+           {
+             "facets": {
+               "languages": {
+                 "values": [
+                   {
+                     "id": "eng",
+                     "value": "eng"
+                   },
+                   {
+                     "id": "ger",
+                     "value": "ger"
+                   },
+                   {
+                     "id": "mus",
+                     "value": "mus"
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+    when(simpleHttpClient.get(eq("configurations/entries"), anyMap())).thenReturn("""
+           {
+             "configs": [
+               {
+                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
+                 "module":"ORG",
+                 "configName":"localeSettings",
+                 "enabled":true,
+                 "value":"{\\"locale\\":\\"de\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
+               }
+             ],
+             "totalRecords": 1,
+             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("mus").label("Creek"),
+      new ValueWithLabel().value("ger").label("Deutsch"),
+      new ValueWithLabel().value("eng").label("Englisch")
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
   void shouldReturnEntityTypeDefinition() {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();

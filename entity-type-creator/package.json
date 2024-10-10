@@ -23,7 +23,7 @@
     "change-case": "^5.4.4",
     "dotenv": "^16.4.5",
     "genson-js": "^0.0.8",
-    "json-schema-to-typescript": "^13.1.2",
+    "json-schema-to-typescript": "^15.0.2",
     "json5": "^2.2.3",
     "next": "^14.1.4",
     "postgres": "^3.4.4",

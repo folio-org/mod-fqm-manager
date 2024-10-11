@@ -1466,7 +1466,7 @@
     "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID",
     "entityType.simple_instance.contributor_type_id": "Contributor type UUID",
     "entityType.simple_instance.contributors_name": "Contributor name",
-    "entityType.simple_instance.contributor_type_text": "Contributor type",
+    "entityType.simple_instance.contributor_type": "Contributor type",
     "entityType.simple_instance.contributor_name_type_id": "Contributor name type UUID",
     "entityType.simple_instance.contributor_name_type": "Contributor name type",
     "entityType.simple_instance.instance_primary_contributor": "Primary contributor",

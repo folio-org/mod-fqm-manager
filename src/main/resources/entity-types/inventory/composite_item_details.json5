@@ -45,6 +45,7 @@
       alias: 'loclibrary',
       type: 'entity-type',
       id: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'effective_location.location',

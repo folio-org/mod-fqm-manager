@@ -67,6 +67,7 @@
       alias: 'mtypes',
       type: 'entity-type',
       id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe', // simple_material_type_details
+      essentialOnly: true,
       join: {
         joinTo: 'items.item',
         type: 'left join',

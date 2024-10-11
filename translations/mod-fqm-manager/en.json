@@ -36,7 +36,7 @@
   "entityType.composite_item_details.instances": "Instances",
   "entityType.composite_item_details.item_level_call_number": "Item level call number",
   "entityType.composite_item_details.items": "Items",
-  "entityType.composite_item_details.loclibrary": "Library",
+  "entityType.composite_item_details.loclibrary": "Effective library",
   "entityType.composite_item_details.mtypes": "Material type",
   "entityType.composite_item_details.permanent_location": "Permanent location",
   "entityType.composite_item_details.temporary_location": "Temporary location",

@@ -259,10 +259,14 @@ public class EntityTypeService {
 
     Set<String> valueSet = new HashSet<>();
     for (String tenant : tenantsToQuery) {
-      String rawJson = simpleHttpClient.get("search/instances/facets", queryParams, tenant);
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      List<String> values = parsedJson.read("$.facets.languages.values.*.id");
-      valueSet.addAll(values);
+      try {
+        String rawJson = simpleHttpClient.get("search/instances/facets", queryParams, tenant);
+        DocumentContext parsedJson = JsonPath.parse(rawJson);
+        List<String> values = parsedJson.read("$.facets.languages.values.*.id");
+        valueSet.addAll(values);
+      } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
+        log.error("Failed to get languages from {} tenant due to exception {}", tenant, e.getMessage());
+      }
     }
     List<String> values = new ArrayList<>(valueSet);
 
@@ -274,8 +278,6 @@ public class EntityTypeService {
         .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
         .build();
 
-    String classpath = System.getProperty("java.class.path");
-    log.info("Classpath: {}", classpath);
     List<Map<String, String>> languages = List.of();
     try(InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
       languages = mapper.readValue(input, new TypeReference<>() {
@@ -318,8 +320,10 @@ public class EntityTypeService {
         label = languageLocale.getDisplayLanguage(folioLocale);
       } else if (StringUtils.isNotEmpty(name)) {
         label = name;
-      } else {
+      } else if (StringUtils.isNotEmpty(code)){
         label = code;
+      } else {
+        continue;
       }
       if (label.toLowerCase().contains(searchText.toLowerCase())) {
         results.add(new ValueWithLabel().value(code).label(label));

@@ -13,7 +13,8 @@
     {
       alias: 'effective_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'holdings.hrd',
@@ -34,6 +35,7 @@
       alias: 'permanent_location',
       type: 'entity-type',
       id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'holdings.hrd',
@@ -43,7 +45,8 @@
     {
       alias: 'temporary_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'holdings.hrd',

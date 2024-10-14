@@ -396,7 +396,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -451,7 +451,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -520,7 +520,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap(), eq("tenant_01"))).thenThrow(FeignException.BadRequest.class);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenThrow(FeignException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }

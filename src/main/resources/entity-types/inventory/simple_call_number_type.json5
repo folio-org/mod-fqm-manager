@@ -22,6 +22,8 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -32,6 +34,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
@@ -56,6 +59,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },
     {
@@ -66,6 +70,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
     },
     {
@@ -76,6 +81,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
@@ -86,6 +92,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
     {
@@ -96,6 +103,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
     {
@@ -106,6 +114,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
     },
     {
@@ -116,6 +125,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
     },
     {
@@ -127,6 +137,7 @@
       queryable: false,
       visibleByDefault: false,
       hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],

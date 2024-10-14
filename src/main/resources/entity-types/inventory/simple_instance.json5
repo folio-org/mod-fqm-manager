@@ -549,7 +549,7 @@
       idColumnName: 'classification_type_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter:"(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY contributor_type.jsonb ->> 'name') FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) JOIN src_inventory_contributor_type contributor_type ON (record.value ->> 'contributorTypeId') = contributor_type.id::text)"
+      valueGetter:"(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY contributor_type.id) FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) JOIN src_inventory_contributor_type contributor_type ON (record.value ->> 'contributorTypeId') = contributor_type.id::text)"
     },
     {
       name: 'classification_numbers',

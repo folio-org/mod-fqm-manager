@@ -31,6 +31,6 @@ public interface SimpleHttpClient {
    * @param tenant      - FOLIO tenant from which to retrieve data
    * @return the body of the response (JSON)
    */
-  @GetMapping(value = "/{path}?{queryParams}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{path}", produces = MediaType.APPLICATION_JSON_VALUE)
   String get(@PathVariable String path, @SpringQueryMap Map<String, String> queryParams, @RequestHeader("X-Okapi-Tenant") String tenant);
 }

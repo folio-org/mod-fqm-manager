@@ -22,6 +22,7 @@
       alias: 'cospi',
       type: 'entity-type',
       id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      essentialOnly: true,
       join: {
         condition: "(:that.jsonb ->> 'checkoutServicePointId')::uuid = :this.id",
         type: 'left join',
@@ -32,6 +33,7 @@
       alias: 'cispi',
       type: 'entity-type',
       id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      essentialOnly: true,
       join: {
         joinTo: 'loans.loan',
         condition: "(:that.jsonb ->> 'checkinServicePointId')::uuid = :this.id",

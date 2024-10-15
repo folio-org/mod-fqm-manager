@@ -4,8 +4,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.NotImplementedException;
 import org.folio.fqm.client.ModPermissionsClient;
+import org.folio.fqm.client.ModRolesKeycloakClient;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
@@ -27,7 +27,8 @@ import java.util.concurrent.TimeUnit;
 public class PermissionsRegularService implements PermissionsService {
 
   // package-private for visibility in unit tests
-  @Value("${folio.is-eureka:false}")
+
+  @Value("${folio.is-eureka}")
   boolean isEureka;
 
   @Value("${mod-fqm-manager.permissions-cache-timeout-seconds:60}")
@@ -35,21 +36,26 @@ public class PermissionsRegularService implements PermissionsService {
 
   private final FolioExecutionContext context;
   private final ModPermissionsClient modPermissionsClient;
-  private final Cache<TenantUserPair, Set<String>> cache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
+  private final ModRolesKeycloakClient modRolesKeycloakClient;
+  private final Cache<TenantUserPair, Set<String>> cache = Caffeine.newBuilder()
+    .expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS)
+    .build();
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+
   private static final List<String> CROSS_TENANT_FQM_PERMISSIONS = List.of(
     "fqm.entityTypes.item.get",
     "fqm.query.async.results.get",
     "fqm.query.async.post"
   );
 
+  @Override
   public Set<String> getUserPermissions() {
     return getUserPermissions(context.getTenantId());
   }
 
   public Set<String> getUserPermissions(String tenantId) {
     TenantUserPair key = new TenantUserPair(tenantId, context.getUserId());
-    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.userId()) : getUserPermissionsFromModPermissions(tenantId, k.userId()));
+    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId()) : getUserPermissionsFromModPermissions(k.tenant(), k.userId()));
   }
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
@@ -57,6 +63,7 @@ public class PermissionsRegularService implements PermissionsService {
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
   }
 
+  @Override
   public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
     verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, checkFqmPermissions);
   }
@@ -92,8 +99,10 @@ public class PermissionsRegularService implements PermissionsService {
       .getPermissionNames();
   }
 
-  private Set<String> getUserPermissionsFromRolesKeycloak(UUID userId) {
-    throw new NotImplementedException("Not implemented yet");
+  private Set<String> getUserPermissionsFromRolesKeycloak(String tenantId, UUID userId) {
+    return modRolesKeycloakClient
+      .getPermissionsUser(tenantId, userId)
+      .getPermissionNames();
   }
 
   private record TenantUserPair(String tenant, UUID userId) {

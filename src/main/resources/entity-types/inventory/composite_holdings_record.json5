@@ -8,7 +8,8 @@
       alias: 'holdings',
       type: 'entity-type',
       id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
-      useIdColumns: true
+      useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'effective_location',

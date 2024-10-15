@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -395,7 +396,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -450,7 +451,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -466,6 +467,10 @@ class EntityTypeServiceTest {
                    {
                      "id": "mus",
                      "value": "mus"
+                   },
+                   {
+                     "id": "",
+                     "value": ""
                    }
                  ]
                }
@@ -496,6 +501,28 @@ class EntityTypeServiceTest {
       new ValueWithLabel().value("eng").label("Englisch")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldCatchExceptionFromLanguagesApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<String> tenantList = List.of("tenant_01");
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenThrow(FeignException.BadRequest.class);
+
+    assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
 
   @Test

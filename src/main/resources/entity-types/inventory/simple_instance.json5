@@ -404,7 +404,7 @@
       valueFunction: 'lower(:value)'
     },
     {
-      name: 'contributor_type_text',
+      name: 'contributor_type',
       sourceAlias: 'inst',
       dataType: {
         dataType: 'arrayType',
@@ -416,9 +416,22 @@
       queryable: true,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeText') FILTER (WHERE (elems.value->>'contributorTypeText') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeText'))  FILTER (WHERE (elems.value->>'contributorTypeText') IS NOT NULL) AS array_agg FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      valueFunction: 'lower(:value)'
+      valueGetter:  "(SELECT array_agg(contributor_type.jsonb ->> 'name') \
+        FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
+          JOIN src_inventory_contributor_type contributor_type ON (record.value ->> 'contributorTypeId') = contributor_type.id::text\
+      )",
+       valueFunction: 'lower(:value)',
+      idColumnName: 'contributor_type_id',
+      source: {
+        columnName: 'contributor_type',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
+      valueSourceApi: {
+        path: 'contributor-types',
+        valueJsonPath: '$.contributorTypes.*.name',
+        labelJsonPath: '$.contributorTypes.*.name',
+      }
     },
     {
       name: "contributor_name_type_id",
@@ -449,9 +462,22 @@
       queryable: true,
       essential: true,
       visibleByDefault: false,
+      idColumnName: 'contributor_name_type_id',
       valueFunction: "lower(:value)",
-      valueGetter: "(SELECT array_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors') -> 'contributorNameTypeId') AS record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text))  FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'contributors'::text) ->> 'contributorNameTypeId'::text) record(value) JOIN src_inventory_contributor_name_type a ON (record.value::text) = a.id::text)",
+      valueGetter:  "(SELECT array_agg(contributor_name_type.jsonb ->> 'name') \
+        FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
+          JOIN src_inventory_contributor_name_type contributor_name_type ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text\
+      )",
+      source: {
+        columnName: 'contributor_name_type',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
+      valueSourceApi: {
+        path: 'contributor-name-types',
+        valueJsonPath: '$.contributorNameTypes.*.name',
+        labelJsonPath: '$.contributorNameTypes.*.name',
+      }
     },
     {
       name: "instance_primary_contributor",
@@ -529,15 +555,6 @@
         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
           JOIN src_inventory_classification_type class_type ON (record.value ->> 'classificationTypeId') = class_type.id::text\
       )",
-      source: {
-        columnName: 'classification_type_names',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
-      valueSourceApi: {
-        path: 'classification-types',
-        valueJsonPath: '$.classificationTypes.*.id',
-        labelJsonPath: '$.classificationTypes.*.name',
-      }
     },
     {
       name: 'classification_numbers',

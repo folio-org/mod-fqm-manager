@@ -543,7 +543,7 @@
   "entityType.simple_group_details.created_date": "Created date",
   "entityType.simple_group_details.desc": "Desc",
   "entityType.simple_group_details.expiration_off_set_in_days": "Expiration off set in days",
-  "entityType.simple_group_details.group": "Group",
+  "entityType.simple_group_details.group": "Name",
   "entityType.simple_group_details.id": "UUID",
   "entityType.simple_group_details.jsonb": "JSONB",
   "entityType.simple_group_details.source": "Source",

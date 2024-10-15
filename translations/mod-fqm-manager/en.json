@@ -97,7 +97,7 @@
   "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate",
   "entityType.composite_purchase_order_lines.pol_updated_by_user": "POL updated by user",
   "entityType.composite_purchase_order_lines.rates": "Exchange rate",
-  "entityType.composite_purchase_order_lines.vendor_organization": "Vendor organization",
+  "entityType.composite_purchase_order_lines.vendor_organization": "Vendor org",
   "entityType.composite_user_details": "Users",
   "entityType.composite_user_details.groups": "Patron group",
   "entityType.composite_user_details.users": "User",

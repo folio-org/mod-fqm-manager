@@ -67,6 +67,7 @@
       alias: 'vendor_organization',
       type: 'entity-type',
       id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      essentialOnly: true,
       join: {
         type: 'left join',
         condition: "(:that.jsonb ->> 'vendor')::uuid = :this.id",

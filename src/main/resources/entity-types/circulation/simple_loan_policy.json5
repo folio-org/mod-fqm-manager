@@ -22,7 +22,8 @@
       },
       isIdColumn: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -34,6 +35,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.creation_date',
     },
     {
@@ -45,6 +47,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.created_by',
     },
     {
@@ -54,7 +57,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.loanspolicy_fixedduedatescheduleid',
     },
@@ -65,7 +68,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.renewalspolicy_alternatefixedduedatescheduleid',
     },
@@ -78,6 +81,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
     },
     {
@@ -88,7 +92,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'description'",
     },
     {
@@ -99,7 +103,9 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'loanable'",
       values: [
         {
@@ -120,7 +126,9 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'profileId'",
     },
     {
@@ -131,7 +139,9 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'renewable'",
       values: [
         {
@@ -151,7 +161,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'unlimited'",
       values: [
@@ -172,7 +182,7 @@
         dataType: 'numberType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'numberAllowed'",
     },
@@ -183,7 +193,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'renewFromId'",
     },
@@ -194,7 +204,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->>'differentPeriod'",
       values: [
@@ -215,7 +225,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'period'->>'duration'",
     },
@@ -226,7 +236,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'period'->>'intervalId'",
       values: [
@@ -259,7 +269,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'closedLibraryDueDateManagementId'",
       values: [ // From https://github.com/folio-org/mod-circulation/blob/master/src/main/java/org/folio/circulation/domain/policy/DueDateManagement.java
@@ -296,7 +306,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -308,7 +318,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'gracePeriod'->>'intervalId'",
       values: [
@@ -341,7 +351,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -353,7 +363,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->'openingTimeOffset'->>'intervalId'",
       values: [
@@ -386,7 +396,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'loansPolicy'->>'fixedDueDateScheduleId'",
     },
@@ -397,7 +407,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'loansPolicy'->>'itemLimit')::integer",
       valueFunction: '(:value)::integer'
@@ -409,7 +419,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->'period'->>'duration'",
     },
@@ -420,7 +430,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'renewalsPolicy'->'period'->>'intervalId'",
       values: [
@@ -453,7 +463,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -465,7 +475,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateGracePeriod'->>'intervalId'",
       values: [
@@ -498,7 +508,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -510,7 +520,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'minimumGuaranteedLoanPeriod'->>'intervalId'",
       values: [
@@ -543,7 +553,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -555,7 +565,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'recallReturnInterval'->>'intervalId'",
       values: [
@@ -588,7 +598,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->>'allowRecallsToExtendOverdueLoans'",
       values: [
@@ -609,7 +619,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -621,7 +631,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'recalls'->'alternateRecallReturnInterval'->>'intervalId'",
       values: [
@@ -654,7 +664,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -666,7 +676,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateCheckoutLoanPeriod'->>'intervalId'",
       values: [
@@ -699,7 +709,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->>'renewItemsWithRequest'",
       values: [
@@ -720,7 +730,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -732,7 +742,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'holds'->'alternateRenewalLoanPeriod'->>'intervalId'",
       values: [
@@ -765,7 +775,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -777,7 +787,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateCheckoutLoanPeriod'->>'intervalId'",
       values: [
@@ -810,7 +820,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->>'renewItemsWithRequest'",
       values: [
@@ -831,7 +841,7 @@
         dataType: 'integerType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'duration')::integer",
       valueFunction: '(:value)::integer'
@@ -843,7 +853,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'requestManagement'->'pages'->'alternateRenewalLoanPeriod'->>'intervalId'",
       values: [
@@ -877,8 +887,9 @@
       },
       isIdColumn: false,
       queryable: false,
-      hidden: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],

@@ -7,6 +7,7 @@
       type: 'entity-type',
       id: '00349126-c923-4045-a29f-3b6db4c6bea9',
       useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'lpolicy',

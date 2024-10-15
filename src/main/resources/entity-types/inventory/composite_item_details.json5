@@ -25,6 +25,7 @@
       alias: 'effective_call_number',
       type: 'entity-type',
       id: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'items.item',
@@ -35,6 +36,7 @@
       alias: 'item_level_call_number',
       type: 'entity-type',
       id: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+      essentialOnly: true,
       join: {
         condition: "(:that.jsonb ->> 'itemLevelCallNumberTypeId')::uuid = :this.id",
         type: 'left join',

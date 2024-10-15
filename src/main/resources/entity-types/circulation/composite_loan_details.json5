@@ -12,6 +12,7 @@
       alias: 'lpolicy',
       type: 'entity-type',
       id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'loans.loan',

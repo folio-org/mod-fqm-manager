@@ -161,7 +161,7 @@ public class EntityTypeService {
             return getTenantIds(entityType);
           }
           case "languages" -> {
-            return getLanguages(searchText, tenantsToQuery);
+            return getLanguages(searchText);
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -250,25 +250,21 @@ public class EntityTypeService {
     return new ColumnValues().content(currencies);
   }
 
-  private ColumnValues getLanguages(String searchText, List<String> tenantsToQuery) {
+  private ColumnValues getLanguages(String searchText) {
     Map<String, String> queryParams = Map.of(
       "facet", "languages",
       "query", "id=*",
       "limit", "1000"
     );
 
-    Set<String> valueSet = new HashSet<>();
-    for (String tenant : tenantsToQuery) {
-      try {
-        String rawJson = simpleHttpClient.get("search/instances/facets", queryParams, tenant);
-        DocumentContext parsedJson = JsonPath.parse(rawJson);
-        List<String> values = parsedJson.read("$.facets.languages.values.*.id");
-        valueSet.addAll(values);
-      } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
-        log.error("Failed to get languages from {} tenant due to exception {}", tenant, e.getMessage());
-      }
+    List<String> values = List.of();
+    try {
+      String rawJson = simpleHttpClient.get("search/instances/facets", queryParams);
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      values = parsedJson.read("$.facets.languages.values.*.id");
+    } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
+      log.error("Failed to get languages from API due to exception {}", e.getMessage());
     }
-    List<String> values = new ArrayList<>(valueSet);
 
     List<ValueWithLabel> results = new ArrayList<>();
     ObjectMapper mapper =
@@ -279,7 +275,7 @@ public class EntityTypeService {
         .build();
 
     List<Map<String, String>> languages = List.of();
-    try(InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
+    try (InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
       languages = mapper.readValue(input, new TypeReference<>() {
       });
     } catch (IOException e) {
@@ -320,7 +316,7 @@ public class EntityTypeService {
         label = languageLocale.getDisplayLanguage(folioLocale);
       } else if (StringUtils.isNotEmpty(name)) {
         label = name;
-      } else if (StringUtils.isNotEmpty(code)){
+      } else if (StringUtils.isNotEmpty(code)) {
         label = code;
       } else {
         continue;

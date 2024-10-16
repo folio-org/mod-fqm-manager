@@ -253,7 +253,6 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      essential: false,
       valueGetter: ":sourceAlias.jsonb->>'claims'",
     },
     {
@@ -962,7 +961,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: false,
       valueGetter: ":sourceAlias.jsonb->>'instanceId'",
     },
     {

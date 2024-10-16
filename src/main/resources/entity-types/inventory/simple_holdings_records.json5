@@ -600,6 +600,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'acquisitionFormat'",
     },
     {
@@ -611,6 +612,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'acquisitionMethod'",
     },
     {
@@ -677,6 +679,7 @@
     {
       name: 'administrative_notes',
       sourceAlias: 'hrd',
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {

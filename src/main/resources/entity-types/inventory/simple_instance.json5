@@ -399,8 +399,8 @@
       essential: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueGetter: "( SELECT array_agg(elems.value->>'contributorTypeId' ORDER BY elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorTypeId') ORDER BY elems.value->>'contributorTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
       valueFunction: 'lower(:value)'
     },
     {
@@ -416,7 +416,7 @@
       queryable: true,
       essential: true,
       visibleByDefault: false,
-      valueGetter:  "(SELECT array_agg(contributor_type.jsonb ->> 'name') \
+      valueGetter:  "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
         FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
           JOIN src_inventory_contributor_type contributor_type ON (record.value ->> 'contributorTypeId') = contributor_type.id::text\
@@ -446,8 +446,8 @@
       essential: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      valueGetter: "( SELECT array_agg(elems.value->>'contributorNameTypeId' ORDER BY elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributorNameTypeId') ORDER BY elems.value->>'contributorNameTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
       valueFunction: 'lower(:value)'
     },
     {
@@ -464,7 +464,7 @@
       visibleByDefault: false,
       idColumnName: 'contributor_name_type_id',
       valueFunction: "lower(:value)",
-      valueGetter:  "(SELECT array_agg(contributor_name_type.jsonb ->> 'name') \
+      valueGetter:  "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
         FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
           JOIN src_inventory_contributor_name_type contributor_name_type ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text\

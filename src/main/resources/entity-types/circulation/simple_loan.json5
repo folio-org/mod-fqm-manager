@@ -22,7 +22,8 @@
       },
       isIdColumn: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -34,6 +35,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: false,
+      essential: true,
       valueGetter: ':sourceAlias.creation_date',
     },
     {
@@ -56,6 +59,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'userId'",
     },
     {
@@ -67,6 +72,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'proxyUserId'",
     },
     {
@@ -78,7 +85,12 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemId'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'itemId\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
+
     },
     {
       name: 'item_effective_location_id_at_check_out',
@@ -99,7 +111,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'status'->>'name'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_circulation_storage.f_unaccent((:sourceAlias.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
@@ -112,8 +125,10 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'loanDate'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'loanDate\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'due_date',
@@ -123,6 +138,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'dueDate'",
       filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'dueDate\'::text), 600)',
@@ -137,6 +153,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'returnDate'",
     },
     {
@@ -158,8 +175,11 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'action'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'action\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'action_comment',
@@ -181,7 +201,10 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'itemStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'renewal_count',
@@ -192,6 +215,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'renewalCount'",
     },
     {
@@ -203,6 +227,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'loanPolicyId'",
     },
     {
@@ -214,7 +240,11 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'checkoutServicePointId'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'checkoutServicePointId\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'checkin_service_point_id',
@@ -225,7 +255,11 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'checkinServicePointId'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'checkinServicePointId\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'patron_group_id_at_checkout',
@@ -236,6 +270,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'patronGroupIdAtCheckout'",
     },
     {
@@ -246,6 +281,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'dueDateChangedByRecall'",
       values: [
@@ -267,7 +303,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'declaredLostDate'",
     },
     {
@@ -278,7 +315,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'claimedReturnedDate'",
     },
     {
@@ -290,6 +328,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'overdueFinePolicyId'",
     },
     {
@@ -301,6 +340,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'lostItemPolicyId'",
     },
     {
@@ -332,7 +372,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      hidden: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'agedToLostDelayedBilling'->>'dateLostItemShouldBeBilled'",
     },
     {
@@ -366,6 +407,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'reminders'->'lastFeeBilled'->>'date'",
     },
     {

@@ -7,6 +7,7 @@
       type: 'entity-type',
       id: '00349126-c923-4045-a29f-3b6db4c6bea9',
       useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'lpolicy',
@@ -88,6 +89,7 @@
       alias: 'holdings',
       type: 'entity-type',
       id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'items.item',

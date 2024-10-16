@@ -23,7 +23,7 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-base.version>8.3.0-SNAPSHOT</folio-spring-base.version>
     <folio-query-tool-metadata.version>2.1.0-SNAPSHOT</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <lib-fqm-query-processor.version>2.1.0-SNAPSHOT</lib-fqm-query-processor.version>
@@ -32,6 +32,7 @@
     <org.postgresql.version>42.5.4</org.postgresql.version>
     <org.jooq.version>3.18.4</org.jooq.version>
     <org.apache.commons.version>4.4</org.apache.commons.version>
+    <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
@@ -128,6 +129,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
       <version>${org.apache.commons.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${org.apache.commons-lang3.version}</version>
     </dependency>
 
     <dependency>

@@ -45,7 +45,8 @@
         {
           "methods": ["POST"],
           "pathPattern": "/entity-types/materialized-views/refresh",
-          "permissionsRequired": ["fqm.materializedViews.post"]
+          "permissionsRequired": ["fqm.materializedViews.post"],
+          "modulePermissions": ["configuration.entries.collection.get", "finance.exchange-rate.item.get"]
         }
       ]
     },
@@ -199,11 +200,7 @@
       "permissionName": "fqm.materializedViews.post",
       "displayName": "FQM - Refresh materialized views",
       "description": "Refresh FQM materialized views",
-      "visible":  true,
-      "subPermissions": [
-        "configuration.entries.collection.get",
-        "finance.exchange-rate.item.get"
-      ]
+      "visible":  true
     },
     {
       "permissionName": "fqm.query.all",

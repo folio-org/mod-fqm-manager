@@ -111,7 +111,8 @@
       valueGetter: ':sourceAlias.callnumbertypeid',
       queryable: false,
       visibleByDefault: false,
-      essential: true
+      essential: true,
+      hidden: true
     },
     {
       name: 'effective_location_id',
@@ -207,6 +208,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'callNumber'",
+      essential: true
     },
     {
       name: 'former_ids',

@@ -328,7 +328,6 @@
               valueGetter: "( SELECT array_agg(elems.value->>'contributor') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contributor')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)',
-              visibleByDefault: true,
             },
             {
               name: 'contributor_name_type_id',
@@ -876,6 +875,7 @@
               dataType: {
                 dataType: 'stringType',
               },
+              essential: true,
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
@@ -887,6 +887,7 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
+              essential: true,
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
@@ -898,6 +899,7 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
+              essential: true,
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
@@ -909,6 +911,7 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
+              essential: true,
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
@@ -920,6 +923,7 @@
               dataType: {
                 dataType: 'stringType',
               },
+              essential: true,
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
@@ -942,6 +946,7 @@
                 dataType: 'numberType',
               },
               queryable: false,
+              essential: true,
               valueGetter: "( SELECT array_agg((elems.value->>'value')::float) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: '(:value)::float',
             },

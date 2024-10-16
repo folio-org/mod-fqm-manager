@@ -691,7 +691,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'dateType',
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,
@@ -703,7 +703,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'integerType',
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,

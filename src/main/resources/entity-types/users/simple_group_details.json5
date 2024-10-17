@@ -46,6 +46,7 @@
       isIdColumn: true,
       queryable: true,
       essential: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
       source: {

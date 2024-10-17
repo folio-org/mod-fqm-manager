@@ -22,6 +22,8 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -40,6 +42,7 @@
     {
       name: 'notes',
       sourceAlias: 'item',
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -77,17 +80,17 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
             },
-            {
-              name: 'item_note_type_id',
-              property: 'itemNoteTypeId',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'itemNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'itemNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
+//            {
+//              name: 'item_note_type_id',
+//              property: 'itemNoteTypeId',
+//              dataType: {
+//                dataType: 'stringType',
+//              },
+//              queryable: false,
+//              valueGetter: "( SELECT array_agg(elems.value->>'itemNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'itemNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              valueFunction: 'lower(:value)',
+//            },
           ],
         },
       },
@@ -115,7 +118,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'status'->>'name'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent((:sourceAlias.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
@@ -229,6 +233,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
       valueFunction: '(:value)::integer',
     },
@@ -252,12 +257,14 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'updated_by_user_id',
       sourceAlias: 'item',
+      hidden: true,
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -349,6 +356,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.materialtypeid",
     },
     {
@@ -540,6 +549,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.holdingsrecordid",
     },
     {
@@ -552,6 +563,8 @@
         },
       },
       isIdColumn: false,
+      essential: true,
+      hidden: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
@@ -637,6 +650,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'permanentLoanTypeId'",
     },
     {
@@ -648,6 +663,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberTypeId'",
     },
     {
@@ -736,7 +753,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumber'",
     },
     {
@@ -748,6 +766,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'"
     },
     {
@@ -759,6 +779,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.permanentlocationid",
     },
     {
@@ -770,6 +792,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'lastCheckIn'->>'dateTime'",
     },
     {
@@ -781,6 +804,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'lastCheckIn'->>'staffMemberId'",
     },
     {
@@ -792,6 +817,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'lastCheckIn'->>'servicePointId'",
     },
     {
@@ -803,18 +830,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'inTransitDestinationServicePointId'",
-    },
-    {
-      name: 'item_level_call_number_prefix',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberPrefix'",
     },
     {
       name: 'number_of_pieces',
@@ -842,6 +859,7 @@
     {
       name: 'tags_tag_list',
       sourceAlias: 'item',
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -863,17 +881,6 @@
         FROM\
           jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
-    },
-    {
-      name: 'item_level_call_number_suffix',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberSuffix'",
     },
     {
       name: 'chronology',
@@ -930,6 +937,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'temporaryLocationId'",
     },
     {
@@ -941,6 +949,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'itemDamagedStatusId'",
     },
     {
@@ -952,6 +961,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'",
     },
     {
@@ -963,6 +973,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'purchaseOrderLineIdentifier'",
     },
     {
@@ -992,6 +1003,7 @@
       isIdColumn: false,
       queryable: false,
       hidden: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

@@ -429,7 +429,7 @@
       },
       valueSourceApi: {
         path: 'contributor-types',
-        valueJsonPath: '$.contributorTypes.*.name',
+        valueJsonPath: '$.contributorTypes.*.id',
         labelJsonPath: '$.contributorTypes.*.name',
       }
     },
@@ -475,7 +475,7 @@
       },
       valueSourceApi: {
         path: 'contributor-name-types',
-        valueJsonPath: '$.contributorNameTypes.*.name',
+        valueJsonPath: '$.contributorNameTypes.*.id',
         labelJsonPath: '$.contributorNameTypes.*.name',
       }
     },

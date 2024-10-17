@@ -1217,7 +1217,7 @@
     "entityType.simple_purchase_order_line.vendor_detail_vendor_account": "Vendor detail vendor account",
     "entityType.simple_call_number_type": "Call number type",
     "entityType.simple_call_number_type.id": "UUID",
-    "entityType.simple_call_number_type.name": "Name",
+    "entityType.simple_call_number_type.name": "Type",
     "entityType.simple_call_number_type.source": "Source",
     "entityType.simple_call_number_type.created_date": "Created date",
     "entityType.simple_call_number_type.updated_date": "Updated date",

@@ -517,7 +517,7 @@
   "entityType.simple_call_number_type.created_date": "Created date",
   "entityType.simple_call_number_type.id": "UUID",
   "entityType.simple_call_number_type.jsonb": "JSONB",
-  "entityType.simple_call_number_type.name": "Name",
+  "entityType.simple_call_number_type.name": "Type",
   "entityType.simple_call_number_type.source": "Source",
   "entityType.simple_call_number_type.updated_by_user_id": "Updated by user UUID",
   "entityType.simple_call_number_type.updated_by_username": "Updated by username",

@@ -520,66 +520,63 @@
       valueFunction: 'lower(:value)',
     },
     {
-      name: 'classification_type_ids',
+      name: 'classifications',
       sourceAlias: 'inst',
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'rangedUUIDType',
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'type_name',
+              property: 'classificationType',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'classificationTypeId') \
+                             FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+                               JOIN src_inventory_classification_type class_type \
+                                 ON (record.value ->> 'classificationTypeId') = class_type.id::text \
+                            )",
+            },
+            {
+              name: 'number',
+              property: 'classificationNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(record.value ->> 'classificationNumber' ORDER BY record.value ->> 'classificationTypeId') \
+                             FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
+                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+                            )"
+            },
+//            {
+//              name: 'type_id',
+//              property: 'classificationTypeId',
+//              dataType: {
+//                dataType: 'rangedUUIDType',
+//              },
+//              queryable: false,
+//              valueGetter: "(SELECT array_agg(elems.value->>'classificationTypeId' ORDER BY elems.value->>'classificationTypeId') \
+//                             FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems \
+//                            )",
+//            },
+          ],
         },
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
-      essential: true,
-      hidden: true,
-      valueGetter:
-      "(SELECT array_agg(elems.value->>'classificationTypeId' ORDER BY elems.value->>'classificationTypeId') \
-        FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems \
-      )",
-      filterValueGetter:
-      "(SELECT array_agg(lower(elems.value->>'classificationTypeId') ORDER BY elems.value->>'classificationTypeId') \
-        FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems \
-      )"
-    },
-    {
-      name: 'classification_type_names',
-      sourceAlias: 'inst',
-      essential: true,
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      idColumnName: 'classification_type_ids',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter:
-      "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'classificationTypeId') \
-        FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-          JOIN src_inventory_classification_type class_type \
-            ON (record.value ->> 'classificationTypeId') = class_type.id::text \
-      )"
-    },
-    {
-      name: 'classification_numbers',
-      sourceAlias: 'inst',
-      essential: true,
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter:
-      "(SELECT array_agg(record.value ->> 'classificationNumber' ORDER BY record.value ->> 'classificationTypeId') \
-        FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
-        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-      )",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                      jsonb_build_object('classificationType', class_type.jsonb ->> 'name') \
+                       ORDER BY record.value ->> 'classificationTypeId') \
+                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+                       LEFT JOIN src_inventory_classification_type class_type \
+                         ON (record.value ->> 'classificationTypeId') = class_type.id::text)::text",
     },
     {
       name: 'publication',

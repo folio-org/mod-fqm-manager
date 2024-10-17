@@ -214,6 +214,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
       filterValueGetter: "lower(:sourceAlias.jsonb ->> 'barcode'::text)",
@@ -240,6 +241,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
     },
     {
@@ -273,6 +275,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
     {
@@ -308,8 +311,9 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'copyNumber'",
+      essential: true
     },
     {
       name: 'year_caption',
@@ -349,23 +353,24 @@
     },
     {
       name: 'circulation_notes',
+      essential: true,
       sourceAlias: 'item',
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
-            {
-              name: 'id',
-              property: 'id',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
+//            {
+//              name: 'id',
+//              property: 'id',
+//              dataType: {
+//                dataType: 'stringType',
+//              },
+//              queryable: false,
+//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
+//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
+//              valueFunction: 'lower(:value)',
+//            },
             {
               name: 'date',
               property: 'date',
@@ -426,17 +431,17 @@
               dataType: {
                 dataType: 'objectType',
                 properties: [
-                  {
-                    name: 'id',
-                    property: 'id',
-                    dataType: {
-                      dataType: 'stringType',
-                    },
-                    queryable: false,
-                    valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
-                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
-                    valueFunction: 'lower(:value)',
-                  },
+//                  {
+//                    name: 'id',
+//                    property: 'id',
+//                    dataType: {
+//                      dataType: 'stringType',
+//                    },
+//                    queryable: false,
+//                    valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
+//                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
+//                    valueFunction: 'lower(:value)',
+//                  },
                   {
                     name: 'personal',
                     property: 'personal',
@@ -489,6 +494,7 @@
     },
     {
       name: 'electronic_access',
+      essential: true,
       sourceAlias: 'item',
       dataType: {
         dataType: 'arrayType',
@@ -515,17 +521,6 @@
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'linkText') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'linkText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'relationship_id',
-              property: 'relationshipId',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'relationshipId') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'relationshipId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
             },
           ],
@@ -597,6 +592,7 @@
     {
       name: 'administrative_notes',
       sourceAlias: 'item',
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -628,6 +624,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.effectivelocationid",
     },
     {
@@ -658,54 +656,55 @@
       dataType: {
         dataType: 'stringType',
       },
+      essential: true,
       queryable: true,
       visibleByDefault: true,
       valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(:sourceAlias.jsonb ->> 'copyNumber'::text, ''::text))",
     },
-    {
-      name: 'effective_call_number_components_prefix',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'prefix'",
-    },
-    {
-      name: 'effective_call_number_components_suffix',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'suffix'",
-    },
-    {
-      name: 'effective_call_number_components_type_id',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
-    },
-    {
-      name: 'effective_call_number_components_call_number',
-      sourceAlias: 'item',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'callNumber'",
-    },
+//    {
+//      name: 'effective_call_number_components_prefix',
+//      sourceAlias: 'item',
+//      dataType: {
+//        dataType: 'stringType',
+//      },
+//      isIdColumn: false,
+//      queryable: true,
+//      visibleByDefault: false,
+//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'prefix'",
+//    },
+//    {
+//      name: 'effective_call_number_components_suffix',
+//      sourceAlias: 'item',
+//      dataType: {
+//        dataType: 'stringType',
+//      },
+//      isIdColumn: false,
+//      queryable: true,
+//      visibleByDefault: false,
+//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'suffix'",
+//    },
+//    {
+//      name: 'effective_call_number_components_type_id',
+//      sourceAlias: 'item',
+//      dataType: {
+//        dataType: 'rangedUUIDType',
+//      },
+//      isIdColumn: false,
+//      queryable: true,
+//      visibleByDefault: false,
+//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
+//    },
+//    {
+//      name: 'effective_call_number_components_call_number',
+//      sourceAlias: 'item',
+//      dataType: {
+//        dataType: 'stringType',
+//      },
+//      isIdColumn: false,
+//      queryable: true,
+//      visibleByDefault: false,
+//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'callNumber'",
+//    },
     {
       name: 'enumeration',
       sourceAlias: 'item',
@@ -726,6 +725,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'effectiveShelvingOrder'",
     },
     {
@@ -834,6 +834,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'descriptionOfPieces'",
@@ -883,6 +884,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'chronology'",
     },
     {
@@ -892,6 +894,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
@@ -916,6 +919,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'accessionNumber'",
+      essential: true
     },
     {
       name: 'temporary_location_id',

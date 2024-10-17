@@ -9,6 +9,7 @@
       type: 'entity-type',
       id: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item_details
       useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'effective_location',

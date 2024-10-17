@@ -24,6 +24,8 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -35,6 +37,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: ':sourceAlias.created_by',
     },
     {
@@ -45,7 +49,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
@@ -58,7 +63,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'approved'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'approved\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
@@ -125,7 +131,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'dateOrdered'",
     },
     {
@@ -137,6 +143,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'manualPo'",
       values: [
         {
@@ -152,6 +159,8 @@
     {
       name: 'notes',
       sourceAlias: 'po',
+      hidden: true,
+      essential: true,
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
@@ -183,7 +192,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'poNumber'",
     },
     {
@@ -216,7 +226,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'orderType'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'orderType\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
@@ -240,6 +251,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'reEncumber'",
       values: [
         {
@@ -281,6 +293,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      hidden: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'vendor'",
@@ -322,6 +335,7 @@
       },
       isIdColumn: false,
       queryable: false,
+      essential: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -345,9 +359,10 @@
           dataType: 'stringType',
         },
       },
+      essential: true,
       idColumnName: 'acq_unit_ids',
       queryable: false,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
@@ -375,6 +390,7 @@
     },
     {
       name: 'tags',
+      essential: true,
       sourceAlias: 'po',
       dataType: {
         dataType: 'arrayType',
@@ -406,7 +422,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
@@ -418,6 +435,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
     {
@@ -429,6 +448,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'assignedTo'",
     },
     {
@@ -440,6 +461,7 @@
       isIdColumn: false,
       queryable: false,
       hidden: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

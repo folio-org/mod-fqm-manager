@@ -37,6 +37,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.created_by',
       essential: true
     },
@@ -61,6 +62,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       essential: true
     },
@@ -111,7 +113,6 @@
       valueGetter: ':sourceAlias.callnumbertypeid',
       queryable: false,
       visibleByDefault: false,
-      essential: true,
       hidden: true
     },
     {
@@ -136,6 +137,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.holdingstypeid',
       essential: true
     },
@@ -169,6 +171,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      hidden: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.permanentlocationid',
@@ -183,6 +186,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.temporarylocationid',
       essential: true
     },
@@ -195,6 +199,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ':sourceAlias.sourceid',
       essential: true
     },

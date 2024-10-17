@@ -14,6 +14,7 @@
       alias: 'po',
       type: 'entity-type',
       id: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      essentialOnly: true,
       join: {
         type: 'join',
         joinTo: 'pol.pol',

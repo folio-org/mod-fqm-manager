@@ -102,6 +102,7 @@
       alias: 'instances',
       type: 'entity-type',
       id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instances
+      essentialOnly: true,
       join: {
         type: 'join',
         condition: ":that.instanceid = :this.id",

@@ -1,0 +1,64 @@
+{
+  id: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
+  name: 'simple_instance_date_type',
+  private: true,
+  sources: [
+    {
+      alias: 'date_type',
+      type: 'db',
+      target: 'src_inventory_instance_date_type',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.instance-date-types.collection.get',
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      hidden: true,
+      essential: true,
+      valueGetter: ':date_type.id',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'id',
+      queryable: true,
+      essential: true,
+      valueGetter: ":date_type.jsonb ->> 'name'",
+      source: {
+        entityTypeId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'instance-date-types',
+        valueJsonPath: '$.instanceDateTypes.*.id',
+        labelJsonPath: '$.instanceDateTypes.*.name',
+      },
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'id',
+      queryable: true,
+      valueGetter: ":date_type.jsonb ->> 'code'",
+      source: {
+        entityTypeId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
+        columnName: 'code',
+      },
+      valueSourceApi: {
+        valueJsonPath: '$.instanceDateTypes.*.id',
+        labelJsonPath: '$.instanceDateTypes.*.code',
+      },
+    },
+  ],
+}

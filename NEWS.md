@@ -1,4 +1,5 @@
 # 2.0.x
+- [MODFQMMGR-523](https://folio-org.atlassian.net/browse/MODFQMMGR-523) Upgrade `holdings-storage` to 8.0
 
 ## 2.0.0
 - [MODFQMMGR-87](https://folio-org.atlassian.net/browse/MODFQMMGR-87) Move FQM-specific code from lib-fqm-query-processor

@@ -239,7 +239,7 @@ class QueryManagementServiceTest {
     when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
-    when(crossTenantQueryService.getTenantsToQuery(any(), eq(false))).thenReturn(tenantIds);
+    when(crossTenantQueryService.getTenantsToQuery(any())).thenReturn(tenantIds);
     when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedQuery.fields(), resultIds, tenantIds)).thenReturn(contents);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
@@ -464,7 +464,7 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
     when(entityTypeService.getEntityTypeDefinition(entityTypeId,true, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class), eq(false))).thenReturn(tenantIds);
+    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(tenantIds);
     when(resultSetService.getResultSet(entityTypeId, fields, ids, tenantIds)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids);
     assertEquals(expectedContents, actualContents);
@@ -490,7 +490,7 @@ class QueryManagementServiceTest {
       Map.of("id", UUID.randomUUID(), "field1", "value3", "field2", "value4")
     );
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class), eq(false))).thenReturn(tenantIds);
+    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(tenantIds);
     when(resultSetService.getResultSet(entityTypeId, expectedFields, ids, tenantIds)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, providedFields, ids);
     assertEquals(expectedContents, actualContents);

@@ -11,7 +11,7 @@
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
           "permissionsRequired": [],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -28,19 +28,19 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}",
           "permissionsRequired": ["fqm.entityTypes.item.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types",
           "permissionsRequired": ["fqm.entityTypes.collection.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "configuration.entries.collection.get"]
         },
         {
           "methods": ["POST"],
@@ -57,43 +57,43 @@
           "methods": ["GET"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.sync.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/fqm/version",
           "permissionsRequired": ["fqm.version.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/fqm/migrate",
           "permissionsRequired": ["fqm.migrate.post"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
           "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
@@ -104,7 +104,7 @@
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         }
       ]
     },
@@ -231,11 +231,15 @@
     },
     {
       "id": "holdings-storage",
-      "version": "6.0 7.0"
+      "version": "6.0 7.0 8.0"
     },
     {
       "id": "instance-storage",
-      "version": "10.0"
+      "version": "10.0 11.0"
+    },
+    {
+      "id": "instance-date-types",
+      "version": "1.0"
     },
     {
       "id": "instance-types",
@@ -364,6 +368,10 @@
     {
       "id": "voucher-storage.voucher-number",
       "version": "1.1"
+    },
+    {
+      "id": "search",
+      "version": "1.3"
     }
   ],
   "optional": [
@@ -423,6 +431,9 @@
       },
       { "name": "mod.fqm-manager.entity-type-cache-timeout-seconds",
         "value": "300"
+      },
+      { "name": "IS_EUREKA",
+        "value": "false"
       }
     ]
   }

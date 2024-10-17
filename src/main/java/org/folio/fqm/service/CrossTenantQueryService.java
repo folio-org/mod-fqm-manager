@@ -26,13 +26,35 @@ public class CrossTenantQueryService {
 
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
+  private static final String SIMPLE_INSTANCE_STATUS_ID = "9c239bfd-198f-4013-bbc4-4551c0cbdeaa";
+  private static final String SIMPLE_INSTANCE_TYPE_ID = "af44e2e0-12e0-4eec-b80d-49feb33a866c";
+  private static final List<String> INSTANCE_RELATED_ENTITIES = List.of(SIMPLE_INSTANCES_ID, COMPOSITE_INSTANCES_ID, SIMPLE_INSTANCE_STATUS_ID, SIMPLE_INSTANCE_TYPE_ID);
 
-  public List<String> getTenantsToQuery(EntityType entityType, boolean forceCrossTenantQuery) {
-    if (!forceCrossTenantQuery
-      && !Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
+  /**
+   * Retrieve list of tenants to run query against.
+   * @param entityType Entity type definition
+   * @return           List of tenants to query
+   */
+  public List<String> getTenantsToQuery(EntityType entityType) {
+    if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
+    return getTenants(entityType);
+  }
+
+  /**
+   * Retrieve list of tenants to retrieve column values from. This method skips the cross-tenant query check, since the
+   * column values API uses simple entity type definitions, which don't have cross-tenant queries enabled.
+   * method skips the cross-tenant query check
+   * @param entityType Entity type definition
+   * @return           List of tenants to query
+   */
+  public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
+    return getTenants(entityType);
+  }
+
+  private List<String> getTenants(EntityType entityType) {
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
@@ -46,7 +68,7 @@ public class CrossTenantQueryService {
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
-      if (COMPOSITE_INSTANCES_ID.equals(entityType.getId()) || SIMPLE_INSTANCES_ID.equals(entityType.getId())) {
+      if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
         return List.of(executionContext.getTenantId(), centralTenantId);
       }
       return List.of(executionContext.getTenantId());

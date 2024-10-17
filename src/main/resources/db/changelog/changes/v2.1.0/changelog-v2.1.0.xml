@@ -178,4 +178,26 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_classification_type" runOnChange="true" author="mweaver@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="classification_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_classification_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.classification_type
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_instance_date_type" runOnChange="true" author="mweaver@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_date_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_date_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_date_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

@@ -117,7 +117,7 @@ class QueryProcessorServiceTest {
       Map.of("field1", "value1", "field2", "value4")
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
-    when(crossTenantQueryService.getTenantsToQuery(entityType, false)).thenReturn(tenantIds);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantIds);
     when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds, false)).thenReturn(expectedContent);
     List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);

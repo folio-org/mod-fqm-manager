@@ -21,9 +21,11 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
+      hidden: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      essential: true
     },
     {
       name: 'code',
@@ -35,6 +37,9 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      essential: true
     },
     {
       name: 'name',
@@ -44,8 +49,11 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      essential: true
     },
     {
       name: 'created_date',
@@ -77,6 +85,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
@@ -88,6 +97,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
@@ -134,6 +144,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoveryDisplayName'",
+      essential: true
     },
     {
       name: 'hold_shelf_expiry_period_duration',
@@ -157,54 +168,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'holdShelfExpiryPeriod'->>'intervalId'",
-    },
-    {
-      name: 'staff_slips',
-      sourceAlias: 'service_point',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'objectType',
-          properties: [
-            {
-              name: 'staff_slip_id',
-              property: 'id',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'print_by_default',
-              property: 'printByDefault',
-              dataType: {
-                dataType: 'booleanType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'printByDefault') FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'printByDefault')) FROM jsonb_array_elements(:sourceAlias.jsonb->'staffSlips') AS elems)",
-              valueFunction: 'lower(:value)',
-              values: [
-                {
-                  value: 'true',
-                  label: 'True',
-                },
-                {
-                  value: 'false',
-                  label: 'False',
-                },
-              ],
-            },
-          ],
-        },
-      },
-      isIdColumn: false,
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'staffSlips'",
     },
     {
       name: 'description',
@@ -239,6 +202,7 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
+      essential: true
     }
   ],
 }

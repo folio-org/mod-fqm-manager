@@ -100,7 +100,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("instance_source", "instance.source"),
     Map.entry("instance_primary_contributor", "instance.instance_primary_contributor"),
     Map.entry("instance_contributor_type_ids", "instance.contributors[*]->contributor_type_id"),
-    Map.entry("instance_contributor_type", "instance.contributors[*]->contributor_type_text"),
+    Map.entry("instance_contributor_type", "instance.contributors[*]->contributor_type"),
     Map.entry("instance_contributor_type_name_ids", "instance.contributors[*]->contributor_name_type_id"),
     Map.entry("instance_contributor_name_type", "instance.contributors[*]->name"),
     Map.entry("instance_language", "instance.languages")

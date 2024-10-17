@@ -23,7 +23,7 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-base.version>8.3.0-SNAPSHOT</folio-spring-base.version>
     <folio-query-tool-metadata.version>2.1.0-SNAPSHOT</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <lib-fqm-query-processor.version>2.1.0-SNAPSHOT</lib-fqm-query-processor.version>
@@ -32,13 +32,14 @@
     <org.postgresql.version>42.5.4</org.postgresql.version>
     <org.jooq.version>3.18.4</org.jooq.version>
     <org.apache.commons.version>4.4</org.apache.commons.version>
+    <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
     <mockwebserver.version>4.11.0</mockwebserver.version>
 
     <!-- plugins -->
-    <openapi-generator.version>6.2.1</openapi-generator.version>
+    <openapi-generator.version>7.4.0</openapi-generator.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <lombok.version>1.18.30</lombok.version>
@@ -128,6 +129,12 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
       <version>${org.apache.commons.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${org.apache.commons-lang3.version}</version>
     </dependency>
 
     <dependency>
@@ -324,6 +331,14 @@
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
               <generateModelDocumentation>true</generateModelDocumentation>
               <skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
+              <typeMappings>
+                <typeMapping>object+FqmMigrateRequest=FqmMigrateRequest</typeMapping>
+                <typeMapping>object+FqmMigrateResponse=FqmMigrateResponse</typeMapping>
+              </typeMappings>
+              <importMappings>
+                <importMapping>FqmMigrateRequest=org.folio.querytool.domain.dto.FqmMigrateRequest</importMapping>
+                <importMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</importMapping>
+              </importMappings>
               <configOptions>
                 <java8>true</java8>
                 <dateLibrary>java</dateLibrary>
@@ -331,16 +346,6 @@
                 <useSpringBoot3>true</useSpringBoot3>
                 <useTags>true</useTags>
               </configOptions>
-            </configuration>
-          </execution>
-          <execution>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-            <configuration>
-              <inputSpec>${mod-fqm-manager.yaml.file}</inputSpec>
-              <output>${project.build.directory}/docs/mod-fqm-manager</output>
-              <generatorName>html2</generatorName>
             </configuration>
           </execution>
         </executions>

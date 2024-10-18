@@ -77,7 +77,7 @@ coffee-boots:
       queryCache: maximumSize=500,expireAfterWrite=1m
       userTenantCache: maximumSize=100,expireAfterWrite=5h
 folio:
-  is-eureka: ${IS_EUREKA:false}
+  is-eureka: ${IS_EUREKA:true}
   tenant:
     validation:
       enabled: true

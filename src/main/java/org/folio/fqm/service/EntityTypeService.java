@@ -1,8 +1,16 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -24,13 +32,21 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
+  private static final String LANGUAGES_FILEPATH = "languages.json5";
+  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
+  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
+    "query", "(module==ORG and configName==localeSettings)"
+  );
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -41,7 +57,7 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
-  private final SimpleHttpClient fieldValueClient;
+  private final SimpleHttpClient simpleHttpClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
 
@@ -89,7 +105,7 @@ public class EntityTypeService {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
-    List<EntityTypeColumn> columns  = entityType
+    List<EntityTypeColumn> columns = entityType
       .getColumns()
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
@@ -107,9 +123,9 @@ public class EntityTypeService {
   /**
    * Return top 1000 values of an entity type field, matching the given search text
    *
-   * @param fieldName    Name of the field for which values have to be returned
-   * @param searchText   Nullable search text. If a search text is provided, the returned values will include only those
-   *                     that contain the specified searchText.
+   * @param fieldName  Name of the field for which values have to be returned
+   * @param searchText Nullable search text. If a search text is provided, the returned values will include only those
+   *                   that contain the specified searchText.
    */
   @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
@@ -124,8 +140,9 @@ public class EntityTypeService {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
     if (field.getValueSourceApi() != null) {
-      return getFieldValuesFromApi(field, searchText);
+      return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }
 
     if (field.getSource() != null) {
@@ -143,6 +160,9 @@ public class EntityTypeService {
           case "tenant_id" -> {
             return getTenantIds(entityType);
           }
+          case "languages" -> {
+            return getLanguages(searchText);
+          }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
           }
@@ -154,7 +174,7 @@ public class EntityTypeService {
   }
 
   private ColumnValues getTenantIds(EntityType entityType) {
-    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType, true);
+    List<String> tenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
     List<ValueWithLabel> tenantValues = tenants
       .stream()
       .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
@@ -173,20 +193,28 @@ public class EntityTypeService {
     return new ColumnValues().content(filteredValues);
   }
 
-  private ColumnValues getFieldValuesFromApi(Field field, String searchText) {
-    String rawJson = fieldValueClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)));
-    DocumentContext parsedJson = JsonPath.parse(rawJson);
-    List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
-    List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-
-    List<ValueWithLabel> results = new ArrayList<>(values.size());
-    for (int i = 0; i < values.size(); i++) {
-      String value = values.get(i);
-      String label = labels.get(i);
-      if (label.contains(searchText)) {
-        results.add(new ValueWithLabel().value(value).label(label));
+  private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
+    Set<ValueWithLabel> resultSet = new HashSet<>();
+    for (String tenantId : tenantsToQuery) {
+      try {
+        String rawJson = simpleHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
+        DocumentContext parsedJson = JsonPath.parse(rawJson);
+        List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
+        List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
+        for (int i = 0; i < values.size(); i++) {
+          String value = values.get(i);
+          String label = labels.get(i);
+          if (label.contains(searchText)) {
+            resultSet.add(new ValueWithLabel().value(value).label(label));
+          }
+        }
+      } catch (FeignException.Unauthorized e) {
+        log.error("Failed to get column values from {} tenant due to exception: {}", tenantId, e.getMessage());
       }
     }
+
+
+    List<ValueWithLabel> results = new ArrayList<>(resultSet);
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }
@@ -222,6 +250,85 @@ public class EntityTypeService {
     return new ColumnValues().content(currencies);
   }
 
+  private ColumnValues getLanguages(String searchText) {
+    Map<String, String> queryParams = Map.of(
+      "facet", "languages",
+      "query", "id=*",
+      "limit", "1000"
+    );
+
+    List<String> values = List.of();
+    try {
+      String rawJson = simpleHttpClient.get("search/instances/facets", queryParams);
+      DocumentContext parsedJson = JsonPath.parse(rawJson);
+      values = parsedJson.read("$.facets.languages.values.*.id");
+    } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
+      log.error("Failed to get languages from API due to exception {}", e.getMessage());
+    }
+
+    List<ValueWithLabel> results = new ArrayList<>();
+    ObjectMapper mapper =
+      JsonMapper
+        .builder()
+        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+        .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
+        .build();
+
+    List<Map<String, String>> languages = List.of();
+    try (InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
+      languages = mapper.readValue(input, new TypeReference<>() {
+      });
+    } catch (IOException e) {
+      log.error("Failed to read language file. Language display names may not be properly translated.");
+    }
+
+    Locale folioLocale;
+    try {
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
+      String valueString = localeSettingsNode
+        .path("configs")
+        .get(0)
+        .path("value")
+        .asText();
+      JsonNode valueNode = objectMapper.readTree(valueString);
+      String localeString = valueNode.path("locale").asText();
+      folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
+    } catch (Exception e) {
+      log.debug("No default locale defined. Defaulting to English for language translations.");
+      folioLocale = Locale.ENGLISH;
+    }
+
+    Map<String, String> a3ToNameMap = new HashMap<>();
+    Map<String, String> a3ToA2Map = new HashMap<>();
+    for (Map<String, String> language : languages) {
+      a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
+      a3ToNameMap.put(language.get("alpha3"), language.get("name"));
+    }
+
+    for (String code : values) {
+      String label;
+      String a2Code = a3ToA2Map.get(code);
+      String name = a3ToNameMap.get(code);
+      if (StringUtils.isNotEmpty(a2Code)) {
+        Locale languageLocale = new Locale(a2Code);
+        label = languageLocale.getDisplayLanguage(folioLocale);
+      } else if (StringUtils.isNotEmpty(name)) {
+        label = name;
+      } else if (StringUtils.isNotEmpty(code)) {
+        label = code;
+      } else {
+        continue;
+      }
+      if (label.toLowerCase().contains(searchText.toLowerCase())) {
+        results.add(new ValueWithLabel().value(code).label(label));
+      }
+    }
+    results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
+    return new ColumnValues().content(results);
+  }
+
   private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String fieldName) {
     var valueWithLabel = new ValueWithLabel().label(getFieldValue(allValues, fieldName));
     return allValues.containsKey(ID_FIELD_NAME)
@@ -232,5 +339,4 @@ public class EntityTypeService {
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
   }
-
 }

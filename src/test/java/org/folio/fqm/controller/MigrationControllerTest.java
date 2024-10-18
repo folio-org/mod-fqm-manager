@@ -1,12 +1,12 @@
 package org.folio.fqm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.folio.fqm.domain.dto.FqmMigrateRequest;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.resource.MigrationController;
 import org.folio.fqm.service.MigrationService;
+import org.folio.querytool.domain.dto.FqmMigrateRequest;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
 import org.folio.spring.integration.XOkapiHeaders;

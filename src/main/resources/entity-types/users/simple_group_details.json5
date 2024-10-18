@@ -22,8 +22,20 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'group'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'group'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+      source: {
+        entityTypeId: "e7717b38-4ff3-4fb9-ae09-b3d0c8400710",
+        columnName: 'group'
+      },
+      valueSourceApi: {
+        path: 'groups',
+        valueJsonPath: '$.usergroups.*.group',
+        labelJsonPath: '$.usergroups.*.group',
+      }
     },
     {
       name: 'id',
@@ -33,8 +45,19 @@
       },
       isIdColumn: true,
       queryable: true,
+      essential: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      source: {
+        entityTypeId: "e7717b38-4ff3-4fb9-ae09-b3d0c8400710",
+        columnName: 'id'
+      },
+      valueSourceApi: {
+        path: 'groups',
+        valueJsonPath: '$.usergroups.*.id',
+        labelJsonPath: '$.usergroups.*.id',
+      }
     },
     {
       name: 'expiration_off_set_in_days',
@@ -42,7 +65,7 @@
       dataType: {
         dataType: 'integerType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'expirationOffsetInDays')::integer",
       valueFunction: '(:value)::integer',
@@ -53,7 +76,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
     },
@@ -63,7 +86,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
     },
@@ -73,7 +96,7 @@
       dataType: {
         dataType: 'dateType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
@@ -83,7 +106,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
@@ -93,7 +116,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },
@@ -103,7 +126,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
     },
@@ -113,13 +136,16 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
     },
     {
       name: 'desc',
       sourceAlias: 'groups',
+      visibleByDefault: false,
+      hidden: true,
+      queryable: false,
       dataType: {
         dataType: 'stringType',
       },
@@ -128,10 +154,13 @@
     {
       name: 'jsonb',
       sourceAlias: 'groups',
+      queryable: false,
+      visibleByDefault: false,
       dataType: {
         dataType: 'stringType',
       },
       hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],

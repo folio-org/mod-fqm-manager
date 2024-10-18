@@ -91,14 +91,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/fqmMigrateRequest'
+              description: Mapped to schema in folio-query-tool-metadata
+              type: object
+              format: FqmMigrateRequest
       responses:
         '200':
-          description:  'FQM version updated successfully'
+          description: 'FQM version updated successfully'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/fqmMigrateResponse'
+                description: Mapped to schemas in folio-query-tool-metadata
+                type: object
+                format: FqmMigrateResponse
         '400':
           $ref: '#/components/responses/badRequestResponse'
         '500':
@@ -157,10 +161,6 @@ components:
           type: array
           items:
             type: string
-    fqmMigrateRequest:
-      $ref: schemas/FqmMigrateRequest.json
-    fqmMigrateResponse:
-      $ref: schemas/FqmMigrateResponse.json
 
   responses:
     badRequestResponse:

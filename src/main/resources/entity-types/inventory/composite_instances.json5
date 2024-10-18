@@ -9,7 +9,7 @@
       type: 'entity-type',
       id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       useIdColumns: true,
-      // essentialOnly: true
+      essentialOnly: true
     },
     {
       alias: 'inst_stat',
@@ -31,6 +31,17 @@
         type: 'left join',
         joinTo: 'instance.inst',
         condition: ':this.id = :that.instanceTypeId',
+      },
+    },
+    {
+      alias: 'date_type',
+      type: 'entity-type',
+      id: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
+      essentialOnly: true,
+      join: {
+        type: 'left join',
+        joinTo: 'instance.inst',
+        condition: ":this.id = ((:that.jsonb -> 'dates') ->> 'dateTypeId')::uuid",
       },
     },
   ],

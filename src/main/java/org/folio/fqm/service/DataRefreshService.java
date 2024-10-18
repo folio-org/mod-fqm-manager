@@ -16,12 +16,7 @@ public class DataRefreshService {
   private final DataRefreshRepository dataRefreshRepository;
 
   static final List<String> MATERIALIZED_VIEW_NAMES = List.of(
-    "drv_circulation_loan_status",
-    "drv_inventory_item_status",
-    "drv_pol_payment_status",
-    "drv_pol_receipt_status",
-    "drv_inventory_statistical_code_full",
-    "drv_languages"
+    "drv_inventory_statistical_code_full"
   );
 
   public DataRefreshResponse refreshData(String tenantId) {

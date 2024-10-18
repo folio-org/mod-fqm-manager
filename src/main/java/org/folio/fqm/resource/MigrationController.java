@@ -1,16 +1,16 @@
 package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
-import org.folio.fqm.domain.dto.FqmMigrateRequest;
-import org.folio.fqm.domain.dto.FqmMigrateResponse;
-import org.folio.fqm.domain.dto.FqmMigrateResponseWarningsInner;
+
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.service.MigrationService;
+import org.folio.querytool.domain.dto.FqmMigrateRequest;
+import org.folio.querytool.domain.dto.FqmMigrateResponse;
+import org.folio.querytool.domain.dto.FqmMigrateWarning;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -39,11 +39,9 @@ public class MigrationController implements FqmVersionApi {
       .fqlQuery(updatedQueryInfo.fqlQuery())
       .fields(updatedQueryInfo.fields())
       .warnings(updatedQueryInfo.warnings().stream()
-        .map(warning -> new FqmMigrateResponseWarningsInner()
-          .type(warning.getType() != null ? warning.getType().toString() : null)
-          .description(warning.getDescription(translationService) != null ?
-            warning.getDescription(translationService) : "No description provided"
-          )
+        .map(warning -> new FqmMigrateWarning()
+          .type(warning.getType().toString())
+          .description(warning.getDescription(translationService))
         )
         .toList()
       );

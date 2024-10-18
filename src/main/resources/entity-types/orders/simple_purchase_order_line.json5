@@ -156,13 +156,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
       )",
     },
     {
@@ -674,13 +674,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
       )",
     },
     {
@@ -1079,13 +1079,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'searchLocationIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'searchLocationIds') AS elems\
       )",
     },
     {
@@ -1274,13 +1274,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
       )",
     },
     {
@@ -1414,13 +1414,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
       )",
     },
     {
@@ -1519,13 +1519,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
     },
     {

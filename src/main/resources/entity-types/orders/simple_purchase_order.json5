@@ -342,13 +342,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
     },
     {
@@ -362,13 +362,13 @@
       },
       essential: true,
       idColumnName: 'acq_unit_ids',
-      queryable: false,
+      queryable: true,
       visibleByDefault: true,
       valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
       source: {
-        entityTypeId: '90403847-8c47-4f58-b117-9a807b052808',
+        entityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234',
         columnName: 'acquisition_unit',
       },
       valueSourceApi: {
@@ -406,13 +406,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
     },
     {

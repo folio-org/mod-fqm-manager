@@ -294,13 +294,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'editions') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'editions') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'editions') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'editions') AS elems\
       )",
     },
     {
@@ -681,13 +681,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'publicationRange') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'publicationRange') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'publicationRange') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'publicationRange') AS elems\
       )",
     },
     {
@@ -840,6 +840,7 @@
       },
       sourceAlias: 'inst',
       queryable: true,
+      essential: true,
       idColumnName: 'instance_format_ids',
       valueSourceApi: {
         path: 'instance-formats',
@@ -868,13 +869,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
       )",
     },
     {
@@ -986,13 +987,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
       )",
     },
     {

@@ -196,17 +196,6 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'address_id',
-              property: 'id',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
               name: 'city',
               property: 'city',
               dataType: {

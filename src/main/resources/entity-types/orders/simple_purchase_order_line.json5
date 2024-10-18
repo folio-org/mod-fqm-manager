@@ -874,7 +874,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',
@@ -918,7 +918,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',

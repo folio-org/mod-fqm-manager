@@ -23,7 +23,6 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      hidden: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -35,6 +34,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'hrid'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
@@ -594,6 +594,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
       filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_code_full statcode ON (record.value::text) = statcode.id::text)",
       valueFunction: 'lower(:value)',
@@ -766,7 +767,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'"
     },
@@ -842,6 +842,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'numberOfPieces'",
     },
     {
@@ -1003,7 +1004,6 @@
       isIdColumn: false,
       queryable: false,
       hidden: true,
-      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb::text",
     }

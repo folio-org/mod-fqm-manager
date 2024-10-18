@@ -234,7 +234,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'countryId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'countryId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',

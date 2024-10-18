@@ -253,7 +253,7 @@
         },
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       essential: true,
       hidden: true,
       visibleByDefault: false,
@@ -270,7 +270,7 @@
         }
       },
       sourceAlias: "inst",
-      queryable: false,
+      queryable: true,
       essential: true,
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitle') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
@@ -840,6 +840,7 @@
       },
       sourceAlias: 'inst',
       queryable: true,
+      essential: true,
       idColumnName: 'instance_format_ids',
       valueSourceApi: {
         path: 'instance-formats',

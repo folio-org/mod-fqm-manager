@@ -1244,7 +1244,7 @@
     "entityType.composite_loan_details.cispi": "Check in service point",
     "entityType.composite_loan_details.cospi": "Check out service point",
     "entityType.composite_loan_details.holdings": "Holdings",
-    "entityType.composite_loan_details.instance": "Instance",
+    "entityType.composite_loan_details.instance": "Instances",
     "entityType.composite_loan_details.items": "Item",
     "entityType.composite_loan_details.loans": "Loan",
     "entityType.composite_loan_details.mtypes": "Material type",

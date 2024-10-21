@@ -305,6 +305,7 @@
         dataType: 'stringType',
       },
       queryable: true,
+      essential: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb ->> 'workflowStatus'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'workflowStatus\'::text)), 600)',

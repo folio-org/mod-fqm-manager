@@ -1466,13 +1466,9 @@
     "entityType.simple_instance.alternative_titles_ids": "Alternativní názvy – Typ UUID",
     "entityType.simple_instance.contributor_type_id": "UUID typu autora",
     "entityType.simple_instance.contributors_name": "Contributor name",
-    "entityType.simple_instance.contributor_type_text": "Typ autora",
     "entityType.simple_instance.contributor_name_type_id": "UUID typu jména autora",
     "entityType.simple_instance.contributor_name_type": "Typ jména autora",
     "entityType.simple_instance.instance_primary_contributor": "Primary contributor",
-    "entityType.simple_instance.classification_type_ids": "UUID typu klasifikace",
-    "entityType.simple_instance.classification_type_names": "Typ identifikátoru klasifikace",
-    "entityType.simple_instance.classification_numbers": "Klasifikace",
     "entityType.composite_instances.date_type": "Instance date type",
     "entityType.simple_instance.instance_date_1": "Datum 1",
     "entityType.simple_instance.instance_date_2": "Datum 2",
@@ -1480,5 +1476,13 @@
     "entityType.simple_instance_date_type": "Instance date type",
     "entityType.simple_instance_date_type.id": "ID",
     "entityType.simple_instance_date_type.name": "Jméno",
-    "entityType.simple_instance_date_type.code": "Kód"
+    "entityType.simple_instance_date_type.code": "Kód",
+    "entityType.simple_instance.contributor_type": "Contributor type",
+    "entityType.simple_instance.classifications": "Classifications",
+    "entityType.simple_instance.classifications.number": "Classification",
+    "entityType.simple_instance.classifications.number._qualified": "Classification number",
+    "entityType.simple_instance.classifications.type_id": "Identifier type UUID",
+    "entityType.simple_instance.classifications.type_id._qualified": "Classification identifier type UUID",
+    "entityType.simple_instance.classifications.type_name": "Classification identifier type",
+    "entityType.simple_instance.classifications.type_name._qualified": "Classification identifier type"
 }

@@ -74,9 +74,8 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
-      filterValueGetter: "\"left\"(lower((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text), 600)",
-      valueFunction: '"left"(lower(:value), 600)'
+      valueGetter: ":sourceAlias.creation_date",
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'updated_by',

@@ -41,7 +41,7 @@ public class FqlQueryController implements FqlQueryApi {
   @Override
   public ResponseEntity<List<Map<String, Object>>> getContents(ContentsRequest contentsRequest) {
     return ResponseEntity.ok(queryManagementService.getContents(contentsRequest.getEntityTypeId(),
-      contentsRequest.getFields(), contentsRequest.getIds()));
+      contentsRequest.getFields(), contentsRequest.getIds(), contentsRequest.getLocalize()));
   }
 
   @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)

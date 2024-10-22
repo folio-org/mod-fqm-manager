@@ -322,7 +322,7 @@ class FqlQueryControllerTest {
       Map.of("id", id1, "field1", "value1", "field2", "value2"),
       Map.of("id", id2, "field1", "value3", "field2", "value4")
     );
-    when(queryManagementService.getContents(entityTypeId, fields, ids)).thenReturn(expectedContent);
+    when(queryManagementService.getContents(entityTypeId, fields, ids, false)).thenReturn(expectedContent);
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType(MediaType.APPLICATION_JSON)
@@ -350,7 +350,7 @@ class FqlQueryControllerTest {
     ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
       .fields(fields)
       .ids(ids);
-    when(queryManagementService.getContents(entityTypeId, fields, ids)).thenThrow(new EntityTypeNotFoundException(entityTypeId));
+    when(queryManagementService.getContents(entityTypeId, fields, ids, false)).thenThrow(new EntityTypeNotFoundException(entityTypeId));
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType(MediaType.APPLICATION_JSON)

@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 
 import java.util.*;
 
+import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.EntityType;
@@ -21,13 +22,15 @@ class ResultSetServiceTest {
 
   private ResultSetRepository resultSetRepository;
   private EntityTypeFlatteningService entityTypeFlatteningService;
+  private ConfigurationClient configurationClient;
   private ResultSetService service;
 
   @BeforeEach
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService);
+    this.configurationClient = mock(ConfigurationClient.class);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, configurationClient);
   }
 
   @Test
@@ -67,7 +70,7 @@ class ResultSetServiceTest {
       entityTypeId,
       fields,
       listIds,
-      tenantIds);
+      tenantIds, false);
     assertEquals(expectedResult, actualResult);
   }
 }

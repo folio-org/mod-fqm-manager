@@ -200,13 +200,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'organizationTypes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'organizationTypes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'organizationTypes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'organizationTypes') AS elems\
       )",
     },
     {
@@ -219,7 +219,7 @@
         },
       },
       idColumnName: 'type_ids',
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'organizationTypes'::text)) record(value) JOIN src_organization_types a ON (record.value::text) = a.id::text)",
       source: {
@@ -746,13 +746,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'contacts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'contacts') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'contacts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'contacts') AS elems\
       )",
     },
     {
@@ -772,13 +772,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'privilegedContacts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'privilegedContacts') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'privilegedContacts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'privilegedContacts') AS elems\
       )",
     },
     {
@@ -987,13 +987,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'vendorCurrencies') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'vendorCurrencies') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'vendorCurrencies') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'vendorCurrencies') AS elems\
       )",
     },
     {
@@ -1143,13 +1143,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'interfaces') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'interfaces') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'interfaces') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'interfaces') AS elems\
       )",
     },
     {

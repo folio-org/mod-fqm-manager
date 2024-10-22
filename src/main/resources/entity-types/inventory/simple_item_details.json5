@@ -301,13 +301,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'formerIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'formerIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds') AS elems\
       )",
     },
     {
@@ -338,13 +338,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'yearCaption') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'yearCaption') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'yearCaption') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'yearCaption') AS elems\
       )",
     },
     {
@@ -499,6 +499,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'circulationNotes'",
     },
     {
@@ -620,13 +621,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'administrativeNotes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
       )",
     },
     {
@@ -874,13 +875,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
     },
     {

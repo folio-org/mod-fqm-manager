@@ -108,6 +108,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'code'",
       filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',

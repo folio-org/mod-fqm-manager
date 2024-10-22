@@ -654,7 +654,7 @@
   "entityType.simple_instance.instance_primary_contributor": "Primary contributor",
   "entityType.simple_instance.created_at": "Created date",
   "entityType.simple_instance.created_by": "Created by user UUID",
-  "entityType.simple_instance.discovery_suppress": "Discovery suppress",
+  "entityType.simple_instance.discovery_suppress": "Suppress from discovery",
   "entityType.simple_instance.editions": "Editions",
   "entityType.simple_instance.electronic_access": "Electronic access",
   "entityType.simple_instance.electronic_access.link_text": "Link text",

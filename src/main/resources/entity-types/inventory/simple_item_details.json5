@@ -733,6 +733,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'enumeration'",
     },
     {
@@ -1006,6 +1007,7 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],

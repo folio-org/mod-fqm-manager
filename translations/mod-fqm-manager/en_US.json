@@ -1462,10 +1462,6 @@
     "entityType.simple_mode_of_issuance.name": "Name",
     "entityType.simple_instance.instance_type_name": "Resource type",
     "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID",
-    "entityType.simple_instance.contributor_type_id": "Contributor type UUID",
-    "entityType.simple_instance.contributors_name": "Contributor name",
-    "entityType.simple_instance.contributor_name_type_id": "Contributor name type UUID",
-    "entityType.simple_instance.contributor_name_type": "Contributor name type",
     "entityType.simple_instance.instance_primary_contributor": "Primary contributor",
     "entityType.composite_instances.date_type": "Instance date type",
     "entityType.simple_instance.instance_date_1": "Date 1",
@@ -1483,6 +1479,7 @@
     "entityType.simple_instance.classifications.type_id._qualified": "Classification identifier type UUID",
     "entityType.simple_instance.classifications.type_name": "Classification identifier type",
     "entityType.simple_instance.classifications.type_name._qualified": "Classification identifier type",
+
   "entityType.simple_FOLIO_user_details": "Simple FOLIO Users",
   "entityType.simple_FOLIO_user_details.active": "Active",
   "entityType.simple_FOLIO_user_details.id": "User UUID",
@@ -1493,5 +1490,20 @@
   "entityType.simple_FOLIO_user_details.email": "Email",
   "entityType.simple_FOLIO_user_details.last_name_first_name": "Last name, first name",
   "entityType.simple_FOLIO_user_details.username": "Username"
+
+    "entityType.simple_instance.contributors": "Contributors",
+    "entityType.simple_instance.contributors.contributor_name_type_id": "Contributor name type UUID",
+    "entityType.simple_instance.contributors.contributor_name_type_id._qualified": "Contributors contributor name type UUID",
+    "entityType.simple_instance.contributors.contributor_type_id": "Contributor type UUID",
+    "entityType.simple_instance.contributors.contributor_type_id._qualified": "Contributors contributor type UUID",
+    "entityType.simple_instance.contributors.contributor_type": "Contributor type text",
+    "entityType.simple_instance.contributors.contributor_type._qualified": "Contributors contributor type",
+    "entityType.simple_instance.contributors.name": "Name",
+    "entityType.simple_instance.contributors.name._qualified": "Contributors name",
+    "entityType.simple_instance.contributors.primary": "Primary",
+    "entityType.simple_instance.contributors.primary._qualified": "Contributors primary",
+    "entityType.simple_instance.contributors.contributor_name_type":"Contributor name type",
+    "entityType.simple_instance.contributors.contributor_name_type._qualified":"Contributors contributor name type"
+
 }
 

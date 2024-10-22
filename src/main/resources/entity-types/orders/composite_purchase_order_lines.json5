@@ -24,7 +24,7 @@
     {
       alias: 'po_created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details,
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -35,7 +35,7 @@
     {
       alias: 'po_updated_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -46,7 +46,7 @@
     {
       alias: 'pol_created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -57,7 +57,7 @@
     {
       alias: 'pol_updated_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         joinTo: 'pol.pol',
@@ -79,7 +79,7 @@
     {
       alias: 'assigned_to_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',

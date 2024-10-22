@@ -51,6 +51,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.creation_date',
+      valueFunction: '(:value)::timestamp',
       essential: true
     },
     {

@@ -104,7 +104,7 @@
       join: {
         type: 'left join',
         joinTo: 'holdings.hrd',
-        condition: "(:that.jsonb ->> 'instanceid')::uuid = :this.id",
+        condition: "(:that.jsonb ->> 'instanceId')::uuid = :this.id",
       },
     },
   ],

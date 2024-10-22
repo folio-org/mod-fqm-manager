@@ -39,6 +39,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.creation_date',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'created_by',

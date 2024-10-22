@@ -38,6 +38,7 @@
       hidden: false,
       essential: true,
       valueGetter: ':sourceAlias.creation_date',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'created_by',
@@ -397,18 +398,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'reminders'->'lastFeeBilled'->>'number'",
-    },
-    {
-      name: 'reminders_last_date',
-      sourceAlias: 'loan',
-      dataType: {
-        dataType: 'dateType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      essential: true,
-      valueGetter: ":sourceAlias.jsonb->'reminders'->'lastFeeBilled'->>'date'",
     },
     {
       name: 'jsonb',

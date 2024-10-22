@@ -1,6 +1,7 @@
 package org.folio.fqm.utils;
 
 import lombok.experimental.UtilityClass;
+import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
@@ -84,5 +85,14 @@ public class EntityTypeUtils {
   public static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
     Field<Object> field = field(entityTypeDefaultSort.getColumnName());
     return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
+  }
+
+  public static List<String> getDateFields(EntityType entityType) {
+    return entityType
+      .getColumns()
+      .stream()
+      .filter(col -> col.getDataType() instanceof DateType)
+      .map(org.folio.querytool.domain.dto.Field::getName)
+      .toList();
   }
 }

@@ -184,7 +184,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'phone'",
     },
     {
@@ -342,7 +342,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'preferredFirstName'",
       filterValueGetter: "${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
       valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)'

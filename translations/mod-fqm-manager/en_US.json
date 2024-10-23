@@ -1342,7 +1342,7 @@
     "entityType.composite_purchase_order_lines.pol_created_by_user": "POL created by user",
     "entityType.composite_purchase_order_lines.pol_updated_by_user": "POL updated by user",
     "entityType.composite_purchase_order_lines.vendor_organization": "Vendor org",
-    "entityType.composite_purchase_order_lines.assigned_to_user": "Assigned to user",
+    "entityType.composite_purchase_order_lines.assigned_to_user": "PO assigned to user",
     "entityType.composite_purchase_order_lines.rates": "Exchange rate",
     "entityType.composite_purchase_order_lines.pol_exchange_rate": "POL exchange rate",
     "entityType.simple_item_details.effective_call_number": "Effective call number",

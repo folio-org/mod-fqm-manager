@@ -183,7 +183,8 @@ public class QueryManagementService {
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
-  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids) {
+  // TODO: check works with null
+  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, boolean localize) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
     EntityTypeUtils.getIdColumnNames(entityType)
       .forEach(colName -> {
@@ -192,7 +193,7 @@ public class QueryManagementService {
         }
       });
     List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
-    return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
+    return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery, localize);
   }
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
@@ -200,7 +201,7 @@ public class QueryManagementService {
       EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
       List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
-      return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery);
+      return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery, false);
     }
     return List.of();
   }

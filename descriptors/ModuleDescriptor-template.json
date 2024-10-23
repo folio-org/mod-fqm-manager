@@ -87,8 +87,8 @@
         {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
-          "permissionsRequired": ["fqm.query.async.results.post"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "permissionsRequired": ["fqm.query.async.results.get"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get", "configuration.entries.collection.get"]
         },
         {
           "methods": ["POST"],

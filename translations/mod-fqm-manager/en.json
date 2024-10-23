@@ -88,7 +88,7 @@
   "entityType.composite_po_instance.ship_to_name": "Ship to - name",
   "entityType.composite_purchase_order_lines": "Purchase order lines",
   "entityType.composite_purchase_order_lines._shortened": "POL",
-  "entityType.composite_purchase_order_lines.assigned_to_user": "Assigned to user",
+  "entityType.composite_purchase_order_lines.assigned_to_user": "PO assigned to user",
   "entityType.composite_purchase_order_lines.po": "PO",
   "entityType.composite_purchase_order_lines.po_created_by_user": "PO created by user",
   "entityType.composite_purchase_order_lines.po_updated_by_user": "PO updated by user",

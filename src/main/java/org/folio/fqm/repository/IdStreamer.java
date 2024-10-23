@@ -72,6 +72,7 @@ public class IdStreamer {
       .orderBy(RESULT_ID_FIELD)
       .offset(offset)
       .limit(batchSize)
+      .fetchSize(batchSize)
       .fetch()
       .map(Record1::value1)
       .stream()
@@ -114,6 +115,10 @@ public class IdStreamer {
       }
     }
     log.debug("Full query: {}", fullQuery);
+
+    if (fullQuery != null) {
+      fullQuery.fetchSize(batchSize);
+    }
 
     try (
       Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();

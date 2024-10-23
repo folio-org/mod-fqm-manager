@@ -22,6 +22,7 @@
       },
       isIdColumn: true,
       queryable: true,
+      essential: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.id',
     },
@@ -45,6 +46,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
       valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
@@ -58,6 +60,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ':sourceAlias.created_by',
     },
     {
@@ -99,6 +103,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'agreementId'",
@@ -151,13 +156,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'alerts') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
       )",
     },
     {
@@ -375,6 +380,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'cost'->>'currency'",
       filterValueGetter: "lower(:sourceAlias.jsonb -> 'cost' ->> 'currency')",
       valueFunction: 'lower(:value)',
@@ -438,6 +444,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->'cost'->>'exchangeRate')::float",
       valueFunction: '(:value)::float',
     },
@@ -474,6 +481,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->'cost'->>'poLineEstimatedPrice')::float",
       valueFunction: '(:value)::float',
     },
@@ -498,6 +506,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'description'",
     },
     {
@@ -509,6 +518,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'details'->>'receivingNote'",
     },
     {
@@ -645,6 +655,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'donor'",
     },
     {
@@ -663,13 +674,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
       )",
     },
     {
@@ -681,6 +692,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'activated'",
       values: [
         {
@@ -714,6 +726,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'createInventory'",
       values: [
         {
@@ -743,6 +756,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'trial'",
       values: [
         {
@@ -764,6 +778,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'expectedActivation'",
     },
     {
@@ -809,6 +824,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'resourceUrl'",
     },
     {
@@ -933,6 +949,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
     },
     {
@@ -1062,13 +1079,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'searchLocationIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'searchLocationIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'searchLocationIds') AS elems\
       )",
     },
     {
@@ -1091,6 +1108,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'orderFormat'",
       values: [
         {
@@ -1130,6 +1148,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'paymentStatus'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'paymentStatus\'::text)), 600)',
@@ -1224,6 +1243,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'physical'->>'expectedReceiptDate'",
     },
@@ -1254,13 +1274,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'physical'->'volumes') AS elems\
       )",
     },
     {
@@ -1295,6 +1315,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'publicationDate'",
     },
@@ -1305,6 +1326,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'publisher'",
@@ -1316,6 +1338,7 @@
         dataType: 'dateType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'receiptDate'",
@@ -1327,6 +1350,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'receiptStatus'",
@@ -1390,13 +1414,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'reportingCodes') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
       )",
     },
     {
@@ -1419,6 +1443,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'rush'",
       values: [
         {
@@ -1438,6 +1463,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'selector'",
@@ -1449,6 +1475,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
@@ -1485,19 +1512,20 @@
         },
       },
       isIdColumn: false,
+      essential: true,
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
     },
     {
@@ -1507,6 +1535,7 @@
         dataType: 'stringType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'titleOrPackage'",
@@ -1551,6 +1580,7 @@
         dataType: 'dateType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
@@ -1562,7 +1592,9 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
+      hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
     },

@@ -1,5 +1,6 @@
 package org.folio.fqm.service;
 
+import feign.FeignException;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -329,6 +331,7 @@ class EntityTypeServiceTest {
   void shouldReturnValuesFromApi() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
+    List<String> tenantList = List.of("tenant_01", "tenant_02");
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("the entity type")
@@ -341,8 +344,9 @@ class EntityTypeServiceTest {
         )
       ));
 
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(simpleHttpClient.get(eq("fake-path"), anyMap())).thenReturn("""
+    when(simpleHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_01"))).thenReturn("""
            {
              "what": {
                "ever": {
@@ -364,6 +368,7 @@ class EntityTypeServiceTest {
              }
            }
       """);
+    when(simpleHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.Unauthorized.class);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "r");
 
@@ -372,6 +377,152 @@ class EntityTypeServiceTest {
       new ValueWithLabel().value("yeah").label("right")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldReturnLanguagesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<String> tenantList = List.of("tenant_01");
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+           {
+             "facets": {
+               "languages": {
+                 "values": [
+                   {
+                     "id": "eng",
+                     "value": "eng"
+                   },
+                   {
+                     "id": "ger",
+                     "value": "ger"
+                   },
+                   {
+                     "id": "fre",
+                     "value": "fre"
+                   },
+                   {
+                     "id": "xyze",
+                     "value": "xyze"
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("eng").label("English"),
+      new ValueWithLabel().value("fre").label("French"),
+      new ValueWithLabel().value("ger").label("German"),
+      new ValueWithLabel().value("xyze").label("xyze") // non-existent language code should use code as display name
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldReturnLocalizedLanguagesFromApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<String> tenantList = List.of("tenant_01");
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+           {
+             "facets": {
+               "languages": {
+                 "values": [
+                   {
+                     "id": "eng",
+                     "value": "eng"
+                   },
+                   {
+                     "id": "ger",
+                     "value": "ger"
+                   },
+                   {
+                     "id": "mus",
+                     "value": "mus"
+                   },
+                   {
+                     "id": "",
+                     "value": ""
+                   }
+                 ]
+               }
+             }
+           }
+      """);
+    when(simpleHttpClient.get(eq("configurations/entries"), anyMap())).thenReturn("""
+           {
+             "configs": [
+               {
+                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
+                 "module":"ORG",
+                 "configName":"localeSettings",
+                 "enabled":true,
+                 "value":"{\\"locale\\":\\"de\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
+               }
+             ],
+             "totalRecords": 1,
+             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
+           }
+      """);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("mus").label("Creek"),
+      new ValueWithLabel().value("ger").label("Deutsch"),
+      new ValueWithLabel().value("eng").label("Englisch")
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldCatchExceptionFromLanguagesApi() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<String> tenantList = List.of("tenant_01");
+    String valueColumnName = "languages";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("languages")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenThrow(FeignException.BadRequest.class);
+
+    assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
 
   @Test
@@ -459,6 +610,7 @@ class EntityTypeServiceTest {
   void shouldReturnTenantId() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "this_is_a_tenant_id_column";
+    List<String> tenantList = List.of("tenant1", "tenant2");
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("tenant-id-test")
@@ -470,7 +622,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1", "tenant2"));
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -496,7 +648,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType, true)).thenReturn(List.of("tenant1", "central"));
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(List.of("tenant1", "central"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")

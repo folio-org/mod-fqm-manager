@@ -8,11 +8,13 @@
       type: 'entity-type',
       id: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
+      essentialOnly: true,
     },
     {
       alias: 'po',
       type: 'entity-type',
       id: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      essentialOnly: true,
       join: {
         type: 'join',
         joinTo: 'pol.pol',
@@ -22,7 +24,7 @@
     {
       alias: 'po_created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details,
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -33,7 +35,7 @@
     {
       alias: 'po_updated_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -44,7 +46,7 @@
     {
       alias: 'pol_created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',
@@ -55,7 +57,7 @@
     {
       alias: 'pol_updated_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         joinTo: 'pol.pol',
@@ -67,6 +69,7 @@
       alias: 'vendor_organization',
       type: 'entity-type',
       id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      essentialOnly: true,
       join: {
         type: 'left join',
         condition: "(:that.jsonb ->> 'vendor')::uuid = :this.id",
@@ -76,7 +79,7 @@
     {
       alias: 'assigned_to_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
       essentialOnly: true,
       join: {
         type: 'left join',

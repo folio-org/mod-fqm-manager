@@ -45,6 +45,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
@@ -67,6 +68,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'code'",
       source: {
         columnName: 'code',
@@ -88,7 +90,7 @@
       queryable: true,
       hidden: true,
       essential: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'campusId'",
       source: {
         columnName: 'campus_id',

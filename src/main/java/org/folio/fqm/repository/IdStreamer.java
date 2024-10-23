@@ -56,7 +56,7 @@ public class IdStreamer {
                               int batchSize,
                               Consumer<IdsWithCancelCallback> idsConsumer) {
     boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType, false);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
     return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery, ecsEnabled);
   }
 

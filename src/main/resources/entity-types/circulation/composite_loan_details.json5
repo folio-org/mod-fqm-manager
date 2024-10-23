@@ -7,11 +7,13 @@
       type: 'entity-type',
       id: '00349126-c923-4045-a29f-3b6db4c6bea9',
       useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'lpolicy',
       type: 'entity-type',
       id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'loans.loan',
@@ -22,6 +24,7 @@
       alias: 'cospi',
       type: 'entity-type',
       id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      essentialOnly: true,
       join: {
         condition: "(:that.jsonb ->> 'checkoutServicePointId')::uuid = :this.id",
         type: 'left join',
@@ -32,6 +35,7 @@
       alias: 'cispi',
       type: 'entity-type',
       id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      essentialOnly: true,
       join: {
         joinTo: 'loans.loan',
         condition: "(:that.jsonb ->> 'checkinServicePointId')::uuid = :this.id",
@@ -42,6 +46,7 @@
       alias: 'items',
       type: 'entity-type',
       id: '372e025a-9444-473a-9ffd-fa0f63db1674',
+      essentialOnly: true,
       join: {
         condition: "(:that.jsonb ->> 'itemId')::uuid = :this.id",
         joinTo: 'loans.loan',
@@ -52,6 +57,7 @@
       alias: 'mtypes',
       type: 'entity-type',
       id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'items.item',
@@ -73,6 +79,7 @@
       alias: 'groups',
       type: 'entity-type',
       id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'users.user',
@@ -83,6 +90,7 @@
       alias: 'holdings',
       type: 'entity-type',
       id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'items.item',
@@ -96,7 +104,7 @@
       join: {
         type: 'left join',
         joinTo: 'holdings.hrd',
-        condition: "(:that.jsonb ->> 'instanceid')::uuid = :this.id",
+        condition: "(:that.jsonb ->> 'instanceId')::uuid = :this.id",
       },
     },
   ],

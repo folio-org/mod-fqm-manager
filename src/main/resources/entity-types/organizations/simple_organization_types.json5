@@ -87,6 +87,11 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        entityTypeId: '85a2b008-af8d-4890-9490-421cabcb7bad',
+        columnName: 'name',
+        type: 'entity-type'
+      }
     },
     {
       name: 'status',

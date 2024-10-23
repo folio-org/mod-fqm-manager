@@ -1,12 +1,16 @@
 package org.folio.fqm.migration.warnings;
 
+import jakarta.validation.constraints.NotNull;
 import javax.annotation.CheckForNull;
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
 public interface Warning {
+  @NotNull
   WarningType getType();
+
+  @NotNull
   String getDescription(TranslationService translationService);
 
   public static String getDescriptionByAlternativeAndFql(

@@ -1485,15 +1485,15 @@
     "entityType.simple_instance.classifications.type_id._qualified": "Classification identifier type UUID",
     "entityType.simple_instance.classifications.type_name": "Classification identifier type",
     "entityType.simple_instance.classifications.type_name._qualified": "Classification identifier type",
-    "entityType.simple_FOLIO_user_details": "Simple FOLIO Users",
-    "entityType.simple_FOLIO_user_details.active": "User active",
-    "entityType.simple_FOLIO_user_details.id": "User UUID",
-    "entityType.simple_FOLIO_user_details.user_created_date": "User created date",
-    "entityType.simple_FOLIO_user_details.user_updated_date": "User updated date",
-    "entityType.simple_FOLIO_user_details.updated_by_user_id": "User updated by user UUID",
-    "entityType.simple_FOLIO_user_details.created_by_user_id'": "User created by user UUID",
-    "entityType.simple_FOLIO_user_details.email": "User email",
-    "entityType.simple_FOLIO_user_details.last_name_first_name": "User last name, first name",
-    "entityType.simple_FOLIO_user_details.username": "User username"
+  "entityType.simple_FOLIO_user_details": "Simple FOLIO Users",
+  "entityType.simple_FOLIO_user_details.active": "Active",
+  "entityType.simple_FOLIO_user_details.id": "User UUID",
+  "entityType.simple_FOLIO_user_details.user_created_date": "Created date",
+  "entityType.simple_FOLIO_user_details.user_updated_date": "Updated date",
+  "entityType.simple_FOLIO_user_details.updated_by_user_id": "Updated by user UUID",
+  "entityType.simple_FOLIO_user_details.created_by_user_id'": "Created by user UUID",
+  "entityType.simple_FOLIO_user_details.email": "Email",
+  "entityType.simple_FOLIO_user_details.last_name_first_name": "Last name, first name",
+  "entityType.simple_FOLIO_user_details.username": "Username"
 }
 

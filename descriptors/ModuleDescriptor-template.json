@@ -64,13 +64,13 @@
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.results.query.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
           "permissionsRequired": ["fqm.query.async.results.sortedids.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
@@ -88,7 +88,7 @@
           "methods": ["POST"],
           "pathPattern": "/query/contents",
           "permissionsRequired": ["fqm.query.async.results.post"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["POST"],

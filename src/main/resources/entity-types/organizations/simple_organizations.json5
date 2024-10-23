@@ -1438,13 +1438,13 @@
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'acqUnitIds') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
       )",
     },
     {
@@ -1463,8 +1463,13 @@
       filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
       source: {
-        entityTypeId: 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78',
-        columnName: 'acquisitions_name',
+        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        columnName: 'acq_unit_names',
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name',
       },
     },
     {

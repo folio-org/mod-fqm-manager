@@ -39,7 +39,7 @@ public class EntityTypeFlatteningService {
   }
 
   private EntityType getFlattenedEntityType(UUID entityTypeId, EntityTypeSource sourceFromParent, String tenantId) {
-  // TODO: clean up
+    // TODO: clean up
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));

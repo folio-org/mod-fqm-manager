@@ -1,4 +1,5 @@
 {
+  "entityType._sourceLabelJoiner": "{sourceLabel} — {fieldLabel}",
   "entityType.composite_holdings_record": "Holdings",
   "entityType.composite_holdings_record.effective_library": "Effective library",
   "entityType.composite_holdings_record.effective_location": "Effective location",

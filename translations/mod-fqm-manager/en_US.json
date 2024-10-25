@@ -1496,7 +1496,7 @@
     "entityType.simple_instance.contributors.contributor_name_type_id._qualified": "Contributors contributor name type UUID",
     "entityType.simple_instance.contributors.contributor_type_id": "Contributor type UUID",
     "entityType.simple_instance.contributors.contributor_type_id._qualified": "Contributors contributor type UUID",
-    "entityType.simple_instance.contributors.contributor_type": "Contributor type text",
+    "entityType.simple_instance.contributors.contributor_type": "Contributor type",
     "entityType.simple_instance.contributors.contributor_type._qualified": "Contributors contributor type",
     "entityType.simple_instance.contributors.name": "Name",
     "entityType.simple_instance.contributors.name._qualified": "Contributors name",

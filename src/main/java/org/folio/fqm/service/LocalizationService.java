@@ -29,6 +29,10 @@ public class LocalizationService {
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
   private static final String ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s._custom_field_possessive";
+  
+  // provides locale-specific way of joining `Source name — Field name`, to account for different separators or RTL
+  // see MODFQMMGR-409 for more details
+  private static final String ENTITY_TYPE_SOURCE_PREFIX_JOINER = "mod-fqm-manager.entityType._sourceLabelJoiner";
 
   // the translation parameter for custom fields
   private static final String CUSTOM_FIELD_PARAMETER = "customField";
@@ -60,6 +64,30 @@ public class LocalizationService {
       } else if (column.getDataType() instanceof ArrayType arrayColumn) {
         localizeArrayColumn(entityType, column, arrayColumn);
       }
+    } else {
+      // column has been previously translated, so just append source translations to it
+      String sourceTranslation = getTranslationWithSourcePrefix(entityType, column.getName(), column.getLabelAlias());
+      column.setLabelAlias(sourceTranslation);
+    }
+  }
+
+  private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {
+    int currentSourceIndex = columnName.indexOf(".");
+    if (currentSourceIndex > 0) {
+      String currentSource = columnName.substring(0, currentSourceIndex);
+      String sourceLabel = translationService.format(
+        ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource)
+      );
+
+      return translationService.format(
+        ENTITY_TYPE_SOURCE_PREFIX_JOINER,
+        "sourceLabel",
+        sourceLabel,
+        "fieldLabel",
+        fieldLabel
+      );
+    } else {
+      return fieldLabel;
     }
   }
 

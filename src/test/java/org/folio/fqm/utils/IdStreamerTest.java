@@ -132,7 +132,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(
@@ -158,7 +158,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
@@ -185,7 +185,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
@@ -211,7 +211,7 @@ class IdStreamerTest {
       List<String[]> ids = idsWithCancelCallback.ids();
       ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
     };
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
     int idsCount = idStreamer.streamIdsInBatch(

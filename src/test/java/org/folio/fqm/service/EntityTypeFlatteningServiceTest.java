@@ -440,7 +440,7 @@ class EntityTypeFlatteningServiceTest {
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);
@@ -629,7 +629,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> {
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> {
       EntityType entityType = invocation.getArgument(0);
       if (entityType.getSourceViewExtractor() == null) {
         entityType.sourceViewExtractor(expectedSourceViewExtractor);
@@ -845,7 +845,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(TRIPLE_NESTED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(TRIPLE_NESTED_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
@@ -859,7 +859,7 @@ class EntityTypeFlatteningServiceTest {
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
     when(entityTypeRepository.getEntityTypeDefinition(COMPLEX_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(COMPLEX_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
@@ -874,7 +874,7 @@ class EntityTypeFlatteningServiceTest {
     String expectedJoinClause = "source1_target \"source1\" JOIN source2_target \"source2\" ON \"source2\".field = \"source1\".field JOIN source3_target \"source3\" ON \"source3\".field = \"source2\".field JOIN source7_target \"source7\" ON \"source7\".field = \"source3\".field JOIN source4_target \"source4\" ON \"source4\".field = \"source3\".field JOIN source6_target \"source6\" ON \"source6\".field = \"source1\".field JOIN source5_target \"source5\" ON \"source5\".field = \"source4\".field";
 
     when(entityTypeRepository.getEntityTypeDefinition(UNORDERED_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(UNORDERED_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
 
@@ -964,7 +964,7 @@ class EntityTypeFlatteningServiceTest {
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"));
 
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null)).thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE)));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean())).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 1}");
 
@@ -1050,7 +1050,7 @@ class EntityTypeFlatteningServiceTest {
     when(entityTypeRepository.getEntityTypeDefinition(SIMPLE_ENTITY_TYPE_ID, null))
       .thenReturn(Optional.of(copyEntityType(SIMPLE_ENTITY_TYPE_WITH_SOURCE_VIEW_EXTRACTOR)));
 
-    when(localizationService.localizeEntityType(any(EntityType.class)))
+    when(localizationService.localizeEntityType(any(EntityType.class), anyBoolean()))
       .thenAnswer(invocation -> invocation.getArgument(0));
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(SIMPLE_ENTITY_TYPE_ID, null);

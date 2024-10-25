@@ -114,7 +114,7 @@ public class EntityTypeFlatteningService {
 
     flattenedEntityType.columns(getFilteredColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
-    return localizationService.localizeEntityType(flattenedEntityType, sourceFromParent == null);
+    return localizationService.localizeEntityType(flattenedEntityType);
   }
 
   private String injectSourceAliasIntoViewExtractor(String sourceViewExtractor, Map<String, String> renamedAliases) {

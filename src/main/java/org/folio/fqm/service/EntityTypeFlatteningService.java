@@ -39,7 +39,7 @@ public class EntityTypeFlatteningService {
   }
 
   private EntityType getFlattenedEntityType(UUID entityTypeId, EntityTypeSource sourceFromParent, String tenantId) {
-  // TODO: clean up
+    // TODO: clean up
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
@@ -114,7 +114,7 @@ public class EntityTypeFlatteningService {
 
     flattenedEntityType.columns(getFilteredColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
-    return localizationService.localizeEntityType(flattenedEntityType, sourceFromParent == null);
+    return localizationService.localizeEntityType(flattenedEntityType);
   }
 
   private String injectSourceAliasIntoViewExtractor(String sourceViewExtractor, Map<String, String> renamedAliases) {

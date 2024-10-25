@@ -1,4 +1,5 @@
 {
+  "entityType._sourceLabelJoiner": "{sourceLabel} — {fieldLabel}",
   "entityType.composite_holdings_record": "Holdings",
   "entityType.composite_holdings_record.effective_library": "Effective library",
   "entityType.composite_holdings_record.effective_location": "Effective location",
@@ -87,7 +88,6 @@
   "entityType.composite_po_instance.ship_to": "Ship to",
   "entityType.composite_po_instance.ship_to_name": "Ship to - name",
   "entityType.composite_purchase_order_lines": "Purchase order lines",
-  "entityType.composite_purchase_order_lines._shortened": "POL",
   "entityType.composite_purchase_order_lines.assigned_to_user": "PO assigned to user",
   "entityType.composite_purchase_order_lines.po": "PO",
   "entityType.composite_purchase_order_lines.po_created_by_user": "PO created by user",
@@ -965,7 +965,6 @@
   "entityType.simple_mode_of_issuance.id": "UUID",
   "entityType.simple_mode_of_issuance.name": "Name",
   "entityType.simple_organization": "Organizations",
-  "entityType.simple_organization._shortened": "Orgs",
   "entityType.simple_organization.access_provider": "Access provider",
   "entityType.simple_organization.accounting_code": "Accounting code",
   "entityType.simple_organization.accounts": "Accounts",

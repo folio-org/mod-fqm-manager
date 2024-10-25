@@ -19,8 +19,6 @@ public class LocalizationService {
 
   // refers to the entity type as a whole in plural, e.g. "Users", "Purchase order lines"
   private static final String ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s";
-  // refers to the shortened entity type as a whole, e.g. "Users", "POL", "Orgs"
-  private static final String ENTITY_TYPE_SHORTENED_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s._shortened";
   // refers to a single column inside the entity type, e.g. "Name", "Barcode"
   private static final String ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s.%s";
   // refers to a property inside an objectType column inside the entity type, e.g. "City" inside "Address" column inside "Users"
@@ -31,6 +29,10 @@ public class LocalizationService {
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
   private static final String ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s._custom_field_possessive";
+  
+  // provides locale-specific way of joining `Source name — Field name`, to account for different separators or RTL
+  // see MODFQMMGR-409 for more details
+  private static final String ENTITY_TYPE_SOURCE_PREFIX_JOINER = "mod-fqm-manager.entityType._sourceLabelJoiner";
 
   // the translation parameter for custom fields
   private static final String CUSTOM_FIELD_PARAMETER = "customField";
@@ -40,15 +42,17 @@ public class LocalizationService {
 
   private TranslationService translationService;
 
-  public EntityType localizeEntityType(EntityType entityType, boolean isRootEntityType) {
+  public EntityType localizeEntityType(EntityType entityType) {
     entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
+    System.out.println("aaaaaaa");
 
-    entityType.getColumns().forEach(column -> localizeEntityTypeColumn(entityType, column, isRootEntityType));
+    entityType.getColumns().forEach(column -> localizeEntityTypeColumn(entityType, column));
 
     return entityType;
   }
 
-  void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column, boolean prependShortenedName) {
+  void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
+    System.out.println("localizeEntityTypeColumn " + column.getName());
     if (column.getLabelAlias() == null) {
       // Custom field names are already localized as they are user-defined, so they require special handling
       if (Boolean.TRUE.equals(column.getIsCustomField())) {
@@ -63,28 +67,30 @@ public class LocalizationService {
         localizeArrayColumn(entityType, column, arrayColumn);
       }
     } else {
-      // column has been previously translated, so just append source translations to it
-      String sourceTranslation = getSourceTranslationPrefix(entityType, column.getName());
-      column.setLabelAlias(sourceTranslation + column.getLabelAlias());
-    }
-    if (prependShortenedName) {
-      String untranslated = ENTITY_TYPE_SHORTENED_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName());
-      String shortenedName = translationService.format(ENTITY_TYPE_SHORTENED_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName()));
-      if (shortenedName.equals(untranslated)) {
-        shortenedName = getEntityTypeLabel(entityType.getName());
-      }
-      column.setLabelAlias(shortenedName + " — " + column.getLabelAlias());
+    System.out.println("previously translated " + column.getName());
+    // column has been previously translated, so just append source translations to it
+      String sourceTranslation = getTranslationWithSourcePrefix(entityType, column.getName(), column.getLabelAlias());
+      column.setLabelAlias(sourceTranslation);
     }
   }
 
-  private String getSourceTranslationPrefix(EntityType entityType, String columnName) {
+  private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {
     int currentSourceIndex = columnName.indexOf(".");
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
-      String formattedKey = ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource);
-      return translationService.format(formattedKey) + " — ";
+      String sourceLabel = translationService.format(
+        ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource)
+      );
+
+      return translationService.format(
+        ENTITY_TYPE_SOURCE_PREFIX_JOINER,
+        "sourceLabel",
+        sourceLabel,
+        "fieldLabel",
+        fieldLabel
+      );
     } else {
-      return "";
+      return fieldLabel;
     }
   }
 

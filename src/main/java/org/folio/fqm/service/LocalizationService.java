@@ -44,7 +44,6 @@ public class LocalizationService {
 
   public EntityType localizeEntityType(EntityType entityType) {
     entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
-    System.out.println("aaaaaaa");
 
     entityType.getColumns().forEach(column -> localizeEntityTypeColumn(entityType, column));
 
@@ -52,7 +51,6 @@ public class LocalizationService {
   }
 
   void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
-    System.out.println("localizeEntityTypeColumn " + column.getName());
     if (column.getLabelAlias() == null) {
       // Custom field names are already localized as they are user-defined, so they require special handling
       if (Boolean.TRUE.equals(column.getIsCustomField())) {
@@ -67,8 +65,7 @@ public class LocalizationService {
         localizeArrayColumn(entityType, column, arrayColumn);
       }
     } else {
-    System.out.println("previously translated " + column.getName());
-    // column has been previously translated, so just append source translations to it
+      // column has been previously translated, so just append source translations to it
       String sourceTranslation = getTranslationWithSourcePrefix(entityType, column.getName(), column.getLabelAlias());
       column.setLabelAlias(sourceTranslation);
     }

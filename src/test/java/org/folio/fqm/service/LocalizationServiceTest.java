@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -23,6 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
+
 @ExtendWith(MockitoExtension.class)
 class LocalizationServiceTest {
 
@@ -34,15 +35,11 @@ class LocalizationServiceTest {
   @InjectMocks
   private LocalizationService localizationService;
 
-  private void testBasicEntityTypeFormatting(
-    Map<String, String> translations,
-    String expectedTableTranslation,
-    String expectedColumnTranslation,
-    int numInvocations
-  ) {
-    translations.forEach((translationKey, translationValue) ->
-      when(translationService.format(translationKey)).thenReturn(translationValue)
-    );
+  private void testBasicEntityTypeFormatting(Map<String, String> translations,
+                                             String expectedTableTranslation,
+                                             String expectedColumnTranslation,
+                                             int numInvocations) {
+    translations.forEach((translationKey, translationValue) -> when(translationService.format(translationKey)).thenReturn(translationValue));
 
     EntityType entityType = new EntityType()
       .name("table_name")
@@ -141,8 +138,7 @@ class LocalizationServiceTest {
     String expectedOuterTranslation = "Outer Column";
     String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
     String expectedInnerTranslation = "Nested Property";
-    String expectedInnerQualifiedTranslationKey =
-      "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
     String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
 
     EntityType entityType = new EntityType()
@@ -184,13 +180,11 @@ class LocalizationServiceTest {
     String expectedOuterTranslation = "Outer Column";
     String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
     String expectedInnerTranslation = "Nested Property";
-    String expectedInnerQualifiedTranslationKey =
-      "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
     String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
     String expectedInnermostTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner";
     String expectedInnermostTranslation = "Nested * 2 Property";
-    String expectedInnermostQualifiedTranslationKey =
-      "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner._qualified";
+    String expectedInnermostQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property_inner._qualified";
     String expectedInnermostQualifiedTranslation = "Outer Column's Nested Property's Nested * 2 Property";
 
     // array -> array -> object -> object -> array
@@ -215,8 +209,7 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
     when(translationService.format(expectedInnermostTranslationKey)).thenReturn(expectedInnermostTranslation);
     when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
-    when(translationService.format(expectedInnermostQualifiedTranslationKey))
-      .thenReturn(expectedInnermostQualifiedTranslation);
+    when(translationService.format(expectedInnermostQualifiedTranslationKey)).thenReturn(expectedInnermostQualifiedTranslation);
 
     localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 

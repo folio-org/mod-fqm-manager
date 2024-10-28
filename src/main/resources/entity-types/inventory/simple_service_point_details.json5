@@ -25,7 +25,16 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-      essential: true
+      essential: true,
+      source: {
+        columnName: 'id',
+        entityTypeId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      },
+      valueSourceApi: {
+        path: 'service-points',
+        valueJsonPath: '$.servicepoints.*.id',
+        labelJsonPath: '$.servicepoints.*.id',
+      }
     },
     {
       name: 'code',
@@ -53,7 +62,17 @@
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      essential: true
+      essential: true,
+      idColumnName: 'id',
+      source: {
+        columnName: 'name',
+        entityTypeId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      },
+      valueSourceApi: {
+        path: 'service-points',
+        valueJsonPath: '$.servicepoints.*.id',
+        labelJsonPath: '$.servicepoints.*.name',
+      }
     },
     {
       name: 'created_date',

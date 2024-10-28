@@ -65,6 +65,7 @@ public class ResultSetRepository {
     SelectConditionStep<Record> query = null;
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
+      log.info("Getting results for tenant {}", tenantId);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 

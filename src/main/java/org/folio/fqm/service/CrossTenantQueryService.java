@@ -55,6 +55,7 @@ public class CrossTenantQueryService {
   }
 
   private List<String> getTenants(EntityType entityType) {
+    log.info("Getting tenants to query");
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
@@ -64,7 +65,7 @@ public class CrossTenantQueryService {
 
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
     if (!executionContext.getTenantId().equals(centralTenantId)) {
-      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+      log.info("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
@@ -79,11 +80,14 @@ public class CrossTenantQueryService {
     List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), executionContext.getUserId().toString());
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
+      log.info("Tenant id: {}", tenantId);
       String userId = userMap.get("userId");
+      log.info("User id: {}", userId);
       if (!tenantId.equals(centralTenantId)) {
         try {
           permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, true);
           tenantsToQuery.add(tenantId);
+          log.info("User with id {} has permissions to query tenant {}!", userId, tenantId);
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", userId, tenantId);
         } catch (FeignException e) {

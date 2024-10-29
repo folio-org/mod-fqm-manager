@@ -908,6 +908,10 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
+      filterValueGetter: "COALESCE(\
+        lower(:sourceAlias.jsonb->>'discoverySuppress'),\
+        'false'\
+      )",
       values: [
         {
           value: 'true',

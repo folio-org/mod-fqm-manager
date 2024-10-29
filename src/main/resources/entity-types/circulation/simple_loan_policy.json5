@@ -25,6 +25,15 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      },
+      valueSourceApi: {
+        path: 'loan-policy-storage/loan-policies',
+        valueJsonPath: '$.loanPolicies.*.id',
+        labelJsonPath: '$.loanPolicies.*.id',
+      }
     },
     {
       name: 'created_at',
@@ -83,6 +92,16 @@
       visibleByDefault: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      idColumnName: 'id',
+      source: {
+        columnName: 'name',
+        entityTypeId: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      },
+      valueSourceApi: {
+        path: 'loan-policy-storage/loan-policies',
+        valueJsonPath: '$.loanPolicies.*.id',
+        labelJsonPath: '$.loanPolicies.*.name',
+      }
     },
     {
       name: 'description',

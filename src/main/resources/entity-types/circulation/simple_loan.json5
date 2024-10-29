@@ -116,7 +116,18 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->'status'->>'name'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_circulation_storage.f_unaccent((:sourceAlias.jsonb -> 'status'::text) ->> 'name'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)',
+      values: [
+        {
+          label: 'Open',
+          value: 'Open',
+        },
+        {
+          label: 'Closed',
+          value: 'Closed',
+        },
+        ]
+
     },
     {
       name: 'loan_date',

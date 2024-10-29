@@ -386,8 +386,9 @@
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: '58148257-bfb0-4687-8c42-d2833d772f3e',
-        name: 'fqm',
-        columnName: 'currency',
+        name: 'currency',
+        type: 'fqm',
+        columnName: 'cost_currency',
       }
     },
     {

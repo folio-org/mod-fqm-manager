@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class QueryExecutionService {
 
-  private static final int DEFAULT_BATCH_SIZE = 100;
+  private static final int DEFAULT_BATCH_SIZE = 10000;
   private final QueryProcessorService queryProcessorService;
   private final FolioExecutionContext folioExecutionContext;
   private final QueryExecutionCallbacks callbacks;

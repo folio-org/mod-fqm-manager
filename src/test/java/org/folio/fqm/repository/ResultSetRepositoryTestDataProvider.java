@@ -2,9 +2,13 @@ package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.folio.querytool.domain.dto.*;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.RangedUUIDType;
+import org.folio.querytool.domain.dto.StringType;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Result;
@@ -13,8 +17,6 @@ import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
-import org.mockito.Mockito;
-import org.postgresql.jdbc.PgArray;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,6 @@ import java.util.UUID;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.jooq.impl.DSL.field;
-import static org.mockito.Mockito.when;
 
 /**
  * Mock data provider that returns query results for Repository tests.
@@ -34,27 +35,36 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value5", "key2", "value6")
   );
 
-  public static final List<Map<String, Object>> TEST_ENTITY_WITH_ARRAY_CONTENTS = List.of(
-    Map.of(ID_FIELD_NAME, UUID.randomUUID(), "testField", getPgArray()));
-
-  private static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
+  public static final EntityType ENTITY_TYPE = new EntityType()
     .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME),
-      new EntityTypeColumn().name("testField").dataType(new EntityDataType().dataType("arrayType"))
-    ));
-
-  private static final EntityType ENTITY_TYPE = new EntityType()
-    .columns(List.of(
-      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(ID_FIELD_NAME).isIdColumn(true),
-      new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter("key1").valueGetter("key1"),
-      new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter("key2").valueGetter("key2")
+      new EntityTypeColumn().name(ID_FIELD_NAME).dataType(new RangedUUIDType().dataType("rangedUUIDType")).valueGetter(":source1." + ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+      new EntityTypeColumn().name("key1").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key1"),
+      new EntityTypeColumn().name("key2").dataType(new StringType().dataType("stringType")).valueGetter(":source1.key2")
     ))
+    .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .name("TEST_ENTITY_TYPE")
-    .fromClause("TEST_ENTITY_TYPE");
+    .fromClause("TEST_ENTITY_TYPE")
+    .sources(
+      List.of(
+        new EntityTypeSource()
+          .type("db")
+          .alias("source1")
+          .target("target1")
+      )
+    )
+    .defaultSort(
+      List.of(
+        new EntityTypeDefaultSort()
+          .direction(EntityTypeDefaultSort.DirectionEnum.ASC)
+          .columnName("key1")
+      )
+    )
+    .additionalEcsConditions(List.of("condition 1"));
+
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final String LIST_CONTENTS_BY_ID_SELECTOR_REGEX = "SELECT .* FROM .* JOIN \\(SELECT CONTENT_ID, SORT_SEQ FROM .* ORDER BY SORT_SEQ";
-  private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE ID IN .*";
-  private static final String GET_RESULT_SET_SYNC_REGEX = "SELECT .* FROM .* WHERE .* ORDER BY ID FETCH NEXT .*";
+  private static final String LIST_CONTENTS_BY_IDS_REGEX = "SELECT .* FROM .* WHERE .*.ID IN .*";
+  private static final String GET_RESULT_SET_SYNC_REGEX = "SELECT .* FROM .* WHERE .* ORDER BY .* FETCH NEXT .*";
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -90,17 +100,6 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
       mockResult = new MockResult(1, result);
     }
     return new MockResult[]{mockResult};
-  }
-
-  private static PgArray getPgArray() {
-    try {
-      PgArray mockPgArray = Mockito.mock(PgArray.class);
-      String[] stringArray = {"value1"};
-      when(mockPgArray.getArray()).thenReturn(stringArray);
-      return mockPgArray;
-    } catch(Exception e) {
-      return null;
-    }
   }
 
   @SneakyThrows

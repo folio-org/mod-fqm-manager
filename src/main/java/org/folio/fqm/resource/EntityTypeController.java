@@ -3,9 +3,10 @@ package org.folio.fqm.resource;
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.EntityTypeService;
+import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.domain.dto.EntityTypeSummaries;
 import org.folio.querytool.rest.resource.EntityTypesApi;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,21 +20,25 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class EntityTypeController implements org.folio.fqm.resource.EntityTypesApi, org.folio.querytool.rest.resource.EntityTypesApi {
+
   private final EntityTypeService entityTypeService;
+  private final MigrationService migrationService;
 
   @EntityTypePermissionsRequired
   @Override
   public ResponseEntity<EntityType> getEntityType(UUID entityTypeId, Boolean includeHidden) {
-    return entityTypeService.getEntityTypeDefinition(entityTypeId)
-      .map(ResponseEntity::ok)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+    return ResponseEntity.ok(entityTypeService.getEntityTypeDefinition(entityTypeId, Boolean.TRUE.equals(includeHidden), true));
   }
 
   @Override
-  public ResponseEntity<List<EntityTypeSummary>> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible) {
+  public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
-    // Permissions are handled in the service layer
-    return ResponseEntity.ok(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible)));
+    // Permissions are handled in the service layer// Permissions are handled in the service layer
+    return ResponseEntity.ok(
+      new EntityTypeSummaries()
+        .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible)))
+        .version(migrationService.getLatestVersion())
+    );
   }
 
   @EntityTypePermissionsRequired

@@ -37,22 +37,31 @@ By utilizing the combination of source views, computed views, and other relevant
 mvn clean install
 ```
 ## Environment Variables
-| Name                                              | Default Value | Description                           |
-|---------------------------------------------------|---------------|---------------------------------------|
-| DB_HOST                                           | localhost     | Postgres hostname                     |
-| DB_PORT                                           | 5432          | Postgres port                         |
-| DB_HOST_READER                                    | localhost     | Postgres hostname                     |
-| DB_PORT_READER                                    | 5432          | Postgres port                         |
-| DB_USERNAME                                       | postgres      | Postgres username                     |
-| DB_PASSWORD                                       | postgres      | Postgres password                     |
-| DB_DATABASE                                       | postgres      | Postgres database name                |
-| MAX_QUERY_SIZE                                    | 1250000       | max result count per query            |
-| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions   |
-| server.port                                       | 8081          | Server port                           |
-| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted             |
-| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks |
-| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks  |
-| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                |
+| Name                                              | Default Value | Description                                       |
+|---------------------------------------------------|---------------|---------------------------------------------------|
+| DB_HOST                                           | localhost     | Postgres hostname                                 |
+| DB_PORT                                           | 5432          | Postgres port                                     |
+| DB_HOST_READER                                    | localhost     | Postgres hostname                                 |
+| DB_PORT_READER                                    | 5432          | Postgres port                                     |
+| DB_USERNAME                                       | postgres      | Postgres username                                 |
+| DB_PASSWORD                                       | postgres      | Postgres password                                 |
+| DB_DATABASE                                       | postgres      | Postgres database name                            |
+| IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA |
+| MAX_QUERY_SIZE                                    | 1250000       | max result count per query                        |
+| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions               |
+| mod-fqm-manager.entity-type-cache-timeout-seconds | 3600          | Cache duration for entity type definitions        |
+| server.port                                       | 8081          | Server port                                       |
+| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted                         |
+| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks             |
+| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks              |
+| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                            |
+
+> **Note regarding `mod-fqm-manager.entity-type-cache-timeout-seconds`:** The default value defined in the project's
+> module descriptor is `300`, as this value is more appropriate for development environments while still being reasonable
+> for production. In general, production environments will see more benefit with higher values, since entity type
+> definitions are very static and normally only change with module upgrades. `86400` (1 day) or `604800` (1 week) would
+> be entirely reasonable for production. In the event that an entity type was updated in the database and this must be
+> reflected quickly when the cache timeout is very high, simply restarting the module should be sufficient.
 
 ### Resource requirements
 
@@ -63,6 +72,15 @@ to mod-fqm-manager to ensure optimal performance and query handling. For larger 
 used, allocate at least 2 gigabytes. In extreme cases with extremely large responses and concurrent usage, 5 gigabytes of
 heap space should be sufficient to maintain performance and stability.
 
+### Local development only environment variables
+
+> [!WARNING]
+>
+> These environment variables are intended for local development only and should not be used in production environments!
+
+| Name                               | Default Value | Description                   |
+|------------------------------------|---------------|-------------------------------|
+| mod-fqm-manager.bypass-permissions | false         | Disable all permission checks |
 
 ## Installing the module
 Follow the guide of Deploying Modules sections of the [Okapi Guide](https://github.com/folio-org/okapi/blob/master/doc/guide.md#example-1-deploying-and-using-a-simple-module) and Reference, which describe the process in detail.
@@ -101,6 +119,13 @@ Then we need to enable the module for the tenant:
     -d @target/TenantModuleDescriptor.json \
     http://localhost:9130/_/proxy/tenants/<tenant_name>/modules
 ```
+
+> **Note regarding ECS environments:** In ECS environments, FQM needs the central tenant ID when it is enabled, so FQM
+> requests this data from mod-users. However, in new ECS environments, modules are enabled for a tenant before the tenant
+> is added to a consortium, so mod-users is not able to provide this data at enable-time. As a result, in this case, it is
+> necessary to provide the central tenant ID as a parameter, named `centralTenantId`, in the `POST` request to the tenant
+> management API when enabling mod-fqm-manager. After the tenant has been added to the consortium, this parameter is no
+> longer required when enabling mod-fqm-manager (e.g., when updating the module).
 
 
 ## Querying FQM - Step-by-step guide
@@ -437,6 +462,9 @@ Fields prefixed with an underscore are reserved for use by FQM.
 
 #### _deleted
 The field name "_deleted" can be used to indicate that the record corresponding to a particular content ID has been deleted.
+
+#### _version
+The name "_version" can be used to indicate the version number of the query.
 
 ## Additional information
 

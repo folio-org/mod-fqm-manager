@@ -20,7 +20,7 @@ public class LocalizationService {
   // refers to the entity type as a whole in plural, e.g. "Users", "Purchase order lines"
   private static final String ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s";
   // refers to a single column inside the entity type, e.g. "Name", "Barcode"
-  private static final String ENTITY_TYPE_COLUMN_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s.%s";
+  private static final String ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s.%s";
   // refers to a property inside an objectType column inside the entity type, e.g. "City" inside "Address" column inside "Users"
   private static final String ENTITY_TYPE_COLUMN_NESTED_LABEL_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s.%s.%s";
@@ -29,9 +29,16 @@ public class LocalizationService {
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
   private static final String ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s._custom_field_possessive";
+  
+  // provides locale-specific way of joining `Source name — Field name`, to account for different separators or RTL
+  // see MODFQMMGR-409 for more details
+  private static final String ENTITY_TYPE_SOURCE_PREFIX_JOINER = "mod-fqm-manager.entityType._sourceLabelJoiner";
 
   // the translation parameter for custom fields
   private static final String CUSTOM_FIELD_PARAMETER = "customField";
+
+  // translation logic happens in Warning classes
+  public static final String MIGRATION_WARNING_TRANSLATION_TEMPLATE = "mod-fqm-manager.migration.warning.%s";
 
   private TranslationService translationService;
 
@@ -43,23 +50,48 @@ public class LocalizationService {
     return entityType;
   }
 
-  public void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
-    // Custom field names are already localized as they are user-defined, so they require special handling
-    if (Boolean.TRUE.equals(column.getIsCustomField())) {
-      column.setLabelAlias(getEntityTypeCustomFieldLabel(entityType.getName(), column.getName()));
-      return;
-    }
+  void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
+    if (column.getLabelAlias() == null) {
+      // Custom field names are already localized as they are user-defined, so they require special handling
+      if (Boolean.TRUE.equals(column.getIsCustomField())) {
+        column.setLabelAlias(getEntityTypeCustomFieldLabel(entityType.getName(), column.getName()));
+        return;
+      }
 
-    column.setLabelAlias(getEntityTypeColumnLabel(entityType.getName(), column.getName()));
-
-    if (column.getDataType() instanceof ObjectType objectColumn) {
-      localizeObjectColumn(entityType, column, objectColumn);
-    } else if (column.getDataType() instanceof ArrayType arrayColumn) {
-      localizeArrayColumn(entityType, column, arrayColumn);
+      column.setLabelAlias(getEntityTypeColumnLabel(entityType.getName(), column.getName()));
+      if (column.getDataType() instanceof ObjectType objectColumn) {
+        localizeObjectColumn(entityType, column, objectColumn);
+      } else if (column.getDataType() instanceof ArrayType arrayColumn) {
+        localizeArrayColumn(entityType, column, arrayColumn);
+      }
+    } else {
+      // column has been previously translated, so just append source translations to it
+      String sourceTranslation = getTranslationWithSourcePrefix(entityType, column.getName(), column.getLabelAlias());
+      column.setLabelAlias(sourceTranslation);
     }
   }
 
-  protected void localizeObjectColumn(EntityType entityType, EntityTypeColumn column, ObjectType objectColumn) {
+  private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {
+    int currentSourceIndex = columnName.indexOf(".");
+    if (currentSourceIndex > 0) {
+      String currentSource = columnName.substring(0, currentSourceIndex);
+      String sourceLabel = translationService.format(
+        ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource)
+      );
+
+      return translationService.format(
+        ENTITY_TYPE_SOURCE_PREFIX_JOINER,
+        "sourceLabel",
+        sourceLabel,
+        "fieldLabel",
+        fieldLabel
+      );
+    } else {
+      return fieldLabel;
+    }
+  }
+
+  private void localizeObjectColumn(EntityType entityType, EntityTypeColumn column, ObjectType objectColumn) {
     objectColumn
       .getProperties()
       .forEach(property -> {
@@ -77,7 +109,7 @@ public class LocalizationService {
       });
   }
 
-  protected void localizeArrayColumn(EntityType entityType, EntityTypeColumn column, ArrayType arrayColumn) {
+  private void localizeArrayColumn(EntityType entityType, EntityTypeColumn column, ArrayType arrayColumn) {
     if (arrayColumn.getItemDataType() instanceof ObjectType nestedObject) {
       localizeObjectColumn(entityType, column, nestedObject);
     } else if (arrayColumn.getItemDataType() instanceof ArrayType nestedArray) {
@@ -85,12 +117,12 @@ public class LocalizationService {
     }
   }
 
-  public String getEntityTypeLabel(String tableName) {
+  String getEntityTypeLabel(String tableName) {
     return translationService.format(ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE.formatted(tableName));
   }
 
-  public String getEntityTypeColumnLabel(String tableName, String columnName) {
-    return translationService.format(ENTITY_TYPE_COLUMN_LABEL_TRANSLATION_TEMPLATE.formatted(tableName, columnName));
+  private String getEntityTypeColumnLabel(String tableName, String columnName) {
+    return translationService.format(ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(tableName, columnName));
   }
 
   public String getEntityTypeColumnLabelNested(String tableName, String columnName, String nestedPropertyName) {
@@ -99,7 +131,7 @@ public class LocalizationService {
     );
   }
 
-  public String getQualifiedEntityTypeColumnLabelNested(
+  private String getQualifiedEntityTypeColumnLabelNested(
     String tableName,
     String columnName,
     String nestedPropertyName
@@ -115,7 +147,7 @@ public class LocalizationService {
 
   // Custom field names are already localized as they are user-defined, so we prepend a possessive (e.g. User's)
   // but leave the {@code customField} untouched
-  public String getEntityTypeCustomFieldLabel(String tableName, String customField) {
+  private String getEntityTypeCustomFieldLabel(String tableName, String customField) {
     return translationService.format(
       ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE.formatted(tableName),
       CUSTOM_FIELD_PARAMETER,

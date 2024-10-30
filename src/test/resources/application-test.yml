@@ -2,6 +2,7 @@ server:
   port: 8081
 mod-fqm-manager:
   permissions-cache-timeout-seconds: 60
+  entity-type-cache-timeout-seconds: 3600
 spring:
   application:
     name: mod-fqm-manager

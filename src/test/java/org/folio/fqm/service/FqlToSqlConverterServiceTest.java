@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -44,6 +45,7 @@ class FqlToSqlConverterServiceTest {
   void setup() {
     fqlToSqlConverter = new FqlToSqlConverterService(new FqlService());
     entityType = new EntityType()
+      .sources(List.of())
       .columns(
         List.of(
           new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),
@@ -73,7 +75,9 @@ class FqlToSqlConverterServiceTest {
         )
       );
   }
+
   static Condition trueCondition = trueCondition();
+
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
     return Arrays.asList(
@@ -96,17 +100,18 @@ class FqlToSqlConverterServiceTest {
         field("field2").equal(true)
       ),
       Arguments.of(
-        "equals date and time",
-        """
-          {"field4": {"$eq": "2023-06-02T16:11:08.766+00:00"}}""",
-        field("field4").equalIgnoreCase("2023-06-02T16:11:08.766+00:00")
-      ),
-      Arguments.of(
         "equals date",
         """
           {"field4": {"$eq": "2023-06-02"}}""",
-        field("field4").greaterOrEqual("2023-06-02")
-          .and(field("field4").lessThan("2023-06-03"))
+        field("field4").greaterOrEqual("2023-06-02T00:00:00.000")
+          .and(field("field4").lessThan("2023-06-03T00:00:00.000"))
+      ),
+      Arguments.of(
+        "equals date and time",
+        """
+          {"field4": {"$eq": "2024-09-13T04:00:00.000"}}""",
+        field("field4").greaterOrEqual("2024-09-13T04:00:00.000")
+          .and(field("field4").lessThan("2024-09-14T04:00:00.000"))
       ),
       Arguments.of(
         "equals ranged UUID",
@@ -171,17 +176,18 @@ class FqlToSqlConverterServiceTest {
         field("field2").notEqual(true)
       ),
       Arguments.of(
-        "not equals date and time",
-        """
-          {"field4": {"$ne": "2023-06-02T16:11:08.766+00:00"}}""",
-        field("field4").notEqualIgnoreCase("2023-06-02T16:11:08.766+00:00")
-      ),
-      Arguments.of(
         "not equals date",
         """
           {"field4": {"$ne": "2023-06-02"}}""",
-        field("field4").greaterOrEqual("2023-06-03")
-          .or(field("field4").lessThan("2023-06-02"))
+        field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
+          .or(field("field4").lessThan("2023-06-02T00:00:00.000"))
+      ),
+      Arguments.of(
+        "not equals date and time",
+        """
+          {"field4": {"$ne": "2023-06-02T04:00:00.000"}}""",
+        field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
+          .or(field("field4").lessThan("2023-06-02T04:00:00.000"))
       ),
 
       Arguments.of(
@@ -212,7 +218,13 @@ class FqlToSqlConverterServiceTest {
         "greater than date",
         """
           {"field4": {"$gt": "2023-06-02"}}""",
-        field("field4").greaterOrEqual("2023-06-03")
+        field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
+      ),
+      Arguments.of(
+        "greater than date and time",
+        """
+          {"field4": {"$gt": "2023-06-02T04:00:00.000"}}""",
+        field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
       ),
 
       Arguments.of(
@@ -231,7 +243,13 @@ class FqlToSqlConverterServiceTest {
         "greater than or equal to date",
         """
           {"field4": {"$gte": "2023-06-02"}}""",
-        field("field4").greaterOrEqual("2023-06-02")
+        field("field4").greaterOrEqual("2023-06-02T00:00:00.000")
+      ),
+      Arguments.of(
+        "greater than or equal to date and time",
+        """
+          {"field4": {"$gte": "2023-06-02T05:30:00.000"}}""",
+        field("field4").greaterOrEqual("2023-06-02T05:30:00.000")
       ),
 
       Arguments.of(
@@ -250,7 +268,13 @@ class FqlToSqlConverterServiceTest {
         "less than date",
         """
           {"field4": {"$lt": "2023-06-02"}}""",
-        field("field4").lessThan("2023-06-02")
+        field("field4").lessThan("2023-06-02T00:00:00.000")
+      ),
+      Arguments.of(
+        "less than date and time",
+        """
+          {"field4": {"$lt": "2023-06-02T06:00:00.000"}}""",
+        field("field4").lessThan("2023-06-02T06:00:00.000")
       ),
 
       Arguments.of(
@@ -269,7 +293,13 @@ class FqlToSqlConverterServiceTest {
         "less than or equal to date",
         """
           {"field4": {"$lte": "2023-06-02"}}""",
-        field("field4").lessThan("2023-06-03")
+        field("field4").lessThan("2023-06-03T00:00:00.000")
+      ),
+      Arguments.of(
+        "less than or equal to date and time",
+        """
+          {"field4": {"$lte": "2023-06-02T07:00:00.000"}}""",
+        field("field4").lessThan("2023-06-03T07:00:00.000")
       ),
 
       Arguments.of(
@@ -341,7 +371,7 @@ class FqlToSqlConverterServiceTest {
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
         cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
-        and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
       ),
       Arguments.of(
         "not in list open UUID",
@@ -647,6 +677,16 @@ class FqlToSqlConverterServiceTest {
     assertThrows(
       FieldNotFoundException.class,
       () -> fqlToSqlConverter.getSqlCondition(fqlWithNonExistingColumn, entityType)
+    );
+  }
+
+  @Test
+  void shouldThrowExceptionForInvalidDateValue() {
+    String invalidDateFql = """
+      {"field4": {"$eq": "03-09-2024"}}""";
+    assertThrows(
+      InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition(invalidDateFql, entityType)
     );
   }
 }

@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
@@ -28,16 +29,19 @@ public class EntityTypeInitializationService {
 
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   @Autowired
   public EntityTypeInitializationService(
     EntityTypeRepository entityTypeRepository,
     FolioExecutionContext folioExecutionContext,
-    ResourcePatternResolver resourceResolver
+    ResourcePatternResolver resourceResolver,
+    CrossTenantQueryService crossTenantQueryService
   ) {
     this.entityTypeRepository = entityTypeRepository;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
+    this.crossTenantQueryService = crossTenantQueryService;
 
     // this enables all JSON5 features, except for numeric ones (hex, starting/trailing
     // decimal points, use of NaN, etc), as those are not relevant for our use
@@ -60,9 +64,19 @@ public class EntityTypeInitializationService {
   }
 
   // called as part of tenant install/upgrade (see FqmTenantService)
-  public void initializeEntityTypes() throws IOException {
+  public void initializeEntityTypes(String centralTenantId) throws IOException {
     log.info("Initializing entity types");
-
+    if (centralTenantId == null) {
+      centralTenantId = crossTenantQueryService.getCentralTenantId();
+    }
+    if (centralTenantId != null) {
+      log.info("ECS central tenant ID: {}", centralTenantId);
+    }
+    else {
+      log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
+      centralTenantId = "${central_tenant_id}";
+    }
+    String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
     List<EntityType> desiredEntityTypes = Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),
@@ -74,7 +88,8 @@ public class EntityTypeInitializationService {
           return objectMapper.readValue(
             resource
               .getContentAsString(StandardCharsets.UTF_8)
-              .replace("${tenant_id}", folioExecutionContext.getTenantId()),
+              .replace("${tenant_id}", folioExecutionContext.getTenantId())
+              .replace("${central_tenant_id}", finalCentralTenantId),
             EntityType.class
           );
         } catch (IOException e) {

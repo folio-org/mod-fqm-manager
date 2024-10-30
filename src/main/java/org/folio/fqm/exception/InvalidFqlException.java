@@ -27,4 +27,9 @@ public class InvalidFqlException extends FqmException {
     errors.forEach((key, value) -> error.addParametersItem(new Parameter().key(key).value(value)));
     return error;
   }
+
+  @Override
+  public String getMessage() {
+    return getError().getMessage();
+  }
 }

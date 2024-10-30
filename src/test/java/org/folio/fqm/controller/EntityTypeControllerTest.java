@@ -14,6 +14,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeService;
+import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -42,6 +43,9 @@ class EntityTypeControllerTest {
   private EntityTypeService entityTypeService;
 
   @MockBean
+  private MigrationService migrationService;
+
+  @MockBean
   private FolioExecutionContext folioExecutionContext;
 
   @Test
@@ -51,7 +55,7 @@ class EntityTypeControllerTest {
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id)).thenReturn(Optional.of(mockDefinition));
+    when(entityTypeService.getEntityTypeDefinition(id,false, true)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -66,17 +70,26 @@ class EntityTypeControllerTest {
       .andExpect(jsonPath("$.columns[0].labelAlias", is(col.getLabelAlias())))
       .andExpect(jsonPath("$.columns[0].visibleByDefault", is(col.getVisibleByDefault())));
   }
-
   @Test
-  void shouldReturnNotFoundErrorWhenEntityNotFound() throws Exception {
+  void shouldReturnEntityTypeDefinitionWithHiddenColumn() throws Exception {
     UUID id = UUID.randomUUID();
+    String derivedTableName = "derived_table_01";
+    EntityTypeColumn col = getHiddenEntityTypeColumn();
+    EntityType mockDefinition = getEntityType(col);
     when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(UUID.randomUUID())).thenReturn(Optional.empty());
+    when(entityTypeService.getEntityTypeDefinition(id,true, true)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
-      .header(XOkapiHeaders.TENANT, "tenant_01");
-    mockMvc.perform(builder).andExpect(status().isNotFound());
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .queryParam("includeHidden", String.valueOf(true));
+    mockMvc
+      .perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.name", is(derivedTableName)))
+      .andExpect(jsonPath("$.labelAlias", is(mockDefinition.getLabelAlias())))
+      .andExpect(jsonPath("$.columns[0].name", is(col.getName())))
+      .andExpect(jsonPath("$.columns[0].hidden", is(col.getHidden())));
   }
 
   @Test
@@ -92,16 +105,20 @@ class EntityTypeControllerTest {
       .get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
+
     when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
+    when(migrationService.getLatestVersion()).thenReturn("newest coolest version");
+
     mockMvc
       .perform(requestBuilder)
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.[0].id", is(expectedSummary.get(0).getId().toString())))
-      .andExpect(jsonPath("$.[0].label", is(expectedSummary.get(0).getLabel())))
-      .andExpect(jsonPath("$.[0].missingPermissions").doesNotExist())
-      .andExpect(jsonPath("$.[1].id", is(expectedSummary.get(1).getId().toString())))
-      .andExpect(jsonPath("$.[1].label", is(expectedSummary.get(1).getLabel())))
-      .andExpect(jsonPath("$.[1].missingPermissions").doesNotExist());
+      .andExpect(jsonPath("$.entityTypes.[0].id", is(expectedSummary.get(0).getId().toString())))
+      .andExpect(jsonPath("$.entityTypes.[0].label", is(expectedSummary.get(0).getLabel())))
+      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[1].id", is(expectedSummary.get(1).getId().toString())))
+      .andExpect(jsonPath("$.entityTypes.[1].label", is(expectedSummary.get(1).getLabel())))
+      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$._version", is("newest coolest version")));
 
     verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false);
     verifyNoMoreInteractions(entityTypeService);
@@ -134,8 +151,10 @@ class EntityTypeControllerTest {
       .get("/entity-types")
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
+
     when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
-    mockMvc.perform(requestBuilder).andExpect(status().isOk()).andExpect(jsonPath("$", is(expectedSummary)));
+
+    mockMvc.perform(requestBuilder).andExpect(status().isOk()).andExpect(jsonPath("$.entityTypes", is(expectedSummary)));
   }
 
   @Test
@@ -270,5 +289,14 @@ class EntityTypeControllerTest {
       .dataType(new StringType().dataType("stringType"))
       .labelAlias("derived_column_alias_01")
       .visibleByDefault(false);
+  }
+
+  private static EntityTypeColumn getHiddenEntityTypeColumn() {
+    return new EntityTypeColumn()
+      .name("derived_column_name_01")
+      .dataType(new StringType().dataType("stringType"))
+      .labelAlias("derived_column_alias_01")
+      .visibleByDefault(false)
+      .hidden(false);
   }
 }

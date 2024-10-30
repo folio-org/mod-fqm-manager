@@ -7,11 +7,7 @@
   <include file="harvested-views.xml" relativeToChangelogFile="true"/>
   <include file="derived-tables.xml" relativeToChangelogFile="true"/>
   <changeSet id="create-mat-views-pol-payment-receipt-status" author="bsharp@ebsco.com" runOnChange="true">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName = "po_line" schemaName="${tenant_id}_mod_orders_storage"/>
-    </preConditions>
-    <sqlFile path="sql/create-mat-view-pol-payment-status.sql" relativeToChangelogFile="true"/>
-    <sqlFile path="sql/create-mat-view-pol-receipt-status.sql" relativeToChangelogFile="true"/>
+    <!-- Changeset logic intentionally removed -->
   </changeSet>
   <changeSet id="create-mat-view-drv-inventory-statistical-code-full" author="bsharp@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
@@ -38,38 +34,23 @@
   </changeSet>
 
   <changeSet id="MODFQMMGR-171" author="kjain@ebsco.com" runOnChange="true">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName = "instance" schemaName="${tenant_id}_mod_inventory_storage"/>
-    </preConditions>
-    <comment>Add materialized view for languages</comment>
-    <sqlFile path="sql/create-mat-view-languages.sql" relativeToChangelogFile="true"/>
+    <comment>Remove unneeded materialized view for languages</comment>
+    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_languages;</sql>
   </changeSet>
-
-  <!-- These slow change sets should be last, since they depend on previously run change sets! -->
-  <!-- Note: These don't do concurrent refreshes, since that requires the views to have been refreshed before -->
-  <changeSet id="MODFQMMGR-210-refresh-payment-status" author="mweaver@ebsco.com" runOnChange="true" context="slow">
-    <preConditions onFail="CONTINUE">
-      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_pol_payment_status';</sqlCheck>
-    </preConditions>
-    <sql>REFRESH MATERIALIZED VIEW drv_pol_payment_status;</sql>
+  <changeSet id="MODFQMMGR-210-refresh-payment-status" author="mweaver@ebsco.com" runOnChange="true">
+    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_pol_payment_status;</sql>
   </changeSet>
-  <changeSet id="MODFQMMGR-210-refresh-receipt-status" author="mweaver@ebsco.com" runOnChange="true" context="slow">
-    <preConditions onFail="CONTINUE">
-      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_pol_receipt_status';</sqlCheck>
-    </preConditions>
-    <sql>REFRESH MATERIALIZED VIEW drv_pol_receipt_status;</sql>
+  <changeSet id="MODFQMMGR-210-refresh-receipt-status" author="mweaver@ebsco.com" runOnChange="true">
+    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_pol_receipt_status;</sql>
   </changeSet>
-  <changeSet id="MODFQMMGR-210-refresh-statistical-code" author="mweaver@ebsco.com" runOnChange="true" context="slow">
+  <changeSet id="MODFQMMGR-210-refresh-statistical-code" author="mweaver@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_statistical_code_full';</sqlCheck>
     </preConditions>
     <sql>REFRESH MATERIALIZED VIEW drv_inventory_statistical_code_full;</sql>
   </changeSet>
-  <changeSet id="MODFQMMGR-210-refresh-languages" author="mweaver@ebsco.com" runOnChange="true" context="slow">
-    <preConditions onFail="CONTINUE">
-      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_languages';</sqlCheck>
-    </preConditions>
-    <sql>REFRESH MATERIALIZED VIEW drv_languages;</sql>
+  <changeSet id="MODFQMMGR-210-refresh-languages" author="mweaver@ebsco.com" runOnChange="true">
+    <!-- Changeset logic intentionally removed -->
   </changeSet>
 
 </databaseChangeLog>

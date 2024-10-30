@@ -2,10 +2,14 @@ package org.folio.fqm.service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
+import org.folio.tenant.domain.dto.Parameter;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -46,8 +50,15 @@ public class FqmTenantService extends TenantService {
 
   @Override
   protected void afterLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    List<Parameter> params = tenantAttributes.getParameters();
+    String centralTenantId = params == null ? null : tenantAttributes.getParameters()
+      .stream()
+      .filter(param -> "centralTenantId".equals(param.getKey()))
+      .map(Parameter::getValue)
+      .findFirst()
+      .orElse(null);
     try {
-      entityTypeInitializationService.initializeEntityTypes();
+      entityTypeInitializationService.initializeEntityTypes(centralTenantId);
     } catch (IOException e) {
       throw new UncheckedIOException("Failed to initialize entity types", e);
     }

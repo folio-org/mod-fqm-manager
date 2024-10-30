@@ -1,5 +1,6 @@
 package org.folio.fqm.controller;
 
+import org.folio.fqm.domain.dto.DataRefreshResponse;
 import org.folio.fqm.resource.DataRefreshController;
 import org.folio.fqm.service.DataRefreshService;
 import org.folio.spring.FolioExecutionContext;
@@ -12,7 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.mockito.Mockito.doNothing;
+import java.util.List;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,13 +33,16 @@ class DataRefreshControllerTest {
   @Test
   void refreshDataTest() throws Exception {
     String tenantId = "tenant_01";
+    DataRefreshResponse expectedResponse = new DataRefreshResponse()
+      .successfulRefresh(List.of())
+      .failedRefresh(List.of());
     RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/materialized-views/refresh")
       .header(XOkapiHeaders.TENANT, tenantId)
       .contentType(APPLICATION_JSON);
     when(executionContext.getTenantId()).thenReturn(tenantId);
-    doNothing().when(dataRefreshService).refreshData(tenantId);
+    when(dataRefreshService.refreshData(tenantId)).thenReturn(expectedResponse);
     mockMvc.perform(requestBuilder)
-      .andExpect(status().isNoContent());
+      .andExpect(status().isOk());
     verify(dataRefreshService, times(1)).refreshData(tenantId);
   }
 }

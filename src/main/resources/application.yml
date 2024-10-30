@@ -1,7 +1,9 @@
 mod-fqm-manager:
   query-retention-duration: 3h
   max-query-size: ${MAX_QUERY_SIZE:1250000}
+  bypass-permissions: false # local development ONLY
   permissions-cache-timeout-seconds: 60
+  entity-type-cache-timeout-seconds: 3600
 server:
   port: 8081
 spring:
@@ -37,12 +39,11 @@ spring:
         format_sql: true
         jdbc:
           batch_size: 50
-    show-sql: false
+    show-sql: true
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.xml
   jackson:
-    default-property-inclusion: non_empty
     deserialization:
       fail-on-unknown-properties: false
       accept-single-value-as-array: true
@@ -74,8 +75,9 @@ coffee-boots:
   cache:
     spec:
       queryCache: maximumSize=500,expireAfterWrite=1m
+      userTenantCache: maximumSize=100,expireAfterWrite=5h
 folio:
-  is-eureka: false
+  is-eureka: ${IS_EUREKA:false}
   tenant:
     validation:
       enabled: true

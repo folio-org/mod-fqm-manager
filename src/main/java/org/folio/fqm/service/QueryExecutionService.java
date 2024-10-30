@@ -1,14 +1,14 @@
 package org.folio.fqm.service;
 
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.model.FqlQueryWithContext;
+import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.function.Supplier;
 
 @Log4j2
 @Service
@@ -24,10 +24,15 @@ public class QueryExecutionService {
   @Async
   // Long-running method. Running this method within a transaction boundary will hog db connection for
   // long time. Hence, do not run this method in a transaction.
-  public void executeQueryAsync(Query query, int maxQuerySize) {
+  public void executeQueryAsync(Query query, EntityType entityType, int maxQuerySize) {
     try {
       log.info("Executing query {}", query.queryId());
-      var fqlQueryWithContext = new FqlQueryWithContext(folioExecutionContext.getTenantId(), query.entityTypeId(), query.fqlQuery(), false);
+      FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(
+        folioExecutionContext.getTenantId(),
+        entityType,
+        query.fqlQuery(),
+        false
+      );
       DataBatchCallback dataBatchCallback = dataBatchCallbackSupplier.get();
       queryProcessorService.getIdsInBatch(
         fqlQueryWithContext,
@@ -36,7 +41,6 @@ public class QueryExecutionService {
         totalCount -> callbacks.handleSuccess(query, totalCount),
         throwable -> callbacks.handleFailure(query, throwable)
       );
-
     } catch (Exception exception) {
       callbacks.handleFailure(query, exception);
     }

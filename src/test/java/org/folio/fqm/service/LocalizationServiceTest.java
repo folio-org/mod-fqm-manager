@@ -1,6 +1,9 @@
 package org.folio.fqm.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -19,8 +22,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Map;
+
 @ExtendWith(MockitoExtension.class)
 class LocalizationServiceTest {
+
+  private static final String ENTITY_TYPE_SOURCE_PREFIX_JOINER = "mod-fqm-manager.entityType._sourceLabelJoiner";
 
   @Mock
   private TranslationService translationService;
@@ -28,28 +35,80 @@ class LocalizationServiceTest {
   @InjectMocks
   private LocalizationService localizationService;
 
-  @Test
-  void testBasicEntityTypeFormatting() {
-    String expectedTableTranslationKey = "mod-fqm-manager.entityType.table_name";
-    String expectedColumnTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
-
-    String expectedTableTranslation = "Table Name";
-    String expectedColumnTranslation = "Column Name";
+  private void testBasicEntityTypeFormatting(Map<String, String> translations,
+                                             String expectedTableTranslation,
+                                             String expectedColumnTranslation,
+                                             int numInvocations) {
+    translations.forEach((translationKey, translationValue) -> when(translationService.format(translationKey)).thenReturn(translationValue));
 
     EntityType entityType = new EntityType()
       .name("table_name")
       .addColumnsItem(new EntityTypeColumn().name("column_name"));
 
-    when(translationService.format(expectedTableTranslationKey)).thenReturn(expectedTableTranslation);
-    when(translationService.format(expectedColumnTranslationKey)).thenReturn(expectedColumnTranslation);
-
     EntityType actual = localizationService.localizeEntityType(entityType);
-
     assertEquals(expectedTableTranslation, actual.getLabelAlias());
     assertEquals(expectedColumnTranslation, actual.getColumns().get(0).getLabelAlias());
+    verify(translationService, times(numInvocations)).format(anyString());
+    verifyNoMoreInteractions(translationService);
+  }
 
-    verify(translationService, times(1)).format(expectedTableTranslationKey);
-    verify(translationService, times(1)).format(expectedColumnTranslationKey);
+  private void mockSourceLabelJoiner() {
+    when(
+      translationService.format(
+        eq(ENTITY_TYPE_SOURCE_PREFIX_JOINER),
+        eq("sourceLabel"),
+        anyString(),
+        eq("fieldLabel"),
+        anyString()
+      )
+    )
+      .thenAnswer(invocation -> {
+        String sourceLabel = invocation.getArgument(2);
+        String fieldLabel = invocation.getArgument(4);
+        return sourceLabel + " | " + fieldLabel;
+      });
+  }
+
+  @Test
+  void testSimpleEntityTypeTranslations() {
+    String expectedTableTranslation = "Table Name";
+    String expectedColumnTranslation = "Column Name";
+    testBasicEntityTypeFormatting(
+      Map.of(
+        "mod-fqm-manager.entityType.table_name",
+        expectedTableTranslation,
+        "mod-fqm-manager.entityType.table_name.column_name",
+        expectedColumnTranslation
+      ),
+      expectedTableTranslation,
+      expectedColumnTranslation,
+      2
+    );
+  }
+
+  @Test
+  void testEntityTypeRootTranslations() {
+    String expectedTableTranslationKey = "mod-fqm-manager.entityType.table_name";
+    String expectedTableTranslation = "Table Name";
+
+    String expectedInnerSourceTranslationKey = "mod-fqm-manager.entityType.table_name.nested_source";
+    String expectedInnerSourceTranslation = "Inner Source Name";
+
+    String expectedColumnTranslation = "Field from a simple entity!";
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(new EntityTypeColumn().name("nested_source.foo").labelAlias(expectedColumnTranslation));
+
+    when(translationService.format(expectedTableTranslationKey)).thenReturn(expectedTableTranslation);
+    when(translationService.format(expectedInnerSourceTranslationKey)).thenReturn(expectedInnerSourceTranslation);
+    mockSourceLabelJoiner();
+
+    EntityType result = localizationService.localizeEntityType(entityType);
+    assertEquals("Inner Source Name | Field from a simple entity!", result.getColumns().get(0).getLabelAlias());
+
+    verify(translationService, times(2)).format(anyString());
+    verify(translationService, times(1)).format(anyString(), any(), any(), any(), any());
     verifyNoMoreInteractions(translationService);
   }
 

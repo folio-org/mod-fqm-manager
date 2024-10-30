@@ -6,6 +6,7 @@ import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class QueryProcessorService {
   private final ResultSetRepository resultSetRepository;
   private final IdStreamer idStreamer;
   private final FqlService fqlService;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   /**
    * Process the FQL query and return the result IDs in batches.
@@ -48,7 +50,7 @@ public class QueryProcessorService {
     try {
       Fql fql = fqlService.getFql(fqlQueryWithContext.fqlQuery());
       int idsCount = idStreamer.streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         batchSize,
@@ -62,17 +64,27 @@ public class QueryProcessorService {
   /**
    * Process the FQL query and return the results.
    *
-   * @param entityTypeId Entity type ID
-   * @param fqlQuery     FQL query
-   * @param fields       fields to return in query results
-   * @param afterId      A cursor used for pagination. 'afterId' is the ID representing your place in the paginated list.
-   *                     This parameter should be omitted in the first call. All subsequent pagination call should
-   *                     include 'afterId'
-   * @param limit        Count of records to be returned.
+   * @param entityType Entity type
+   * @param fqlQuery   FQL query
+   * @param fields     fields to return in query results
+   * @param afterId    A cursor used for pagination. 'afterId' is the ID representing your place in the paginated list.
+   *                   This parameter should be omitted in the first call. All subsequent pagination call should
+   *                   include 'afterId'
+   * @param limit      Count of records to be returned.
    * @return Results matching the query
    */
-  public List<Map<String, Object>> processQuery(UUID entityTypeId, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
+  public List<Map<String, Object>> processQuery(EntityType entityType, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
-    return resultSetRepository.getResultSet(entityTypeId, fql, fields, afterId, limit);
+    boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+    return resultSetRepository.getResultSetSync(
+      UUID.fromString(entityType.getId()),
+      fql,
+      fields,
+      afterId,
+      limit,
+      tenantsToQuery,
+      ecsEnabled
+    );
   }
 }

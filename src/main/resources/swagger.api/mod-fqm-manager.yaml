@@ -52,13 +52,61 @@ paths:
         - materializedViews
       description: Refresh all materialized views and similar data for a tenant.
       responses:
-        '204':
+        '200':
           description: 'Data refreshed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dataRefreshResponse'
         '400':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
-
+  /fqm/version:
+    get:
+      operationId: getFqmVersion
+      tags:
+        - fqmVersion
+      description: Get version of the fqm.
+      responses:
+        '200':
+          description: 'Version of the fqm'
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
+  /fqm/migrate:
+    post:
+      summary: fqm migrate request
+      operationId: fqmMigrate
+      tags:
+        - fqmVersion
+      requestBody:
+        description: 'Request for FQM version submitted successfully'
+        required: true
+        content:
+          application/json:
+            schema:
+              description: Mapped to schema in folio-query-tool-metadata
+              type: object
+              format: FqmMigrateRequest
+      responses:
+        '200':
+          description: 'FQM version updated successfully'
+          content:
+            application/json:
+              schema:
+                description: Mapped to schemas in folio-query-tool-metadata
+                type: object
+                format: FqmMigrateResponse
+        '400':
+          $ref: '#/components/responses/badRequestResponse'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
 
 components:
   parameters:
@@ -99,13 +147,20 @@ components:
       additionalProperties:
         type: object
     entityTypeSummaries:
-      type: array
-      items:
-        $ref: '#/components/schemas/entityTypeSummary'
-    entityTypeSummary:
-      $ref: schemas/EntityTypeSummaryDTO.json
+      $ref: schemas/EntityTypeSummaries.json
     purgedQueries:
       $ref: schemas/PurgedQueries.json
+    dataRefreshResponse:
+      type: object
+      properties:
+        successfulRefresh:
+          type: array
+          items:
+            type: string
+        failedRefresh:
+          type: array
+          items:
+            type: string
 
   responses:
     badRequestResponse:
@@ -128,4 +183,3 @@ components:
                 code: unexpected.error
           schema:
             $ref: "#/components/schemas/errorResponse"
-

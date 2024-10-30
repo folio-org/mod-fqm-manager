@@ -1,17 +1,8 @@
 package org.folio.fqm.repository;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.or;
-import static org.jooq.impl.DSL.table;
-import static org.jooq.impl.DSL.trueCondition;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import lombok.RequiredArgsConstructor;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -19,17 +10,25 @@ import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.InsertValuesStep2;
-import org.jooq.JSONB;
+import org.folio.spring.FolioExecutionContext;
 import org.jooq.Record;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.table;
+
 @Repository
-@RequiredArgsConstructor
 @Log4j2
 public class EntityTypeRepository {
 
@@ -44,48 +43,60 @@ public class EntityTypeRepository {
 
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
 
-  @Qualifier("readerJooqContext")
   private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
+  private final FolioExecutionContext executionContext;
 
-  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId) {
-    log.info("Getting definition name for entity type ID: {}", entityTypeId);
+  private final Cache<String, Map<UUID, EntityType>> entityTypeCache;
 
-    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
-
-    return readerJooqContext
-      .select(definitionField)
-      .from(table(TABLE_NAME))
-      .where(field(ID_FIELD_NAME).eq(entityTypeId))
-      .fetchOptional(definitionField)
-      .map(this::unmarshallEntityType)
-      .map(entityType -> {
-        String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
-        if (customFieldsEntityTypeId != null) {
-          entityType.getColumns().addAll(fetchColumnNamesForCustomFields(UUID.fromString(customFieldsEntityTypeId)));
-        }
-        return entityType;
-      });
+  @Autowired
+  public EntityTypeRepository(@Qualifier("readerJooqContext") DSLContext readerJooqContext,
+                              DSLContext jooqContext,
+                              ObjectMapper objectMapper,
+                              FolioExecutionContext executionContext,
+                              @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:3600}") long cacheDurationSeconds) {
+    this.readerJooqContext = readerJooqContext;
+    this.jooqContext = jooqContext;
+    this.objectMapper = objectMapper;
+    this.executionContext = executionContext;
+    this.entityTypeCache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
-  public List<RawEntityTypeSummary> getEntityTypeSummaries(Set<UUID> entityTypeIds) {
-    log.info("Fetching entityTypeSummary for ids: {}", entityTypeIds);
-    Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
+  public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId, String tenantId) {
+    return getEntityTypeDefinitions(Collections.singleton(entityTypeId), tenantId).findFirst();
+  }
 
-    Field<Boolean> privateEntityField = field("(definition ->> 'private')::boolean", Boolean.class);
+  public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
+    log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
-    Condition publicEntityCondition = or(field(privateEntityField).isFalse(), field(privateEntityField).isNull());
-    Condition entityTypeIdCondition = isEmpty(entityTypeIds) ? trueCondition() : field("id").in(entityTypeIds);
-    return readerJooqContext
-      .select(definitionField)
-      .from(table(TABLE_NAME))
-      .where(entityTypeIdCondition.and(publicEntityCondition))
-      .fetch(definitionField)
-      .stream()
-      .map(this::unmarshallEntityType)
-      .map(entityType -> new RawEntityTypeSummary(UUID.fromString(entityType.getId()), entityType.getName(), entityType.getRequiredPermissions()))
-      .toList();
+    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId != null ? tenantId : executionContext.getTenantId(), tenantIdKey -> {
+        String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
+        Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
+      Map<String, EntityType> rawEntityTypes = readerJooqContext
+        .select(definitionField)
+        .from(table(tableName))
+        .fetch(definitionField)
+        .stream()
+        .map(this::unmarshallEntityType)
+        .collect(Collectors.toMap(EntityType::getId, Function.identity()));
+
+      return rawEntityTypes.values().stream()
+        .map(entityType -> {
+          String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
+          if (customFieldsEntityTypeId != null) {
+            entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
+          }
+          return entityType;
+        })
+        .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
+      }
+    );
+
+    if (isEmpty(entityTypeIds)) {
+      return entityTypes.values().stream();
+    }
+    return entityTypeIds.stream().filter(entityTypes::containsKey).map(entityTypes::get);
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {
@@ -112,10 +123,10 @@ public class EntityTypeRepository {
     });
   }
 
-  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(UUID entityTypeId) {
+  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId, EntityType entityType, Map<String, EntityType> rawEntityTypes) {
     log.info("Getting columns for entity type ID: {}", entityTypeId);
-    EntityType entityTypeDefinition = getEntityTypeDefinition(entityTypeId)
-      .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
+      Optional.ofNullable(rawEntityTypes.get(entityTypeId)).orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
@@ -129,10 +140,10 @@ public class EntityTypeRepository {
       .fetch()
       .stream()
       .map(row -> {
-        Object value = row.get(REQUIRED_FIELD_NAME);
-        Object extractedRefId = row.get(REF_ID);
-        assert value != null : "The value is marked as non-nullable in the database";
-        return handleSingleCheckBox(value.toString(), extractedRefId.toString(), sourceViewExtractor);
+        String name = row.get(REQUIRED_FIELD_NAME, String.class);
+        String refId = row.get(REF_ID, String.class);
+        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
+        return handleSingleCheckBox(name, refId, sourceViewExtractor);
       })
       .toList();
   }
@@ -156,6 +167,4 @@ public class EntityTypeRepository {
   private EntityType unmarshallEntityType(String str) {
     return objectMapper.readValue(str, EntityType.class);
   }
-
-  public record RawEntityTypeSummary(UUID id, String name, List<String> requiredPermissions) {}
 }

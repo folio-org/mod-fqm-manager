@@ -10,7 +10,8 @@
         {
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
-          "permissionsRequired": []
+          "permissionsRequired": [],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -21,77 +22,90 @@
     },
     {
       "id": "entity-types",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}",
           "permissionsRequired": ["fqm.entityTypes.item.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types",
           "permissionsRequired": ["fqm.entityTypes.collection.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "configuration.entries.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/entity-types/materialized-views/refresh",
-          "permissionsRequired": ["fqm.materializedViews.post"]
+          "permissionsRequired": ["fqm.materializedViews.post"],
+          "modulePermissions": ["configuration.entries.collection.get", "finance.exchange-rate.item.get"]
         }
       ]
     },
     {
       "id": "fqm-query",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.sync.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}",
-          "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get"]
+          "permissionsRequired": ["fqm.query.async.results.query.get"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/query/{query-id}/sortedIds",
-          "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get"]
+          "permissionsRequired": ["fqm.query.async.results.sortedids.get"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/fqm/version",
+          "permissionsRequired": ["fqm.version.get"],
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/fqm/migrate",
+          "permissionsRequired": ["fqm.migrate.post"],
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query/contents",
-          "permissionsRequired": ["fqm.query.async.results.get"],
-          "modulePermissions": ["perms.users.get"]
+          "permissionsRequired": ["fqm.query.async.results.post"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/query/purge",
-          "permissionsRequired": ["fqm.query.purge"]
+          "permissionsRequired": ["fqm.query.purge.post"]
         },
         {
           "methods": ["DELETE"],
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
         }
       ]
     },
@@ -106,7 +120,7 @@
           "unit": "hour",
           "delay": "1",
           "modulePermissions": [
-            "fqm.query.purge"
+            "fqm.query.purge.post"
           ]
         },
         {
@@ -123,7 +137,8 @@
   ],
   "permissionSets" : [
     {
-      "permissionName": "fqm.query.purge",
+      "permissionName": "fqm.query.purge.post",
+      "replaces":  ["fqm.query.purge"],
       "displayName": "FQM - purge old queries",
       "description": "Purge old queries",
       "visible": true
@@ -156,6 +171,29 @@
       "permissionName": "fqm.query.async.results.get",
       "displayName": "FQM - Retrieve results of a submitted query",
       "description": "Retrieve results of a submitted query",
+      "visible":  true,
+      "subPermissions": [
+        "fqm.query.async.results.post",
+        "fqm.query.async.results.sortedids.get",
+        "fqm.query.async.results.query.get"
+      ]
+    },
+    {
+      "permissionName": "fqm.query.async.results.sortedids.get",
+      "displayName": "FQM - Retrieve results of a submitted query with sorted Ids ",
+      "description": "Retrieve results of a submitted query with sorted Ids",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.results.query.get",
+      "displayName": "FQM - Retrieve results of a submitted query",
+      "description": "Retrieve results of a submitted query",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.async.results.post",
+      "displayName": "FQM - Retrieve results of a submitted query",
+      "description": "Retrieve results of a submitted query",
       "visible":  true
     },
     {
@@ -171,14 +209,22 @@
       "visible":  true
     },
     {
+      "permissionName": "fqm.version.get",
+      "displayName": "FQM - Get version of fqm",
+      "description": "Get the version of fqm",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.migrate.post",
+      "displayName": "FQM - Submit FQM Migration",
+      "description": "Submit FQM Migration and get results",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.materializedViews.post",
       "displayName": "FQM - Refresh materialized views",
       "description": "Refresh FQM materialized views",
-      "visible":  true,
-      "subPermissions": [
-        "configuration.entries.collection.get",
-        "finance.exchange-rate.item.get"
-      ]
+      "visible":  true
     },
     {
       "permissionName": "fqm.query.all",
@@ -191,7 +237,9 @@
         "fqm.query.async.post",
         "fqm.query.async.results.get",
         "fqm.query.async.delete",
-        "fqm.query.sync.get"
+        "fqm.query.sync.get",
+        "fqm.version.get",
+        "fqm.migrate.post"
       ],
       "visible": true
     }
@@ -203,11 +251,19 @@
     },
     {
       "id": "holdings-storage",
-      "version": "6.0 7.0"
+      "version": "6.0 7.0 8.0"
     },
     {
       "id": "instance-storage",
-      "version": "10.0"
+      "version": "10.0 11.0"
+    },
+    {
+      "id": "instance-date-types",
+      "version": "1.0"
+    },
+    {
+      "id": "instance-types",
+      "version": "2.0"
     },
     {
       "id": "loan-types",
@@ -216,10 +272,6 @@
     {
       "id": "material-types",
       "version": "2.2"
-    },
-    {
-      "id": "shelf-locations",
-      "version": "1.1"
     },
     {
       "id": "location-units",
@@ -244,6 +296,10 @@
     {
       "id": "users",
       "version": "16.0"
+    },
+    {
+      "id": "user-tenants",
+      "version": "1.0"
     },
     {
       "id": "loan-policy-storage",
@@ -316,6 +372,28 @@
     {
       "id": "organizations.organizations",
       "version": "1.2"
+    },
+    {
+      "id": "voucher-storage.vouchers",
+      "version": "1.2"
+    },
+    {
+      "id": "voucher-storage.voucher-lines",
+      "version": "2.1"
+    },
+    {
+      "id": "voucher-storage.voucher-number",
+      "version": "1.1"
+    },
+    {
+      "id": "search",
+      "version": "1.3"
+    }
+  ],
+  "optional": [
+    {
+      "id": "consortia",
+      "version": "1.0"
     }
   ],
   "launchDescriptor": {
@@ -366,6 +444,12 @@
       },
       { "name": "MAX_QUERY_SIZE",
         "value": "1250000"
+      },
+      { "name": "mod.fqm-manager.entity-type-cache-timeout-seconds",
+        "value": "300"
+      },
+      { "name": "IS_EUREKA",
+        "value": "false"
       }
     ]
   }

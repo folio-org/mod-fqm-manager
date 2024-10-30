@@ -8,6 +8,7 @@ import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,27 +27,29 @@ class QueryProcessorServiceTest {
   private ResultSetRepository resultSetRepository;
   private IdStreamer idStreamer;
   private FqlService fqlService;
+  private CrossTenantQueryService crossTenantQueryService;
 
   @BeforeEach
   public void setup() {
     resultSetRepository = mock(ResultSetRepository.class);
     idStreamer = mock(IdStreamer.class);
     fqlService = mock(FqlService.class);
-    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService);
+    crossTenantQueryService = mock(CrossTenantQueryService.class);
+    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService, crossTenantQueryService);
   }
 
   @Test
   void shouldGetIdsInBatch() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
-    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType();
     Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
     IntConsumer totalCountConsumer = mock(IntConsumer.class);
     Consumer<Throwable> errorConsumer = mock(Consumer.class);
 
     when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityTypeId, fqlCriteria, true);
+    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
     service.getIdsInBatch(fqlQueryWithContext,
       DEFAULT_BATCH_SIZE,
       idsConsumer,
@@ -56,7 +59,7 @@ class QueryProcessorServiceTest {
 
     verify(idStreamer, times(1))
       .streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         DEFAULT_BATCH_SIZE,
@@ -66,10 +69,10 @@ class QueryProcessorServiceTest {
 
   @Test
   void shouldConsumeButNotThrowError() {
-    Fql fql = new Fql(new EqualsCondition(new FqlField("status"), "missing"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("status"), "missing"));
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
-    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType();
     Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
     IntConsumer totalCountConsumer = mock(IntConsumer.class);
     AtomicInteger actualErrorCount = new AtomicInteger(0);
@@ -77,12 +80,12 @@ class QueryProcessorServiceTest {
     int expectedErrorCount = 1;
 
     when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityTypeId, fqlCriteria, true);
+    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
 
     doThrow(new RuntimeException("something went wrong"))
       .when(idStreamer)
       .streamIdsInBatch(
-        fqlQueryWithContext.entityTypeId(),
+        fqlQueryWithContext.entityType(),
         fqlQueryWithContext.sortResults(),
         fql,
         1000,
@@ -100,20 +103,23 @@ class QueryProcessorServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnPaginatedResults() {
     UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true, false);
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;
+    List<String> tenantIds = List.of("tenant_01");
     List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
-    Fql expectedFql = new Fql(new EqualsCondition(new FqlField("status"), "value1"));
+    Fql expectedFql = new Fql("", new EqualsCondition(new FqlField("status"), "value1"));
     List<String> fields = List.of("field1", "field2");
     List<Map<String, Object>> expectedContent = List.of(
       Map.of("field1", "value1", "field2", "value2"),
       Map.of("field1", "value1", "field2", "value4")
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
-    when(resultSetRepository.getResultSet(entityTypeId, expectedFql, fields, afterId, limit)).thenReturn(expectedContent);
-    List<Map<String, Object>> actualContent = service.processQuery(entityTypeId, fqlQuery, fields, afterId, limit);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantIds);
+    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds, false)).thenReturn(expectedContent);
+    List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
   }
 }

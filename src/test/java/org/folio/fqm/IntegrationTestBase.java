@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -68,6 +69,7 @@ public class IntegrationTestBase {
       .withEnv("DB_PASSWORD", "mypassword")
       .withEnv("DB_DATABASE", "mypostgres")
       .withEnv("okapi_url", "http://host.testcontainers.internal:" + mokapi.getPort())
+      .withEnv("mod-fqm-manager.entity-type-cache-timeout-seconds", "0")
       .withStartupTimeout(Duration.ofMinutes(3))
       .dependsOn(postgres);
 
@@ -102,6 +104,8 @@ public class IntegrationTestBase {
            """ + body.substring(1);
     postTenant(body);
 
+    createDummyViews();
+
     // Test: smoke test the /entity-types endpoint to verify DB interactions are working
     smokeTest();
   }
@@ -121,7 +125,8 @@ public class IntegrationTestBase {
 
   private static void postTenant(String body) {
     given()
-      .header(XOkapiHeaders.TENANT, TENANT_ID)
+//      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .headers(getOkapiHeaders())
       .contentType("application/json")
       .body(body)
       .when()
@@ -130,15 +135,21 @@ public class IntegrationTestBase {
       .statusCode(204);
   }
 
+  private static void createDummyViews() {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
+    // Create a src_user_custom_fields view, since the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
+    jdbcTemplate.execute("CREATE VIEW src_user_custom_fields AS SELECT '{}'::jsonb AS jsonb LIMIT 1");
+  }
+
   private static void smokeTest() {
     given()
       .headers(getOkapiHeaders())
       .contentType("application/json")
       .when()
-      .get("/entity-types")
+      .get("/entity-types?includeInaccessible=true")
       .then()
       .statusCode(200)
-      .body("$.size()", greaterThan(0));
+      .body("entityTypes.size()", greaterThan(0));
   }
 
   protected static Map<String, String> getOkapiHeaders() {
@@ -162,6 +173,9 @@ public class IntegrationTestBase {
             "totalRecords": 3
           }
           """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+      }
+      if (recordedRequest.getPath().matches("/user-tenants.*")) {
+        return new MockResponse().setBody("{\"userTenants\": [], \"totalRecords\": 0}").setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
       throw new RuntimeException("Unexpected request: " + recordedRequest.getPath());
     }

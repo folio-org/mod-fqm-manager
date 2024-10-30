@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.fqm.utils.IdColumnUtils.RESULT_ID_FIELD;
+import static org.folio.fqm.utils.EntityTypeUtils.RESULT_ID_FIELD;
 import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.field;
 

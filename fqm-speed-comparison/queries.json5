@@ -821,8 +821,8 @@
           },
           {
             $and: [
-              { 'loans.loan_date': { $gt: '2020-01-01' } },
-              { 'loans.loan_date': { $lt: '2021-01-01' } },
+              { 'loans.checkout_date': { $gt: '2020-01-01' } },
+              { 'loans.checkout_date': { $lt: '2021-01-01' } },
             ],
           },
         ],
@@ -931,7 +931,7 @@
           [
             'items.id',
             'items.status_name',
-            'loans.loan_date',
+            'loans.checkout_date',
             'loans.id',
             'loans.status_name',
             'users.active',

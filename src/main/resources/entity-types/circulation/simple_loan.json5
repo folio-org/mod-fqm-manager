@@ -130,7 +130,7 @@
 
     },
     {
-      name: 'loan_date',
+      name: 'checkout_date',
       sourceAlias: 'loan',
       dataType: {
         dataType: 'dateType',
@@ -138,6 +138,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'loanDate'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'loanDate\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
@@ -214,6 +215,7 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'itemStatus'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'itemStatus\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'

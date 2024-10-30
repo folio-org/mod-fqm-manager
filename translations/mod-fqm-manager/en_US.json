@@ -835,7 +835,7 @@
     "entityType.simple_loans.item_effective_location_id_at_check_out": "Item effective location UUID at check out",
     "entityType.simple_loans.item_id": "Item UUID",
     "entityType.simple_loans.item_status": "Item status",
-    "entityType.simple_loans.loan_date": "Loan date",
+    "entityType.simple_loans.checkout_date": "Checkout date",
     "entityType.simple_loans.loan_policy_id": "Loan policy UUID",
     "entityType.simple_loans.lost_item_policy_id": "Lost item policy UUID",
     "entityType.simple_loans.overdue_fine_policy_id": "Overdue fine policy UUID",

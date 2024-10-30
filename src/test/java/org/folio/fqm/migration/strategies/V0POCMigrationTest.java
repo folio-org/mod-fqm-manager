@@ -158,7 +158,7 @@ class V0POCMigrationTest extends TestTemplate {
               "groups.group",
               "loans.id",
               "loans.status_name",
-              "loans.loan_date",
+              "loans.checkout_date",
               "loans.due_date",
               "lpolicy.id",
               "lpolicy.name",

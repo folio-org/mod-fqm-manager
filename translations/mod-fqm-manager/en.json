@@ -974,6 +974,8 @@
   "entityType.simple_organization.accounts.account_status._qualified": "Accounts status",
   "entityType.simple_organization.accounts.acq_unit_ids": "Acquisition unit UUIDs",
   "entityType.simple_organization.accounts.acq_unit_ids._qualified": "Accounts acquisition unit UUIDs",
+  "entityType.simple_organization.accounts.acq_unit": "Acquisition unit names",
+  "entityType.simple_organization.accounts.acq_unit._qualified": "Accounts acquisition unit names",
   "entityType.simple_organization.accounts.app_system_no": "Accounting code",
   "entityType.simple_organization.accounts.app_system_no._qualified": "Accounts accounting code",
   "entityType.simple_organization.accounts.contact_info": "Contact info",

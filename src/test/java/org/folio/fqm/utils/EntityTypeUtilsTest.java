@@ -1,7 +1,10 @@
 package org.folio.fqm.utils;
 
+import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
@@ -86,5 +89,15 @@ class EntityTypeUtilsTest {
     assertEquals(expectedSortFields, actualSortFields);
   }
 
-
+  @Test
+  void shouldGetDateFields() {
+    EntityType entityType = new EntityType()
+      .columns(List.of(
+        new EntityTypeColumn().name("dateField").dataType(new DateType()),
+        new EntityTypeColumn().name("notDateField").dataType(new StringType())
+      ));
+    List<String> expectedDateFields = List.of("dateField");
+    List<String> actualDateFields = EntityTypeUtils.getDateFields(entityType);
+    assertEquals(expectedDateFields, actualDateFields);
+  }
 }

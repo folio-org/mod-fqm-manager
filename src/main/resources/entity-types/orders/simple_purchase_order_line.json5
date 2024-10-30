@@ -1303,7 +1303,8 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'poLineNumber'",
       filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'poLineNumber'::text))",
       valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))'

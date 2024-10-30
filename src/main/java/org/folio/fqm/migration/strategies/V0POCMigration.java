@@ -35,7 +35,7 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("loan_checkin_servicepoint_name", "cispi.name"),
     Map.entry("loan_checkout_servicepoint_id", "cospi.id"),
     Map.entry("loan_checkout_servicepoint_name", "cospi.name"),
-    Map.entry("loan_checkout_date", "loans.loan_date"),
+    Map.entry("loan_checkout_date", "loans.checkout_date"),
     Map.entry("id", "loans.id"),
     Map.entry("loan_policy_id", "lpolicy.id"),
     Map.entry("loan_policy_name", "lpolicy.name"),

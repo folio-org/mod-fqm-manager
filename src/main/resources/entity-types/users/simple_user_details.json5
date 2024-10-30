@@ -372,17 +372,6 @@
       valueGetter: ":sourceAlias.jsonb->>'createdDate'",
     },
     {
-      name: 'patron_group',
-      sourceAlias: 'user',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'patronGroup'",
-    },
-    {
       name: 'updated_date',
       sourceAlias: 'user',
       dataType: {

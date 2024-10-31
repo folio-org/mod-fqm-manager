@@ -111,4 +111,10 @@
       },
     },
   ],
+  defaultSort: [
+    {
+      columnName: '"items.item".id',
+      direction: 'ASC',
+    },
+  ]
 }

@@ -50,11 +50,11 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public Set<String> getUserPermissions() {
-    return getUserPermissions(context.getTenantId());
+    return getUserPermissions(context.getTenantId(), context.getUserId());
   }
 
-  public Set<String> getUserPermissions(String tenantId) {
-    TenantUserPair key = new TenantUserPair(tenantId, context.getUserId());
+  public Set<String> getUserPermissions(String tenantId, UUID userId) {
+    TenantUserPair key = new TenantUserPair(tenantId, userId);
     return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId()) : getUserPermissionsFromModPermissions(k.tenant(), k.userId()));
   }
 
@@ -65,12 +65,12 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
-    verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, checkFqmPermissions);
+    verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, context.getUserId(), checkFqmPermissions);
   }
 
-  public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, boolean checkFqmPermissions) {
+  public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, UUID userId, boolean checkFqmPermissions) {
     Set<String> requiredPermissions = getRequiredPermissions(entityType);
-    Set<String> userPermissions = getUserPermissions(tenantId);
+    Set<String> userPermissions = getUserPermissions(tenantId, userId);
 
     Set<String> missingPermissions = new HashSet<>();
     if (checkFqmPermissions) {
@@ -88,7 +88,7 @@ public class PermissionsRegularService implements PermissionsService {
     }
 
     if (!missingPermissions.isEmpty()) {
-      log.warn("User {} is missing permissions that are required for this operation: [{}]", context.getUserId(), missingPermissions);
+      log.warn("User {} is missing permissions that are required for this operation: [{}]", userId, missingPermissions);
       throw new MissingPermissionsException(missingPermissions);
     }
   }

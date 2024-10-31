@@ -322,7 +322,7 @@ class FqlQueryControllerTest {
       Map.of("id", id1, "field1", "value1", "field2", "value2"),
       Map.of("id", id2, "field1", "value3", "field2", "value4")
     );
-    when(queryManagementService.getContents(entityTypeId, fields, ids, false)).thenReturn(expectedContent);
+    when(queryManagementService.getContents(entityTypeId, fields, ids, null, false, false)).thenReturn(expectedContent);
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType(MediaType.APPLICATION_JSON)
@@ -337,6 +337,7 @@ class FqlQueryControllerTest {
       .andExpect(jsonPath("$.[1].field2", is(expectedContent.get(1).get("field2"))));
   }
 
+
   @Test
   void getContentsShouldReturn404WhenEntityTypeNotFound() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
@@ -350,7 +351,7 @@ class FqlQueryControllerTest {
     ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
       .fields(fields)
       .ids(ids);
-    when(queryManagementService.getContents(entityTypeId, fields, ids, false)).thenThrow(new EntityTypeNotFoundException(entityTypeId));
+    when(queryManagementService.getContents(entityTypeId, fields, ids, null, false, false)).thenThrow(new EntityTypeNotFoundException(entityTypeId));
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType(MediaType.APPLICATION_JSON)
@@ -371,6 +372,51 @@ class FqlQueryControllerTest {
     ContentsRequest contentsRequest = new ContentsRequest().fields(fields)
       .ids(ids);
     RequestBuilder builder = post("/query/contents").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(new ObjectMapper().writeValueAsString(contentsRequest));
+    mockMvc.perform(builder)
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void shouldGetContentsPrivileged() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    List<String> fields = List.of("id");
+    List<List<String>> ids = List.of(
+      List.of(id1.toString())
+    );
+    ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
+      .fields(fields)
+      .ids(ids)
+      .userId(userId);
+    List<Map<String, Object>> expectedContent = List.of(
+      Map.of("id", id1)
+    );
+    when(queryManagementService.getContents(entityTypeId, fields, ids, userId, false, true)).thenReturn(expectedContent);
+    RequestBuilder builder = post("/query/contents/privileged").contentType(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, TENANT_ID)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(new ObjectMapper().writeValueAsString(contentsRequest));
+    mockMvc.perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.[0].id", is(expectedContent.get(0).get("id").toString())));
+  }
+
+  @Test
+  void shouldReturn400WhenMissingUserIdForContentsPrivileged() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    List<String> fields = List.of("id");
+    List<List<String>> ids = List.of(
+      List.of(id1.toString())
+    );
+    ContentsRequest contentsRequest = new ContentsRequest().entityTypeId(entityTypeId)
+      .fields(fields)
+      .ids(ids);
+    RequestBuilder builder = post("/query/contents/privileged").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .contentType(MediaType.APPLICATION_JSON)
       .content(new ObjectMapper().writeValueAsString(contentsRequest));

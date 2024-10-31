@@ -1,6 +1,8 @@
 package org.folio.fqm.service;
 
 import java.util.Set;
+import java.util.UUID;
+
 import lombok.extern.log4j.Log4j2;
 import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.context.annotation.Lazy;
@@ -17,7 +19,7 @@ public class PermissionsBypassService implements PermissionsService {
   }
 
   @Override
-  public Set<String> getUserPermissions(String tenantId) {
+  public Set<String> getUserPermissions(String tenantId, UUID userId) {
     return Set.of();
   }
 
@@ -36,11 +38,12 @@ public class PermissionsBypassService implements PermissionsService {
   }
 
   @Override
-  public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, boolean checkFqmPermissions) {
+  public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, UUID userId, boolean checkFqmPermissions) {
     log.info(
-      "Bypassing permissions check for tenantId: {}, entity type: {}, checkFqmPermissions={}",
+      "Bypassing permissions check for tenantId: {}, entity type: {}, userId: {}, checkFqmPermissions={}",
       tenantId,
       entityType.getName(),
+      userId,
       checkFqmPermissions
     );
   }

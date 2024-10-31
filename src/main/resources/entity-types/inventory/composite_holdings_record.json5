@@ -58,7 +58,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'id',
+      columnName: '"holdings.hrd".id',
       direction: 'ASC',
     },
   ],

@@ -108,4 +108,10 @@
       },
     },
   ],
+  defaultSort: [
+    {
+      columnName: '"loans.loan".id',
+      direction: 'ASC',
+    },
+  ]
 }

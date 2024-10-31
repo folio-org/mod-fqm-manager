@@ -2128,4 +2128,10 @@
       valueGetter: ":sourceAlias.jsonb::text",
     }
   ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ]
 }

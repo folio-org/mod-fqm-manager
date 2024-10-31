@@ -78,7 +78,7 @@
       name: 'updated_by_user_id',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
       queryable: true,
@@ -89,7 +89,7 @@
       name: 'created_by_user_id',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
       queryable: true,

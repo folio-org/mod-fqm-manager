@@ -1,5 +1,54 @@
-# 2.0.x
+# 3.0.x - Ramsons
+
+## 3.0.0
+- Many (many) bug fixes and entity type data additions
 - [MODFQMMGR-523](https://folio-org.atlassian.net/browse/MODFQMMGR-523) Upgrade `holdings-storage` to 8.0
+- [MODFQMMGR-227](https://folio-org.atlassian.net/browse/MODFQMMGR-227) Remove derived_table_name column from entity type table
+- [MODFQMMGR-203](https://folio-org.atlassian.net/browse/MODFQMMGR-203) New, simpler, entity type management system
+- [MODFQMMGR-88](https://folio-org.atlassian.net/browse/MODFQMMGR-88) Add back-end translation guidelines
+- [MODFQMMGR-174](https://folio-org.atlassian.net/browse/MODFQMMGR-174) Add entity type creator dev tool to simplify creating/maintaining entity types
+- [UXPROD-4500](https://folio-org.atlassian.net/browse/UXPROD-4500) Add support for entity-type-level permissions
+- [MODFQMMGR-222](https://folio-org.atlassian.net/browse/MODFQMMGR-222) Add resource allocation guidance to README
+- [MODFQMGMR-303](https://folio-org.atlassian.net/browse/MODFQMGMR-303) Add support for the new stringUUIDType data type
+- [MODFQMMGR-308](https://folio-org.atlassian.net/browse/MODFQMMGR-308) Change data types to make better use of indexes
+- [MODFQMMGR-333](https://folio-org.atlassian.net/browse/MODFQMMGR-333) Update API to support fetching entity types with missing permissions
+- [MODFQMMGR-230](https://folio-org.atlassian.net/browse/MODFQMMGR-230) Add support for composite entity types
+- [UXPROD-4868](https://folio-org.atlassian.net/browse/UXPROD-4868) Recreate all entity types using the composite model
+- [MODFQMMGR-390](https://folio-org.atlassian.net/browse/MODFQMMGR-390) Add ability to hide fields
+- [MODFQMMGR-394](https://folio-org.atlassian.net/browse/MODFQMMGR-394) Expose JSONB as a hidden field in most entity types
+- [UXPROD-4881](https://folio-org.atlassian.net/browse/UXPROD-4881) Add support for automatic query migration, to prevent breaking changes
+- [MODFQMMGR-382](https://folio-org.atlassian.net/browse/MODFQMMGR-382) Add support for limiting non-essential columns when inheriting entity types
+- [MODFQMMGR-225](https://folio-org.atlassian.net/browse/MODFQMMGR-225) Enable cross-tenant querying in ECS environments
+- [MODFQMMGR-415](https://folio-org.atlassian.net/browse/MODFQMMGR-415) Cache entity type definitions
+- [MODFQMMGR-453](https://folio-org.atlassian.net/browse/MODFQMMGR-453) Add local development permissions bypass (THIS SHOULD NOT BE USED IN PRODUCTION!)
+- [MODFQMMGR-494](https://folio-org.atlassian.net/browse/MODFQMMGR-494) Update permission names
+- [MODFQMMGR-496](https://folio-org.atlassian.net/browse/MODFQMMGR-496) Create unique permissions for each API endpoint
+- [MODFQMMGR-525](https://folio-org.atlassian.net/browse/MODFQMMGR-525) Use folio-spring-support 8.3.0
+- [UIPQB-144](https://folio-org.atlassian.net/browse/UIPQB-144) Remove the "not equal" operator from the UUID types
+
+# 2.0.x - Quesnelia
+
+## 2.0.5
+- [MODFQMMGR-331](https://folio-org.atlassian.net/browse/MODFQMMGR-331) Retry materialized view refreshes on failure
+
+## 2.0.4
+- [MODFQMMGR-289](https://folio-org.atlassian.net/browse/MODFQMMGR-289) Fix bug where custom fields were not queryable
+- [MODFQMMGR-290](https://folio-org.atlassian.net/browse/MODFQMMGR-290) Fix bug in the Instances entity type where data was incorrectly filtered out in some cases
+
+
+## 2.0.3
+- [MODFQMMGR-202](https://folio-org.atlassian.net/browse/MODFQMMGR-202) Include system exchange rate when set exchange rate isn't active
+
+## 2.0.2
+- [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Fix read/write split bug
+- [MODFQMMGR-217](https://folio-org.atlassian.net/browse/MODFQMMGR-217) Lower contributor-name-types dependency version
+- [MODFQMMGR-213](https://folio-org.atlassian.net/browse/MODFQMMGR-213) Limit available currencies in queries to only those actually supported in FOLIO
+
+
+## 2.0.1
+- Update translations
+- [MODFQMMGR-216](https://folio-org.atlassian.net/browse/MODFQMMGR-216) Fix NPE
+
 
 ## 2.0.0
 - [MODFQMMGR-87](https://folio-org.atlassian.net/browse/MODFQMMGR-87) Move FQM-specific code from lib-fqm-query-processor
@@ -43,7 +92,7 @@
 - [MODFQMMGR-210](https://folio-org.atlassian.net/browse/MODFQMMGR-210), [MODFQMMGR-210](https://folio-org.atlassian.net/browse/MODFQMMGR-210) Add second, asynchronous, liquibase run to createOrUpdateTenant() to populate materialized views in the "slow" context
 - [MODFQMMGR-181](https://folio-org.atlassian.net/browse/MODFQMMGR-181) Sort fields alphabetically
 
-# 1.0.x
+# 1.0.x - Poppy
 
 ## 1.0.3
 - [MODFQMMGR-58](https://issues.folio.org/browse/MODFQMMGR-58) Refactor drv_item_callnumber_location view

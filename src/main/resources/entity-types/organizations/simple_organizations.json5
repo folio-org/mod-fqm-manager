@@ -1306,27 +1306,50 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'notes')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
             },
+//            {
+//              name: 'acq_unit_ids',
+//              property: 'acqUnitIds',
+//              dataType: {
+//                dataType: 'arrayType',
+//                itemDataType: {
+//                  dataType: 'rangedUUIDType',
+//                },
+//              },
+//              queryable: false,
+//              valueGetter: "(SELECT array_agg(elems.value->>'acqUnitIds' \
+//                    ORDER BY elems.value->>'acqUnitIds') \
+//                 FILTER (WHERE elems.value->>'acqUnitIds' IS NOT NULL) \
+//                 FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)"
+//            },
             {
-              name: 'acq_unit_ids',
-              property: 'acqUnitIds',
+              name: 'acq_unit',
+              property: 'acqUnit',
               dataType: {
                 dataType: 'arrayType',
                 itemDataType: {
-                  dataType: 'rangedUUIDType',
+                  dataType: 'stringType',
                 },
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'acqUnitIds') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'acqUnitIds')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
+              valueGetter: "(SELECT jsonb_agg(acq_unit.jsonb ->> 'name' ORDER BY acq_unit.jsonb ->> 'name') \
+                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'accounts'->'acqUnitIds')) id \
+                 JOIN src_acquisitions_unit acq_unit ON id.value::text = acq_unit.id::text \
+                 WHERE id.value IS NOT NULL)"
+            }
           ],
         },
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'accounts'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                    jsonb_build_object('acqUnit', \
+                                    (SELECT jsonb_agg(acq_unit.jsonb ->> 'name') \
+                                     FROM jsonb_array_elements_text(record.value -> 'acqUnitIds') id \
+                                     JOIN src_acquisitions_unit acq_unit \
+                                       ON id.value::text = acq_unit.id::text)) \
+                                   ORDER BY record.value ->> 'acqUnitIds') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'accounts')) record(value))::text"
     },
     {
       name: 'is_vendor',

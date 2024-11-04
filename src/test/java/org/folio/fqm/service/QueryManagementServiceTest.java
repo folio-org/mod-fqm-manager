@@ -466,7 +466,7 @@ class QueryManagementServiceTest {
     when(entityTypeService.getEntityTypeDefinition(entityTypeId,true, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(tenantIds);
     when(resultSetService.getResultSet(entityTypeId, fields, ids, tenantIds, false)).thenReturn(expectedContents);
-    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids, false);
+    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids, null, false, false);
     assertEquals(expectedContents, actualContents);
   }
 
@@ -492,7 +492,32 @@ class QueryManagementServiceTest {
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(tenantIds);
     when(resultSetService.getResultSet(entityTypeId, expectedFields, ids, tenantIds, false)).thenReturn(expectedContents);
-    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, providedFields, ids, false);
+    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, providedFields, ids, null, false, false);
+    assertEquals(expectedContents, actualContents);
+  }
+
+  @Test
+  void shouldGetPrivilegedContents() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true)
+    );
+    EntityType entityType = new EntityType().columns(columns);
+    List<List<String>> ids = List.of(
+      List.of(UUID.randomUUID().toString()),
+      List.of(UUID.randomUUID().toString())
+    );
+    List<String> tenantIds = List.of("tenant_01");
+    List<String> fields = List.of("id");
+    List<Map<String, Object>> expectedContents = List.of(
+      Map.of("id", UUID.randomUUID()),
+      Map.of("id", UUID.randomUUID())
+    );
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId,true, false)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class), eq(userId))).thenReturn(tenantIds);
+    when(resultSetService.getResultSet(entityTypeId, fields, ids, tenantIds, false)).thenReturn(expectedContents);
+    List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids, userId, false, true);
     assertEquals(expectedContents, actualContents);
   }
 

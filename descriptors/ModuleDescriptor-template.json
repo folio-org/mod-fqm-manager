@@ -92,6 +92,12 @@
         },
         {
           "methods": ["POST"],
+          "pathPattern": "/query/contents/privileged",
+          "permissionsRequired": ["fqm.query.privileged.async.results.post"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get", "configuration.entries.collection.get"]
+        },
+        {
+          "methods": ["POST"],
           "pathPattern": "/query",
           "permissionsRequired": ["fqm.query.async.post"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
@@ -195,6 +201,12 @@
       "displayName": "FQM - Retrieve results of a submitted query",
       "description": "Retrieve results of a submitted query",
       "visible":  true
+    },
+    {
+      "permissionName": "fqm.query.privileged.async.results.post",
+      "displayName": "FQM - Retrieve contents (privileged)",
+      "description": "FQM - Retrieve contents (privileged)",
+      "visible":  false
     },
     {
       "permissionName": "fqm.query.async.delete",

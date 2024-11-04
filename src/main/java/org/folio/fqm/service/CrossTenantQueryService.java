@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +37,22 @@ public class CrossTenantQueryService {
    * @return           List of tenants to query
    */
   public List<String> getTenantsToQuery(EntityType entityType) {
+    return getTenantsToQuery(entityType, executionContext.getUserId());
+  }
+
+  /**
+   * Retrieve list of tenants to run query against for a specified user.
+   *
+   * @param entityType Entity type definition
+   * @param userId ID of user to retrieve tenant affiliations for
+   * @return List of tenants to query
+   */
+  public List<String> getTenantsToQuery(EntityType entityType, UUID userId) {
     if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
-    return getTenants(entityType);
+    return getTenants(entityType, userId);
   }
 
   /**
@@ -51,10 +63,11 @@ public class CrossTenantQueryService {
    * @return           List of tenants to query
    */
   public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
-    return getTenants(entityType);
+    return getTenants(entityType, executionContext.getUserId());
   }
 
-  private List<String> getTenants(EntityType entityType) {
+  private List<String> getTenants(EntityType entityType, UUID userId) {
+    log.info("Getting tenants to query for user {}", userId);
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
@@ -76,18 +89,18 @@ public class CrossTenantQueryService {
 
     List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
-    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), executionContext.getUserId().toString());
+    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
-      String userId = userMap.get("userId");
+      String currentUserId = userMap.get("userId");
       if (!tenantId.equals(centralTenantId)) {
         try {
-          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, true);
+          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
           tenantsToQuery.add(tenantId);
         } catch (MissingPermissionsException e) {
-          log.info("User with id {} does not have permissions to query tenant {}. Skipping.", userId, tenantId);
+          log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
         } catch (FeignException e) {
-          log.error("Error retrieving permissions for user ID %s in tenant %s".formatted(userId, tenantId), e);
+          log.error("Error retrieving permissions for user ID %s in tenant %s".formatted(currentUserId, tenantId), e);
           throw e;
         }
       }

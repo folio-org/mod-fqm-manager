@@ -42,7 +42,17 @@ public class FqlQueryController implements FqlQueryApi {
   @Override
   public ResponseEntity<List<Map<String, Object>>> getContents(ContentsRequest contentsRequest) {
     return ResponseEntity.ok(queryManagementService.getContents(contentsRequest.getEntityTypeId(),
-      contentsRequest.getFields(), contentsRequest.getIds(), Boolean.TRUE.equals(contentsRequest.getLocalize())));
+      contentsRequest.getFields(), contentsRequest.getIds(), null, Boolean.TRUE.equals(contentsRequest.getLocalize()), false));
+  }
+
+  @EntityTypePermissionsRequired(ContentsRequest.class)
+  @Override
+  public ResponseEntity<List<Map<String, Object>>> getContentsPrivileged(ContentsRequest contentsRequest) {
+    if (contentsRequest.getUserId() == null) {
+      return ResponseEntity.badRequest().build();
+    }
+    return ResponseEntity.ok(queryManagementService.getContents(contentsRequest.getEntityTypeId(),
+      contentsRequest.getFields(), contentsRequest.getIds(), contentsRequest.getUserId(), Boolean.TRUE.equals(contentsRequest.getLocalize()), true));
   }
 
   /**

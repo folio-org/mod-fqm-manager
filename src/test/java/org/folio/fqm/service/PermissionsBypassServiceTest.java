@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 class PermissionsBypassServiceTest {
 
   // all methods should work with zero context
@@ -16,12 +18,12 @@ class PermissionsBypassServiceTest {
   @Test
   void testAllMethodsBypassed() {
     assertThat(permissionsService.getUserPermissions(), is(empty()));
-    assertThat(permissionsService.getUserPermissions("foo"), is(empty()));
+    assertThat(permissionsService.getUserPermissions("foo", UUID.randomUUID()), is(empty()));
     assertThat(permissionsService.getRequiredPermissions(new EntityType()), is(empty()));
 
     assertDoesNotThrow(() -> {
-      permissionsService.verifyUserHasNecessaryPermissions("tenant_01", new EntityType(), false);
       permissionsService.verifyUserHasNecessaryPermissions(new EntityType(), true);
+      permissionsService.verifyUserHasNecessaryPermissions("tenant_01", new EntityType(), UUID.randomUUID(),true);
     });
   }
 }

@@ -183,7 +183,7 @@ public class QueryManagementService {
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
-  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, boolean localize) {
+  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, UUID userId, boolean localize, boolean privileged) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
     EntityTypeUtils.getIdColumnNames(entityType)
       .forEach(colName -> {
@@ -191,7 +191,9 @@ public class QueryManagementService {
           fields.add(colName);
         }
       });
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+    List<String> tenantsToQuery = privileged
+      ? crossTenantQueryService.getTenantsToQuery(entityType, userId)
+      : crossTenantQueryService.getTenantsToQuery(entityType);
     return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery, localize);
   }
 

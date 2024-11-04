@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.*;
+
 import org.folio.fqm.client.ModPermissionsClient;
 import org.folio.fqm.client.ModRolesKeycloakClient;
 import org.folio.fqm.exception.MissingPermissionsException;
@@ -19,26 +20,27 @@ class PermissionsRegularServiceTest {
 
   private final FolioExecutionContext context = mock(FolioExecutionContext.class);
   private final ModPermissionsClient modPermissionsClient = mock(ModPermissionsClient.class);
-  private final ModRolesKeycloakClient modRolesKeyclockClient = mock(ModRolesKeycloakClient.class);
+  private final ModRolesKeycloakClient modRolesKeycloakClient = mock(ModRolesKeycloakClient.class);
   private final EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
   private final PermissionsRegularService permissionsService = new PermissionsRegularService(
     context,
     modPermissionsClient,
-    modRolesKeyclockClient,
+    modRolesKeycloakClient,
     entityTypeFlatteningService
   );
   private static final String TENANT_ID = "tenant_01";
+  private static final UUID USER_ID = UUID.randomUUID();
 
   void setUpMocks(String... permissions) {
-    var userId = UUID.randomUUID();
-    when(context.getUserId()).thenReturn(userId);
+
+    when(context.getUserId()).thenReturn(USER_ID);
     when(context.getTenantId()).thenReturn(TENANT_ID);
 
     if (permissionsService.isEureka) {
-      when(modRolesKeyclockClient.getPermissionsUser(TENANT_ID, userId))
-        .thenReturn(new ModRolesKeycloakClient.UserPermissions(List.of(permissions), userId));
+      when(modRolesKeycloakClient.getPermissionsUser(TENANT_ID, USER_ID))
+        .thenReturn(new ModRolesKeycloakClient.UserPermissions(List.of(permissions), USER_ID));
     } else {
-      when(modPermissionsClient.getPermissionsForUser(TENANT_ID, userId.toString()))
+      when(modPermissionsClient.getPermissionsForUser(TENANT_ID, USER_ID.toString()))
         .thenReturn(new ModPermissionsClient.UserPermissions(List.of(permissions), permissions.length));
     }
   }
@@ -61,16 +63,17 @@ class PermissionsRegularServiceTest {
   void userWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
     setUpMocks(); // User has no permissions
     EntityType entityType = getTestEntityType();
+
     when(context.getTenantId()).thenReturn(TENANT_ID);
     assertDoesNotThrow(
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false),
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
       "No permissions are required"
     );
 
     entityType.requiredPermissions(List.of("permission1"));
     assertThrows(
       MissingPermissionsException.class,
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false),
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
       "The does not have the required permission"
     );
   }
@@ -102,18 +105,20 @@ class PermissionsRegularServiceTest {
   void userDoesNotHaveNecessaryPermissions() {
     setUpMocks("permission1", "permission2");
     EntityType entityType = getTestEntityType();
+    UUID userId = UUID.randomUUID();
+    when(context.getUserId()).thenReturn(userId);
 
     entityType.requiredPermissions(List.of("permission3"));
     assertThrows(
       MissingPermissionsException.class,
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false),
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
       "The user does not have the required permission"
     );
 
     entityType.requiredPermissions(List.of("permission1", "permission3"));
     MissingPermissionsException exception = assertThrows(
       MissingPermissionsException.class,
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, false)
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false)
     );
 
     assertEquals(Set.of("permission3"), exception.getMissingPermissions());
@@ -130,7 +135,7 @@ class PermissionsRegularServiceTest {
 
     MissingPermissionsException exception = assertThrows(
       MissingPermissionsException.class,
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, true)
+      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, true)
     );
 
     assertEquals(expectedMissingPermissions, exception.getMissingPermissions());
@@ -143,7 +148,7 @@ class PermissionsRegularServiceTest {
     Set<String> userPermissions = permissionsService.getUserPermissions();
 
     ArgumentCaptor<UUID> userIdCaptor = ArgumentCaptor.forClass(UUID.class);
-    verify(modRolesKeyclockClient).getPermissionsUser(eq(TENANT_ID), userIdCaptor.capture());
+    verify(modRolesKeycloakClient).getPermissionsUser(eq(TENANT_ID), userIdCaptor.capture());
     assertEquals(2, userPermissions.size());
 
     // Ensure no interactions with modPermissionsClient
@@ -161,7 +166,7 @@ class PermissionsRegularServiceTest {
     assertEquals(2, userPermissions.size());
 
     // Ensure no interactions with modRolesKeyclockClient
-    verifyNoInteractions(modRolesKeyclockClient);
+    verifyNoInteractions(modRolesKeycloakClient);
   }
 
 }

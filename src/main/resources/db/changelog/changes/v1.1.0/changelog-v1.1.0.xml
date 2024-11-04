@@ -14,7 +14,7 @@
       <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>
       <tableExists tableName = "statistical_code_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
-    <sqlFile path="sql/create-mat-view-drv-inventory-statistical-code-full.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-view-drv-inventory-statistical-code-full.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
   <changeSet id="MODFQMMGR-107" author="mweaver@ebsco.com">
@@ -44,10 +44,7 @@
     <sql>DROP MATERIALIZED VIEW IF EXISTS drv_pol_receipt_status;</sql>
   </changeSet>
   <changeSet id="MODFQMMGR-210-refresh-statistical-code" author="mweaver@ebsco.com" runOnChange="true">
-    <preConditions onFail="CONTINUE">
-      <sqlCheck expectedResult="1">SELECT COUNT(*) FROM pg_matviews WHERE schemaname = '${tenant_id}_mod_fqm_manager'AND matviewname = 'drv_inventory_statistical_code_full';</sqlCheck>
-    </preConditions>
-    <sql>REFRESH MATERIALIZED VIEW drv_inventory_statistical_code_full;</sql>
+    <!-- Changeset logic intentionally removed -->
   </changeSet>
   <changeSet id="MODFQMMGR-210-refresh-languages" author="mweaver@ebsco.com" runOnChange="true">
     <!-- Changeset logic intentionally removed -->

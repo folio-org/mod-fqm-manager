@@ -7,7 +7,7 @@
     {
       type: 'db',
       alias: 'statistical_code_full',
-      target: 'drv_inventory_statistical_code_full', // materialized
+      target: 'drv_inventory_statistical_codes_full',
     }
   ],
   requiredPermissions: [

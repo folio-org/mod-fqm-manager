@@ -15,17 +15,9 @@ import static org.folio.fqm.repository.DataRefreshRepository.EXCHANGE_RATE_TABLE
 public class DataRefreshService {
   private final DataRefreshRepository dataRefreshRepository;
 
-  static final List<String> MATERIALIZED_VIEW_NAMES = List.of(
-    "drv_inventory_statistical_code_full"
-  );
-
   public DataRefreshResponse refreshData(String tenantId) {
-    List<String> failedConcurrentRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, MATERIALIZED_VIEW_NAMES, true);
-    List<String> failedRefreshes = dataRefreshRepository.refreshMaterializedViews(tenantId, failedConcurrentRefreshes, false);
-    List<String> successRefreshes = new ArrayList<>(MATERIALIZED_VIEW_NAMES
-      .stream()
-      .filter(matView -> !failedRefreshes.contains(matView))
-      .toList());
+    List<String> successRefreshes = new ArrayList<>();
+    List<String> failedRefreshes = new ArrayList<>();
     if (dataRefreshRepository.refreshExchangeRates(tenantId)) {
       successRefreshes.add(EXCHANGE_RATE_TABLE);
     } else {

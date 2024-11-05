@@ -29,9 +29,6 @@ public class DataRefreshRepository {
   public static final Field<String> CURRENCY_FIELD = field("currency", String.class);
   public static final Field<Double> EXCHANGE_RATE_FIELD = field("exchange_rate", Double.class);
   public static final String EXCHANGE_RATE_TABLE = "currency_exchange_rates";
-
-  private static final String REFRESH_MATERIALIZED_VIEW_CONCURRENTLY_SQL = "REFRESH MATERIALIZED VIEW CONCURRENTLY ";
-  private static final String REFRESH_MATERIALIZED_VIEW_SQL = "REFRESH MATERIALIZED VIEW ";
   private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
   private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
   private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
@@ -77,34 +74,6 @@ public class DataRefreshRepository {
   private final DSLContext jooqContext;
 
   private final SimpleHttpClient simpleHttpClient;
-
-  /**
-   * Refresh a list of materialized views
-   *
-   * @param tenantId              Tenant ID
-   * @param viewsToRefresh        List of materialized views to refresh
-   * @param refreshConcurrently   Whether to execute a concurrent refresh
-   * @return                      List of all materialized views that failed to refresh
-   */
-  public List<String> refreshMaterializedViews(String tenantId, List<String> viewsToRefresh, boolean refreshConcurrently) {
-    List<String> failedRefreshes = new ArrayList<>();
-    String refreshType = refreshConcurrently ? "concurrently" : "non-concurrently";
-    for (String matViewName : viewsToRefresh) {
-      String fullName = tenantId + "_mod_fqm_manager." + matViewName;
-      log.info("Refreshing materialized view {} {}", fullName, refreshType);
-      try {
-        if (refreshConcurrently) {
-          jooqContext.execute(REFRESH_MATERIALIZED_VIEW_CONCURRENTLY_SQL + fullName);
-        } else {
-          jooqContext.execute(REFRESH_MATERIALIZED_VIEW_SQL + fullName);
-        }
-      } catch (Exception e) {
-        log.info("Failed to refresh materialized view {} {}.", matViewName, refreshType);
-        failedRefreshes.add(matViewName);
-      }
-    }
-    return failedRefreshes;
-  }
 
   /**
    * Refresh the currency exchange rates for a tenant, based on the tenant's default system currency.

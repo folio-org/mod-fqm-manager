@@ -384,7 +384,7 @@
 //                },
 //              ],
 //            },
-//            {
+//          {
 //              name: 'categories',
 //              property: 'categories',
 //              dataType: {
@@ -394,10 +394,27 @@
 //                },
 //              },
 //              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'categories') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'categories')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              valueFunction: 'lower(:value)',
+//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+//                          ORDER BY elems.value->>'categories') \
+//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)"
 //            },
+            {
+              name: 'categories_names',
+              property: 'categoriesNames',
+              dataType: {
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
+              },
+              queryable: false,
+              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses'->'categories')) id \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)"
+            }
+
 //            {
 //              name: 'language',
 //              property: 'language',
@@ -415,7 +432,14 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'addresses'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                    jsonb_build_object('categoriesNames', \
+                                    (SELECT jsonb_agg(catg_name.jsonb ->> 'value') \
+                                     FROM jsonb_array_elements_text(record.value -> 'categories') id \
+                                     JOIN src_organization_categories catg_name \
+                                       ON id.value::text = catg_name.id::text)) \
+                                   ORDER BY record.value ->> 'categories') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'addresses')) record(value))::text",
     },
     {
       name: 'phone_numbers',
@@ -457,10 +481,26 @@
 //                },
 //              },
 //              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'categories') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'categories')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              valueFunction: 'lower(:value)',
+//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+//                          ORDER BY elems.value->>'categories') \
+//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)"
 //            },
+            {
+              name: 'categories_names',
+              property: 'categoriesNames',
+              dataType: {
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
+              },
+              queryable: false,
+              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'phoneNumbers'->'categories')) id \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)"
+            },
             {
               name: 'type',
               property: 'type',
@@ -528,7 +568,14 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'phoneNumbers'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                    jsonb_build_object('categoriesNames', \
+                                    (SELECT jsonb_agg(catg_name.jsonb ->> 'value') \
+                                     FROM jsonb_array_elements_text(record.value -> 'categories') id \
+                                     JOIN src_organization_categories catg_name \
+                                       ON id.value::text = catg_name.id::text)) \
+                                   ORDER BY record.value ->> 'categories') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'phoneNumbers')) record(value))::text",
     },
     {
       name: 'emails',
@@ -593,6 +640,7 @@
 //              ],
 //            },
 //            {
+//            {
 //              name: 'categories',
 //              property: 'categories',
 //              dataType: {
@@ -602,10 +650,26 @@
 //                },
 //              },
 //              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'categories') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'categories')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              valueFunction: 'lower(:value)',
+//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+//                          ORDER BY elems.value->>'categories') \
+//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)"
 //            },
+            {
+              name: 'categories_names',
+              property: 'categoriesNames',
+              dataType: {
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
+              },
+              queryable: false,
+              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'emails'->'categories')) id \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)"
+            },
 //            {
 //              name: 'language',
 //              property: 'language',
@@ -623,7 +687,14 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'emails'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                    jsonb_build_object('categoriesNames', \
+                                    (SELECT jsonb_agg(catg_name.jsonb ->> 'value') \
+                                     FROM jsonb_array_elements_text(record.value -> 'categories') id \
+                                     JOIN src_organization_categories catg_name \
+                                       ON id.value::text = catg_name.id::text)) \
+                                   ORDER BY record.value ->> 'categories') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'emails')) record(value))::text",
     },
     {
       name: 'urls',
@@ -708,10 +779,26 @@
 //                },
 //              },
 //              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'categories') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'categories')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              valueFunction: 'lower(:value)',
+//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+//                          ORDER BY elems.value->>'categories') \
+//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)"
 //            },
+            {
+              name: 'categories_names',
+              property: 'categoriesNames',
+              dataType: {
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
+              },
+              queryable: false,
+              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'urls'->'categories')) id \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)"
+            },
             {
               name: 'notes',
               property: 'notes',
@@ -729,7 +816,14 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'urls'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                    jsonb_build_object('categoriesNames', \
+                                    (SELECT jsonb_agg(catg_name.jsonb ->> 'value') \
+                                     FROM jsonb_array_elements_text(record.value -> 'categories') id \
+                                     JOIN src_organization_categories catg_name \
+                                       ON id.value::text = catg_name.id::text)) \
+                                   ORDER BY record.value ->> 'categories') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'urls')) record(value))::text"
     },
     {
       name: 'contacts',

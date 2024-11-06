@@ -1,7 +1,11 @@
 package org.folio.fqm.service;
 
+import org.folio.fql.deserializer.FqlParsingException;
 import org.folio.fqm.domain.Query;
+import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.model.FqlQueryWithContext;
+import org.folio.fqm.repository.QueryRepository;
+import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
@@ -12,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +31,8 @@ class QueryExecutionServiceTest {
   @Mock
   private FolioExecutionContext executionContext;
   @Mock
-  private Supplier<DataBatchCallback> dataBatchCallbackSupplier;
+  private QueryRepository queryRepository;
+
 
   @Test
   void testQueryExecutionService() {
@@ -47,8 +51,15 @@ class QueryExecutionServiceTest {
     verify(queryProcessorService, times(1)).getIdsInBatch(
       eq(fqlQueryWithContext),
       anyInt(),
-      any(),
-      any(),
+      anyInt(),
       any());
+  }
+
+  @Test
+  void shouldHandleFailure() {
+    Query query = TestDataFixture.getMockQuery();
+    Throwable throwable = new FqlParsingException("field1", "Field not present");
+    queryExecutionService.handleFailure(query, throwable);
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.FAILED), any(), any());
   }
 }

@@ -1,10 +1,12 @@
 package org.folio.fqm.service;
 
-import java.util.function.Supplier;
+import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
+import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.model.FqlQueryWithContext;
+import org.folio.fqm.repository.QueryRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.scheduling.annotation.Async;
@@ -18,8 +20,8 @@ public class QueryExecutionService {
   private static final int DEFAULT_BATCH_SIZE = 10000;
   private final QueryProcessorService queryProcessorService;
   private final FolioExecutionContext folioExecutionContext;
-  private final QueryExecutionCallbacks callbacks;
-  private final Supplier<DataBatchCallback> dataBatchCallbackSupplier;
+  private final QueryRepository queryRepository;
+
 
   @Async
   // Long-running method. Running this method within a transaction boundary will hog db connection for
@@ -33,16 +35,21 @@ public class QueryExecutionService {
         query.fqlQuery(),
         false
       );
-      DataBatchCallback dataBatchCallback = dataBatchCallbackSupplier.get();
       queryProcessorService.getIdsInBatch(
         fqlQueryWithContext,
         DEFAULT_BATCH_SIZE,
-        resultIds -> dataBatchCallback.accept(query.queryId(), resultIds, maxQuerySize),
-        totalCount -> callbacks.handleSuccess(query, totalCount),
-        throwable -> callbacks.handleFailure(query, throwable)
+        maxQuerySize,
+        query
       );
     } catch (Exception exception) {
-      callbacks.handleFailure(query, exception);
+      handleFailure(query, exception);
     }
   }
+
+  public void handleFailure(Query query, Throwable throwable) {
+    log.error("Query Execution failed for queryId {}, entityTypeId {}. Failure reason: {}", query.queryId(),
+      query.entityTypeId(), throwable.getMessage());
+    queryRepository.updateQuery(query.queryId(), QueryStatus.FAILED, OffsetDateTime.now(), throwable.getMessage());
+  }
+
 }

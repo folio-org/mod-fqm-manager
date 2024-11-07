@@ -1,5 +1,19 @@
 # 3.0.x - Ramsons
 
+## 3.0.1
+- [MODFQMMGR-558] Add acquisition unit names to the Organizations entity type
+- [MODFQMMGR-563] Add /query/contents/privileged endpoint to request query results on behalf of another user
+  - This includes a minor version bump for the `fqm-query` interface
+- [MODFQMMGR-544] Remove the last materialized view 🎉
+- [MODFQMMGR-555] Add categories to the Organizations entity type
+- [MODFQMMGR-568] Remove callbacks to simplify code
+
+[MODFQMMGR-558]: https://folio-org.atlassian.net/browse/MODFQMMGR-558
+[MODFQMMGR-563]: https://folio-org.atlassian.net/browse/MODFQMMGR-563
+[MODFQMMGR-544]: https://folio-org.atlassian.net/browse/MODFQMMGR-544
+[MODFQMMGR-555]: https://folio-org.atlassian.net/browse/MODFQMMGR-555
+[MODFQMMGR-568]: https://folio-org.atlassian.net/browse/MODFQMMGR-568
+
 ## 3.0.0
 - Many (many) bug fixes and entity type data additions
 - [MODFQMMGR-523](https://folio-org.atlassian.net/browse/MODFQMMGR-523) Upgrade `holdings-storage` to 8.0

@@ -4,18 +4,19 @@ import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.domain.Query;
+import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.model.FqlQueryWithContext;
-import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.repository.IdStreamer;
+import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.ResultSetRepository;
+import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +29,7 @@ class QueryProcessorServiceTest {
   private IdStreamer idStreamer;
   private FqlService fqlService;
   private CrossTenantQueryService crossTenantQueryService;
+  private QueryRepository queryRepository;
 
   @BeforeEach
   public void setup() {
@@ -35,7 +37,8 @@ class QueryProcessorServiceTest {
     idStreamer = mock(IdStreamer.class);
     fqlService = mock(FqlService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
-    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService, crossTenantQueryService);
+    queryRepository = mock(QueryRepository.class);
+    this.service = new QueryProcessorService(resultSetRepository, idStreamer, fqlService, crossTenantQueryService, queryRepository);
   }
 
   @Test
@@ -44,17 +47,15 @@ class QueryProcessorServiceTest {
     String tenantId = "tenant_01";
     String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
     EntityType entityType = new EntityType();
-    Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
-    IntConsumer totalCountConsumer = mock(IntConsumer.class);
-    Consumer<Throwable> errorConsumer = mock(Consumer.class);
 
     when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
     FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
+    Query query = TestDataFixture.getMockQuery(QueryStatus.IN_PROGRESS);
+    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(query));
     service.getIdsInBatch(fqlQueryWithContext,
       DEFAULT_BATCH_SIZE,
-      idsConsumer,
-      totalCountConsumer,
-      errorConsumer
+      100,
+      query
     );
 
     verify(idStreamer, times(1))
@@ -63,41 +64,9 @@ class QueryProcessorServiceTest {
         fqlQueryWithContext.sortResults(),
         fql,
         DEFAULT_BATCH_SIZE,
-        idsConsumer
+        100,
+        query.queryId()
       );
-  }
-
-  @Test
-  void shouldConsumeButNotThrowError() {
-    Fql fql = new Fql("", new EqualsCondition(new FqlField("status"), "missing"));
-    String tenantId = "tenant_01";
-    String fqlCriteria = "{\"status\": {\"$eq\": \"missing\"}}";
-    EntityType entityType = new EntityType();
-    Consumer<IdsWithCancelCallback> idsConsumer = mock(Consumer.class);
-    IntConsumer totalCountConsumer = mock(IntConsumer.class);
-    AtomicInteger actualErrorCount = new AtomicInteger(0);
-    Consumer<Throwable> errorConsumer = err -> actualErrorCount.getAndIncrement();
-    int expectedErrorCount = 1;
-
-    when(fqlService.getFql(fqlCriteria)).thenReturn(fql);
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlCriteria, true);
-
-    doThrow(new RuntimeException("something went wrong"))
-      .when(idStreamer)
-      .streamIdsInBatch(
-        fqlQueryWithContext.entityType(),
-        fqlQueryWithContext.sortResults(),
-        fql,
-        1000,
-        idsConsumer
-      );
-    service.getIdsInBatch(fqlQueryWithContext,
-      DEFAULT_BATCH_SIZE,
-      idsConsumer,
-      totalCountConsumer,
-      errorConsumer
-    );
-    assertEquals(expectedErrorCount, actualErrorCount.get(), "Actual Error Count should be 1 when an exception occurs");
   }
 
   @Test
@@ -121,5 +90,22 @@ class QueryProcessorServiceTest {
     when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds, false)).thenReturn(expectedContent);
     List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
     assertEquals(expectedContent, actualContent);
+  }
+
+  @Test
+  void shouldHandleSuccess() {
+    Query query = TestDataFixture.getMockQuery();
+    when(queryRepository.getQuery(query.queryId(), true)).thenReturn(Optional.of(query));
+    service.handleSuccess(query);
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.SUCCESS), any(), eq(null));
+  }
+
+  @Test
+  void successHandlerShouldHandleCancelledQuery() {
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
+      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    when(queryRepository.getQuery(query.queryId(), true)).thenReturn(Optional.of(query));
+    service.handleSuccess(query);
+    verify(queryRepository, times(0)).updateQuery(query.queryId(), query.status(), query.endDate(), query.failureReason());
   }
 }

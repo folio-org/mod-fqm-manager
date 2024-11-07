@@ -3,6 +3,10 @@ package org.folio.fqm.repository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.fqm.domain.Query;
+import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.exception.MaxQuerySizeExceededException;
+import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
@@ -28,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -46,18 +49,21 @@ public class IdStreamer {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final FolioExecutionContext executionContext;
+  private final QueryRepository queryRepository;
+  private final QueryResultsRepository queryResultsRepository;
 
   /**
    * Executes the given Fql Query and stream the result Ids back.
    */
-  public int streamIdsInBatch(EntityType entityType,
+  public void streamIdsInBatch(EntityType entityType,
                               boolean sortResults,
                               Fql fql,
                               int batchSize,
-                              Consumer<IdsWithCancelCallback> idsConsumer) {
+                              int maxQuerySize,
+                              UUID queryId) {
     boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
     List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
-    return this.streamIdsInBatch(entityType, sortResults, fql, batchSize, idsConsumer, tenantsToQuery, ecsEnabled);
+    this.streamIdsInBatch(entityType, sortResults, fql, batchSize, maxQuerySize, queryId, tenantsToQuery, ecsEnabled);
   }
 
   public List<List<String>> getSortedIds(String derivedTableName,
@@ -80,10 +86,10 @@ public class IdStreamer {
       .toList();
   }
 
-  private int streamIdsInBatch(EntityType entityType,
+  private void streamIdsInBatch(EntityType entityType,
                                boolean sortResults,
                                Fql fql, int batchSize,
-                               Consumer<IdsWithCancelCallback> idsConsumer, List<String> tenantsToQuery, boolean ecsEnabled) {
+                               int maxQuerySize, UUID queryId, List<String> tenantsToQuery, boolean ecsEnabled) {
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
@@ -132,10 +138,28 @@ public class IdStreamer {
       var total = new AtomicInteger();
       idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
         .forEach(idsWithCancelCallback -> {
-          idsConsumer.accept(idsWithCancelCallback);
+          handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total);
           total.addAndGet(idsWithCancelCallback.ids().size());
         });
-      return total.get();
+    }
+  }
+
+  void handleBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback, Integer maxQuerySize, AtomicInteger total) {
+    Query query = queryRepository.getQuery(queryId, true)
+      .orElseThrow(() -> new QueryNotFoundException(queryId));
+    if (query.status() == QueryStatus.CANCELLED) {
+      log.info("Query {} has been cancelled, closing id stream", queryId);
+      idsWithCancelCallback.cancel();
+      return;
+    }
+    List<String[]> resultIds = idsWithCancelCallback.ids();
+    log.info("Saving query results for queryId: {}. Count: {}", queryId, resultIds.size());
+    queryResultsRepository.saveQueryResults(queryId, resultIds);
+    if (total.addAndGet(resultIds.size()) > maxQuerySize) {
+      log.info("Query {} with size {} has exceeded maximum query size of {}. Marking execution as failed.",
+        queryId, total.get(), maxQuerySize);
+      idsWithCancelCallback.cancel();
+      throw new MaxQuerySizeExceededException(queryId, total.get(), maxQuerySize);
     }
   }
 

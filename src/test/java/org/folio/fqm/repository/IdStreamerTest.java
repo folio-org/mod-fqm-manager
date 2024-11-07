@@ -1,32 +1,34 @@
-package org.folio.fqm.utils;
+package org.folio.fqm.repository;
 
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.domain.Query;
+import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.domain.dto.Error;
+import org.folio.fqm.exception.MaxQuerySizeExceededException;
 import org.folio.fqm.model.IdsWithCancelCallback;
-import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.fqm.repository.IdStreamer;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
 import org.folio.fqm.service.PermissionsService;
 import org.folio.fqm.service.UserTenantService;
+import org.folio.fqm.utils.IdStreamerTestDataProvider;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -49,6 +51,8 @@ class IdStreamerTest {
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
   private UserTenantService userTenantService;
+  private QueryRepository queryRepository;
+  QueryResultsRepository queryResultsRepository;
 
   private static final String USER_TENANT_JSON = """
       {
@@ -108,6 +112,8 @@ class IdStreamerTest {
     ecsClient = mock(SimpleHttpClient.class);
     userTenantService = mock(UserTenantService.class);
     PermissionsService permissionsService = mock(PermissionsService.class);
+    queryRepository = mock(QueryRepository.class);
+    queryResultsRepository = mock(QueryResultsRepository.class);
 
 
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, executionContext, userTenantService);
@@ -117,7 +123,9 @@ class IdStreamerTest {
         context,
         entityTypeFlatteningService,
         crossTenantQueryService,
-        mock(FolioExecutionContext.class)
+        mock(FolioExecutionContext.class),
+        queryRepository,
+        queryResultsRepository
       );
   }
 
@@ -127,23 +135,20 @@ class IdStreamerTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
-    int idsCount = idStreamer.streamIdsInBatch(
+    List<List<String>> actualIds = mockQueryRepositories();
+
+    idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
       fql,
       2,
-      idsConsumer
+      100,
+      UUID.randomUUID()
     );
     assertEquals(expectedIds, actualIds);
-    assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
   }
 
   @Test
@@ -153,22 +158,19 @@ class IdStreamerTest {
     List<List<String>> expectedIds = List.of(
       List.of("ecsValue")
     );
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+    List<List<String>> actualIds = mockQueryRepositories();
 
     idStreamer.streamIdsInBatch(
       new EntityType().additionalEcsConditions(List.of("condition 1")).id("6b08439b-4f8e-4468-8046-ea620f5cfb74"),
       true,
       fql,
       2,
-      idsConsumer
+      100,
+      UUID.randomUUID()
     );
     assertEquals(expectedIds, actualIds);
   }
@@ -180,24 +182,21 @@ class IdStreamerTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-    int idsCount = idStreamer.streamIdsInBatch(
+    List<List<String>> actualIds = mockQueryRepositories();
+
+    idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
       true,
       fql,
       2,
-      idsConsumer
+      100,
+      UUID.randomUUID()
     );
     assertEquals(expectedIds, actualIds);
-    assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
   }
 
   @Test
@@ -206,23 +205,20 @@ class IdStreamerTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    List<List<String>> actualIds = new ArrayList<>();
-    Consumer<IdsWithCancelCallback> idsConsumer = idsWithCancelCallback -> {
-      List<String[]> ids = idsWithCancelCallback.ids();
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-    };
     when(localizationService.localizeEntityType(any(EntityType.class))).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
-    int idsCount = idStreamer.streamIdsInBatch(
+    List<List<String>> actualIds = mockQueryRepositories();
+
+    idStreamer.streamIdsInBatch(
       IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION,
       true,
       fql,
       2,
-      idsConsumer
+      100,
+      UUID.randomUUID()
     );
     assertEquals(expectedIds, actualIds);
-    assertEquals(IdStreamerTestDataProvider.TEST_CONTENT_IDS.size(), idsCount);
   }
 
   @Test
@@ -240,5 +236,73 @@ class IdStreamerTest {
       queryId
     );
     assertEquals(expectedIds, actualIds);
+  }
+
+  @Test
+  void shouldHandleDataBatch() {
+    UUID queryId = UUID.randomUUID();
+    int maxQuerySize = 100;
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
+    Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
+      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
+    idStreamer.handleBatch(queryId, idsWithCancelCallback, maxQuerySize, new AtomicInteger(0));
+    verify(queryResultsRepository, times(1)).saveQueryResults(queryId, resultIds);
+  }
+
+  @Test
+  void shouldHandleDataBatchForCancelledQuery() {
+    AtomicBoolean streamClosed = new AtomicBoolean(false);
+    UUID queryId = UUID.randomUUID();
+    int maxQuerySize = 100;
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> streamClosed.set(true));
+    assertFalse(streamClosed.get());
+    Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
+      OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
+    idStreamer.handleBatch(queryId, idsWithCancelCallback, maxQuerySize, new AtomicInteger(0));
+    assertTrue(streamClosed.get());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenMaxQuerySizeExceeded() {
+    UUID queryId = UUID.randomUUID();
+    int maxQuerySize = 1;
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
+    Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
+      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", queryId, 2, maxQuerySize);
+    org.folio.fqm.domain.dto.Error expectedError = new Error().message(expectedMessage);
+    when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
+    var total = new AtomicInteger(0);
+    MaxQuerySizeExceededException actualException = assertThrows(MaxQuerySizeExceededException.class, () -> idStreamer.handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
+    assertEquals(expectedMessage, actualException.getMessage());
+    assertEquals(expectedError, actualException.getError());
+  }
+
+  // Suppress the unchecked cast warning on the Class<T> cast below. We know the parameter type is List<String[]>, but can't
+  // easily create a Class object for it.
+  @SuppressWarnings("unchecked")
+  private List<List<String>> mockQueryRepositories() {
+    List<List<String>> actualIds = new ArrayList<>();
+    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(mock(Query.class)));
+    doAnswer(invocation -> {
+      List<String[]> ids = invocation.getArgument(1, List.class);
+      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
+      return null;
+    }).when(queryResultsRepository).saveQueryResults(any(UUID.class), any(List.class));
+    return actualIds;
   }
 }

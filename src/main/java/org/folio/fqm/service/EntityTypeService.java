@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
+import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.FieldNotFoundException;
@@ -60,6 +61,7 @@ public class EntityTypeService {
   private final SimpleHttpClient simpleHttpClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
+  private final LanguageClient languageClient;
 
   /**
    * Returns the list of all entity types.
@@ -161,7 +163,7 @@ public class EntityTypeService {
             return getTenantIds(entityType);
           }
           case "languages" -> {
-            return getLanguages(searchText);
+            return getLanguages(searchText, tenantsToQuery);
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -250,20 +252,17 @@ public class EntityTypeService {
     return new ColumnValues().content(currencies);
   }
 
-  private ColumnValues getLanguages(String searchText) {
-    Map<String, String> queryParams = Map.of(
-      "facet", "languages",
-      "query", "id=*",
-      "limit", "1000"
-    );
-
-    List<String> values = List.of();
-    try {
-      String rawJson = simpleHttpClient.get("search/instances/facets", queryParams);
-      DocumentContext parsedJson = JsonPath.parse(rawJson);
-      values = parsedJson.read("$.facets.languages.values.*.id");
-    } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
-      log.error("Failed to get languages from API due to exception {}", e.getMessage());
+  private ColumnValues getLanguages(String searchText, List<String> tenantsToQuery) {
+    Set<String> langSet = new HashSet<>();
+    for (String tenantId : tenantsToQuery) {
+      try {
+        String rawJson = languageClient.get(tenantId);
+        DocumentContext parsedJson = JsonPath.parse(rawJson);
+        List<String> values = parsedJson.read("$.facets.languages.values.*.id");
+        langSet.addAll(values);
+      } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
+        log.error("Failed to get languages for tenant {} due to exception {}", tenantId, e.getMessage());
+      }
     }
 
     List<ValueWithLabel> results = new ArrayList<>();
@@ -307,7 +306,7 @@ public class EntityTypeService {
       a3ToNameMap.put(language.get("alpha3"), language.get("name"));
     }
 
-    for (String code : values) {
+    for (String code : langSet) {
       String label;
       String a2Code = a3ToA2Map.get(code);
       String name = a3ToNameMap.get(code);

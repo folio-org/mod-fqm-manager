@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import feign.FeignException;
+import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
@@ -55,6 +56,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private CrossTenantQueryService crossTenantQueryService;
+
+  @Mock
+  private LanguageClient languageClient;
 
   @InjectMocks
   private EntityTypeService entityTypeService;
@@ -396,7 +400,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+    when(languageClient.get("tenant_01")).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -451,7 +455,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenReturn("""
+    when(languageClient.get("tenant_01")).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -520,7 +524,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(simpleHttpClient.get(eq("search/instances/facets"), anyMap())).thenThrow(FeignException.BadRequest.class);
+    when(languageClient.get("tenant_01")).thenThrow(FeignException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }

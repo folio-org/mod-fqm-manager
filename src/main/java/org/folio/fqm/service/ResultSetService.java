@@ -89,8 +89,7 @@ public class ResultSetService {
     for (String fieldName : dateFields) {
       contents.computeIfPresent(fieldName, (key, value) -> {
         if (value instanceof Timestamp ts) {
-        log.info("{} {} {}", ts, ts.toInstant(), ts.toLocalDateTime());
-        return adjustDate(ts.toInstant(), tenantTimezone);
+          return adjustDate(ts.toInstant(), tenantTimezone);
         } else if (value instanceof String s) {
           return parseAndAdjustDate(s, tenantTimezone);
         }

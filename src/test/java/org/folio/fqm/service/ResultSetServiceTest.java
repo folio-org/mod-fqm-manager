@@ -186,8 +186,8 @@ class ResultSetServiceTest {
     List<Map<String, Object>> repositoryResponse = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "invalid date",
-        "offsetDateField", extraordinarilyInvalidDate
+        "dateField", "invalid date", // verify strings are attempted to be parsed and handled gracefully
+        "offsetDateField", extraordinarilyInvalidDate // verify non-strings are handled gracefully
       )
     );
     List<Map<String, Object>> expectedResult = List.of(

@@ -1,9 +1,5 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.repository.ResultSetRepository;
@@ -15,11 +11,11 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +30,11 @@ import java.util.stream.Collectors;
 @Log4j2
 public class ResultSetService {
 
-  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-  private static final DateTimeFormatter DATE_TIME_OFFSET_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'+00:00'");
-  private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$";
-  private static final String DATE_TIME_OFFSET_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}[+-]\\d{2}:\\d{2}$";
+  private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
+    .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+    .optionalStart().appendOffsetId() // optional Z/timezone at end
+    .toFormatter().withZone(ZoneOffset.UTC); // force interpretation as UTC
+  private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final ConfigurationClient configurationClient;
@@ -64,7 +61,7 @@ public class ResultSetService {
       );
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateFields(entityType) : List.of();
-    ZoneOffset zoneOffset = localize ? getZoneOffset() : null;
+    ZoneId tenantTimezone = localize ? configurationClient.getTenantTimezone() : null;
 
     return contentIds
       .stream()
@@ -81,57 +78,36 @@ public class ResultSetService {
 
         Map<String, Object> copiedContents = new HashMap<>(contents);
         if (localize) {
-          localizeContent(copiedContents, dateFields, zoneOffset);
+          localizeContent(copiedContents, dateFields, tenantTimezone);
         }
         return copiedContents;
       })
       .toList();
   }
 
-  private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneOffset zoneOffset) {
+  private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {
     for (String fieldName : dateFields) {
       contents.computeIfPresent(fieldName, (key, value) -> {
         if (value instanceof Timestamp ts) {
-          return adjustDate(ts.toLocalDateTime(), zoneOffset);
+          return adjustDate(ts.toInstant(), tenantTimezone);
         } else if (value instanceof String s) {
-          return parseAndAdjustDate(s, zoneOffset);
+          return parseAndAdjustDate(s, tenantTimezone);
         }
         return value;
       });
     }
   }
 
-  private static String adjustDate(LocalDateTime dateTime, ZoneOffset zoneOffset) {
-    return dateTime.plusSeconds(zoneOffset.getTotalSeconds()).toLocalDate().toString();
+  private static String adjustDate(Instant instant, ZoneId tenantTimezone) {
+    return instant.atZone(tenantTimezone).toLocalDate().toString();
   }
 
-  private static String parseAndAdjustDate(String contentItem, ZoneOffset zoneOffset) {
-    LocalDateTime dateTime = null;
-    if (contentItem.matches(DATE_TIME_REGEX)) {
-      dateTime = LocalDateTime.parse(contentItem, DATE_TIME_FORMATTER);
-    } else if (contentItem.matches(DATE_TIME_OFFSET_REGEX)) {
-      dateTime = LocalDateTime.parse(contentItem, DATE_TIME_OFFSET_FORMATTER);
+  private static String parseAndAdjustDate(String value, ZoneId tenantTimezone) {
+    if (value.matches(DATE_TIME_REGEX)) {
+      return adjustDate(Instant.from(DATE_TIME_FORMATTER.parse(value)), tenantTimezone);
     }
-    return dateTime != null ? adjustDate(dateTime, zoneOffset) : contentItem;
-  }
 
-  private ZoneOffset getZoneOffset() {
-    try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      String localeSettingsResponse = configurationClient.getLocaleSettings();
-      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode
-        .path("configs")
-        .get(0)
-        .path("value")
-        .asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      ZoneId zoneId = ZoneId.of(valueNode.path("timezone").asText());
-      ZonedDateTime zonedDateTime = ZonedDateTime.now(zoneId);
-      return zonedDateTime.getOffset();
-    } catch (JsonProcessingException | FeignException.Unauthorized | FeignException.NotFound | NullPointerException e) {
-      log.error("Failed to retrieve locale information from mod-configuration. Defaulting to UTC.");
-      return ZoneOffset.UTC;
-    }
+    log.warn("Database date value is in an unrecognized format: \"{}\"", value);
+    return value;
   }
 }

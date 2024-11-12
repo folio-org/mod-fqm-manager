@@ -157,13 +157,47 @@ class ResultSetServiceTest {
     );
     List<String> fields = List.of("id", "dateField", "timestampField", "offsetDateField");
     List<String> tenantIds = List.of("tenant_01");
-    List<List<String>> listIds = List.of(
-      List.of(contentId.toString())
-    );
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01")).thenReturn(DATE_ENTITY_TYPE);
     when(configurationClient.getTenantTimezone()).thenReturn(timezone);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
+
+    List<Map<String, Object>> actualResult = service.getResultSet(
+      entityTypeId,
+      fields,
+      listIds,
+      tenantIds,
+      true
+    );
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void testInvalidDateHandling() {
+    UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
+    UUID contentId = UUID.fromString("bb0e294a-bd66-5878-a597-a2a3ac035d8e");
+
+    List<Map<String, Object>> repositoryResponse = List.of(
+      Map.of(
+        "id", contentId,
+        "dateField", "invalid date"
+      )
+    );
+    List<Map<String, Object>> expectedResult = List.of(
+      Map.of(
+        "id", contentId,
+        "dateField", "invalid date"
+      )
+    );
+    List<String> fields = List.of("id", "dateField");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(DATE_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01")).thenReturn(DATE_ENTITY_TYPE);
+    when(configurationClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(

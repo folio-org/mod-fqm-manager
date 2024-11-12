@@ -188,7 +188,7 @@ public class EntityTypeService {
     List<ValueWithLabel> filteredValues = field
       .getValues()
       .stream()
-      .filter(valueWithLabel -> valueWithLabel.getLabel().contains(searchText))
+      .filter(valueWithLabel -> valueWithLabel.getLabel().toLowerCase().contains(searchText.toLowerCase()))
       .distinct()
       .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
@@ -206,7 +206,7 @@ public class EntityTypeService {
         for (int i = 0; i < values.size(); i++) {
           String value = values.get(i);
           String label = labels.get(i);
-          if (label.contains(searchText)) {
+          if (label.toLowerCase().contains(searchText.toLowerCase())) {
             resultSet.add(new ValueWithLabel().value(value).label(label));
           }
         }

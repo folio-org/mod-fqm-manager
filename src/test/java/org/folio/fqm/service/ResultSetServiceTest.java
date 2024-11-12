@@ -179,16 +179,22 @@ class ResultSetServiceTest {
     UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
     UUID contentId = UUID.fromString("bb0e294a-bd66-5878-a597-a2a3ac035d8e");
 
+    Object extraordinarilyInvalidDate = new Object() {
+      public String toString() { return "extraordinarily invalid date"; }
+    };
+
     List<Map<String, Object>> repositoryResponse = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "invalid date"
+        "dateField", "invalid date",
+        "offsetDateField", extraordinarilyInvalidDate
       )
     );
     List<Map<String, Object>> expectedResult = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "invalid date"
+        "dateField", "invalid date",
+        "offsetDateField", extraordinarilyInvalidDate
       )
     );
     List<String> fields = List.of("id", "dateField");

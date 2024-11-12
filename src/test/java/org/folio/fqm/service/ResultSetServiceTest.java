@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 
-import feign.FeignException;
 import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;

@@ -8,7 +8,8 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 
 import java.sql.Timestamp;
-
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 
 import feign.FeignException;
@@ -21,6 +22,9 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 
 class ResultSetServiceTest {
@@ -43,19 +47,7 @@ class ResultSetServiceTest {
           .target("target1")
       )
     );
-  private static final String LOCALE_SETTINGS = """
-    {
-      "configs": [
-        {
-           "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
-           "module":"ORG",
-           "configName":"localeSettings",
-           "enabled":true,
-           "value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"Africa/Lagos\\",\\"currency\\":\\"USD\\"}"
-        }
-      ],
-      "totalRecords": 1
-    }""";
+
   private ResultSetRepository resultSetRepository;
   private EntityTypeFlatteningService entityTypeFlatteningService;
   private ConfigurationClient configurationClient;
@@ -112,26 +104,56 @@ class ResultSetServiceTest {
     assertEquals(expectedResult, actualResult);
   }
 
-  @Test
-  void shouldLocalizeDatesIfRequested() {
+  static List<Arguments> dateLocalizationTestCases() {
+    return List.of(
+      // (tz, date string, timestamp, offset date string, expected)
+
+      // Africa/Ceuta is UTC+1 in normal time, UTC+2 in summer
+
+      // For a UTC+1 timezone, a record at 2024-12-23T23:30:00.000Z UTC should get localized to 2024-12-24T00:30:00.000Z,
+      // which will then be truncated to 2024-12-24
+      Arguments.of(ZoneId.of("Africa/Ceuta"),
+        "2024-12-23T23:30:00.000Z", Timestamp.from(Instant.parse("2024-12-23T23:30:00Z")), "2024-12-23T23:30:00.000+00:00",
+        "2024-12-24"),
+      Arguments.of(ZoneId.of("Africa/Ceuta"),
+        "2024-12-23T22:30:00.000Z", Timestamp.from(Instant.parse("2024-12-23T22:30:00Z")), "2024-12-23T22:30:00.000+00:00",
+        "2024-12-23"),
+
+      // in summer, this tz is UTC+2
+      Arguments.of(ZoneId.of("Africa/Ceuta"),
+        "2024-06-23T22:30:00.000Z", Timestamp.from(Instant.parse("2024-06-23T22:30:00Z")), "2024-06-23T22:30:00.000+00:00",
+        "2024-06-24"),
+
+      // and sanity checks, in UTC
+      Arguments.of(ZoneId.of("UTC"),
+        "2024-12-23T23:59:59.000Z", Timestamp.from(Instant.parse("2024-12-23T23:59:59Z")), "2024-12-23T23:59:59.000+00:00",
+        "2024-12-23"),
+      Arguments.of(ZoneId.of("UTC"),
+        "2024-12-23T00:00:00.000Z", Timestamp.from(Instant.parse("2024-12-23T00:00:00Z")), "2024-12-23T00:00:00.000+00:00",
+        "2024-12-23")
+    );
+  }
+
+  @ParameterizedTest(name = "should localize dates {1} to {4} for timezone {0}")
+  @MethodSource("dateLocalizationTestCases")
+  void testDateLocalization(ZoneId timezone, String dateField, Timestamp timestampField, String offsetDateField, String expected) {
     UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
-    UUID contentId = UUID.randomUUID();
-    // For a UTC+1 timezone, a record at 2024-10-23T23:30:00.000Z UTC should get localized to 2024-10-24T00:30:00.000Z,
-    // which will then be truncated to 2024-10-24
+    UUID contentId = UUID.fromString("900111ca-f498-5e8e-b12d-a90d275b5080");
+
     List<Map<String, Object>> repositoryResponse = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "2024-10-23T23:30:00.000Z",
-        "timestampField", Timestamp.valueOf("2024-10-23 23:30:00"),
-        "offsetDateField", "2024-10-23T23:30:00.000+00:00"
+        "dateField", dateField,
+        "timestampField", timestampField,
+        "offsetDateField", offsetDateField
       )
     );
     List<Map<String, Object>> expectedResult = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "2024-10-24",
-        "timestampField", "2024-10-24",
-        "offsetDateField", "2024-10-24"
+        "dateField", expected,
+        "timestampField", expected,
+        "offsetDateField", expected
       )
     );
     List<String> fields = List.of("id", "dateField", "timestampField", "offsetDateField");
@@ -142,40 +164,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01")).thenReturn(DATE_ENTITY_TYPE);
-    when(configurationClient.getLocaleSettings()).thenReturn(LOCALE_SETTINGS);
-    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
-
-    List<Map<String, Object>> actualResult = service.getResultSet(
-      entityTypeId,
-      fields,
-      listIds,
-      tenantIds,
-      true
-    );
-    assertEquals(expectedResult, actualResult);
-  }
-
-  @Test
-  void shouldUseUtcOffsetIfConfigurationClientThrowsError() {
-    UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
-    UUID contentId = UUID.randomUUID();
-    List<Map<String, Object>> repositoryResponse = List.of(
-      Map.of(
-        "id", contentId, "dateField", "2024-10-24T00:00:00.000Z")
-    );
-    List<Map<String, Object>> expectedResult = List.of(
-      Map.of("id", contentId, "dateField", "2024-10-24")
-    );
-    List<String> fields = List.of("id", "dateField");
-    List<String> tenantIds = List.of("tenant_01");
-    List<List<String>> listIds = List.of(
-      List.of(contentId.toString())
-    );
-
-
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(DATE_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01")).thenReturn(DATE_ENTITY_TYPE);
-    when(configurationClient.getLocaleSettings()).thenThrow(FeignException.NotFound.class);
+    when(configurationClient.getTenantTimezone()).thenReturn(timezone);
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(

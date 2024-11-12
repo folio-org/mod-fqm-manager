@@ -286,17 +286,17 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-//            {
-//              name: 'id',
-//              property: 'id',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'id',
+            //              property: 'id',
+            //              dataType: {
+            //                dataType: 'rangedUUIDType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'address_line1',
               property: 'addressLine1',
@@ -363,42 +363,42 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'country')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'is_primary',
-//              property: 'isPrimary',
-//              dataType: {
-//                dataType: 'booleanType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              valueFunction: 'lower(:value)',
-//              values: [
-//                {
-//                  value: 'true',
-//                  label: 'True',
-//                },
-//                {
-//                  value: 'false',
-//                  label: 'False',
-//                },
-//              ],
-//            },
-//          {
-//              name: 'categories',
-//              property: 'categories',
-//              dataType: {
-//                dataType: 'arrayType',
-//                itemDataType: {
-//                  dataType: 'rangedUUIDType',
-//                },
-//              },
-//              queryable: false,
-//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
-//                          ORDER BY elems.value->>'categories') \
-//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
-//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)"
-//            },
+            //            {
+            //              name: 'is_primary',
+            //              property: 'isPrimary',
+            //              dataType: {
+            //                dataType: 'booleanType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //              values: [
+            //                {
+            //                  value: 'true',
+            //                  label: 'True',
+            //                },
+            //                {
+            //                  value: 'false',
+            //                  label: 'False',
+            //                },
+            //              ],
+            //            },
+            //          {
+            //              name: 'categories',
+            //              property: 'categories',
+            //              dataType: {
+            //                dataType: 'arrayType',
+            //                itemDataType: {
+            //                  dataType: 'rangedUUIDType',
+            //                },
+            //              },
+            //              queryable: false,
+            //              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+            //                          ORDER BY elems.value->>'categories') \
+            //                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+            //                          FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)"
+            //            },
             {
               name: 'categories_names',
               property: 'categoriesNames',
@@ -409,23 +409,23 @@
                 },
               },
               queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' || ' ' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses'->'categories')) id \
-                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
-                 WHERE id.value IS NOT NULL)"
+              valueGetter: "(SELECT jsonb_agg((catg_name.jsonb ->> 'value') ORDER BY catg_name.jsonb ->> 'value') \
+             FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses'->'categories')) id \
+             JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+             WHERE id.value IS NOT NULL)"
             }
 
-//            {
-//              name: 'language',
-//              property: 'language',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'language',
+            //              property: 'language',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
           ],
         },
       },
@@ -449,17 +449,17 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-//            {
-//              name: 'id',
-//              property: 'id',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'id',
+            //              property: 'id',
+            //              dataType: {
+            //                dataType: 'rangedUUIDType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'phone_number',
               property: 'phoneNumber',
@@ -471,21 +471,21 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'phoneNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'categories',
-//              property: 'categories',
-//              dataType: {
-//                dataType: 'arrayType',
-//                itemDataType: {
-//                  dataType: 'rangedUUIDType',
-//                },
-//              },
-//              queryable: false,
-//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
-//                          ORDER BY elems.value->>'categories') \
-//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
-//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)"
-//            },
+            //            {
+            //              name: 'categories',
+            //              property: 'categories',
+            //              dataType: {
+            //                dataType: 'arrayType',
+            //                itemDataType: {
+            //                  dataType: 'rangedUUIDType',
+            //                },
+            //              },
+            //              queryable: false,
+            //              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+            //                          ORDER BY elems.value->>'categories') \
+            //                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+            //                          FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)"
+            //            },
             {
               name: 'categories_names',
               property: 'categoriesNames',
@@ -530,38 +530,38 @@
                 },
               ],
             },
-//            {
-//              name: 'is_primary',
-//              property: 'isPrimary',
-//              dataType: {
-//                dataType: 'booleanType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              valueFunction: 'lower(:value)',
-//              values: [
-//                {
-//                  value: 'true',
-//                  label: 'True',
-//                },
-//                {
-//                  value: 'false',
-//                  label: 'False',
-//                },
-//              ],
-//            },
-//            {
-//              name: 'language',
-//              property: 'language',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'is_primary',
+            //              property: 'isPrimary',
+            //              dataType: {
+            //                dataType: 'booleanType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //              values: [
+            //                {
+            //                  value: 'true',
+            //                  label: 'True',
+            //                },
+            //                {
+            //                  value: 'false',
+            //                  label: 'False',
+            //                },
+            //              ],
+            //            },
+            //            {
+            //              name: 'language',
+            //              property: 'language',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
           ],
         },
       },
@@ -585,17 +585,17 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-//            {
-//              name: 'id',
-//              property: 'id',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'id',
+            //              property: 'id',
+            //              dataType: {
+            //                dataType: 'rangedUUIDType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'value',
               property: 'value',
@@ -618,43 +618,43 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'description')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'is_primary',
-//              property: 'isPrimary',
-//              dataType: {
-//                dataType: 'booleanType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              valueFunction: 'lower(:value)',
-//              values: [
-//                {
-//                  value: 'true',
-//                  label: 'True',
-//                },
-//                {
-//                  value: 'false',
-//                  label: 'False',
-//                },
-//              ],
-//            },
-//            {
-//            {
-//              name: 'categories',
-//              property: 'categories',
-//              dataType: {
-//                dataType: 'arrayType',
-//                itemDataType: {
-//                  dataType: 'rangedUUIDType',
-//                },
-//              },
-//              queryable: false,
-//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
-//                          ORDER BY elems.value->>'categories') \
-//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
-//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)"
-//            },
+            //            {
+            //              name: 'is_primary',
+            //              property: 'isPrimary',
+            //              dataType: {
+            //                dataType: 'booleanType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //              values: [
+            //                {
+            //                  value: 'true',
+            //                  label: 'True',
+            //                },
+            //                {
+            //                  value: 'false',
+            //                  label: 'False',
+            //                },
+            //              ],
+            //            },
+            //            {
+            //            {
+            //              name: 'categories',
+            //              property: 'categories',
+            //              dataType: {
+            //                dataType: 'arrayType',
+            //                itemDataType: {
+            //                  dataType: 'rangedUUIDType',
+            //                },
+            //              },
+            //              queryable: false,
+            //              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+            //                          ORDER BY elems.value->>'categories') \
+            //                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+            //                          FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)"
+            //            },
             {
               name: 'categories_names',
               property: 'categoriesNames',
@@ -670,17 +670,17 @@
                  JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                  WHERE id.value IS NOT NULL)"
             },
-//            {
-//              name: 'language',
-//              property: 'language',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'language',
+            //              property: 'language',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
           ],
         },
       },
@@ -704,17 +704,17 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-//            {
-//              name: 'id',
-//              property: 'id',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'id',
+            //              property: 'id',
+            //              dataType: {
+            //                dataType: 'rangedUUIDType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'value',
               property: 'value',
@@ -737,53 +737,53 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'description')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'language',
-//              property: 'language',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
-//            {
-//              name: 'is_primary',
-//              property: 'isPrimary',
-//              dataType: {
-//                dataType: 'booleanType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
-//              valueFunction: 'lower(:value)',
-//              values: [
-//                {
-//                  value: 'true',
-//                  label: 'True',
-//                },
-//                {
-//                  value: 'false',
-//                  label: 'False',
-//                },
-//              ],
-//            },
-//            {
-//              name: 'categories',
-//              property: 'categories',
-//              dataType: {
-//                dataType: 'arrayType',
-//                itemDataType: {
-//                  dataType: 'rangedUUIDType',
-//                },
-//              },
-//              queryable: false,
-//              valueGetter: "(SELECT array_agg(elems.value->>'categories \
-//                          ORDER BY elems.value->>'categories') \
-//                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
-//                          FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)"
-//            },
+            //            {
+            //              name: 'language',
+            //              property: 'language',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'language') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'language')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
+            //            {
+            //              name: 'is_primary',
+            //              property: 'isPrimary',
+            //              dataType: {
+            //                dataType: 'booleanType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'isPrimary') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'isPrimary')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //              values: [
+            //                {
+            //                  value: 'true',
+            //                  label: 'True',
+            //                },
+            //                {
+            //                  value: 'false',
+            //                  label: 'False',
+            //                },
+            //              ],
+            //            },
+            //            {
+            //              name: 'categories',
+            //              property: 'categories',
+            //              dataType: {
+            //                dataType: 'arrayType',
+            //                itemDataType: {
+            //                  dataType: 'rangedUUIDType',
+            //                },
+            //              },
+            //              queryable: false,
+            //              valueGetter: "(SELECT array_agg(elems.value->>'categories \
+            //                          ORDER BY elems.value->>'categories') \
+            //                          FILTER (WHERE elems.value->>'categories' IS NOT NULL) \
+            //                          FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)"
+            //            },
             {
               name: 'categories_names',
               property: 'categoriesNames',
@@ -1400,21 +1400,21 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'notes')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'acq_unit_ids',
-//              property: 'acqUnitIds',
-//              dataType: {
-//                dataType: 'arrayType',
-//                itemDataType: {
-//                  dataType: 'rangedUUIDType',
-//                },
-//              },
-//              queryable: false,
-//              valueGetter: "(SELECT array_agg(elems.value->>'acqUnitIds' \
-//                    ORDER BY elems.value->>'acqUnitIds') \
-//                 FILTER (WHERE elems.value->>'acqUnitIds' IS NOT NULL) \
-//                 FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)"
-//            },
+            //            {
+            //              name: 'acq_unit_ids',
+            //              property: 'acqUnitIds',
+            //              dataType: {
+            //                dataType: 'arrayType',
+            //                itemDataType: {
+            //                  dataType: 'rangedUUIDType',
+            //                },
+            //              },
+            //              queryable: false,
+            //              valueGetter: "(SELECT array_agg(elems.value->>'acqUnitIds' \
+            //                    ORDER BY elems.value->>'acqUnitIds') \
+            //                 FILTER (WHERE elems.value->>'acqUnitIds' IS NOT NULL) \
+            //                 FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)"
+            //            },
             {
               name: 'acq_unit',
               property: 'acqUnit',

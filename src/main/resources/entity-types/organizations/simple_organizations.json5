@@ -496,10 +496,11 @@
                 },
               },
               queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'phoneNumbers'->'categories')) id \
-                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
-                 WHERE id.value IS NOT NULL)"
+              valueGetter: "(SELECT jsonb_agg(array_to_string(array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value'), ' | ')) \
+              FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'phoneNumbers'->'categories')) id \
+              JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+              WHERE id.value IS NOT NULL)"
+
             },
             {
               name: 'type',

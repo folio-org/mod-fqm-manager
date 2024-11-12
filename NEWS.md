@@ -1,5 +1,16 @@
 # 3.0.x - Ramsons
 
+## 3.0.2
+- [MODFQMMGR-532]: Aggregate languages from all tenants in ECS environments
+- [MODFQMMGR-566]: Make the available value API case-insensitive
+- [MODFQMMGR-570]: Add missing "permissions" interfaces to the module descriptor
+- [MODFQMMGR-573] Consider converted date for timezone offsets, rather than system time
+
+[MODFQMMGR-532]: https://folio-org.atlassian.net/browse/MODFQMMGR-532
+[MODFQMMGR-566]: https://folio-org.atlassian.net/browse/MODFQMMGR-566
+[MODFQMMGR-570]: https://folio-org.atlassian.net/browse/MODFQMMGR-570
+[MODFQMMGR-573]: https://folio-org.atlassian.net/browse/MODFQMMGR-573
+
 ## 3.0.1
 - [MODFQMMGR-558] Add acquisition unit names to the Organizations entity type
 - [MODFQMMGR-563] Add /query/contents/privileged endpoint to request query results on behalf of another user

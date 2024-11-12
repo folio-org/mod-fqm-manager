@@ -406,6 +406,14 @@
     {
       "id": "consortia",
       "version": "1.0"
+    },
+    {
+      "id": "permissions",
+      "version": "5.8"
+    },
+    {
+      "id": "permissions-users",
+      "version": "1.0"
     }
   ],
   "launchDescriptor": {

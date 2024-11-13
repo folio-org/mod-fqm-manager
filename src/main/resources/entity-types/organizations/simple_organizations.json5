@@ -429,7 +429,6 @@
                         JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                         WHERE id.value IS NOT NULL)"
             }
-
             //            {
 //              name: 'language',
 //              property: 'language',

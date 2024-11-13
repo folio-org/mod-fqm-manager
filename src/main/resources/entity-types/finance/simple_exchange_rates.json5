@@ -35,7 +35,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.exchange_rate',
+      valueGetter: "(:sourceAlias.exchange_rate)::float",
+      valueFunction: '(:value)::float'
     },
   ],
 }

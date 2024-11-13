@@ -410,9 +410,9 @@
               },
               queryable: false,
               valueGetter: "(SELECT array_to_string(array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value'), ' | ') \
-                FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses'->'categories')) id \
-                JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
-                WHERE id.value IS NOT NULL)"
+                         FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses' -> 'categories')) id \
+                         JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                         WHERE id.value IS NOT NULL)"
             }
 
             //            {
@@ -433,13 +433,13 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
-                                    jsonb_build_object('categoriesNames', \
-                                    (SELECT jsonb_agg(catg_name.jsonb ->> 'value') \
-                                     FROM jsonb_array_elements_text(record.value -> 'categories') id \
-                                     JOIN src_organization_categories catg_name \
-                                       ON id.value::text = catg_name.id::text)) \
-                                   ORDER BY record.value ->> 'categories') \
-                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'addresses')) record(value))::text",
+                                   jsonb_build_object('categoriesNames', \
+                                   (SELECT array_to_string(array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value'), ' | ') \
+                                    FROM jsonb_array_elements_text(record.value -> 'categories') id \
+                                    JOIN src_organization_categories catg_name \
+                                      ON id.value::text = catg_name.id::text)) \
+                                  ORDER BY record.value ->> 'categories') \
+                FROM jsonb_array_elements((:sourceAlias.jsonb -> 'addresses')) record(value))::text"
     },
     {
       name: 'phone_numbers',

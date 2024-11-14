@@ -436,7 +436,7 @@
         "value": "postgres"
       },
       { "name": "DB_HOST_READER",
-        "value": "postgres"
+        "value": ""
       },
       { "name": "DB_PORT",
         "value": "5432"

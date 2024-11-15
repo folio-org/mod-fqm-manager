@@ -139,7 +139,6 @@ public class IdStreamer {
       idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
         .forEach(idsWithCancelCallback -> {
           handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total);
-          total.addAndGet(idsWithCancelCallback.ids().size());
         });
     }
   }

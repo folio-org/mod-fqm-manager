@@ -128,7 +128,7 @@
       isIdColumn: false,
       essential: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
     },
     {
@@ -139,7 +139,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'username'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",

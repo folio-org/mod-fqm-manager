@@ -318,7 +318,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'copyNumber'",
       essential: true
     },
@@ -756,7 +756,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumber'",
     },

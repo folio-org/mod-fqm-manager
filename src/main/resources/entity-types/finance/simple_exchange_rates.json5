@@ -23,7 +23,7 @@
       },
       isIdColumn: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ':sourceAlias.currency',
     },
     {

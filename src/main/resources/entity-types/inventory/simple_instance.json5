@@ -72,7 +72,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.creation_date",
       valueFunction: '(:value)::timestamp',
@@ -155,7 +155,7 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'name'::text))",
@@ -1036,7 +1036,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
       filterValueGetter: "COALESCE(\
         lower(:sourceAlias.jsonb->>'discoverySuppress'),\

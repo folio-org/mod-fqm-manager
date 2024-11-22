@@ -23,7 +23,7 @@
       },
       isIdColumn: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: ':sourceAlias.id',
     },

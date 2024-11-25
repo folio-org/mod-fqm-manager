@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,6 +53,7 @@ class IdStreamerTest {
   private SimpleHttpClient ecsClient;
   private UserTenantService userTenantService;
   private QueryRepository queryRepository;
+  private ScheduledExecutorService executorService;
   QueryResultsRepository queryResultsRepository;
 
   private static final String USER_TENANT_JSON = """
@@ -114,6 +116,8 @@ class IdStreamerTest {
     PermissionsService permissionsService = mock(PermissionsService.class);
     queryRepository = mock(QueryRepository.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
+    executorService = mock(ScheduledExecutorService.class);
+
 
 
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, executionContext, userTenantService);
@@ -125,7 +129,8 @@ class IdStreamerTest {
         crossTenantQueryService,
         mock(FolioExecutionContext.class),
         queryRepository,
-        queryResultsRepository
+        queryResultsRepository,
+        executorService
       );
   }
 

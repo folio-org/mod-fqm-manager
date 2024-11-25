@@ -73,23 +73,34 @@ public class EntityTypeRepository {
     Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId != null ? tenantId : executionContext.getTenantId(), tenantIdKey -> {
         String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
         Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
-      Map<String, EntityType> rawEntityTypes = readerJooqContext
-        .select(definitionField)
-        .from(table(tableName))
-        .fetch(definitionField)
-        .stream()
-        .map(this::unmarshallEntityType)
-        .collect(Collectors.toMap(EntityType::getId, Function.identity()));
 
-      return rawEntityTypes.values().stream()
-        .map(entityType -> {
-          String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
-          if (customFieldsEntityTypeId != null) {
-            entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
-          }
-          return entityType;
-        })
-        .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
+        ////
+      var QUERY_DETAILS_TABLE = "query_details";
+      var QUERY_ID = "query_id";
+      var queryId = UUID.fromString("6dbe7cf6-ef5f-40b2-a0f2-69a705cb94c8");
+      var result = jooqContext.select()
+        .from(table(QUERY_DETAILS_TABLE))
+        .where(field(QUERY_ID).eq(queryId))
+        .fetch();
+      System.out.println("Result: " + result);
+
+        Map<String, EntityType> rawEntityTypes = readerJooqContext
+          .select(definitionField)
+          .from(table(tableName))
+          .fetch(definitionField)
+          .stream()
+          .map(this::unmarshallEntityType)
+          .collect(Collectors.toMap(EntityType::getId, Function.identity()));
+
+        return rawEntityTypes.values().stream()
+          .map(entityType -> {
+            String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
+            if (customFieldsEntityTypeId != null) {
+              entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
+            }
+            return entityType;
+          })
+          .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
       }
     );
 

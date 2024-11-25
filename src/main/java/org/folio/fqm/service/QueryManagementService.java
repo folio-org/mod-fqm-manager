@@ -123,7 +123,7 @@ public class QueryManagementService {
    */
   @Transactional(readOnly = true)
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
-    return queryRepository.getQuery(queryId, false)
+    var returnValue = queryRepository.getQuery(queryId, false)
       .map(query -> new QueryDetails().queryId(queryId)
         .entityTypeId(query.entityTypeId())
         .fqlQuery(query.fqlQuery())
@@ -134,6 +134,7 @@ public class QueryManagementService {
         .failureReason(query.failureReason())
         .totalRecords(queryResultsRepository.getQueryResultsCount(queryId))
         .content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit)));
+    return returnValue;
   }
 
   /**

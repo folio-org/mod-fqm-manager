@@ -1,7 +1,7 @@
 {
-  id: '0cb79a4c-f7eb-4941-a104-745224ae0291',
-  name: 'entity_type_01',
-  labelAlias: 'entity_type_01',
+  id: '47593013-f7eb-4941-a104-45224ae0ffbc',
+  name: 'group_by_entity_type',
+  labelAlias: 'group_by_entity_type',
   private: false,
   columns: [
     {

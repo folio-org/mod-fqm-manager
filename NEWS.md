@@ -1,5 +1,15 @@
 # 3.0.x - Ramsons
 
+## 3.0.3
+* Add DB_HOST_READER env variable to module descriptor, set to `""`
+* [MODFQMMGR-575]: Fix bug where query results would be double-counted
+* [MODFQMMGR-576]: Make field Exchange rate — Rate queryable
+* [MODFQMMGR-582]: Update fields that are visible by default when viewing list results
+
+[MODFQMMGR-575]: https://folio-org.atlassian.net/browse/MODFQMMGR-575
+[MODFQMMGR-576]: https://folio-org.atlassian.net/browse/MODFQMMGR-576
+[MODFQMMGR-582]: https://folio-org.atlassian.net/browse/MODFQMMGR-582
+
 ## 3.0.2
 - [MODFQMMGR-532]: Aggregate languages from all tenants in ECS environments
 - [MODFQMMGR-566]: Make the available value API case-insensitive

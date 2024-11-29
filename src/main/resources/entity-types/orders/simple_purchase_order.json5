@@ -263,6 +263,8 @@
           label: 'False',
         },
       ],
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'reEncumber\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
     },
     {
       name: 'ship_to',

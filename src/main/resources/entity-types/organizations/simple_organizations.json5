@@ -169,8 +169,8 @@
       visibleByDefault: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'status'",
-      filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'status'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> \'status\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value)), 600)',
       values: [
         {
           value: 'Active',

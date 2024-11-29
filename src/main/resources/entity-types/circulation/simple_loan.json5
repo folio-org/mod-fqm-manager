@@ -140,8 +140,8 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'loanDate'",
-      filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'loanDate\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'loanDate'::text), 600)",
+      valueFunction: "\"left\"(lower(:value), 600)"
     },
     {
       name: 'due_date',

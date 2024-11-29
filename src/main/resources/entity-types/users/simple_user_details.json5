@@ -454,7 +454,9 @@
           value: 'DCB',
           label: 'DCB',
         }
-      ]
+      ],
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> \'type\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
     },
     {
       name: 'tags_tag_list',

@@ -932,8 +932,10 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'accessionNumber'",
-      essential: true
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'accessionNumber'::text), 600)",
+      valueFunction: "\"left\"(lower(:value), 600)"
     },
     {
       name: 'temporary_location_id',
@@ -946,6 +948,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'temporaryLocationId'",
+
     },
     {
       name: 'item_damaged_status_id',
@@ -969,7 +972,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'",
+      valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'"
     },
     {
       name: 'purchase_order_line_identifier',

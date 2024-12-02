@@ -214,7 +214,9 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'callNumber'",
-      essential: true
+      essential: true,
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'callNumber'::text), 600)",
+      valueFunction: "\"left\"(lower(:value), 600)"
     },
     {
       name: 'former_ids',

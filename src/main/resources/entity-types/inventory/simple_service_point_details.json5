@@ -129,7 +129,6 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'pickupLocation'",
       values: [
         {
           value: 'true',
@@ -140,6 +139,9 @@
           label: 'False',
         },
       ],
+      valueGetter: ":sourceAlias.jsonb->>'pickupLocation'",
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'pickupLocation'::text), 600)",
+      valueFunction: "\"left\"(lower(:value), 600)"
     },
     {
       name: 'shelving_lag_time',

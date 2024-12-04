@@ -471,7 +471,7 @@
       { "name": "MAX_QUERY_SIZE",
         "value": "1250000"
       },
-      { "name": "mod.fqm-manager.entity-type-cache-timeout-seconds",
+      { "name": "mod-fqm-manager.entity-type-cache-timeout-seconds",
         "value": "300"
       },
       { "name": "IS_EUREKA",

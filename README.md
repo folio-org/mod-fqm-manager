@@ -49,7 +49,7 @@ mvn clean install
 | IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA |
 | MAX_QUERY_SIZE                                    | 1250000       | max result count per query                        |
 | mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions               |
-| mod-fqm-manager.entity-type-cache-timeout-seconds | 3600          | Cache duration for entity type definitions        |
+| mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions        |
 | server.port                                       | 8081          | Server port                                       |
 | QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted                         |
 | task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks             |

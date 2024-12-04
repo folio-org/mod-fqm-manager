@@ -1,5 +1,12 @@
 # 3.0.x - Ramsons
 
+## 3.0.4
+- [MODFQMMGR-577]: Reduce the default cache expiration time for the entity type cache
+- [MODFQMMGR-583]: Use available indexes for more fields
+
+[MODFQMMGR-577]: https://folio-org.atlassian.net/browse/MODFQMMGR-577
+[MODFQMMGR-583]: https://folio-org.atlassian.net/browse/MODFQMMGR-583
+
 ## 3.0.3
 * Add DB_HOST_READER env variable to module descriptor, set to `""`
 * [MODFQMMGR-575]: Fix bug where query results would be double-counted

@@ -3,7 +3,7 @@ mod-fqm-manager:
   max-query-size: ${MAX_QUERY_SIZE:1250000}
   bypass-permissions: false # local development ONLY
   permissions-cache-timeout-seconds: 60
-  entity-type-cache-timeout-seconds: 3600
+  entity-type-cache-timeout-seconds: 300
 server:
   port: 8081
 spring:

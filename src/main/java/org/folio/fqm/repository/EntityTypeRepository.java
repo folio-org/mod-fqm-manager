@@ -55,7 +55,7 @@ public class EntityTypeRepository {
                               DSLContext jooqContext,
                               ObjectMapper objectMapper,
                               FolioExecutionContext executionContext,
-                              @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:3600}") long cacheDurationSeconds) {
+                              @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:300}") long cacheDurationSeconds) {
     this.readerJooqContext = readerJooqContext;
     this.jooqContext = jooqContext;
     this.objectMapper = objectMapper;

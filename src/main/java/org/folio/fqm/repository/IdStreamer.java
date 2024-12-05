@@ -198,7 +198,8 @@ public class IdStreamer {
     List<Integer> pids = jooqContext
       .select(field("pid", Integer.class))
       .from(table("pg_stat_activity"))
-      .where(field("query").like(querySearchText))
+      .where(field("state").eq("active"))
+      .and(field("query").like(querySearchText))
       .fetchInto(Integer.class);
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);

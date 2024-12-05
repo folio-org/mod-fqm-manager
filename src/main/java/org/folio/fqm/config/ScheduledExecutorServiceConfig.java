@@ -7,28 +7,22 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
 @Log4j2
 public class ScheduledExecutorServiceConfig {
-  @Bean
+  @Bean(destroyMethod = "shutdown")
   public ScheduledExecutorService scheduledExecutorService() {
     return Executors.newScheduledThreadPool(1);
-  }
-
-  @PreDestroy
-  public void shutdownExecutorService(ScheduledExecutorService executorService) {
-    log.info("Shutting down ScheduledExecutorService...");
-    executorService.shutdown();
-    try {
-      if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
-        log.warn("Scheduled executor service did not terminate in time. Forcing shutdown...");
-        executorService.shutdownNow();
-      }
-    } catch (InterruptedException e) {
-      log.error("Interrupted while shutting down executorService", e);
-      Thread.currentThread().interrupt();
-    }
+//    return new ScheduledThreadPoolExecutor(1) {
+//      @Override
+//      public void shutdown() {
+//        log.info("ScheduledExecutorService is shutting down...");
+//        super.shutdown();
+//        log.info("ScheduledExecutorService shutdown completed.");
+//      }
+//    };
   }
 }

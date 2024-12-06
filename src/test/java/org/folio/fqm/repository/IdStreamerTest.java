@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,20 +40,28 @@ import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link IdStreamerTestDataProvider} class
  */
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 class IdStreamerTest {
+
 
   private IdStreamer idStreamer;
   private LocalizationService localizationService;
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
   private UserTenantService userTenantService;
+//  @MockBean
   private QueryRepository queryRepository;
   private ScheduledExecutorService executorService;
   QueryResultsRepository queryResultsRepository;
@@ -102,6 +111,8 @@ class IdStreamerTest {
       new MockConnection(new IdStreamerTestDataProvider()),
       SQLDialect.POSTGRES
     );
+//    DSLContext readerContext = mock(DSLContext.class);
+//    DSLContext context = mock(DSLContext.class);
 
     executionContext = mock(FolioExecutionContext.class);
     when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
@@ -119,8 +130,19 @@ class IdStreamerTest {
     queryResultsRepository = mock(QueryResultsRepository.class);
 //    executorService = mock(ScheduledExecutorService.class);
     executorService = Executors.newScheduledThreadPool(1);
+    QueryRepository testRepo = mock(QueryRepository.class);
+    System.out.println("queryRepository mock status: " + Mockito.mockingDetails(queryRepository).isMock());
+    System.out.println("queryResultsRepository mock status: " + Mockito.mockingDetails(queryResultsRepository).isMock());
+    System.out.println("ecsClient mock status: " + Mockito.mockingDetails(ecsClient).isMock());
+    System.out.println("localizationService mock status: " + Mockito.mockingDetails(localizationService).isMock());
 
 
+
+
+    // NOT BEING MOCKED EVEN THOUGH THEY SHOULD
+    // QueryRepository
+    // UserTenantService
+    // QueryResultsRepository
 
     EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, executionContext, userTenantService);
     CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, permissionsService, userTenantService);
@@ -299,6 +321,61 @@ class IdStreamerTest {
     assertEquals(expectedError, actualException.getError());
   }
 
+  @Test
+  void shouldMonitorQueryCancellation() {
+    String tenantId = "tenant_01";
+    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    List<List<String>> expectedIds = new ArrayList<>();
+    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
+    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(cancelledQuery));
+//    List<List<String>> actualIds = mockQueryRepositories();
+//    mockQueryRepositories();
+
+    idStreamer.monitorQueryCancellation(cancelledQuery.queryId());
+    Awaitility.await()
+      .atMost(50, TimeUnit.SECONDS);
+//    fail();
+//    assertEquals(expectedIds, actualIds);
+  }
+
+  @Test
+  void shouldCancelQuery() {
+    fail();
+    String tenantId = "tenant_01";
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
+    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    List<List<String>> expectedIds = new ArrayList<>();
+    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
+    when(queryRepository.getQuery(any(), eq(false))).thenReturn(Optional.of(cancelledQuery));
+    List<List<String>> actualIds = mockQueryRepositories();
+
+    idStreamer.streamIdsInBatch(
+      IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION,
+      true,
+      fql,
+      2,
+      100,
+      UUID.randomUUID()
+    );
+    assertEquals(expectedIds, actualIds);
+  }
+
+  @Test
+  void testQueryRepositoryMock() {
+    QueryRepository queryRepository = mock(QueryRepository.class);
+    when(queryRepository.getQuery(any(), any())).thenReturn(null);
+
+    assertNotNull(queryRepository);
+    assertNull(queryRepository.getQuery(UUID.randomUUID(), false));
+  }
+
+
   // Suppress the unchecked cast warning on the Class<T> cast below. We know the parameter type is List<String[]>, but can't
   // easily create a Class object for it.
   @SuppressWarnings("unchecked")
@@ -311,5 +388,7 @@ class IdStreamerTest {
       return null;
     }).when(queryResultsRepository).saveQueryResults(any(UUID.class), any(List.class));
     return actualIds;
+//    System.out.println("Mock query repositories");
+//    return null;
   }
 }

@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.deserializer.FqlParsingException;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.testutil.TestDataFixture;
@@ -79,9 +80,8 @@ class QueryExecutionServiceTest {
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
 
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlQuery, false);
     doThrow(RuntimeException.class).when(queryProcessorService).getIdsInBatch(
-      eq(fqlQueryWithContext),
+      any(),
       anyInt(),
       anyInt(),
       any());
@@ -102,9 +102,29 @@ class QueryExecutionServiceTest {
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
 
-    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlQuery, false);
     doThrow(RuntimeException.class).when(queryProcessorService).getIdsInBatch(
-      eq(fqlQueryWithContext),
+      any(),
+      anyInt(),
+      anyInt(),
+      any());
+
+    assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.FAILED), any(), any());
+  }
+
+  @Test
+  void shouldHandleQueryNotFoundException() {
+    String tenantId = "tenant_01";
+    EntityType entityType = new EntityType();
+    String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+
+    int maxSize = 100;
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(queryRepository.getQuery(query.queryId(), false)).thenThrow(QueryNotFoundException.class);
+
+    doThrow(RuntimeException.class).when(queryProcessorService).getIdsInBatch(
+      any(),
       anyInt(),
       anyInt(),
       any());

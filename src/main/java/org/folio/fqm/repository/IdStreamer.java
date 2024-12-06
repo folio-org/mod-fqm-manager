@@ -42,7 +42,8 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
 @Repository
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 @Log4j2
 public class IdStreamer {
 
@@ -168,17 +169,20 @@ public class IdStreamer {
     }
   }
 
-  private void monitorQueryCancellation(UUID queryId) {
+  void monitorQueryCancellation(UUID queryId) {
     Runnable cancellationMonitor = new Runnable() {
       @Override
       public void run() {
         try {
-          log.debug("Checking query cancellation for query {}", queryId);
+          System.out.println("Checking query cancellation");
+          System.out.println("for query " + queryId);
+          log.debug("Checking query cancellation for query {}", queryId); // TODO: change back to debug
           QueryStatus queryStatus = queryRepository
             .getQuery(queryId, false)
             .orElseThrow(() -> new QueryNotFoundException(queryId))
             .status();
           if (queryStatus == QueryStatus.CANCELLED) {
+            System.out.println("Query done been cancelled"); // TODO: remove
             cancelQuery(queryId);
           } else if (queryStatus == QueryStatus.IN_PROGRESS) {
             // Reschedule the cancellation monitor if query is still in progress
@@ -193,7 +197,8 @@ public class IdStreamer {
   }
 
   private void cancelQuery(UUID queryId) {
-    log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
+//    log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
+    System.out.println("Query marked as cancelled");
     String querySearchText = "%Query ID: " + queryId + "%";
     List<Integer> pids = jooqContext
       .select(field("pid", Integer.class))

@@ -87,5 +87,29 @@ class QueryExecutionServiceTest {
       any());
 
     assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
+    verify(queryRepository, times(0)).updateQuery(any(), any(), any(), any());
+  }
+
+  @Test
+  void shouldCatchExceptionDuringExecution() {
+    String tenantId = "tenant_01";
+    EntityType entityType = new EntityType();
+    String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
+    List<String> fields = List.of();
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+
+    int maxSize = 100;
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
+
+    FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(tenantId, entityType, fqlQuery, false);
+    doThrow(RuntimeException.class).when(queryProcessorService).getIdsInBatch(
+      eq(fqlQueryWithContext),
+      anyInt(),
+      anyInt(),
+      any());
+
+    assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.FAILED), any(), any());
   }
 }

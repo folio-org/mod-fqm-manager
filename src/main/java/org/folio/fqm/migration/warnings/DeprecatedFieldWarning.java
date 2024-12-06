@@ -11,7 +11,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeprecatedFieldWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.DEPRECATED_FIELD;

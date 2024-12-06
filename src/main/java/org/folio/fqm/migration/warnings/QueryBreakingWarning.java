@@ -10,7 +10,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class QueryBreakingWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.QUERY_BREAKING;
@@ -34,10 +34,10 @@ public class QueryBreakingWarning implements FieldWarning {
   }
 
   public static BiFunction<String, String, FieldWarning> withoutAlternative() {
-    return (String field, String fql) -> new RemovedFieldWarning(field, null, fql);
+    return (String field, String fql) -> new QueryBreakingWarning(field, null, fql);
   }
 
   public static BiFunction<String, String, FieldWarning> withAlternative(String alternative) {
-    return (String field, String fql) -> new RemovedFieldWarning(field, alternative, fql);
+    return (String field, String fql) -> new QueryBreakingWarning(field, alternative, fql);
   }
 }

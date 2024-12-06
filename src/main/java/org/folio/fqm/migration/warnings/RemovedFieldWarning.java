@@ -10,7 +10,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class RemovedFieldWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_FIELD;

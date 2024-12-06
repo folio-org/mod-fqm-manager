@@ -84,8 +84,8 @@ class AbstractSimpleMigrationStrategyTest {
     @Override
     public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
       return Map.ofEntries(
-        Map.entry(UUID_0A, fql -> new DeprecatedEntityWarning("0a", null)),
-        Map.entry(UUID_0B, fql -> new RemovedEntityWarning("0b", null, fql))
+        Map.entry(UUID_0A, DeprecatedEntityWarning.withoutAlternative("0a")),
+        Map.entry(UUID_0B, RemovedEntityWarning.withoutAlternative("0b"))
       );
     }
 
@@ -95,9 +95,9 @@ class AbstractSimpleMigrationStrategyTest {
         Map.entry(
           UUID_0C,
           Map.ofEntries(
-            Map.entry("deprecated", DeprecatedFieldWarning::new),
-            Map.entry("query_breaking", (field, fql) -> new QueryBreakingWarning(field, "alt", fql)),
-            Map.entry("removed", (field, fql) -> new RemovedFieldWarning(field, "alt", fql))
+            Map.entry("deprecated", DeprecatedFieldWarning.build()),
+            Map.entry("query_breaking", QueryBreakingWarning.withAlternative("alt")),
+            Map.entry("removed", RemovedFieldWarning.withAlternative("alt"))
           )
         )
       );
@@ -265,7 +265,7 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_0A,
           "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2"),
-          List.of(new DeprecatedEntityWarning("0a", null))
+          List.of(DeprecatedEntityWarning.withoutAlternative("0a").apply(null))
         )
       ),
       // Removed ET
@@ -279,7 +279,7 @@ class AbstractSimpleMigrationStrategyTest {
           MigrationService.REMOVED_ENTITY_TYPE_ID,
           "{\"_version\":\"target\"}",
           List.of(),
-          List.of(new RemovedEntityWarning("0b", null, "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}"))
+          List.of(RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}"))
         )
       ),
       // field-level warnings
@@ -306,11 +306,11 @@ class AbstractSimpleMigrationStrategyTest {
           """,
           List.of("unrelated", "deprecated", "query_breaking"),
           List.of(
-            new DeprecatedFieldWarning("deprecated", "{\n  \"$lte\" : 2\n}"),
-            new DeprecatedFieldWarning("deprecated", null),
-            new QueryBreakingWarning("query_breaking", "alt", "{\n  \"$ne\" : 2\n}"),
-            new RemovedFieldWarning("removed", "alt", "{\n  \"$lte\" : 3\n}"),
-            new RemovedFieldWarning("removed", "alt", null)
+            DeprecatedFieldWarning.build().apply("deprecated", "{\n  \"$lte\" : 2\n}"),
+            DeprecatedFieldWarning.build().apply("deprecated", null),
+            QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}"),
+            RemovedFieldWarning.withAlternative("alt").apply("removed", "{\n  \"$lte\" : 3\n}"),
+            RemovedFieldWarning.withAlternative("alt").apply("removed", null)
           )
         )
       ),
@@ -330,7 +330,7 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_0C,
           "{\"_version\":\"target\"}",
           List.of("query_breaking"),
-          List.of(new QueryBreakingWarning("query_breaking", "alt", "{\n  \"$ne\" : 2\n}"))
+          List.of(QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}"))
         )
       )
     );

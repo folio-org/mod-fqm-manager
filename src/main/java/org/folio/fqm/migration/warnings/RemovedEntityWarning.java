@@ -10,7 +10,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class RemovedEntityWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_ENTITY;

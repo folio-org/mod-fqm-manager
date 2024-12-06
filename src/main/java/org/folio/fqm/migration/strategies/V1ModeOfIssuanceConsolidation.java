@@ -2,11 +2,7 @@ package org.folio.fqm.migration.strategies;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
-import org.folio.fqm.migration.warnings.EntityTypeWarning;
-import org.folio.fqm.migration.warnings.FieldWarning;
 
 /**
  * Version 1 -> 2, decouples simple_mode_of_issuance entity type from simple_instances
@@ -32,11 +28,6 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
   }
 
   @Override
-  public Map<UUID, UUID> getEntityTypeChanges() {
-    return Map.of();
-  }
-
-  @Override
   public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.ofEntries(
       Map.entry(
@@ -47,15 +38,5 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
         )
       )
     );
-  }
-
-  @Override
-  public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
-    return Map.of();
-  }
-
-  @Override
-  public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
-    return Map.of();
   }
 }

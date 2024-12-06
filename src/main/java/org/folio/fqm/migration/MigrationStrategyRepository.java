@@ -4,6 +4,7 @@ import java.util.List;
 import org.folio.fqm.migration.strategies.V0POCMigration;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
+import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +14,8 @@ public class MigrationStrategyRepository {
   private static final List<MigrationStrategy> MIGRATION_STRATEGIES = List.of(
     new V0POCMigration(),
     new V1ModeOfIssuanceConsolidation(),
-    new V2ResourceTypeConsolidation()
+    new V2ResourceTypeConsolidation(),
+    new V3RamsonsFieldCleanup()
   );
 
   public List<MigrationStrategy> getMigrationStrategies() {

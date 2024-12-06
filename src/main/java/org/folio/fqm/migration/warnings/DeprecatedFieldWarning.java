@@ -1,6 +1,8 @@
 package org.folio.fqm.migration.warnings;
 
+import java.util.function.BiFunction;
 import javax.annotation.CheckForNull;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -9,7 +11,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeprecatedFieldWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.DEPRECATED_FIELD;
@@ -41,5 +43,9 @@ public class DeprecatedFieldWarning implements FieldWarning {
         field
       );
     }
+  }
+
+  public static BiFunction<String, String, FieldWarning> build() {
+    return (String field, String fql) -> new DeprecatedFieldWarning(field, fql);
   }
 }

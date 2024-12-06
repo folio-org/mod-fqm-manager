@@ -1,6 +1,8 @@
 package org.folio.fqm.migration.warnings;
 
+import java.util.function.Function;
 import javax.annotation.CheckForNull;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -9,7 +11,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeprecatedEntityWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.DEPRECATED_ENTITY;
@@ -43,5 +45,13 @@ public class DeprecatedEntityWarning implements EntityTypeWarning {
         entityType
       );
     }
+  }
+
+  public static Function<String, EntityTypeWarning> withoutAlternative(String entityType) {
+    return (String fql) -> new DeprecatedEntityWarning(entityType, null);
+  }
+
+  public static Function<String, EntityTypeWarning> withAlternative(String entityType, String alternative) {
+    return (String fql) -> new DeprecatedEntityWarning(entityType, alternative);
   }
 }

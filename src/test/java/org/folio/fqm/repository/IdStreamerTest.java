@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -116,7 +117,8 @@ class IdStreamerTest {
     PermissionsService permissionsService = mock(PermissionsService.class);
     queryRepository = mock(QueryRepository.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
-    executorService = mock(ScheduledExecutorService.class);
+//    executorService = mock(ScheduledExecutorService.class);
+    executorService = Executors.newScheduledThreadPool(1);
 
 
 

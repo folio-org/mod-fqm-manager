@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import java.time.OffsetDateTime;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
@@ -43,18 +44,17 @@ public class QueryExecutionService {
         query
       );
     } catch (Exception exception) {
-      // Check query status. Only mark query as failed if query is not already cancelled
-      QueryStatus queryStatus = null;
       try {
-        queryStatus = queryRepository
+        // Check query status. Only mark query as failed if query is not already cancelled
+        QueryStatus queryStatus = queryRepository
           .getQuery(query.queryId(), false)
           .orElseThrow(() -> new QueryNotFoundException(query.queryId()))
           .status();
+        if (queryStatus != QueryStatus.CANCELLED) {
+          handleFailure(query, exception);
+        }
       } catch (QueryNotFoundException e) {
         handleFailure(query, e);
-      }
-      if (queryStatus != QueryStatus.CANCELLED) {
-        handleFailure(query, exception);
       }
     }
   }

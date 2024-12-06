@@ -1,6 +1,8 @@
 package org.folio.fqm.migration.warnings;
 
+import java.util.function.Function;
 import javax.annotation.CheckForNull;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -8,7 +10,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class RemovedEntityWarning implements EntityTypeWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_ENTITY;
@@ -29,5 +31,13 @@ public class RemovedEntityWarning implements EntityTypeWarning {
   @Override
   public String getDescription(TranslationService translationService) {
     return Warning.getDescriptionByAlternativeAndFql(translationService, TYPE, entityType, fql, alternative);
+  }
+
+  public static Function<String, EntityTypeWarning> withoutAlternative(String entityType) {
+    return (String fql) -> new RemovedEntityWarning(entityType, null, fql);
+  }
+
+  public static Function<String, EntityTypeWarning> withAlternative(String entityType, String alternative) {
+    return (String fql) -> new RemovedEntityWarning(entityType, alternative, fql);
   }
 }

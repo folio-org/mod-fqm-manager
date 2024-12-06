@@ -1,6 +1,8 @@
 package org.folio.fqm.migration.warnings;
 
+import java.util.function.BiFunction;
 import javax.annotation.CheckForNull;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -8,7 +10,7 @@ import org.folio.spring.i18n.service.TranslationService;
 
 @ToString
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class RemovedFieldWarning implements FieldWarning {
 
   public static final WarningType TYPE = WarningType.REMOVED_FIELD;
@@ -29,5 +31,13 @@ public class RemovedFieldWarning implements FieldWarning {
   @Override
   public String getDescription(TranslationService translationService) {
     return Warning.getDescriptionByAlternativeAndFql(translationService, this.getType(), field, fql, alternative);
+  }
+
+  public static BiFunction<String, String, FieldWarning> withoutAlternative() {
+    return (String field, String fql) -> new RemovedFieldWarning(field, null, fql);
+  }
+
+  public static BiFunction<String, String, FieldWarning> withAlternative(String alternative) {
+    return (String field, String fql) -> new RemovedFieldWarning(field, alternative, fql);
   }
 }

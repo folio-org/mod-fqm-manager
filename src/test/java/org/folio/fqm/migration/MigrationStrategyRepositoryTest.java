@@ -88,6 +88,9 @@ class MigrationStrategyRepositoryTest {
     if (strategy instanceof AbstractSimpleMigrationStrategy abstractStrategy) {
       abstractStrategy.getEntityTypeChanges();
       abstractStrategy.getFieldChanges();
+      assertThat(abstractStrategy.getLabel(), is(notNullValue()));
+      assertThat(abstractStrategy.getSourceVersion(), is(notNullValue()));
+      assertThat(abstractStrategy.getTargetVersion(), is(notNullValue()));
       abstractStrategy
         .getEntityTypeWarnings()
         .forEach((k, v) -> {

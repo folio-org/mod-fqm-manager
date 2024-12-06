@@ -33,11 +33,11 @@ public class WarningTest {
 
   public static List<Arguments> getExpectedTypes() {
     return List.of(
-      Arguments.of(new DeprecatedEntityWarning("old", "new"), WarningType.DEPRECATED_ENTITY),
-      Arguments.of(new DeprecatedFieldWarning("old", "{}"), WarningType.DEPRECATED_FIELD),
-      Arguments.of(new QueryBreakingWarning("old", "new", "{}"), WarningType.QUERY_BREAKING),
-      Arguments.of(new RemovedEntityWarning("old", "new", "{}"), WarningType.REMOVED_ENTITY),
-      Arguments.of(new RemovedFieldWarning("old", "new", "{}"), WarningType.REMOVED_FIELD)
+      Arguments.of(DeprecatedEntityWarning.withAlternative("old", "new").apply(null), WarningType.DEPRECATED_ENTITY),
+      Arguments.of(DeprecatedFieldWarning.build().apply("old", "{}"), WarningType.DEPRECATED_FIELD),
+      Arguments.of(QueryBreakingWarning.withAlternative("new").apply("old", "{}"), WarningType.QUERY_BREAKING),
+      Arguments.of(RemovedEntityWarning.withAlternative("old", "new").apply("{}"), WarningType.REMOVED_ENTITY),
+      Arguments.of(RemovedFieldWarning.withAlternative("new").apply("old", "{}"), WarningType.REMOVED_FIELD)
     );
   }
 
@@ -50,52 +50,52 @@ public class WarningTest {
   public static List<Arguments> getExpectedTranslations() {
     return List.of(
       Arguments.of(
-        new DeprecatedEntityWarning("old", "alt"),
+        DeprecatedEntityWarning.withAlternative("old", "alt").apply(null),
         "mod-fqm-manager.migration.warning.DEPRECATED_ENTITY.withAlternative",
         List.of("name", "old", "alternative", "alt")
       ),
       Arguments.of(
-        new DeprecatedEntityWarning("old", null),
+        DeprecatedEntityWarning.withoutAlternative("old").apply(null),
         "mod-fqm-manager.migration.warning.DEPRECATED_ENTITY.withoutAlternative",
         List.of("name", "old")
       ),
       Arguments.of(
-        new DeprecatedFieldWarning("old", null),
+        DeprecatedFieldWarning.build().apply("old", null),
         "mod-fqm-manager.migration.warning.DEPRECATED_FIELD.field",
         List.of("name", "old")
       ),
       Arguments.of(
-        new DeprecatedFieldWarning("old", "{}"),
+        DeprecatedFieldWarning.build().apply("old", "{}"),
         "mod-fqm-manager.migration.warning.DEPRECATED_FIELD.query",
         List.of("name", "old")
       ),
       Arguments.of(
-        new QueryBreakingWarning("old", "alt", "{}"),
+        QueryBreakingWarning.withAlternative("alt").apply("old", "{}"),
         "mod-fqm-manager.migration.warning.QUERY_BREAKING.withAlternative",
         List.of("name", "old", "alternative", "alt", "fql", "{}")
       ),
       Arguments.of(
-        new QueryBreakingWarning("old", null, "{}"),
+        QueryBreakingWarning.withoutAlternative().apply("old", "{}"),
         "mod-fqm-manager.migration.warning.QUERY_BREAKING.withoutAlternative",
         List.of("name", "old", "fql", "{}")
       ),
       Arguments.of(
-        new RemovedEntityWarning("old", "alt", "{}"),
+        RemovedEntityWarning.withAlternative("old", "alt").apply("{}"),
         "mod-fqm-manager.migration.warning.REMOVED_ENTITY.withAlternative",
         List.of("name", "old", "alternative", "alt", "fql", "{}")
       ),
       Arguments.of(
-        new RemovedEntityWarning("old", null, "{}"),
+        RemovedEntityWarning.withoutAlternative("old").apply("{}"),
         "mod-fqm-manager.migration.warning.REMOVED_ENTITY.withoutAlternative",
         List.of("name", "old", "fql", "{}")
       ),
       Arguments.of(
-        new RemovedFieldWarning("old", "alt", "{}"),
+        RemovedFieldWarning.withAlternative("alt").apply("old", "{}"),
         "mod-fqm-manager.migration.warning.REMOVED_FIELD.withAlternative",
         List.of("name", "old", "alternative", "alt", "fql", "{}")
       ),
       Arguments.of(
-        new RemovedFieldWarning("old", null, "{}"),
+        RemovedFieldWarning.withoutAlternative().apply("old", "{}"),
         "mod-fqm-manager.migration.warning.REMOVED_FIELD.withoutAlternative",
         List.of("name", "old", "fql", "{}")
       )

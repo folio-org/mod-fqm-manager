@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
@@ -411,27 +410,27 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     return Map.ofEntries(
       Map.entry(
         UUID.fromString("146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2"),
-        fql -> new RemovedEntityWarning("drv_loan_status", "simple_loans", fql)
+        RemovedEntityWarning.withAlternative("drv_loan_status", "simple_loans")
       ),
       Map.entry(
         UUID.fromString("097a6f96-edd0-11ed-a05b-0242ac120003"),
-        fql -> new RemovedEntityWarning("drv_item_callnumber_location", null, fql)
+        RemovedEntityWarning.withoutAlternative("drv_item_callnumber_location")
       ),
       Map.entry(
         UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0293"),
-        fql -> new RemovedEntityWarning("drv_item_holdingsrecord_instance", "composite_item_details", fql)
+        RemovedEntityWarning.withAlternative("drv_item_holdingsrecord_instance", "composite_item_details")
       ),
       Map.entry(
         UUID.fromString("a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d"),
-        fql -> new RemovedEntityWarning("drv_item_status", null, fql)
+        RemovedEntityWarning.withoutAlternative("drv_item_status")
       ),
       Map.entry(
         UUID.fromString("5fefec2a-9d6c-474c-8698-b0ea77186c12"),
-        fql -> new RemovedEntityWarning("drv_pol_receipt_status", null, fql)
+        RemovedEntityWarning.withoutAlternative("drv_pol_receipt_status")
       ),
       Map.entry(
         UUID.fromString("2168014f-9316-4760-9d82-d0306d5f59e4"),
-        fql -> new RemovedEntityWarning("drv_pol_payment_status", null, fql)
+        RemovedEntityWarning.withoutAlternative("drv_pol_payment_status")
       )
     );
   }
@@ -441,24 +440,15 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     return Map.ofEntries(
       Map.entry(
         OLD_DRV_LOAN_DETAILS,
-        Map.of(
-          "instance_primary_contributor",
-          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
-        )
+        Map.of("instance_primary_contributor", QueryBreakingWarning.withAlternative("instance.contributors"))
       ),
       Map.entry(
         OLD_DRV_ITEM_DETAILS,
-        Map.of(
-          "instance_primary_contributor",
-          (String field, String fql) -> new QueryBreakingWarning(field, "instance.contributors", fql)
-        )
+        Map.of("instance_primary_contributor", QueryBreakingWarning.withAlternative("instance.contributors"))
       ),
       Map.entry(
         OLD_DRV_USER_DETAILS,
-        Map.of(
-          "user_primary_address",
-          (String field, String fql) -> new QueryBreakingWarning(field, "users.addresses", fql)
-        )
+        Map.of("user_primary_address", QueryBreakingWarning.withAlternative("users.addresses"))
       )
     );
   }

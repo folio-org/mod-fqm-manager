@@ -6,10 +6,10 @@ Entity types and their fields change over time, be it adding fields, moving them
 
 The version of a query is stored inside the FQL string:
 
-```json5
+```json
 {
-  _version: '3',
-  'users.first_name': { $eq: 'John' },
+  "_version": "3",
+  "users.first_name": { "$eq": "John" }
 }
 ```
 

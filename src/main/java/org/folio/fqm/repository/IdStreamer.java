@@ -208,7 +208,7 @@ public class IdStreamer {
   }
 
   private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize, UUID queryId) {
-    String hint = "\n/* Query ID: " + queryId + " */\n";
+    String hint = "/* Query ID: " + queryId + " */";
     if (!isEmpty(entityType.getGroupByFields())) {
       Field<?>[] groupByFields = entityType
         .getColumns()

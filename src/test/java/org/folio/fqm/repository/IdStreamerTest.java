@@ -35,6 +35,9 @@ import org.folio.fqm.service.PermissionsService;
 import org.folio.fqm.service.UserTenantService;
 import org.folio.fqm.utils.IdStreamerTestDataProvider;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -48,11 +51,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /**
@@ -61,17 +69,47 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 //@RunWith(MockitoJUnitRunner.class)
   // TODO: some tests may need executionContext mock set
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("db-test")
+@SpringBootTest
 class IdStreamerTest {
 
+  private static final EntityType entityType = new EntityType()
+    .name("entity_type_01")
+    .id("0cb79a4c-f7eb-4941-a104-745224ae0291")
+    .columns(List.of(
+      new EntityTypeColumn()
+        .name("id")
+        .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
+        .isIdColumn(true)
+        .sourceAlias("source_1")
+        .valueGetter("id"),
+      new EntityTypeColumn()
+        .name("column_01")
+        .dataType(new RangedUUIDType().dataType("stringType"))
+        .sourceAlias("source_1")
+        .valueGetter("column_01")
+    ))
+    .sources(List.of(new EntityTypeSource().alias("source_1")));
 
+//  @Autowired
   private IdStreamer idStreamer;
+  @MockBean
   private LocalizationService localizationService;
+  @Mock
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
+  @Mock
   private UserTenantService userTenantService;
+  private EntityTypeFlatteningService entityTypeFlatteningService;
+  private CrossTenantQueryService crossTenantQueryService;
   //  @MockBean
+//  @Autowired
   private QueryRepository queryRepository;
+  @Autowired
   private ScheduledExecutorService executorService;
+  @Autowired
+  @Qualifier("readerJooqContext") private DSLContext context;
+  @Autowired
   QueryResultsRepository queryResultsRepository;
 
   private static final String USER_TENANT_JSON = """
@@ -111,47 +149,55 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
-    DSLContext readerContext = DSL.using(
-      new MockConnection(new IdStreamerTestDataProvider()),
-      SQLDialect.POSTGRES
-    );
-    DSLContext context = DSL.using(
-      new MockConnection(new IdStreamerTestDataProvider()),
-      SQLDialect.POSTGRES
-    );
-//    DSLContext readerContext = mock(DSLContext.class);
-//    DSLContext context = mock(DSLContext.class);
+//    DSLContext readerContext = DSL.using(
+//      new MockConnection(new IdStreamerTestDataProvider()),
+//      SQLDialect.POSTGRES
+//    );
+//    DSLContext context = DSL.using(
+//      new MockConnection(new IdStreamerTestDataProvider()),
+//      SQLDialect.POSTGRES
+//    );
+////    DSLContext readerContext = mock(DSLContext.class);
+////    DSLContext context = mock(DSLContext.class);
+//
+//    executionContext = mock(FolioExecutionContext.class);
+////    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+//    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
+//      readerContext,
+//      context,
+//      new ObjectMapper(),
+//      executionContext,
+//      0);
+//    localizationService = mock(LocalizationService.class);
+//    ecsClient = mock(SimpleHttpClient.class);
+//    userTenantService = mock(UserTenantService.class);
+//    PermissionsService permissionsService = mock(PermissionsService.class);
+//    queryRepository = mock(QueryRepository.class);
+//    queryResultsRepository = mock(QueryResultsRepository.class);
+////    executorService = mock(ScheduledExecutorService.class);
+//    executorService = Executors.newScheduledThreadPool(1);
+//    QueryRepository testRepo = mock(QueryRepository.class);
+//    System.out.println("queryRepository mock status: " + Mockito.mockingDetails(queryRepository).isMock());
+//    System.out.println("queryResultsRepository mock status: " + Mockito.mockingDetails(queryResultsRepository).isMock());
+//    System.out.println("ecsClient mock status: " + Mockito.mockingDetails(ecsClient).isMock());
+//    System.out.println("localizationService mock status: " + Mockito.mockingDetails(localizationService).isMock());
+//
+//
+//    // NOT BEING MOCKED EVEN THOUGH THEY SHOULD
+//    // QueryRepository
+//    // UserTenantService
+//    // QueryResultsRepository
+//
+//    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, executionContext, userTenantService);
+//    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, permissionsService, userTenantService);
 
-    executionContext = mock(FolioExecutionContext.class);
-//    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
-    EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
-      readerContext,
-      context,
-      new ObjectMapper(),
-      executionContext,
-      0);
-    localizationService = mock(LocalizationService.class);
-    ecsClient = mock(SimpleHttpClient.class);
-    userTenantService = mock(UserTenantService.class);
-    PermissionsService permissionsService = mock(PermissionsService.class);
-    queryRepository = mock(QueryRepository.class);
-    queryResultsRepository = mock(QueryResultsRepository.class);
-//    executorService = mock(ScheduledExecutorService.class);
-    executorService = Executors.newScheduledThreadPool(1);
-    QueryRepository testRepo = mock(QueryRepository.class);
-    System.out.println("queryRepository mock status: " + Mockito.mockingDetails(queryRepository).isMock());
-    System.out.println("queryResultsRepository mock status: " + Mockito.mockingDetails(queryResultsRepository).isMock());
-    System.out.println("ecsClient mock status: " + Mockito.mockingDetails(ecsClient).isMock());
-    System.out.println("localizationService mock status: " + Mockito.mockingDetails(localizationService).isMock());
-
-
-    // NOT BEING MOCKED EVEN THOUGH THEY SHOULD
-    // QueryRepository
-    // UserTenantService
-    // QueryResultsRepository
-
-    EntityTypeFlatteningService entityTypeFlatteningService = new EntityTypeFlatteningService(entityTypeRepository, new ObjectMapper(), localizationService, executionContext, userTenantService);
-    CrossTenantQueryService crossTenantQueryService = new CrossTenantQueryService(ecsClient, executionContext, permissionsService, userTenantService);
+//    var configuration = new DefaultConfiguration();
+//    configuration.set(SQLDialect.H2);
+//    configuration.set(dataSource);
+//    DSLContext jooqContext = DSL.using(configuration);
+    entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    crossTenantQueryService = mock(CrossTenantQueryService.class);
+    queryRepository = new QueryRepository(context);
     this.idStreamer =
       new IdStreamer(
         context,
@@ -162,18 +208,23 @@ class IdStreamerTest {
         queryResultsRepository,
         executorService
       );
+    System.out.println("YYZ Void setup");
   }
 
   @Test
   void shouldFetchIdStreamForFql() {
+    System.out.println("YYZ shouldFetchIdStreamForFql");
     String tenantId = "tenant_01";
-    Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("column_01"), "value1"));
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
+    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(entityType);
+    when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
     List<List<String>> actualIds = mockQueryRepositories();
 
     idStreamer.streamIdsInBatch(
@@ -334,23 +385,26 @@ class IdStreamerTest {
   }
 
   @Test
-  @DirtiesContext
+//  @DirtiesContext
   void shouldMonitorQueryCancellation() {
+    UUID queryId = UUID.fromString("6dbe7cf6-ef5f-40b2-a0f2-69a705cb94c8");
     String tenantId = "tenant_01";
     Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
-    List<List<String>> expectedIds = new ArrayList<>();
-    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
-    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(cancelledQuery));
+//    List<List<String>> expectedIds = new ArrayList<>();
+//    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+//    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//    when(executionContext.getTenantId()).thenReturn(tenantId);
+//    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
+//    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(cancelledQuery));
 //    List<List<String>> actualIds = mockQueryRepositories();
 //    mockQueryRepositories();
+//    when(executionContext.getTenantId()).thenReturn(tenantId);
+    List<List<String>> actualIds = mockQueryRepositories();
 
 
-    EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    CrossTenantQueryService crossTenantQueryService = mock(CrossTenantQueryService.class);
-    DSLContext mockContext = mock(DSLContext.class);
+//    EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+//    CrossTenantQueryService crossTenantQueryService = mock(CrossTenantQueryService.class);
+//    DSLContext mockContext = mock(DSLContext.class);
 //    when(mockContext.dsl()
 //      .select(field("some_field"))
 //      .from(table("pg_stat_activity"))
@@ -358,21 +412,22 @@ class IdStreamerTest {
 //      .and(field("query").like(anyString()))
 //      .fetchInto(Integer.class))
 //      .thenReturn(Collections.singletonList(123));
-    setUpMocks(mockContext);
-    IdStreamer newIdStreamer = new IdStreamer(
-      mockContext,
-      entityTypeFlatteningService,
-      crossTenantQueryService,
-      mock(FolioExecutionContext.class),
-      queryRepository,
-      queryResultsRepository,
-      executorService
-    );
+//    setUpMocks(mockContext);
+//    IdStreamer newIdStreamer = new IdStreamer(
+//      mockContext,
+//      entityTypeFlatteningService,
+//      crossTenantQueryService,
+//      mock(FolioExecutionContext.class),
+//      queryRepository,
+//      queryResultsRepository,
+//      executorService
+//    );
 //    idStreamer.monitorQueryCancellation(cancelledQuery.queryId());
+    assertDoesNotThrow(() -> idStreamer.monitorQueryCancellation(queryId));
 
-    newIdStreamer.monitorQueryCancellation(cancelledQuery.queryId());
-    Awaitility.await()
-      .atMost(50, TimeUnit.SECONDS);
+//    newIdStreamer.monitorQueryCancellation(cancelledQuery.queryId());
+//    Awaitility.await()
+//      .atMost(50, TimeUnit.SECONDS);
 //    fail();
 //    assertEquals(expectedIds, actualIds);
   }
@@ -441,14 +496,15 @@ class IdStreamerTest {
   @SuppressWarnings("unchecked")
   private List<List<String>> mockQueryRepositories() {
     List<List<String>> actualIds = new ArrayList<>();
-    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(mock(Query.class)));
-    doAnswer(invocation -> {
-      List<String[]> ids = invocation.getArgument(1, List.class);
-      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
-      return null;
-    }).when(queryResultsRepository).saveQueryResults(any(UUID.class), any(List.class));
-    return actualIds;
+//    when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(mock(Query.class)));
+//    doAnswer(invocation -> {
+//      List<String[]> ids = invocation.getArgument(1, List.class);
+//      ids.forEach(idSet -> actualIds.add(Arrays.asList(idSet)));
+//      return null;
+//    }).when(queryResultsRepository).saveQueryResults(any(UUID.class), any(List.class));
+//    return actualIds;
 //    System.out.println("Mock query repositories");
 //    return null;
+    return actualIds;
   }
 }

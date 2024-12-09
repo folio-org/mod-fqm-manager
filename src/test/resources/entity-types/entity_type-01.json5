@@ -1,7 +1,7 @@
 {
   id: '0cb79a4c-f7eb-4941-a104-745224ae0291',
-  name: 'entity_type-01',
-  labelAlias: 'entity_type-01',
+  name: 'entity_type_01',
+  labelAlias: 'entity_type_01',
   private: false,
   columns: [
     {
@@ -13,15 +13,15 @@
       visibleByDefault: false,
     },
     {
-      name: 'column-01',
+      name: 'column_01',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       labelAlias: 'Column 1',
       visibleByDefault: false,
     },
     {
-      name: 'column-02',
+      name: 'column_02',
       dataType: {
         dataType: 'stringType',
       },
@@ -31,8 +31,14 @@
   ],
   defaultSort: [
     {
-      columnName: 'column-01',
+      columnName: 'column_01',
       direction: 'ASC',
     },
   ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'source_1',
+    }
+  ]
 }

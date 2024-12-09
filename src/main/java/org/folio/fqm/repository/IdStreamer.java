@@ -15,6 +15,8 @@ import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -135,7 +137,7 @@ public class IdStreamer {
 
     monitorQueryCancellation(queryId);
 
-    System.out.println("YYZ " + jooqContext.dsl().getClass().getName());
+//    System.out.println("YYZ " + jooqContext.dsl().getClass().getName());
 //    System.out.println(jooqContext.dsl().render());
     try (
       Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
@@ -172,6 +174,7 @@ public class IdStreamer {
   }
 
   void monitorQueryCancellation(UUID queryId) {
+    System.out.println("Monitoring query cancellation");
     Runnable cancellationMonitor = new Runnable() {
       @Override
       public void run() {

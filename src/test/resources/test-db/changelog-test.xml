@@ -11,4 +11,10 @@
   <changeSet id="custom-fields-source-view.sql" author="bsharp@ebsco.com">
     <sqlFile path="test-db/scripts/custom-fields-source-view.sql" relativeToChangelogFile="false"/>
   </changeSet>
+  <changeSet id="add-idstreamer-test-data" author="bsharp@ebsco.com">
+    <sqlFile path="test-db/scripts/add-idstreamer-test-data.sql" relativeToChangelogFile="false"/>
+  </changeSet>
+  <changeSet id="create-dummy-entity-type-table" author="bsharp@ebsco.com">
+    <sqlFile path="test-db/scripts/create-dummy-entity-type-table.sql" relativeToChangelogFile="false"/>
+  </changeSet>
 </databaseChangeLog>

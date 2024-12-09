@@ -79,6 +79,7 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
 
   @Override
   public MockResult[] execute(MockExecuteContext ctx) {
+    System.out.println("WHYYYYYYY");
     DSLContext create = DSL.using(SQLDialect.POSTGRES);
     MockResult mockResult = new MockResult();
 

@@ -2,6 +2,8 @@ package org.folio.fqm.repository;
 
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
 import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -35,7 +37,11 @@ import org.folio.fqm.utils.IdStreamerTestDataProvider;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SQLDialect;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectSelectStep;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,12 +52,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link IdStreamerTestDataProvider} class
  */
 //@RunWith(MockitoJUnitRunner.class)
+  // TODO: some tests may need executionContext mock set
 @ExtendWith(MockitoExtension.class)
 class IdStreamerTest {
 
@@ -61,45 +69,45 @@ class IdStreamerTest {
   private FolioExecutionContext executionContext;
   private SimpleHttpClient ecsClient;
   private UserTenantService userTenantService;
-//  @MockBean
+  //  @MockBean
   private QueryRepository queryRepository;
   private ScheduledExecutorService executorService;
   QueryResultsRepository queryResultsRepository;
 
   private static final String USER_TENANT_JSON = """
-      {
-          "userTenants": [
-              {
-                  "id": "06192681-0df7-4f33-a38f-48e017648d69",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_01",
-                  "centralTenantId": "tenant_01",
-                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
-              },
-              {
-                  "id": "3c1bfbe9-7d64-41fe-a358-cdaced6a631f",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_02",
-                  "centralTenantId": "tenant_01",
-                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
-              },
-              {
-                  "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
-                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
-                  "tenantId": "tenant_03",
-                  "centralTenantId": "tenant_01",
-                  "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
-              }
-          ],
-          "totalRecords": 3
-      }
-      """;
+    {
+        "userTenants": [
+            {
+                "id": "06192681-0df7-4f33-a38f-48e017648d69",
+                "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
+                "tenantId": "tenant_01",
+                "centralTenantId": "tenant_01",
+                "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
+            },
+            {
+                "id": "3c1bfbe9-7d64-41fe-a358-cdaced6a631f",
+                "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
+                "tenantId": "tenant_02",
+                "centralTenantId": "tenant_01",
+                "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
+            },
+            {
+                "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
+                "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
+                "tenantId": "tenant_03",
+                "centralTenantId": "tenant_01",
+                "consortiumId": "0e88ed41-eadb-44c3-a7a7-f6572bbe06fc"
+            }
+        ],
+        "totalRecords": 3
+    }
+    """;
   private static final String NON_ECS_USER_TENANT_JSON = """
-      {
-          "userTenants": [],
-          "totalRecords": 0
-      }
-      """;
+    {
+        "userTenants": [],
+        "totalRecords": 0
+    }
+    """;
 
   @BeforeEach
   void setup() {
@@ -115,7 +123,7 @@ class IdStreamerTest {
 //    DSLContext context = mock(DSLContext.class);
 
     executionContext = mock(FolioExecutionContext.class);
-    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+//    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     EntityTypeRepository entityTypeRepository = new EntityTypeRepository(
       readerContext,
       context,
@@ -135,8 +143,6 @@ class IdStreamerTest {
     System.out.println("queryResultsRepository mock status: " + Mockito.mockingDetails(queryResultsRepository).isMock());
     System.out.println("ecsClient mock status: " + Mockito.mockingDetails(ecsClient).isMock());
     System.out.println("localizationService mock status: " + Mockito.mockingDetails(localizationService).isMock());
-
-
 
 
     // NOT BEING MOCKED EVEN THOUGH THEY SHOULD
@@ -165,6 +171,7 @@ class IdStreamerTest {
     List<List<String>> expectedIds = new ArrayList<>();
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
     List<List<String>> actualIds = mockQueryRepositories();
@@ -191,6 +198,7 @@ class IdStreamerTest {
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     List<List<String>> actualIds = mockQueryRepositories();
 
     idStreamer.streamIdsInBatch(
@@ -213,6 +221,7 @@ class IdStreamerTest {
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
     when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     List<List<String>> actualIds = mockQueryRepositories();
@@ -236,6 +245,7 @@ class IdStreamerTest {
     TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
     when(localizationService.localizeEntityType(any(EntityType.class))).thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     when(executionContext.getTenantId()).thenReturn("tenant_01");
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(NON_ECS_USER_TENANT_JSON);
     List<List<String>> actualIds = mockQueryRepositories();
 
@@ -275,7 +285,8 @@ class IdStreamerTest {
       new String[]{UUID.randomUUID().toString()},
       new String[]{UUID.randomUUID().toString()}
     );
-    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {
+    });
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
       OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
@@ -309,7 +320,8 @@ class IdStreamerTest {
       new String[]{UUID.randomUUID().toString()},
       new String[]{UUID.randomUUID().toString()}
     );
-    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {});
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {
+    });
     Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
       OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", queryId, 2, maxQuerySize);
@@ -322,6 +334,7 @@ class IdStreamerTest {
   }
 
   @Test
+  @DirtiesContext
   void shouldMonitorQueryCancellation() {
     String tenantId = "tenant_01";
     Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
@@ -334,7 +347,30 @@ class IdStreamerTest {
 //    List<List<String>> actualIds = mockQueryRepositories();
 //    mockQueryRepositories();
 
-    idStreamer.monitorQueryCancellation(cancelledQuery.queryId());
+
+    EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    CrossTenantQueryService crossTenantQueryService = mock(CrossTenantQueryService.class);
+    DSLContext mockContext = mock(DSLContext.class);
+//    when(mockContext.dsl()
+//      .select(field("some_field"))
+//      .from(table("pg_stat_activity"))
+//      .where(field("state").eq("active"))
+//      .and(field("query").like(anyString()))
+//      .fetchInto(Integer.class))
+//      .thenReturn(Collections.singletonList(123));
+    setUpMocks(mockContext);
+    IdStreamer newIdStreamer = new IdStreamer(
+      mockContext,
+      entityTypeFlatteningService,
+      crossTenantQueryService,
+      mock(FolioExecutionContext.class),
+      queryRepository,
+      queryResultsRepository,
+      executorService
+    );
+//    idStreamer.monitorQueryCancellation(cancelledQuery.queryId());
+
+    newIdStreamer.monitorQueryCancellation(cancelledQuery.queryId());
     Awaitility.await()
       .atMost(50, TimeUnit.SECONDS);
 //    fail();
@@ -373,6 +409,30 @@ class IdStreamerTest {
 
     assertNotNull(queryRepository);
     assertNull(queryRepository.getQuery(UUID.randomUUID(), false));
+  }
+
+  private void setUpMocks(DSLContext jooqContext) {
+    DSLContext mockDslContext = mock(DSLContext.class);
+    when(jooqContext.dsl()).thenReturn(mockDslContext);
+
+// Mock the select() call on the DSLContext
+    SelectSelectStep selectStep = mock(SelectSelectStep.class);
+    when(mockDslContext.select(field("pid", Integer.class))).thenReturn(selectStep);
+
+// Mock the from() call
+    SelectJoinStep<Record> joinStep = mock(SelectJoinStep.class);
+    when(selectStep.from(table("pg_stat_activity"))).thenReturn(joinStep);
+
+// Mock the where() call
+    SelectConditionStep<Record> conditionStep = mock(SelectConditionStep.class);
+    when(joinStep.where(field("state").eq("active"))).thenReturn(conditionStep);
+
+// Mock the and() call
+    SelectConditionStep<Record> conditionStep2 = mock(SelectConditionStep.class);
+    when(conditionStep.and(any(org.jooq.Condition.class))).thenReturn(conditionStep2);
+
+// Mock the final fetchInto() call
+    when(conditionStep2.fetchInto(Integer.class)).thenReturn(List.of(123, 456));
   }
 
 

@@ -1,7 +1,7 @@
 package org.folio.fqm.repository;
 
-import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
-import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
+//import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_CONTENT_IDS;
+//import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,63 +9,41 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.client.SimpleHttpClient;
-import org.folio.fqm.domain.Query;
-import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.exception.MaxQuerySizeExceededException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.LocalizationService;
-import org.folio.fqm.service.PermissionsService;
 import org.folio.fqm.service.UserTenantService;
-import org.folio.fqm.utils.IdStreamerTestDataProvider;
+//import org.folio.fqm.utils.IdStreamerTestDataProvider;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SQLDialect;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSelectStep;
-import org.jooq.impl.DSL;
-import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 /**
- * NOTE - Tests in this class depends on the mock results returned from {@link IdStreamerTestDataProvider} class
+ * NOTE - Tests in this class depends on the mock results returned from {@blink IdStreamerTestDataProvider} class
  */
 //@RunWith(MockitoJUnitRunner.class)
 // TODO: some tests may need executionContext mock set
@@ -77,7 +55,7 @@ class IdStreamerTest {
   private static final UUID IN_PROGRESS_QUERY_ID = UUID.fromString("d81b10cb-9511-4541-9646-3aaec72e41e0");
   private static final UUID CANCELLED_QUERY_ID = UUID.fromString("6dbe7cf6-ef5f-40b2-a0f2-69a705cb94c8");
   private static final List<String> CONTENT_IDS = List.of("123e4567-e89b-12d3-a456-426614174000", "223e4567-e89b-12d3-a456-426614174001");
-  private static final EntityType entityType = new EntityType()
+  private static final EntityType BASIC_ENTITY_TYPE = new EntityType()
     .name("entity_type_01")
     .id("0cb79a4c-f7eb-4941-a104-745224ae0291")
     .columns(List.of(
@@ -94,6 +72,42 @@ class IdStreamerTest {
         .valueGetter("column_01")
     ))
     .sources(List.of(new EntityTypeSource().alias("source_1")));
+  private static final EntityType ECS_ENTITY_TYPE = new EntityType()
+    .name("ecs_entity_type")
+    .id("abababab-f7eb-4941-a104-45224ae0ffff")
+    .columns(List.of(
+      new EntityTypeColumn()
+        .name("id")
+        .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
+        .isIdColumn(true)
+        .sourceAlias("source_1")
+        .valueGetter("id"),
+      new EntityTypeColumn()
+        .name("column_01")
+        .dataType(new RangedUUIDType().dataType("stringType"))
+        .sourceAlias("source_1")
+        .valueGetter("column_01")
+    ))
+    .sources(List.of(new EntityTypeSource().alias("source_1")))
+    .additionalEcsConditions(List.of("true = true"));
+  private static final EntityType GROUP_BY_ENTITY_TYPE = new EntityType()
+    .name("group_by_entity_type")
+    .id("47593013-f7eb-4941-a104-45224ae0ffbc")
+    .columns(List.of(
+      new EntityTypeColumn()
+        .name("id")
+        .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
+        .isIdColumn(true)
+        .sourceAlias("source_1")
+        .valueGetter("id"),
+      new EntityTypeColumn()
+        .name("column_01")
+        .dataType(new RangedUUIDType().dataType("stringType"))
+        .sourceAlias("source_1")
+        .valueGetter("column_01")
+    ))
+    .sources(List.of(new EntityTypeSource().alias("source_1")))
+    .groupByFields(List.of("id", "column_01"));
 
   //  @Autowired
   private IdStreamer idStreamer;
@@ -196,6 +210,7 @@ class IdStreamerTest {
 //    configuration.set(SQLDialect.H2);
 //    configuration.set(dataSource);
 //    DSLContext jooqContext = DSL.using(configuration);
+    ecsClient = mock(SimpleHttpClient.class);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryRepository = new QueryRepository(context);
@@ -222,11 +237,11 @@ class IdStreamerTest {
 
     when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(BASIC_ENTITY_TYPE);
     when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
 
     idStreamer.streamIdsInBatch(
-      entityType,
+      BASIC_ENTITY_TYPE,
       true,
       fql,
       2,
@@ -237,31 +252,32 @@ class IdStreamerTest {
     verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
   }
 
-//  @Test
-//  void shouldUseAdditionalEcsConditionsInEcsEnvironment() {
-//    String tenantId = "tenant_01";
-//    Fql fql = new Fql("", new EqualsCondition(new FqlField("field1"), "value1"));
-//    List<List<String>> expectedIds = List.of(
-//      List.of("ecsValue")
-//    );
-//    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(USER_TENANT_JSON);
-//    when(ecsClient.get(eq("consortia/0e88ed41-eadb-44c3-a7a7-f6572bbe06fc/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
-//    when(executionContext.getTenantId()).thenReturn("tenant_01");
-//    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
-//    List<List<String>> actualIds = mockQueryRepositories();
-//
-//    idStreamer.streamIdsInBatch(
-//      new EntityType().additionalEcsConditions(List.of("condition 1")).id("6b08439b-4f8e-4468-8046-ea620f5cfb74"),
-//      true,
-//      fql,
-//      2,
-//      100,
-//      UUID.randomUUID()
-//    );
-//    assertEquals(expectedIds, actualIds);
-//  }
-//
+  @Test
+  void shouldUseAdditionalEcsConditionsInEcsEnvironment() {
+    String tenantId = "tenant_01";
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("column_01"), "value1"));
+    List<String[]> expectedIds = new ArrayList<>();
+    // This dummy ECS query produces a union between 2 identical subqueries, so the id will show up twice in the results
+    expectedIds.add(new String[]{CONTENT_IDS.get(0)});
+    expectedIds.add(new String[]{CONTENT_IDS.get(0)});
+
+    when(localizationService.localizeEntityType(any(EntityType.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId, "tenant_02"));
+    when(crossTenantQueryService.ecsEnabled()).thenReturn(true);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyString())).thenReturn(ECS_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), anyString())).thenReturn("source_1");
+
+    idStreamer.streamIdsInBatch(
+      ECS_ENTITY_TYPE,
+      true,
+      fql,
+      2,
+      100,
+      IN_PROGRESS_QUERY_ID
+    );
+    verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
+  }
+
 //  @Test
 //  void shouldUseUnionAllForCrossTenantQuery() {
 //    String tenantId = "tenant_01";

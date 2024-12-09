@@ -21,3 +21,8 @@ VALUES (
     'CANCELLED',
     null
 );
+
+INSERT INTO query_results (query_id, result_id)
+VALUES
+('d81b10cb-9511-4541-9646-3aaec72e41e0', '{"123e4567-e89b-12d3-a456-426614174000"}'),
+('d81b10cb-9511-4541-9646-3aaec72e41e0', '{"223e4567-e89b-12d3-a456-426614174001"}');

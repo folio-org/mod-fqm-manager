@@ -137,8 +137,6 @@ public class IdStreamer {
 
     monitorQueryCancellation(queryId);
 
-//    System.out.println("YYZ " + jooqContext.dsl().getClass().getName());
-//    System.out.println(jooqContext.dsl().render());
     try (
       Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
       Stream<String[]> idStream = idsCursor
@@ -206,26 +204,25 @@ public class IdStreamer {
     System.out.println("Query marked as cancelled");
     String querySearchText = "%Query ID: " + queryId + "%";
     var myField = field("pid", Integer.class);
-//    System.out.println("YYZ " + jooqContext.dsl().getClass().getName());
-//    List<Integer> pids = jooqContext
-//      .dsl() // TODO: maybe?
-//      .select(myField)
-//      .from(table("pg_stat_activity"))
-//      .where(field("state").eq("active"))
-//      .and(field("query").like(querySearchText))
-//      .fetchInto(Integer.class);
-
-    var intermediate = jooqContext
+    List<Integer> pids = jooqContext
       .dsl() // TODO: maybe?
       .select(myField)
       .from(table("pg_stat_activity"))
-      .where(field("state").eq("active"));
+      .where(field("state").eq("active"))
+      .and(field("query").like(querySearchText))
+      .fetchInto(Integer.class);
 
-    Condition andCondition = field("query").like(querySearchText);
-
-    var intermediate2 = intermediate.and(andCondition);
-
-    List<Integer> pids = intermediate2.fetchInto(Integer.class); // The whole thing actually succeeded at least once
+//    var intermediate = jooqContext
+//      .dsl() // TODO: maybe?
+//      .select(myField)
+//      .from(table("pg_stat_activity"))
+//      .where(field("state").eq("active"));
+//
+//    Condition andCondition = field("query").like(querySearchText);
+//
+//    var intermediate2 = intermediate.and(andCondition);
+//
+//    List<Integer> pids = intermediate2.fetchInto(Integer.class); // The whole thing actually succeeded at least once
     System.out.println("Got here");
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);

@@ -308,24 +308,23 @@ class IdStreamerTest {
 //    );
 //    assertEquals(expectedIds, actualIds);
 //  }
-//
-//  @Test
-//  void shouldGetSortedIds() {
-//    UUID queryId = UUID.randomUUID();
-//    int offset = 0;
-//    int limit = 0;
-//    String derivedTableName = "query_results";
-//    List<List<String>> expectedIds = new ArrayList<>();
-//    TEST_CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
-//    List<List<String>> actualIds = idStreamer.getSortedIds(
-//      derivedTableName,
-//      offset,
-//      limit,
-//      queryId
-//    );
-//    assertEquals(expectedIds, actualIds);
-//  }
-//
+
+  @Test
+  void shouldGetSortedIds() {
+    int offset = 0;
+    int limit = 100;
+    String derivedTableName = "query_results";
+    List<List<String>> expectedIds = new ArrayList<>();
+    CONTENT_IDS.forEach(contentId -> expectedIds.add(List.of(contentId.toString())));
+    List<List<String>> actualIds = idStreamer.getSortedIds(
+      derivedTableName,
+      offset,
+      limit,
+      IN_PROGRESS_QUERY_ID
+    );
+    assertEquals(expectedIds, actualIds);
+  }
+
 //  @Test
 //  void shouldHandleDataBatch() {
 //    UUID queryId = UUID.randomUUID();

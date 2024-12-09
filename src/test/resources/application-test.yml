@@ -24,3 +24,5 @@ management:
 logging:
   level:
     org.springframework.web: debug
+    org.jooq: DEBUG
+debug: true

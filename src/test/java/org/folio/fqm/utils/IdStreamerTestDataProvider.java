@@ -67,17 +67,19 @@ public class IdStreamerTestDataProvider implements MockDataProvider {
     );
 
   private static final String ENTITY_TYPE_DEFINITION_REGEX = "SELECT DEFINITION FROM .*ENTITY_TYPE_DEFINITION";
-  private static final String GET_IDS_QUERY_REGEX = "SELECT CAST.* AS VARCHAR.* WHERE .*";
+  private static final String GET_IDS_QUERY_REGEX = "SELECT .* CAST.* AS VARCHAR.* WHERE .*";
   private static final String GET_SORTED_IDS_QUERY_REGEX = "SELECT RESULT_ID FROM .* WHERE .* ORDER BY RESULT_ID .*";
   private static final String GET_ENTITY_TYPE_ID_FROM_QUERY_ID_REGEX = "SELECT ENTITY_TYPE_ID FROM QUERY_DETAILS WHERE QUERY_ID = .*";
   private static final String GET_IDS_REGEX = ".*QUERY_RESULTS.*";
-  private static final String ADDITIONAL_ECS_REGEX = ".*SELECT CAST.* AS VARCHAR.* WHERE .* AND .*CONDITION 1.*";
+  private static final String ADDITIONAL_ECS_REGEX = ".*SELECT .* CAST.* AS VARCHAR.* WHERE .* AND .*CONDITION 1.*";
+//  private static final String ADDITIONAL_ECS_REGEX = ".*SELECT.*";// CAST.* AS VARCHAR.* WHERE .* AND .*CONDITION 1.*";
 
   Pattern GET_IDS_PATTERN = Pattern.compile(GET_IDS_QUERY_REGEX, Pattern.DOTALL);
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Override
   public MockResult[] execute(MockExecuteContext ctx) {
+    System.out.println("WHYYYYYYY");
     DSLContext create = DSL.using(SQLDialect.POSTGRES);
     MockResult mockResult = new MockResult();
 

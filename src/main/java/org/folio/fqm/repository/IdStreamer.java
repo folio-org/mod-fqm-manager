@@ -15,6 +15,8 @@ import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -31,6 +33,8 @@ import org.jooq.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -40,9 +44,12 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
 @Repository
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 @Log4j2
 public class IdStreamer {
+
+  private static final long QUERY_CANCELLATION_CHECK_SECONDS = 30;
 
   @Qualifier("readerJooqContext")
   private final DSLContext jooqContext;
@@ -51,16 +58,17 @@ public class IdStreamer {
   private final FolioExecutionContext executionContext;
   private final QueryRepository queryRepository;
   private final QueryResultsRepository queryResultsRepository;
+  private final ScheduledExecutorService executorService;
 
   /**
    * Executes the given Fql Query and stream the result Ids back.
    */
   public void streamIdsInBatch(EntityType entityType,
-                              boolean sortResults,
-                              Fql fql,
-                              int batchSize,
-                              int maxQuerySize,
-                              UUID queryId) {
+                               boolean sortResults,
+                               Fql fql,
+                               int batchSize,
+                               int maxQuerySize,
+                               UUID queryId) {
     boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
     List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
     this.streamIdsInBatch(entityType, sortResults, fql, batchSize, maxQuerySize, queryId, tenantsToQuery, ecsEnabled);
@@ -87,9 +95,9 @@ public class IdStreamer {
   }
 
   private void streamIdsInBatch(EntityType entityType,
-                               boolean sortResults,
-                               Fql fql, int batchSize,
-                               int maxQuerySize, UUID queryId, List<String> tenantsToQuery, boolean ecsEnabled) {
+                                boolean sortResults,
+                                Fql fql, int batchSize,
+                                int maxQuerySize, UUID queryId, List<String> tenantsToQuery, boolean ecsEnabled) {
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
@@ -112,7 +120,8 @@ public class IdStreamer {
         innerJoinClause,
         whereClause,
         sortResults,
-        batchSize
+        batchSize,
+        queryId
       );
       if (fullQuery == null) {
         fullQuery = (Select<Record1<String[]>>) innerQuery;
@@ -126,6 +135,8 @@ public class IdStreamer {
       fullQuery.fetchSize(batchSize);
     }
 
+    monitorQueryCancellation(queryId);
+
     try (
       Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
       Stream<String[]> idStream = idsCursor
@@ -137,9 +148,7 @@ public class IdStreamer {
     ) {
       var total = new AtomicInteger();
       idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
-        .forEach(idsWithCancelCallback -> {
-          handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total);
-        });
+        .forEach(idsWithCancelCallback -> handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
     }
   }
 
@@ -162,7 +171,68 @@ public class IdStreamer {
     }
   }
 
-  private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize) {
+  void monitorQueryCancellation(UUID queryId) {
+    System.out.println("Monitoring query cancellation");
+    Runnable cancellationMonitor = new Runnable() {
+      @Override
+      public void run() {
+        try {
+          System.out.println("Checking query cancellation");
+          System.out.println("for query " + queryId);
+          log.debug("Checking query cancellation for query {}", queryId); // TODO: change back to debug
+          QueryStatus queryStatus = queryRepository
+            .getQuery(queryId, false)
+            .orElseThrow(() -> new QueryNotFoundException(queryId))
+            .status();
+          if (queryStatus == QueryStatus.CANCELLED) {
+            System.out.println("Query done been cancelled"); // TODO: remove
+            cancelQuery(queryId);
+          } else if (queryStatus == QueryStatus.IN_PROGRESS) {
+            // Reschedule the cancellation monitor if query is still in progress
+            executorService.schedule(this, QUERY_CANCELLATION_CHECK_SECONDS, TimeUnit.SECONDS);
+          }
+        } catch (Exception e) {
+          log.error("Unexpected error occurred while cancelling query: {}", e.getMessage(), e);
+        }
+      }
+    };
+    executorService.schedule(cancellationMonitor, 0, TimeUnit.SECONDS);
+  }
+
+  private void cancelQuery(UUID queryId) {
+//    log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
+    System.out.println("Query marked as cancelled");
+    String querySearchText = "%Query ID: " + queryId + "%";
+    var myField = field("pid", Integer.class);
+    List<Integer> pids = jooqContext
+      .dsl() // TODO: maybe?
+      .select(myField)
+      .from(table("pg_stat_activity"))
+      .where(field("state").eq("active"))
+      .and(field("query").like(querySearchText))
+      .fetchInto(Integer.class);
+
+//    var intermediate = jooqContext
+//      .dsl() // TODO: maybe?
+//      .select(myField)
+//      .from(table("pg_stat_activity"))
+//      .where(field("state").eq("active"));
+//
+//    Condition andCondition = field("query").like(querySearchText);
+//
+//    var intermediate2 = intermediate.and(andCondition);
+//
+//    List<Integer> pids = intermediate2.fetchInto(Integer.class); // The whole thing actually succeeded at least once
+    System.out.println("Got here");
+    for (int pid : pids) {
+      log.debug("PID for the executing query: {}", pid);
+      jooqContext.dsl().execute("SELECT pg_cancel_backend(?)", pid);
+    }
+  }
+
+  // TODO: may be able to remove the dsl()s
+  private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize, UUID queryId) {
+    String hint = "/* Query ID: " + queryId + " */";
     if (!isEmpty(entityType.getGroupByFields())) {
       Field<?>[] groupByFields = entityType
         .getColumns()
@@ -173,6 +243,7 @@ public class IdStreamer {
         .toArray(Field[]::new);
       return jooqContext.dsl()
         .select(field(idValueGetter))
+        .hint(hint)
         .from(finalJoinClause)
         .where(sqlWhereClause)
         .groupBy(groupByFields)
@@ -181,6 +252,7 @@ public class IdStreamer {
     } else {
       return jooqContext.dsl()
         .select(field(idValueGetter))
+        .hint(hint)
         .from(finalJoinClause)
         .where(sqlWhereClause)
         .orderBy(EntityTypeUtils.getSortFields(entityType, sortResults))

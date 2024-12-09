@@ -1,8 +1,9 @@
 {
-  id: '0cb79a4c-f7eb-4941-a104-745224ae0291',
-  name: 'entity_type_01',
-  labelAlias: 'entity_type_01',
+  id: 'abababab-f7eb-4941-a104-45224ae0ffff',
+  name: 'ecs_entity_type',
+  labelAlias: 'ecs_entity_type',
   private: false,
+  additionalEcsConditions: ["true = true"],
   columns: [
     {
       name: 'id',

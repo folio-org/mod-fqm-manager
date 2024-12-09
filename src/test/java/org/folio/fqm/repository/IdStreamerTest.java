@@ -68,7 +68,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
  * NOTE - Tests in this class depends on the mock results returned from {@link IdStreamerTestDataProvider} class
  */
 //@RunWith(MockitoJUnitRunner.class)
-  // TODO: some tests may need executionContext mock set
+// TODO: some tests may need executionContext mock set
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -95,7 +95,7 @@ class IdStreamerTest {
     ))
     .sources(List.of(new EntityTypeSource().alias("source_1")));
 
-//  @Autowired
+  //  @Autowired
   private IdStreamer idStreamer;
   @MockBean
   private LocalizationService localizationService;
@@ -112,8 +112,9 @@ class IdStreamerTest {
   @Autowired
   private ScheduledExecutorService executorService;
   @Autowired
-  @Qualifier("readerJooqContext") private DSLContext context;
-//  @Autowired
+  @Qualifier("readerJooqContext")
+  private DSLContext context;
+  //  @Autowired
   QueryResultsRepository queryResultsRepository;
 
   private static final String USER_TENANT_JSON = """
@@ -233,7 +234,7 @@ class IdStreamerTest {
       IN_PROGRESS_QUERY_ID
     );
 
-    verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID),argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
+    verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
   }
 
 //  @Test
@@ -325,7 +326,7 @@ class IdStreamerTest {
     assertEquals(expectedIds, actualIds);
   }
 
-//  @Test
+  //  @Test
 //  void shouldHandleDataBatch() {
 //    UUID queryId = UUID.randomUUID();
 //    int maxQuerySize = 100;
@@ -360,26 +361,22 @@ class IdStreamerTest {
 //    assertTrue(streamClosed.get());
 //  }
 //
-//  @Test
-//  void shouldThrowExceptionWhenMaxQuerySizeExceeded() {
-//    UUID queryId = UUID.randomUUID();
-//    int maxQuerySize = 1;
-//    List<String[]> resultIds = List.of(
-//      new String[]{UUID.randomUUID().toString()},
-//      new String[]{UUID.randomUUID().toString()}
-//    );
-//    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {
-//    });
-//    Query expectedQuery = new Query(queryId, UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
-//      OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
-//    String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", queryId, 2, maxQuerySize);
-//    org.folio.fqm.domain.dto.Error expectedError = new Error().message(expectedMessage);
-//    when(queryRepository.getQuery(queryId, true)).thenReturn(Optional.of(expectedQuery));
-//    var total = new AtomicInteger(0);
-//    MaxQuerySizeExceededException actualException = assertThrows(MaxQuerySizeExceededException.class, () -> idStreamer.handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
-//    assertEquals(expectedMessage, actualException.getMessage());
-//    assertEquals(expectedError, actualException.getError());
-//  }
+  @Test
+  void shouldThrowExceptionWhenMaxQuerySizeExceeded() {
+    int maxQuerySize = 1;
+    List<String[]> resultIds = List.of(
+      new String[]{UUID.randomUUID().toString()},
+      new String[]{UUID.randomUUID().toString()}
+    );
+    IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {
+    });
+    String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", IN_PROGRESS_QUERY_ID, 2, maxQuerySize);
+    org.folio.fqm.domain.dto.Error expectedError = new Error().message(expectedMessage);
+    var total = new AtomicInteger(0);
+    MaxQuerySizeExceededException actualException = assertThrows(MaxQuerySizeExceededException.class, () -> idStreamer.handleBatch(IN_PROGRESS_QUERY_ID, idsWithCancelCallback, maxQuerySize, total));
+    assertEquals(expectedMessage, actualException.getMessage());
+    assertEquals(expectedError, actualException.getError());
+  }
 //
 //  @Test
 ////  @DirtiesContext

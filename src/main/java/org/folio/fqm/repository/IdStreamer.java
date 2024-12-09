@@ -226,10 +226,11 @@ public class IdStreamer {
     System.out.println("Got here");
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);
-      jooqContext.dsl().execute("SELECT pg_cancel_backend(?)", pid); // TODO: maybe?
+      jooqContext.dsl().execute("SELECT pg_cancel_backend(?)", pid);
     }
   }
 
+  // TODO: may be able to remove the dsl()s
   private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize, UUID queryId) {
     String hint = "/* Query ID: " + queryId + " */";
     if (!isEmpty(entityType.getGroupByFields())) {

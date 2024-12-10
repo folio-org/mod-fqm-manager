@@ -35,15 +35,14 @@ import org.jooq.SelectJoinStep;
 import org.jooq.SelectSelectStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-//@RunWith(MockitoJUnitRunner.class)
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 @ActiveProfiles("db-test")
 @SpringBootTest
 class IdStreamerTest {
@@ -239,7 +238,7 @@ class IdStreamerTest {
 
   @Test
   void shouldCancelQuery() {
-    // Horrible mocks because our test DSL doesn't behave nicely in separate threads
+    // This test uses a mocked DSLContext because our test DSLContext doesn't behave nicely in separate threads
     DSLContext mockJooqContext = mock(DSLContext.class);
     SelectSelectStep mockSelectStep = mock(SelectSelectStep.class);
     SelectJoinStep mockJoinStep = mock(SelectJoinStep.class);

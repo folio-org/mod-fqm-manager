@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class MigrationStrategyRepositoryTest {
 
   FqlService fqlService = new FqlService();
-  MigrationStrategyRepository migrationStrategyRepository = new MigrationStrategyRepository();
+  MigrationStrategyRepository migrationStrategyRepository = new MigrationStrategyRepository(null);
   MigrationService migrationService = new MigrationService(null, null, new ObjectMapper());
 
   @Test

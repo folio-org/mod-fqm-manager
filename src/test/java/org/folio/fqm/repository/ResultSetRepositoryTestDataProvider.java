@@ -2,6 +2,7 @@ package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
@@ -29,6 +30,46 @@ import static org.jooq.impl.DSL.field;
  * Mock data provider that returns query results for Repository tests.
  */
 public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
+  public static final List<UUID> TEST_CONTENT_IDS = List.of(UUID.randomUUID(), UUID.randomUUID());
+  public static final EntityType TEST_ENTITY_TYPE_DEFINITION = new EntityType()
+//    .id(UUID.randomUUID().toString())
+    .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
+    .columns(
+      List.of(
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias." + EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+        new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias.field1").sourceAlias("source1")
+      )
+    )
+    .defaultSort(List.of(new EntityTypeDefaultSort().columnName(EntityTypeRepository.ID_FIELD_NAME)))
+    .name("TEST_ENTITY_TYPE")
+    .fromClause("TEST_ENTITY_TYPE")
+    .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source1")
+        .target("target1"))
+    );
+  public static final EntityType TEST_GROUP_BY_ENTITY_TYPE_DEFINITION = new EntityType()
+    .id(UUID.randomUUID().toString())
+    .columns(
+      List.of(
+        new EntityTypeColumn().name(EntityTypeRepository.ID_FIELD_NAME).dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias." + EntityTypeRepository.ID_FIELD_NAME).isIdColumn(true).sourceAlias("source1"),
+        new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")).valueGetter(":sourceAlias.field1").sourceAlias("source1")
+      )
+    )
+    .name("TEST_GROUP_BY_ENTITY_TYPE")
+    .groupByFields(
+      List.of(
+        "id", "field1"
+      )
+    )
+    .fromClause("TEST_GROUP_BY_ENTITY_TYPE")
+    .sources(List.of(
+      new EntityTypeSource()
+        .type("db")
+        .alias("source1")
+        .target("target1"))
+    );
   public static final List<Map<String, Object>> TEST_ENTITY_CONTENTS = List.of(
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value1", "key2", "value2"),
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value3", "key2", "value4"),

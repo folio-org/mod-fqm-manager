@@ -15,25 +15,19 @@ import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.ResultQuery;
-import org.jooq.SQLDialect;
 import org.jooq.Select;
 import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.jooq.Record1;
 import org.jooq.Field;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -48,8 +42,7 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
 @Repository
-//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Log4j2
 public class IdStreamer {
 
@@ -180,15 +173,12 @@ public class IdStreamer {
       @Override
       public void run() {
         try {
-          System.out.println("Checking query cancellation");
-          System.out.println("for query " + queryId);
           log.debug("Checking query cancellation for query {}", queryId);
           QueryStatus queryStatus = queryRepository
             .getQuery(queryId, false)
             .orElseThrow(() -> new QueryNotFoundException(queryId))
             .status();
           if (queryStatus == QueryStatus.CANCELLED) {
-            System.out.println("Query done been cancelled"); // TODO: remove
             cancelQuery(queryId);
           } else if (queryStatus == QueryStatus.IN_PROGRESS) {
             // Reschedule the cancellation monitor if query is still in progress
@@ -211,7 +201,6 @@ public class IdStreamer {
       .where(field("state").eq("active"))
       .and(field("query").like(querySearchText))
       .fetchInto(Integer.class);
-    System.out.println("Got here"); // TODO: remove
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);
       jooqContext.execute("SELECT pg_cancel_backend(?)", pid);

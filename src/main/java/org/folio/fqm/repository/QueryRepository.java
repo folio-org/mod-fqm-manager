@@ -53,27 +53,10 @@ public class QueryRepository {
 
   @Cacheable(value = "queryCache", condition = "#useCache==true")
   public Optional<Query> getQuery(UUID queryId, boolean useCache) {
-    System.out.println("Whatever");
-//    log.info("Getting query {}", queryId);
-
-//    var test = jooqContext.select(field("definition")).from(table("entity_type_definition")).fetch();
-//    System.out.println("test: " + test);
-//
-//    var tables = jooqContext.resultQuery("SELECT * FROM INFORMATION_SCHEMA.TABLES").fetch();
-//    System.out.println(tables);
-
-//    var result = jooqContext.select()
-////      .from(table(QUERY_DETAILS_TABLE))
-//      .from(table("tenant_01_mod_fqm_manager.query_details"))
-//      .where(field(QUERY_ID).eq(queryId))
-//      .fetch();
-    var returnValue = Optional.ofNullable(jooqContext.select()
+    return Optional.ofNullable(jooqContext.select()
       .from(table(QUERY_DETAILS_TABLE))
       .where(field(QUERY_ID).eq(queryId))
       .fetchOneInto(Query.class));
-//    System.out.println("Result: " + result);
-    log.info("Return value: {}", returnValue);
-    return returnValue;
   }
 
   public List<UUID> getQueryIdsStartedBefore(Duration duration) {

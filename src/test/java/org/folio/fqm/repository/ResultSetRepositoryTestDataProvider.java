@@ -32,7 +32,6 @@ import static org.jooq.impl.DSL.field;
 public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
   public static final List<UUID> TEST_CONTENT_IDS = List.of(UUID.randomUUID(), UUID.randomUUID());
   public static final EntityType TEST_ENTITY_TYPE_DEFINITION = new EntityType()
-//    .id(UUID.randomUUID().toString())
     .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .columns(
       List.of(

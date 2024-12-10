@@ -3,11 +3,13 @@ package org.folio.fqm.migration.strategies;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
@@ -24,6 +26,7 @@ import org.folio.fqm.migration.MigrationUtils;
  * @see https://folio-org.atlassian.net/browse/UIPQB-126 for the query builder addition
  * @see https://folio-org.atlassian.net/browse/MODFQMMGR-573 for the addition of tenant TZ logic in FQM
  */
+@Log4j2
 @RequiredArgsConstructor
 public class V4DateFieldTimezones implements MigrationStrategy {
 
@@ -151,10 +154,15 @@ public class V4DateFieldTimezones implements MigrationStrategy {
             timezone.set(configurationClient.getTenantTimezone());
           }
 
-          result.set(
-            key,
-            new TextNode(LocalDate.parse(value.textValue()).atStartOfDay(timezone.get()).toInstant().toString())
-          );
+          try {
+            result.set(
+              key,
+              new TextNode(LocalDate.parse(value.textValue()).atStartOfDay(timezone.get()).toInstant().toString())
+            );
+          } catch (DateTimeParseException e) {
+            log.warn("Could not migrate date {}", value, e);
+            result.set(key, value); // no-op
+          }
         }
       )
     );

@@ -1,21 +1,18 @@
 package org.folio.fqm.migration.strategies;
 
 import com.fasterxml.jackson.databind.node.TextNode;
-
-import org.folio.fql.service.FqlService;
-import org.folio.fqm.client.ConfigurationClient;
-import org.folio.fqm.migration.MigratableQueryInformation;
-import org.folio.fqm.migration.MigrationStrategy;
-import org.folio.fqm.migration.MigrationUtils;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-
 import lombok.RequiredArgsConstructor;
+import org.folio.fql.service.FqlService;
+import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.migration.MigratableQueryInformation;
+import org.folio.fqm.migration.MigrationStrategy;
+import org.folio.fqm.migration.MigrationUtils;
 
 /**
  * Version 4 -> 5, handles addition of time component to date queries. These are not required for the query to run,
@@ -134,6 +131,7 @@ public class V4DateFieldTimezones implements MigrationStrategy {
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
     Set<String> fieldsToMigrate = DATE_FIELDS.getOrDefault(query.entityTypeId(), Set.of());
 
+    // avoid initializing this if we don't actually need it
     AtomicReference<ZoneId> timezone = new AtomicReference<>();
 
     return query.withFqlQuery(

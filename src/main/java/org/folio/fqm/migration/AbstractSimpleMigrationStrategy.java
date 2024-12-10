@@ -2,8 +2,6 @@ package org.folio.fqm.migration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -105,16 +103,27 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       result =
         result.withEntityTypeId(this.getEntityTypeChanges().getOrDefault(src.entityTypeId(), src.entityTypeId()));
 
-      ObjectNode fql = (ObjectNode) objectMapper.readTree(result.fqlQuery());
-      fql.set(MigrationService.VERSION_KEY, objectMapper.valueToTree(this.getTargetVersion()));
-
       Map<String, String> fieldChanges = this.getFieldChanges().getOrDefault(src.entityTypeId(), Map.of());
       Map<String, BiFunction<String, String, FieldWarning>> fieldWarnings =
         this.getFieldWarnings().getOrDefault(src.entityTypeId(), Map.of());
-      if (!fieldChanges.isEmpty() || !fieldWarnings.isEmpty()) {
-        // map query fields
-        fql = migrateFqlTree(fieldChanges, fieldWarnings, fql, warnings);
 
+      String newFql = MigrationUtils.migrateFql(
+        result.fqlQuery(),
+        _v -> this.getTargetVersion(),
+        (fql, key, value) -> {
+          if (fieldWarnings.containsKey(key)) {
+            FieldWarning warning = fieldWarnings.get(key).apply(key, value.toPrettyString());
+
+            warnings.add(warning);
+            if (warning instanceof RemovedFieldWarning || warning instanceof QueryBreakingWarning) {
+              return;
+            }
+          }
+          fql.set(getNewFieldName(fieldChanges, key), value);
+        }
+      );
+
+      if (!fieldChanges.isEmpty() || !fieldWarnings.isEmpty()) {
         // map fields list
         result =
           result.withFields(
@@ -139,7 +148,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
           );
       }
 
-      result = result.withFqlQuery(objectMapper.writeValueAsString(fql));
+      result = result.withFqlQuery(newFql);
 
       return result.withWarnings(new ArrayList<>(warnings));
     } catch (JsonProcessingException e) {
@@ -156,44 +165,5 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
     } else {
       return fieldChanges.getOrDefault(oldFieldName, oldFieldName);
     }
-  }
-
-  protected static ObjectNode migrateFqlTree(
-    Map<String, String> fieldChanges,
-    Map<String, BiFunction<String, String, FieldWarning>> fieldWarnings,
-    ObjectNode fql,
-    Set<Warning> warnings
-  ) {
-    ObjectNode result = new ObjectMapper().createObjectNode();
-    // iterate through fields in source
-    fql
-      .fields()
-      .forEachRemaining(entry -> {
-        if ("$and".equals(entry.getKey())) {
-          ArrayNode resultContents = new ObjectMapper().createArrayNode();
-          ((ArrayNode) entry.getValue()).elements()
-            .forEachRemaining(node -> {
-              ObjectNode innerResult = migrateFqlTree(fieldChanges, fieldWarnings, (ObjectNode) node, warnings);
-              // handle removed fields
-              if (!innerResult.isEmpty()) {
-                resultContents.add(innerResult);
-              }
-            });
-          result.set("$and", resultContents);
-        } else {
-          if (fieldWarnings.containsKey(entry.getKey())) {
-            FieldWarning warning = fieldWarnings
-              .get(entry.getKey())
-              .apply(entry.getKey(), entry.getValue().toPrettyString());
-            warnings.add(warning);
-            if (warning instanceof RemovedFieldWarning || warning instanceof QueryBreakingWarning) {
-              return;
-            }
-          }
-          result.set(getNewFieldName(fieldChanges, entry.getKey()), entry.getValue());
-        }
-      });
-
-    return result;
   }
 }

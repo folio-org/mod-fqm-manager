@@ -14,8 +14,7 @@ import java.util.List;
 
 import static org.jooq.impl.DSL.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.folio.fqm.utils.IdStreamerTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
+import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
 
 class EntityTypeUtilsTest {
 

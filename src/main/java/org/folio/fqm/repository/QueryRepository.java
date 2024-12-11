@@ -51,7 +51,7 @@ public class QueryRepository {
       .execute();
   }
 
-  @Cacheable(value="queryCache", condition="#useCache==true")
+  @Cacheable(value = "queryCache", condition = "#useCache==true")
   public Optional<Query> getQuery(UUID queryId, boolean useCache) {
     return Optional.ofNullable(jooqContext.select()
       .from(table(QUERY_DETAILS_TABLE))

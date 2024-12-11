@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.validation.constraints.NotNull;
 import java.io.UncheckedIOException;
+import java.util.Optional;
 import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
@@ -43,7 +44,11 @@ public class MigrationUtils {
 
       fql.set(
         MigrationService.VERSION_KEY,
-        objectMapper.valueToTree(versionTransformer.apply(fql.get(MigrationService.VERSION_KEY).asText()))
+        objectMapper.valueToTree(
+          versionTransformer.apply(
+            Optional.ofNullable(fql.get(MigrationService.VERSION_KEY)).map(JsonNode::asText).orElse(null)
+          )
+        )
       );
 
       fql = migrateFqlTree(fql, handler);
@@ -89,6 +94,9 @@ public class MigrationUtils {
           // ensure we don't run this on the _version
         } else if (!MigrationService.VERSION_KEY.equals(entry.getKey())) {
           handler.accept(result, entry.getKey(), entry.getValue());
+        } else {
+          // keep _version as-is
+          result.set(entry.getKey(), entry.getValue());
         }
       });
 

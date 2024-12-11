@@ -1,6 +1,8 @@
 package org.folio.fqm.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.folio.fqm.config.CrossTenantFeignConfig;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,10 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
-@FeignClient(name = "permissions")
+@FeignClient(name = "permissions", configuration = CrossTenantFeignConfig.class)
 public interface ModRolesKeycloakClient {
   @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-  UserPermissions getPermissionsUser(@RequestHeader("X-Okapi-Tenant") String tenant, @PathVariable UUID id);
+  UserPermissions getPermissionsUser(@RequestHeader(XOkapiHeaders.TENANT) String tenant, @PathVariable UUID id);
 
   record UserPermissions(@JsonProperty("permissions") List<String> permissionNames,
                          @JsonProperty("userId") UUID userId) {

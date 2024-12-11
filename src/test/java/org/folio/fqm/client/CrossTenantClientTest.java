@@ -86,12 +86,19 @@ class CrossTenantClientTest {
         Map.of(
           "a", List.of("a-val"),
           "b", List.of("b-val"),
-          "c", List.of("c-val")
+          "c", List.of("c-val"),
+          "x-okapi-tenant", List.of("outgoing-tenant")
         )
       );
 
     FolioExecutionContext context = mock(FolioExecutionContext.class);
-    when(context.getOkapiHeaders()).thenReturn(Map.of("z", List.of("z-val")));
+    when(context.getOkapiHeaders())
+      .thenReturn(
+        Map.of(
+          "z", List.of("z-val"),
+          "x-okapi-tenant", List.of("incoming-tenant")
+        )
+      );
     when(context.getAllHeaders())
       .thenReturn(
         Map.of(
@@ -109,8 +116,9 @@ class CrossTenantClientTest {
           hasEntry("b", List.of("b-val")),
           hasEntry("c", List.of("c-val")),
           hasEntry("z", List.of("z-val")),
+          hasEntry("x-okapi-tenant", List.of("outgoing-tenant")),
           hasEntry("Accept-Language", List.of("en-US,en;q=0.9")),
-          is(aMapWithSize(5))
+          is(aMapWithSize(6))
         )
       )
     );

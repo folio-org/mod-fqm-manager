@@ -5,9 +5,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -195,5 +197,10 @@ class MigrationUtilsTest {
       ),
       is(equalTo("{\"_version\":\"new version\",\"$and\":[{\"foo\":\"bar\"}]}"))
     );
+  }
+
+  @Test
+  void testInvalidJson() {
+    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql("invalid", v -> null, (r, k, v) -> {}));
   }
 }

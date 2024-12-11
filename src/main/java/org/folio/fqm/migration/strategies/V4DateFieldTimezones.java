@@ -142,6 +142,10 @@ public class V4DateFieldTimezones implements MigrationStrategy {
         query.fqlQuery(),
         _v -> TARGET_VERSION,
         (result, key, value) -> {
+          log.info("key: {}", key);
+          log.info("value: {}", value);
+          log.info("value.textValue(): {}", value.textValue());
+          log.info("value.asText(): {}", value.asText());
           if (
             !fieldsToMigrate.contains(key) || // not a date field
             value.textValue().contains("T") // already has time component

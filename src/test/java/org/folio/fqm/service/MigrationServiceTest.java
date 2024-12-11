@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
@@ -33,6 +34,9 @@ class MigrationServiceTest {
 
   @Mock
   private FqlService fqlService;
+
+  @Spy
+  private MigrationConfiguration migrationConfiguration;
 
   @Mock
   private MigrationStrategyRepository migrationStrategyRepository;

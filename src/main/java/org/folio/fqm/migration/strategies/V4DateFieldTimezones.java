@@ -1,5 +1,6 @@
 package org.folio.fqm.migration.strategies;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -142,31 +143,38 @@ public class V4DateFieldTimezones implements MigrationStrategy {
         query.fqlQuery(),
         _v -> TARGET_VERSION,
         (result, key, value) -> {
-          log.info("key: {}", key);
-          log.info("value: {}", value);
-          log.info("value.textValue(): {}", value.textValue());
-          log.info("value.asText(): {}", value.asText());
-          if (
-            !fieldsToMigrate.contains(key) || // not a date field
-            value.textValue().contains("T") // already has time component
-          ) {
+          if (!fieldsToMigrate.contains(key)) {
             result.set(key, value); // no-op
             return;
           }
 
-          if (timezone.get() == null) {
-            timezone.set(configurationClient.getTenantTimezone());
-          }
+          ObjectNode conditions = (ObjectNode) value;
 
-          try {
-            result.set(
-              key,
-              new TextNode(LocalDate.parse(value.textValue()).atStartOfDay(timezone.get()).toInstant().toString())
-            );
-          } catch (DateTimeParseException e) {
-            log.warn("Could not migrate date {}", value, e);
-            result.set(key, value); // no-op
-          }
+          conditions
+            .properties()
+            .forEach(entry -> {
+              if (entry.getValue().textValue().contains("T")) {
+                // no-op, we already have a time component
+                return;
+              }
+
+              if (timezone.get() == null) {
+                timezone.set(configurationClient.getTenantTimezone());
+              }
+
+              try {
+                conditions.set(
+                  entry.getKey(),
+                  new TextNode(
+                    LocalDate.parse(entry.getValue().textValue()).atStartOfDay(timezone.get()).toInstant().toString()
+                  )
+                );
+              } catch (DateTimeParseException e) {
+                log.warn("Could not migrate date {}", entry, e);
+              }
+            });
+
+          result.set(key, conditions);
         }
       )
     );

@@ -14,13 +14,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;
 import org.folio.fqm.migration.warnings.QueryBreakingWarning;
 import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.folio.fqm.migration.warnings.Warning;
-import org.folio.fqm.service.MigrationService;
 
 @Log4j2
 public abstract class AbstractSimpleMigrationStrategy implements MigrationStrategy {
@@ -84,8 +84,10 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       if (entityTypeWarning.isPresent() && entityTypeWarning.get() instanceof RemovedEntityWarning) {
         return MigratableQueryInformation
           .builder()
-          .entityTypeId(MigrationService.REMOVED_ENTITY_TYPE_ID)
-          .fqlQuery(objectMapper.writeValueAsString(Map.of(MigrationService.VERSION_KEY, this.getTargetVersion())))
+          .entityTypeId(MigrationConfiguration.REMOVED_ENTITY_TYPE_ID)
+          .fqlQuery(
+            objectMapper.writeValueAsString(Map.of(MigrationConfiguration.VERSION_KEY, this.getTargetVersion()))
+          )
           .fields(List.of())
           .warning(getEntityTypeWarnings().get(src.entityTypeId()).apply(src.fqlQuery()))
           .build();
@@ -96,7 +98,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       if (src.fqlQuery() == null) {
         result =
           result.withFqlQuery(
-            objectMapper.writeValueAsString(Map.of(MigrationService.VERSION_KEY, this.getTargetVersion()))
+            objectMapper.writeValueAsString(Map.of(MigrationConfiguration.VERSION_KEY, this.getTargetVersion()))
           );
       }
 
@@ -109,7 +111,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
 
       String newFql = MigrationUtils.migrateFql(
         result.fqlQuery(),
-        _v -> this.getTargetVersion(),
+        originalVersion -> this.getTargetVersion(),
         (fql, key, value) -> {
           if (fieldWarnings.containsKey(key)) {
             FieldWarning warning = fieldWarnings.get(key).apply(key, value.toPrettyString());
@@ -158,7 +160,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
   }
 
   protected static String getNewFieldName(Map<String, String> fieldChanges, String oldFieldName) {
-    if (MigrationService.VERSION_KEY.equals(oldFieldName)) {
+    if (MigrationConfiguration.VERSION_KEY.equals(oldFieldName)) {
       return oldFieldName;
     } else if (fieldChanges.containsKey("*")) {
       return fieldChanges.get("*").formatted(oldFieldName);

@@ -27,7 +27,7 @@ import org.folio.fqm.migration.MigrationUtils;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V4DateFieldTimezones implements MigrationStrategy {
+public class V4DateFieldTimezoneAddition implements MigrationStrategy {
 
   public static final String SOURCE_VERSION = "4";
   public static final String TARGET_VERSION = "5";
@@ -103,7 +103,7 @@ public class V4DateFieldTimezones implements MigrationStrategy {
     return query.withFqlQuery(
       MigrationUtils.migrateFql(
         query.fqlQuery(),
-        _v -> TARGET_VERSION,
+        originalVersion -> TARGET_VERSION,
         (result, key, value) -> {
           if (!DATE_FIELDS.contains(key)) {
             result.set(key, value); // no-op

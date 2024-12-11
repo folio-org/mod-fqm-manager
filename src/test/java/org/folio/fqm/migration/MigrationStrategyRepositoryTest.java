@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.service.MigrationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -26,7 +27,12 @@ class MigrationStrategyRepositoryTest {
 
   FqlService fqlService = new FqlService();
   MigrationStrategyRepository migrationStrategyRepository = new MigrationStrategyRepository(null);
-  MigrationService migrationService = new MigrationService(null, null, new ObjectMapper());
+  MigrationService migrationService = new MigrationService(
+    null,
+    new MigrationConfiguration(),
+    null,
+    new ObjectMapper()
+  );
 
   @Test
   void testHasStrategies() {

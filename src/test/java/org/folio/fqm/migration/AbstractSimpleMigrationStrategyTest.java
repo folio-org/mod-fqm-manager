@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
 import org.folio.fqm.migration.warnings.DeprecatedFieldWarning;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
@@ -20,7 +21,6 @@ import org.folio.fqm.migration.warnings.QueryBreakingWarning;
 import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.folio.fqm.migration.warnings.Warning;
-import org.folio.fqm.service.MigrationService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -276,10 +276,12 @@ class AbstractSimpleMigrationStrategyTest {
           List.of("field1", "foo", "field2")
         ),
         new MigratableQueryInformation(
-          MigrationService.REMOVED_ENTITY_TYPE_ID,
+          MigrationConfiguration.REMOVED_ENTITY_TYPE_ID,
           "{\"_version\":\"target\"}",
           List.of(),
-          List.of(RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}"))
+          List.of(
+            RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}")
+          )
         )
       ),
       // field-level warnings

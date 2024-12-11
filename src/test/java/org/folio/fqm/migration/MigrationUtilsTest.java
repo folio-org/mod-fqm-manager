@@ -13,7 +13,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -126,7 +126,7 @@ class MigrationUtilsTest {
   @MethodSource("functionCallTestCases")
   void testFunctionCalls(String query, String versionArgument, List<Pair<String, String>> fieldArguments) {
     AtomicInteger versionTransformationCalls = new AtomicInteger(0);
-    Function<String, String> versionTransformer = input -> {
+    UnaryOperator<String> versionTransformer = input -> {
       assertThat(input, is(versionArgument));
       versionTransformationCalls.incrementAndGet();
       return "newVersion";

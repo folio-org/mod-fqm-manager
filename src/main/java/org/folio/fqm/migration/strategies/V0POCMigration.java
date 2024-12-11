@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.EntityTypeWarning;
 import org.folio.fqm.migration.warnings.FieldWarning;

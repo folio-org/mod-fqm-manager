@@ -6,14 +6,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.validation.constraints.NotNull;
 import java.io.UncheckedIOException;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.function.TriConsumer;
-import org.folio.fqm.service.MigrationService;
+import org.folio.fqm.config.MigrationConfiguration;
 
 @Log4j2
 @UtilityClass
@@ -35,18 +34,18 @@ public class MigrationUtils {
    * @throws JsonProcessingException
    */
   public static String migrateFql(
-    @NotNull String fqlQuery,
-    Function<String, String> versionTransformer,
+    String fqlQuery,
+    UnaryOperator<String> versionTransformer,
     TriConsumer<ObjectNode, String, JsonNode> handler
   ) {
     try {
       ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
 
       fql.set(
-        MigrationService.VERSION_KEY,
+        MigrationConfiguration.VERSION_KEY,
         objectMapper.valueToTree(
           versionTransformer.apply(
-            Optional.ofNullable(fql.get(MigrationService.VERSION_KEY)).map(JsonNode::asText).orElse(null)
+            Optional.ofNullable(fql.get(MigrationConfiguration.VERSION_KEY)).map(JsonNode::asText).orElse(null)
           )
         )
       );
@@ -92,7 +91,7 @@ public class MigrationUtils {
             });
           result.set("$and", resultContents);
           // ensure we don't run this on the _version
-        } else if (!MigrationService.VERSION_KEY.equals(entry.getKey())) {
+        } else if (!MigrationConfiguration.VERSION_KEY.equals(entry.getKey())) {
           handler.accept(result, entry.getKey(), entry.getValue());
         } else {
           // keep _version as-is

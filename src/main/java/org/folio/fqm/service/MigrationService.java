@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Optional;
-import java.util.UUID;
 import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
@@ -21,21 +21,13 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor(onConstructor_ = @Autowired)
 public class MigrationService {
 
-  public static final String VERSION_KEY = "_version";
-
-  public static final UUID REMOVED_ENTITY_TYPE_ID = UUID.fromString("deadbeef-dead-dead-dead-deaddeadbeef");
-
-  protected static final String CURRENT_VERSION = "4";
-
-  // TODO: replace this with current version in the future?
-  protected static final String DEFAULT_VERSION = "0";
-
   private final FqlService fqlService;
+  private final MigrationConfiguration migrationConfiguration;
   private final MigrationStrategyRepository migrationStrategyRepository;
   private final ObjectMapper objectMapper;
 
   public String getLatestVersion() {
-    return CURRENT_VERSION;
+    return migrationConfiguration.getCurrentVersion();
   }
 
   public boolean isMigrationNeeded(@CheckForNull String fqlQuery) {
@@ -61,15 +53,15 @@ public class MigrationService {
 
   public String getVersion(@CheckForNull String fqlQuery) {
     if (fqlQuery == null) {
-      return DEFAULT_VERSION;
+      return migrationConfiguration.getDefaultVersion();
     }
     try {
       return Optional
-        .ofNullable(((ObjectNode) objectMapper.readTree(fqlQuery)).get(VERSION_KEY))
+        .ofNullable(((ObjectNode) objectMapper.readTree(fqlQuery)).get(MigrationConfiguration.VERSION_KEY))
         .map(JsonNode::asText)
-        .orElse(DEFAULT_VERSION);
+        .orElse(migrationConfiguration.getDefaultVersion());
     } catch (JsonProcessingException e) {
-      return DEFAULT_VERSION;
+      return migrationConfiguration.getDefaultVersion();
     }
   }
 }

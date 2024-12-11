@@ -153,8 +153,10 @@ public class V4DateFieldTimezones implements MigrationStrategy {
           conditions
             .properties()
             .forEach(entry -> {
-              if (entry.getValue().textValue().contains("T")) {
-                // no-op, we already have a time component
+              if (
+                !entry.getValue().isTextual() || // no-op, may be a boolean or something else
+                entry.getValue().textValue().contains("T") // no-op, we already have a time component
+              ) {
                 return;
               }
 

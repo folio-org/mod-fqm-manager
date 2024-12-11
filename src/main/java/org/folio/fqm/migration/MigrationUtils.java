@@ -29,7 +29,7 @@ public class MigrationUtils {
    * @param fqlQuery The root query to migrate
    * @param versionTransformer A function that takes the current (potentially null) version and
    *                           returns the new one to be persisted in the query
-   * @param handler something that takes the result node, the field name, and the field's query value,
+   * @param handler something that takes the result node, the field name, and the field's query object,
    *                applies some transformation, and stores the results back in result
    * @throws JsonMappingException
    * @throws JsonProcessingException
@@ -70,7 +70,7 @@ public class MigrationUtils {
    * This conveniently handles `$and`s, allowing logic to be handled on fields only.
    *
    * @param fql the fql node
-   * @param handler something that takes the result node, the field name, and the field's query value,
+   * @param handler something that takes the result node, the field name, and the field's query object,
    *                applies some transformation, and stores the results back in result
    * @return
    */

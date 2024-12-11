@@ -42,7 +42,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
             """
             {
               "items.updated_date": {
-                "$ne": "2024-05-01T12:34:56Z",
+                "$ne": "2024-05-01T12:34:56.000",
                 "$eq": "2024-07-01",
                 "$leq": "2024-11-01",
                 "$empty": false
@@ -68,14 +68,20 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
             """
             {
               "items.updated_date": {
-                "$ne": "2024-05-01T12:34:56Z",
-                "$eq": "2024-07-01T04:00:00Z",
-                "$leq": "2024-11-01T04:00:00Z",
+                "$ne": "2024-05-01T12:34:56.000",
+                "$eq": "2024-07-01T04:00:00.000",
+                "$leq": "2024-11-01T04:00:00.000",
                 "$empty": false
               },
-              "items.last_check_in_date_time": { "$eq": "2024-01-01T05:00:00Z" },
-              "items.created_date": { "$eq": "invalid" },
-              "unrelated.field": { "$contains": "2024-07-01" },
+              "items.last_check_in_date_time": {
+                "$eq": "2024-01-01T05:00:00.000"
+              },
+              "items.created_date": {
+                "$eq": "invalid"
+              },
+              "unrelated.field": {
+                "$contains": "2024-07-01"
+              },
               "_version": "5"
             }
             """

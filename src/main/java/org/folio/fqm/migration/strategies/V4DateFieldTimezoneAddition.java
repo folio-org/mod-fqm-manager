@@ -14,6 +14,7 @@ import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationUtils;
+import org.folio.fqm.service.FqlToSqlConverterService;
 
 /**
  * Version 4 -> 5, handles addition of time component to date queries. These are not required for the query to run,
@@ -130,7 +131,9 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
                 conditions.set(
                   entry.getKey(),
                   new TextNode(
-                    LocalDate.parse(entry.getValue().textValue()).atStartOfDay(timezone.get()).toInstant().toString()
+                    FqlToSqlConverterService.DATE_TIME_FORMATTER.format(
+                      LocalDate.parse(entry.getValue().textValue()).atStartOfDay(timezone.get())
+                    )
                   )
                 );
               } catch (DateTimeParseException e) {

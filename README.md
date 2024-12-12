@@ -305,8 +305,7 @@ If a date and time are both provided, the query will match all the records with 
 ```
 
 ### $ne
-Match values that are not equal to a specified value. String comparison is done in a case-insensitive manner. Supports
-string, number, boolean, date and uuid types.
+Match values that are not equal to a specified value. String comparison is done in a case-insensitive manner. Supports uuid (by API only, with potentially [strange behavior](https://folio-org.atlassian.net/browse/UIPQB-144)), string, number, boolean, and date types.
 
 Examples:
 ```json

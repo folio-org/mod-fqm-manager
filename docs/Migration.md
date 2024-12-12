@@ -32,7 +32,7 @@ Any change to an entity type that results in a field being removed or renamed sh
 1. Describe the [changes](#changes) in this migration by implementing any of the applicable methods.
 1. Describe the [warnings](#warnings) in this migration by implementing any of the applicable methods.
 1. Add your new strategy to `src/main/java/org/folio/fqm/migration/MigrationStrategyRepository.java`.
-1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/service/MigrationService.java`.
+1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/config/MigrationConfiguration.java`.
 1. If something fancy is being done, or you want to go above and beyond, write a custom test. You can see `src/test/java/org/folio/fqm/migration/strategies/TestTemplate` and `V0POCMigrationTest` for a framework that can easily be extended for common test case formats.
    - Implementations of `AbstractSimpleMigrationStrategy` are automatically tested via `MigrationStrategyRepositoryTest`, however, this is just for basic smoke tests and contains no logic to test specifics of an actual migration.
 
@@ -79,7 +79,7 @@ public Map<UUID, UUID> getEntityTypeChanges() {
 
 ### Warnings
 
-Sometimes, things do not go as planned, and we cannot be backwards compatible. A suite of `Warning` classes are provided to handle common use cases:
+Sometimes, things do not go as planned, and we cannot be backwards compatible. A suite of `Warning` classes are provided to handle common use cases, as described below. Generally, you should use the factory methods when creating an `AbstractSimpleMigrationStrategy`, and the builders when creating a custom migration.
 
 #### Entity type warnings
 

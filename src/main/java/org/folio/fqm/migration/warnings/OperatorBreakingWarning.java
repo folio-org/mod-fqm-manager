@@ -15,7 +15,7 @@ import org.folio.spring.i18n.service.TranslationService;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class OperatorBreakingWarning implements FieldWarning {
 
-  public static final WarningType TYPE = WarningType.QUERY_BREAKING;
+  public static final WarningType TYPE = WarningType.OPERATOR_BREAKING;
 
   private final String field;
   private final String operator;

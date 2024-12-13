@@ -98,6 +98,9 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
               "users.id": {
                 "$ne": "cf1baaa9-a55c-5ac7-bcbd-d27fbc477303"
               },
+              "groups.id": {
+                "$eq": "cf1baaa9-a55c-5ac7-bcbd-d27fbc477303"
+              },
               "users.username": {
                 "$ne": "admin"
               }
@@ -109,7 +112,18 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"_version\": \"6\", \"users.username\": {\"$ne\": \"admin\"}}")
+          .fqlQuery(
+            """
+            {
+              "_version": "6",
+              "groups.id": {
+                "$eq": "cf1baaa9-a55c-5ac7-bcbd-d27fbc477303"
+              },
+              "users.username": {
+                "$ne": "admin"
+              }
+            }
+            """)
           .fields(List.of())
           .warning(
             OperatorBreakingWarning

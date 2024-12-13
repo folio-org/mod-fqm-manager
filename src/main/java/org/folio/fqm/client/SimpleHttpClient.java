@@ -1,5 +1,6 @@
 package org.folio.fqm.client;
 
+import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -32,5 +33,5 @@ public interface SimpleHttpClient {
    * @return the body of the response (JSON)
    */
   @GetMapping(value = "/{path}", produces = MediaType.APPLICATION_JSON_VALUE)
-  String get(@PathVariable String path, @SpringQueryMap Map<String, String> queryParams, @RequestHeader("X-Okapi-Tenant") String tenant);
+  String get(@PathVariable String path, @SpringQueryMap Map<String, String> queryParams, @RequestHeader(XOkapiHeaders.TENANT) String tenant);
 }

@@ -172,7 +172,7 @@
     "entityType.drv_fund_details.fund_type_id": "Fund type ID",
     "entityType.drv_fund_details.id": "ID",
     "entityType.drv_fund_details.ledger_id": "Ledger ID",
-    "entityType.drv_fund_details.locations": "Locations",
+    "entityType.drv_fund_details.locations": "館藏地",
     "entityType.drv_fund_details.locations.location_id": "location ID",
     "entityType.drv_fund_details.locations.location_id._qualified": "location ID",
     "entityType.drv_fund_details.locations.tenant_id": "Tenant ID",
@@ -394,7 +394,7 @@
     "entityType.simple_service_point_detail.hold_shelf_expiry_period_interval_id": "Hold shelf expiry period interval UUID",
     "entityType.simple_service_point_detail.id": "UUID",
     "entityType.simple_service_point_detail.name": "Name",
-    "entityType.simple_service_point_detail.pickup_location": "Pickup location",
+    "entityType.simple_service_point_detail.pickup_location": "取書館藏地",
     "entityType.simple_service_point_detail.shelving_lag_time": "Shelving lag time",
     "entityType.simple_service_point_detail.staff_slips": "Staff slips",
     "entityType.simple_service_point_detail.staff_slips.print_by_default": "Print by default",
@@ -935,7 +935,7 @@
     "entityType.simple_organization.changelogs.description._qualified": "Changelogs description",
     "entityType.simple_organization.changelogs.timestamp": "Timestamp",
     "entityType.simple_organization.changelogs.timestamp._qualified": "Changelogs timestamp",
-    "entityType.simple_organization.claiming_interval": "Claiming interval",
+    "entityType.simple_organization.claiming_interval": "催缺間隔",
     "entityType.simple_organization.code": "Code",
     "entityType.simple_organization.contacts": "Contacts",
     "entityType.simple_organization.created_at": "Created at",
@@ -1091,7 +1091,7 @@
     "entityType.simple_purchase_order_line.cancellation_restriction_note": "Cancellation restriction note",
     "entityType.simple_purchase_order_line.checkin_items": "Is checkin items",
     "entityType.simple_purchase_order_line.claiming_active": "Claiming is active",
-    "entityType.simple_purchase_order_line.claiming_interval": "Claiming interval",
+    "entityType.simple_purchase_order_line.claiming_interval": "催缺間隔",
     "entityType.simple_purchase_order_line.claims": "Claims",
     "entityType.simple_purchase_order_line.claims.claimed": "Claimed",
     "entityType.simple_purchase_order_line.claims.claimed._qualified": "Claims claimed",
@@ -1511,5 +1511,6 @@
     "entityType.simple_organization.phone_numbers.categories_names": "Categories",
     "entityType.simple_organization.phone_numbers.categories_names._qualified": "Phone number categories",
     "entityType.simple_organization.urls.categories_names": "Categories",
-    "entityType.simple_organization.urls.categories_names._qualified": "URL categories"
+    "entityType.simple_organization.urls.categories_names._qualified": "URL categories",
+    "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}."
 }

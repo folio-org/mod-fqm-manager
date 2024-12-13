@@ -1511,5 +1511,6 @@
     "entityType.simple_organization.phone_numbers.categories_names": "Nomes de categorias",
     "entityType.simple_organization.phone_numbers.categories_names._qualified": "Nomes de categorias de números de telefone",
     "entityType.simple_organization.urls.categories_names": "Nomes de categorias",
-    "entityType.simple_organization.urls.categories_names._qualified": "Nomes de categorias de URLs"
+    "entityType.simple_organization.urls.categories_names._qualified": "Nomes de categorias de URLs",
+    "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}."
 }

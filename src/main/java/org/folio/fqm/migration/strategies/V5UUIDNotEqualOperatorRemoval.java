@@ -22,6 +22,7 @@ import org.folio.fqm.migration.warnings.Warning;
  * @see https://folio-org.atlassian.net/browse/MODFQMMGR-599 for the addition of this migration
  */
 @Log4j2
+@SuppressWarnings({ "java:S115", "java:S1192" })
 public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
 
   public static final String SOURCE_VERSION = "5";

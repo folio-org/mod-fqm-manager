@@ -1,6 +1,7 @@
 package org.folio.fqm.client;
 
 import org.folio.fqm.config.CrossTenantFeignConfig;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -18,5 +19,5 @@ public interface LanguageClient {
    * @return the body of the response (JSON)
    */
   @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-  String get(@RequestHeader("x-okapi-tenant") String tenantId);
+  String get(@RequestHeader(XOkapiHeaders.TENANT) String tenantId);
 }

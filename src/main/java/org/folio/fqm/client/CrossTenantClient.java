@@ -7,6 +7,7 @@ import feign.okhttp.OkHttpClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.integration.XOkapiHeaders;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -53,7 +54,7 @@ public class CrossTenantClient implements Client {
   static Map<String, Collection<String>> prepareHeaders(Request request, FolioExecutionContext context) {
     Map<String, Collection<String>> allHeaders = new HashMap<>(request.headers());
     var okapiHeaders = new HashMap<>(context.getOkapiHeaders());
-    okapiHeaders.remove("x-okapi-tenant");
+    okapiHeaders.remove(XOkapiHeaders.TENANT);
     allHeaders.putAll(okapiHeaders);
     context.getAllHeaders()
       .keySet()

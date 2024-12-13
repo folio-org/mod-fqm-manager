@@ -1508,6 +1508,7 @@
   "migration.warning.DEPRECATED_FIELD.query": "Field {name}, used in your query, is deprecated and will no longer be available in a future release.",
   "migration.warning.QUERY_BREAKING.withAlternative": "Field {name} is no longer supported in your query. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
   "migration.warning.QUERY_BREAKING.withoutAlternative": "Field {name} is no longer supported in your query. For reference, your original query was {fql}.",
+  "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_ENTITY.withAlternative": "Record type {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_ENTITY.withoutAlternative": "Record type {name} is no longer available. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_FIELD.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",

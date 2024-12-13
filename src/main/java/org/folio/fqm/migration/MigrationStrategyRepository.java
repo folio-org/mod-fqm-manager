@@ -7,6 +7,7 @@ import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
 import org.folio.fqm.migration.strategies.V4DateFieldTimezoneAddition;
+import org.folio.fqm.migration.strategies.V5UUIDNotEqualOperatorRemoval;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +22,8 @@ public class MigrationStrategyRepository {
         new V1ModeOfIssuanceConsolidation(),
         new V2ResourceTypeConsolidation(),
         new V3RamsonsFieldCleanup(),
-        new V4DateFieldTimezoneAddition(configurationClient)
+        new V4DateFieldTimezoneAddition(configurationClient),
+        new V5UUIDNotEqualOperatorRemoval()
       );
   }
 

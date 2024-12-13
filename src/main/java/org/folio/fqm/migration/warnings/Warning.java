@@ -49,6 +49,8 @@ public interface Warning {
     DEPRECATED_ENTITY("DEPRECATED_ENTITY"),
     /** Query is broken and will not work with this field; we will remove the field from the query */
     QUERY_BREAKING("QUERY_BREAKING"),
+    /** Operator is broken and will not work with this field; we will remove the field from the query */
+    OPERATOR_BREAKING("OPERATOR_BREAKING"),
     /** This field is completely gone from both fields and queries */
     REMOVED_FIELD("REMOVED_FIELD"),
     /** This entity type is completely gone */

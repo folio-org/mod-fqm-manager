@@ -44,5 +44,6 @@ public abstract class TestTemplate {
       is(objectMapper.readTree(expected.fqlQuery()))
     );
     assertThat("[Fields] " + label, actual.fields(), is(expected.fields()));
+    assertThat("[Warnings] " + label, actual.warnings(), is(expected.warnings()));
   }
 }

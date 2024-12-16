@@ -1,10 +1,12 @@
 package org.folio.fqm.migration.strategies;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
@@ -22,7 +24,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
 
   @BeforeEach
   public void setup() {
-    when(configurationClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
+    lenient().when(configurationClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
   }
 
   @Override
@@ -33,6 +35,22 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
   @Override
   public List<Arguments> getExpectedTransformations() {
     return List.of(
+      Arguments.of(
+        "Query with no dates should not hit configuration API",
+        MigratableQueryInformation
+          .builder()
+          .entityTypeId(UUID.fromString("3ad4b672-a69c-5a80-b483-bbc77c29cbfd"))
+          .fqlQuery("{\"name\": {\"$eq\":\"foo\"}}")
+          .fields(List.of())
+          .build(),
+        MigratableQueryInformation
+          .builder()
+          .entityTypeId(UUID.fromString("3ad4b672-a69c-5a80-b483-bbc77c29cbfd"))
+          .fqlQuery("{\"name\": {\"$eq\":\"foo\"}, \"_version\": \"5\"}")
+          .fields(List.of())
+          .build(),
+        (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(configurationClient)
+      ),
       Arguments.of(
         "Query with dates",
         MigratableQueryInformation

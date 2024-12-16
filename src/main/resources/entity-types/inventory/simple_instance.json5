@@ -683,7 +683,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'dates'->>'date1'",
+      valueGetter: ":sourceAlias.jsonb->'dates'->>'date2'",
     },
     {
       name: 'instance_date_type_id',

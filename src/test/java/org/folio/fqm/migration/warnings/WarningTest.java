@@ -35,6 +35,7 @@ public class WarningTest {
     return List.of(
       Arguments.of(DeprecatedEntityWarning.withAlternative("old", "new").apply(null), WarningType.DEPRECATED_ENTITY),
       Arguments.of(DeprecatedFieldWarning.build().apply("old", "{}"), WarningType.DEPRECATED_FIELD),
+      Arguments.of(OperatorBreakingWarning.builder().build(), WarningType.OPERATOR_BREAKING),
       Arguments.of(QueryBreakingWarning.withAlternative("new").apply("old", "{}"), WarningType.QUERY_BREAKING),
       Arguments.of(RemovedEntityWarning.withAlternative("old", "new").apply("{}"), WarningType.REMOVED_ENTITY),
       Arguments.of(RemovedFieldWarning.withAlternative("new").apply("old", "{}"), WarningType.REMOVED_FIELD)
@@ -70,6 +71,11 @@ public class WarningTest {
         List.of("name", "old")
       ),
       Arguments.of(
+        OperatorBreakingWarning.builder().field("old").operator("$ne").fql("{}").build(),
+        "mod-fqm-manager.migration.warning.OPERATOR_BREAKING",
+        List.of("name", "old", "operator", "$ne", "fql", "{}")
+      ),
+      Arguments.of(
         QueryBreakingWarning.withAlternative("alt").apply("old", "{}"),
         "mod-fqm-manager.migration.warning.QUERY_BREAKING.withAlternative",
         List.of("name", "old", "alternative", "alt", "fql", "{}")
@@ -98,6 +104,11 @@ public class WarningTest {
         RemovedFieldWarning.withoutAlternative().apply("old", "{}"),
         "mod-fqm-manager.migration.warning.REMOVED_FIELD.withoutAlternative",
         List.of("name", "old", "fql", "{}")
+      ),
+      Arguments.of(
+        ValueBreakingWarning.builder().field("old").value("val").fql("{}").build(),
+        "mod-fqm-manager.migration.warning.VALUE_BREAKING",
+        List.of("name", "old", "value", "val", "fql", "{}")
       )
     );
   }

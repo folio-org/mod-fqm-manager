@@ -2,6 +2,24 @@
 
 Entity types and their fields change over time, be it adding fields, moving them between entity types, or completely rethinking the way some fields are handled. As such, we have a robust migration system to ensure that consuming apps will not break, and their queries will continue to work despite any internal FQM changes.
 
+- [Query versions](#query-versions)
+- [Updating a query](#updating-a-query)
+- [Writing migrations](#writing-migrations)
+  - [Changes](#changes)
+    - [Entity type changes](#entity-type-changes)
+    - [Field changes](#field-changes)
+  - [Warnings](#warnings)
+    - [Entity type warnings](#entity-type-warnings)
+      - [DeprecatedEntityWarning](#deprecatedentitywarning)
+      - [RemovedEntityWarning](#removedentitywarning)
+    - [Field warnings](#field-warnings)
+      - [Example](#example)
+      - [DeprecatedFieldWarning](#deprecatedfieldwarning)
+      - [QueryBreakingWarning](#querybreakingwarning)
+      - [RemovedFieldWarning](#removedfieldwarning)
+      - [Additional warnings](#additional-warnings)
+  - [Advanced migrations](#advanced-migrations)
+
 ## Query versions
 
 The version of a query is stored inside the FQL string:
@@ -32,7 +50,7 @@ Any change to an entity type that results in a field being removed or renamed sh
 1. Describe the [changes](#changes) in this migration by implementing any of the applicable methods.
 1. Describe the [warnings](#warnings) in this migration by implementing any of the applicable methods.
 1. Add your new strategy to `src/main/java/org/folio/fqm/migration/MigrationStrategyRepository.java`.
-1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/service/MigrationService.java`.
+1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/config/MigrationConfiguration.java`.
 1. If something fancy is being done, or you want to go above and beyond, write a custom test. You can see `src/test/java/org/folio/fqm/migration/strategies/TestTemplate` and `V0POCMigrationTest` for a framework that can easily be extended for common test case formats.
    - Implementations of `AbstractSimpleMigrationStrategy` are automatically tested via `MigrationStrategyRepositoryTest`, however, this is just for basic smoke tests and contains no logic to test specifics of an actual migration.
 
@@ -79,7 +97,7 @@ public Map<UUID, UUID> getEntityTypeChanges() {
 
 ### Warnings
 
-Sometimes, things do not go as planned, and we cannot be backwards compatible. A suite of `Warning` classes are provided to handle common use cases:
+Sometimes, things do not go as planned, and we cannot be backwards compatible. A suite of `Warning` classes are provided to handle common use cases, as described below. Generally, you should use the factory methods when creating an `AbstractSimpleMigrationStrategy`, and the builders when creating a custom migration.
 
 #### Entity type warnings
 
@@ -176,6 +194,10 @@ Due to the nature of this, the FQL from the original query (if applicable) will 
 - `RemovedFieldWarning.withAlternative(String alternative)`
   - Example: `RemovedFieldWarning.withAlternative("future_field")` to denote that this field is removed and users may be able to use `future_field` instead.
 
+##### Additional warnings
+
+Warnings for more complex use cases include `OperatorBreakingWarning` and `ValueBreakingWarning`. These are only available for advanced migrations, and are not covered here.
+
 ### Advanced migrations
 
 Advanced migrations that need to do more advanced logic or conditionals, or apply to a range of migration versions, require custom implementations of `MigrationStrategy`. Tutorials for this is outside the scope of this document, however, there are three methods to be implemented here which should unlock full power:
@@ -183,5 +205,7 @@ Advanced migrations that need to do more advanced logic or conditionals, or appl
 - `getLabel` should return a descriptive label for logging, just like `AbstractSimpleMigrationStrategy`
 - `applies` should return `true` if this migration logic should be run on a given `version`
 - `apply` is responsible for the full transformation of the query, adding warnings if applicable, updating the `_version`, and anything else necessary.
+
+Helper functions are available in `MigrationUtils`; it is highly recommend to build off one of the existing migrations if possible.
 
 **It is critical that, after `apply` is called, `applies` should return false. Otherwise, an infinite loop may occur.**

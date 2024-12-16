@@ -28,15 +28,11 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("item_call_number", "items.effective_call_number"),
     Map.entry("item_id", "items.id"),
     Map.entry("item_material_type", "mtypes.name"),
-    Map.entry("item_material_type_id", "mtypes.id"),
     Map.entry("item_status", "items.status_name"),
-    Map.entry("loan_checkin_servicepoint_id", "cispi.id"),
     Map.entry("loan_checkin_servicepoint_name", "cispi.name"),
-    Map.entry("loan_checkout_servicepoint_id", "cospi.id"),
     Map.entry("loan_checkout_servicepoint_name", "cospi.name"),
     Map.entry("loan_checkout_date", "loans.checkout_date"),
     Map.entry("id", "loans.id"),
-    Map.entry("loan_policy_id", "lpolicy.id"),
     Map.entry("loan_policy_name", "lpolicy.name"),
     Map.entry("loan_return_date", "loans.return_date"),
     Map.entry("loan_status", "loans.status_name"),
@@ -49,9 +45,16 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("loan_due_date", "loans.due_date"),
     Map.entry("user_last_name", "users.last_name"),
     Map.entry("user_patron_group", "groups.group"),
-    Map.entry("user_patron_group_id", "groups.id"),
     // this column did not exist in the actual entity type, but it is (incorrectly) referenced by a canned list; we should fix that:
-    Map.entry("item_holdingsrecord_id", "items.hrid")
+    Map.entry("item_holdingsrecord_id", "items.hrid"),
+    // not query-breaking removals; this is to reflect a Poppy change in how ID columns are queried
+    // we've hidden most of the fields, so our intended behavior now is to use the non-ID column in
+    // the field list. Users can re-add the ID column if they want it, provided it is still available.
+    Map.entry("loan_checkin_servicepoint_id", "cispi.name"),
+    Map.entry("loan_checkout_servicepoint_id", "cospi.name"),
+    Map.entry("loan_policy_id", "lpolicy.name"),
+    Map.entry("item_material_type_id", "mtypes.name"),
+    Map.entry("user_patron_group_id", "groups.group")
   );
 
   public static final UUID OLD_SRC_CIRCULATION_LOAN_POLICY = UUID.fromString("5e7de445-bcc6-4008-8032-8d9602b854d7");
@@ -119,28 +122,31 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("item_created_date", "items.created_date"),
     Map.entry("item_effective_call_number", "items.effective_call_number"),
     Map.entry("item_effective_call_number_type_name", "effective_call_number.name"),
-    Map.entry("item_effective_call_number_typeid", "effective_call_number.id"),
     Map.entry("item_effective_library_code", "loclibrary.code"),
-    Map.entry("item_effective_library_id", "loclibrary.id"),
     Map.entry("item_effective_library_name", "loclibrary.name"),
-    Map.entry("item_effective_location_id", "effective_location.id"),
     Map.entry("item_effective_location_name", "effective_location.name"),
     Map.entry("item_hrid", "items.hrid"),
     Map.entry("item_level_call_number", "items.item_level_call_number"),
     Map.entry("item_level_call_number_type_name", "item_level_call_number.name"),
-    Map.entry("item_level_call_number_typeid", "item_level_call_number.id"),
     Map.entry("item_material_type", "mtypes.name"),
-    Map.entry("item_material_type_id", "mtypes.id"),
-    Map.entry("item_permanent_location_id", "permanent_location.id"),
     Map.entry("item_permanent_location_name", "permanent_location.name"),
     Map.entry("item_statistical_code_ids", "items.statistical_code_ids"),
     Map.entry("item_statistical_codes", "items.statistical_code_names"),
     Map.entry("item_status", "items.status_name"),
-    Map.entry("item_temporary_location_id", "temporary_location.id"),
     Map.entry("item_temporary_location_name", "temporary_location.name"),
     Map.entry("item_updated_date", "items.updated_date"),
     // this column did not exist in the actual entity type, but it is (incorrectly) referenced by a canned list; we should fix that:
-    Map.entry("item_holdings_record_id", "items.hrid")
+    Map.entry("item_holdings_record_id", "items.hrid"),
+    // not query-breaking removals; this is to reflect a Poppy change in how ID columns are queried
+    // we've hidden most of the fields, so our intended behavior now is to use the non-ID column in
+    // the field list. Users can re-add the ID column if they want it, provided it is still available.
+    Map.entry("item_effective_call_number_typeid", "effective_call_number.name"),
+    Map.entry("item_effective_library_id", "loclibrary.name"),
+    Map.entry("item_effective_location_id", "effective_location.name"),
+    Map.entry("item_level_call_number_typeid", "item_level_call_number.name"),
+    Map.entry("item_material_type_id", "mtypes.name"),
+    Map.entry("item_permanent_location_id", "permanent_location.name"),
+    Map.entry("item_temporary_location_id", "temporary_location.name")
   );
 
   public static final UUID OLD_SRC_INVENTORY_CALL_NUMBER_TYPE = UUID.fromString("5c8315be-13f5-4df5-ae8b-086bae83484d");
@@ -308,7 +314,6 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("user_middle_name", "users.middle_name"),
     Map.entry("user_mobile_phone", "users.mobile_phone"),
     Map.entry("user_patron_group", "groups.group"),
-    Map.entry("user_patron_group_id", "groups.id"),
     Map.entry("user_phone", "users.phone"),
     Map.entry("user_postal_codes", "users.addresses[*]->postal_code"),
     Map.entry("user_preferred_contact_type", "users.preferred_contact_type"),
@@ -316,7 +321,11 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
     Map.entry("user_primary_address", "users.addresses"),
     Map.entry("user_regions", "users.addresses[*]->region"),
     Map.entry("user_updated_date", "users.updated_date"),
-    Map.entry("username", "users.username")
+    Map.entry("username", "users.username"),
+    // not query-breaking removals; this is to reflect a Poppy change in how ID columns are queried
+    // we've hidden most of the fields, so our intended behavior now is to use the non-ID column in
+    // the field list. Users can re-add the ID column if they want it, provided it is still available.
+    Map.entry("user_patron_group_id", "groups.group")
   );
 
   public static final UUID OLD_SRC_USERS_ADDRESSTYPE = UUID.fromString("e627a89b-682b-41fe-b532-f4262020a451");

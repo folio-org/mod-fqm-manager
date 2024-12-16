@@ -74,8 +74,22 @@ public class V6ModeOfIssuanceValueChange implements MigrationStrategy {
               .findFirst()
               .map(ModeOfIssuance::name)
               .orElseGet(() -> {
-                warnings.add(ValueBreakingWarning.builder().field(FIELD_NAME).value(value).fql(fql.get()).build());
-                return null;
+                // some of these may already be the correct value, as both `mode_of_issuance_id` and
+                // `mode_of_issuance` got mapped to `mode_of_issuance_name`. If the name is being used,
+                // we want to make sure not to discard it
+                boolean existsAsName = modesOfIssuance
+                  .get()
+                  .stream()
+                  .filter(mode -> mode.name().equals(value))
+                  .findFirst()
+                  .isPresent();
+
+                if (existsAsName) {
+                  return value;
+                } else {
+                  warnings.add(ValueBreakingWarning.builder().field(FIELD_NAME).value(value).fql(fql.get()).build());
+                  return null;
+                }
               });
           }
         )

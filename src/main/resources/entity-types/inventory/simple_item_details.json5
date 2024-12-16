@@ -558,7 +558,7 @@
       name: 'statistical_code_ids',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
@@ -568,25 +568,15 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'statisticalCodeIds') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'statisticalCodeIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'statisticalCodeIds'::text)",
       valueFunction: 'lower(:value)',
     },
     {
       name: 'statistical_code_names',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -596,9 +586,8 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "( SELECT array_agg(statcode.statistical_code) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_codes_full statcode ON (record.value::text) = statcode.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FILTER (WHERE (statcode.statistical_code) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'statisticalCodeIds'::text)) record(value) JOIN drv_inventory_statistical_codes_full statcode ON (record.value::text) = statcode.id::text)",
-      valueFunction: 'lower(:value)',
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
       source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
         columnName: 'statistical_code',

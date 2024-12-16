@@ -8,6 +8,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.jooq.Condition;
+import org.jooq.JSONB;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +58,7 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("StringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
+          new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
           new EntityTypeColumn().name("arrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("arrayType"))
             .valueGetter("valueGetter")
@@ -454,7 +456,26 @@ class FqlToSqlConverterServiceTest {
           field("field1").notEqual(true)
         )
       ),
-
+      Arguments.of(
+        "contains all for jsonb array",
+        """
+          {"jsonbArrayField": {"$contains_all": ["value1", "value2"]}}""",
+        DSL.and(
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value1\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value2\"]"))
+        )
+      ),
+      Arguments.of(
+        "not contains all for jsonb array",
+        """
+          {"jsonbArrayField": {"$not_contains_all": ["value1", "value2"]}}""",
+        DSL.not(
+          DSL.and(
+            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value1\"]")),
+            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          )
+        )
+      ),
       Arguments.of(
         "contains all string",
         """
@@ -505,6 +526,26 @@ class FqlToSqlConverterServiceTest {
         """
           {"arrayField": {"$not_contains_any": [10]}}""",
         not(arrayOverlap(cast(field("arrayField"), String[].class), (cast(array(10), String[].class))))
+      ),
+      Arguments.of(
+        "contains any for jsonb array",
+        """
+          {"jsonbArrayField": {"$contains_any": ["value1", "value2"]}}""",
+        DSL.or(
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+        )
+      ),
+      Arguments.of(
+        "not contains any for jsonb array",
+        """
+          {"jsonbArrayField": {"$not_contains_any": ["value1", "value2"]}}""",
+        DSL.not(
+          DSL.or(
+            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          )
+        )
       ),
 
       Arguments.of(

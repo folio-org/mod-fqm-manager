@@ -104,7 +104,7 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
       MigrationUtils.migrateFqlValues(
         query.fqlQuery(),
         originalVersion -> TARGET_VERSION,
-        (String key) -> DATE_FIELDS.contains(key),
+        DATE_FIELDS::contains,
         (String key, String value, Supplier<String> fql) -> {
           if (
             value.contains("T") // no-op, we already have a time component

@@ -148,7 +148,7 @@ public class MigrationUtils {
               List<JsonNode> transformedValues = new ArrayList<>();
               node.forEach(element -> {
                 JsonNode transformedValue = transformIfStringOnly(
-                  entry.getValue(),
+                  element,
                   textValue ->
                     valueTransformer.apply(
                       key,
@@ -194,7 +194,7 @@ public class MigrationUtils {
    * node version of the supplier's response, if applicable; if the original node is non-string,
    * simply returns that.
    */
-  public static JsonNode transformIfStringOnly(JsonNode value, UnaryOperator<String> transformer) {
+  private static JsonNode transformIfStringOnly(JsonNode value, UnaryOperator<String> transformer) {
     if (!value.isTextual()) {
       return value;
     }

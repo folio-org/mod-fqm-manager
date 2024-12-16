@@ -18,6 +18,21 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
   public List<Arguments> getExpectedTransformations() {
     return List.of(
       Arguments.of(
+        "Query with non-matching entity type",
+        MigratableQueryInformation
+          .builder()
+          .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
+          .fqlQuery("{\"users.id\": {\"$ne\": \"cf1baaa9-a55c-5ac7-bcbd-d27fbc477303\"}}")
+          .fields(List.of())
+          .build(),
+        MigratableQueryInformation
+          .builder()
+          .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
+          .fqlQuery("{\"users.id\": {\"$ne\": \"cf1baaa9-a55c-5ac7-bcbd-d27fbc477303\"},\"_version\":\"6\"}")
+          .fields(List.of())
+          .build()
+      ),
+      Arguments.of(
         "Query with no impacted fields",
         MigratableQueryInformation
           .builder()

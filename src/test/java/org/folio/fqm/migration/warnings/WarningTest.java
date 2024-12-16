@@ -104,6 +104,11 @@ public class WarningTest {
         RemovedFieldWarning.withoutAlternative().apply("old", "{}"),
         "mod-fqm-manager.migration.warning.REMOVED_FIELD.withoutAlternative",
         List.of("name", "old", "fql", "{}")
+      ),
+      Arguments.of(
+        ValueBreakingWarning.builder().field("old").value("val").fql("{}").build(),
+        "mod-fqm-manager.migration.warning.VALUE_BREAKING",
+        List.of("name", "old", "value", "val", "fql", "{}")
       )
     );
   }

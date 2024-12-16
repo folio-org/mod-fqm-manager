@@ -54,7 +54,9 @@ public interface Warning {
     /** This field is completely gone from both fields and queries */
     REMOVED_FIELD("REMOVED_FIELD"),
     /** This entity type is completely gone */
-    REMOVED_ENTITY("REMOVED_ENTITY");
+    REMOVED_ENTITY("REMOVED_ENTITY"),
+    /** Value is invalid/broken; we will remove this value from the query */
+    VALUE_BREAKING("VALUE_BREAKING");
 
     private final String type;
 

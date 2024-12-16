@@ -1,13 +1,17 @@
 package org.folio.fqm.migration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
@@ -30,8 +34,6 @@ public class MigrationUtils {
    *                           returns the new one to be persisted in the query
    * @param handler something that takes the result node, the field name, and the field's query object,
    *                applies some transformation, and stores the results back in result
-   * @throws JsonMappingException
-   * @throws JsonProcessingException
    */
   public static String migrateFql(
     String fqlQuery,
@@ -100,5 +102,114 @@ public class MigrationUtils {
       });
 
     return result;
+  }
+
+  /**
+   * Helper function to transform values in an FQL query. This changes a version to a new one, and
+   * runs a given function on each value in the query. Returning `null` from the transformation
+   * function will result in the value being removed from the query.
+   *
+   * This is similar to {@link #migrateFql(String, UnaryOperator, TriConsumer)}, but operates on
+   * each value, and provides additional convenience to handle cases of array values, etc.
+   *
+   * @param fqlQuery The root query to migrate
+   * @param versionTransformer A function that takes the current (potentially null) version and
+   *                           returns the new one to be persisted in the query
+   * @param applies If the valueTransformer should be applied to the field (for optimization)
+   * @param valueTransformer Something that takes an incoming field name, value, and a supplier
+   *                         (to get the original fql for warnings), returning either the
+   *                         transformed value, or `null` if it should be removed (the transformer
+   *                         is responsible for handling warnings)
+   */
+  public static String migrateFqlValues(
+    String fqlQuery,
+    UnaryOperator<String> versionTransformer,
+    Predicate<String> applies,
+    ValueTransformer valueTransformer
+  ) {
+    return migrateFql(
+      fqlQuery,
+      versionTransformer,
+      (result, key, value) -> {
+        if (!applies.test(key)) {
+          result.set(key, value); // no-op
+          return;
+        }
+
+        ObjectNode conditions = (ObjectNode) value;
+        ObjectNode newValues = objectMapper.createObjectNode();
+
+        conditions
+          .properties()
+          .forEach(entry -> {
+            if (entry.getValue().isArray()) {
+              ArrayNode node = (ArrayNode) entry.getValue();
+
+              List<JsonNode> transformedValues = new ArrayList<>();
+              node.forEach(element -> {
+                JsonNode transformedValue = transformIfStringOnly(
+                  element,
+                  textValue ->
+                    valueTransformer.apply(
+                      key,
+                      textValue,
+                      () -> objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString()
+                    )
+                );
+
+                if (transformedValue != null) {
+                  transformedValues.add(transformedValue);
+                }
+              });
+
+              if (!transformedValues.isEmpty()) {
+                newValues.set(entry.getKey(), objectMapper.createArrayNode().addAll(transformedValues));
+              }
+            } else {
+              JsonNode transformedValue = transformIfStringOnly(
+                entry.getValue(),
+                textValue ->
+                  valueTransformer.apply(
+                    key,
+                    textValue,
+                    () -> objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString()
+                  )
+              );
+
+              if (transformedValue != null) {
+                newValues.set(entry.getKey(), transformedValue);
+              }
+            }
+          });
+
+        if (newValues.size() != 0) {
+          result.set(key, newValues);
+        }
+      }
+    );
+  }
+
+  /**
+   * Calls provided function with the String contents of the node, if it is safe to do so. Returns
+   * node version of the supplier's response, if applicable; if the original node is non-string,
+   * simply returns that.
+   */
+  private static JsonNode transformIfStringOnly(JsonNode value, UnaryOperator<String> transformer) {
+    if (!value.isTextual()) {
+      return value;
+    }
+
+    String newValue = transformer.apply(value.textValue());
+
+    if (newValue == null) {
+      return null;
+    }
+
+    return new TextNode(newValue);
+  }
+
+  @FunctionalInterface
+  public interface ValueTransformer {
+    String apply(String key, String value, Supplier<String> fql);
   }
 }

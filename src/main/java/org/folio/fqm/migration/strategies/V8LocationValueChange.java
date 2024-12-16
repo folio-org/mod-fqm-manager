@@ -77,19 +77,14 @@ public class V8LocationValueChange implements MigrationStrategy {
             return records
               .get()
               .stream()
-              .filter(record -> record.id().equals(value))
+              .filter(r -> r.id().equals(value))
               .findFirst()
               .map(Location::name)
               .orElseGet(() -> {
                 // some of these may already be the correct value, as both the name and ID fields
                 // got mapped to the same place. If the name is already being used, we want to make
                 // sure not to discard it
-                boolean existsAsName = records
-                  .get()
-                  .stream()
-                  .filter(record -> record.name().equals(value))
-                  .findFirst()
-                  .isPresent();
+                boolean existsAsName = records.get().stream().anyMatch(r -> r.name().equals(value));
 
                 if (existsAsName) {
                   return value;

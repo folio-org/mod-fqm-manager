@@ -77,17 +77,12 @@ public class V6ModeOfIssuanceValueChange implements MigrationStrategy {
                 // some of these may already be the correct value, as both `mode_of_issuance_id` and
                 // `mode_of_issuance` got mapped to `mode_of_issuance_name`. If the name is being used,
                 // we want to make sure not to discard it
-                boolean existsAsName = modesOfIssuance
-                  .get()
-                  .stream()
-                  .filter(mode -> mode.name().equals(value))
-                  .findFirst()
-                  .isPresent();
+                boolean existsAsName = modesOfIssuance.get().stream().anyMatch(mode -> mode.name().equals(value));
 
                 if (existsAsName) {
                   return value;
                 } else {
-                  warnings.add(ValueBreakingWarning.builder().field(FIELD_NAME).value(value).fql(fql.get()).build());
+                  warnings.add(ValueBreakingWarning.builder().field(key).value(value).fql(fql.get()).build());
                   return null;
                 }
               });

@@ -71,24 +71,19 @@ public class V7PatronGroupsValueChange implements MigrationStrategy {
             return records
               .get()
               .stream()
-              .filter(record -> record.id().equals(value))
+              .filter(r -> r.id().equals(value))
               .findFirst()
               .map(PatronGroup::group)
               .orElseGet(() -> {
                 // some of these may already be the correct value, as both the name and ID fields
                 // got mapped to the same place. If the name is already being used, we want to make
                 // sure not to discard it
-                boolean existsAsName = records
-                  .get()
-                  .stream()
-                  .filter(record -> record.group().equals(value))
-                  .findFirst()
-                  .isPresent();
+                boolean existsAsName = records.get().stream().anyMatch(r -> r.group().equals(value));
 
                 if (existsAsName) {
                   return value;
                 } else {
-                  warnings.add(ValueBreakingWarning.builder().field(FIELD_NAME).value(value).fql(fql.get()).build());
+                  warnings.add(ValueBreakingWarning.builder().field(key).value(value).fql(fql.get()).build());
                   return null;
                 }
               });

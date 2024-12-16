@@ -1,5 +1,19 @@
 # 3.0.x - Ramsons
 
+## 3.0.5
+- [MODFQMMGR-577]: Fix env var typo in module descriptor and update documentation
+- [MODFQMMGR-588]: Additional migration scripts
+- [MODFQMMGR-510]: Cancel running queries in DB upon request
+- more fix
+- [MODFQMMGR-591]: Fix bug where FQM was sending multiple (and different) tenant headers in some API requests
+
+[MODFQMMGR-577]: https://folio-org.atlassian.net/browse/MODFQMMGR-577
+[MODFQMMGR-588]: https://folio-org.atlassian.net/browse/MODFQMMGR-588
+[MODFQMMGR-510]: https://folio-org.atlassian.net/browse/MODFQMMGR-510
+[MODFQMMGR-599]: https://folio-org.atlassian.net/browse/MODFQMMGR-599
+[MODFQMMGR-591]: https://folio-org.atlassian.net/browse/MODFQMMGR-591
+[MODFQMMGR-601]: https://folio-org.atlassian.net/browse/MODFQMMGR-601
+
 ## 3.0.4
 - [MODFQMMGR-577]: Reduce the default cache expiration time for the entity type cache
 - [MODFQMMGR-583]: Use available indexes for more fields

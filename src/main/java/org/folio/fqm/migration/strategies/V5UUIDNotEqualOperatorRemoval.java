@@ -198,7 +198,7 @@ public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
 
   @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
-    Set<String> fieldsToTarget = UUID_FIELDS.get(query.entityTypeId());
+    Set<String> fieldsToTarget = UUID_FIELDS.getOrDefault(query.entityTypeId(), Set.of());
 
     List<Warning> warnings = new ArrayList<>(query.warnings());
 

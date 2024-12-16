@@ -1,12 +1,11 @@
 package org.folio.fqm.migration.strategies;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
@@ -102,46 +101,29 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
     AtomicReference<ZoneId> timezone = new AtomicReference<>();
 
     return query.withFqlQuery(
-      MigrationUtils.migrateFql(
+      MigrationUtils.migrateFqlValues(
         query.fqlQuery(),
         originalVersion -> TARGET_VERSION,
-        (result, key, value) -> {
-          if (!DATE_FIELDS.contains(key)) {
-            result.set(key, value); // no-op
-            return;
+        (String key) -> DATE_FIELDS.contains(key),
+        (String key, String value, Supplier<String> fql) -> {
+          if (
+            value.contains("T") // no-op, we already have a time component
+          ) {
+            return value;
           }
 
-          ObjectNode conditions = (ObjectNode) value;
+          if (timezone.get() == null) {
+            timezone.set(configurationClient.getTenantTimezone());
+          }
 
-          conditions
-            .properties()
-            .forEach(entry -> {
-              if (
-                !entry.getValue().isTextual() || // no-op, may be a boolean or something else
-                entry.getValue().textValue().contains("T") // no-op, we already have a time component
-              ) {
-                return;
-              }
-
-              if (timezone.get() == null) {
-                timezone.set(configurationClient.getTenantTimezone());
-              }
-
-              try {
-                conditions.set(
-                  entry.getKey(),
-                  new TextNode(
-                    FqlToSqlConverterService.DATE_TIME_FORMATTER.format(
-                      LocalDate.parse(entry.getValue().textValue()).atStartOfDay(timezone.get())
-                    )
-                  )
-                );
-              } catch (DateTimeParseException e) {
-                log.warn("Could not migrate date {}", entry, e);
-              }
-            });
-
-          result.set(key, conditions);
+          try {
+            return FqlToSqlConverterService.DATE_TIME_FORMATTER.format(
+              LocalDate.parse(value).atStartOfDay(timezone.get())
+            );
+          } catch (DateTimeParseException e) {
+            log.warn("Could not migrate date {}", value, e);
+            return value;
+          }
         }
       )
     );

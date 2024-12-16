@@ -1,6 +1,8 @@
 package org.folio.fqm.migration.strategies;
 
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.ZoneId;
@@ -105,7 +107,10 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
             """
           )
           .fields(List.of())
-          .build()
+          .build(),
+        (Consumer<MigratableQueryInformation>) (
+          transformed -> verify(configurationClient, times(1)).getTenantTimezone()
+        )
       )
     );
   }

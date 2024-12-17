@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.client.LocationUnitsClient;
+import org.folio.fqm.client.LocationUnitsClient.LibraryLocation;
+import org.folio.fqm.client.LocationUnitsClient.LibraryLocationsResponse;
 import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.LocationsClient.Location;
 import org.folio.fqm.client.LocationsClient.LocationsResponse;
@@ -38,6 +41,9 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
   LocationsClient locationsClient;
 
   @Mock
+  LocationUnitsClient locationUnitsClient;
+
+  @Mock
   ModesOfIssuanceClient modesOfIssuanceClient;
 
   @Mock
@@ -48,6 +54,13 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
     lenient()
       .when(locationsClient.getLocations())
       .thenReturn(new LocationsResponse(List.of(new Location("id1", "name1"), new Location("id2", "name2"))));
+    lenient()
+      .when(locationUnitsClient.getLibraries())
+      .thenReturn(
+        new LibraryLocationsResponse(
+          List.of(new LibraryLocation("id1", "name1", "name1"), new LibraryLocation("id2", "name2", "name2"))
+        )
+      );
     lenient()
       .when(modesOfIssuanceClient.getModesOfIssuance())
       .thenReturn(
@@ -63,7 +76,8 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
     List<MigrationStrategy> strategies = List.of(
       new V6ModeOfIssuanceValueChange(modesOfIssuanceClient),
       new V7PatronGroupsValueChange(patronGroupsClient),
-      new V8LocationValueChange(locationsClient)
+      new V8LocationValueChange(locationsClient),
+      new V9LocLibraryValueChange(locationUnitsClient)
     );
 
     return new MigrationStrategy() {
@@ -138,6 +152,16 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
         "8418e512-feac-4a6a-a56d-9006aab31e33",
         "temporary_location.name",
         () -> verify(locationsClient, times(1)).getLocations()
+      ),
+      Triple.of(
+        "8418e512-feac-4a6a-a56d-9006aab31e33",
+        "effective_library.name",
+        () -> verify(locationUnitsClient, times(1)).getLibraries()
+      ),
+      Triple.of(
+        "8418e512-feac-4a6a-a56d-9006aab31e33",
+        "effective_library.code",
+        () -> verify(locationUnitsClient, times(1)).getLibraries()
       )
     );
 
@@ -157,7 +181,7 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
               MigratableQueryInformation
                 .builder()
                 .entityTypeId(UUID.fromString(pair.getLeft()))
-                .fqlQuery("{\"" + pair.getRight() + "\": {\"$ne\": \"invalid\"}, \"_version\":\"9\"}")
+                .fqlQuery("{\"" + pair.getRight() + "\": {\"$ne\": \"invalid\"}, \"_version\":\"10\"}")
                 .fields(List.of())
                 .build(),
               (Consumer<MigratableQueryInformation>) (
@@ -198,7 +222,7 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
                       {
                         "%s": {"$ne": "name1"},
                         "not_a_relevant_field": {"$ne": "id1"},
-                        "_version": "9"
+                        "_version": "10"
                       }
                       """.formatted(
                           triple.getMiddle()
@@ -224,7 +248,7 @@ class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
                     .builder()
                     .entityTypeId(UUID.fromString(triple.getLeft()))
                     .fqlQuery(
-                      "{\"%s\": {\"$eq\": \"name1\", \"$ne\": \"name1\", \"$in\": [\"name2\"]}, \"_version\":\"9\"}".formatted(
+                      "{\"%s\": {\"$eq\": \"name1\", \"$ne\": \"name1\", \"$in\": [\"name2\"]}, \"_version\":\"10\"}".formatted(
                           triple.getMiddle()
                         )
                     )

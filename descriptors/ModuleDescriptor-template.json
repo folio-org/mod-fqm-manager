@@ -11,7 +11,7 @@
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
           "permissionsRequired": [],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get", "inventory-storage.location-units.libraries.collection.get"]
         },
         {
           "methods": ["GET", "DELETE"],

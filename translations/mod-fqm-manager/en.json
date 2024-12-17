@@ -1512,6 +1512,6 @@
   "migration.warning.REMOVED_ENTITY.withAlternative": "Record type {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_ENTITY.withoutAlternative": "Record type {name} is no longer available. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_FIELD.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
-  "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
+  "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. For reference, your original query was {fql}.",
   "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}."
 }

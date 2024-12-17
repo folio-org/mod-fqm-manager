@@ -1194,7 +1194,7 @@
   "entityType.simple_purchase_order.updated_at": "Updated at",
   "entityType.simple_purchase_order.updated_by": "Updated by user UUID",
   "entityType.simple_purchase_order.vendor": "Vendor",
-  "entityType.simple_purchase_order.workflow_status": "Workflow Status",
+  "entityType.simple_purchase_order.workflow_status": "Workflow status",
   "entityType.simple_purchase_order_line": "Purchase order lines",
   "entityType.simple_purchase_order_line.acquisition_method": "Acquisition method UUID",
   "entityType.simple_purchase_order_line.agreement_id": "Agreement UUID",

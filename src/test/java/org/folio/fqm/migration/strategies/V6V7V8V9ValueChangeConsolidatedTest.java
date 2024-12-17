@@ -34,8 +34,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-// TODO: rename once all are done
-class V6ThroughFILLTHISINValueChangeTest extends TestTemplate {
+// tests all four together, as they're all very similar
+class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
 
   @Mock
   LocationsClient locationsClient;

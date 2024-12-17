@@ -11,7 +11,7 @@
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
           "permissionsRequired": [],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get", "inventory-storage.location-units.libraries.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -40,7 +40,7 @@
           "methods": ["GET"],
           "pathPattern": "/entity-types/{entity-type-id}/columns/{column-name}/values",
           "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
-          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "configuration.entries.collection.get"]
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "configuration.entries.collection.get", "inventory-storage.location-units.libraries.collection.get"]
         },
         {
           "methods": ["POST"],

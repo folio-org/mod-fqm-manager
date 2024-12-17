@@ -82,7 +82,7 @@
           "methods": ["POST"],
           "pathPattern": "/fqm/migrate",
           "permissionsRequired": ["fqm.migrate.post"],
-          "modulePermissions": ["perms.users.get", "permissions.users.item.get", "configuration.entries.collection.get", "inventory-storage.modes-of-issuance.collection.get"]
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get", "configuration.entries.collection.get", "inventory-storage.modes-of-issuance.collection.get", "usergroups.collection.get", "inventory-storage.locations.collection.get", "inventory-storage.location-units.libraries.collection.get"]
         },
         {
           "methods": ["POST"],

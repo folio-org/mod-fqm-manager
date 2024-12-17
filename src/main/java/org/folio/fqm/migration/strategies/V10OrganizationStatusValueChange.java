@@ -47,9 +47,7 @@ public class V10OrganizationStatusValueChange implements MigrationStrategy {
         query.fqlQuery(),
         originalVersion -> TARGET_VERSION,
         key -> ORGANIZATIONS_ENTITY_TYPE_ID.equals(query.entityTypeId()) && FIELD_NAME.equals(key),
-        (key, value, fql) -> {
-          return NEW_VALUES.getOrDefault(value, value);
-        }
+        (key, value, fql) -> NEW_VALUES.getOrDefault(value, value)
       )
     );
   }

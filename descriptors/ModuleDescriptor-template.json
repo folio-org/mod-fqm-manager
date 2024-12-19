@@ -465,8 +465,8 @@
       { "name": "QUERY_RETENTION_DURATION",
         "value": "3h"
       },
-      { "name": "task.execution.pool.max-size",
-        "value": "10"
+      { "name": "spring.task.execution.pool.max-size",
+        "value": "12"
       },
       { "name": "MAX_QUERY_SIZE",
         "value": "1250000"

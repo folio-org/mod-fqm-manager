@@ -108,16 +108,14 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
                           )
                       );
                   }
-                  case "$regex" -> {
-                    warnings.add(
-                      OperatorBreakingWarning
-                        .builder()
-                        .field(FIELD_NAME)
-                        .operator(entry.getKey())
-                        .fql(objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString())
-                        .build()
-                    );
-                  }
+                  case "$regex" -> warnings.add(
+                    OperatorBreakingWarning
+                      .builder()
+                      .field(FIELD_NAME)
+                      .operator(entry.getKey())
+                      .fql(objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString())
+                      .build()
+                  );
                   case "$empty" -> transformed.set(entry.getKey(), entry.getValue());
                   default -> {
                     log.warn(

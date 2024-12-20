@@ -106,7 +106,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery("""
-            { "code": { "$regex": "^foo" } }
+            { "ignore_me": { "$eq": "z" }, "code": { "$regex": "^foo" } }
             """)
           .fields(List.of())
           .build(),
@@ -114,7 +114,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery("""
-            { "_version": "12" }
+            { "ignore_me": { "$eq": "z" }, "_version": "12" }
             """)
           .fields(List.of())
           .warning(

@@ -82,7 +82,7 @@
           "methods": ["POST"],
           "pathPattern": "/fqm/migrate",
           "permissionsRequired": ["fqm.migrate.post"],
-          "modulePermissions": ["perms.users.get", "permissions.users.item.get", "configuration.entries.collection.get", "inventory-storage.modes-of-issuance.collection.get", "usergroups.collection.get", "inventory-storage.locations.collection.get", "inventory-storage.location-units.libraries.collection.get"]
+          "modulePermissions": ["perms.users.get", "permissions.users.item.get", "configuration.entries.collection.get", "inventory-storage.modes-of-issuance.collection.get", "usergroups.collection.get", "inventory-storage.locations.collection.get", "inventory-storage.location-units.libraries.collection.get", "organizations.organizations.collection.get"]
         },
         {
           "methods": ["POST"],
@@ -465,8 +465,8 @@
       { "name": "QUERY_RETENTION_DURATION",
         "value": "3h"
       },
-      { "name": "task.execution.pool.max-size",
-        "value": "10"
+      { "name": "spring.task.execution.pool.max-size",
+        "value": "12"
       },
       { "name": "MAX_QUERY_SIZE",
         "value": "1250000"

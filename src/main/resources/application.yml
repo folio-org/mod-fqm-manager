@@ -23,6 +23,7 @@ spring:
       initialization-fail-timeout: 1800000
       data-source-properties:
         reWriteBatchedInserts: true
+      maximum-pool-size: 12
   sql:
     init:
       # to boot up application despite of any DB connection issues
@@ -65,8 +66,8 @@ spring:
   task:
     execution:
       pool:
-        core-size: 9
-        max-size: 10 # Max number of concurrent async tasks
+        core-size: 12
+        max-size: 12 # Max number of concurrent async tasks
         queue-capacity: 1000
       thread-name-prefix: mod-fqm-manager-
   banner:

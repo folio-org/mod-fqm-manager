@@ -189,7 +189,7 @@ public class IdStreamer {
         }
       }
     };
-    executorService.schedule(cancellationMonitor, 0, TimeUnit.SECONDS);
+    executorService.schedule(cancellationMonitor, QUERY_CANCELLATION_CHECK_SECONDS, TimeUnit.SECONDS);
   }
 
   void cancelQuery(UUID queryId) {

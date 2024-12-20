@@ -1,5 +1,14 @@
 # 3.0.x - Ramsons
 
+## 3.0.6
+- [MODFQMMGR-599]: Add migration to remove query conditions that use $ne on UUID-type fields
+- [MODFQMMGR-601]: Fix bug with the instance date_2 field implementation
+- [MODFQMMGR-602]: Add migration for ID -> name field changes
+
+[MODFQMMGR-599]: https://folio-org.atlassian.net/browse/MODFQMMGR-599
+[MODFQMMGR-601]: https://folio-org.atlassian.net/browse/MODFQMMGR-601
+[MODFQMMGR-602]: https://folio-org.atlassian.net/browse/MODFQMMGR-602
+
 ## 3.0.5
 - [MODFQMMGR-577]: Fix env var typo in module descriptor and update documentation
 - [MODFQMMGR-588]: Additional migration scripts
@@ -10,9 +19,7 @@
 [MODFQMMGR-577]: https://folio-org.atlassian.net/browse/MODFQMMGR-577
 [MODFQMMGR-588]: https://folio-org.atlassian.net/browse/MODFQMMGR-588
 [MODFQMMGR-510]: https://folio-org.atlassian.net/browse/MODFQMMGR-510
-[MODFQMMGR-599]: https://folio-org.atlassian.net/browse/MODFQMMGR-599
 [MODFQMMGR-591]: https://folio-org.atlassian.net/browse/MODFQMMGR-591
-[MODFQMMGR-601]: https://folio-org.atlassian.net/browse/MODFQMMGR-601
 
 ## 3.0.4
 - [MODFQMMGR-577]: Reduce the default cache expiration time for the entity type cache

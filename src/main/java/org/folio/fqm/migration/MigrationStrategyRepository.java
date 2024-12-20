@@ -5,9 +5,11 @@ import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.client.LocationUnitsClient;
 import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.ModesOfIssuanceClient;
+import org.folio.fqm.client.OrganizationsClient;
 import org.folio.fqm.client.PatronGroupsClient;
 import org.folio.fqm.migration.strategies.V0POCMigration;
 import org.folio.fqm.migration.strategies.V10OrganizationStatusValueChange;
+import org.folio.fqm.migration.strategies.V11OrganizationCodeOperatorChange;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
@@ -29,6 +31,7 @@ public class MigrationStrategyRepository {
     LocationsClient locationsClient,
     LocationUnitsClient locationUnitsClient,
     ModesOfIssuanceClient modesOfIssuanceClient,
+    OrganizationsClient organizationsClient,
     PatronGroupsClient patronGroupsClient
   ) {
     this.migrationStrategies =
@@ -43,7 +46,8 @@ public class MigrationStrategyRepository {
         new V7PatronGroupsValueChange(patronGroupsClient),
         new V8LocationValueChange(locationsClient),
         new V9LocLibraryValueChange(locationUnitsClient),
-        new V10OrganizationStatusValueChange()
+        new V10OrganizationStatusValueChange(),
+        new V11OrganizationCodeOperatorChange(organizationsClient)
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

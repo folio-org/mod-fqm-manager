@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>3.0.7-SNAPSHOT</version>
+  <version>3.0.7</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
@@ -71,7 +71,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-query-tool-metadata</artifactId>
-      <version>${folio-query-tool-metadata.version}</version>
+      <version>3.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
@@ -429,7 +429,7 @@
     <url>https://github.com/folio-org/${artifactId}</url>
     <connection>scm:git:git://github.com/folio-org/${artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:folio-org/${artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v3.0.7</tag>
   </scm>
 
 </project>

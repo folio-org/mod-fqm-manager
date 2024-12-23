@@ -1,5 +1,14 @@
 # 3.0.x - Ramsons
 
+## 3.0.7
+- [MODFQMMGR-548]: Add new `jsonbArrayType` data type
+- [MODFQMMGR-552]: Increase thread pool size to 12
+- [MODFQMMGR-606]: Support migration of old organization code field operators
+
+[MODFQMMGR-548]: https://folio-org.atlassian.net/browse/MODFQMMGR-548
+[MODFQMMGR-552]: https://folio-org.atlassian.net/browse/MODFQMMGR-552
+[MODFQMMGR-606]: https://folio-org.atlassian.net/browse/MODFQMMGR-606
+
 ## 3.0.6
 - [MODFQMMGR-599]: Add migration to remove query conditions that use $ne on UUID-type fields
 - [MODFQMMGR-601]: Fix bug with the instance date_2 field implementation

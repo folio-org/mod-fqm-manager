@@ -2,11 +2,11 @@
 
 ## 3.0.7
 - [MODFQMMGR-548]: Add new `jsonbArrayType` data type
-- [MODFQMMGR-552]: Increase thread pool size to 12
+- [MODFQMMGR-522]: Increase thread pool size to 12
 - [MODFQMMGR-606]: Support migration of old organization code field operators
 
 [MODFQMMGR-548]: https://folio-org.atlassian.net/browse/MODFQMMGR-548
-[MODFQMMGR-552]: https://folio-org.atlassian.net/browse/MODFQMMGR-552
+[MODFQMMGR-522]: https://folio-org.atlassian.net/browse/MODFQMMGR-522
 [MODFQMMGR-606]: https://folio-org.atlassian.net/browse/MODFQMMGR-606
 
 ## 3.0.6

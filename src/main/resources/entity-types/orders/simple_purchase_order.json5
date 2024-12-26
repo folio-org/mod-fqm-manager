@@ -331,7 +331,7 @@
       name: 'acq_unit_ids',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
@@ -340,24 +340,14 @@
       queryable: false,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
     },
     {
       name: 'acquisition_unit',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -366,19 +356,20 @@
       idColumnName: 'acq_unit_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON lower(record.value::text) = acq_unit.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'acqUnitIds'::text)) record(value) JOIN src_acquisitions_unit acq_unit ON (record.value::text) = acq_unit.id::text)",
+      valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text)",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234',
-        columnName: 'acquisition_unit',
+        columnName: 'acquisition_unit'
       },
       valueSourceApi: {
         path: 'acquisitions-units/units',
         valueJsonPath: '$.acquisitionsUnits.*.id',
-        labelJsonPath: '$.acquisitionsUnits.*.name',
-      },
+        labelJsonPath: '$.acquisitionsUnits.*.name'
+      }
     },
+
     {
       name: 'next_pol_number',
       sourceAlias: 'po',

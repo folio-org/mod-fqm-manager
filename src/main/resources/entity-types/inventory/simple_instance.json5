@@ -774,9 +774,8 @@
       name: 'instance_format_ids',
       sourceAlias: 'inst',
       essential: true,
-      hidden: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
@@ -784,44 +783,32 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'format_names',
-      source: {
-        columnName: 'format_names',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      sourceAlias: 'inst',
-      queryable: true,
-      essential: true,
-      idColumnName: 'instance_format_ids',
       valueSourceApi: {
         path: 'instance-formats',
         valueJsonPath: '$.instanceFormats.*.id',
         labelJsonPath: '$.instanceFormats.*.name',
       },
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'instance_format_ids',
+      queryable: true,
       visibleByDefault: false,
-      valueFunction: 'lower(:value)',
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
+      valueGetter: "( SELECT array_agg(format.jsonb ->> 'name'::text) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'instanceFormatIds'::text) record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(format.jsonb ->> 'name'::text)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'instanceFormatIds'::text) record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text)",
+      source: {
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        columnName: 'format_names',
+      },
     },
     {
       name: 'physical_descriptions',
@@ -854,7 +841,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -862,18 +849,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
       source: {
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         columnName: 'languages',

@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -32,7 +33,7 @@ class ResultSetRepositoryArrayTest {
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class));
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class), new ObjectMapper());
   }
 
   @Test

@@ -16,6 +16,7 @@ import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
 import org.mockito.Mockito;
 import org.postgresql.jdbc.PgArray;
+import org.postgresql.util.PGobject;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
   );
 
   public static final List<Map<String, Object>> TEST_ENTITY_WITH_ARRAY_CONTENTS = List.of(
-    Map.of(ID_FIELD_NAME, UUID.randomUUID(), "testField", getPgArray()));
+    Map.of(ID_FIELD_NAME, UUID.randomUUID(), "testField", getPgArray(), "testJsonbArrayField", getJsonbArray()));
 
   public static final EntityType ARRAY_ENTITY_TYPE = new EntityType()
     .columns(List.of(
@@ -50,7 +51,12 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
         .name("testField")
         .dataType(new EntityDataType().dataType("arrayType"))
         .sourceAlias("source1")
-        .valueGetter(":sourceAlias.testField")
+        .valueGetter(":sourceAlias.testField"),
+      new EntityTypeColumn()
+        .name("testJsonbArrayField")
+        .dataType(new EntityDataType().dataType("jsonbArrayType"))
+        .sourceAlias("source1")
+        .valueGetter(":sourceAlias.testJsonbArrayField")
     ))
     .name("TEST_ARRAY_ENTITY_TYPE")
     .fromClause("TEST_ARRAY_ENTITY_TYPE")
@@ -107,6 +113,17 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
       PgArray mockPgArray = Mockito.mock(PgArray.class);
       String[] stringArray = {"value1"};
       when(mockPgArray.getArray()).thenReturn(stringArray);
+      return mockPgArray;
+    } catch(Exception e) {
+      return null;
+    }
+  }
+
+  private static PGobject getJsonbArray() {
+    try {
+      PGobject mockPgArray = Mockito.mock(PGobject.class);
+      when(mockPgArray.getType()).thenReturn("jsonb");
+      when(mockPgArray.getValue()).thenReturn("[\"value1\"]");
       return mockPgArray;
     } catch(Exception e) {
       return null;

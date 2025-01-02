@@ -1,5 +1,7 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -9,10 +11,16 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.InsertValuesStep2;
+import org.jooq.JSONB;
 import org.jooq.Record;
-import org.jooq.*;
+import org.jooq.Record4;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,18 +44,39 @@ public class EntityTypeRepository {
 
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
+  public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
+  public static final String CUSTOM_FIELD_REF_ID = "jsonb ->> 'refId'";
+  public static final String CUSTOM_FIELD_TYPE = "jsonb ->> 'type'";
+  public static final String CUSTOM_FIELD_FILTER_VALUE_GETTER = "jsonb -> 'selectField' -> 'options' ->> 'values'";
+  public static final String CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX = "SINGLE_CHECKBOX";
+  public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
+  public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";
+  public static final String CUSTOM_FIELD_VALUE_GETTER = """
+      (
+        SELECT f.entry ->> 'value'
+        FROM jsonb_array_elements(
+               (SELECT jsonb -> 'selectField' -> 'options' -> 'values'\s
+                FROM %s_mod_fqm_manager.%s\s
+                WHERE jsonb ->> 'refId' = '%s')
+             ) AS f(entry)
+        WHERE f.entry ->> 'id' = %s ->> '%s'
+      )
+    """;
 
-  public static final String REQUIRED_FIELD_NAME = "jsonb ->> 'name'";
-  public static final String REF_ID = "jsonb ->> 'refId'";
-  public static final String TYPE_FIELD = "jsonb ->> 'type'";
-
-  public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
+  public static final List<ValueWithLabel> CUSTOM_FIELD_BOOLEAN_VALUES = List.of(
+    new ValueWithLabel().label("True").value("true"),
+    new ValueWithLabel().label("False").value("false")
+  );
+  private static final List<String> SUPPORTED_CUSTOM_FIELD_TYPES = List.of(
+    CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX,
+    CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN,
+    CUSTOM_FIELD_TYPE_RADIO_BUTTON
+  );
 
   private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
   private final FolioExecutionContext executionContext;
-
   private final Cache<String, Map<UUID, EntityType>> entityTypeCache;
 
   @Autowired
@@ -123,42 +152,96 @@ public class EntityTypeRepository {
     });
   }
 
-  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId, EntityType entityType, Map<String, EntityType> rawEntityTypes) {
-    log.info("Getting columns for entity type ID: {}", entityTypeId);
+  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId,
+                                                                 EntityType entityType,
+                                                                 Map<String, EntityType> rawEntityTypes) {
+    log.info("Getting custom field columns for entity type ID: {}", entityTypeId);
     EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
-      Optional.ofNullable(rawEntityTypes.get(entityTypeId)).orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
+      Optional.ofNullable(rawEntityTypes.get(entityTypeId))
+        .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
-    return readerJooqContext
-      .select(field(REQUIRED_FIELD_NAME), field(REF_ID))
+    Result<Record4<Object, Object, Object, Object>> results = readerJooqContext
+      .select(field(CUSTOM_FIELD_NAME), field(CUSTOM_FIELD_REF_ID), field(CUSTOM_FIELD_TYPE), field(CUSTOM_FIELD_FILTER_VALUE_GETTER))
       .from(sourceViewName)
-      // This where condition will be removed when handling other CustomFieldTypes.
-      // A generic method can be created with if and else statements.
-      // Currently, if implemented, "null" will be needed in the else part.
-      .where(field(TYPE_FIELD).eq(CUSTOM_FIELD_TYPE))
-      .fetch()
-      .stream()
+      .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
+      .fetch();
+
+    return results.stream()
       .map(row -> {
-        String name = row.get(REQUIRED_FIELD_NAME, String.class);
-        String refId = row.get(REF_ID, String.class);
-        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
-        return handleSingleCheckBox(name, refId, sourceViewExtractor);
+        String name = "";
+        try {
+          name = row.get(CUSTOM_FIELD_NAME, String.class);
+          String refId = row.get(CUSTOM_FIELD_REF_ID, String.class);
+          String type = row.get(CUSTOM_FIELD_TYPE, String.class);
+          String customFieldValueJson = row.get(CUSTOM_FIELD_FILTER_VALUE_GETTER, String.class);
+
+          if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type) || CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {
+            List<ValueWithLabel> columnValues = parseCustomFieldValues(customFieldValueJson);
+            return handleSingleSelectCustomField(name, refId, sourceViewName, sourceViewExtractor, columnValues);
+          } else if (CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX.equals(type)) {
+            return handleBooleanCustomField(name, refId, sourceViewExtractor);
+          }
+          return null;
+        } catch (Exception e) {
+          log.error("Error processing custom field {} for entity type ID: {}", name, entityTypeId, e);
+          return null;
+        }
       })
+      .filter(Objects::nonNull)
       .toList();
   }
 
-  private EntityTypeColumn handleSingleCheckBox(String value, String refId, String sourceViewExtractor) {
-    ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
-    ValueWithLabel falseValue = new ValueWithLabel().label("False").value("false");
 
+  private List<ValueWithLabel> parseCustomFieldValues(String customFieldValueJson) throws JsonProcessingException {
+    List<Map<String, String>> optionList = objectMapper.readValue(customFieldValueJson, new TypeReference<>() {
+    });
+    return optionList
+      .stream()
+      .map(option -> new ValueWithLabel()
+        .value(option.get("id"))
+        .label(option.get("value"))
+      )
+      .toList();
+  }
+
+  private EntityTypeColumn handleBooleanCustomField(String name,
+                                                    String refId,
+                                                    String sourceViewExtractor) {
     return new EntityTypeColumn()
-      .name(value)
+      .name(name)
       .dataType(new BooleanType().dataType("booleanType"))
-      .values(List.of(trueValue, falseValue))
+      .values(CUSTOM_FIELD_BOOLEAN_VALUES)
       .visibleByDefault(false)
       .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
-      .labelAlias(value)
+      .labelAlias(name)
+      .queryable(true)
+      .isCustomField(true);
+  }
+
+  private EntityTypeColumn handleSingleSelectCustomField(String name,
+                                                         String refId,
+                                                         String sourceViewName,
+                                                         String sourceViewExtractor,
+                                                         List<ValueWithLabel> columnValues) {
+    String filterValueGetter = sourceViewExtractor + " ->> '" + refId + "'";
+    String valueGetter = String.format(
+      CUSTOM_FIELD_VALUE_GETTER,
+      executionContext.getTenantId(),
+      sourceViewName,
+      refId,
+      sourceViewExtractor,
+      refId
+    );
+    return new EntityTypeColumn()
+      .name(name)
+      .dataType(new StringType().dataType("stringType"))
+      .values(columnValues)
+      .visibleByDefault(false)
+      .valueGetter(valueGetter)
+      .filterValueGetter(filterValueGetter)
+      .labelAlias(name)
       .queryable(true)
       .isCustomField(true);
   }

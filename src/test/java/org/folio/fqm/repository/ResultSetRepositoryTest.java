@@ -57,6 +57,14 @@ class ResultSetRepositoryTest {
   }
 
   @Test
+  void getResultSetWithEmptyIdsShouldReturnEmptyList() {
+    List<String> fields = List.of("field1");
+    List<Map<String, Object>> expectedList = List.of();
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, List.of(), List.of("tenant_01"));
+    assertEquals(expectedList, actualList);
+  }
+
+  @Test
   void getResultSetWithEmptyFieldsShouldEmptyList() {
     List<List<String>> listIds = List.of(
       List.of(UUID.randomUUID().toString()),

@@ -18,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("db-test")
@@ -43,11 +45,18 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldGetEntityTypeDefinitionWithCustomFields() {
-    String valueGetter1 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn1'";
-    String valueGetter2 = "src_users_users.jsonb -> 'customFields' ->> 'customColumn2'";
-    var values = List.of(
-      new ValueWithLabel().label("True").value("true"),
-      new ValueWithLabel().label("False").value("false")
+    String valueGetter1 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn1'";
+    String filterValueGetter2 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn2'";
+    String filterValueGetter3 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn3'";
+    String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", "customColumn2", "custom_fields_source_view.jsonb -> 'customFields'", "customColumn2");
+    String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", "customColumn3", "custom_fields_source_view.jsonb -> 'customFields'", "customColumn3");
+    var radioButtonValues = List.of(
+      new ValueWithLabel().label("label1").value("opt1"),
+      new ValueWithLabel().label("label2").value("opt2")
+    );
+    var singleSelectValues = List.of(
+      new ValueWithLabel().label("label3").value("opt3"),
+      new ValueWithLabel().label("label4").value("opt4")
     );
     List<EntityTypeColumn> expectedColumns = List.of(
       new EntityTypeColumn()
@@ -70,16 +79,27 @@ class EntityTypeRepositoryTest {
         .dataType(new BooleanType().dataType("booleanType"))
         .valueGetter(valueGetter1)
         .labelAlias("custom_column_1")
-        .values(values)
+        .values(CUSTOM_FIELD_BOOLEAN_VALUES)
         .visibleByDefault(false)
         .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name("custom_column_2")
-        .dataType(new BooleanType().dataType("booleanType"))
+        .dataType(new StringType().dataType("stringType"))
         .valueGetter(valueGetter2)
+        .filterValueGetter(filterValueGetter2)
         .labelAlias("custom_column_2")
-        .values(values)
+        .values(radioButtonValues)
+        .visibleByDefault(false)
+        .queryable(true)
+        .isCustomField(true),
+      new EntityTypeColumn()
+        .name("custom_column_3")
+        .dataType(new StringType().dataType("stringType"))
+        .valueGetter(valueGetter3)
+        .filterValueGetter(filterValueGetter3)
+        .labelAlias("custom_column_3")
+        .values(singleSelectValues)
         .visibleByDefault(false)
         .queryable(true)
         .isCustomField(true)

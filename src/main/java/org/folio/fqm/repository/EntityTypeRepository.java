@@ -159,27 +159,33 @@ public class EntityTypeRepository {
       log.warn("No custom fields found for entity type ID: {}", entityTypeId);
       return Collections.emptyList();  // Return empty list if no results found
     }
-    return results.stream()
-      .map(row -> {
-        String name = row.get(REQUIRED_FIELD_NAME, String.class);
-        String refId = row.get(REF_ID, String.class);
-        String type = row.get(TYPE_FIELD, String.class);
-        String selectFieldJson = row.get(SELECT_FIELD, String.class); // Dropdown/Radio options as JSON
-        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
 
-        if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type)) {
-          List<ValueWithLabel> dropdownValues = parseDropdownValues(selectFieldJson);
-          return handleSingleSelectDropdown(name, refId, sourceViewExtractor, dropdownValues);
-        } else if (CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {
-          List<ValueWithLabel> radioButtonValues = parseRadioButtonValues(selectFieldJson);
-          return handleRadioButton(name, refId, sourceViewExtractor, radioButtonValues);
-        } else if (CUSTOM_FIELD_TYPE.equals(type)) {
-          return handleSingleCheckBox(name, refId, sourceViewExtractor);
-        }
-        return null;
-      })
-      .filter(Objects::nonNull)
-      .collect(Collectors.toList());
+    try {
+      return results.stream()
+        .map(row -> {
+          String name = row.get(REQUIRED_FIELD_NAME, String.class);
+          String refId = row.get(REF_ID, String.class);
+          String type = row.get(TYPE_FIELD, String.class);
+          String selectFieldJson = row.get(SELECT_FIELD, String.class); // Dropdown/Radio options as JSON
+          Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
+
+          if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type)) {
+            List<ValueWithLabel> dropdownValues = parseDropdownValues(selectFieldJson);
+            return handleSingleSelectDropdown(name, refId, sourceViewExtractor, dropdownValues);
+          } else if (CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {
+            List<ValueWithLabel> radioButtonValues = parseRadioButtonValues(selectFieldJson);
+            return handleRadioButton(name, refId, sourceViewExtractor, radioButtonValues);
+          } else if (CUSTOM_FIELD_TYPE.equals(type)) {
+            return handleSingleCheckBox(name, refId, sourceViewExtractor);
+          }
+          return null;
+        })
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    } catch (Exception e) {
+      log.error("Error processing custom fields for entity type ID: {}", entityTypeId, e);
+      return Collections.emptyList();  // Return empty list if there was an exception
+    }
   }
 
 

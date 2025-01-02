@@ -990,7 +990,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'staffSuppress'",
       filterValueGetter: "COALESCE(\
-        lower(:sourceAlias.jsonb->>'staffSuppress'),\
+        \"left\"(lower(:sourceAlias.jsonb ->> 'staffSuppress'::text), 600),\
         'false'\
       )",
       values: [
@@ -1016,7 +1016,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
       filterValueGetter: "COALESCE(\
-        lower(:sourceAlias.jsonb->>'discoverySuppress'),\
+        \"left\"(lower(:sourceAlias.jsonb ->> 'discoverySuppress'::text), 600),\
         'false'\
       )",
       values: [

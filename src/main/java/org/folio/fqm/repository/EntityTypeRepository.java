@@ -159,7 +159,6 @@ public class EntityTypeRepository {
       log.warn("No custom fields found for entity type ID: {}", entityTypeId);
       return Collections.emptyList();  // Return empty list if no results found
     }
-
     return results.stream()
       .map(row -> {
         String name = row.get(REQUIRED_FIELD_NAME, String.class);

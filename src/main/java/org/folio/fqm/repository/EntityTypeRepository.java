@@ -149,7 +149,6 @@ public class EntityTypeRepository {
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
-    // Fetch query results (no need to use .intoList())
     Result<Record4<Object, Object, Object, Object>> results = readerJooqContext
       .select(field(REQUIRED_FIELD_NAME), field(REF_ID), field(TYPE_FIELD), field(SELECT_FIELD)) // SELECT_FIELD for dropdown and radio button values
       .from(sourceViewName)

@@ -230,64 +230,65 @@
       ],
     },
     {
-      name: 'select_field_options_values',
-      sourceAlias: 'custom_fields',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'objectType',
-          properties: [
+      "name": "select_field_options_values",
+      "sourceAlias": "custom_fields",
+      "dataType": {
+        "dataType": "arrayType",
+        "itemDataType": {
+          "dataType": "objectType",
+          "properties": [
             {
-              name: 'select_field_option_value_id',
-              property: 'id',
-              dataType: {
-                dataType: 'rangedUUIDType',
+              "name": "select_field_option_value_id",
+              "property": "id",
+              "dataType": {
+                "dataType": "rangedUUIDType"
               },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              valueFunction: 'lower(:value)',
+              "queryable": false,
+              "valueGetter": "(SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "filterValueGetter": "(SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "valueFunction": "lower(:value)"
             },
             {
-              name: 'value',
-              property: 'value',
-              dataType: {
-                dataType: 'stringType',
+              "name": "value",
+              "property": "value",
+              "dataType": {
+                "dataType": "stringType"
               },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              valueFunction: 'lower(:value)',
+              "queryable": false,
+              "valueGetter": "(SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "filterValueGetter": "(SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "valueFunction": "lower(:value)"
             },
             {
-              name: 'default',
-              property: 'default',
-              dataType: {
-                dataType: 'booleanType',
+              "name": "default",
+              "property": "default",
+              "dataType": {
+                "dataType": "booleanType"
               },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value->>'default') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'default')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
-              valueFunction: 'lower(:value)',
-              values: [
+              "queryable": false,
+              "valueGetter": "(SELECT array_agg(elems.value->>'default') FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "filterValueGetter": "(SELECT array_agg(lower(elems.value->>'default')) FROM jsonb_array_elements(:sourceAlias.jsonb->'selectField'->'options'->'values') AS elems)",
+              "valueFunction": "lower(:value)",
+              "values": [
                 {
-                  value: 'true',
-                  label: 'True',
+                  "value": "true",
+                  "label": "True"
                 },
                 {
-                  value: 'false',
-                  label: 'False',
-                },
-              ],
-            },
-          ],
-        },
+                  "value": "false",
+                  "label": "False"
+                }
+              ]
+            }
+          ]
+        }
       },
-      isIdColumn: false,
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'selectField'->'options'->>'values'",
+      "isIdColumn": false,
+      "queryable": false,
+      "visibleByDefault": false,
+      "valueGetter": ":sourceAlias.jsonb->'selectField'->'options'->>'values'"
     },
+
     {
       name: 'select_field_options_sorting_order',
       sourceAlias: 'custom_fields',

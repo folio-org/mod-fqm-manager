@@ -141,18 +141,27 @@ public class EntityTypeRepository {
 
   private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId, EntityType entityType, Map<String, EntityType> rawEntityTypes) {
     log.info("Getting columns for entity type ID: {}", entityTypeId);
+
     EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
       Optional.ofNullable(rawEntityTypes.get(entityTypeId))
         .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
+
     String sourceViewName = entityTypeDefinition.getSourceView();
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
-    return readerJooqContext
+    // Fetch query results (no need to use .intoList())
+    Result<Record4<Object, Object, Object, Object>> results = readerJooqContext
       .select(field(REQUIRED_FIELD_NAME), field(REF_ID), field(TYPE_FIELD), field(SELECT_FIELD)) // SELECT_FIELD for dropdown and radio button values
       .from(sourceViewName)
       .where(field(TYPE_FIELD).in(CUSTOM_FIELD_TYPE, CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN, CUSTOM_FIELD_TYPE_RADIO_BUTTON)) // Handle checkbox, dropdown, and radio button
-      .fetch()
-      .stream()
+      .fetch();
+
+    if (results.isEmpty()) {
+      log.warn("No custom fields found for entity type ID: {}", entityTypeId);
+      return Collections.emptyList();  // Return empty list if no results found
+    }
+
+    return results.stream()
       .map(row -> {
         String name = row.get(REQUIRED_FIELD_NAME, String.class);
         String refId = row.get(REF_ID, String.class);
@@ -172,8 +181,9 @@ public class EntityTypeRepository {
         return null;
       })
       .filter(Objects::nonNull)
-      .toList();
+      .collect(Collectors.toList());
   }
+
 
   private List<ValueWithLabel> parseDropdownValues(String selectFieldJson) {
     if (selectFieldJson == null || selectFieldJson.isEmpty()) {

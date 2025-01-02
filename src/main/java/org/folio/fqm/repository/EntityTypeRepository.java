@@ -36,16 +36,13 @@ public class EntityTypeRepository {
 
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
-
   public static final String REQUIRED_FIELD_NAME = "jsonb ->> 'name'";
   public static final String REF_ID = "jsonb ->> 'refId'";
   public static final String TYPE_FIELD = "jsonb ->> 'type'";
-
   public static final String SELECT_FIELD = "jsonb -> 'selectField'";
-
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
-
   public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
+  public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";
 
   private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
@@ -127,7 +124,6 @@ public class EntityTypeRepository {
     });
   }
 
-
   private EntityTypeColumn handleSingleCheckBox(String value, String refId, String sourceViewExtractor) {
     ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
     ValueWithLabel falseValue = new ValueWithLabel().label("False").value("false");
@@ -152,22 +148,24 @@ public class EntityTypeRepository {
     String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
     return readerJooqContext
-      .select(field(REQUIRED_FIELD_NAME), field(REF_ID), field(TYPE_FIELD), field(SELECT_FIELD)) // SELECT_FIELD contains JSON data
+      .select(field(REQUIRED_FIELD_NAME), field(REF_ID), field(TYPE_FIELD), field(SELECT_FIELD)) // SELECT_FIELD for dropdown and radio button values
       .from(sourceViewName)
-      .where(field(TYPE_FIELD).in(CUSTOM_FIELD_TYPE, CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN))
+      .where(field(TYPE_FIELD).in(CUSTOM_FIELD_TYPE, CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN, CUSTOM_FIELD_TYPE_RADIO_BUTTON)) // Handle checkbox, dropdown, and radio button
       .fetch()
       .stream()
       .map(row -> {
         String name = row.get(REQUIRED_FIELD_NAME, String.class);
         String refId = row.get(REF_ID, String.class);
         String type = row.get(TYPE_FIELD, String.class);
-        String selectFieldJson = row.get(SELECT_FIELD, String.class); // Fetch the JSON data
+        String selectFieldJson = row.get(SELECT_FIELD, String.class); // Dropdown/Radio options as JSON
         Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
 
         if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type)) {
-          // Parse the dropdown values from the JSON
           List<ValueWithLabel> dropdownValues = parseDropdownValues(selectFieldJson);
           return handleSingleSelectDropdown(name, refId, sourceViewExtractor, dropdownValues);
+        } else if (CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {
+          List<ValueWithLabel> radioButtonValues = parseRadioButtonValues(selectFieldJson);
+          return handleRadioButton(name, refId, sourceViewExtractor, radioButtonValues);
         } else if (CUSTOM_FIELD_TYPE.equals(type)) {
           return handleSingleCheckBox(name, refId, sourceViewExtractor);
         }
@@ -177,18 +175,15 @@ public class EntityTypeRepository {
       .toList();
   }
 
-  // Parse the JSON to extract dropdown values
   private List<ValueWithLabel> parseDropdownValues(String selectFieldJson) {
     if (selectFieldJson == null || selectFieldJson.isEmpty()) {
       return List.of();
     }
     try {
-      // Parse the JSON structure to get "values" field
       ObjectMapper mapper = new ObjectMapper();
       JsonNode root = mapper.readTree(selectFieldJson);
       JsonNode valuesNode = root.path("options").path("values");
 
-      // Map each value to a ValueWithLabel
       List<ValueWithLabel> dropdownValues = new ArrayList<>();
       for (JsonNode valueNode : valuesNode) {
         String value = valueNode.get("value").asText();
@@ -212,6 +207,37 @@ public class EntityTypeRepository {
       .isCustomField(true);
   }
 
+  private List<ValueWithLabel> parseRadioButtonValues(String selectFieldJson) {
+    if (selectFieldJson == null || selectFieldJson.isEmpty()) {
+      return List.of();
+    }
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode root = mapper.readTree(selectFieldJson);
+      JsonNode valuesNode = root.path("options").path("values");
+
+      List<ValueWithLabel> radioButtonValues = new ArrayList<>();
+      for (JsonNode valueNode : valuesNode) {
+        String value = valueNode.get("value").asText();
+        radioButtonValues.add(new ValueWithLabel().label(value).value(value));
+      }
+      return radioButtonValues;
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("Failed to parse selectField JSON: " + selectFieldJson, e);
+    }
+  }
+
+  private EntityTypeColumn handleRadioButton(String value, String refId, String sourceViewExtractor, List<ValueWithLabel> radioButtonValues) {
+    return new EntityTypeColumn()
+      .name(value)
+      .dataType(new StringType().dataType("stringType"))
+      .values(radioButtonValues)
+      .visibleByDefault(true)
+      .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
+      .labelAlias(value)
+      .queryable(true)
+      .isCustomField(true);
+  }
 
   @SneakyThrows
   private EntityType unmarshallEntityType(String str) {

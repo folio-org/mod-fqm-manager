@@ -1,16 +1,16 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
-import org.folio.querytool.domain.dto.BooleanType;
-import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.querytool.domain.dto.*;
 import org.folio.spring.FolioExecutionContext;
+import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,11 @@ public class EntityTypeRepository {
   public static final String REF_ID = "jsonb ->> 'refId'";
   public static final String TYPE_FIELD = "jsonb ->> 'type'";
 
+  public static final String SELECT_FIELD = "jsonb -> 'selectField'";
+
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
+
+  public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
 
   private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
@@ -123,30 +127,6 @@ public class EntityTypeRepository {
     });
   }
 
-  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId, EntityType entityType, Map<String, EntityType> rawEntityTypes) {
-    log.info("Getting columns for entity type ID: {}", entityTypeId);
-    EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
-      Optional.ofNullable(rawEntityTypes.get(entityTypeId)).orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
-    String sourceViewName = entityTypeDefinition.getSourceView();
-    String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
-
-    return readerJooqContext
-      .select(field(REQUIRED_FIELD_NAME), field(REF_ID))
-      .from(sourceViewName)
-      // This where condition will be removed when handling other CustomFieldTypes.
-      // A generic method can be created with if and else statements.
-      // Currently, if implemented, "null" will be needed in the else part.
-      .where(field(TYPE_FIELD).eq(CUSTOM_FIELD_TYPE))
-      .fetch()
-      .stream()
-      .map(row -> {
-        String name = row.get(REQUIRED_FIELD_NAME, String.class);
-        String refId = row.get(REF_ID, String.class);
-        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
-        return handleSingleCheckBox(name, refId, sourceViewExtractor);
-      })
-      .toList();
-  }
 
   private EntityTypeColumn handleSingleCheckBox(String value, String refId, String sourceViewExtractor) {
     ValueWithLabel trueValue = new ValueWithLabel().label("True").value("true");
@@ -162,6 +142,76 @@ public class EntityTypeRepository {
       .queryable(true)
       .isCustomField(true);
   }
+
+  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId, EntityType entityType, Map<String, EntityType> rawEntityTypes) {
+    log.info("Getting columns for entity type ID: {}", entityTypeId);
+    EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
+      Optional.ofNullable(rawEntityTypes.get(entityTypeId))
+        .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
+    String sourceViewName = entityTypeDefinition.getSourceView();
+    String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
+
+    return readerJooqContext
+      .select(field(REQUIRED_FIELD_NAME), field(REF_ID), field(TYPE_FIELD), field(SELECT_FIELD)) // SELECT_FIELD contains JSON data
+      .from(sourceViewName)
+      .where(field(TYPE_FIELD).in(CUSTOM_FIELD_TYPE, CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN))
+      .fetch()
+      .stream()
+      .map(row -> {
+        String name = row.get(REQUIRED_FIELD_NAME, String.class);
+        String refId = row.get(REF_ID, String.class);
+        String type = row.get(TYPE_FIELD, String.class);
+        String selectFieldJson = row.get(SELECT_FIELD, String.class); // Fetch the JSON data
+        Objects.requireNonNull(name, "The name is marked as non-nullable in the database");
+
+        if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type)) {
+          // Parse the dropdown values from the JSON
+          List<ValueWithLabel> dropdownValues = parseDropdownValues(selectFieldJson);
+          return handleSingleSelectDropdown(name, refId, sourceViewExtractor, dropdownValues);
+        } else if (CUSTOM_FIELD_TYPE.equals(type)) {
+          return handleSingleCheckBox(name, refId, sourceViewExtractor);
+        }
+        return null;
+      })
+      .filter(Objects::nonNull)
+      .toList();
+  }
+
+  // Parse the JSON to extract dropdown values
+  private List<ValueWithLabel> parseDropdownValues(String selectFieldJson) {
+    if (selectFieldJson == null || selectFieldJson.isEmpty()) {
+      return List.of();
+    }
+    try {
+      // Parse the JSON structure to get "values" field
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode root = mapper.readTree(selectFieldJson);
+      JsonNode valuesNode = root.path("options").path("values");
+
+      // Map each value to a ValueWithLabel
+      List<ValueWithLabel> dropdownValues = new ArrayList<>();
+      for (JsonNode valueNode : valuesNode) {
+        String value = valueNode.get("value").asText();
+        dropdownValues.add(new ValueWithLabel().label(value).value(value));
+      }
+      return dropdownValues;
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("Failed to parse selectField JSON: " + selectFieldJson, e);
+    }
+  }
+
+  private EntityTypeColumn handleSingleSelectDropdown(String value, String refId, String sourceViewExtractor, List<ValueWithLabel> dropdownValues) {
+    return new EntityTypeColumn()
+      .name(value)
+      .dataType(new StringType().dataType("stringType"))
+      .values(dropdownValues)
+      .visibleByDefault(true)
+      .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
+      .labelAlias(value)
+      .queryable(true)
+      .isCustomField(true);
+  }
+
 
   @SneakyThrows
   private EntityType unmarshallEntityType(String str) {

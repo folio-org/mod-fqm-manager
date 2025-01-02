@@ -4,12 +4,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -193,7 +188,7 @@ public class ResultSetRepository {
       .filter(col -> col.getDataType() instanceof JsonbArrayType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .collect(Collectors.toSet());
-    Set<String> jsonbArrayColumnsInResults = result.get(0).intoMap()
+    Set<String> jsonbArrayColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()
       .keySet()
       .stream()
       .filter(jsonbArrayColumnsInEntityType::contains)

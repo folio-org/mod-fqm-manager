@@ -183,7 +183,21 @@ public class QueryManagementService {
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
-  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, UUID userId, boolean localize, boolean privileged) {
+//  public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, UUID userId, boolean localize, boolean privileged) {
+//    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+//    EntityTypeUtils.getIdColumnNames(entityType)
+//      .forEach(colName -> {
+//        if (!fields.contains(colName)) {
+//          fields.add(colName);
+//        }
+//      });
+//    List<String> tenantsToQuery = privileged
+//      ? crossTenantQueryService.getTenantsToQuery(entityType, userId)
+//      : crossTenantQueryService.getTenantsToQuery(entityType);
+//    return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery, localize);
+//  }
+public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, UUID userId, boolean localize, boolean privileged) {
+  try {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
     EntityTypeUtils.getIdColumnNames(entityType)
       .forEach(colName -> {
@@ -195,7 +209,12 @@ public class QueryManagementService {
       ? crossTenantQueryService.getTenantsToQuery(entityType, userId)
       : crossTenantQueryService.getTenantsToQuery(entityType);
     return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery, localize);
+  } catch (Exception e) {
+    e.printStackTrace();
+    return Collections.emptyList();
   }
+}
+
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
     if (includeResults) {

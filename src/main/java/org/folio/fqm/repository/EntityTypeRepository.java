@@ -39,7 +39,7 @@ public class EntityTypeRepository {
   public static final String REQUIRED_FIELD_NAME = "jsonb ->> 'name'";
   public static final String REF_ID = "jsonb ->> 'refId'";
   public static final String TYPE_FIELD = "jsonb ->> 'type'";
-  public static final String SELECT_FIELD = "jsonb -> 'selectField'";
+  public static final String SELECT_FIELD = "jsonb -> 'selectField'->'options'->>'values'";
   public static final String CUSTOM_FIELD_TYPE = "SINGLE_CHECKBOX";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
   public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";

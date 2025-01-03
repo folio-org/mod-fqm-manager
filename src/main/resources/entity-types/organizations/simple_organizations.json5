@@ -23,8 +23,22 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      isIdColumn: true,
+      isIdColumn: false,
       queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    // used as id columns for name/code
+    {
+      name: '_id',
+      sourceAlias: 'org',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: false,
+      hidden: true,
       visibleByDefault: false,
       essential: true,
       valueGetter: ':sourceAlias.id',
@@ -89,7 +103,7 @@
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
-      idColumnName: 'id',
+      idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
         columnName: 'name',
@@ -113,7 +127,7 @@
       valueGetter: ":sourceAlias.jsonb->>'code'",
       filterValueGetter: "lower(${tenant_id}_mod_organizations_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
-      idColumnName: 'id',
+      idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
         columnName: 'code',

@@ -28,13 +28,15 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
     lenient()
       .when(organizationsClient.getOrganizations())
       .thenReturn(
-        new OrganizationsResponse(List.of(new Organization("id1", "code1"), new Organization("id2", "code2")))
+        new OrganizationsResponse(
+          List.of(new Organization("id1", "code1", "name1"), new Organization("id2", "code2", "name2"))
+        )
       );
   }
 
   @Override
   public MigrationStrategy getStrategy() {
-    return new V11OrganizationCodeOperatorChange(organizationsClient);
+    return new V11OrganizationNameCodeOperatorChange(organizationsClient);
   }
 
   @Override
@@ -61,16 +63,18 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery("""
-            { "code": { "$eq": "code1" } }
+            { "code": { "$eq": "code1" }, "name": { "$eq": "name1" } }
             """)
           .fields(List.of())
           .build(),
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
-          .fqlQuery("""
-            { "_version": "12", "code": { "$eq": "id1" } }
-            """)
+          .fqlQuery(
+            """
+            { "_version": "12", "code": { "$eq": "id1" }, "name": { "$eq": "id1" } }
+            """
+          )
           .fields(List.of())
           .build()
       ),

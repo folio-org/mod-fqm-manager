@@ -965,6 +965,7 @@
   "entityType.simple_mode_of_issuance.id": "UUID",
   "entityType.simple_mode_of_issuance.name": "Name",
   "entityType.simple_organization": "Organizations",
+  "entityType.simple_organization._id": "UUID",
   "entityType.simple_organization.access_provider": "Access provider",
   "entityType.simple_organization.accounting_code": "Accounting code",
   "entityType.simple_organization.accounts": "Accounts",

@@ -92,8 +92,11 @@ public class V11OrganizationNameCodeOperatorChange implements MigrationStrategy 
                       .get()
                       .stream()
                       .filter(org ->
-                        ("code".equals(key) && org.code().equalsIgnoreCase(entry.getValue().textValue())) ||
-                        ("name".equals(key) && org.name().equalsIgnoreCase(entry.getValue().textValue()))
+                        // our earlier condition ensures that the key is either "code" or "name",
+                        // so no need to check both here.
+                        "code".equals(key)
+                          ? org.code().equalsIgnoreCase(entry.getValue().textValue())
+                          : org.name().equalsIgnoreCase(entry.getValue().textValue())
                       )
                       .findAny()
                       .ifPresentOrElse(

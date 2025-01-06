@@ -13,5 +13,5 @@ public interface OrganizationsClient {
 
   public record OrganizationsResponse(List<Organization> organizations) {}
 
-  public record Organization(String id, String code) {}
+  public record Organization(String id, String code, String name) {}
 }

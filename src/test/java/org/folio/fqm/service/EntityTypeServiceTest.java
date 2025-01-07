@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import feign.FeignException;
+import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -47,6 +48,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private SimpleHttpClient simpleHttpClient;
+
+  @Mock
+  private CrossTenantHttpClient crossTenantHttpClient;
 
   @Mock
   private PermissionsService permissionsService;
@@ -350,7 +354,7 @@ class EntityTypeServiceTest {
 
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(simpleHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_01"))).thenReturn("""
            {
              "what": {
                "ever": {
@@ -372,7 +376,7 @@ class EntityTypeServiceTest {
              }
            }
       """);
-    when(simpleHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.Unauthorized.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.Unauthorized.class);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "r");
 
@@ -440,8 +444,9 @@ class EntityTypeServiceTest {
 
   @Test
   void shouldReturnLocalizedLanguagesFromApi() {
+    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of("tenant_01");
+    List<String> tenantList = List.of(tenantId);
     String valueColumnName = "languages";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())

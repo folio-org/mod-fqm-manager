@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
+import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
@@ -59,6 +60,7 @@ public class EntityTypeService {
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
   private final SimpleHttpClient simpleHttpClient;
+  private final CrossTenantHttpClient crossTenantHttpClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final LanguageClient languageClient;
@@ -199,7 +201,7 @@ public class EntityTypeService {
     Set<ValueWithLabel> resultSet = new HashSet<>();
     for (String tenantId : tenantsToQuery) {
       try {
-        String rawJson = simpleHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
+        String rawJson = crossTenantHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
         List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());

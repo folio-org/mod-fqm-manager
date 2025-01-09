@@ -72,7 +72,6 @@ public class DataRefreshRepository {
   );
 
   private final DSLContext jooqContext;
-
   private final SimpleHttpClient simpleHttpClient;
 
   /**

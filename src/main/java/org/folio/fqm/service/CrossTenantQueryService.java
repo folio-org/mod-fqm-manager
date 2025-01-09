@@ -100,8 +100,7 @@ public class CrossTenantQueryService {
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
         } catch (FeignException e) {
-          log.error("Error retrieving permissions for user ID %s in tenant %s".formatted(currentUserId, tenantId), e);
-          throw e;
+          log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
         }
       }
     }

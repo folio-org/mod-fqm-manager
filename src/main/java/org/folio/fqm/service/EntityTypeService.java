@@ -10,6 +10,7 @@ import com.jayway.jsonpath.JsonPath;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
@@ -140,7 +141,7 @@ public class EntityTypeService {
       .findFieldDefinition(new FqlField(fieldName), entityType)
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName));
 
-    if (field.getValues() != null) {
+    if (!CollectionUtils.isEmpty(field.getValues())) {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 

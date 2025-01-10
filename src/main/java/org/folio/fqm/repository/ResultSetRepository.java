@@ -53,6 +53,9 @@ public class ResultSetRepository {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
       return List.of();
     }
+    if (CollectionUtils.isEmpty(ids)) {
+      return List.of();
+    }
 
     EntityType baseEntityType = getEntityType(null, entityTypeId);
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);

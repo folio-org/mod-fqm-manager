@@ -794,6 +794,8 @@
         valueJsonPath: '$.instanceFormats.*.id',
         labelJsonPath: '$.instanceFormats.*.name',
       },
+      sourceAlias: 'inst',
+      essential: true,
       dataType: {
         dataType: 'jsonbArrayType',
         itemDataType: {

@@ -797,7 +797,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'jsonbArrayType',
+        dataType: 'arrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -805,7 +805,7 @@
       idColumnName: 'instance_format_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(format.jsonb ->> 'name'::text) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds'::text) record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text)",
+      valueGetter: "( SELECT array_agg(format.jsonb ->> 'name'::text) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance_format format ON record.value::text = format.id::text)",
       filterValueGetter: "lower(\
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",

@@ -228,7 +228,7 @@
       idColumnName: 'type_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'organizationTypes'::text) record(value) JOIN src_organization_types a ON record.value::text = a.id::text)",
+      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb -> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'organizationTypes'::text) record(value) JOIN src_organization_types a ON record.value::text = a.id::text)",
       filterValueGetter: "${tenant_id}_mod_organizations_storage.f_unaccent (:sourceAlias.jsonb->'name'::text)",
       valueFunction: '${tenant_id}_mod_organizations_storage.f_unaccent (:value)',
        source: {

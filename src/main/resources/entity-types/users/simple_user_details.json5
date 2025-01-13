@@ -544,11 +544,9 @@
         valueJsonPath: '$.departments.*.id'
       },
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value) JOIN src_users_departments a ON record.value::text = a.id::text)",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_users.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent (:value))'
+      valueGetter: "( SELECT array_agg(a.jsonb -> 'name'::text) FILTER (WHERE (a.jsonb -> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value) JOIN src_users_departments a ON record.value::text = a.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(a.jsonb -> 'name'::text)) FILTER (WHERE (a.jsonb -> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value) JOIN src_users_departments a ON record.value::text = a.id::text)"
+
     },
     {
       name: 'enrollment_date',

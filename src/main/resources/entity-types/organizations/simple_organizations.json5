@@ -213,8 +213,6 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb -> 'organizationTypes'::text)",
-      filterValueGetter: "(:sourceAlias.jsonb -> 'organizationTypes'::text)",
-      valueFunction: 'lower(:value)',
     },
     {
       name: 'type_names',

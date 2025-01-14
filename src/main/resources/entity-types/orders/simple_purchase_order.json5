@@ -356,9 +356,9 @@
       idColumnName: 'acq_unit_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_unit.jsonb ->> 'name'::text) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(acq_unit.jsonb ->> 'name'::text)) FILTER (WHERE (acq_unit.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text)",
-      valueFunction: 'lower(:value)',
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
       source: {
         entityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234',
         columnName: 'acquisition_unit'
@@ -369,7 +369,6 @@
         labelJsonPath: '$.acquisitionsUnits.*.name'
       }
     },
-
     {
       name: 'next_pol_number',
       sourceAlias: 'po',

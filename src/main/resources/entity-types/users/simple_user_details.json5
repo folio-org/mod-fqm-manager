@@ -520,14 +520,14 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb -> 'departments'::text)",
-      filterValueGetter: "(:sourceAlias.jsonb -> 'departments'::text)"
+      valueGetter: "(:sourceAlias.jsonb -> 'departments')",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'departments')"
     },
     {
       name: 'departments',
       source: {
         columnName: 'departments',
-        entityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2'
+        entityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
       },
       dataType: {
         dataType: 'jsonbArrayType',
@@ -541,12 +541,12 @@
       valueSourceApi: {
         path: 'departments',
         labelJsonPath: '$.departments.*.name',
-        valueJsonPath: '$.departments.*.id'
+        valueJsonPath: '$.departments.*.id',
       },
       visibleByDefault: false,
       valueFunction: 'lower(:value)',
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value) JOIN src_users_departments a ON record.value::text = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments'::text) record(value) JOIN src_users_departments a ON record.value::text = a.id::text)"
+      valueGetter: "( SELECT jsonb_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments') record(value) JOIN src_users_departments a ON record.value::text = a.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(a.jsonb ->> 'name')) FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments') record(value) JOIN src_users_departments a ON record.value::text = a.id::text )",
     },
     {
       name: 'enrollment_date',

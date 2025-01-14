@@ -794,7 +794,6 @@
         valueJsonPath: '$.instanceFormats.*.id',
         labelJsonPath: '$.instanceFormats.*.name',
       },
-      sourceAlias: 'inst',
       essential: true,
       dataType: {
         dataType: 'jsonbArrayType',
@@ -805,8 +804,8 @@
       idColumnName: 'instance_format_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(format.jsonb ->> 'name'::text) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds'::text) record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(format.jsonb ->> 'name'::text)) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds'::text) record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text)",
+      valueGetter: "( SELECT jsonb_agg(format.jsonb ->> 'name') FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(format.jsonb ->> 'name')) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
       source: {
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         columnName: 'format_names',

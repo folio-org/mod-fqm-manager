@@ -13,6 +13,9 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @ControllerAdvice
 @Slf4j
 public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
@@ -28,5 +31,19 @@ public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
     String url = webRequest.getHttpMethod() + " " + webRequest.getRequest().getRequestURI();
     log.error("Request failed. URL: {}. Failure reason : {}", url, exception.getMessage());
     return new ResponseEntity<>(exception.getError(), exception.getHttpStatus());
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<String> handleGenericExceptions(Exception exception, ServletWebRequest webRequest) {
+    String url = webRequest.getHttpMethod() + " " + webRequest.getRequest().getRequestURI();
+    log.error("Request failed with an unhandled exception. URL: {}. Failure reason : {}", url, exception.getMessage());
+    return new ResponseEntity<>(getStackTraceAsString(exception), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  private static String getStackTraceAsString(Exception e) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    return sw.toString();
   }
 }

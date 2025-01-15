@@ -1575,8 +1575,8 @@
       filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       valueFunction: 'lower(:value)',
       source: {
-        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
-        columnName: 'acq_unit_names',
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name',
       },
       valueSourceApi: {
         path: 'acquisitions-units/units',

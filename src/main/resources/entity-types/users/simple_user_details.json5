@@ -526,8 +526,8 @@
     {
       name: 'departments',
       source: {
-        columnName: 'departments',
-        entityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+        columnName: 'name',
+        entityTypeId: 'f067beda-cbeb-4423-9a0d-3b59fb329ce2',
       },
       dataType: {
         dataType: 'jsonbArrayType',

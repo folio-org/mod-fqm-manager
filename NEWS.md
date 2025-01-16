@@ -1,5 +1,8 @@
 # 3.0.x - Ramsons
 
+## 3.0.9
+- Add instance-formats interface to module descriptor
+
 ## 3.0.8
 - Fix user-friendly queries and dropdown values for various fields
 - [MODFQMMGR-618]: Organizations migration id/name/code fixes

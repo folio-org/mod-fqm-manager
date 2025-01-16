@@ -50,13 +50,31 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public Set<String> getUserPermissions() {
+    if (context.getUserId() == null) {
+      log.warn("UserId is null in the context..");
+    }
+    log.debug("Fetching user permissions using context tenantId: {} and userId: {}", context.getTenantId(), context.getUserId());
     return getUserPermissions(context.getTenantId(), context.getUserId());
   }
 
   public Set<String> getUserPermissions(String tenantId, UUID userId) {
+    if (userId == null) {
+      log.warn("Received null userId for tenantId: {}.", tenantId);
+    }
+    log.debug("Fetching user permissions for tenantId: {} and userId: {}", tenantId, userId);
     TenantUserPair key = new TenantUserPair(tenantId, userId);
-    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId()) : getUserPermissionsFromModPermissions(k.tenant(), k.userId()));
+    log.debug("Created TenantUserPair key: {}", key);
+
+    Set<String> permissions = cache.get(key, k -> {
+      log.debug("Fetching permissions for key: {}", k);
+      return isEureka ? getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId())
+        : getUserPermissionsFromModPermissions(k.tenant(), k.userId());
+    });
+
+    log.debug("Fetched permissions for user {}: {}", userId, permissions);
+    return permissions;
   }
+
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
     EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), null);
@@ -65,10 +83,17 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
+    if (context.getUserId() == null) {
+      log.warn("UserId is null. Permission verification cannot proceed.");
+    }
     verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, context.getUserId(), checkFqmPermissions);
   }
 
   public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, UUID userId, boolean checkFqmPermissions) {
+    if (userId == null) {
+      log.warn("UserId is null. Permission verification cannot proceed.");
+    }
+
     Set<String> requiredPermissions = getRequiredPermissions(entityType);
     Set<String> userPermissions = getUserPermissions(tenantId, userId);
 
@@ -92,6 +117,7 @@ public class PermissionsRegularService implements PermissionsService {
       throw new MissingPermissionsException(missingPermissions);
     }
   }
+
 
   private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
     return modPermissionsClient

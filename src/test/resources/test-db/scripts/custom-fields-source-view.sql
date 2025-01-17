@@ -73,14 +73,40 @@ VALUES (
          }
        }
      }'
-    ),
+  ),
   (
-    '2c4e9797-422f-4962-a302-174af09b23fb',
+      '2c4e9797-422f-4962-a302-174af09b23fb',
+      '{
+         "id": "2c4e9797-422f-4962-a302-174af09b23fb",
+         "name": "custom_column_4",
+         "type": "TEXTBOX_SHORT",
+         "order": 4,
+         "refId": "customColumn4",
+         "visible": true,
+         "entityType": "user",
+         "selectField": {}
+      }'
+  ),
+  (
+        '2c4e9797-422f-4962-a302-174af09b23fc',
+        '{
+           "id": "2c4e9797-422f-4962-a302-174af09b23fc",
+           "name": "custom_column_5",
+           "type": "TEXTBOX_LONG",
+           "order": 5,
+           "refId": "customColumn5",
+           "visible": true,
+           "entityType": "user",
+           "selectField": {}
+        }'
+  ),
+  (
+    '2c4e9797-422f-4962-a302-174af09b23ff',
     '{
-       "id": "2c4e9797-422f-4962-a302-174af09b23fb",
+       "id": "2c4e9797-422f-4962-a302-174af09b23ff",
        "name": "invalid_custom_column",
        "type": "SINGLE_SELECT_DROPDOWN",
-       "order": 4,
+       "order": 6,
        "refId": "invalidCustomColumn",
        "visible": true,
        "entityType": "user",

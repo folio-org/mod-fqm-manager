@@ -44,6 +44,7 @@ public class EntityTypeRepository {
 
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
+  public static final String STRING_EXTRACTOR = "%s ->> '%s'";
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
   public static final String CUSTOM_FIELD_REF_ID = "jsonb ->> 'refId'";
   public static final String CUSTOM_FIELD_TYPE = "jsonb ->> 'type'";
@@ -51,6 +52,8 @@ public class EntityTypeRepository {
   public static final String CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX = "SINGLE_CHECKBOX";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
   public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";
+  public static final String CUSTOM_FIELD_TYPE_TEXTBOX_SHORT = "TEXTBOX_SHORT";
+  public static final String CUSTOM_FIELD_TYPE_TEXTBOX_LONG = "TEXTBOX_LONG";
   public static final String CUSTOM_FIELD_VALUE_GETTER = """
       (
         SELECT f.entry ->> 'value'
@@ -70,7 +73,9 @@ public class EntityTypeRepository {
   private static final List<String> SUPPORTED_CUSTOM_FIELD_TYPES = List.of(
     CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX,
     CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN,
-    CUSTOM_FIELD_TYPE_RADIO_BUTTON
+    CUSTOM_FIELD_TYPE_RADIO_BUTTON,
+    CUSTOM_FIELD_TYPE_TEXTBOX_SHORT,
+    CUSTOM_FIELD_TYPE_TEXTBOX_LONG
   );
 
   private final DSLContext readerJooqContext;
@@ -182,6 +187,8 @@ public class EntityTypeRepository {
             return handleSingleSelectCustomField(name, refId, sourceViewName, sourceViewExtractor, columnValues);
           } else if (CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX.equals(type)) {
             return handleBooleanCustomField(name, refId, sourceViewExtractor);
+          } else if (CUSTOM_FIELD_TYPE_TEXTBOX_SHORT.equals(type) || CUSTOM_FIELD_TYPE_TEXTBOX_LONG.equals(type)) {
+            return handleTextboxCustomField(name, refId, sourceViewExtractor);
           }
           return null;
         } catch (Exception e) {
@@ -214,7 +221,7 @@ public class EntityTypeRepository {
       .dataType(new BooleanType().dataType("booleanType"))
       .values(CUSTOM_FIELD_BOOLEAN_VALUES)
       .visibleByDefault(false)
-      .valueGetter(sourceViewExtractor + " ->> '" + refId + "'")
+      .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
       .queryable(true)
       .isCustomField(true);
@@ -225,7 +232,7 @@ public class EntityTypeRepository {
                                                          String sourceViewName,
                                                          String sourceViewExtractor,
                                                          List<ValueWithLabel> columnValues) {
-    String filterValueGetter = sourceViewExtractor + " ->> '" + refId + "'";
+    String filterValueGetter = String.format(STRING_EXTRACTOR, sourceViewExtractor, refId);
     String valueGetter = String.format(
       CUSTOM_FIELD_VALUE_GETTER,
       executionContext.getTenantId(),
@@ -241,6 +248,19 @@ public class EntityTypeRepository {
       .visibleByDefault(false)
       .valueGetter(valueGetter)
       .filterValueGetter(filterValueGetter)
+      .labelAlias(name)
+      .queryable(true)
+      .isCustomField(true);
+  }
+
+  private EntityTypeColumn handleTextboxCustomField(String name,
+                                                    String refId,
+                                                    String sourceViewExtractor) {
+    return new EntityTypeColumn()
+      .name(name)
+      .dataType(new StringType().dataType("stringType"))
+      .visibleByDefault(false)
+      .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
       .queryable(true)
       .isCustomField(true);

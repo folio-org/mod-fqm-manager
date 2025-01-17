@@ -1,7 +1,7 @@
 {
   id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
   name: 'simple_material_type_details',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

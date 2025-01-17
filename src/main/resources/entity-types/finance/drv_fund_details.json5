@@ -1,7 +1,7 @@
 {
   id: '4c63c7f5-1a28-4394-b401-98c02c31492d',
   name: 'drv_fund_details',
-  private: true,
+  private: false,
   columns: [
     {
       name: 'id',

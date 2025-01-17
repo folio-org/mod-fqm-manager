@@ -15,6 +15,8 @@ import org.folio.fql.model.NotContainsAnyCondition;
 import org.folio.fql.model.NotEqualsCondition;
 import org.folio.fql.model.NotInCondition;
 import org.folio.fql.model.RegexCondition;
+import org.folio.fql.model.StartsWithCondition;
+import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
@@ -117,29 +119,31 @@ public class FqlToSqlConverterService {
    * Converts the given FQL condition to the corresponding SQL query
    */
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
-    final org.jooq.Field<Object> field = fqlCondition instanceof FieldCondition<?> fieldCondition
-      ? field(fieldCondition, entityType)
-      : null;
-
-    // TODO: make this better
-    // I don't love the casts here, but the only way to avoid that is a massive chain of if-else statements
-    // with instanceof, and that'd be well over double the size. Hopefully JDK 21 will bring some improvements...
-    return switch (fqlCondition.getClass().getSimpleName()) {
-      case "EqualsCondition" -> handleEquals((EqualsCondition) fqlCondition, entityType, field);
-      case "NotEqualsCondition" -> handleNotEquals((NotEqualsCondition) fqlCondition, entityType, field);
-      case "InCondition" -> handleIn((InCondition) fqlCondition, entityType, field);
-      case "NotInCondition" -> handleNotIn((NotInCondition) fqlCondition, entityType, field);
-      case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
-      case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
-      case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
-      case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
-      case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
-      case "NotContainsAllCondition" -> handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
-      case "ContainsAnyCondition" -> handleContainsAny((ContainsAnyCondition) fqlCondition, entityType, field);
-      case "NotContainsAnyCondition" -> handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
-      case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
-      default -> falseCondition();
-    };
+    if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
+      final org.jooq.Field<Object> field = field(fieldCondition, entityType);
+      return switch (fqlCondition.getClass().getSimpleName()) {
+        case "EqualsCondition" -> handleEquals((EqualsCondition) fqlCondition, entityType, field);
+        case "NotEqualsCondition" -> handleNotEquals((NotEqualsCondition) fqlCondition, entityType, field);
+        case "InCondition" -> handleIn((InCondition) fqlCondition, entityType, field);
+        case "NotInCondition" -> handleNotIn((NotInCondition) fqlCondition, entityType, field);
+        case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
+        case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
+        case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
+        case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
+        case "NotContainsAllCondition" -> handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
+        case "ContainsAnyCondition" -> handleContainsAny((ContainsAnyCondition) fqlCondition, entityType, field);
+        case "NotContainsAnyCondition" -> handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
+        case "StartsWithCondition" -> handleStartsWith((StartsWithCondition) fqlCondition, entityType, field);
+        case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
+        case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
+        default -> falseCondition();
+      };
+    } else {
+      return switch (fqlCondition.getClass().getSimpleName()) {
+        case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
+        default -> falseCondition();
+      };
+    }
   }
 
   private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType, org.jooq.Field<Object> field) {
@@ -395,6 +399,13 @@ public class FqlToSqlConverterService {
     }
   }
 
+  private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    return field.contains(valueField(containsCondition.value(), containsCondition, entityType));
+  }
+
+  private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    return field.startsWith(valueField(startsWithCondition.value(), startsWithCondition, entityType));
+  }
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String fieldType = getFieldDataType(entityType, emptyCondition);
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());

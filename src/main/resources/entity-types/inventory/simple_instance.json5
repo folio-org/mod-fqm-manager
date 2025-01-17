@@ -37,6 +37,7 @@
     'inventory-storage.contributor-types.collection.get',
     'inventory-storage.statistical-codes.collection.get',
     'inventory-storage.statistical-code-types.collection.get',
+    'inventory-storage.instance-formats.collection.get'
   ],
   columns: [
     {
@@ -774,9 +775,8 @@
       name: 'instance_format_ids',
       sourceAlias: 'inst',
       essential: true,
-      hidden: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
@@ -784,44 +784,33 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'instanceFormatIds') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'format_names',
-      source: {
-        columnName: 'format_names',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      sourceAlias: 'inst',
-      queryable: true,
-      essential: true,
-      idColumnName: 'instance_format_ids',
       valueSourceApi: {
         path: 'instance-formats',
         valueJsonPath: '$.instanceFormats.*.id',
         labelJsonPath: '$.instanceFormats.*.name',
       },
+      essential: true,
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'instance_format_ids',
+      queryable: true,
       visibleByDefault: false,
-      valueFunction: 'lower(:value)',
-      valueGetter: "( SELECT array_agg(a.jsonb ->> 'name'::text) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(a.jsonb ->> 'name'::text)) FILTER (WHERE (a.jsonb ->> 'name'::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'instanceFormatIds'::text)) record(value) JOIN src_inventory_instance_format a ON (record.value::text) = a.id::text)",
+      valueGetter: "( SELECT jsonb_agg(format.jsonb ->> 'name') FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(format.jsonb ->> 'name')) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
+      source: {
+        entityTypeId: '5e8f16c7-086e-4a3f-a8ec-a55237f061be',
+        columnName: 'name',
+      },
     },
     {
       name: 'physical_descriptions',
@@ -854,7 +843,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -862,18 +851,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'languages') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
       source: {
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         columnName: 'languages',
@@ -1083,8 +1062,8 @@
       idColumnName: 'statistical_code_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
        source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
         columnName: 'statistical_code',

@@ -1,5 +1,6 @@
 package org.folio.fqm.service;
 
+import feign.FeignException;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
@@ -78,6 +79,12 @@ class CrossTenantQueryServiceTest {
                   "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
                   "tenantId": "tenant_03",
                   "centralTenantId": "tenant_01"
+              },
+              {
+                  "id": "b167837a-ecdd-482b-b5d3-79a391a1dbf1",
+                  "userId": "a5e7895f-503c-4335-8828-f507bc8d1c45",
+                  "tenantId": "tenant_04",
+                  "centralTenantId": "tenant_01"
               }
           ]
       }
@@ -98,7 +105,7 @@ class CrossTenantQueryServiceTest {
   @Test
   void shouldGetListOfTenantsToQuery() {
     String tenantId = "tenant_01";
-    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03");
+    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03", "tenant_04");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
@@ -175,6 +182,7 @@ class CrossTenantQueryServiceTest {
     when(ecsClient.get(eq("consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants"), anyMap())).thenReturn(USER_TENANT_JSON);
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions("tenant_02", entityType, userId, true);
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, userId, true);
+    doThrow(FeignException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_04", entityType, userId, true);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
     assertEquals(expectedTenants, actualTenants);
   }
@@ -197,7 +205,7 @@ class CrossTenantQueryServiceTest {
   @Test
   void shouldGetListOfTenantsToQueryForColumnValues() {
     String tenantId = "tenant_01";
-    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03");
+    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03", "tenant_04");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
@@ -211,7 +219,7 @@ class CrossTenantQueryServiceTest {
   void shouldGetListOfTenantsToQueryForSpecifiedUser() {
     String tenantId = "tenant_01";
     UUID userId = UUID.randomUUID();
-    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03");
+    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03", "tenant_04");
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);

@@ -21,9 +21,10 @@ class UserTenantServiceTest {
   private UserTenantService userTenantService;
   @Test
   void shouldGetUserTenantsResponse() {
+    String tenantId = "tenant_01";
     String expectedResponse = "{\"totalRecords\": 1}";
     when(userTenantsClient.get(eq("user-tenants"), anyMap())).thenReturn(expectedResponse);
-    String actualResponse = userTenantService.getUserTenantsResponse("tenant_01");
+    String actualResponse = userTenantService.getUserTenantsResponse(tenantId);
     assertEquals(expectedResponse, actualResponse);
   }
 }

@@ -274,6 +274,10 @@
       "version": "1.0"
     },
     {
+      "id": "instance-formats",
+      "version": "2.0"
+    },
+    {
       "id": "instance-types",
       "version": "2.0"
     },

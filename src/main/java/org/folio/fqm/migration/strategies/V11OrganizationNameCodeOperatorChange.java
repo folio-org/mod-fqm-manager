@@ -20,12 +20,12 @@ import org.folio.fqm.migration.warnings.ValueBreakingWarning;
 import org.folio.fqm.migration.warnings.Warning;
 
 /**
- * Version 11 -> 12, handles a change in operators for the organization code field.
+ * Version 11 -> 12, handles a change in operators for the organization code and name fields.
  *
- * Previously, organization codes were considered a plain text field, with $eq/$ne and $regex
+ * Previously, organization codes/names were considered a plain text field, with $eq/$ne and $regex
  * (backing "contains" and "starts with" functionality). In Ramsons, this was changed to have a
- * value source of the codes themselves, using a dropdown in the UI. The values used in the query
- * are now the UUIDs, too, rather than just the plain text.
+ * value source of the codes/names themselves, using a dropdown in the UI. The values used in the
+ * query are now the UUIDs, too, rather than just the plain text.
  *
  * Therefore, we need to (for $eq/$ne) update queries to use the corresponding UUIDs, and will
  * be removing $regex queries (the alternative was to pull all that matched these, but a query
@@ -35,20 +35,20 @@ import org.folio.fqm.migration.warnings.Warning;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
+public class V11OrganizationNameCodeOperatorChange implements MigrationStrategy {
 
   public static final String SOURCE_VERSION = "11";
   public static final String TARGET_VERSION = "12";
 
   private static final UUID ORGANIZATIONS_ENTITY_TYPE_ID = UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503");
-  private static final String FIELD_NAME = "code";
+  private static final List<String> FIELD_NAMES = List.of("code", "name");
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final OrganizationsClient organizationsClient;
 
   @Override
   public String getLabel() {
-    return "V11 -> V12 Organizations code operator/value transformation (MODFQMMGR-606)";
+    return "V11 -> V12 Organizations name/code operator/value transformation (MODFQMMGR-606)";
   }
 
   @Override
@@ -68,7 +68,7 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
           query.fqlQuery(),
           originalVersion -> TARGET_VERSION,
           (result, key, value) -> {
-            if (!ORGANIZATIONS_ENTITY_TYPE_ID.equals(query.entityTypeId()) || !FIELD_NAME.equals(key)) {
+            if (!ORGANIZATIONS_ENTITY_TYPE_ID.equals(query.entityTypeId()) || !FIELD_NAMES.contains(key)) {
               result.set(key, value); // no-op
               return;
             }
@@ -91,7 +91,13 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
                     records
                       .get()
                       .stream()
-                      .filter(org -> org.code().equalsIgnoreCase(entry.getValue().textValue()))
+                      .filter(org ->
+                        // our earlier condition ensures that the key is either "code" or "name",
+                        // so no need to check both here.
+                        "code".equals(key)
+                          ? org.code().equalsIgnoreCase(entry.getValue().textValue())
+                          : org.name().equalsIgnoreCase(entry.getValue().textValue())
+                      )
                       .findAny()
                       .ifPresentOrElse(
                         org -> transformed.set(entry.getKey(), TextNode.valueOf(org.id())),
@@ -99,7 +105,7 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
                           warnings.add(
                             ValueBreakingWarning
                               .builder()
-                              .field(FIELD_NAME)
+                              .field(key)
                               .value(entry.getValue().asText())
                               .fql(
                                 objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString()
@@ -111,7 +117,7 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
                   case "$regex" -> warnings.add(
                     OperatorBreakingWarning
                       .builder()
-                      .field(FIELD_NAME)
+                      .field(key)
                       .operator(entry.getKey())
                       .fql(objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString())
                       .build()
@@ -119,9 +125,10 @@ public class V11OrganizationCodeOperatorChange implements MigrationStrategy {
                   case "$empty" -> transformed.set(entry.getKey(), entry.getValue());
                   default -> {
                     log.warn(
-                      "Unknown operator {}: {} found for organizations' code field, not migrating...",
+                      "Unknown operator {}: {} found for organizations' {} field, not migrating...",
                       entry.getKey(),
-                      entry.getValue()
+                      entry.getValue(),
+                      key
                     );
                     transformed.set(entry.getKey(), entry.getValue());
                   }

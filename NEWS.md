@@ -1,5 +1,24 @@
 # 3.0.x - Ramsons
 
+## 3.0.9
+- Add instance-formats interface to module descriptor
+
+## 3.0.8
+- Fix user-friendly queries and dropdown values for various fields
+- [MODFQMMGR-618]: Organizations migration id/name/code fixes
+- [MODFQMMGR-619]: Handle hidden POL fields
+- [MODFQMMGR-622]: Turn JSONB arrays into Java arrays when retrieving results
+- [MODFQMMGR-623]: Resolve query failures against loan policy field
+- [MODFQMMGR-625]: Aggregate dropdown values from all tenants in ECS environments
+- [MODFQMMGR-630]: Add generic exception handler
+
+[MODFQMMGR-618]: https://folio-org.atlassian.net/browse/MODFQMMGR-618
+[MODFQMMGR-619]: https://folio-org.atlassian.net/browse/MODFQMMGR-619
+[MODFQMMGR-622]: https://folio-org.atlassian.net/browse/MODFQMMGR-622
+[MODFQMMGR-623]: https://folio-org.atlassian.net/browse/MODFQMMGR-623
+[MODFQMMGR-625]: https://folio-org.atlassian.net/browse/MODFQMMGR-625
+[MODFQMMGR-630]: https://folio-org.atlassian.net/browse/MODFQMMGR-630
+
 ## 3.0.7
 - [MODFQMMGR-548]: Add new `jsonbArrayType` data type
 - [MODFQMMGR-522]: Increase thread pool size to 12

@@ -4,13 +4,10 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;
@@ -22,16 +19,13 @@ import org.folio.querytool.domain.dto.EntityType;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.jooq.Record;
+import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.jooq.*;
 import org.folio.spring.FolioExecutionContext;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectLimitPercentStep;
+import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.postgresql.jdbc.PgArray;
+import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -48,6 +42,7 @@ public class ResultSetRepository {
   private final DSLContext jooqContext;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final FolioExecutionContext executionContext;
+  private final ObjectMapper objectMapper;
 
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
@@ -56,6 +51,9 @@ public class ResultSetRepository {
                                                 List<String> tenantsToQuery) {
     if (CollectionUtils.isEmpty(fields)) {
       log.info("List of fields to retrieve is empty. Returning empty results list.");
+      return List.of();
+    }
+    if (CollectionUtils.isEmpty(ids)) {
       return List.of();
     }
 
@@ -97,7 +95,7 @@ public class ResultSetRepository {
       result = query.groupBy(groupByFields).fetch();
     }
 
-    return recordToMap(result);
+    return recordToMap(baseEntityType, result);
   }
 
   // TODO: update for GROUP BY functionality
@@ -169,7 +167,7 @@ public class ResultSetRepository {
       throw new IllegalArgumentException("Synchronous queries are not currently supported for entity types with GROUP BY clauses.");
     }
 
-    return recordToMap(result);
+    return recordToMap(baseEntityType, result);
   }
 
   private List<Field<Object>> getSqlFields(EntityType entityType, List<String> fields) {
@@ -186,11 +184,22 @@ public class ResultSetRepository {
     return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
   }
 
-  private List<Map<String, Object>> recordToMap(Result<Record> result) {
+  private List<Map<String, Object>> recordToMap(EntityType entityType, Result<Record> result) {
     List<Map<String, Object>> resultList = new ArrayList<>();
+    Set<String> jsonbArrayColumnsInEntityType = entityType.getColumns()
+      .stream()
+      .filter(col -> col.getDataType() instanceof JsonbArrayType)
+      .map(org.folio.querytool.domain.dto.Field::getName)
+      .collect(Collectors.toSet());
+    Set<String> jsonbArrayColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()
+      .keySet()
+      .stream()
+      .filter(jsonbArrayColumnsInEntityType::contains)
+      .collect(Collectors.toSet());
     result.forEach(row -> {
       Map<String, Object> recordMap = row.intoMap();
       for (Map.Entry<String, Object> entry : recordMap.entrySet()) {
+        // Turn SQL arrays into Java arrays
         if (entry.getValue() instanceof PgArray pgArray) {
           try {
             recordMap.put(entry.getKey(), pgArray.getArray());
@@ -199,6 +208,16 @@ public class ResultSetRepository {
             recordMap.remove(entry.getKey());
           }
         }
+        if (jsonbArrayColumnsInResults.contains(entry.getKey()) && entry.getValue() instanceof PGobject pgobject && "jsonb".equals(pgobject.getType())) {
+          try {
+            JSONB jsonb = JSONB.valueOf(pgobject.getValue());
+            recordMap.put(entry.getKey(), objectMapper.readValue(jsonb.toString(), String[].class));
+          } catch (Exception e) {
+            log.error("Failed to parse jsonb value: {}", e.getMessage(), e);
+            recordMap.remove(entry.getKey());
+          }
+        }
+
       }
       resultList.add(recordMap);
     });

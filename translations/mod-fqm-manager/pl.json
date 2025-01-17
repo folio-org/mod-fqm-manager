@@ -1081,7 +1081,7 @@
     "entityType.simple_purchase_order.updated_at": "Updated at",
     "entityType.simple_purchase_order.updated_by": "Updated by user UUID",
     "entityType.simple_purchase_order.vendor": "Dostawca",
-    "entityType.simple_purchase_order.workflow_status": "Workflow Status",
+    "entityType.simple_purchase_order.workflow_status": "Workflow status",
     "entityType.simple_purchase_order_line": "Purchase order lines",
     "entityType.simple_purchase_order_line.acquisition_method": "Acquisition method UUID",
     "entityType.simple_purchase_order_line.agreement_id": "Agreement UUID",
@@ -1448,7 +1448,7 @@
     "migration.warning.REMOVED_ENTITY.withAlternative": "Record type {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
     "migration.warning.REMOVED_ENTITY.withoutAlternative": "Record type {name} is no longer available. For reference, your original query was {fql}.",
     "migration.warning.REMOVED_FIELD.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
-    "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
+    "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. For reference, your original query was {fql}.",
     "entityType.simple_instance.shared": "Shared",
     "entityType.simple_instance.tenant_id": "Tenant ID",
     "entityType.simple_instance_status.name": "Term",
@@ -1512,5 +1512,6 @@
     "entityType.simple_organization.phone_numbers.categories_names._qualified": "Kategorie numerów telefonów",
     "entityType.simple_organization.urls.categories_names": "Kategorie",
     "entityType.simple_organization.urls.categories_names._qualified": "Kategorie URL",
-    "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}."
+    "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}.",
+    "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}."
 }

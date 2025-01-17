@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
@@ -41,7 +42,7 @@ class ResultSetRepositoryTest {
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class));
+    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class), new ObjectMapper());
   }
 
   @Test
@@ -52,6 +53,14 @@ class ResultSetRepositoryTest {
     );
     List<Map<String, Object>> expectedList = List.of();
     List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), null, listIds, List.of("tenant_01"));
+    assertEquals(expectedList, actualList);
+  }
+
+  @Test
+  void getResultSetWithEmptyIdsShouldReturnEmptyList() {
+    List<String> fields = List.of("field1");
+    List<Map<String, Object>> expectedList = List.of();
+    List<Map<String, Object>> actualList = repo.getResultSet(UUID.randomUUID(), fields, List.of(), List.of("tenant_01"));
     assertEquals(expectedList, actualList);
   }
 

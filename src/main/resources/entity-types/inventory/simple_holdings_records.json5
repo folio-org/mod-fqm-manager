@@ -325,8 +325,8 @@
       idColumnName: 'statistical_code_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',

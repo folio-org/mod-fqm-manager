@@ -19,6 +19,10 @@ export default function FqmConnector({
   const [connectionState, setConnectionState] = useState({ connected: false, message: 'Waiting to connect...' });
 
   useEffect(() => {
+    socket.on('fqm-credentials', (conn) => {
+      setFqmConnection(conn);
+      socket.emit('connect-to-fqm', fqmConnection);
+    });
     socket.on('fqm-connection-change', (msg) => {
       console.log('FQM Connection change', msg);
       setConnectionState(msg);

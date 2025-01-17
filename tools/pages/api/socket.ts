@@ -37,11 +37,22 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       console.log('Found DB credentials in .env, sending up');
       socket.emit('db-credentials', {
         host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
+        port: parseInt(process.env.DB_PORT ?? '5432'),
         database: process.env.DB_DATABASE,
         user: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
-      });
+      } as PostgresConnection);
+    }
+    if ('FQM_HOST' in process.env) {
+      console.log('Found FQM credentials in .env, sending up');
+      socket.emit('fqm-credentials', {
+        host: process.env.FQM_HOST,
+        port: parseInt(process.env.FQM_PORT ?? '8080'),
+        tenant: process.env.FQM_TENANT,
+        limit: parseInt(process.env.FQM_LIMIT ?? '50'),
+        user: process.env.FQM_USERNAME,
+        password: process.env.FQM_PASSWORD,
+      } as FqmConnection);
     }
 
     async function findEntityTypes() {

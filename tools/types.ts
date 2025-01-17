@@ -3,6 +3,8 @@ export interface FqmConnection {
   port: number;
   tenant: string;
   limit: number;
+  user?: string;
+  password?: string;
 }
 
 export interface PostgresConnection {
@@ -15,6 +17,7 @@ export interface PostgresConnection {
 
 export enum DataTypeValue {
   arrayType = 'arrayType',
+  jsonbArrayType = 'jsonbArrayType',
   booleanType = 'booleanType',
   dateType = 'dateType',
   enumType = 'enumType',
@@ -23,6 +26,7 @@ export enum DataTypeValue {
   objectType = 'objectType',
   openUUIDType = 'openUUIDType',
   rangedUUIDType = 'rangedUUIDType',
+  stringUUIDType = 'stringUUIDType',
   stringType = 'stringType',
 }
 
@@ -34,12 +38,17 @@ export interface DataType {
 
 export interface EntityTypeField {
   name: string;
+  labelAlias?: string;
+  labelAliasFullyQualified?: string;
   property?: string;
   dataType: DataType;
   sourceAlias?: string;
   isIdColumn?: boolean;
   idColumnName?: string;
   queryable?: boolean;
+  queryOnly?: boolean;
+  hidden?: boolean;
+  essential?: boolean;
   visibleByDefault?: boolean;
   valueGetter?: string;
   filterValueGetter?: string;

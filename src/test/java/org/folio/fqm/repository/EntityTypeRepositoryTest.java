@@ -45,11 +45,14 @@ class EntityTypeRepositoryTest {
 
   @Test
   void shouldGetEntityTypeDefinitionWithCustomFields() {
-    String valueGetter1 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn1'";
-    String filterValueGetter2 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn2'";
-    String filterValueGetter3 = "custom_fields_source_view.jsonb -> 'customFields' ->> 'customColumn3'";
-    String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", "customColumn2", "custom_fields_source_view.jsonb -> 'customFields'", "customColumn2");
-    String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", "customColumn3", "custom_fields_source_view.jsonb -> 'customFields'", "customColumn3");
+    String genericValueGetter = "custom_fields_source_view.jsonb -> 'customFields' ->> '%s'";
+    String refId1 = "customColumn1";
+    String refId2 = "customColumn2";
+    String refId3 = "customColumn3";
+    String refId4 = "customColumn4";
+    String refId5 = "customColumn5";
+    String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId2, "custom_fields_source_view.jsonb -> 'customFields'", refId2);
+    String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId3, "custom_fields_source_view.jsonb -> 'customFields'", refId3);
     var radioButtonValues = List.of(
       new ValueWithLabel().label("label1").value("opt1"),
       new ValueWithLabel().label("label2").value("opt2")
@@ -77,7 +80,7 @@ class EntityTypeRepositoryTest {
       new EntityTypeColumn()
         .name("custom_column_1")
         .dataType(new BooleanType().dataType("booleanType"))
-        .valueGetter(valueGetter1)
+        .valueGetter(String.format(genericValueGetter, refId1))
         .labelAlias("custom_column_1")
         .values(CUSTOM_FIELD_BOOLEAN_VALUES)
         .visibleByDefault(false)
@@ -87,7 +90,7 @@ class EntityTypeRepositoryTest {
         .name("custom_column_2")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(valueGetter2)
-        .filterValueGetter(filterValueGetter2)
+        .filterValueGetter(String.format(genericValueGetter, refId2))
         .labelAlias("custom_column_2")
         .values(radioButtonValues)
         .visibleByDefault(false)
@@ -97,9 +100,25 @@ class EntityTypeRepositoryTest {
         .name("custom_column_3")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(valueGetter3)
-        .filterValueGetter(filterValueGetter3)
+        .filterValueGetter(String.format(genericValueGetter, refId3))
         .labelAlias("custom_column_3")
         .values(singleSelectValues)
+        .visibleByDefault(false)
+        .queryable(true)
+        .isCustomField(true),
+      new EntityTypeColumn()
+        .name("custom_column_4")
+        .dataType(new StringType().dataType("stringType"))
+        .valueGetter(String.format(genericValueGetter, refId4))
+        .labelAlias("custom_column_4")
+        .visibleByDefault(false)
+        .queryable(true)
+        .isCustomField(true),
+      new EntityTypeColumn()
+        .name("custom_column_5")
+        .dataType(new StringType().dataType("stringType"))
+        .valueGetter(String.format(genericValueGetter, refId5))
+        .labelAlias("custom_column_5")
         .visibleByDefault(false)
         .queryable(true)
         .isCustomField(true)

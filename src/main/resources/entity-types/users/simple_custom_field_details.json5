@@ -2,7 +2,7 @@
   id: '0b70ae1e-a87a-4621-a2d8-143973821e39',
   name: 'simple_user_custom_field_details',
   root: false,
-  private: true,
+  private: false,
   sources: [
     {
       alias: 'custom_fields',

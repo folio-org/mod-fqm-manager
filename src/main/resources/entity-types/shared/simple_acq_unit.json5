@@ -1,7 +1,7 @@
 {
   id: '661633d0-4cb5-4764-a108-2132b80320ec',
   name: 'simple_acq_unit',
-  private: true,
+  private: false,
   requiredPermissions: [
     'acquisitions-units.units.collection.get'
   ],

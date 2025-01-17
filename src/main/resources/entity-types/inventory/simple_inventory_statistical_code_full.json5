@@ -2,7 +2,7 @@
   id: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
   name: 'simple_inventory_statistical_code_full',
   root: false,
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

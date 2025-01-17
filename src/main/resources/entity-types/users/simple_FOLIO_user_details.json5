@@ -2,7 +2,7 @@
   id: 'f2615ea6-450b-425d-804d-6a495afd9308',
   name: 'simple_FOLIO_user_details',
   root: false,
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

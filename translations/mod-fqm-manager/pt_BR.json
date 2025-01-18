@@ -284,7 +284,7 @@
     "entityType.drv_invoices_details.folio_invoice_no": "Número da fatura do fólio",
     "entityType.drv_invoices_details.id": "ID",
     "entityType.drv_invoices_details.invoice_date": "Data da fatura",
-    "entityType.drv_invoices_details.lock_total": "Total de bloqueio",
+    "entityType.drv_invoices_details.lock_total": "Total de suspensão",
     "entityType.drv_invoices_details.manual_payment": "Pagamento manual",
     "entityType.drv_invoices_details.next_invoice_line_number": "Número da próxima linha da fatura",
     "entityType.drv_invoices_details.note": "Nota",
@@ -1513,5 +1513,6 @@
     "entityType.simple_organization.urls.categories_names": "Nomes de categorias",
     "entityType.simple_organization.urls.categories_names._qualified": "Nomes de categorias de URLs",
     "migration.warning.OPERATOR_BREAKING": "O operador {operator} não é mais suportado em consultas ao campo {name}. Para referência, sua consulta original era {fql}.",
-    "migration.warning.VALUE_BREAKING": "Um valor inválido `{value}` foi encontrado em sua consulta para o campo {name} e foi removido. Para referência, sua consulta original era {fql}."
+    "migration.warning.VALUE_BREAKING": "Um valor inválido `{value}` foi encontrado em sua consulta para o campo {name} e foi removido. Para referência, sua consulta original era {fql}.",
+    "entityType.simple_organization._id": "UUID"
 }

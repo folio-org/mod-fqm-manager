@@ -1513,5 +1513,6 @@
     "entityType.simple_organization.urls.categories_names": "Categories",
     "entityType.simple_organization.urls.categories_names._qualified": "URL categories",
     "migration.warning.OPERATOR_BREAKING": "The {operator} operator is no longer supported in queries against the {name} field. For reference, your original query was {fql}.",
-    "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}."
+    "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}.",
+    "entityType.simple_organization._id": "UUID"
 }

@@ -11,6 +11,7 @@ import org.folio.fqm.migration.strategies.V0POCMigration;
 import org.folio.fqm.migration.strategies.V10OrganizationStatusValueChange;
 import org.folio.fqm.migration.strategies.V11OrganizationNameCodeOperatorChange;
 import org.folio.fqm.migration.strategies.V12PurchaseOrderIdFieldRemoval;
+import org.folio.fqm.migration.strategies.V13CustomFieldRename;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
@@ -20,6 +21,8 @@ import org.folio.fqm.migration.strategies.V6ModeOfIssuanceValueChange;
 import org.folio.fqm.migration.strategies.V7PatronGroupsValueChange;
 import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
+import org.folio.spring.FolioExecutionContext;
+import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +36,9 @@ public class MigrationStrategyRepository {
     LocationUnitsClient locationUnitsClient,
     ModesOfIssuanceClient modesOfIssuanceClient,
     OrganizationsClient organizationsClient,
-    PatronGroupsClient patronGroupsClient
+    PatronGroupsClient patronGroupsClient,
+    DSLContext jooqContext,
+    FolioExecutionContext executionContext
   ) {
     this.migrationStrategies =
       List.of(
@@ -49,7 +54,8 @@ public class MigrationStrategyRepository {
         new V9LocLibraryValueChange(locationUnitsClient),
         new V10OrganizationStatusValueChange(),
         new V11OrganizationNameCodeOperatorChange(organizationsClient),
-        new V12PurchaseOrderIdFieldRemoval()
+        new V12PurchaseOrderIdFieldRemoval(),
+        new V13CustomFieldRename(executionContext, jooqContext)
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

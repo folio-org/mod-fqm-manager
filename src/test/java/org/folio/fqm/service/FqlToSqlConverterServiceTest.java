@@ -317,6 +317,18 @@ class FqlToSqlConverterServiceTest {
         condition("{0} ~* {1}", field("fieldWithAValueFunction"), field("upper(:value)", String.class, param("value", "some_text")))
       ),
       Arguments.of(
+        "starts_with",
+        """
+          {"field1": {"$starts_with": "prefix"}}""",
+        field("field1").startsWith("prefix")
+      ),
+      Arguments.of(
+        "contains",
+        """
+          {"field1": {"$contains": "substring"}}""",
+        field("field1").contains("substring")
+      ),
+      Arguments.of(
         "in list",
         """
           {"field1": {"$in": ["value1", 2, true]}}""",

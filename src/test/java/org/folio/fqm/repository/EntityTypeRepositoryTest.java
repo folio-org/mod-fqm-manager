@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.*;
 
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -78,7 +79,7 @@ class EntityTypeRepositoryTest {
         .labelAlias("Column 2")
         .visibleByDefault(true),
       new EntityTypeColumn()
-        .name("custom_column_1")
+        .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23f8")
         .dataType(new BooleanType().dataType("booleanType"))
         .valueGetter(String.format(genericValueGetter, refId1))
         .labelAlias("custom_column_1")
@@ -87,7 +88,7 @@ class EntityTypeRepositoryTest {
         .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
-        .name("custom_column_2")
+        .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23f9")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(valueGetter2)
         .filterValueGetter(String.format(genericValueGetter, refId2))
@@ -97,7 +98,7 @@ class EntityTypeRepositoryTest {
         .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
-        .name("custom_column_3")
+        .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fa")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(valueGetter3)
         .filterValueGetter(String.format(genericValueGetter, refId3))
@@ -107,7 +108,7 @@ class EntityTypeRepositoryTest {
         .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
-        .name("custom_column_4")
+        .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fb")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(String.format(genericValueGetter, refId4))
         .labelAlias("custom_column_4")
@@ -115,7 +116,7 @@ class EntityTypeRepositoryTest {
         .queryable(true)
         .isCustomField(true),
       new EntityTypeColumn()
-        .name("custom_column_5")
+        .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fc")
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(String.format(genericValueGetter, refId5))
         .labelAlias("custom_column_5")

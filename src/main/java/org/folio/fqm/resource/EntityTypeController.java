@@ -26,7 +26,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   @EntityTypePermissionsRequired
   @Override
-  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId, Boolean includeHidden) {
+  public ResponseEntity<EntityType> getEntityType(UUID entityTypeId, Boolean includeHidden, Boolean includeAll) {
     return ResponseEntity.ok(entityTypeService.getEntityTypeDefinition(entityTypeId, Boolean.TRUE.equals(includeHidden), true));
   }
 

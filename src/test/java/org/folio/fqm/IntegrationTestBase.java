@@ -138,7 +138,7 @@ public class IntegrationTestBase {
   private static void createDummyViews() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
     // Create a src_user_custom_fields view, since the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
-    jdbcTemplate.execute("CREATE VIEW src_user_custom_fields AS SELECT '{}'::jsonb AS jsonb LIMIT 1");
+    jdbcTemplate.execute("CREATE VIEW src_user_custom_fields AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
   }
 
   private static void smokeTest() {

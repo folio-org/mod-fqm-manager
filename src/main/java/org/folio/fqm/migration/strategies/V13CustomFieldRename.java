@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_NAME;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
@@ -73,7 +72,6 @@ public class V13CustomFieldRename implements MigrationStrategy {
             ObjectNode conditions = (ObjectNode) value;
             /////////////////////////////////////////////////////////////
 
-            AtomicReference<String> newKey = new AtomicReference<>("");
             conditions
               .fields()
               .forEachRemaining(entry -> {
@@ -83,14 +81,9 @@ public class V13CustomFieldRename implements MigrationStrategy {
                 if (namePair.isEmpty()) {
                   result.set(key, value);
                 } else {
-                  String newName = namePair.get().getRight();
-                  log.info("New name: {}", newName);
-                  newKey.set(newName);
+                  result.set(namePair.get().getRight(), value);
                 }
               });
-            if (!newKey.get().equals("")) {
-              result.set(newKey.get(), value);
-            }
           }
         )
       )
@@ -104,9 +97,7 @@ public class V13CustomFieldRename implements MigrationStrategy {
             if (namePair.isEmpty()) {
               return oldName;
             } else {
-              String newName = namePair.get().getRight();
-              log.info("New name: {}", newName);
-              return newName;
+              return namePair.get().getRight();
             }
           }
         ).toList()

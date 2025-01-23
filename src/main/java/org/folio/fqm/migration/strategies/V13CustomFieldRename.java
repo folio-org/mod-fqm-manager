@@ -95,8 +95,6 @@ public class V13CustomFieldRename implements MigrationStrategy {
       .withWarnings(warnings);
   }
 
-  //
-
   private synchronized List<Pair<String, String>> getNamePairs(String tenantId) {
     return tenantCustomFieldNamePairs.computeIfAbsent(tenantId, id -> {
       try {

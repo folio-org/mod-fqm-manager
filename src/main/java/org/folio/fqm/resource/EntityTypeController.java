@@ -31,12 +31,12 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   @Override
-  public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible) {
+  public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible, Boolean includeAll) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
     // Permissions are handled in the service layer// Permissions are handled in the service layer
     return ResponseEntity.ok(
       new EntityTypeSummaries()
-        .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible)))
+        .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible), Boolean.TRUE.equals(includeAll)))
         .version(migrationService.getLatestVersion())
     );
   }

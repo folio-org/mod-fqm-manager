@@ -17,6 +17,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/entity-type-ids'
         - $ref: '#/components/parameters/include-inaccessible'
+        - $ref: '#/components/parameters/include-All'
       responses:
         '200':
           description: 'Entity type summaries'
@@ -133,6 +134,13 @@ components:
       in: query
       required: false
       description: Include inaccessible entity types in the result
+      schema:
+        type: boolean
+    include-All:
+      name: includeAll
+      in: query
+      required: false
+      description: Include all the entity types regardless of being private
       schema:
         type: boolean
   schemas:

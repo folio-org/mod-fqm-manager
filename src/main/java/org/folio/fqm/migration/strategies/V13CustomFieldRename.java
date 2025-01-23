@@ -55,6 +55,8 @@ public class V13CustomFieldRename implements MigrationStrategy {
     return SOURCE_VERSION.equals(version);
   }
 
+  /////////////////////////////////////////////////////////////
+
   @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
     Result<Record2<Object, Object>> results = jooqContext

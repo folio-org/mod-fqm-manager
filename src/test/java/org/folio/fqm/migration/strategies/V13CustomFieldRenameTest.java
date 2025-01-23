@@ -3,6 +3,7 @@ package org.folio.fqm.migration.strategies;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
@@ -34,6 +35,8 @@ class V13CustomFieldRenameTest extends TestTemplate {
   private static final String CUSTOM_FIELD_ID_2 = "48e035c3-d2fe-4575-b387-e7fdc07dde58";
   private static final String CUSTOM_FIELD_NAME_1 = "a_custom_field";
   private static final String CUSTOM_FIELD_NAME_2 = "another_custom_field";
+  private static final Field<Object> ID_FIELD = field("id", Object.class);
+  private static final Field<Object> NAME_FIELD = field(CUSTOM_FIELD_NAME, Object.class);
 
   @Mock
   DSLContext jooqContext;
@@ -43,20 +46,20 @@ class V13CustomFieldRenameTest extends TestTemplate {
     DSLContext creator = DSL.using(new DefaultConfiguration()); // for creating results
 
     Result<Record2<Object, Object>> result = creator.newResult(
-      DSL.field("id", Object.class),
-      DSL.field("custom_field_name", Object.class)
+      ID_FIELD,
+      NAME_FIELD
     );
-    result.add(creator.newRecord(
-      DSL.field("id", Object.class),
-      DSL.field(CUSTOM_FIELD_NAME, Object.class)
-    ).values(CUSTOM_FIELD_ID_1, CUSTOM_FIELD_NAME_1));
-    result.add(creator.newRecord(
-      DSL.field("id", Object.class),
-      DSL.field(CUSTOM_FIELD_NAME, Object.class)
-    ).values(CUSTOM_FIELD_ID_2, CUSTOM_FIELD_NAME_2));
+    result.add(creator
+      .newRecord(ID_FIELD, NAME_FIELD)
+      .values(CUSTOM_FIELD_ID_1, CUSTOM_FIELD_NAME_1)
+    );
+    result.add(creator
+      .newRecord(ID_FIELD, NAME_FIELD)
+      .values(CUSTOM_FIELD_ID_2, CUSTOM_FIELD_NAME_2)
+    );
 
     SelectSelectStep<Record2<Object, Object>> mockSelect = mock(SelectSelectStep.class);
-    lenient().when(jooqContext.select(field("id"), field(CUSTOM_FIELD_NAME))).thenReturn(mockSelect);
+    lenient().when(jooqContext.select(ID_FIELD, field(CUSTOM_FIELD_NAME))).thenReturn(mockSelect);
 
     SelectJoinStep<Record2<Object, Object>> selectJoinStep = mock(SelectJoinStep.class);
     lenient().when(mockSelect.from(CUSTOM_FIELD_SOURCE_VIEW)).thenReturn(selectJoinStep);

@@ -1,6 +1,5 @@
 package org.folio.fqm.migration.strategies;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -69,37 +68,24 @@ public class V13CustomFieldRename implements MigrationStrategy {
               return;
             }
 
-            ObjectNode conditions = (ObjectNode) value;
-            /////////////////////////////////////////////////////////////
-
-            conditions
-              .fields()
-              .forEachRemaining(entry -> {
-                Optional<Pair<String, String>> namePair = getNamePairs().stream()
-                  .filter(pair -> pair.getLeft().equals(key))
-                  .findFirst();
-                if (namePair.isEmpty()) {
-                  result.set(key, value);
-                } else {
-                  result.set(namePair.get().getRight(), value);
-                }
-              });
+            Optional<Pair<String, String>> namePair = getNamePairs()
+              .stream()
+              .filter(pair -> pair.getLeft().equals(key))
+              .findFirst();
+            String resultKey = namePair.map(Pair::getRight).orElse(key);
+            result.set(resultKey, value);
           }
         )
       )
       .withFields(query
         .fields()
         .stream()
-        .map(oldName -> {
-            Optional<Pair<String, String>> namePair = getNamePairs().stream()
-              .filter(pair -> pair.getLeft().equals(oldName))
-              .findFirst();
-            if (namePair.isEmpty()) {
-              return oldName;
-            } else {
-              return namePair.get().getRight();
-            }
-          }
+        .map(oldName -> getNamePairs()
+          .stream()
+          .filter(pair -> pair.getLeft().equals(oldName))
+          .map(Pair::getRight)
+          .findFirst()
+          .orElse(oldName)
         ).toList()
       )
       .withWarnings(warnings);

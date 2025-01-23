@@ -106,7 +106,7 @@ class EntityTypeControllerTest {
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
 
-    when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
+    when(entityTypeService.getEntityTypeSummary(ids, false, false)).thenReturn(expectedSummary);
     when(migrationService.getLatestVersion()).thenReturn("newest coolest version");
 
     mockMvc
@@ -120,7 +120,7 @@ class EntityTypeControllerTest {
       .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").doesNotExist())
       .andExpect(jsonPath("$._version", is("newest coolest version")));
 
-    verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false);
+    verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false, false);
     verifyNoMoreInteractions(entityTypeService);
   }
 
@@ -131,13 +131,29 @@ class EntityTypeControllerTest {
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("includeInaccessible", "true");
 
-    when(entityTypeService.getEntityTypeSummary(Set.of(), true)).thenReturn(List.of());
+    when(entityTypeService.getEntityTypeSummary(Set.of(), true, false)).thenReturn(List.of());
 
     // all we really want to check here is that the includeInaccessible parameter is correctly unboxed
     // no sense making fake data to pass through to ourself; that's redundant with shouldGetEntityTypeSummaryForValidIds
     mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
-    verify(entityTypeService, times(1)).getEntityTypeSummary(Set.of(), true);
+    verify(entityTypeService, times(1)).getEntityTypeSummary(Set.of(), true, false);
+    verifyNoMoreInteractions(entityTypeService);
+  }
+
+  @Test
+  void testSummaryIncludesAllEntityTypesIfRequested() throws Exception {
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .get("/entity-types")
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .queryParam("includeAll", "true");
+
+    when(entityTypeService.getEntityTypeSummary(Set.of(), false, true)).thenReturn(List.of());
+
+    mockMvc.perform(requestBuilder)
+      .andExpect(status().isOk());
+
+    verify(entityTypeService, times(1)).getEntityTypeSummary(Set.of(), false, true);
     verifyNoMoreInteractions(entityTypeService);
   }
 
@@ -152,7 +168,7 @@ class EntityTypeControllerTest {
       .header(XOkapiHeaders.TENANT, "tenant_01")
       .queryParam("ids", id1.toString(), id2.toString());
 
-    when(entityTypeService.getEntityTypeSummary(ids, false)).thenReturn(expectedSummary);
+    when(entityTypeService.getEntityTypeSummary(ids, false, false)).thenReturn(expectedSummary);
 
     mockMvc.perform(requestBuilder).andExpect(status().isOk()).andExpect(jsonPath("$.entityTypes", is(expectedSummary)));
   }

@@ -2,6 +2,7 @@ package org.folio.fqm.migration.strategies;
 
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
+import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record2;
@@ -41,6 +42,9 @@ class V13CustomFieldRenameTest extends TestTemplate {
   @Mock
   DSLContext jooqContext;
 
+  @Mock
+  FolioExecutionContext executionContext;
+
   @BeforeEach
   public void setup() {
     DSLContext creator = DSL.using(new DefaultConfiguration()); // for creating results
@@ -58,6 +62,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
       .values(CUSTOM_FIELD_ID_2, CUSTOM_FIELD_NAME_2)
     );
 
+    lenient().when(executionContext.getTenantId()).thenReturn("tenant_01");
     SelectSelectStep<Record2<Object, Object>> mockSelect = mock(SelectSelectStep.class);
     lenient().when(jooqContext.select(ID_FIELD, field(CUSTOM_FIELD_NAME))).thenReturn(mockSelect);
 
@@ -72,7 +77,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
 
   @Override
   public MigrationStrategy getStrategy() {
-    return new V13CustomFieldRename(jooqContext);
+    return new V13CustomFieldRename(executionContext, jooqContext);
   }
 
   @Override

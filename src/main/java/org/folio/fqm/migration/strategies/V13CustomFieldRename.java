@@ -10,8 +10,6 @@ import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationUtils;
 import org.folio.fqm.migration.warnings.Warning;
 import org.jooq.DSLContext;
-import org.jooq.Record2;
-import org.jooq.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +43,8 @@ public class V13CustomFieldRename implements MigrationStrategy {
 
   private final DSLContext jooqContext;
 
+  private List<Pair<String, String>> customFieldNamePairs;
+
   @Override
   public String getLabel() {
     return "V13 -> V14 Custom field renaming (MODFQMMGR-642)";
@@ -55,33 +55,8 @@ public class V13CustomFieldRename implements MigrationStrategy {
     return SOURCE_VERSION.equals(version);
   }
 
-  /////////////////////////////////////////////////////////////
-
   @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
-    Result<Record2<Object, Object>> results = jooqContext
-      .select(field("id"), field(CUSTOM_FIELD_NAME))
-      .from(CUSTOM_FIELD_SOURCE_VIEW)
-      .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
-      .fetch();
-
-    var namePairs = results.stream()
-      .map(row -> {
-        String name = "";
-        try {
-          String id = row.get("id", String.class);
-          name = row.get(CUSTOM_FIELD_NAME, String.class);
-          return Pair.of(name, CUSTOM_FIELD_PREPENDER + id);
-        } catch (Exception e) {
-          log.error("Error processing custom field {} for entity type ID: {}", name, USERS_ENTITY_TYPE_ID, e);
-          return null;
-        }
-      })
-      .filter(Objects::nonNull)
-      .toList();
-
-    log.info("Name pairs: {}", namePairs);
-
     List<Warning> warnings = new ArrayList<>(query.warnings());
 
     return query
@@ -96,11 +71,13 @@ public class V13CustomFieldRename implements MigrationStrategy {
             }
 
             ObjectNode conditions = (ObjectNode) value;
+            /////////////////////////////////////////////////////////////
+
             AtomicReference<String> newKey = new AtomicReference<>("");
             conditions
               .fields()
               .forEachRemaining(entry -> {
-                Optional<Pair<String, String>> namePair = namePairs.stream()
+                Optional<Pair<String, String>> namePair = getNamePairs().stream()
                   .filter(pair -> pair.getLeft().equals(key))
                   .findFirst();
                 if (namePair.isEmpty()) {
@@ -117,12 +94,11 @@ public class V13CustomFieldRename implements MigrationStrategy {
           }
         )
       )
-      .withWarnings(warnings)
       .withFields(query
         .fields()
         .stream()
         .map(oldName -> {
-            Optional<Pair<String, String>> namePair = namePairs.stream()
+            Optional<Pair<String, String>> namePair = getNamePairs().stream()
               .filter(pair -> pair.getLeft().equals(oldName))
               .findFirst();
             if (namePair.isEmpty()) {
@@ -133,6 +109,33 @@ public class V13CustomFieldRename implements MigrationStrategy {
               return newName;
             }
           }
-      ).toList());
+        ).toList()
+      )
+      .withWarnings(warnings);
+  }
+
+  private synchronized List<Pair<String, String>> getNamePairs() {
+    if (customFieldNamePairs == null) {
+      customFieldNamePairs = jooqContext
+        .select(field("id"), field(CUSTOM_FIELD_NAME))
+        .from(CUSTOM_FIELD_SOURCE_VIEW)
+        .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
+        .fetch()
+        .stream()
+        .map(row -> {
+          String name = "";
+          try {
+            String id = row.get("id", String.class);
+            name = row.get(CUSTOM_FIELD_NAME, String.class);
+            return Pair.of(name, CUSTOM_FIELD_PREPENDER + id);
+          } catch (Exception e) {
+            log.error("Error processing custom field {} for entity type ID: {}", name, USERS_ENTITY_TYPE_ID, e);
+            return null;
+          }
+        })
+        .filter(Objects::nonNull)
+        .toList();
+    }
+    return customFieldNamePairs;
   }
 }

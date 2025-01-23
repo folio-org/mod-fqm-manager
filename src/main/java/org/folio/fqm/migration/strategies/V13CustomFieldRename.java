@@ -91,6 +91,8 @@ public class V13CustomFieldRename implements MigrationStrategy {
       .withWarnings(warnings);
   }
 
+  //
+
   private synchronized List<Pair<String, String>> getNamePairs() {
     if (customFieldNamePairs == null) {
       customFieldNamePairs = jooqContext

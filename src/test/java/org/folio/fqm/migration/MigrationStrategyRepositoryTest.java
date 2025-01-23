@@ -32,6 +32,7 @@ class MigrationStrategyRepositoryTest {
     null,
     null,
     null,
+    null,
     null
   );
   MigrationService migrationService = new MigrationService(

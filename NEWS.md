@@ -1,5 +1,8 @@
 # 3.0.x - Ramsons
 
+## 3.0.10
+- [MODFQMMGR-639](https://folio-org.atlassian.net/browse/MODFQMMGR-639):  Add acquisition-units interface dependency to module descriptor
+
 ## 3.0.9
 - Add instance-formats interface to module descriptor
 

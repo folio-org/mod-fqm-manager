@@ -2,7 +2,7 @@
 {
   id: '2028a343-5603-4e86-99d5-c7de322c1709',
   name: 'composite_invoice__voucher_line__organization',
-  private: true,
+  private: false,
   sources: [
     {
       id: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab',

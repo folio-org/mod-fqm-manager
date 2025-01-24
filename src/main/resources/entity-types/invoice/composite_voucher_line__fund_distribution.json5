@@ -1,7 +1,7 @@
 {
   id: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab',
   name: 'composite_voucher_line__fund_distribution',
-  private: true,
+  private: false,
   sources: [
     {
       id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',

@@ -2,6 +2,9 @@
   id: '6e11cd39-a34e-4afc-90db-957dd45d139e',
   name: 'drv_expense_class_details',
   private: true,
+  requiredPermissions: [
+    'finance.expense-classes.collection.get'
+  ],
   columns: [
     {
       name: 'id',

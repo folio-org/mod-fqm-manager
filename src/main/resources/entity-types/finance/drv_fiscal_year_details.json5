@@ -2,6 +2,9 @@
   id: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
   name: 'drv_fiscal_year_details',
   private: false,
+  requiredPermissions: [
+    'finance.fiscal-years.collection.get'
+  ],
   sources: [
     {
       type: 'db',

@@ -2,7 +2,7 @@
 {
   id: '0013c960-d08b-4266-b7d3-5b1bea68e2dc',
   name: 'composite_voucher_line_totals_per_account',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

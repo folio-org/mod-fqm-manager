@@ -18,6 +18,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      isIdColumn: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -66,7 +67,7 @@
       name: 'name',
       sourceAlias: 'fiscal_year',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -76,7 +77,7 @@
       name: 'code',
       sourceAlias: 'fiscal_year',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -96,7 +97,7 @@
       name: 'description',
       sourceAlias: 'fiscal_year',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: false,

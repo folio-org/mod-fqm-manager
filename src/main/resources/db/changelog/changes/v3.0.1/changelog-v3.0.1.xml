@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <changeSet id="create_view_fiscal_year" runOnChange="true" author="kjain@ebsco.com">
+  <preConditions onFail="CONTINUE">
+    <tableExists tableName="fiscal_year" schemaName="${tenant_id}_mod_finance_storage" />
+  </preConditions>
+  <createView
+    replaceIfExists="true"
+    viewName="src_finance_fiscal_year">
+    SELECT * FROM ${tenant_id}_mod_finance_storage.fiscal_year
+  </createView>
+</changeSet>
+
+</databaseChangeLog>

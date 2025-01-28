@@ -1,124 +1,155 @@
 {
-  id: 'a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2',
-  name: 'drv_contributor_type_details',
+  id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+  name: 'simple_material_type',
   private: true,
   sources: [
     {
       type: 'db',
-      alias: 'contributor_type',
-      target: 'src_inventory_contributor_type',
+      alias: 'material_type',
+      target: 'src_inventory_material_type',
     },
+  ],
+  requiredPermissions: [
+    'inventory-storage.material-types.collection.get'
   ],
   columns: [
     {
       name: 'id',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      },
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.id',
+        labelJsonPath: '$.mtypes.*.id',
+      },
     },
     {
       name: 'name',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'code',
-      sourceAlias: 'contributor_type',
-      dataType: {
-        dataType: 'stringType',
+      source: {
+        columnName: 'name',
+        entityTypeId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
       },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'name'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      idColumnName: 'id',
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.id',
+        labelJsonPath: '$.mtypes.*.name',
+      },
     },
     {
       name: 'source',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'stringType',
       },
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
+      hidden: true
     },
     {
       name: 'created_date',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'dateType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+      hidden: true
     },
     {
       name: 'updated_date',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'dateType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+      hidden: true
     },
     {
       name: 'created_by_user_id',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      hidden: true
     },
     {
       name: 'updated_by_user_id',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      hidden: true
     },
     {
       name: 'created_by_username',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+      hidden: true
     },
     {
       name: 'updated_by_username',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'material_type',
       dataType: {
         dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+      hidden: true
     },
+    {
+      name: 'jsonb',
+      sourceAlias: 'material_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      hidden: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
   ],
   defaultSort: [
     {

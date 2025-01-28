@@ -1,6 +1,6 @@
 {
   id: 'abb28bac-e090-48c1-a48b-3fe805638041',
-  name: 'drv_config_data_details',
+  name: 'simple_config_data',
   private: true,
   columns: [
     {

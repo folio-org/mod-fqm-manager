@@ -1,6 +1,6 @@
 {
   id: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
-  name: 'simple_languages',
+  name: 'simple_language',
   root: true,
   private: true,
   sources: [

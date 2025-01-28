@@ -1,6 +1,6 @@
 {
   id: '04107b49-ad2f-47ad-879f-6737b3018027',
-  name: 'simple_loan_types',
+  name: 'simple_loan_type',
   root: true,
   private: true,
   sources: [

@@ -1,6 +1,6 @@
 {
   id: '372e025a-9444-473a-9ffd-fa0f63db1674',
-  name: 'simple_item_details',
+  name: 'simple_item',
   private: true,
   sources: [
     {

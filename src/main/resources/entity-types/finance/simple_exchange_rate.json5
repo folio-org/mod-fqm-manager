@@ -1,6 +1,6 @@
 {
   id: '770a383e-c6cb-412b-abc3-6fa3c8a8795c',
-  name: 'simple_exchange_rates',
+  name: 'simple_exchange_rate',
   root: false,
   private: true,
   sources: [

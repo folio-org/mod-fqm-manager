@@ -2,6 +2,9 @@
   id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
   name: 'drv_vouchers_details',
   private: true,
+  requiredPermissions: [
+    "voucher.vouchers.collection.get"
+  ],
   columns: [
     {
       name: 'id',

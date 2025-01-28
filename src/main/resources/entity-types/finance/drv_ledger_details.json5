@@ -2,6 +2,9 @@
   id: 'abce1078-b099-467f-811b-367bd05638e3',
   name: 'drv_ledger_details',
   private: true,
+  requiredPermissions: [
+    "finance.ledgers.collection.get"
+  ],
   columns: [
     {
       name: 'id',

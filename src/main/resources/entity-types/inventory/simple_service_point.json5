@@ -1,6 +1,6 @@
 {
   id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
-  name: 'simple_service_point_detail',
+  name: 'simple_service_point',
   root: false,
   private: true,
   sources: [

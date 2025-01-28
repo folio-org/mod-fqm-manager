@@ -1,6 +1,6 @@
 {
   id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
-  name: 'drv_invoices_details',
+  name: 'simple_invoice',
   private: false,
   requiredPermissions: [
     'invoice.invoices.collection.get'

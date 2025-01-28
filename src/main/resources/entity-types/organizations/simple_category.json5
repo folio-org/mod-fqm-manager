@@ -1,6 +1,6 @@
 {
   id: 'a4ab7592-fb09-4feb-8e88-b91b456ff251',
-  name: 'drv_categories_details',
+  name: 'simple_category',
   private: true,
   sources: [
     {

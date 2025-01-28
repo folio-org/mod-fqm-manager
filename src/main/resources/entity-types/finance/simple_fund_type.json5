@@ -1,6 +1,6 @@
 {
   id: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
-  name: 'drv_fund_type_details',
+  name: 'simple_fund_type',
   private: false,
   requiredPermissions: [
     'finance.fund-types.collection.get'

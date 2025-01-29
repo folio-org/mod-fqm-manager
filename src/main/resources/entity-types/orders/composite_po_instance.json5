@@ -2,6 +2,15 @@
   id: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf',
   name: 'composite_po_instance',
   private: true,
+  requiredPermissions: [
+    'orders.po-lines.item.get',
+    'orders.item.get',
+    'inventory-storage.locations.collection.get',
+    'inventory-storage.holdings.item.get',
+    'inventory-storage.instances.item.get',
+    'users.collection.get',
+    'organizations.organizations.collection.get'
+  ],
   sources: [
     {
       type: 'db',

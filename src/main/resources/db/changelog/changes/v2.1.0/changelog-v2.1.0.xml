@@ -200,4 +200,12 @@
     </createView>
   </changeSet>
 
+  <changeSet id="remove_unused_entity_types" author="bsharp@ebsco.com">
+    <delete tableName="entity_type_definition" schemaName="${tenant_id}_mod_fqm_manager">
+      <where>
+        id IN ('230b18b1-ee3b-4382-9236-db44e5f30121', 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78')
+      </where>
+    </delete>
+  </changeSet>
+
 </databaseChangeLog>

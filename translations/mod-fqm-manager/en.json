@@ -831,7 +831,7 @@
   "entityType.simple_item.statistical_code_names": "Statistical code",
   "entityType.simple_item.status_date": "Status date",
   "entityType.simple_item.status_name": "Status",
-  "entityType.simple_item.tags_tag_list": "Tags",
+  "entityType.simple_item.tags": "Tags",
   "entityType.simple_item.temporary_loan_type_id": "Temporary loan type UUID",
   "entityType.simple_item.temporary_location_id": "Temporary location UUID",
   "entityType.simple_item.tenant_id": "Tenant ID",

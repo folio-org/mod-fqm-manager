@@ -849,7 +849,7 @@
       valueGetter: ":sourceAlias.jsonb->>'descriptionOfPieces'",
     },
     {
-      name: 'tags_tag_list',
+      name: 'tags',
       sourceAlias: 'item',
       essential: true,
       dataType: {

@@ -1,5 +1,8 @@
 # 3.0.x - Ramsons
 
+## 3.0.11
+- [MODFQMMGR-657](https://folio-org.atlassian.net/browse/MODFQMMGR-657): Fix export for Organizations ET
+
 ## 3.0.10
 - [MODFQMMGR-639](https://folio-org.atlassian.net/browse/MODFQMMGR-639):  Add acquisition-units interface dependency to module descriptor
 

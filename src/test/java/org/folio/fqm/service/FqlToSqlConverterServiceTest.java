@@ -711,6 +711,18 @@ class FqlToSqlConverterServiceTest {
         """
           {"arrayField": {"$empty": false}}""",
         field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(NOT_ALL_NULLS.formatted("arrayField"))
+      ),
+      Arguments.of(
+        "empty JSONB array",
+        """
+          {"jsonbArrayField": {"$empty": true}}""",
+        field("jsonbArrayField").isNull().or(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0))
+      ),
+      Arguments.of(
+        "not empty JSONB array",
+        """
+          {"jsonbArrayField": {"$empty": false}}""",
+        field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
       )
     );
   }

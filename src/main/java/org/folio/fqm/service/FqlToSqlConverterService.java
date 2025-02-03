@@ -104,7 +104,6 @@ public class FqlToSqlConverterService {
     )
     """;
 
-
   private final FqlService fqlService;
 
   /**
@@ -420,6 +419,14 @@ public class FqlToSqlConverterService {
           yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
         } else {
           yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
+        }
+      }
+      case JSONB_ARRAY_TYPE -> {
+        var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
+        if (isEmpty) {
+          yield nullCondition.or(jsonbCardinality.eq(0));
+        } else {
+          yield nullCondition.and(jsonbCardinality.ne(0));
         }
       }
       default -> nullCondition;

@@ -2,6 +2,9 @@
   id: 'abb28bac-e090-48c1-a48b-3fe805638041',
   name: 'simple_config_data',
   private: true,
+  requiredPermissions: [
+    "configuration.entries.collection.get",
+  ],
   columns: [
     {
       name: 'id',

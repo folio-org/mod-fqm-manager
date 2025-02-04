@@ -3,13 +3,8 @@
   name: 'composite_po_instance',
   private: true,
   requiredPermissions: [
-    'orders.po-lines.item.get',
-    'orders.item.get',
-    'inventory-storage.locations.collection.get',
-    'inventory-storage.holdings.item.get',
-    'inventory-storage.instances.item.get',
-    'users.collection.get',
-    'organizations.organizations.collection.get'
+    // This inherited from simple_config_data, but is also included here because of the added columns here that also retrieve config data
+    "configuration.entries.collection.get",
   ],
   sources: [
     {
@@ -70,7 +65,8 @@
     {
       type: 'db',
       alias: 'bill_to',
-      target: 'src_configuration_config_data',
+      type: 'entity-type',
+      id: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
       join: {
         type: 'LEFT JOIN',
         joinTo: 'purchase_order',

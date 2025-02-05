@@ -90,7 +90,7 @@
     {
       alias: 'created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       join: {
         type: 'LEFT JOIN',
         joinTo: 'purchase_order.po',

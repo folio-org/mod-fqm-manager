@@ -3,25 +3,22 @@
   name: 'composite_po_instance',
   private: false,
   requiredPermissions: [
-    'orders.po-lines.item.get',
-    'orders.item.get',
-    'inventory-storage.locations.collection.get',
-    'inventory-storage.holdings.item.get',
-    'inventory-storage.instances.item.get',
-    'users.collection.get',
-    'organizations.organizations.collection.get'
+    // This inherited from simple_config_data, but is also included here because of the added columns here that also retrieve config data
+    "configuration.entries.collection.get",
   ],
   sources: [
     {
       alias: 'pol',
       type: 'entity-type',
       id: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
-      useIdColumns: true
+      useIdColumns: true,
+      essentialOnly: true
     },
     {
       alias: 'purchase_order',
       type: 'entity-type',
       id: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      essentialOnly: true,
       join: {
         type: 'RIGHT JOIN',
         joinTo: 'pol.pol',
@@ -32,6 +29,7 @@
 //      alias: 'location',
 //      type: 'entity-type',
 //      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+//      essentialOnly: true,
 //      join: {
 //        type: 'LEFT JOIN',
 //        joinTo: 'pol.pol',
@@ -66,6 +64,7 @@
 //      alias: 'holdings_permanent_location',
 //      type: 'entity-type',
 //      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+//      essentialOnly: true,
 //      join: {
 //        type: 'LEFT JOIN',
 //        joinTo: 'holdings',
@@ -75,7 +74,8 @@
     {
       alias: 'bill_to',
       type: 'entity-type',
-      id: 'abb28bac-e090-48c1-a48b-3fe805638041', // drv_config_data_details
+      id: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      essentialOnly: true,
       join: {
         type: 'LEFT JOIN',
         joinTo: 'purchase_order.po',
@@ -86,6 +86,7 @@
       alias: 'ship_to',
       type: 'entity-type',
       id: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      essentialOnly: true,
       join: {
         type: 'LEFT JOIN',
         joinTo: 'purchase_order.po',
@@ -95,7 +96,8 @@
     {
       alias: 'created_by_user',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      essentialOnly: true,
       join: {
         type: 'LEFT JOIN',
         joinTo: 'purchase_order.po',
@@ -106,6 +108,7 @@
       alias: 'organization',
       type: 'entity-type',
       id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      essentialOnly: true,
       join: {
         type: 'left join',
         joinTo: 'purchase_order.po',

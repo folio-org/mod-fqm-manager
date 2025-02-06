@@ -65,6 +65,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'version',
@@ -90,8 +104,8 @@
       source: {
         entityTypeId: '85a2b008-af8d-4890-9490-421cabcb7bad',
         columnName: 'name',
-        type: 'entity-type'
-      }
+        type: 'entity-type',
+      },
     },
     {
       name: 'status',
@@ -124,7 +138,7 @@
       queryable: false,
       hidden: true,
       visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

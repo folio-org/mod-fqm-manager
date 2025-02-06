@@ -1,7 +1,14 @@
 package org.folio.fqm.repository;
 
+import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -9,14 +16,11 @@ import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.mockito.Mockito.mock;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link ResultSetRepositoryArrayTestDataProvider} class
@@ -49,15 +53,22 @@ class ResultSetRepositoryArrayTest {
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, null))
-      .thenReturn("TEST_ENTITY_TYPE");
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, "tenant_01"))
-      .thenReturn("TEST_ENTITY_TYPE");
-    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds, List.of("tenant_01"));
-    assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
-    assertEquals(expectedList.get(0).get("arrayField"), actualList.get(0).get("arrayField"));
+
+    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
+      fromClauseUtils
+        .when(() -> getFromClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, null))
+        .thenReturn("TEST_ENTITY_TYPE");
+      fromClauseUtils
+        .when(() -> getFromClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, "tenant_01"))
+        .thenReturn("TEST_ENTITY_TYPE");
+
+      List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds, List.of("tenant_01"));
+
+      assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
+      assertEquals(expectedList.get(0).get("arrayField"), actualList.get(0).get("arrayField"));
+    }
   }
 
   @Test
@@ -73,14 +84,21 @@ class ResultSetRepositoryArrayTest {
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, null))
-      .thenReturn("TEST_ENTITY_TYPE");
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, "tenant_01"))
-      .thenReturn("TEST_ENTITY_TYPE");
-    List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds, List.of("tenant_01"));
-    assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
-    assertEquals(expectedList.get(0).get("jsonbArrayField"), actualList.get(0).get("jsonbArrayField"));
+
+    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
+      fromClauseUtils
+        .when(() -> getFromClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, null))
+        .thenReturn("TEST_ENTITY_TYPE");
+      fromClauseUtils
+        .when(() -> getFromClause(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE, "tenant_01"))
+        .thenReturn("TEST_ENTITY_TYPE");
+
+      List<Map<String, Object>> actualList = repo.getResultSet(entityTypeId, fields, listIds, List.of("tenant_01"));
+
+      assertEquals(expectedList.get(0).get("id"), actualList.get(0).get("id"));
+      assertEquals(expectedList.get(0).get("jsonbArrayField"), actualList.get(0).get("jsonbArrayField"));
+    }
   }
 }

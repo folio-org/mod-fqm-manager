@@ -9,6 +9,9 @@ import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Small wrapper class for {@link TranslationService TranslationService} to provide reusable templates for translations,
  * particularly for entity type definitions.
@@ -41,6 +44,10 @@ public class LocalizationService {
   public static final String MIGRATION_WARNING_TRANSLATION_TEMPLATE = "mod-fqm-manager.migration.warning.%s";
 
   private TranslationService translationService;
+
+  public List<Locale> getCurrentLocales() {
+    return translationService.getCurrentLocales();
+  }
 
   public EntityType localizeEntityType(EntityType entityType) {
     entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));

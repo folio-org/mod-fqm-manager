@@ -9,9 +9,7 @@
       target: 'src_inventory_statistical_code',
     },
   ],
-  requiredPermissions: [
-    "inventory-storage.statistical-codes.collection.get"
-  ],
+  requiredPermissions: ['inventory-storage.statistical-codes.collection.get'],
   columns: [
     {
       name: 'id',
@@ -101,6 +99,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_by_user_id',
@@ -111,6 +123,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'created_by_username',
@@ -141,8 +167,8 @@
       queryable: false,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
   defaultSort: [
     {

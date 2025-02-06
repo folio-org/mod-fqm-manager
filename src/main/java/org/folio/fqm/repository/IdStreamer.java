@@ -13,6 +13,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
@@ -102,8 +103,8 @@ public class IdStreamer {
     for (String tenantId : tenantsToQuery) {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
         entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
-      var currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
-      String innerJoinClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+      Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
+      String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinition, tenantId);
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (ecsEnabled && !CollectionUtils.isEmpty(entityType.getAdditionalEcsConditions())) {
@@ -114,7 +115,7 @@ public class IdStreamer {
       ResultQuery<Record1<String[]>> innerQuery = buildQuery(
         entityTypeDefinition,
         currentIdValueGetter,
-        innerJoinClause,
+        innerFromClause,
         whereClause,
         sortResults,
         batchSize,

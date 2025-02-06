@@ -9,9 +9,7 @@
       target: 'src_inventory_material_type',
     },
   ],
-  requiredPermissions: [
-    'inventory-storage.material-types.collection.get'
-  ],
+  requiredPermissions: ['inventory-storage.material-types.collection.get'],
   columns: [
     {
       name: 'id',
@@ -70,7 +68,7 @@
       essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'source'",
-      hidden: true
+      hidden: true,
     },
     {
       name: 'created_date',
@@ -81,7 +79,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
-      hidden: true
+      hidden: true,
     },
     {
       name: 'updated_date',
@@ -92,7 +90,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
-      hidden: true
+      hidden: true,
     },
     {
       name: 'created_by_user_id',
@@ -103,7 +101,21 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
-      hidden: true
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+      hidden: true,
     },
     {
       name: 'updated_by_user_id',
@@ -114,7 +126,21 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
-      hidden: true
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+      hidden: true,
     },
     {
       name: 'created_by_username',
@@ -125,7 +151,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
-      hidden: true
+      hidden: true,
     },
     {
       name: 'updated_by_username',
@@ -136,7 +162,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
-      hidden: true
+      hidden: true,
     },
     {
       name: 'jsonb',
@@ -148,8 +174,8 @@
       hidden: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
   defaultSort: [
     {

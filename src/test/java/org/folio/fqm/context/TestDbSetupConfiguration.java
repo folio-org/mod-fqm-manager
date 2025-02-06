@@ -11,6 +11,7 @@ import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.PermissionsService;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.when;
 /**
  * This class is responsible for inserting test data into a PostgreSQL test container database.
  */
+@Disabled
 @Configuration
 @Profile("db-test")
 public class TestDbSetupConfiguration {

@@ -14,6 +14,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 
@@ -67,7 +68,7 @@ public class ResultSetRepository {
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+      var currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinition, tenantId);
       var currentWhereClause = buildWhereClause(entityTypeDefinition, ids, idColumnNames, idColumnValueGetters);
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
@@ -141,7 +142,7 @@ public class ResultSetRepository {
         }
       }
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+      var currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinition, tenantId);
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
           .from(currentFromClause)

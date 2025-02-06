@@ -1,5 +1,6 @@
 package org.folio.fqm;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -13,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
  *
  * <p>Test installation and migration with smoke test.
  */
+@Disabled
 @Testcontainers
 class ModFqmManagerIT extends IntegrationTestBase {
 

@@ -18,7 +18,7 @@ import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +40,7 @@ class ResultSetServiceTest {
       )
     )
     .sources(List.of(
-        new EntityTypeSource()
+        new EntityTypeSourceDatabase()
           .type("db")
           .alias("source1")
           .target("target1")
@@ -81,7 +81,7 @@ class ResultSetServiceTest {
         )
       )
       .sources(List.of(
-          new EntityTypeSource()
+          new EntityTypeSourceDatabase()
             .type("db")
             .alias("source1")
             .target("target1")

@@ -375,7 +375,6 @@
     },
     {
       name: 'material_type_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -384,7 +383,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.materialtypeid',
+      valueGetter: ':item.materialtypeid',
+      joinsTo: [
+        {
+          targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe', // simple_material_type
+          targetField: 'id',
+          type: 'equality-simple', // both are already uuids
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'circulation_notes',
@@ -579,6 +586,14 @@
       essential: true,
       hidden: true,
       valueGetter: ':sourceAlias.holdingsrecordid',
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_record
+          targetField: 'id',
+          type: 'equality-simple', // both are already uuids
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'statistical_code_ids',

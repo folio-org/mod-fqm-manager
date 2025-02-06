@@ -104,7 +104,13 @@ public class IdStreamer {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
         entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
-      String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinition, tenantId);
+
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (ecsEnabled && !CollectionUtils.isEmpty(entityType.getAdditionalEcsConditions())) {

@@ -34,7 +34,9 @@ public class FromClauseUtils {
   /**
    * Build the FROM/JOIN clause for a given flattened entity type.
    *
-   * @param flattenedEntityType The entity type to build the clause for, MUST be flattened
+   * @param flattenedEntityType The entity type to build the clause for, MUST be flattened and SHOULD have been done so
+   *                            with `preserveAllColumns=true`. Not setting `preserveAllColumns=true` when flattening may
+   *                            cause columns needed for joining to be filtered out, resulting in a failure here.
    * @param tenantId The tenant ID to use for the table prefix
    */
   public static String getFromClause(EntityType flattenedEntityType, String tenantId) {

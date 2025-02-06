@@ -6,12 +6,10 @@
     {
       type: 'db',
       alias: 'location',
-      target: 'src_inventory_location'
-    }
+      target: 'src_inventory_location',
+    },
   ],
-  requiredPermissions: [
-    "inventory-storage.locations.collection.get"
-  ],
+  requiredPermissions: ['inventory-storage.locations.collection.get'],
   columns: [
     {
       name: 'id',
@@ -24,7 +22,7 @@
       isIdColumn: true,
       hidden: true,
       essential: true,
-      valueGetter: ":sourceAlias.id",
+      valueGetter: ':sourceAlias.id',
       source: {
         columnName: 'id',
         entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
@@ -33,7 +31,7 @@
         path: 'locations',
         valueJsonPath: '$.locations.*.id',
         labelJsonPath: '$.locations.*.id',
-      }
+      },
     },
     {
       name: 'code',
@@ -55,7 +53,7 @@
         path: 'locations',
         valueJsonPath: '$.locations.*.code',
         labelJsonPath: '$.locations.*.code',
-      }
+      },
     },
     {
       name: 'name',
@@ -77,7 +75,7 @@
         path: 'locations',
         valueJsonPath: '$.locations.*.name',
         labelJsonPath: '$.locations.*.name',
-      }
+      },
     },
     {
       name: 'description',
@@ -89,7 +87,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'description'",
       hidden: true,
-      essential: true
+      essential: true,
     },
     {
       name: 'discovery_display_name',
@@ -110,7 +108,7 @@
         labelJsonPath: '$.locations.*.discoveryDisplayName',
       },
       hidden: true,
-      essential: true
+      essential: true,
     },
     {
       name: 'is_active',
@@ -132,31 +130,48 @@
           label: 'False',
           value: 'false',
         },
-      ]
+      ],
     },
     {
       name: 'institution_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'institutionId'"
+      valueGetter: ':location.institutionid',
     },
     {
       name: 'campus_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'location',
       queryable: true,
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'campusId'"
+      valueGetter: ':location.campusid',
+    },
+    {
+      name: 'library_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ':location.libraryid',
+      joinsTo: [
+        {
+          targetId: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'details',
@@ -168,7 +183,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'details'",
       hidden: true,
-      essential: true
+      essential: true,
     },
     {
       name: 'service_point_ids',
@@ -185,7 +200,7 @@
       filterValueGetter: "( SELECT array_agg(lower(sp_id.value::text)) FILTER (WHERE (sp_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'servicePointIds'::text) sp_id(value))",
       valueFunction: 'lower(:value)',
       hidden: true,
-      essential: true
+      essential: true,
     },
     {
       name: 'primary_service_point',
@@ -198,8 +213,8 @@
       valueGetter: ":sourceAlias.jsonb->>'primaryServicePoint'",
       hidden: true,
       essential: true,
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'primaryServicePoint'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)'
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> \'primaryServicePoint\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'jsonb',
@@ -211,8 +226,8 @@
       hidden: true,
       essential: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
   defaultSort: [
     {

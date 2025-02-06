@@ -121,7 +121,6 @@
     },
     {
       name: 'instance_type_id',
-      sourceAlias: 'inst',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -129,7 +128,15 @@
       queryable: true,
       essential: false,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.instancetypeid',
+      valueGetter: ':inst.instancetypeid',
+      joinsTo: [
+        {
+          targetId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'instance_type_name',
@@ -702,16 +709,23 @@
     },
     {
       name: 'instance_date_type_id',
-      sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'integerType',
+        dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
       queryable: true,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'date'->>'dateTypeId'",
+      valueGetter: ":inst.jsonb->'date'->>'dateTypeId'",
+      joinsTo: [
+        {
+          targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'electronic_access',
@@ -1083,19 +1097,26 @@
         columnName: 'statistical_code',
       },
     },
-    //    {
-    //      name: 'status_id',
-    //      sourceAlias: 'inst',
-    //      essential: true,
-    //      dataType: {
-    //        dataType: 'rangedUUIDType',
-    //      },
-    //      isIdColumn: false,
-    //      hidden: true,
-    //      queryable: true,
-    //      visibleByDefault: false,
-    //      valueGetter: ":sourceAlias.jsonb->>'statusId'",
-    //    },
+    {
+      name: 'status_id',
+      essential: true,
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      hidden: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":inst.jsonb->>'statusId'",
+      joinsTo: [
+        {
+          targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
     //    {
     //      name: 'status_updated_date',
     //      sourceAlias: 'inst',

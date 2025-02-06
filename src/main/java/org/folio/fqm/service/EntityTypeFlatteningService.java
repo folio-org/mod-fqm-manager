@@ -57,16 +57,30 @@ public class EntityTypeFlatteningService {
   }
 
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId) {
+    return getFlattenedEntityType(entityTypeId, tenantId, false);
+  }
+
+  /**
+   * Gets a flattened entity type definition, fully localized.
+   *
+   * @param entityTypeId The ID of the entity type to flatten
+   * @param tenantId The tenant ID to use for fetching the entity type definition
+   * @param preserveAllColumns If true, all columns will be preserved, even if they are marked as non-essential and should be filtered out.
+   *                             This is primary for use by methods which build the from clause, since some join-related columns aren't exposed to users.
+   * @return
+   */
+  public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
     return entityTypeCache.get(
-      new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales()),
-      k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId())
+      new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
+      k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
     );
   }
 
   private EntityType getFlattenedEntityType(
     UUID entityTypeId,
     @CheckForNull EntityTypeSourceEntityType sourceFromParent,
-    String tenantId
+    String tenantId,
+    boolean preserveAllColumns
   ) {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
@@ -108,7 +122,7 @@ public class EntityTypeFlatteningService {
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
         // Recursively flatten the source and add it to ourselves
         UUID sourceEntityTypeId = sourceEt.getTargetId();
-        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, sourceEt, tenantId);
+        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, sourceEt, tenantId, preserveAllColumns);
 
         // If the original entity type already supports cross-tenant queries, we can skip this. Otherwise, copy the nested source's setting
         // This effectively means that if any nested source supports cross-tenant queries, the flattened entity type will too
@@ -135,14 +149,17 @@ public class EntityTypeFlatteningService {
           flattenedSourceDefinition
             .getColumns()
             .stream()
-            .filter(col -> !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
+            .filter(col -> preserveAllColumns || !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
             // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source alias in flattenedSourceDefinition
             .map(col ->
               SourceUtils.injectSourceAlias(
                 col
                   .name(sourceEt.getAlias() + '.' + col.getName())
                   .idColumnName(
-                    col.getIdColumnName() == null ? null : sourceEt.getAlias() + '.' + col.getIdColumnName()
+                    Optional
+                      .ofNullable(col.getIdColumnName())
+                      .map(idColumnName -> sourceEt.getAlias() + '.' + idColumnName)
+                      .orElse(null)
                   )
                   .originalEntityTypeId(Optional.ofNullable(col.getOriginalEntityTypeId()).orElse(sourceEntityTypeId)),
                 renamedAliases,
@@ -188,5 +205,10 @@ public class EntityTypeFlatteningService {
   }
 
   // translations are included as part of flattening, so we must cache based on locales, too
-  private record EntityTypeCacheKey(String tenantId, UUID entityTypeId, List<Locale> locales) {}
+  private record EntityTypeCacheKey(
+    String tenantId,
+    UUID entityTypeId,
+    List<Locale> locales,
+    boolean preserveAllColumns
+  ) {}
 }

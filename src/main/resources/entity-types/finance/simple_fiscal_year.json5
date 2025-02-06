@@ -106,7 +106,7 @@
       name: 'currency',
       sourceAlias: 'fiscal_year',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       essential: true,
       queryable: true,

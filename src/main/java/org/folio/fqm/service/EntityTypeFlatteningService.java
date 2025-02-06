@@ -22,7 +22,6 @@ import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
-import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,16 +126,9 @@ public class EntityTypeFlatteningService {
         // Copy each sub-source into the flattened entity type
         flattenedSourceDefinition
           .getSources()
-          .forEach(subSource -> {
-            renamedAliases.put(subSource.getAlias(), aliasPrefix + subSource.getAlias());
-            if (subSource instanceof EntityTypeSourceDatabase subSourceDb) {
-              flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSourceDb, renamedAliases));
-            } else if (subSource instanceof EntityTypeSourceEntityType subSourceEt) {
-              flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSourceEt, renamedAliases));
-            } else {
-              throw log.throwing(new IllegalStateException("Unknown source type: " + source.getClass()));
-            }
-          });
+          .forEach(subSource ->
+            flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSource, renamedAliases))
+          );
 
         // Add a prefix to each column's name and idColumnName, then add 'em to the flattened entity type
         childColumns.addAll(

@@ -106,7 +106,7 @@ public class EntityTypeFlatteningService {
       flattenedEntityType.addSourcesItem(newSource);
 
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
-        // Recursively flatten the source and add it to the ourselves
+        // Recursively flatten the source and add it to ourselves
         UUID sourceEntityTypeId = sourceEt.getTargetId();
         EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, sourceEt, tenantId);
 

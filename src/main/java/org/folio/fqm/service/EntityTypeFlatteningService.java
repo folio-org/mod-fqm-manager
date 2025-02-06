@@ -56,10 +56,6 @@ public class EntityTypeFlatteningService {
       Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, java.util.concurrent.TimeUnit.SECONDS).build();
   }
 
-  public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId) {
-    return getFlattenedEntityType(entityTypeId, tenantId, false);
-  }
-
   /**
    * Gets a flattened entity type definition, fully localized.
    *

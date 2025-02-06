@@ -576,7 +576,6 @@
     },
     {
       name: 'holdings_record_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -585,7 +584,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.holdingsrecordid',
+      valueGetter: ':item.holdingsrecordid',
       joinsTo: [
         {
           targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_record
@@ -662,7 +661,6 @@
     },
     {
       name: 'effective_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -671,7 +669,15 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ':sourceAlias.effectivelocationid',
+      valueGetter: ':item.effectivelocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'permanent_loan_type_id',
@@ -688,7 +694,6 @@
     },
     {
       name: 'item_level_call_number_type_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -697,7 +702,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberTypeId'",
+      valueGetter: ":item.jsonb->>'itemLevelCallNumberTypeId'",
+      joinsTo: [
+        {
+          targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'effective_call_number',
@@ -732,17 +745,26 @@
     //      visibleByDefault: false,
     //      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'suffix'",
     //    },
-    //    {
-    //      name: 'effective_call_number_components_type_id',
-    //      sourceAlias: 'item',
-    //      dataType: {
-    //        dataType: 'rangedUUIDType',
-    //      },
-    //      isIdColumn: false,
-    //      queryable: true,
-    //      visibleByDefault: false,
-    //      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
-    //    },
+    {
+      name: 'effective_call_number_components_type_id',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
+      joinsTo: [
+        {
+          targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
     //    {
     //      name: 'effective_call_number_components_call_number',
     //      sourceAlias: 'item',
@@ -804,7 +826,6 @@
     },
     {
       name: 'permanent_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -813,7 +834,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.permanentlocationid',
+      valueGetter: ':item.permanentlocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'last_check_in_date_time',
@@ -969,7 +998,6 @@
     },
     {
       name: 'temporary_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -977,7 +1005,15 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLocationId'",
+      valueGetter: ':item.temporarylocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_damaged_status_id',

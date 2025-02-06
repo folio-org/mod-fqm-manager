@@ -144,7 +144,7 @@ class IdStreamerTest {
     expectedIds.add(new String[]{CONTENT_IDS.get(0)});
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(BASIC_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId), anyBoolean())).thenReturn(BASIC_ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
 
@@ -172,7 +172,7 @@ class IdStreamerTest {
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId, "tenant_02"));
     when(crossTenantQueryService.ecsEnabled()).thenReturn(true);
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyString())).thenReturn(ECS_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyString(), anyBoolean())).thenReturn(ECS_ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(any(EntityType.class), anyString())).thenReturn("source_1");
 
@@ -197,7 +197,7 @@ class IdStreamerTest {
     expectedIds.add(new String[]{CONTENT_IDS.get(0)});
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(GROUP_BY_ENTITY_TYPE);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId), anyBoolean())).thenReturn(GROUP_BY_ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
 

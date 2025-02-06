@@ -24,6 +24,7 @@ import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -96,9 +97,9 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
 
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
@@ -127,9 +128,9 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, null))
@@ -173,9 +174,9 @@ class ResultSetRepositoryTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1", "key2");
     List<String> tenantIds = List.of("tenant_01");
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, null))
@@ -196,9 +197,9 @@ class ResultSetRepositoryTest {
     Fql fql = new Fql("", new EqualsCondition(new FqlField("id"), "value1"));
     List<String> fields = List.of("id");
     List<String> tenantIds = List.of("tenant_01");
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION, null))
@@ -217,9 +218,9 @@ class ResultSetRepositoryTest {
     List<String> fields = List.of("id", "key1", "key2");
     List<String> tenantIds = List.of("tenant_01", "tenant_02", "tenant_03");
     List<Map<String, Object>> expectedResults = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(String.class)))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(String.class), anyBoolean()))
       .thenReturn(ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(eq(ENTITY_TYPE), any(String.class)))
@@ -243,9 +244,9 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, null))
@@ -273,9 +274,9 @@ class ResultSetRepositoryTest {
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
       Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(String.class)))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(String.class), anyBoolean()))
       .thenReturn(ENTITY_TYPE);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(eq(ENTITY_TYPE), any(String.class)))
@@ -295,9 +296,9 @@ class ResultSetRepositoryTest {
     );
     List<String> fields = List.of("id");
     List<String> tenantIds = List.of("tenant_01");
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
       .thenReturn(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION);
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
       fromClauseUtils.when(() -> getFromClause(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION, null))

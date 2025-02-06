@@ -423,7 +423,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType flattened = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(entityType.getId()),
-      null
+      null,
+      false
     );
 
     for (EntityTypeSource source : flattened.getSources()) {
@@ -537,7 +538,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(SIMPLE_1.getId()),
-      null
+      null,
+      false
     );
 
     assertEquals(expectedEntityType, actualEntityType);
@@ -549,7 +551,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_WRAPPER.getId()),
-      null
+      null,
+      false
     );
 
     assertThat(
@@ -579,7 +582,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_TO_2.getId()),
-      null
+      null,
+      false
     );
 
     assertThat(
@@ -636,7 +640,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1W_TO_2W.getId()),
-      null
+      null,
+      false
     );
 
     assertThat(
@@ -699,7 +704,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_COMPOSITE.getId()),
-      null
+      null,
+      false
     );
 
     assertThat(
@@ -774,7 +780,7 @@ class EntityTypeFlatteningServiceTest {
 
     assertThrows(
       IllegalStateException.class,
-      () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, "tenant")
+      () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, "tenant", false)
     );
   }
 
@@ -784,7 +790,8 @@ class EntityTypeFlatteningServiceTest {
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_WRAPPER.getId()),
-      null
+      null,
+      false
     );
 
     assertThat(actual.getColumns(), hasItem(hasProperty("name", equalTo("simple_1.ecs_field"))));

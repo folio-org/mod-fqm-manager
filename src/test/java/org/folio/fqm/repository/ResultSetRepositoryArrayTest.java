@@ -2,6 +2,9 @@ package org.folio.fqm.repository;
 
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -51,9 +54,7 @@ class ResultSetRepositoryArrayTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
-      .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(), anyBoolean()))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
 
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
@@ -82,9 +83,7 @@ class ResultSetRepositoryArrayTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "testField", List.of("value1"))
     );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
-      .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01"))
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(), anyBoolean()))
       .thenReturn(ResultSetRepositoryArrayTestDataProvider.ARRAY_ENTITY_TYPE);
 
     try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {

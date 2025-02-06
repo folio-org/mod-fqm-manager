@@ -193,7 +193,7 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
   }
 
   private List<Map<String, Object>> recordToMap(EntityType entityType, Result<Record> result) {

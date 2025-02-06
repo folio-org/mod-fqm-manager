@@ -102,7 +102,7 @@ public class IdStreamer {
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
-        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
+        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch

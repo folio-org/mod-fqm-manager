@@ -13,6 +13,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinCustom;
+import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.JoinEqualityCastUUID;
 import org.folio.querytool.domain.dto.JoinEqualitySimple;
 import org.hibernate.query.sqm.EntityTypeException;
@@ -40,7 +41,7 @@ class FromClauseUtilsComputeTest {
           .sql(":this -> :that")
           .targetId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
           .targetField("b")
-          .direction(Join.DirectionEnum.LEFT)
+          .direction(JoinDirection.LEFT)
       )
     )
     .build();
@@ -52,7 +53,7 @@ class FromClauseUtilsComputeTest {
           .sql(":this -> :that")
           .targetId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
           .targetField("zzzz")
-          .direction(Join.DirectionEnum.LEFT)
+          .direction(JoinDirection.LEFT)
       )
     )
     .build();
@@ -64,7 +65,7 @@ class FromClauseUtilsComputeTest {
           .sql(":this -> :that")
           .targetId(UUID.fromString("6061b4b1-b188-5e31-a431-eeb4dd35eca4"))
           .targetField("b")
-          .direction(Join.DirectionEnum.LEFT)
+          .direction(JoinDirection.LEFT)
       )
     )
     .build();
@@ -76,7 +77,7 @@ class FromClauseUtilsComputeTest {
           .sql(":this -> :that")
           .targetId(UUID.fromString("6061b4b1-b188-5e31-a431-eeb4dd35eca4"))
           .targetField("zzzz")
-          .direction(Join.DirectionEnum.LEFT)
+          .direction(JoinDirection.LEFT)
       )
     )
     .build();
@@ -88,32 +89,42 @@ class FromClauseUtilsComputeTest {
           .sql(":this -> :that")
           .targetId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
           .targetField("a")
-          .direction(Join.DirectionEnum.LEFT)
+          .direction(JoinDirection.LEFT)
       )
     )
     .build();
 
   static List<Arguments> computeJoinDirectionCases() {
     return List.of(
-      // starting direction, if reversed, expected direction
-      Arguments.of(Join.DirectionEnum.LEFT, false, "LEFT JOIN"),
-      Arguments.of(Join.DirectionEnum.RIGHT, false, "RIGHT JOIN"),
-      Arguments.of(Join.DirectionEnum.INNER, false, "INNER JOIN"),
-      Arguments.of(Join.DirectionEnum.FULL, false, "FULL JOIN"),
-      Arguments.of(Join.DirectionEnum.LEFT, true, "RIGHT JOIN"),
-      Arguments.of(Join.DirectionEnum.RIGHT, true, "LEFT JOIN"),
-      Arguments.of(Join.DirectionEnum.INNER, true, "INNER JOIN"),
-      Arguments.of(Join.DirectionEnum.FULL, true, "FULL JOIN")
+      // starting direction, override, if reversed, expected direction
+      Arguments.of(JoinDirection.LEFT, null, false, "LEFT JOIN"),
+      Arguments.of(JoinDirection.RIGHT, null, false, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.INNER, null, false, "INNER JOIN"),
+      Arguments.of(JoinDirection.FULL, null, false, "FULL JOIN"),
+      Arguments.of(JoinDirection.LEFT, null, true, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.RIGHT, null, true, "LEFT JOIN"),
+      Arguments.of(JoinDirection.INNER, null, true, "INNER JOIN"),
+      Arguments.of(JoinDirection.FULL, null, true, "FULL JOIN"),
+      // overridden
+      Arguments.of(JoinDirection.LEFT, JoinDirection.RIGHT, false, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.RIGHT, JoinDirection.RIGHT, false, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.INNER, JoinDirection.RIGHT, false, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.FULL, JoinDirection.RIGHT, false, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.LEFT, JoinDirection.RIGHT, true, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.RIGHT, JoinDirection.RIGHT, true, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.INNER, JoinDirection.RIGHT, true, "RIGHT JOIN"),
+      Arguments.of(JoinDirection.FULL, JoinDirection.RIGHT, true, "RIGHT JOIN")
     );
   }
 
   @ParameterizedTest
   @MethodSource("computeJoinDirectionCases")
-  void testComputeJoinDirection(Join.DirectionEnum direction, boolean reversed, String expected) {
+  void testComputeJoinDirection(JoinDirection direction, JoinDirection override, boolean reversed, String expected) {
     EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(
       COLUMN_A,
       COLUMN_B,
       new JoinCustom().sql(":this -> :that").direction(direction),
+      override,
       reversed
     );
 
@@ -135,7 +146,8 @@ class FromClauseUtilsComputeTest {
     EntityTypeSourceDatabaseJoin computed = FromClauseUtils.computeJoin(
       COLUMN_A,
       COLUMN_B,
-      join.direction(Join.DirectionEnum.INNER),
+      join.direction(JoinDirection.INNER),
+      null,
       false
     );
 
@@ -145,7 +157,7 @@ class FromClauseUtilsComputeTest {
   @Test
   void testComputeJoinUnknownType() {
     Join join = new Join() {};
-    assertThrows(EntityTypeException.class, () -> FromClauseUtils.computeJoin(COLUMN_A, COLUMN_B, join, false));
+    assertThrows(EntityTypeException.class, () -> FromClauseUtils.computeJoin(COLUMN_A, COLUMN_B, join, null, false));
   }
 
   @Test

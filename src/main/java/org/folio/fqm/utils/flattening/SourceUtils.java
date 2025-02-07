@@ -224,6 +224,7 @@ public class SourceUtils {
     return new EntityTypeSourceEntityType()
       .type(source.getType())
       .alias(renamedAliases.get(source.getAlias()))
+      .overrideJoinDirection(source.getOverrideJoinDirection())
       .sourceField(
         Optional
           .ofNullable(source.getSourceField())

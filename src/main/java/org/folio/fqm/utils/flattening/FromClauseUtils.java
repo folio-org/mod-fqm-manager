@@ -23,6 +23,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinCustom;
+import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.JoinEqualityCastUUID;
 import org.folio.querytool.domain.dto.JoinEqualitySimple;
 import org.hibernate.query.sqm.EntityTypeException;
@@ -136,11 +137,11 @@ public class FromClauseUtils {
   ) {
     // joined via plain SQL, not an entity type
     if (source.getJoin() != null) {
-      String joinClause = source
-        .getJoin()
-        .getCondition()
-        .replace(":this", "\"" + source.getAlias() + "\"")
-        .replace(":that", "\"" + source.getJoin().getJoinTo() + "\"");
+      String joinClause = Optional
+        .ofNullable(source.getJoin().getCondition())
+        .map(s -> s.replace(":this", "\"" + source.getAlias() + "\""))
+        .map(s -> s.replace(":that", "\"" + source.getJoin().getJoinTo() + "\""))
+        .orElse(null);
 
       return source.join(source.getJoin().condition(joinClause));
     }
@@ -169,10 +170,20 @@ public class FromClauseUtils {
   ) {
     EntityTypeColumn sourceColumn = EntityTypeUtils
       .findColumnByName(flattenedEntityType, source.getSourceField())
-      .orElseThrow();
+      .orElseThrow(() ->
+        new InvalidEntityTypeDefinitionException(
+          "Column " + source.getSourceField() + " could not be found",
+          flattenedEntityType
+        )
+      );
     EntityTypeColumn targetColumn = EntityTypeUtils
       .findColumnByName(flattenedEntityType, source.getTargetField())
-      .orElseThrow();
+      .orElseThrow(() ->
+        new InvalidEntityTypeDefinitionException(
+          "Column " + source.getTargetField() + " could not be found",
+          flattenedEntityType
+        )
+      );
 
     Optional<Join> sourceToTargetJoin = EntityTypeUtils.findJoinBetween(sourceColumn, targetColumn);
     Optional<Join> targetToSourceJoin = EntityTypeUtils.findJoinBetween(targetColumn, sourceColumn);
@@ -196,8 +207,12 @@ public class FromClauseUtils {
       );
     } else {
       return sourceToTargetJoin
-        .map(join -> computeJoin(sourceColumn, targetColumn, join, false))
-        .or(() -> targetToSourceJoin.map(join -> computeJoin(targetColumn, sourceColumn, join, true)))
+        .map(join -> computeJoin(sourceColumn, targetColumn, join, source.getOverrideJoinDirection(), false))
+        .or(() ->
+          targetToSourceJoin.map(join ->
+            computeJoin(targetColumn, sourceColumn, join, source.getOverrideJoinDirection(), true)
+          )
+        )
         .orElseThrow();
     }
   }
@@ -207,19 +222,25 @@ public class FromClauseUtils {
     EntityTypeColumn a,
     EntityTypeColumn b,
     Join join,
+    JoinDirection directionOverride,
     boolean flipJoinDirection
   ) {
-    String direction = flipJoinDirection
-      ? switch (join.getDirection()) {
+    JoinDirection direction = Optional
+      .ofNullable(directionOverride)
+      .or(() -> Optional.of(join.getDirection()))
+      .orElse(JoinDirection.INNER);
+
+    String directionStr = flipJoinDirection && directionOverride == null
+      ? switch (direction) {
         case LEFT -> "RIGHT";
         case RIGHT -> "LEFT";
-        default -> join.getDirection().toString();
+        default -> direction.toString();
       }
-      : join.getDirection().toString();
+      : direction.toString();
 
     return new EntityTypeSourceDatabaseJoin()
       .condition(getJoinTemplate(join).replace(":this", a.getValueGetter()).replace(":that", b.getValueGetter()))
-      .type(direction.toUpperCase() + " JOIN");
+      .type(directionStr.toUpperCase() + " JOIN");
   }
 
   private static String getJoinTemplate(Join join) {

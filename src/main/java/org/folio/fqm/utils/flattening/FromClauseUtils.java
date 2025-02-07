@@ -227,7 +227,7 @@ public class FromClauseUtils {
   ) {
     JoinDirection direction = Optional
       .ofNullable(directionOverride)
-      .or(() -> Optional.of(join.getDirection()))
+      .or(() -> Optional.ofNullable(join.getDirection()))
       .orElse(JoinDirection.INNER);
 
     String directionStr = flipJoinDirection && directionOverride == null

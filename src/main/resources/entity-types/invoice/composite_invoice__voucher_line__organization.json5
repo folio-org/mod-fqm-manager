@@ -32,21 +32,11 @@
       sourceField: 'voucher_line__fund_distribution.invoice_line_id',
     },
     {
-      alias: 'pol',
-      type: 'entity-type',
-      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
-      targetField: 'id',
-      sourceField: 'invoice_line.po_line_id',
-    },
-    {
       alias: 'po_instance',
       type: 'entity-type',
       targetId: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf', // composite_po_instance
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol',
-        condition: ":this.jsonb ->> 'poLineNumber' = :that.jsonb ->> 'poLineNumber'",
-      },
+      targetField: 'pol.id',
+      sourceField: 'invoice_line.po_line_id',
     },
   ],
   defaultSort: [

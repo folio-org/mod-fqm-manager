@@ -66,6 +66,8 @@
       },
       isIdColumn: 'true',
       valueGetter: ':sourceAlias.id',
+      queryable: true,
+      visibleByDefault: true,
     },
     {
       name: 'ledger_name',
@@ -74,6 +76,8 @@
         dataType: 'stringType',
       },
       valueGetter: ":sourceAlias.jsonb->>'name'",
+      queryable: true,
+      visibleByDefault: true,
     },
     {
       name: 'external_account_number',
@@ -83,6 +87,8 @@
       },
       isIdColumn: true,
       valueGetter: ":sourceAlias.jsonb->>'externalAccountNo'",
+      queryable: true,
+      visibleByDefault: true,
     },
     {
       name: 'total_amount_spent_per_account_number',
@@ -91,7 +97,9 @@
         dataType: 'numberType',
       },
       valueGetter: "SUM((:sourceAlias.jsonb->'amount')::float)",
-      valueFunction: "(:value)::float"
+      valueFunction: "(:value)::float",
+      queryable: true,
+      visibleByDefault: true,
     },
     {
       name: 'voucher_date',
@@ -100,7 +108,9 @@
         dataType: 'dateType',
       },
       valueGetter: ":sourceAlias.jsonb->>'voucherDate'",
-      queryOnly: true
+      queryOnly: true,
+      queryable: true,
+      visibleByDefault: true,
     },
   ],
   groupByFields: [

@@ -69,9 +69,9 @@
       <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
-	    <groupId>com.github.folio-org</groupId>
+	    <groupId>org.folio</groupId>
 	    <artifactId>folio-query-tool-metadata</artifactId>
-	    <version>fqtm-11-jitpack-SNAPSHOT</version>
+	    <version>${folio-query-tool-metadata.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
@@ -405,10 +405,6 @@
       <id>folio-nexus</id>
       <name>FOLIO Maven repository</name>
       <url>https://repository.folio.org/repository/maven-folio</url>
-    </repository>
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://www.jitpack.io</url>
     </repository>
   </repositories>
 

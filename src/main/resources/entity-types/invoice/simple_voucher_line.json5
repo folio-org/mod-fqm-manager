@@ -105,7 +105,7 @@
       valueGetter: ":sourceAlias.jsonb ->> 'voucherId'",
       joinsTo: [
         {
-          targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
+          targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',

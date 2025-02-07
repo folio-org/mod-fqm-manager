@@ -69,9 +69,9 @@
       <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
-	    <groupId>org.folio</groupId>
-	    <artifactId>folio-query-tool-metadata</artifactId>
-	    <version>${folio-query-tool-metadata.version}</version>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-query-tool-metadata</artifactId>
+      <version>${folio-query-tool-metadata.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>

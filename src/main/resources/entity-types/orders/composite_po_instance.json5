@@ -4,116 +4,96 @@
   private: false,
   requiredPermissions: [
     // This inherited from simple_config_data, but is also included here because of the added columns here that also retrieve config data
-    "configuration.entries.collection.get",
+    'configuration.entries.collection.get',
   ],
   sources: [
     {
       alias: 'pol',
       type: 'entity-type',
-      id: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
     },
     {
       alias: 'purchase_order',
       type: 'entity-type',
-      id: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'pol.purchase_order_id',
       essentialOnly: true,
-      join: {
-        type: 'RIGHT JOIN',
-        joinTo: 'pol.pol',
-        condition: ":this.id = (:that.jsonb ->> 'purchaseOrderId')::uuid",
-      },
+      overrideJoinDirection: 'right',
     },
-//    {
-//      alias: 'location',
-//      type: 'entity-type',
-//      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
-//      essentialOnly: true,
-//      join: {
-//        type: 'LEFT JOIN',
-//        joinTo: 'pol.pol',
-//        condition: "jsonb_extract_path_text(:that.jsonb, 'locations', 'locationId')::uuid = :this.id",
-//      },
-//    },
+    //    {
+    //      alias: 'location',
+    //      type: 'entity-type',
+    //      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+    //      essentialOnly: true,
+    //      join: {
+    //        type: 'LEFT JOIN',
+    //        joinTo: 'pol.pol',
+    //        condition: "jsonb_extract_path_text(:that.jsonb, 'locations', 'locationId')::uuid = :this.id",
+    //      },
+    //    },
     {
       alias: 'holdings',
       type: 'entity-type',
-      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
+      targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
       essentialOnly: true,
       // Because there could theoretically be multiple holdings associated with a single POL ID, we need to include that ID to avoid ID collisions
       useIdColumns: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol.pol',
-        condition: "EXISTS (SELECT 1 FROM jsonb_array_elements(:that.jsonb -> 'locations') AS hLoc WHERE (hLoc ->> 'holdingId')::uuid = :this.id)",
-      },
+      targetField: 'id',
+      sourceField: 'pol._locations_for_join_only',
     },
     {
       alias: 'instance',
       type: 'entity-type',
-      id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetField: 'id',
+      sourceField: 'pol.instance_id',
       essentialOnly: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol.pol',
-        condition: "(:that.jsonb ->> 'instanceId')::uuid = :this.id",
-      },
     },
-//    {
-//      alias: 'holdings_permanent_location',
-//      type: 'entity-type',
-//      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
-//      essentialOnly: true,
-//      join: {
-//        type: 'LEFT JOIN',
-//        joinTo: 'holdings',
-//        condition: "(:that.jsonb ->> 'permanentLocationId')::uuid = :this.id",
-//      },
-//    },
+    //    {
+    //      alias: 'holdings_permanent_location',
+    //      type: 'entity-type',
+    //      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+    //      essentialOnly: true,
+    //      join: {
+    //        type: 'LEFT JOIN',
+    //        joinTo: 'holdings',
+    //        condition: "(:that.jsonb ->> 'permanentLocationId')::uuid = :this.id",
+    //      },
+    //    },
     {
       alias: 'bill_to',
       type: 'entity-type',
-      id: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      targetId: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      targetField: 'id',
+      sourceField: 'purchase_order.bill_to',
       essentialOnly: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order.po',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'billTo')::uuid = :this.id",
-      },
     },
     {
       alias: 'ship_to',
       type: 'entity-type',
-      id: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      targetId: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
+      targetField: 'id',
+      sourceField: 'purchase_order.ship_to',
       essentialOnly: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order.po',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'shipTo')::uuid = :this.id",
-      },
     },
     {
       alias: 'created_by_user',
       type: 'entity-type',
-      id: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'purchase_order.created_by',
       essentialOnly: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order.po',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'metadata', 'createdByUserId')::uuid = :this.id",
-      },
     },
     {
       alias: 'organization',
       type: 'entity-type',
-      id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'purchase_order.vendor',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'purchase_order.po',
-        condition: "(:that.jsonb ->> 'vendor')::uuid = :this.id",
-      },
     },
   ],
   columns: [

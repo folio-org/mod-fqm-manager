@@ -14,6 +14,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 
@@ -66,8 +67,13 @@ public class ResultSetRepository {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
       var currentWhereClause = buildWhereClause(entityTypeDefinition, ids, idColumnNames, idColumnValueGetters);
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
@@ -141,7 +147,13 @@ public class ResultSetRepository {
         }
       }
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
           .from(currentFromClause)
@@ -181,7 +193,7 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
   }
 
   private List<Map<String, Object>> recordToMap(EntityType entityType, Result<Record> result) {

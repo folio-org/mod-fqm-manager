@@ -10,9 +10,7 @@
       target: 'src_inventory_service_point',
     },
   ],
-  requiredPermissions: [
-    'inventory-storage.service-points.collection.get'
-  ],
+  requiredPermissions: ['inventory-storage.service-points.collection.get'],
   columns: [
     {
       name: 'id',
@@ -34,7 +32,7 @@
         path: 'service-points',
         valueJsonPath: '$.servicepoints.*.id',
         labelJsonPath: '$.servicepoints.*.id',
-      }
+      },
     },
     {
       name: 'code',
@@ -48,7 +46,7 @@
       valueGetter: ":sourceAlias.jsonb->>'code'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      essential: true
+      essential: true,
     },
     {
       name: 'name',
@@ -72,7 +70,7 @@
         path: 'service-points',
         valueJsonPath: '$.servicepoints.*.id',
         labelJsonPath: '$.servicepoints.*.name',
-      }
+      },
     },
     {
       name: 'created_date',
@@ -107,6 +105,20 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_by_user_id',
@@ -119,6 +131,20 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'pickup_location',
@@ -140,8 +166,8 @@
         },
       ],
       valueGetter: ":sourceAlias.jsonb->>'pickupLocation'",
-      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'pickupLocation'::text), 600)",
-      valueFunction: "\"left\"(lower(:value), 600)"
+      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'pickupLocation\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
     },
     {
       name: 'shelving_lag_time',
@@ -165,7 +191,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoveryDisplayName'",
-      essential: true
+      essential: true,
     },
     {
       name: 'hold_shelf_expiry_period_duration',
@@ -222,8 +248,8 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-      essential: true
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+      essential: true,
+    },
   ],
 }

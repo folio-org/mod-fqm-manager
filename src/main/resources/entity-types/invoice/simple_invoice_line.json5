@@ -2,9 +2,7 @@
   id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
   name: 'simple_invoice_line',
   private: false,
-  requiredPermissions: [
-    'invoice.invoice-lines.collection.get'
-  ],
+  requiredPermissions: ['invoice.invoice-lines.collection.get'],
   columns: [
     {
       name: 'id',
@@ -228,10 +226,17 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'poLineId'",
+      valueGetter: ":invoice_lines.jsonb->>'poLineId'",
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'product_id',
@@ -365,6 +370,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_by_user_id',
@@ -375,6 +394,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'created_by_username',
@@ -495,8 +528,8 @@
     {
       type: 'db',
       alias: 'invoice_lines',
-      target: 'src_invoice_lines'
-    }
+      target: 'src_invoice_lines',
+    },
   ],
   defaultSort: [
     {

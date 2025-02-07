@@ -1,5 +1,6 @@
 package org.folio.fqm.repository;
 
+import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +24,7 @@ import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -36,6 +38,7 @@ import org.jooq.SelectSelectStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -141,17 +144,19 @@ class IdStreamerTest {
     expectedIds.add(new String[]{CONTENT_IDS.get(0)});
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(BASIC_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId), anyBoolean())).thenReturn(BASIC_ENTITY_TYPE);
+    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
+      fromClauseUtils.when(() -> getFromClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
 
-    idStreamer.streamIdsInBatch(
-      BASIC_ENTITY_TYPE,
-      true,
-      fql,
-      2,
-      100,
-      IN_PROGRESS_QUERY_ID
-    );
+      idStreamer.streamIdsInBatch(
+        BASIC_ENTITY_TYPE,
+        true,
+        fql,
+        2,
+        100,
+        IN_PROGRESS_QUERY_ID
+      );
+    }
 
     verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
   }
@@ -167,17 +172,20 @@ class IdStreamerTest {
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId, "tenant_02"));
     when(crossTenantQueryService.ecsEnabled()).thenReturn(true);
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyString())).thenReturn(ECS_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), anyString())).thenReturn("source_1");
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), anyString(), anyBoolean())).thenReturn(ECS_ENTITY_TYPE);
+    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
+      fromClauseUtils.when(() -> getFromClause(any(EntityType.class), anyString())).thenReturn("source_1");
 
-    idStreamer.streamIdsInBatch(
-      ECS_ENTITY_TYPE,
-      true,
-      fql,
-      2,
-      100,
-      IN_PROGRESS_QUERY_ID
-    );
+      idStreamer.streamIdsInBatch(
+        ECS_ENTITY_TYPE,
+        true,
+        fql,
+        2,
+        100,
+        IN_PROGRESS_QUERY_ID
+      );
+    }
+
     verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
   }
 
@@ -189,17 +197,20 @@ class IdStreamerTest {
     expectedIds.add(new String[]{CONTENT_IDS.get(0)});
 
     when(crossTenantQueryService.getTenantsToQuery(any(EntityType.class))).thenReturn(List.of(tenantId));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId))).thenReturn(GROUP_BY_ENTITY_TYPE);
-    when(entityTypeFlatteningService.getJoinClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(tenantId), anyBoolean())).thenReturn(GROUP_BY_ENTITY_TYPE);
+    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
+      fromClauseUtils.when(() -> getFromClause(any(EntityType.class), eq(tenantId))).thenReturn("source_1");
 
-    idStreamer.streamIdsInBatch(
-      GROUP_BY_ENTITY_TYPE,
-      true,
-      fql,
-      2,
-      100,
-      IN_PROGRESS_QUERY_ID
-    );
+      idStreamer.streamIdsInBatch(
+        GROUP_BY_ENTITY_TYPE,
+        true,
+        fql,
+        2,
+        100,
+        IN_PROGRESS_QUERY_ID
+      );
+    }
+
     verify(queryResultsRepository, times(1)).saveQueryResults(eq(IN_PROGRESS_QUERY_ID), argThat(actual -> Arrays.deepEquals(expectedIds.toArray(), actual.toArray())));
   }
 

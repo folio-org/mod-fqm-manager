@@ -4,55 +4,43 @@
   private: false,
   sources: [
     {
-      id: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab',
-      type: 'entity-type',
       alias: 'voucher_line__fund_distribution',
+      type: 'entity-type',
+      targetId: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab', // composite_voucher_line__fund_distribution
       useIdColumns: true,
     },
     {
-      id: '4c63c7f5-1a28-4394-b401-98c02c31492d',
-      type: 'entity-type',
       alias: 'fund',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher_line__fund_distribution.fund_distribution',
-        condition: "(:that.jsonb ->> 'fundId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      targetField: 'id',
+      sourceField: 'voucher_line__fund_distribution.fund_id',
     },
     {
-      id: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
-      type: 'entity-type',
       alias: 'fund_type',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'fund.fund',
-        condition: "(:that.jsonb ->> 'fundTypeId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
+      targetField: 'id',
+      sourceField: 'fund.fund_type_id',
     },
     {
-      id: '6e11cd39-a34e-4afc-90db-957dd45d139e',
-      type: 'entity-type',
       alias: 'expense_class',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher_line__fund_distribution.fund_distribution',
-        condition: "(:that.jsonb ->> 'expenseClassId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e',
+      targetField: 'id',
+      sourceField: 'voucher_line__fund_distribution.expense_class_id',
     },
     {
-      id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
-      type: 'entity-type',
       alias: 'voucher',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher_line__fund_distribution.voucher_line',
-        condition: "(:that.jsonb ->> 'voucherId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+      targetField: 'id',
+      sourceField: 'voucher_line__fund_distribution.voucher_line.voucher_id',
     },
   ],
   defaultSort: [
     {
-      columnName: '"voucher_line".id',
+      columnName: '"voucher_line__fund_distribution.voucher_line.voucher_lines".id',
       direction: 'ASC',
     },
   ],

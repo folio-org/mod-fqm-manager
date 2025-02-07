@@ -1,0 +1,26 @@
+{
+  id: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9',
+  name: 'composite_ledger_fund',
+  private: false,
+  sources: [
+    {
+      alias: 'fund',
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      useIdColumns: true,
+    },
+    {
+      alias: 'ledger',
+      type: 'entity-type',
+      targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
+      targetField: 'id',
+      sourceField: 'fund.ledger_id',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"fund.fund".id',
+      direction: 'ASC',
+    },
+  ],
+}

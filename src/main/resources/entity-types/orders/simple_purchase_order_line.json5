@@ -10,9 +10,7 @@
       target: 'src_purchase_order_line',
     },
   ],
-  requiredPermissions: [
-    "orders.po-lines.item.get"
-  ],
+  requiredPermissions: ['orders.po-lines.item.get'],
   columns: [
     {
       name: 'id',
@@ -36,6 +34,14 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.purchaseorderid',
+      joinsTo: [
+        {
+          targetId: '48de4796-11a2-44e9-abb7-01e84af87234',
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'created_at',
@@ -49,7 +55,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'created_by',
@@ -63,6 +69,20 @@
       essential: true,
       hidden: true,
       valueGetter: ':sourceAlias.created_by',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid', // this column is actually `text`
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid', // this column is actually `text`
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'edition',
@@ -389,7 +409,15 @@
         name: 'currency',
         type: 'fqm',
         columnName: 'cost_currency',
-      }
+      },
+      joinsTo: [
+        {
+          targetId: '770a383e-c6cb-412b-abc3-6fa3c8a8795c',
+          targetField: 'currency',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'cost_additional_cost',
@@ -659,7 +687,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'donor'",
       filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'donor'::text))",
-      valueFunction: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))"
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
     },
     {
       name: 'donor_organization_ids',
@@ -708,7 +736,7 @@
       ],
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'activated'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'eresource'::text) ->> 'activated'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'eresource_activation_due',
@@ -774,7 +802,7 @@
       ],
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'trial'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'eresource'::text) ->> 'trial'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'eresource_expected_activation',
@@ -788,7 +816,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->'eresource'->>'expectedActivation'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'eresource'::text) ->> 'expectedActivation'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'eresource_user_limit',
@@ -971,6 +999,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'instanceId'",
+      joinsTo: [
+        {
+          targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'is_package',
@@ -1073,6 +1109,25 @@
       valueGetter: ":sourceAlias.jsonb->>'locations'",
     },
     {
+      // joins are not supported from nested properties yet
+      name: '_locations_for_join_only',
+      hidden: true,
+      queryable: false,
+      isIdColumn: false,
+      visibleByDefault: false,
+      dataType: { dataType: 'arrayType' },
+      valueGetter: "jsonb_array_elements(:pol.jsonb -> 'locations')",
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+          targetField: 'id',
+          direction: 'left',
+          type: 'custom',
+          sql: "EXISTS (SELECT 1 FROM :this AS hLoc WHERE (hLoc ->> 'holdingId')::uuid = :that)",
+        },
+      ],
+    },
+    {
       name: 'search_location_ids',
       sourceAlias: 'pol',
       dataType: {
@@ -1138,7 +1193,7 @@
       ],
       valueGetter: ":sourceAlias.jsonb->>'orderFormat'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'orderFormat\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'package_po_line_id',
@@ -1258,7 +1313,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'physical'->>'expectedReceiptDate'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'physical'::text) ->> 'expectedReceiptDate'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'physical_receipt_due',
@@ -1319,7 +1374,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'poLineNumber'",
       filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'poLineNumber'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
     },
     {
       name: 'publication_date',
@@ -1345,7 +1400,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'publisher'",
       filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'publisher'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
     },
     {
       name: 'receipt_date',
@@ -1359,7 +1414,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'receiptDate'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'receiptDate\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'receipt_status',
@@ -1474,7 +1529,7 @@
       ],
       valueGetter: ":sourceAlias.jsonb->>'rush'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'rush\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'selector',
@@ -1488,7 +1543,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'selector'",
       filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> 'selector'::text))",
-      valueFunction: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))"
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
     },
     {
       name: 'source',
@@ -1524,7 +1579,7 @@
       ],
       valueGetter: ":sourceAlias.jsonb->>'source'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'source\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'tags',
@@ -1564,7 +1619,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'titleOrPackage'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'titleOrPackage\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'vendor_detail_instructions',
@@ -1623,6 +1678,20 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'vendor_detail_reference_numbers',
@@ -1715,7 +1784,7 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

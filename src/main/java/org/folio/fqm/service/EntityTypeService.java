@@ -107,7 +107,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
     List<EntityTypeColumn> columns = entityType
@@ -135,7 +135,7 @@ public class EntityTypeService {
   @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
@@ -152,7 +152,7 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null, false);
 
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 

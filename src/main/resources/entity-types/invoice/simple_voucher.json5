@@ -2,9 +2,7 @@
   id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
   name: 'simple_voucher',
   private: false,
-  requiredPermissions: [
-    "voucher.vouchers.collection.get"
-  ],
+  requiredPermissions: ['voucher.vouchers.collection.get'],
   columns: [
     {
       name: 'id',
@@ -15,7 +13,7 @@
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
-      valueGetter: ":sourceAlias.id"
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'type',
@@ -43,7 +41,7 @@
           label: 'Voucher',
           value: 'Voucher',
         },
-      ]
+      ],
     },
     {
       name: 'amount',
@@ -53,7 +51,7 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'amount'"
+      valueGetter: ":sourceAlias.jsonb ->> 'amount'",
     },
     {
       name: 'status',
@@ -77,7 +75,7 @@
           label: 'Cancelled',
           value: 'Cancelled',
         },
-      ]
+      ],
     },
     {
       name: 'created_date',
@@ -87,7 +85,7 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
       name: 'updated_date',
@@ -97,7 +95,7 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
     },
     {
       name: 'created_by_user_id',
@@ -107,7 +105,7 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'"
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
     },
     {
       name: 'updated_by_user_id',
@@ -117,17 +115,24 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'"
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
     },
     {
       name: 'vendor_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'vendorId'"
+      valueGetter: ":vouchers.jsonb ->> 'vendorId'",
+      joinsTo: [
+        {
+          targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'account_no',
@@ -137,17 +142,24 @@
       sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'accountNo'"
+      valueGetter: ":sourceAlias.jsonb ->> 'accountNo'",
     },
     {
       name: 'invoice_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'vouchers',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'invoiceId'"
+      valueGetter: ":vouchers.jsonb ->> 'invoiceId'",
+      joinsTo: [
+        {
+          targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'acq_unit_ids',
@@ -162,7 +174,7 @@
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
-      valueFunction: 'lower(:value)'
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'voucher_date',
@@ -173,8 +185,8 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'voucherDate'",
-      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:sourceAlias.jsonb ->> 'voucherDate'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value)), 600)'
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:sourceAlias.jsonb ->> \'voucherDate\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_invoice_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'batch_group_id',
@@ -184,7 +196,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'batchGroupId'"
+      valueGetter: ":sourceAlias.jsonb ->> 'batchGroupId'",
     },
     {
       name: 'exchange_rate',
@@ -194,7 +206,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'exchangeRate'"
+      valueGetter: ":sourceAlias.jsonb ->> 'exchangeRate'",
     },
     {
       name: 'voucher_number',
@@ -204,7 +216,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'voucherNumber'"
+      valueGetter: ":sourceAlias.jsonb ->> 'voucherNumber'",
     },
     {
       name: 'accounting_code',
@@ -214,7 +226,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'accountingCode'"
+      valueGetter: ":sourceAlias.jsonb ->> 'accountingCode'",
     },
     {
       name: 'system_currency',
@@ -224,7 +236,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'systemCurrency'"
+      valueGetter: ":sourceAlias.jsonb ->> 'systemCurrency'",
     },
     {
       name: 'enclosure_needed',
@@ -244,7 +256,7 @@
           label: 'False',
           value: 'false',
         },
-      ]
+      ],
     },
     {
       name: 'invoice_currency',
@@ -254,7 +266,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCurrency'"
+      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCurrency'",
     },
     {
       name: 'export_to_accounting',
@@ -286,7 +298,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'disbursementNumber'"
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementNumber'",
     },
     {
       name: 'disbursement_date',
@@ -296,7 +308,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'disbursementDate'"
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementDate'",
     },
     {
       name: 'disbursement_amount',
@@ -306,7 +318,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'disbursementAmount'"
+      valueGetter: ":sourceAlias.jsonb ->> 'disbursementAmount'",
     },
     {
       name: 'address_line1',
@@ -316,7 +328,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine1'"
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine1'",
     },
     {
       name: 'address_line2',
@@ -326,7 +338,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine2'"
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'addressLine2'",
     },
     {
       name: 'city',
@@ -336,7 +348,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'city'"
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'city'",
     },
     {
       name: 'state_region',
@@ -346,7 +358,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'stateRegion'"
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'stateRegion'",
     },
     {
       name: 'zip_code',
@@ -356,7 +368,7 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'zipCode'"
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'zipCode'",
     },
     {
       name: 'country',
@@ -366,15 +378,15 @@
       sourceAlias: 'vouchers',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'country'"
-    }
+      valueGetter: ":sourceAlias.jsonb -> 'vendorAddress' ->> 'country'",
+    },
   ],
   sources: [
     {
       type: 'db',
       alias: 'vouchers',
-      target: 'src_invoice_vouchers'
-    }
+      target: 'src_invoice_vouchers',
+    },
   ],
   defaultSort: [
     {

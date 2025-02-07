@@ -12,8 +12,8 @@
   ],
   requiredPermissions: [
     'inventory-storage.holdings.item.get',
-    "inventory-storage.statistical-codes.collection.get",
-    "inventory-storage.statistical-code-types.collection.get"
+    'inventory-storage.statistical-codes.collection.get',
+    'inventory-storage.statistical-code-types.collection.get',
   ],
   columns: [
     {
@@ -39,7 +39,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ':sourceAlias.created_by',
-      essential: true
+      essential: true,
     },
     {
       name: 'created_at',
@@ -52,7 +52,7 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.creation_date',
       valueFunction: '(:value)::timestamp',
-      essential: true
+      essential: true,
     },
     {
       name: 'updated_by',
@@ -65,7 +65,7 @@
       visibleByDefault: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
-      essential: true
+      essential: true,
     },
     {
       name: 'updated_at',
@@ -77,7 +77,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
-      essential: true
+      essential: true,
     },
     {
       name: 'version',
@@ -89,7 +89,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'_version'",
-      essential: true
+      essential: true,
     },
     {
       name: 'hrid',
@@ -103,7 +103,7 @@
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
       essential: true,
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'call_number_type_id',
@@ -114,11 +114,10 @@
       valueGetter: ':sourceAlias.callnumbertypeid',
       queryable: false,
       visibleByDefault: false,
-      hidden: true
+      hidden: true,
     },
     {
       name: 'effective_location_id',
-      sourceAlias: 'hrd',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -127,7 +126,15 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.effectivelocationid',
+      valueGetter: ':hrd.effectivelocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'holdings_type_id',
@@ -140,7 +147,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ':sourceAlias.holdingstypeid',
-      essential: true
+      essential: true,
     },
     {
       name: 'ill_policy_id',
@@ -164,10 +171,17 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.instanceid',
       essential: true,
+      joinsTo: [
+        {
+          targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+          targetField: 'id',
+          type: 'equality-simple', // both are already uuids
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'permanent_location_id',
-      sourceAlias: 'hrd',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -175,12 +189,19 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.permanentlocationid',
-      essential: true
+      valueGetter: ':hrd.permanentlocationid',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'temporary_location_id',
-      sourceAlias: 'hrd',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -188,8 +209,16 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ':sourceAlias.temporarylocationid',
-      essential: true
+      valueGetter: ':hrd.temporarylocationid',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'source_id',
@@ -202,7 +231,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ':sourceAlias.sourceid',
-      essential: true
+      essential: true,
     },
     {
       name: 'call_number',
@@ -215,8 +244,8 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'callNumber'",
       essential: true,
-      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'callNumber'::text), 600)",
-      valueFunction: "\"left\"(lower(:value), 600)"
+      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'callNumber\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
     },
     {
       name: 'former_ids',
@@ -255,7 +284,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'callNumberPrefix'",
-      essential: true
+      essential: true,
     },
     {
       name: 'call_number_suffix',
@@ -267,7 +296,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'callNumberSuffix'",
-      essential: true
+      essential: true,
     },
     {
       name: 'discovery_suppress',
@@ -587,7 +616,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'shelvingTitle'",
-      essential: true
+      essential: true,
     },
     {
       name: 'acquisition_format',
@@ -623,7 +652,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'receiptStatus'",
-      essential: true
+      essential: true,
     },
     {
       name: 'retention_policy',
@@ -635,7 +664,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'retentionPolicy'",
-      essential: true
+      essential: true,
     },
     {
       name: 'digitization_policy',
@@ -647,7 +676,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'digitizationPolicy'",
-      essential: true
+      essential: true,
     },
     {
       name: 'copy_number',
@@ -672,7 +701,7 @@
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb->>'numberOfItems')::float",
       valueFunction: '(:value)::float',
-      essential: true
+      essential: true,
     },
     {
       name: 'administrative_notes',
@@ -698,7 +727,7 @@
           array_agg(lower(elems.value::text))\
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
-      )"
+      )",
     },
     {
       name: 'tags',
@@ -796,7 +825,7 @@
         columnName: 'tenant_id',
         entityTypeId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
         type: 'fqm',
-        name: 'tenant_id'
+        name: 'tenant_id',
       },
       ecsOnly: true,
     },
@@ -811,7 +840,7 @@
       hidden: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

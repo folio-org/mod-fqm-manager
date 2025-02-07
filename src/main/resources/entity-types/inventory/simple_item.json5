@@ -9,9 +9,7 @@
       target: 'src_inventory_item',
     },
   ],
-  requiredPermissions: [
-    'inventory-storage.items.item.get'
-  ],
+  requiredPermissions: ['inventory-storage.items.item.get'],
   columns: [
     {
       name: 'id',
@@ -37,7 +35,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'hrid'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'notes',
@@ -80,17 +78,17 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'item_note_type_id',
-//              property: 'itemNoteTypeId',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'itemNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'itemNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'item_note_type_id',
+            //              property: 'itemNoteTypeId',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'itemNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'itemNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
           ],
         },
       },
@@ -208,7 +206,7 @@
           label: 'Withdrawn',
           value: 'Withdrawn',
         },
-      ]
+      ],
     },
     {
       name: 'barcode',
@@ -222,7 +220,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
       filterValueGetter: "lower(:sourceAlias.jsonb ->> 'barcode'::text)",
-      valueFunction: 'lower(:value)'
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'version',
@@ -272,6 +270,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'created_by_user_id',
@@ -284,6 +296,20 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'former_ids',
@@ -320,7 +346,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'copyNumber'",
-      essential: true
+      essential: true,
     },
     {
       name: 'year_caption',
@@ -349,7 +375,6 @@
     },
     {
       name: 'material_type_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -358,7 +383,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.materialtypeid",
+      valueGetter: ':item.materialtypeid',
+      joinsTo: [
+        {
+          targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe', // simple_material_type
+          targetField: 'id',
+          type: 'equality-simple', // both are already uuids
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'circulation_notes',
@@ -369,17 +402,17 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-//            {
-//              name: 'id',
-//              property: 'id',
-//              dataType: {
-//                dataType: 'stringType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'id',
+            //              property: 'id',
+            //              dataType: {
+            //                dataType: 'stringType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'date',
               property: 'date',
@@ -440,17 +473,17 @@
               dataType: {
                 dataType: 'objectType',
                 properties: [
-//                  {
-//                    name: 'id',
-//                    property: 'id',
-//                    dataType: {
-//                      dataType: 'stringType',
-//                    },
-//                    queryable: false,
-//                    valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
-//                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
-//                    valueFunction: 'lower(:value)',
-//                  },
+                  //                  {
+                  //                    name: 'id',
+                  //                    property: 'id',
+                  //                    dataType: {
+                  //                      dataType: 'stringType',
+                  //                    },
+                  //                    queryable: false,
+                  //                    valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
+                  //                    filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes'->'source') AS elems)",
+                  //                    valueFunction: 'lower(:value)',
+                  //                  },
                   {
                     name: 'personal',
                     property: 'personal',
@@ -543,7 +576,6 @@
     },
     {
       name: 'holdings_record_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -552,7 +584,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.holdingsrecordid",
+      valueGetter: ':item.holdingsrecordid',
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_record
+          targetField: 'id',
+          type: 'equality-simple', // both are already uuids
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'statistical_code_ids',
@@ -621,7 +661,6 @@
     },
     {
       name: 'effective_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -630,7 +669,15 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ":sourceAlias.effectivelocationid",
+      valueGetter: ':item.effectivelocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'permanent_loan_type_id',
@@ -647,7 +694,6 @@
     },
     {
       name: 'item_level_call_number_type_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -656,7 +702,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberTypeId'",
+      valueGetter: ":item.jsonb->>'itemLevelCallNumberTypeId'",
+      joinsTo: [
+        {
+          targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'effective_call_number',
@@ -669,50 +723,59 @@
       visibleByDefault: true,
       valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'prefix'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'callNumber'::text, ''::text), NULLIF((:sourceAlias.jsonb -> 'effectiveCallNumberComponents'::text) ->> 'suffix'::text, ''::text), NULLIF(:sourceAlias.jsonb ->> 'copyNumber'::text, ''::text))",
     },
-//    {
-//      name: 'effective_call_number_components_prefix',
-//      sourceAlias: 'item',
-//      dataType: {
-//        dataType: 'stringType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'prefix'",
-//    },
-//    {
-//      name: 'effective_call_number_components_suffix',
-//      sourceAlias: 'item',
-//      dataType: {
-//        dataType: 'stringType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'suffix'",
-//    },
-//    {
-//      name: 'effective_call_number_components_type_id',
-//      sourceAlias: 'item',
-//      dataType: {
-//        dataType: 'rangedUUIDType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
-//    },
-//    {
-//      name: 'effective_call_number_components_call_number',
-//      sourceAlias: 'item',
-//      dataType: {
-//        dataType: 'stringType',
-//      },
-//      isIdColumn: false,
-//      queryable: true,
-//      visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'callNumber'",
-//    },
+    //    {
+    //      name: 'effective_call_number_components_prefix',
+    //      sourceAlias: 'item',
+    //      dataType: {
+    //        dataType: 'stringType',
+    //      },
+    //      isIdColumn: false,
+    //      queryable: true,
+    //      visibleByDefault: false,
+    //      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'prefix'",
+    //    },
+    //    {
+    //      name: 'effective_call_number_components_suffix',
+    //      sourceAlias: 'item',
+    //      dataType: {
+    //        dataType: 'stringType',
+    //      },
+    //      isIdColumn: false,
+    //      queryable: true,
+    //      visibleByDefault: false,
+    //      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'suffix'",
+    //    },
+    {
+      name: 'effective_call_number_components_type_id',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'typeId'",
+      joinsTo: [
+        {
+          targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    //    {
+    //      name: 'effective_call_number_components_call_number',
+    //      sourceAlias: 'item',
+    //      dataType: {
+    //        dataType: 'stringType',
+    //      },
+    //      isIdColumn: false,
+    //      queryable: true,
+    //      visibleByDefault: false,
+    //      valueGetter: ":sourceAlias.jsonb->'effectiveCallNumberComponents'->>'callNumber'",
+    //    },
     {
       name: 'enumeration',
       sourceAlias: 'item',
@@ -759,11 +822,10 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'"
+      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'",
     },
     {
       name: 'permanent_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -772,7 +834,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.permanentlocationid",
+      valueGetter: ':item.permanentlocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'last_check_in_date_time',
@@ -923,12 +993,11 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'accessionNumber'",
-      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'accessionNumber'::text), 600)",
-      valueFunction: "\"left\"(lower(:value), 600)"
+      filterValueGetter: '"left"(lower(:sourceAlias.jsonb ->> \'accessionNumber\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
     },
     {
       name: 'temporary_location_id',
-      sourceAlias: 'item',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -936,8 +1005,15 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLocationId'",
-
+      valueGetter: ':item.temporarylocationid',
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_damaged_status_id',
@@ -961,7 +1037,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'"
+      valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'",
     },
     {
       name: 'purchase_order_line_identifier',
@@ -989,7 +1065,7 @@
         columnName: 'tenant_id',
         entityTypeId: '372e025a-9444-473a-9ffd-fa0f63db1674',
         type: 'fqm',
-        name: 'tenant_id'
+        name: 'tenant_id',
       },
       ecsOnly: true,
     },
@@ -1004,7 +1080,7 @@
       hidden: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

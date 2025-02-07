@@ -13,6 +13,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
@@ -101,9 +102,15 @@ public class IdStreamer {
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
-        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
-      var currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
-      String innerJoinClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
+      Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
+
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (ecsEnabled && !CollectionUtils.isEmpty(entityType.getAdditionalEcsConditions())) {
@@ -114,7 +121,7 @@ public class IdStreamer {
       ResultQuery<Record1<String[]>> innerQuery = buildQuery(
         entityTypeDefinition,
         currentIdValueGetter,
-        innerJoinClause,
+        innerFromClause,
         whereClause,
         sortResults,
         batchSize,

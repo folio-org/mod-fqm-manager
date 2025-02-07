@@ -5,60 +5,48 @@
   private: false,
   sources: [
     {
-      id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
-      type: 'entity-type',
       alias: 'voucher',
+      type: 'entity-type',
+      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
     },
     {
-      id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
-      type: 'entity-type',
       alias: 'voucher_line',
+      type: 'entity-type',
+      targetId: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb', // simple_voucher_line
+      targetField: 'voucher_id',
+      sourceField: 'voucher.id',
       useIdColumns: true,
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher',
-        condition: "(:this.jsonb ->> 'voucherId')::uuid = :that.id",
-      },
     },
     {
-      id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
-      type: 'entity-type',
       alias: 'invoice',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher',
-        condition: "(:that.jsonb ->> 'invoiceId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      targetField: 'id',
+      sourceField: 'voucher.invoice_id',
     },
     {
-      id: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9',
-      type: 'entity-type',
       alias: 'ledger_fund',
-      join: {
-        type: 'left join',
-        joinTo: 'voucher_line',
-        condition: "(:that.jsonb ->> 'externalAccountNumber') = :this.jsonb ->> 'externalAccountNo'",
-      },
+      type: 'entity-type',
+      targetId: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9', // composite_ledger_fund
+      targetField: 'fund.external_account_no',
+      sourceField: 'voucher_line.external_account_number',
       useIdColumns: true,
     },
     {
-      id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
-      type: 'entity-type',
       alias: 'organization',
-      join: {
-        type: 'left join',
-        joinTo: 'voucher',
-        condition: "(:that.jsonb ->> 'vendorId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'voucher.vendor_id',
     },
   ],
   defaultSort: [
     {
-      columnName: '"ledger_fund.fund".name',
+      columnName: '"ledger_fund.fund.fund".jsonb ->> \'name\'',
       direction: 'ASC',
     },
     {
-      columnName: '"voucher_line.voucher_lines".external_account_number',
+      columnName: '"voucher_line.voucher_lines".jsonb ->> \'externalAccountNumber\'',
       direction: 'ASC',
     },
   ],

@@ -91,8 +91,8 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: "( SELECT fis_y.jsonb ->> 'name' FILTER (WHERE fis_y.jsonb ->> 'name' IS NOT NULL) FROM (:sourceAlias.jsonb ->> 'fiscalYearOneId') record(value) JOIN  ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y ON record.value::text = fis_y.id::text )",
-      filterValueGetter: "( SELECT lower(fis_y.jsonb ->> 'name') FILTER (WHERE fis_y.jsonb ->> 'name' IS NOT NULL) FROM (:sourceAlias.jsonb ->> 'fiscalYearOneId') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y ON record.value::text = fis_y.id::text )",
+      valueGetter:"(SELECT fis_y.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y WHERE (:sourceAlias.jsonb->>'fiscalYearOneId') = fis_y.id::text)",
+      filterValueGetter: "(SELECT lower(fis_y.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y WHERE (:sourceAlias.jsonb->>'fiscalYearOneId') = fis_y.id::text)",
       valueFunction: "lower(:value)",
       source: {
         entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',

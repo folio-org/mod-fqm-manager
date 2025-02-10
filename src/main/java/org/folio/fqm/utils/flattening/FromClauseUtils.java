@@ -72,7 +72,8 @@ public class FromClauseUtils {
   ) {
     String tablePrefix = tenantId != null ? tenantId + "_mod_fqm_manager." : "";
 
-    StringBuilder finalJoinClause = new StringBuilder();
+    List<String> baseTables = new ArrayList<>();
+    List<String> joins = new ArrayList<>();
 
     for (EntityTypeSource source : orderedAndResolvedSources) {
       if (source instanceof EntityTypeSourceEntityType) {
@@ -83,17 +84,17 @@ public class FromClauseUtils {
       String alias = "\"" + source.getAlias() + "\"";
       String target = sourceDb.getTarget();
       if (join != null) {
-        String joinClause = " " + join.getType() + " " + tablePrefix + target + " " + alias;
+        String joinClause = join.getType() + " " + tablePrefix + target + " " + alias;
         if (join.getCondition() != null) {
           joinClause += " ON " + join.getCondition();
         }
-        finalJoinClause.append(joinClause);
+        joins.add(joinClause);
       } else {
-        finalJoinClause.append(tablePrefix).append(target).append(" ").append(alias);
+        baseTables.add(tablePrefix + target + " " + alias);
       }
     }
 
-    return finalJoinClause.toString();
+    return baseTables.stream().collect(Collectors.joining(", ")) + " " + joins.stream().collect(Collectors.joining(" "));
   }
 
   public static boolean isJoined(EntityTypeSource source) {

@@ -7,7 +7,8 @@
       type: 'entity-type',
       targetId: '00349126-c923-4045-a29f-3b6db4c6bea9', // simple_loan
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
+      order: 10,
     },
     {
       alias: 'lpolicy',
@@ -16,6 +17,7 @@
       sourceField: 'loans.loan_policy_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 20,
     },
     {
       alias: 'cospi',
@@ -24,6 +26,7 @@
       sourceField: 'loans.checkout_service_point_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 100,
     },
     {
       alias: 'cispi',
@@ -32,6 +35,7 @@
       sourceField: 'loans.checkin_service_point_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 90,
     },
     {
       alias: 'items',
@@ -40,6 +44,7 @@
       sourceField: 'loans.item_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 60,
     },
     {
       alias: 'mtypes',
@@ -48,6 +53,7 @@
       sourceField: 'items.material_type_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 50,
     },
     {
       alias: 'users',
@@ -56,6 +62,7 @@
       sourceField: 'loans.user_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 30,
     },
     {
       alias: 'groups',
@@ -64,6 +71,7 @@
       sourceField: 'users.group_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 40,
     },
     {
       alias: 'holdings',
@@ -72,6 +80,7 @@
       sourceField: 'items.holdings_record_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 80,
     },
     {
       alias: 'instance',
@@ -79,6 +88,7 @@
       targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
       sourceField: 'holdings.instance_id',
       targetField: 'id',
+      order: 70,
     },
   ],
   defaultSort: [

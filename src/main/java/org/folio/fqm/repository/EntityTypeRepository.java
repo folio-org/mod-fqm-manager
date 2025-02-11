@@ -11,6 +11,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
@@ -19,7 +20,7 @@ import org.jooq.Field;
 import org.jooq.InsertValuesStep2;
 import org.jooq.JSONB;
 import org.jooq.Record;
-import org.jooq.Record5;
+import org.jooq.Record6;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,6 +50,7 @@ public class EntityTypeRepository {
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
   public static final String CUSTOM_FIELD_REF_ID = "jsonb ->> 'refId'";
   public static final String CUSTOM_FIELD_TYPE = "jsonb ->> 'type'";
+  public static final String CUSTOM_FIELD_ENTITY_TYPE = "jsonb ->> 'entityType'";
   public static final String CUSTOM_FIELD_FILTER_VALUE_GETTER = "jsonb -> 'selectField' -> 'options' ->> 'values'";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX = "SINGLE_CHECKBOX";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
@@ -166,10 +168,9 @@ public class EntityTypeRepository {
       Optional.ofNullable(rawEntityTypes.get(entityTypeId))
         .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
     String sourceViewName = entityTypeDefinition.getSourceView();
-    String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
 
-    Result<Record5<Object, Object, Object, Object, Object>> results = readerJooqContext
-      .select(field("id"), field(CUSTOM_FIELD_NAME), field(CUSTOM_FIELD_REF_ID), field(CUSTOM_FIELD_TYPE), field(CUSTOM_FIELD_FILTER_VALUE_GETTER))
+    Result<Record6<Object, Object, Object, Object, Object, Object>> results = readerJooqContext
+      .select(field("id"), field(CUSTOM_FIELD_NAME), field(CUSTOM_FIELD_REF_ID), field(CUSTOM_FIELD_TYPE), field(CUSTOM_FIELD_ENTITY_TYPE), field(CUSTOM_FIELD_FILTER_VALUE_GETTER))
       .from(sourceViewName)
       .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
       .fetch();
@@ -182,6 +183,13 @@ public class EntityTypeRepository {
           name = row.get(CUSTOM_FIELD_NAME, String.class);
           String refId = row.get(CUSTOM_FIELD_REF_ID, String.class);
           String type = row.get(CUSTOM_FIELD_TYPE, String.class);
+          String entityTypeVal = row.get(CUSTOM_FIELD_ENTITY_TYPE, String.class);
+          String sourceAlias = entityTypeDefinition.getSources().stream()
+            .filter(source -> source.getCustomFieldEntity().equals(entityTypeVal))
+            .map(EntityTypeSource::getAlias)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No matching source alias found for custom field entity: " + entityTypeVal));
+          String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor().replace(":sourceAlias",  ':' + sourceAlias + '.' + sourceAlias);
           String customFieldValueJson = row.get(CUSTOM_FIELD_FILTER_VALUE_GETTER, String.class);
 
           if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type) || CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {

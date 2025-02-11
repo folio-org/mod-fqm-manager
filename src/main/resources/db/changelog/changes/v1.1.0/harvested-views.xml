@@ -59,6 +59,17 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_purchase_order_custom_fields" author="v-snosko@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "custom_fields" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_purchase_order_custom_fields">
+      SELECT * FROM ${tenant_id}_mod_orders_storage.custom_fields
+    </createView>
+  </changeSet>
+
   <changeSet id="create_view_statistical_code" author="kjain@ebsco.com" runOnChange="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>

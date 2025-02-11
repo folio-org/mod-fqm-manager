@@ -14,4 +14,15 @@
   </createView>
 </changeSet>
 
+  <changeSet id="create_view_finance_groups" runOnChange="true" author="kjain@ebsco.com">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="groups" schemaName="${tenant_id}_mod_finance_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_groups">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.groups
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

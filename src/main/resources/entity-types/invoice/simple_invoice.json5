@@ -2,89 +2,189 @@
   id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
   name: 'simple_invoice',
   private: false,
-  requiredPermissions: ['invoice.invoices.collection.get'],
+  requiredPermissions: [
+    'invoice.invoices.collection.get',
+    'acquisitions-units.units.collection.get',
+    'finance.fiscal-years.collection.get',
+    'batch-groups.collection.get',
+    'users.collection.get',
+    'configuration.entries.collection.get',
+    'invoice.invoice-lines.collection.get',
+    'organizations.organizations.collection.get'
+  ],
   columns: [
     {
       name: 'id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.id',
+      essential: true,
+      valueGetter: ':invoice.id',
     },
     {
       name: 'accounting_code',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'accountingCode'",
     },
     {
       name: 'adjustments_total',
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "(:invoice.jsonb->>'adjustmentsTotal')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'approved_by_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
-      valueFunction: '(:value)::float',
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->>'approvedBy'",
     },
     {
       name: 'approved_by',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'approvedBy'",
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          (users.jsonb->'personal'->>'lastName') || ', ' || (users.jsonb->'personal'->>'firstName') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_users_users users \
+        WHERE \
+          users.id = (:invoice.jsonb ->> 'approvedBy')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower((users.jsonb->'personal'->>'lastName') || ', ' || (users.jsonb->'personal'->>'firstName')) \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_users_users users \
+        WHERE \
+          users.id = (:invoice.jsonb ->> 'approvedBy')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'approval_date',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'approvalDate'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'approvalDate'",
     },
     {
       name: 'batch_group_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'batchGroupId'",
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->>'batchGroupId'",
+    },
+    {
+      name: 'batch_group',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      idColumnName: 'batch_group_id',
+      valueGetter: "( \
+        SELECT \
+          batch_group.jsonb ->> 'name' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_invoice_batch_groups batch_group \
+        WHERE \
+          batch_group.id = (:invoice.jsonb ->> 'batchGroupId')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower(batch_group.jsonb ->> 'name') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_invoice_batch_groups batch_group \
+        WHERE \
+          batch_group.id = (:invoice.jsonb ->> 'batchGroupId')::uuid \
+      )",
+      source: {
+        entityTypeId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
+        columnName: 'batch_group'
+      },
+      valueSourceApi: {
+        path: 'batch-groups',
+        valueJsonPath: '$.batchGroups.*.id',
+        labelJsonPath: '$.batchGroups.*.name',
+      },
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'bill_to_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->>'billTo'",
     },
     {
       name: 'bill_to',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'billTo'",
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          (config_data.jsonb ->> 'value')::jsonb ->> 'address' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_configuration_config_data config_data \
+        WHERE \
+          config_data.id = (:invoice.jsonb ->> 'billTo')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower((config_data.jsonb ->> 'value')::jsonb ->> 'address') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_configuration_config_data config_data \
+        WHERE \
+          config_data.id = (:invoice.jsonb ->> 'billTo')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'chk_subscription_overlap',
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'chkSubscriptionOverlap'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'chkSubscriptionOverlap'",
       values: [
         {
           label: 'True',
@@ -101,30 +201,29 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'cancellationNote'",
+      valueGetter: ":invoice.jsonb->>'cancellationNote'",
     },
     {
       name: 'currency',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'currency'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'currency'",
     },
     {
       name: 'enclosure_needed',
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'enclosureNeeded'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'enclosureNeeded'",
       values: [
         {
           label: 'True',
@@ -141,10 +240,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "(:sourceAlias.jsonb->>'exchangeRate')::float",
+      essential: true,
+      valueGetter: "(:invoice.jsonb->>'exchangeRate')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -152,10 +251,10 @@
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'exportToAccounting'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'exportToAccounting'",
       values: [
         {
           label: 'True',
@@ -172,30 +271,29 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'folioInvoiceNo'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'folioInvoiceNo'",
     },
     {
       name: 'invoice_date',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'invoiceDate'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'invoiceDate'",
     },
     {
       name: 'lock_total',
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'lockTotal')::float",
+      valueGetter: "(:invoice.jsonb->>'lockTotal')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -203,60 +301,60 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'note'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'note'",
     },
     {
       name: 'payment_due',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'paymentDue'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'paymentDue'",
     },
     {
       name: 'payment_date',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'paymentDate'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'paymentDate'",
     },
     {
       name: 'payment_terms',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'paymentTerms'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'paymentTerms'",
     },
     {
       name: 'payment_method',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'paymentMethod'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'paymentMethod'",
     },
     {
       name: 'status',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'status'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'status'",
       values: [
         {
           label: 'Open',
@@ -285,10 +383,10 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'source'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'source'",
       values: [
         {
           label: 'User',
@@ -309,10 +407,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "(:invoice.jsonb->>'subTotal')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -320,10 +418,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'total')::float",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "(:invoice.jsonb->>'total')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -331,50 +429,20 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'vendorInvoiceNo'",
-    },
-    {
-      name: 'disbursement_number',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'disbursementNumber'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'vendorInvoiceNo'",
     },
     {
       name: 'voucher_number',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'voucherNumber'",
-    },
-    {
-      name: 'payment_id',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'paymentId'",
-    },
-    {
-      name: 'disbursement_date',
-      dataType: {
-        dataType: 'dateType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'disbursement_date'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'voucherNumber'",
     },
     {
       name: 'po_numbers',
@@ -384,11 +452,12 @@
           dataType: 'stringType',
         },
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(alc_id.value::text) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(alc_id.value::text)) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      essential: true,
+      hidden: true,
+      valueGetter: "(\n  SELECT\n    array_agg(alc_id.value::text) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:invoice.jsonb->'poNumbers'::text) alc_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(alc_id.value::text)) FILTER (\n      WHERE\n        (alc_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:invoice.jsonb->'poNumbers'::text) alc_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
     {
@@ -396,75 +465,145 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'vendorId'",
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->>'vendorId'",
+    },
+    {
+      name: 'vendor_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(\
+        SELECT \
+          org.jsonb ->> 'name' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_organizations org \
+        WHERE \
+          org.id = (:invoice.jsonb ->> 'vendorId')::uuid \
+      )",
+      filterValueGetter: "(\
+        SELECT \
+          lower(org.jsonb ->> 'name') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_organizations org \
+        WHERE \
+          org.id = (:invoice.jsonb ->> 'vendorId')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
+      idColumnName: 'vendor_id',
+      source: {
+        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        columnName: 'name',
+      }
     },
     {
       name: 'fiscal_year_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'fiscalYearId'",
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->>'fiscalYearId'",
+    },
+    {
+      name: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'fiscal_year_id',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(\
+        SELECT \
+          fiscal_year.jsonb ->> 'name' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fiscal_year \
+        WHERE \
+          fiscal_year.id = (:invoice.jsonb ->> 'fiscalYearId')::uuid \
+      )",
+      filterValueGetter: "(\
+        SELECT \
+          lower(fiscal_year.jsonb ->> 'name') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fiscal_year \
+        WHERE \
+          fiscal_year.id = (:invoice.jsonb ->> 'fiscalYearId')::uuid \
+      )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'name',
+      }
     },
     {
       name: 'account_no',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'accountNo'",
-    },
-    {
-      name: 'manual_payment',
-      dataType: {
-        dataType: 'booleanType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'manualPayment'",
-      values: [
-        {
-          label: 'True',
-          value: 'true',
-        },
-        {
-          label: 'False',
-          value: 'false',
-        },
-      ],
+      essential: true,
+      valueGetter: ":invoice.jsonb->>'accountNo'",
     },
     {
       name: 'acq_unit_ids',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'invoice',
+      isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(acq_id.value::text) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(acq_id.value::text)) FILTER (\n      WHERE\n        (acq_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'acqUnitIds'::text) acq_id (value)\n)",
-      valueFunction: 'lower(:value)',
+      hidden: true,
+      valueGetter: "(:invoice.jsonb -> 'acqUnitIds'::text)",
+      filterValueGetter: "(:invoice.jsonb -> 'acqUnitIds'::text)",
+    },
+    {
+      name: 'acquisition_unit',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      idColumnName: 'acq_unit_ids',
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:invoice.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:invoice.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name',
+      },
     },
     {
       name: 'next_invoice_line_number',
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'nextInvoiceLineNumber')::integer",
+      essential: true,
+      hidden: true,
+      valueGetter: "(:invoice.jsonb->>'nextInvoiceLineNumber')::integer",
       valueFunction: '(:value)::integer',
     },
     {
@@ -472,30 +611,31 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->'metadata'->>'createdDate'",
     },
     {
       name: 'updated_date',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+      essential: true,
+      valueGetter: ":invoice.jsonb->'metadata'->>'updatedDate'",
     },
     {
       name: 'created_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->'metadata'->>'createdByUserId'",
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
@@ -516,10 +656,11 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      essential: true,
+      hidden: true,
+      valueGetter: ":invoice.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
@@ -536,26 +677,6 @@
       ],
     },
     {
-      name: 'created_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
-    },
-    {
-      name: 'updated_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
-    },
-    {
       name: 'tag_list',
       dataType: {
         dataType: 'arrayType',
@@ -563,13 +684,30 @@
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'invoice',
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      essential: true,
+      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:invoice.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:invoice.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
       valueFunction: 'lower(:value)',
     },
+    {
+      name: 'total_units',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "( \
+        SELECT \
+          SUM((invoice_line.jsonb -> 'quantity')::numeric) \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_invoice_lines invoice_line \
+        WHERE \
+          (invoice_line.jsonb ->> 'invoiceId')::uuid = :invoice.id \
+      )",
+      valueFunction: '(:value)::integer'
+    }
   ],
   sources: [
     {

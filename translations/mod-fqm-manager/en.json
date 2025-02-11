@@ -1523,5 +1523,17 @@
   "migration.warning.REMOVED_ENTITY.withoutAlternative": "Record type {name} is no longer available. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_FIELD.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_FIELD.withoutAlternative": "Field {name} is no longer available. For reference, your original query was {fql}.",
-  "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}."
+  "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}.",
+  "entityType.simple_finance_group": "Finance group",
+  "entityType.simple_finance_group.acq_unit_ids": "Acquisition unit UUIDs",
+  "entityType.simple_finance_group.acquisition_unit": "Acquisition unit names",
+  "entityType.simple_finance_group.created_by_user_id": "Created by user UUID",
+  "entityType.simple_finance_group.created_by_username": "Created by username",
+  "entityType.simple_finance_group.created_date": "Created date",
+  "entityType.simple_finance_group.description": "Description",
+  "entityType.simple_finance_group.id": "UUID",
+  "entityType.simple_finance_group.name": "Name",
+  "entityType.simple_finance_group.code": "Code",
+  "entityType.simple_finance_group.status": "Status",
+  "entityType.simple_finance_group.version": "Version"
 }

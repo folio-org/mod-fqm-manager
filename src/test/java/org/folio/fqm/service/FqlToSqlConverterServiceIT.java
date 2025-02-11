@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.IntegrationTestBase;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
-import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -52,7 +51,7 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
           .valueFunction("lower(\"left\"(:value, 10))")
           .sourceAlias("t")
       )).sources(List.of(
-        new EntityTypeSource("db", "t")
+        new EntityTypeSourceDatabase("db", "t")
           .target("""
               (select id, some_column, unused_column
               from (values

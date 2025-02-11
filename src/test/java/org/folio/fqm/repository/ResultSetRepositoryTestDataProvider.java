@@ -6,7 +6,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.DSLContext;
@@ -43,7 +43,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE")
     .sources(List.of(
-      new EntityTypeSource()
+      new EntityTypeSourceDatabase()
         .type("db")
         .alias("source1")
         .target("target1"))
@@ -64,7 +64,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     )
     .fromClause("TEST_GROUP_BY_ENTITY_TYPE")
     .sources(List.of(
-      new EntityTypeSource()
+      new EntityTypeSourceDatabase()
         .type("db")
         .alias("source1")
         .target("target1"))
@@ -86,7 +86,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     .fromClause("TEST_ENTITY_TYPE")
     .sources(
       List.of(
-        new EntityTypeSource()
+        new EntityTypeSourceDatabase()
           .type("db")
           .alias("source1")
           .target("target1")

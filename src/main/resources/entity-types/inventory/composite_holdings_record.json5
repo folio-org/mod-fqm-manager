@@ -7,54 +7,42 @@
     {
       alias: 'holdings',
       type: 'entity-type',
-      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
+      targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
     },
     {
       alias: 'effective_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      targetField: 'id',
+      sourceField: 'holdings.effective_location_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'holdings.hrd',
-        condition: ":this.id = :that.effectivelocationid"
-      }
     },
     {
       alias: 'effective_library',
       type: 'entity-type',
-      id: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary,
+      targetId: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary,
+      targetField: 'id',
+      sourceField: 'effective_location.library_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'effective_location.location',
-        condition: ":this.id = :that.libraryid"
-      }
     },
     {
       alias: 'permanent_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      targetField: 'id',
+      sourceField: 'holdings.permanent_location_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'holdings.hrd',
-        condition: ":this.id = :that.permanentlocationid"
-      }
     },
     {
       alias: 'temporary_location',
       type: 'entity-type',
-      id: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
+      targetField: 'id',
+      sourceField: 'holdings.temporary_location_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'holdings.hrd',
-        condition: ":this.id = :that.temporarylocationid"
-      }
-    }
+    },
   ],
   defaultSort: [
     {

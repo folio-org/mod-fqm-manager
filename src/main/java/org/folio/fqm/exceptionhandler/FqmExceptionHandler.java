@@ -29,14 +29,14 @@ public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<Error> handleFqmExceptions(FqmException exception,
                                                    ServletWebRequest webRequest) {
     String url = webRequest.getHttpMethod() + " " + webRequest.getRequest().getRequestURI();
-    log.error("Request failed. URL: {}. Failure reason : {}", url, exception.getMessage());
+    log.error("Request failed with internal exception. URL: {}. Failure reason:", url, exception);
     return new ResponseEntity<>(exception.getError(), exception.getHttpStatus());
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleGenericExceptions(Exception exception, ServletWebRequest webRequest) {
     String url = webRequest.getHttpMethod() + " " + webRequest.getRequest().getRequestURI();
-    log.error("Request failed with an unhandled exception. URL: {}. Failure reason : {}", url, exception.getMessage());
+    log.error("Request failed with an unhandled exception. URL: {}. Failure reason:", url, exception);
     return new ResponseEntity<>(getStackTraceAsString(exception), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 

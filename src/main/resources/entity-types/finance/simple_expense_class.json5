@@ -14,6 +14,8 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       isIdColumn: true,
       valueGetter: ":sourceAlias.id"
     },
@@ -25,6 +27,7 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
       valueFunction: '(:value)::integer'
     }
@@ -36,7 +39,8 @@
       },
       sourceAlias: 'expense_class',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'name'",
       filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
@@ -48,7 +52,8 @@
       },
       sourceAlias: 'expense_class',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'code'",
       filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
@@ -60,7 +65,8 @@
       },
       sourceAlias: 'expense_class',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNumberExt'"
     },
     {
@@ -71,6 +77,7 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
     },
     {
@@ -81,6 +88,7 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
     },
     {
@@ -91,7 +99,23 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'"
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_by_user_id',
@@ -101,27 +125,23 @@
       sourceAlias: 'expense_class',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'"
-    },
-    {
-      name: 'created_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'expense_class',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUsername'"
-    },
-    {
-      name: 'updated_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'expense_class',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUsername'"
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     }
   ],
   sources: [

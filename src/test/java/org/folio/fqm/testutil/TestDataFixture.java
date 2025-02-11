@@ -144,21 +144,6 @@ public class TestDataFixture {
     return mockDefinition;
   }
 
-  public static EntityType getEntityTypeDefinition(
-    String name,
-    List<EntityTypeColumn> columns,
-    List<EntityTypeDefaultSort> sorts,
-    List<UUID> subEntityTypes
-  ) {
-    return new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name(name)
-      .labelAlias(name)
-      .columns(columns)
-      .defaultSort(sorts)
-      .subEntityTypeIds(subEntityTypes);
-  }
-
   public static EntityTypeColumn column1() {
     return col1;
   }

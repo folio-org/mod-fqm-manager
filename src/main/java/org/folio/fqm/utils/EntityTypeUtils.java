@@ -1,16 +1,19 @@
 package org.folio.fqm.utils;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.Join;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
@@ -94,5 +97,43 @@ public class EntityTypeUtils {
       .filter(col -> col.getDataType() instanceof DateType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .toList();
+  }
+
+  /**
+   * Searches for a column within an entity type by name, returning it if it exists.
+   * This method will not search nested object fields, only top-level columns.
+   */
+  public static Optional<EntityTypeColumn> findColumnByName(EntityType entityType, String columnName) {
+    return entityType.getColumns().stream().filter(column -> column.getName().equals(columnName)).findFirst();
+  }
+
+  /**
+   * Searches for a join from source to target and returns it, if it exists.
+   * The join MUST be defined in source; a separate call is needed to check for joins defined target to source.
+   */
+  public static Optional<Join> findJoinBetween(EntityTypeColumn source, EntityTypeColumn target) {
+    return source
+      .getJoinsTo()
+      .stream()
+      .filter(j ->
+        j.getTargetId().equals(target.getOriginalEntityTypeId()) &&
+        j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
+      )
+      .findFirst();
+  }
+
+  /**
+   * Splits a composite field name (foo.bar) into an alias and a field name.
+   * 
+   * @example foo.bar -> Pair.of("foo", "bar")
+   * @example bar -> Pair.of("", "bar")
+   * @example foo.bar.baz -> Pair.of("foo.bar", "baz")
+   */
+  public static Pair<String, String> splitFieldIntoAliasAndField(String field) {
+    int dotIndex = field.lastIndexOf('.');
+    if (dotIndex == -1) {
+      return Pair.of("", field);
+    }
+    return Pair.of(field.substring(0, dotIndex), field.substring(dotIndex + 1));
   }
 }

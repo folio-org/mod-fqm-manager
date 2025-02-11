@@ -59,7 +59,7 @@ public class PermissionsRegularService implements PermissionsService {
   }
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
-    EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), null);
+    EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), null, false);
     return new HashSet<>(flattenedEntityType.getRequiredPermissions());
   }
 

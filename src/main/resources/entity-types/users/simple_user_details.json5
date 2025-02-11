@@ -10,14 +10,10 @@
       alias: 'user',
     },
   ],
-  requiredPermissions: [
-    'users.collection.get',
-    'users.item.get',
-  ],
+  requiredPermissions: ['users.collection.get', 'users.item.get'],
   columns: [
     {
       name: 'id',
-      sourceAlias: 'user',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -25,7 +21,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ':sourceAlias.id',
+      valueGetter: ':user.id',
     },
     {
       name: 'active',
@@ -97,6 +93,23 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
     },
     {
+      name: 'group_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb->>'patronGroup'",
+      joinsTo: [
+        {
+          targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
       name: 'email',
       sourceAlias: 'user',
       dataType: {
@@ -107,7 +120,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'email'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'email'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'last_name',
@@ -120,7 +133,7 @@
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'lastName'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
       name: 'first_name',
@@ -133,7 +146,7 @@
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'firstName'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
       name: 'last_name_first_name',
@@ -345,7 +358,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'preferredFirstName'",
       filterValueGetter: "${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'preferredFirstName'::text)",
-      valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)'
+      valueFunction: '${tenant_id}_mod_users.f_unaccent(:value)',
     },
     {
       name: 'username',
@@ -358,7 +371,7 @@
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'username'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'created_date',
@@ -394,7 +407,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'expirationDate'",
       filterValueGetter: '"left"(:sourceAlias.jsonb ->> \'expirationDate\'::text, 600)',
-      valueFunction: '"left"(:value, 600)'
+      valueFunction: '"left"(:value, 600)',
     },
     {
       name: 'barcode',
@@ -408,7 +421,7 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'barcode'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'external_system_id',
@@ -421,7 +434,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'externalSystemId'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'externalSystemId'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
       name: 'type',
@@ -453,10 +466,10 @@
         {
           value: 'DCB',
           label: 'DCB',
-        }
+        },
       ],
       filterValueGetter: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> \'type\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
       name: 'tags_tag_list',
@@ -521,7 +534,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb -> 'departments')",
-      filterValueGetter: "(:sourceAlias.jsonb -> 'departments')"
+      filterValueGetter: "(:sourceAlias.jsonb -> 'departments')",
     },
     {
       name: 'departments',
@@ -569,8 +582,8 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
   defaultSort: [
     {

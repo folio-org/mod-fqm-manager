@@ -3,7 +3,9 @@
   name: 'simple_ledger',
   private: false,
   requiredPermissions: [
-    "finance.ledgers.collection.get"
+    "finance.ledgers.collection.get",
+    "acquisitions-units.units.collection.get",
+    "finance.fiscal-years.collection.get"
   ],
   columns: [
     {
@@ -14,6 +16,7 @@
       sourceAlias: 'ledger',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       isIdColumn: true,
       valueGetter: ":sourceAlias.id"
     },
@@ -25,6 +28,7 @@
       sourceAlias: 'ledger',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
       valueFunction: '(:value)::integer'
     },
@@ -35,7 +39,8 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'code'",
       filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
@@ -47,7 +52,8 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'description'"
     },
     {
@@ -57,8 +63,9 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      essential: true,
       filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
     },
@@ -69,8 +76,28 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
+      essential: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'fiscalYearOneId'"
+      valueGetter: "(:sourceAlias.jsonb ->> 'fiscalYearOneId'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb ->> 'fiscalYearOneId'::text)"
+    },
+    {
+      name: 'fiscal_year_one',
+      sourceAlias: 'ledger',
+      dataType: {
+        dataType: 'stringType',
+      },
+      idColumnName: 'fiscal_year_one_id',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter:"(SELECT fis_y.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y WHERE (:sourceAlias.jsonb->>'fiscalYearOneId') = fis_y.id::text)",
+      filterValueGetter: "(SELECT lower(fis_y.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fis_y WHERE (:sourceAlias.jsonb->>'fiscalYearOneId') = fis_y.id::text)",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'name',
+      }
     },
     {
       name: 'ledger_status',
@@ -93,7 +120,8 @@
         },
       ],
       queryable: true,
-      visibleByDefault: false,
+      essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb ->> 'ledgerStatus'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> \'ledgerStatus\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:value)), 600)'
@@ -105,23 +133,52 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'currency'"
     },
     {
       name: 'acq_unit_ids',
+      sourceAlias: 'ledger',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
       },
-      sourceAlias: 'ledger',
+      isIdColumn: false,
       queryable: false,
+      hidden: true,
+      essential: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(acq_id.value::text) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(acq_id.value::text)) FILTER (WHERE (acq_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds'::text) acq_id(value))",
-      valueFunction: 'lower(:value)'
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+    },
+    {
+      name: 'acquisition_unit',
+      sourceAlias: 'ledger',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'acq_unit_ids',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name'
+      }
     },
     {
       name: 'restrict_encumbrance',
@@ -140,7 +197,8 @@
         },
       ],
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'restrictEncumbrance'"
     },
     {
@@ -160,7 +218,8 @@
         },
       ],
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'restrictExpenditures'"
     },
     {
@@ -171,6 +230,7 @@
       sourceAlias: 'ledger',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
     },
     {
@@ -181,6 +241,7 @@
       sourceAlias: 'ledger',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
     },
     {
@@ -190,193 +251,50 @@
       },
       sourceAlias: 'ledger',
       queryable: true,
+      essential: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'"
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
-
     {
       name: 'updated_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       sourceAlias: 'ledger',
+      essential: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'"
-    },
-    {
-      name: 'allocated',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'allocated')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'available',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'available')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'net_transfers',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'netTransfers')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'created_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUsername'"
-    },
-    {
-      name: 'updated_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUsername'"
-    },
-    {
-      name: 'unavailable',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'unavailable')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'initial_allocation',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'initialAllocation')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'allocation_to',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'allocationTo')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'allocation_from',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'allocationFrom')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'total_funding',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'totalFunding')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'cash_balance',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'cashBalance')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'awaiting_payment',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'awaitingPayment')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'encumbered',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'encumbered')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'expenditures',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'expenditures')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'over_encumbrance',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'overEncumbrance')::float",
-      valueFunction: '(:value)::float'
-    },
-    {
-      name: 'over_expended',
-      dataType: {
-        dataType: 'numberType',
-      },
-      sourceAlias: 'ledger',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'overExpended')::float",
-      valueFunction: '(:value)::float'
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     }
   ],
   sources: [

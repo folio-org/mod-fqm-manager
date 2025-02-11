@@ -80,7 +80,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .columns(columns);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true, true);
     List<EntityTypeColumn> expectedColumns = columns.stream()
       .sorted(nullsLast(comparing(EntityTypeColumn::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
@@ -88,7 +88,7 @@ class EntityTypeServiceTest {
 
     assertEquals(expectedColumns, result.getColumns(), "Columns should include hidden ones and be sorted");
 
-    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null);
+    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
     verifyNoMoreInteractions(entityTypeFlatteningService);
   }
 
@@ -255,7 +255,7 @@ class EntityTypeServiceTest {
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -279,7 +279,7 @@ class EntityTypeServiceTest {
           Map.of(valueColumnName, "value_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues expectedColumnValues = new ColumnValues().content(
       List.of(
@@ -304,7 +304,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
@@ -321,7 +321,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
@@ -339,7 +339,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(new ColumnValues().content(values), actualColumnValueLabel);
@@ -361,7 +361,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(new ColumnValues().content(expectedValues), actualColumnValueLabel);
@@ -385,7 +385,7 @@ class EntityTypeServiceTest {
       ));
 
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_01"))).thenReturn("""
            {
              "what": {
@@ -434,7 +434,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(languageClient.get("tenant_01")).thenReturn("""
            {
@@ -490,7 +490,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(languageClient.get("tenant_01")).thenReturn("""
            {
@@ -559,7 +559,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(languageClient.get("tenant_01")).thenThrow(FeignException.BadRequest.class);
 
@@ -571,7 +571,7 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false))
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
@@ -590,7 +590,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .crossTenantQueriesEnabled(true);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false))
       .thenReturn(entityType);
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
@@ -610,7 +610,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .crossTenantQueriesEnabled(false);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false))
       .thenReturn(entityType);
     when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
 
@@ -634,7 +634,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -662,7 +662,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
@@ -688,7 +688,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(List.of("tenant1", "central"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService

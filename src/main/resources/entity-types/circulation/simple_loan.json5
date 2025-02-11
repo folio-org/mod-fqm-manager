@@ -63,6 +63,20 @@
       hidden: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'userId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'proxy_user_id',
@@ -76,6 +90,20 @@
       hidden: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'proxyUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_id',
@@ -90,8 +118,15 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemId'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'itemId\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
-
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)',
+      joinsTo: [
+        {
+          targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_effective_location_id_at_check_out',
@@ -244,6 +279,14 @@
       hidden: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'loanPolicyId'",
+      joinsTo: [
+        {
+          targetId: '64d7b5fb-2ead-444c-a9bd-b9db831f4132', // simple_loan_policy
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'checkout_service_point_id',
@@ -258,7 +301,15 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'checkoutServicePointId'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'checkoutServicePointId\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)',
+      joinsTo: [
+        {
+          targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'checkin_service_point_id',
@@ -273,7 +324,15 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'checkinServicePointId'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:sourceAlias.jsonb ->> \'checkinServicePointId\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_circulation_storage.f_unaccent(:value)), 600)',
+      joinsTo: [
+        {
+          targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'patron_group_id_at_checkout',

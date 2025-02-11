@@ -15,7 +15,6 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      hidden: true,
       isIdColumn: true,
       valueGetter: ":sourceAlias.id"
     },

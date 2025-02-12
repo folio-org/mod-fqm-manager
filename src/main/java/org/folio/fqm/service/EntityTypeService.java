@@ -139,7 +139,7 @@ public class EntityTypeService {
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName));
+      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldName)));
 
     if (!CollectionUtils.isEmpty(field.getValues())) {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);

@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,6 +60,7 @@ import static org.jooq.impl.DSL.trueCondition;
 /**
  * Class responsible for converting an FQL query to SQL query
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FqlToSqlConverterService {
@@ -220,13 +222,13 @@ public class FqlToSqlConverterService {
   private static Field getField(FieldCondition<?> fieldCondition, EntityType entityType) {
     return FqlValidationService
       .findFieldDefinition(fieldCondition.field(), entityType)
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
   }
 
   private static Field getFieldForFiltering(FieldCondition<?> fieldCondition, EntityType entityType) {
     return FqlValidationService
       .findFieldDefinitionForQuerying(fieldCondition.field(), entityType)
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
@@ -464,7 +466,7 @@ public class FqlToSqlConverterService {
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
       .map(col -> col.getDataType().getDataType())
       .findFirst()
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get

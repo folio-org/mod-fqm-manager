@@ -253,7 +253,7 @@ public class ResultSetRepository {
         .map(EntityTypeColumn::getDataType)
         .map(EntityDataType::getDataType)
         .findFirst()
-        .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), idColumnName));
+        .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), idColumnName)));
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()

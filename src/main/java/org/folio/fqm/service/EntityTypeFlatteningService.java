@@ -66,10 +66,14 @@ public class EntityTypeFlatteningService {
    * @return
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
-    return entityTypeCache.get(
-      new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
-      k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
-    );
+    return entityTypeCache
+      .get(
+        new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
+        k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
+      )
+      // ensures we get a fresh copy each time, preventing any changes to the cached entity type from affecting future requests
+      .toBuilder()
+      .build();
   }
 
   private EntityType getFlattenedEntityType(
@@ -118,7 +122,12 @@ public class EntityTypeFlatteningService {
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
         // Recursively flatten the source and add it to ourselves
         UUID sourceEntityTypeId = sourceEt.getTargetId();
-        EntityType flattenedSourceDefinition = getFlattenedEntityType(sourceEntityTypeId, sourceEt, tenantId, preserveAllColumns);
+        EntityType flattenedSourceDefinition = getFlattenedEntityType(
+          sourceEntityTypeId,
+          sourceEt,
+          tenantId,
+          preserveAllColumns
+        );
 
         // If the original entity type already supports cross-tenant queries, we can skip this. Otherwise, copy the nested source's setting
         // This effectively means that if any nested source supports cross-tenant queries, the flattened entity type will too
@@ -145,7 +154,11 @@ public class EntityTypeFlatteningService {
           flattenedSourceDefinition
             .getColumns()
             .stream()
-            .filter(col -> preserveAllColumns || !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) || Boolean.TRUE.equals(col.getEssential()))
+            .filter(col ->
+              preserveAllColumns ||
+              !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) ||
+              Boolean.TRUE.equals(col.getEssential())
+            )
             // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source alias in flattenedSourceDefinition
             .map(col ->
               SourceUtils.injectSourceAlias(

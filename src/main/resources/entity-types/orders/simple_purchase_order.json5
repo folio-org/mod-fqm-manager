@@ -3,6 +3,9 @@
   name: 'simple_purchase_order',
   root: true,
   private: true,
+  customFieldEntityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234', // This entity type
+  sourceView: 'src_purchase_order_custom_fields',
+  sourceViewExtractor: ":po.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'po',

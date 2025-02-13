@@ -227,6 +227,7 @@ public class EntityTypeRepository {
       .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
       .queryable(true)
+      .essential(true)
       .isCustomField(true);
   }
 
@@ -254,6 +255,7 @@ public class EntityTypeRepository {
       .filterValueGetter(filterValueGetter)
       .labelAlias(name)
       .queryable(true)
+      .essential(true)
       .isCustomField(true);
   }
 
@@ -268,6 +270,7 @@ public class EntityTypeRepository {
       .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
       .queryable(true)
+      .essential(true)
       .isCustomField(true);
   }
 

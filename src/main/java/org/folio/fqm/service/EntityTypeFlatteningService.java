@@ -66,10 +66,10 @@ public class EntityTypeFlatteningService {
    * @return
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
-    return entityTypeCache.get(
-      new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
-      k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
-    );
+    // return entityTypeCache.get(
+      // new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
+     return getFlattenedEntityType(entityTypeId, null, tenantId, preserveAllColumns);
+    // );
   }
 
   private EntityType getFlattenedEntityType(

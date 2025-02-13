@@ -2,17 +2,13 @@
   id: 'abc777d3-2a45-43e6-82cb-71e8c96d13d2',
   name: 'composite_purchase_order_lines',
   private: false,
-  customFieldEntityTypeId: 'abc777d3-2a45-43e6-82cb-71e8c96d13d2', // This entity type
-  sourceView: 'src_purchase_order_custom_fields',
-  sourceViewExtractor: ":sourceAlias.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'pol',
       type: 'entity-type',
       targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
-      essentialOnly: true,
-      customFieldEntity: 'po_line'
+      essentialOnly: true
     },
     {
       alias: 'po',
@@ -20,8 +16,7 @@
       targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
       targetField: 'id',
       sourceField: 'pol.purchase_order_id',
-      essentialOnly: true,
-      customFieldEntity: 'purchase_order'
+      essentialOnly: true
     },
     {
       alias: 'po_created_by_user',

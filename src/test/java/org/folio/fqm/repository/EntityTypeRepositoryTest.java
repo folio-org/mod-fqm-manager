@@ -86,6 +86,7 @@ class EntityTypeRepositoryTest {
         .values(CUSTOM_FIELD_BOOLEAN_VALUES)
         .visibleByDefault(false)
         .queryable(true)
+        .essential(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23f9")
@@ -96,6 +97,7 @@ class EntityTypeRepositoryTest {
         .values(radioButtonValues)
         .visibleByDefault(false)
         .queryable(true)
+        .essential(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fa")
@@ -106,6 +108,7 @@ class EntityTypeRepositoryTest {
         .values(singleSelectValues)
         .visibleByDefault(false)
         .queryable(true)
+        .essential(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fb")
@@ -114,6 +117,7 @@ class EntityTypeRepositoryTest {
         .labelAlias("custom_column_4")
         .visibleByDefault(false)
         .queryable(true)
+        .essential(true)
         .isCustomField(true),
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23fc")
@@ -122,6 +126,7 @@ class EntityTypeRepositoryTest {
         .labelAlias("custom_column_5")
         .visibleByDefault(false)
         .queryable(true)
+        .essential(true)
         .isCustomField(true)
     );
     EntityType expectedEntityType = new EntityType()

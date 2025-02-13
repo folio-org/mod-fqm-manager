@@ -49,7 +49,7 @@ public class IntegrationTestBase {
 
   @Container
   private static final PostgreSQLContainer<?> postgres =
-    new PostgreSQLContainer<>("postgres:12-alpine")
+    new PostgreSQLContainer<>("postgres:16-alpine")
       .withNetwork(network)
       .withNetworkAliases("mypostgres")
       .withExposedPorts(5432)

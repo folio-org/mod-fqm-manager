@@ -64,6 +64,7 @@ public class QueryManagementService {
   public QueryIdentifier runFqlQueryAsync(SubmitQuery submitQuery) {
     EntityType entityType = entityTypeService
       .getEntityTypeDefinition(submitQuery.getEntityTypeId(), true, false);
+    log.info("entityTypeService.getEntityTypeDefinition({}, true, false) yields columns {}", submitQuery.getEntityTypeId(), entityType.getColumns().stream().map(EntityTypeColumn::getName).toList());
     List<String> fields = CollectionUtils.isEmpty(submitQuery.getFields()) ?
       getFieldsFromEntityType(entityType) : new ArrayList<>(submitQuery.getFields());
     List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);

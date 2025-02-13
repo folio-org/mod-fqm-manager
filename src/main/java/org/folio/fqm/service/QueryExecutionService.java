@@ -29,6 +29,7 @@ public class QueryExecutionService {
   // Long-running method. Running this method within a transaction boundary will hog db connection for
   // long time. Hence, do not run this method in a transaction.
   public void executeQueryAsync(Query query, EntityType entityType, int maxQuerySize) {
+    log.info("Creating FqlQueryWithContext with ET with columns {}", entityType.getColumns().stream().map(e -> e.getName()).toList());
     try {
       log.info("Executing query {}", query.queryId());
       FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(

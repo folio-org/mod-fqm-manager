@@ -16,6 +16,7 @@ import org.folio.fqm.utils.StreamHelper;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.fql.model.Fql;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Cursor;
@@ -101,6 +102,7 @@ public class IdStreamer {
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
+      log.info("entityType = {}", tenantId != null && tenantId.equals(executionContext.getTenantId()) ? "provided" : "derived with false");
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
         entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
@@ -110,6 +112,9 @@ public class IdStreamer {
       // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
       EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
       String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
+      log.info("calling FqlToSqlConverterService.getSqlCondition with column list: {}", entityTypeDefinition.getColumns().stream().map(EntityTypeColumn::getName).toList());
+      log.info("alternatively, entityTypeDefinitionWithAllFields has: {}", entityTypeDefinitionWithAllFields.getColumns().stream().map(EntityTypeColumn::getName).toList());
 
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 

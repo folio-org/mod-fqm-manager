@@ -264,7 +264,10 @@ public class FqlToSqlConverterService {
   private static Field getField(FieldCondition<?> fieldCondition, EntityType entityType) {
     return FqlValidationService
       .findFieldDefinition(fieldCondition.field(), entityType)
-      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
+      .orElseThrow(() -> {
+        log.fatal("ERROR AT SITE 1");
+        return log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      });
   }
 
   private static Field getFieldForFiltering(FieldCondition<?> fieldCondition, EntityType entityType) {
@@ -281,7 +284,10 @@ public class FqlToSqlConverterService {
           return field;
         }
       })
-      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
+      .orElseThrow(() -> {
+        log.fatal("ERROR AT SITE 2");
+        return log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      });
   }
 
   private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
@@ -589,7 +595,10 @@ public class FqlToSqlConverterService {
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
       .map(col -> col.getDataType().getDataType())
       .findFirst()
-      .orElseThrow(() -> log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field())));
+      .orElseThrow(() -> {
+        log.fatal("ERROR AT SITE 3");
+        return log.throwing(new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+      });
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get

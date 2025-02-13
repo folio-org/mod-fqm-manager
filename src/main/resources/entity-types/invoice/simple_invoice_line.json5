@@ -2,7 +2,11 @@
   id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
   name: 'simple_invoice_line',
   private: false,
-  requiredPermissions: ['invoice.invoice-lines.collection.get'],
+  requiredPermissions: [
+    'invoice.invoice-lines.collection.get',
+    'invoice.invoices.collection.get',
+    'orders.po-lines.item.get'
+  ],
   columns: [
     {
       name: 'id',
@@ -13,6 +17,7 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -22,7 +27,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'accountingCode'",
     },
     {
@@ -32,7 +38,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'accountNumber'",
     },
     {
@@ -43,6 +50,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'adjustmentsTotal')::float",
       valueFunction: '(:value)::float',
     },
@@ -54,6 +62,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'comment'",
     },
     {
@@ -63,7 +72,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'description'",
     },
     {
@@ -80,8 +90,8 @@
                 dataType: 'stringType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
@@ -101,8 +111,8 @@
                 },
               ],
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
@@ -112,8 +122,8 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
@@ -123,21 +133,21 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
-            {
-              name: 'invoice_line_id',
-              property: 'invoiceLineId',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
+//            {
+//              name: 'invoice_line_id',
+//              property: 'invoiceLineId',
+//              dataType: {
+//                dataType: 'rangedUUIDType',
+//              },
+//              queryable: false,
+//              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+//              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+//              valueFunction: 'lower(:value)',
+//            },
             {
               name: 'expense_class_id',
               property: 'expenseClassId',
@@ -145,8 +155,8 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value ->> 'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
@@ -156,14 +166,14 @@
                 dataType: 'numberType',
               },
               queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
             },
           ],
         },
       },
       sourceAlias: 'invoice_lines',
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
+      valueGetter: ":sourceAlias.jsonb->>'fundDistributions'",
     },
     {
       name: 'invoice_id',
@@ -173,7 +183,35 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'invoiceId'",
+    },
+    {
+      name: 'invoice_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          invoice.jsonb ->> 'folioInvoiceNo' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_invoice_invoices invoice \
+        WHERE \
+          invoice.id = (:invoice_lines.jsonb ->> 'invoiceId')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower(invoice.jsonb ->> 'folioInvoiceNo') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_invoice_invoices invoice \
+        WHERE \
+          invoice.id = (:invoice_lines.jsonb ->> 'invoiceId')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'invoice_line_number',
@@ -182,7 +220,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'invoiceLineNumber'",
     },
     {
@@ -192,7 +231,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'invoiceLineStatus'",
       values: [
         {
@@ -224,10 +264,12 @@
     {
       name: 'po_line_id',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'rangedUUIDType',
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":invoice_lines.jsonb->>'poLineId'",
       joinsTo: [
         {
@@ -239,24 +281,30 @@
       ],
     },
     {
-      name: 'product_id',
+      name: 'po_line_number',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'productId'",
-    },
-    {
-      name: 'product_id_type',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice_lines',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'productIdType'",
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          po_line.jsonb ->> 'poLineNumber' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_purchase_order_line po_line \
+        WHERE \
+          po_line.id = (:invoice_lines.jsonb ->> 'poLineId')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower(po_line.jsonb ->> 'poLineNumber') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_purchase_order_line po_line \
+        WHERE \
+          po_line.id = (:invoice_lines.jsonb ->> 'poLineId')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'quantity',
@@ -265,7 +313,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'quantity')::integer",
       valueFunction: '(:value)::integer',
     },
@@ -276,7 +325,8 @@
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'releaseEncumbrance'",
       values: [
         {
@@ -297,6 +347,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionInfo'",
     },
     {
@@ -307,6 +358,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionStart'",
     },
     {
@@ -317,6 +369,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'subscriptionEnd'",
     },
     {
@@ -327,6 +380,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'subTotal')::float",
       valueFunction: '(:value)::float',
     },
@@ -338,6 +392,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb->>'total')::float",
       valueFunction: '(:value)::float',
     },
@@ -359,6 +414,7 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {
@@ -369,6 +425,8 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
       joinsTo: [
         {
@@ -393,6 +451,8 @@
       sourceAlias: 'invoice_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
@@ -410,26 +470,6 @@
       ],
     },
     {
-      name: 'created_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice_lines',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
-    },
-    {
-      name: 'updated_by_username',
-      dataType: {
-        dataType: 'stringType',
-      },
-      sourceAlias: 'invoice_lines',
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
-    },
-    {
       name: 'tag_list',
       dataType: {
         dataType: 'arrayType',
@@ -440,6 +480,7 @@
       sourceAlias: 'invoice_lines',
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
       filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
       valueFunction: 'lower(:value)',
@@ -495,32 +536,12 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'refNumberType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
               valueFunction: 'lower(:value)',
             },
-            {
-              name: 'vendor_details_source',
-              property: 'vendorDetailsSource',
-              dataType: {
-                dataType: 'stringType',
-              },
-              values: [
-                {
-                  label: 'OrderLine',
-                  value: 'OrderLine',
-                },
-                {
-                  label: 'InvoiceLine',
-                  value: 'InvoiceLine',
-                },
-              ],
-              queryable: false,
-              valueGetter: "( SELECT array_agg(elems.value ->> 'vendorDetailsSource') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'vendorDetailsSource')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'referenceNumbers') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
           ],
         },
       },
       sourceAlias: 'invoice_lines',
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'referenceNumbers'",
     },
   ],

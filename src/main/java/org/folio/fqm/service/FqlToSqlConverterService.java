@@ -49,6 +49,7 @@ import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.jooq.Condition;
 import org.jooq.JSONB;
@@ -277,6 +278,7 @@ public class FqlToSqlConverterService {
         log.info("AAAA: found field {}", field);
         if (field.getIdColumnName() != null) {
           log.info("AAAB: field has ID column name {}, recursing...", field.getIdColumnName());
+          log.info("as a reminder, entity type has fields {}", entityType.getColumns().stream().map(EntityTypeColumn::getName).toList());
           return FqlValidationService
             .findFieldDefinitionForQuerying(new FqlField(field.getIdColumnName()), entityType)
             .orElse(null);

@@ -1523,5 +1523,17 @@
     "entityType.simple_FOLIO_user.email": "Email",
     "entityType.simple_FOLIO_user.last_name_first_name": "Last name, first name",
     "entityType.simple_FOLIO_user.username": "Username",
-    "entityType.simple_item.tags": "Tags"
+    "entityType.simple_item.tags": "Tags",
+    "entityType.simple_finance_group": "Finance group",
+    "entityType.simple_finance_group.acq_unit_ids": "Acquisition unit UUIDs",
+    "entityType.simple_finance_group.acquisition_unit": "Acquisition unit names",
+    "entityType.simple_finance_group.created_by_user_id": "Created by user UUID",
+    "entityType.simple_finance_group.created_by_username": "Created by username",
+    "entityType.simple_finance_group.created_date": "Created date",
+    "entityType.simple_finance_group.description": "Description",
+    "entityType.simple_finance_group.id": "UUID",
+    "entityType.simple_finance_group.name": "Name",
+    "entityType.simple_finance_group.code": "Code",
+    "entityType.simple_finance_group.status": "Status",
+    "entityType.simple_finance_group.version": "Version"
 }

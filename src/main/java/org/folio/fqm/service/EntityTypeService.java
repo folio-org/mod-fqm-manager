@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.io.IOException;
@@ -103,10 +102,9 @@ public class EntityTypeService {
    * @param entityTypeId  the ID to search for
    * @param includeHidden Indicates whether the hidden column should be displayed.
    *                      If set to true, the hidden column will be included in the output
-   * @param sortColumns   If true, columns will be alphabetically sorted by their translations
    * @return the entity type definition if found, empty otherwise
    */
-  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
+  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
@@ -115,11 +113,6 @@ public class EntityTypeService {
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
       .toList();
-    if (sortColumns) {
-      columns = columns.stream()
-        .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-        .toList();
-    }
     return entityType
       .columns(columns)
       .crossTenantQueriesEnabled(crossTenantEnabled);

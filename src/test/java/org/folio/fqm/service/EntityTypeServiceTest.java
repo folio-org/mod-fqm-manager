@@ -81,7 +81,7 @@ class EntityTypeServiceTest {
       .columns(columns);
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true, true);
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     List<EntityTypeColumn> expectedColumns = columns.stream()
       .sorted(nullsLast(comparing(EntityTypeColumn::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList();
@@ -575,7 +575,7 @@ class EntityTypeServiceTest {
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualDefinition);
   }
@@ -595,7 +595,7 @@ class EntityTypeServiceTest {
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
     EntityType actualEntityType = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -615,7 +615,7 @@ class EntityTypeServiceTest {
     when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
 
     EntityType actualEntityType = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualEntityType);
   }

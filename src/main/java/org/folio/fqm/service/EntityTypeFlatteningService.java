@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import lombok.extern.log4j.Log4j2;
@@ -28,6 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
+import static java.util.Objects.requireNonNullElse;
+
 @Log4j2
 @Service
 public class EntityTypeFlatteningService {
@@ -38,6 +44,20 @@ public class EntityTypeFlatteningService {
   private final UserTenantService userTenantService;
 
   private final Cache<EntityTypeCacheKey, EntityType> entityTypeCache;
+
+  // Comparator for sorting sources based on their order, then alias properties
+  private static final Comparator<EntityTypeSource> sourceComparator =
+    comparing((EntityTypeSource source) ->
+      source instanceof EntityTypeSourceEntityType etSource
+        ? etSource.getOrder()
+        : Integer.MAX_VALUE) // Right now this only really affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
+      .thenComparing(EntityTypeSource::getAlias);
+  // Sort columns within a source, based on their label alias (nulls last)
+  private static final Comparator<EntityTypeColumn> columnComparator =
+    nullsLast(
+      comparing(entityTypeColumn ->
+        requireNonNullElse(entityTypeColumn.getLabelAlias(), ""),
+        String.CASE_INSENSITIVE_ORDER));
 
   @Autowired
   public EntityTypeFlatteningService(
@@ -53,7 +73,7 @@ public class EntityTypeFlatteningService {
     this.userTenantService = userTenantService;
 
     this.entityTypeCache =
-      Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, java.util.concurrent.TimeUnit.SECONDS).build();
+      Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
   /**
@@ -63,7 +83,7 @@ public class EntityTypeFlatteningService {
    * @param tenantId The tenant ID to use for fetching the entity type definition
    * @param preserveAllColumns If true, all columns will be preserved, even if they are marked as non-essential and should be filtered out.
    *                             This is primary for use by methods which build the from clause, since some join-related columns aren't exposed to users.
-   * @return
+   * @return The flattened entity type definition, fully localized
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
     return entityTypeCache
@@ -115,9 +135,10 @@ public class EntityTypeFlatteningService {
     Set<String> finalPermissions = new HashSet<>(originalEntityType.getRequiredPermissions());
     List<EntityTypeColumn> childColumns = new ArrayList<>();
 
-    for (EntityTypeSource source : originalEntityType.getSources()) {
-      EntityTypeSource newSource = SourceUtils.copySource(sourceFromParent, source, renamedAliases);
-      flattenedEntityType.addSourcesItem(newSource);
+    // Sort the sources, so that the resulting groups of columns end up sorted appropriately
+    Iterable<EntityTypeSource> orderedSources = originalEntityType.getSources().stream().sorted(sourceComparator)::iterator;
+    for (EntityTypeSource source : orderedSources) {
+      flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceFromParent, source, renamedAliases));
 
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
         // Recursively flatten the source and add it to ourselves
@@ -149,11 +170,21 @@ public class EntityTypeFlatteningService {
             flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSource, renamedAliases))
           );
 
+        List<EntityTypeColumn> columns = flattenedSourceDefinition
+          .getColumns();
+        EntityType sourceEntityType = entityTypeRepository
+          .getEntityTypeDefinition(sourceEntityTypeId, tenantId)
+          .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+        long numETSources = sourceEntityType.getSources().stream().filter(EntityTypeSourceEntityType.class::isInstance).count();
+        if (numETSources == 0) {
+          // If all the source's sub-sources are non-entity-type sources, then sort the columns within the source alphabetically
+          // Don't bother sorting if there are any ET sub-sources, since they are already sorted by their labelAliases
+          columns = columns.stream().sorted(columnComparator).toList();
+        }
+
         // Add a prefix to each column's name and idColumnName, then add 'em to the flattened entity type
         childColumns.addAll(
-          flattenedSourceDefinition
-            .getColumns()
-            .stream()
+            columns.stream()
             .filter(col ->
               preserveAllColumns ||
               !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) ||

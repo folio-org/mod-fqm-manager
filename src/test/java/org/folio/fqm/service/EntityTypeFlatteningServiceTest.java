@@ -1,20 +1,7 @@
 package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,9 +11,13 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import jakarta.validation.Valid;
 import lombok.SneakyThrows;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
@@ -260,7 +251,8 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "simple_2",
-                "targetId": "00000000-0000-0000-0000-000000000002"
+                "targetId": "00000000-0000-0000-0000-000000000002",
+                "order": 1
               }
             ]
           }
@@ -795,6 +787,26 @@ class EntityTypeFlatteningServiceTest {
     );
 
     assertThat(actual.getColumns(), hasItem(hasProperty("name", equalTo("simple_1.ecs_field"))));
+  }
+
+  @Test
+  void testFieldOrderInComposites() {
+    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+
+    List<EntityTypeColumn> actual = entityTypeFlatteningService.getFlattenedEntityType(
+      UUID.fromString(COMPOSITE_1_TO_2.getId()),
+      null,
+      false
+    ).getColumns();
+
+    // In COMPOSITE_1_TO_2, simple_2 has "order: 1" - order is unset in simple_1
+    // Therefore, fields from simple_2 should come before fields from simple_1 in the columns list
+    String prev = "zzzzzzzz"; // Dummy value that is greater (as in string comparison) than any aliases in the ET
+    for (EntityTypeColumn column : actual) {
+      String alias = column.getName().split("\\.")[0];
+      assertThat(prev.compareTo(alias), greaterThanOrEqualTo(0));
+      prev = alias;
+    }
   }
 
   @SneakyThrows

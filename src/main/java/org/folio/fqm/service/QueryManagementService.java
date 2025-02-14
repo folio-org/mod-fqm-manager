@@ -63,7 +63,7 @@ public class QueryManagementService {
    */
   public QueryIdentifier runFqlQueryAsync(SubmitQuery submitQuery) {
     EntityType entityType = entityTypeService
-      .getEntityTypeDefinition(submitQuery.getEntityTypeId(), true, false);
+      .getEntityTypeDefinition(submitQuery.getEntityTypeId(), true);
     List<String> fields = CollectionUtils.isEmpty(submitQuery.getFields()) ?
       getFieldsFromEntityType(entityType) : new ArrayList<>(submitQuery.getFields());
     List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);
@@ -100,7 +100,7 @@ public class QueryManagementService {
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
     }
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     List<String> idColumns = EntityTypeUtils.getIdColumnNames(entityType);
     for (String idColumn : idColumns) {
       if (!fields.contains(idColumn)) {
@@ -166,7 +166,7 @@ public class QueryManagementService {
   }
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType, fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);
@@ -178,13 +178,13 @@ public class QueryManagementService {
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true, false);
+    entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
 
   public List<Map<String, Object>> getContents(UUID entityTypeId, List<String> fields, List<List<String>> ids, UUID userId, boolean localize, boolean privileged) {
-    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     EntityTypeUtils.getIdColumnNames(entityType)
       .forEach(colName -> {
         if (!fields.contains(colName)) {
@@ -199,7 +199,7 @@ public class QueryManagementService {
 
   private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
     if (includeResults) {
-      EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true, false);
+      EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
       List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
       List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
       return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery, false);

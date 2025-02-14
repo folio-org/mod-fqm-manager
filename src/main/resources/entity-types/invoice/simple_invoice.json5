@@ -111,7 +111,6 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      idColumnName: 'batch_group_id',
       valueGetter: "( \
         SELECT \
           batch_group.jsonb ->> 'name' \
@@ -134,7 +133,7 @@
       },
       valueSourceApi: {
         path: 'batch-groups',
-        valueJsonPath: '$.batchGroups.*.id',
+        valueJsonPath: '$.batchGroups.*.name',
         labelJsonPath: '$.batchGroups.*.name',
       },
       valueFunction: 'lower(:value)',

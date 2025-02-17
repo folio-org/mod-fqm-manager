@@ -1,5 +1,14 @@
 # 3.0.x - Ramsons
 
+## 3.0.12
+- [MODFQMMGR-658], [MODFQMMGR-650], [MODFQMMGR-643], [MODFQMMGR-649]: Add missing permissions to private entity types
+- [MODFQMMGR-649] additioanally tweaks some settings on composite_voucher_line_totals_per_account to make it more usable
+
+[MODFQMMGR-658]: https://folio-org.atlassian.net/browse/MODFQMMGR-658
+[MODFQMMGR-650]: https://folio-org.atlassian.net/browse/MODFQMMGR-650
+[MODFQMMGR-643]: https://folio-org.atlassian.net/browse/MODFQMMGR-643
+[MODFQMMGR-649]: https://folio-org.atlassian.net/browse/MODFQMMGR-649
+
 ## 3.0.11
 - [MODFQMMGR-657](https://folio-org.atlassian.net/browse/MODFQMMGR-657): Fix export for Organizations ET
 

@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -42,7 +44,7 @@ class SourceUtilsCopyTest {
     EntityTypeColumn result = SourceUtils
       .copyColumns(
         parent,
-        new EntityType().addColumnsItem(new EntityTypeColumn().isIdColumn(isIdColumn).valueGetter("")),
+        Stream.of(new EntityTypeColumn().isIdColumn(isIdColumn).valueGetter("")),
         Map.of()
       )
       .findAny()

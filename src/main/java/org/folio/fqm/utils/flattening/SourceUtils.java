@@ -8,7 +8,6 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.ArrayType;
-import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
@@ -147,12 +146,10 @@ public class SourceUtils {
 
   public static Stream<EntityTypeColumn> copyColumns(
     EntityTypeSourceEntityType sourceFromParent,
-    EntityType originalEntityType,
+    Stream<EntityTypeColumn> columns,
     Map<String, String> renamedAliases
   ) {
-    return originalEntityType
-      .getColumns()
-      .stream()
+    return columns
       .map(column -> {
         EntityTypeColumn newColumn = copyColumn(column);
         // Only treat newColumn as idColumn if outer source specifies to do so

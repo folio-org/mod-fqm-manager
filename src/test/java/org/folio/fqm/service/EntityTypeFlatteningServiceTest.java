@@ -392,6 +392,9 @@ class EntityTypeFlatteningServiceTest {
     lenient()
       .when(localizationService.localizeEntityType(any(EntityType.class)))
       .thenAnswer(invocation -> invocation.getArgument(0));
+    lenient()
+      .when(localizationService.localizeEntityTypeColumn(any(EntityType.class), any(EntityTypeColumn.class)))
+      .then(invocation -> invocation.getArgument(1));
     lenient().when(executionContext.getTenantId()).thenReturn("tenant_01");
   }
 

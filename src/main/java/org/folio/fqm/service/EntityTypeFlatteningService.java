@@ -172,15 +172,6 @@ public class EntityTypeFlatteningService {
 
         List<EntityTypeColumn> columns = flattenedSourceDefinition
           .getColumns();
-        EntityType sourceEntityType = entityTypeRepository
-          .getEntityTypeDefinition(sourceEntityTypeId, tenantId)
-          .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
-        long numETSources = sourceEntityType.getSources().stream().filter(EntityTypeSourceEntityType.class::isInstance).count();
-        if (numETSources == 0) {
-          // If all the source's sub-sources are non-entity-type sources, then sort the columns within the source alphabetically
-          // Don't bother sorting if there are any ET sub-sources, since they are already sorted by their labelAliases
-          columns = columns.stream().sorted(columnComparator).toList();
-        }
 
         // Add a prefix to each column's name and idColumnName, then add 'em to the flattened entity type
         childColumns.addAll(
@@ -217,8 +208,14 @@ public class EntityTypeFlatteningService {
         SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
       );
     }
+
+    // Copy and localize all of the columns defined directly in the entity type separately, so that they can be sorted
+    // by localized label alias before adding them to the flattened entity type
+    Stream<EntityTypeColumn> selfColumns = originalEntityType.getColumns().stream()
+      .map(column -> localizationService.localizeEntityTypeColumn(originalEntityType, column))
+      .sorted(columnComparator);
     Stream<EntityTypeColumn> allColumns = Stream.concat(
-      SourceUtils.copyColumns(sourceFromParent, originalEntityType, renamedAliases),
+      SourceUtils.copyColumns(sourceFromParent, selfColumns, renamedAliases),
       childColumns.stream()
     );
 

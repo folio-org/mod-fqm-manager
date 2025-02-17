@@ -124,9 +124,9 @@ class LocalizationServiceTest {
     when(translationService.format(expectedTranslationKey, "customField", "Custom Field"))
       .thenReturn("Test's Custom Field");
 
-    localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 
-    assertEquals(expectedTranslation, entityType.getColumns().get(0).getLabelAlias());
+    assertEquals(expectedTranslation, localizedColumn.getLabelAlias());
 
     verify(translationService, times(1)).format(expectedTranslationKey, "customField", "Custom Field");
     verifyNoMoreInteractions(translationService);
@@ -156,9 +156,9 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
     when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
 
-    localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 
-    assertEquals(expectedOuterTranslation, entityType.getColumns().get(0).getLabelAlias());
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
     assertEquals(
       expectedInnerTranslation,
       ((ObjectType) entityType.getColumns().get(0).getDataType()).getProperties().get(0).getLabelAlias()
@@ -211,9 +211,9 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
     when(translationService.format(expectedInnermostQualifiedTranslationKey)).thenReturn(expectedInnermostQualifiedTranslation);
 
-    localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
 
-    assertEquals(expectedOuterTranslation, entityType.getColumns().get(0).getLabelAlias());
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
     assertEquals(expectedInnerTranslation, inner.getLabelAlias());
     assertEquals(expectedInnermostTranslation, innermost.getLabelAlias());
     assertEquals(expectedInnerQualifiedTranslation, inner.getLabelAliasFullyQualified());

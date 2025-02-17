@@ -1538,6 +1538,8 @@
     "entityType.simple_finance_group.acquisition_unit": "Acquisition unit names",
     "entityType.simple_finance_group.created_by_user_id": "Created by user UUID",
     "entityType.simple_finance_group.created_by_username": "Created by username",
+    "entityType.simple_finance_group.updated_by_user_id": "Updated by user UUID",
+    "entityType.simple_finance_group.updated_by_username": "Updated by username",
     "entityType.simple_finance_group.created_date": "Created date",
     "entityType.simple_finance_group.description": "Description",
     "entityType.simple_finance_group.id": "UUID",

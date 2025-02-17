@@ -318,6 +318,15 @@ public class FromClauseUtils {
       EntityTypeSource joinToSource = sourceMap.get(sourceDb.getJoin().getJoinTo());
       orderSourcesRecursively(joinToSource, sourceMap, visited, orderedList, allSources);
     }
+
     orderedList.add(source);
+
+    // join the DB sources that depend on this ET source.
+    // Do it after the current source, so that the parent source appears before the children sources
+    if (source instanceof EntityTypeSourceEntityType sourceEt) {
+      allSources.stream()
+          .filter(s -> sourceEt.getAlias().equals(s.getJoinedViaEntityType()))
+          .forEach(s -> orderSourcesRecursively(s, sourceMap, visited, orderedList, allSources));
+    }
   }
 }

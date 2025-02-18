@@ -5,15 +5,19 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
   <changeSet id="create-derived-table-definition" author="kjain@ebsco.com">
-    <sqlFile path="sql/create-derived-table-definition.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-table-entity_type_definition.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
   <changeSet id="create-query-details-table" author="bsharp@ebsco.com">
-    <sqlFile path="sql/create-query-details-table.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-table-query_details.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
   <changeSet id="create-query-results-table" author="bsharp@ebsco.com">
-    <sqlFile path="sql/create-query-results-table.sql" relativeToChangelogFile="true"/>
+    <sqlFile path="sql/create-table-query_results-table.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
+  <changeSet id="MODFQMMGR-202" author="bsharp@ebsco.com" runOnChange="true">
+    <sqlFile path="sql/create-table-currency-exchange-rates.sql" relativeToChangelogFile="true"/>
   </changeSet>
 
 </databaseChangeLog>

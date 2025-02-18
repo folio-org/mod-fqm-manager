@@ -4,8 +4,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-  <include file="drv_item_callnumber_location_create.xml" relativeToChangelogFile="true"/>
-  <include file="drv_item_holdingsrecord_instance_create.xml" relativeToChangelogFile="true"/>
-  <include file="drv_item_details_create.xml" relativeToChangelogFile="true"/>
-
+  <include file="core-tables.xml" relativeToChangelogFile="true"/>
+  <include file="harvested-views-poppy.xml" relativeToChangelogFile="true"/>
+  <include file="harvested-views-quenelia.xml" relativeToChangelogFile="true"/>
+  <include file="harvested-views-ramsons.xml" relativeToChangelogFile="true"/>
+  <include file="harvested-views-sunflower.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

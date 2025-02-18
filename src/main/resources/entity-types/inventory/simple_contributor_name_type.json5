@@ -37,7 +37,7 @@
     },
     {
       name: 'ordering',
-      sourceAlias: 'contributor_type',
+      sourceAlias: 'contributor_name_type',
       dataType: {
         dataType: 'stringType',
       },

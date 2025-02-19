@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,13 +46,6 @@ public class EntityTypeFlatteningService {
 
   private final Cache<EntityTypeCacheKey, EntityType> entityTypeCache;
 
-  // Comparator for sorting sources based on their order, then alias properties
-  private static final Comparator<EntityTypeSource> sourceComparator =
-    comparing((EntityTypeSource source) ->
-      source instanceof EntityTypeSourceEntityType etSource
-        ? etSource.getOrder()
-        : Integer.MAX_VALUE) // Right now this only really affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
-      .thenComparing(EntityTypeSource::getAlias);
   // Sort columns within a source, based on their label alias (nulls last)
   private static final Comparator<EntityTypeColumn> columnComparator =
     nullsLast(
@@ -136,7 +130,7 @@ public class EntityTypeFlatteningService {
     List<EntityTypeColumn> childColumns = new ArrayList<>();
 
     // Sort the sources, so that the resulting groups of columns end up sorted appropriately
-    Iterable<EntityTypeSource> orderedSources = originalEntityType.getSources().stream().sorted(sourceComparator)::iterator;
+    Iterable<EntityTypeSource> orderedSources = originalEntityType.getSources().stream().sorted(getSourceComparator(tenantId))::iterator;
     for (EntityTypeSource source : orderedSources) {
       flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceFromParent, source, renamedAliases));
 
@@ -239,6 +233,21 @@ public class EntityTypeFlatteningService {
     // The value isn't needed here, this just provides an easy way to tell if ECS is enabled
     int totalRecords = parsedJson.read("totalRecords", Integer.class);
     return totalRecords > 0;
+  }
+
+  private Comparator<EntityTypeSource> getSourceComparator(String tenantId) {
+    return comparing((EntityTypeSource source) ->
+      source instanceof EntityTypeSourceEntityType etSource
+        ? etSource.getOrder()
+        : Integer.MAX_VALUE) // Right now this only affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
+      .thenComparing(source -> {
+        if (source instanceof EntityTypeSourceEntityType etSource) {
+          EntityType et = entityTypeRepository.getEntityTypeDefinition(etSource.getTargetId(), tenantId)
+            .orElseThrow(() -> new EntityTypeNotFoundException(etSource.getTargetId()));
+          return Objects.toString(localizationService.getEntityTypeLabel(et.getName())); // Use Objects.toString(), to handle nulls gracefully
+        }
+        return source.getAlias();
+      });
   }
 
   // translations are included as part of flattening, so we must cache based on locales, too

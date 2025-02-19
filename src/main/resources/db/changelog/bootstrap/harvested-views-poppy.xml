@@ -3,7 +3,9 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-  <changeSet id="create_view_inventory_storage_item" author="kjain@ebsco.com">
+  <!-- Poppy -->
+
+  <changeSet id="create_view_inventory_storage_item" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
         <tableExists tableName = "item" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -14,7 +16,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_holding_record" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_holding_record" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "holdings_record" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -25,7 +27,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_instance" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_instance" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "instance" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -36,7 +38,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_material_type" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_material_type" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "material_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -47,7 +49,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_location" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_location" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "location" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -58,7 +60,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_service_point" author="bsharp@ebsco.com">
+  <changeSet id="create_view_inventory_service_point" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "service_point" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -69,7 +71,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_loclibrary" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_loclibrary" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loclibrary" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -80,7 +82,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_inventory_call_number_type" author="kjain@ebsco.com">
+  <changeSet id="create_view_inventory_call_number_type" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "call_number_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
@@ -91,7 +93,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_circulation_loan" author="bsharp@ebsco.com">
+  <changeSet id="create_view_circulation_loan" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loan" schemaName="${tenant_id}_mod_circulation_storage"/>
     </preConditions>
@@ -102,7 +104,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_circulation_loan_policy" author="bsharp@ebsco.com">
+  <changeSet id="create_view_circulation_loan_policy" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "loan_policy" schemaName="${tenant_id}_mod_circulation_storage"/>
     </preConditions>
@@ -113,7 +115,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_users_groups" author="bsharp@ebsco.com">
+  <changeSet id="create_view_users_groups" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "groups" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
@@ -124,7 +126,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_users_users" author="bsharp@ebsco.com">
+  <changeSet id="create_view_users_users" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "users" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
@@ -135,7 +137,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_users_departments" author="bsharp@ebsco.com">
+  <changeSet id="create_view_users_departments" author="bsharp@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "departments" schemaName="${tenant_id}_mod_users"/>
     </preConditions>
@@ -146,7 +148,7 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_users_addresstype" author="kjain@ebsco.com">
+  <changeSet id="create_view_users_addresstype" author="kjain@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
       <tableExists tableName = "addresstype" schemaName="${tenant_id}_mod_users"/>
     </preConditions>

@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS query_details
     start_date             TIMESTAMP NOT NULL,
     end_date               TIMESTAMP NULL,
     status                 VARCHAR(64) CHECK (status IN ('IN_PROGRESS','SUCCESS','FAILED','CANCELLED')) NOT NULL,
-    failure_reason         VARCHAR(1024) NULL
+    failure_reason         TEXT NULL
 );

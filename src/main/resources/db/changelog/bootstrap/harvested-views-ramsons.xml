@@ -1,0 +1,162 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <!-- Ramsons -->
+
+  <changeSet id="create_view_vouchers" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="vouchers" schemaName="${tenant_id}_mod_invoice_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_vouchers">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.vouchers
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_voucher_lines" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="voucher_lines" schemaName="${tenant_id}_mod_invoice_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_voucher_lines">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.voucher_lines
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_ledger" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="ledger" schemaName="${tenant_id}_mod_finance_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_ledger">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.ledger
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_fund" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="fund" schemaName="${tenant_id}_mod_finance_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_fund">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.fund
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_expense_class" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="expense_class" schemaName="${tenant_id}_mod_finance_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_expense_class">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.expense_class
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_fund_type" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="fund_type" schemaName="${tenant_id}_mod_finance_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_fund_type">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.fund_type
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_invoices" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="invoices" schemaName="${tenant_id}_mod_invoice_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_invoices">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.invoices
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_invoice_lines" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="invoice_lines" schemaName="${tenant_id}_mod_invoice_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_invoice_lines">
+      SELECT * FROM ${tenant_id}_mod_invoice_storage.invoice_lines
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_config_data" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="config_data" schemaName="${tenant_id}_mod_configuration" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_configuration_config_data">
+      SELECT * FROM ${tenant_id}_mod_configuration.config_data
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_loan_type" author="novercash@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="loan_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_storage_loan_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.loan_type
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_instance_type_view" author="mweaver@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_type
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_instance_format" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_format" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_format">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_format
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_classification_type" author="mweaver@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="classification_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_classification_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.classification_type
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_instance_date_type" author="mweaver@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_date_type" schemaName="${tenant_id}_mod_inventory_storage" />
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_instance_date_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_date_type
+    </createView>
+  </changeSet>
+
+</databaseChangeLog>

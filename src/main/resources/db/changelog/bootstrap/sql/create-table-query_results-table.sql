@@ -1,9 +1,9 @@
 -- Create the parent partitioned table
 CREATE TABLE IF NOT EXISTS query_results
 (
-    result_id        UUID NOT NULL,
+    result_id        TEXT[] NOT NULL,
     query_id         UUID NOT NULL,
-    PRIMARY KEY (result_id, query_id),
+    PRIMARY KEY (query_id, result_id),
     CONSTRAINT fk_query_id FOREIGN KEY (query_id)
                     REFERENCES query_details (query_id) MATCH SIMPLE
 ) PARTITION BY HASH(query_id);

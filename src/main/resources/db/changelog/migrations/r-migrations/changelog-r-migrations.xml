@@ -1,0 +1,61 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <changeSet id="MODFQMMGR-227-drop-derived_table_name" author="ncovercash@ebsco.com" runOnChange="true">
+    <sql>
+      ALTER TABLE IF EXISTS entity_type_definition DROP COLUMN IF EXISTS derived_table_name;
+    </sql>
+  </changeSet>
+
+  <changeSet id="remove-legacy-entity-types" runOnChange="true" author="mweaver@ebsco.com">
+    <comment>Remove all of the old entity types that use the old model. This isn't necessary if the updated versions use the same ID (they will get updated automatically), but just to be safe, let's get them all</comment>
+    <sql>
+      DELETE
+      FROM entity_type_definition
+      WHERE id IN ( '4e09d89a-44ed-418e-a9cc-820dfb27bf3a' -- drv_loan_details
+                  , '5e7de445-bcc6-4008-8032-8d9602b854d7' -- src_circulation_loan_policy
+                  , '146dfba5-cdc9-45f5-a8a1-3fdc454c9ae2' -- drv_loan_status
+                  , '7a7860cd-e939-504f-b51f-ed3e1e6b12b9' -- drv_organization_contacts
+                  , '489234a9-8703-48cd-85e3-7f84011bafa3' -- src_organizations
+                  , '6b335e41-2654-4e2a-9b4e-c6930b330ccc' -- src_organization_types
+                  , '837f262e-2073-4a00-8bcc-4e4ce6e669b3' -- drv_organization_details
+                  , '6b08439b-4f8e-4468-8046-ea620f5cfb74' -- drv_instances
+                  , '8418e512-feac-4a6a-a56d-9006aab31e33' -- drv_holdings_record_details
+                  , '0cb79a4c-f7eb-4941-a104-745224ae0293' -- drv_item_holdingsrecord_instance
+                  , '917ea5c8-cafe-4fa6-a942-e2388a88c6f6' -- src_inventory_material_type
+                  , '097a6f96-edd0-11ed-a05b-0242ac120003' -- drv_item_callnumber_location
+                  , '60e315d6-db28-4077-9277-b946411fe7d9' -- src_inventory_mode_of_issuance
+                  , 'cf9f5c11-e943-483c-913b-81d1e338accc' -- src_inventory_loclibrary
+                  , '5c8315be-13f5-4df5-ae8b-086bae83484d' -- src_inventory_call_number_type
+                  , 'a1a37288-1afe-4fa5-ab59-a5bcf5d8ca2d' -- drv_item_status
+                  , '89cdeac4-9582-4388-800b-9ccffd8d7691' -- src_inventory_service_point
+                  , 'a9d6305e-fdb4-4fc4-8a73-4a5f76d8410b' -- src_inventory_location
+                  , '9c24a719-679b-4cca-9146-42a46d721df5' -- src_inventory_contributor_name_type
+                  , '3553ca38-d522-439b-9f91-1512275a43b9' -- src_inventory_contributor_type
+                  , 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c' -- drv_inventory_statistical_code_full
+                  , 'bc03686c-657e-4f74-9d89-91eac5ea86a4' -- src_inventory_instance_status
+                  , '0cb79a4c-f7eb-4941-a104-745224ae0292' -- drv_item_details
+                  , '5fefec2a-9d6c-474c-8698-b0ea77186c12' -- drv_pol_receipt_status
+                  , '2168014f-9316-4760-9d82-d0306d5f59e4' -- drv_pol_payment_status
+                  , '90403847-8c47-4f58-b117-9a807b052808' -- drv_purchase_order_line_details
+                  , 'a435d29f-ff11-4b7a-8a5f-3c5505452208' -- drv_languages
+                  , 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78' -- src_acquisitions_unit
+                  , '0069cf6f-2833-46db-8a51-8934769b8289' -- drv_user_details
+                  , 'c8364551-7e51-475d-8473-88951181452d' -- src_users_departments
+                  , 'e627a89b-682b-41fe-b532-f4262020a451' -- src_users_addresstype
+                  , 'e611264d-377e-4d87-a93f-f1ca327d3db0' -- src_users_groups
+                  )
+    </sql>
+  </changeSet>
+
+  <changeSet id="remove_unused_entity_types" author="bsharp@ebsco.com">
+    <delete tableName="entity_type_definition" schemaName="${tenant_id}_mod_fqm_manager">
+      <where>
+        id IN ('230b18b1-ee3b-4382-9236-db44e5f30121', 'cc51f042-03e2-43d1-b1d6-11aa6a39bc78')
+      </where>
+    </delete>
+  </changeSet>
+
+</databaseChangeLog>

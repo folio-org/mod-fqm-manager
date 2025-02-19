@@ -82,13 +82,17 @@ public class LocalizationService {
     return newColumn;
   }
 
+  String localizeSourceLabel(EntityType entityType, String sourceAlias) {
+    return translationService.format(
+      ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), sourceAlias)
+    );
+  }
+
   private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {
     int currentSourceIndex = columnName.indexOf(".");
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
-      String sourceLabel = translationService.format(
-        ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource)
-      );
+      String sourceLabel = localizeSourceLabel(entityType, currentSource);
 
       return translationService.format(
         ENTITY_TYPE_SOURCE_PREFIX_JOINER,

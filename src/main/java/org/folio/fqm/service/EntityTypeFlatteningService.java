@@ -130,7 +130,7 @@ public class EntityTypeFlatteningService {
     List<EntityTypeColumn> childColumns = new ArrayList<>();
 
     // Sort the sources, so that the resulting groups of columns end up sorted appropriately
-    Iterable<EntityTypeSource> orderedSources = originalEntityType.getSources().stream().sorted(getSourceComparator(tenantId))::iterator;
+    Iterable<EntityTypeSource> orderedSources = originalEntityType.getSources().stream().sorted(getSourceComparator(originalEntityType))::iterator;
     for (EntityTypeSource source : orderedSources) {
       flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceFromParent, source, renamedAliases));
 
@@ -235,19 +235,12 @@ public class EntityTypeFlatteningService {
     return totalRecords > 0;
   }
 
-  private Comparator<EntityTypeSource> getSourceComparator(String tenantId) {
+  private Comparator<EntityTypeSource> getSourceComparator(EntityType entityType) {
     return comparing((EntityTypeSource source) ->
       source instanceof EntityTypeSourceEntityType etSource
         ? etSource.getOrder()
         : Integer.MAX_VALUE) // Right now this only affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
-      .thenComparing(source -> {
-        if (source instanceof EntityTypeSourceEntityType etSource) {
-          EntityType et = entityTypeRepository.getEntityTypeDefinition(etSource.getTargetId(), tenantId)
-            .orElseThrow(() -> new EntityTypeNotFoundException(etSource.getTargetId()));
-          return Objects.toString(localizationService.getEntityTypeLabel(et.getName())); // Use Objects.toString(), to handle nulls gracefully
-        }
-        return source.getAlias();
-      });
+      .thenComparing(source -> Objects.toString(localizationService.localizeSourceLabel(entityType, source.getAlias()))); // Use Objects.toString(), to handle nulls gracefully
   }
 
   // translations are included as part of flattening, so we must cache based on locales, too

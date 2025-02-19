@@ -39,16 +39,17 @@ public class MigrationService {
   }
 
   public MigratableQueryInformation migrate(MigratableQueryInformation migratableQueryInformation) {
-    while (isMigrationNeeded(migratableQueryInformation)) {
-      for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (strategy.applies(getVersion(migratableQueryInformation.fqlQuery()))) {
-          log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
-          migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
-        }
-      }
-    }
+    throw new RuntimeException("kaboom!");
+    // while (isMigrationNeeded(migratableQueryInformation)) {
+    //   for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
+    //     if (strategy.applies(getVersion(migratableQueryInformation.fqlQuery()))) {
+    //       log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
+    //       migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
+    //     }
+    //   }
+    // }
 
-    return migratableQueryInformation;
+    // return migratableQueryInformation;
   }
 
   public String getVersion(@CheckForNull String fqlQuery) {

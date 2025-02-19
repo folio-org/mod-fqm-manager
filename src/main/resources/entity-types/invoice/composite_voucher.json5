@@ -1,0 +1,30 @@
+{
+  id: '7c739fd3-fe38-4099-9f97-f56b859ff2e6',
+  name: 'composite_voucher',
+  private: false,
+  sources: [
+    {
+      alias: 'voucher',
+      type: 'entity-type',
+      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'vendor',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'voucher.vendor_id',
+      essentialOnly: true,
+      order: 20,
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"voucher.voucher".id',
+      direction: 'ASC',
+    },
+  ],
+}

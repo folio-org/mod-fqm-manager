@@ -1543,6 +1543,7 @@
     "entityType.simple_fund.allocated_to": "Transfer to",
     "entityType.simple_fund.donor_organizations": "Donor organizations",
     "entityType.simple_fund.locations.location_name": "Location name",
+    "entityType.simple_finance_group.updated_date": "Updated date",
     "entityType.simple_fund.locations.location_name._qualified": "Location name",
     "entityType.simple_finance_group.updated_by_user_id": "Updated by user UUID",
     "entityType.simple_finance_group.updated_by_username": "Updated by username"

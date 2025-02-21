@@ -690,7 +690,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'permanentLoanTypeId'",
+      valueGetter: ":sourceAlias.permanentLoanTypeId",
+      joinsTo: [
+        {
+          targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_level_call_number_type_id',
@@ -822,7 +830,15 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'",
+      valueGetter: ":sourceAlias.temporaryLoanTypeId",
+      joinsTo: [
+        {
+          targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'permanent_location_id',

@@ -47,6 +47,24 @@
       order: 60,
     },
     {
+      alias: 'item_permanent_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.permanent_loan_type_id',
+      essentialOnly: true,
+      order: 64,
+    },
+    {
+      alias: 'item_temporary_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.temporary_loan_type_id',
+      essentialOnly: true,
+      order: 65,
+    },
+    {
       alias: 'mtypes',
       type: 'entity-type',
       targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',

@@ -10,6 +10,9 @@
       target: 'src_inventory_storage_loan_type',
     },
   ],
+  requiredPermissions: [
+    "inventory-storage.loan-types.collection.get",
+  ],
   columns: [
     {
       name: 'id',
@@ -19,7 +22,8 @@
       },
       isIdColumn: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
+      essential: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -43,6 +47,20 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.created_by',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'name',
@@ -53,18 +71,19 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
-    },
-    {
-      name: 'source',
-      sourceAlias: 'lt',
-      dataType: {
-        dataType: 'stringType',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
+      source: {
+        entityTypeId: '04107b49-ad2f-47ad-879f-6737b3018027',
+        columnName: 'name',
       },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'source'",
+      valueSourceApi: {
+        path: 'loan-types',
+        valueJsonPath: '$.loantypes.*.name',
+        labelJsonPath: '$.loantypes.*.name',
+      }
     },
     {
       name: 'updated_at',
@@ -76,31 +95,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
-    },
-    {
-      name: 'updated_by',
-      sourceAlias: 'lt',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
-      joinsTo: [
-        {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
-          targetField: 'id',
-          type: 'equality-cast-uuid',
-          direction: 'left',
-        },
-        {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
-          targetField: 'id',
-          type: 'equality-cast-uuid',
-          direction: 'left',
-        },
-      ],
     },
     {
       name: 'jsonb',

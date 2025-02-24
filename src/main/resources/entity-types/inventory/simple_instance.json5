@@ -251,6 +251,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'indexTitle'",
+      essential: true,
     },
     {
       name: 'alternative_titles_ids',

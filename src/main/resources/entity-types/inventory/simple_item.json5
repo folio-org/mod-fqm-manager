@@ -362,6 +362,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\
@@ -823,6 +824,30 @@
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumber'",
     },
     {
+      name: 'item_level_call_number_prefix',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberPrefix'",
+    },
+    {
+      name: 'item_level_call_number_suffix',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberSuffix'",
+    },
+    {
       name: 'temporary_loan_type_id',
       sourceAlias: 'item',
       dataType: {
@@ -1001,6 +1026,18 @@
       ],
     },
     {
+      name: 'display_summary',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'displaySummary'",
+    },
+    {
       name: 'accession_number',
       sourceAlias: 'item',
       dataType: {
@@ -1086,6 +1123,18 @@
         name: 'tenant_id',
       },
       ecsOnly: true,
+    },
+    {
+      name: 'volume',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'volume'",
     },
     {
       name: 'jsonb',

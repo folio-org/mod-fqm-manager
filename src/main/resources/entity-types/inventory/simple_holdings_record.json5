@@ -62,7 +62,7 @@
       },
       isIdColumn: false,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       essential: true,

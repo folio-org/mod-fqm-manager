@@ -268,6 +268,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
@@ -292,6 +293,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       hidden: true,

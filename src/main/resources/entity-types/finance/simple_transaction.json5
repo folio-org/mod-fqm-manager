@@ -1,0 +1,465 @@
+{
+  id: 'f73e67e8-ee2d-41e1-978a-3de7b961bac0',
+  name: 'simple_transaction',
+  private: false, // TODO: set to true
+  requiredPermissions: [
+    'finance.transactions.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    // TODO: couldn't find this field
+    {
+      name: '_version',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "'implement'",
+    },
+    {
+      name: 'amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb ->> 'amount')::float",
+      valueFunction: '(:value::float)'
+    },
+    // TODO: this is an object
+    {
+      name: 'awaiting_payment',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "'implement'",
+    },
+    {
+      name: 'currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'currency'",
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'description'",
+    },
+    {
+      name: 'expense_class_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.expenseclassid",
+    },
+    {
+      name: 'fiscal_year_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ',:sourceAlias.fiscalyearid',
+    },
+    {
+      name: 'from_fund_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ':sourceAlias.fromfundid',
+    },
+    {
+      name: 'invoice_cancelled',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCancelled'",
+    },
+    {
+      name: 'payment_encumbrance_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'paymentEncumbranceId'",
+    },
+    {
+      name: 'source',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'source'",
+      values: [
+        {
+          label: 'Fiscal year',
+          value: 'Fiscal year',
+        },
+        {
+          label: 'Invoice',
+          value: 'Invoice',
+        },
+        {
+          label: 'PO line',
+          value: 'PO line',
+        },
+        {
+          label: 'User',
+          value: 'User',
+        },
+      ],
+    },
+    {
+      name: 'source_fiscal_year_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ':sourceAlias.sourcefiscalyearid',
+    },
+    {
+      name: 'source_invoice_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceId'",
+    },
+    {
+      name: 'source_invoice_line_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceLineId'",
+    },
+    {
+      name: 'tags',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'tags'",
+    },
+    {
+      name: 'to_fund_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ':sourceAlias.tofundid',
+    },
+    {
+      name: 'transaction_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'transactionType'::text",
+      values: [
+        {
+          label: 'Allocation',
+          value: 'Allocation',
+        },
+        {
+          label: 'Credit',
+          value: 'Credit',
+        },
+        {
+          label: 'Encumbrance',
+          value: 'Encumbrance',
+        },
+        {
+          label: 'Payment',
+          value: 'Payment',
+        },
+        {
+          label: 'Pending payment',
+          value: 'Pending payment',
+        },
+        {
+          label: 'Rollover transfer',
+          value: 'Rollover transfer',
+        },
+        {
+          label: 'Transfer',
+          value: 'Transfer',
+        },
+      ],
+    },
+    {
+      name: 'voided_amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb ->> 'voidedAmount')::float",
+      valueFunction: '(:value::float)',
+    },
+    // starts here
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+    },
+    {
+      name: 'amount_awaiting_payment',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountAwaitingPayment')::float",
+      valueFunction: '(:value::float)',
+    },
+    {
+      name: 'amount_credited',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountCredited')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'amount_expended',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountExpended')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'initial_amount_encumbered',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'initialAmountEncumbered')::float",
+      valueFunction: '(:value)::float'
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'status'",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'order_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderType'",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'order_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderStatus'",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'subscription',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'subscription'",
+    },
+    {
+      name: 're_encumber',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'reEncumber'",
+    },
+    {
+      name: 'source_purchase_order_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePurchaseOrderId'::text"
+    },
+    {
+      name: 'source_po_line_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePoLineId'::text",
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'transaction',
+      target: 'src_finance_transaction',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

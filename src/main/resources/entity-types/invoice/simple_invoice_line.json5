@@ -482,7 +482,7 @@
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'rangedUUIDType',
+          dataType: 'stringType',
         },
       },
       sourceAlias: 'invoice_lines',

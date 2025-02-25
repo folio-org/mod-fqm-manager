@@ -310,7 +310,7 @@
         dataType: 'stringType',
       },
       sourceAlias: 'voucher',
-      queryable: false,
+      queryable: true,
       visibleByDefault: true,
       essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'accountingCode'",

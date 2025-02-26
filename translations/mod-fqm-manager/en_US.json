@@ -1139,7 +1139,7 @@
     "entityType.simple_ledger.updated_by_username": "Updated by username",
     "entityType.simple_ledger.updated_date": "Updated date",
     "entityType.simple_ledger.version": "Version",
-    "entityType.simple_voucher_line": "Voucher Lines",
+    "entityType.simple_voucher_line": "Voucher lines",
     "entityType.simple_voucher_line.amount": "Amount",
     "entityType.simple_voucher_line.created_by_user_id": "Created by user UUID",
     "entityType.simple_voucher_line.created_date": "Created date",
@@ -1542,5 +1542,8 @@
     "entityType.simple_finance_group.updated_date": "Updated date",
     "entityType.simple_fund.locations.location_name._qualified": "Location name",
     "entityType.simple_finance_group.updated_by_user_id": "Updated by user UUID",
-    "entityType.simple_finance_group.updated_by_username": "Updated by username"
+    "entityType.simple_finance_group.updated_by_username": "Updated by username",
+    "entityType.composite_invoice_line": "Invoice line",
+    "entityType.composite_invoice_line.invoice_line": "Invoice line",
+    "entityType.composite_invoice_line.invoice": "Invoice"
 }

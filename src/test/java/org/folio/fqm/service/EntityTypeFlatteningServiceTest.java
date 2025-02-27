@@ -12,12 +12,10 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
 import lombok.SneakyThrows;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
@@ -435,7 +433,7 @@ class EntityTypeFlatteningServiceTest {
           assertThat(
             "Source " + source.getAlias() + "'s targetField exists",
             flattened.getColumns(),
-            hasItem(hasProperty("name", equalTo(sourceEt.getTargetField())))
+            hasItem(hasProperty("name", equalTo(sourceEt.getAlias() + "." + sourceEt.getTargetField())))
           );
         }
       }
@@ -589,7 +587,7 @@ class EntityTypeFlatteningServiceTest {
           hasProperty("alias", equalTo("simple_1")),
           hasProperty("joinedViaEntityType", nullValue()),
           hasProperty("sourceField", equalTo("simple_2.fieldZ")),
-          hasProperty("targetField", equalTo("simple_1.field1"))
+          hasProperty("targetField", equalTo("field1"))
         ),
         allOf(
           instanceOf(EntityTypeSourceDatabase.class),
@@ -711,7 +709,7 @@ class EntityTypeFlatteningServiceTest {
           hasProperty("alias", equalTo("composite_wrapper_to_wrapper.composite_2")),
           hasProperty("joinedViaEntityType", equalTo("composite_wrapper_to_wrapper")),
           hasProperty("sourceField", equalTo("composite_wrapper_to_wrapper.composite_1.simple_1.field1")),
-          hasProperty("targetField", equalTo("composite_wrapper_to_wrapper.composite_2.simple_2.fieldZ"))
+          hasProperty("targetField", equalTo("simple_2.fieldZ"))
         ),
         allOf(
           instanceOf(EntityTypeSourceDatabase.class),
@@ -727,14 +725,14 @@ class EntityTypeFlatteningServiceTest {
           instanceOf(EntityTypeSourceEntityType.class),
           hasProperty("alias", equalTo("composite_1_to_2")),
           hasProperty("sourceField", equalTo("composite_wrapper_to_wrapper.composite_1.simple_1.field1")),
-          hasProperty("targetField", equalTo("composite_1_to_2.simple_2.fieldZ"))
+          hasProperty("targetField", equalTo("simple_2.fieldZ"))
         ),
         allOf(
           instanceOf(EntityTypeSourceEntityType.class),
           hasProperty("alias", equalTo("composite_1_to_2.simple_1")),
           hasProperty("joinedViaEntityType", equalTo("composite_1_to_2")),
           hasProperty("sourceField", equalTo("composite_1_to_2.simple_2.fieldZ")),
-          hasProperty("targetField", equalTo("composite_1_to_2.simple_1.field1"))
+          hasProperty("targetField", equalTo("field1"))
         ),
         allOf(
           instanceOf(EntityTypeSourceDatabase.class),

@@ -25,11 +25,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 class FromClauseUtilsComputeTest {
 
   private static final EntityTypeColumn COLUMN_A = new EntityTypeColumn()
-    .name("a")
+    .name("ETA.a")
     .valueGetter("A")
     .originalEntityTypeId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
   private static final EntityTypeColumn COLUMN_B = new EntityTypeColumn()
-    .name("b")
+    .name("ETB.b")
     .valueGetter("B")
     .originalEntityTypeId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
 
@@ -164,7 +164,7 @@ class FromClauseUtilsComputeTest {
   void testComputeJoinCorrectDirection() {
     EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(
       EntityType.builder().columns(List.of(COLUMN_A_WITH_JOINS_TO_B, COLUMN_B)).build(),
-      EntityTypeSourceEntityType.builder().sourceField("a").targetField("b").build()
+      EntityTypeSourceEntityType.builder().alias("ETB").sourceField("ETA.a").targetField("b").build()
     );
 
     assertThat(join.getCondition(), is("A -> B"));
@@ -175,7 +175,7 @@ class FromClauseUtilsComputeTest {
   void testComputeJoinReversedDirection() {
     EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(
       EntityType.builder().columns(List.of(COLUMN_A_WITH_JOINS_TO_B, COLUMN_B)).build(),
-      EntityTypeSourceEntityType.builder().sourceField("b").targetField("a").build()
+      EntityTypeSourceEntityType.builder().alias("ETA").sourceField("ETB.b").targetField("a").build()
     );
 
     assertThat(join.getCondition(), is("A -> B"));

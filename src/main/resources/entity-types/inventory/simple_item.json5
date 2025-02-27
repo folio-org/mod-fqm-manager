@@ -268,6 +268,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
@@ -292,6 +293,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
+      essential: true,
       queryable: true,
       visibleByDefault: false,
       hidden: true,
@@ -360,6 +362,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\
@@ -690,7 +693,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'permanentLoanTypeId'",
+      valueGetter: ":sourceAlias.permanentLoanTypeId",
+      joinsTo: [
+        {
+          targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'item_level_call_number_type_id',
@@ -813,6 +824,30 @@
       valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumber'",
     },
     {
+      name: 'item_level_call_number_prefix',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberPrefix'",
+    },
+    {
+      name: 'item_level_call_number_suffix',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberSuffix'",
+    },
+    {
       name: 'temporary_loan_type_id',
       sourceAlias: 'item',
       dataType: {
@@ -822,7 +857,15 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'temporaryLoanTypeId'",
+      valueGetter: ":sourceAlias.temporaryLoanTypeId",
+      joinsTo: [
+        {
+          targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'permanent_location_id',
@@ -983,6 +1026,18 @@
       ],
     },
     {
+      name: 'display_summary',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'displaySummary'",
+    },
+    {
       name: 'accession_number',
       sourceAlias: 'item',
       dataType: {
@@ -1068,6 +1123,18 @@
         name: 'tenant_id',
       },
       ecsOnly: true,
+    },
+    {
+      name: 'volume',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'volume'",
     },
     {
       name: 'jsonb',

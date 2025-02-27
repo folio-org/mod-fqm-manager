@@ -1,8 +1,7 @@
-// Corresponds to MCR114
 {
   id: '2028a343-5603-4e86-99d5-c7de322c1709',
   name: 'composite_invoice__voucher_line__organization',
-  private: false,
+  private: true,
   sources: [
     {
       alias: 'voucher_line__fund_distribution',

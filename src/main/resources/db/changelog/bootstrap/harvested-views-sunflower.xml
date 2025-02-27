@@ -60,4 +60,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_budget" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="budget" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_finance_budget">
+      SELECT * FROM ${tenant_id}_mod_finance_storage.budget
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

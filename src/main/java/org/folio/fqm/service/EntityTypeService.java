@@ -26,6 +26,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -195,7 +196,12 @@ public class EntityTypeService {
     Set<ValueWithLabel> resultSet = new HashSet<>();
     for (String tenantId : tenantsToQuery) {
       try {
-        String rawJson = crossTenantHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
+        ValueSourceApi valueSourceApi = field.getValueSourceApi();
+        Map<String, String> queryParams = Objects.requireNonNullElseGet(
+          valueSourceApi.getQueryParams(),
+          () -> Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE))
+        );
+        String rawJson = crossTenantHttpClient.get(valueSourceApi.getPath(), queryParams, tenantId);
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
         List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());

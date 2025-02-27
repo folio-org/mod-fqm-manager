@@ -226,6 +226,20 @@
       valueGetter: ":inst.jsonb->>'source'",
       filterValueGetter: '"left"(lower(:inst.jsonb ->> \'source\'::text), 600)',
       valueFunction: '"left"(lower(:value), 600)',
+      valueSourceApi: {
+        path: 'search/instances/facets',
+        queryParams: {
+          query: 'id=*',
+          limit: '1000',
+          facet: 'source',
+        },
+        labelJsonPath: '$.facets.source.values.*.id',
+        valueJsonPath: '$.facets.source.values.*.id',
+      },
+      source: {
+        columnName: 'source',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      },
     },
     {
       name: 'title',
@@ -251,6 +265,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'indexTitle'",
+      essential: true,
     },
     {
       name: 'alternative_titles_ids',

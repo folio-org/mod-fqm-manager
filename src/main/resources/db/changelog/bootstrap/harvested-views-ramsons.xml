@@ -159,4 +159,12 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create-view-drv-inventory-statistical-code-full" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName = "statistical_code" schemaName="${tenant_id}_mod_inventory_storage"/>
+      <tableExists tableName = "statistical_code_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <sqlFile path="sql/create-view-drv-inventory-statistical-code-full.sql" relativeToChangelogFile="true"/>
+  </changeSet>
+
 </databaseChangeLog>

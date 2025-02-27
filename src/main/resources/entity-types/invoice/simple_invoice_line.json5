@@ -1,7 +1,7 @@
 {
   id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
   name: 'simple_invoice_line',
-  private: false,
+  private: true,
   requiredPermissions: [
     'invoice.invoice-lines.collection.get',
     'invoice.invoices.collection.get',

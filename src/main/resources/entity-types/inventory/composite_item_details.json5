@@ -83,6 +83,22 @@
       sourceField: 'holdings.instance_id',
       essentialOnly: true,
     },
+    {
+      alias: 'permanent_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.permanent_loan_type_id',
+      essentialOnly: true,
+    },
+    {
+      alias: 'temporary_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.temporary_loan_type_id',
+      essentialOnly: true,
+    },
   ],
   defaultSort: [
     {

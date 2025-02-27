@@ -185,7 +185,15 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb->>'invoiceId'",
+      valueGetter: ':sourceAlias.invoiceid',
+      joinsTo: [
+        {
+          targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'invoice_number',

@@ -469,7 +469,7 @@
   "entityType.drv_statistical_code_type_details.updated_by_user_id": "Updated by user ID",
   "entityType.drv_statistical_code_type_details.updated_by_username": "Updated by username",
   "entityType.drv_statistical_code_type_details.updated_date": "Updated date",
-  "entityType.simple_voucher_line": "Voucher Lines",
+  "entityType.simple_voucher_line": "Voucher lines",
   "entityType.simple_voucher_line.amount": "Amount",
   "entityType.simple_voucher_line.created_by_user_id": "Created by user UUID",
   "entityType.simple_voucher_line.created_date": "Created date",
@@ -1549,5 +1549,8 @@
   "entityType.simple_finance_group.name": "Name",
   "entityType.simple_finance_group.code": "Code",
   "entityType.simple_finance_group.status": "Status",
-  "entityType.simple_finance_group.version": "Version"
+  "entityType.simple_finance_group.version": "Version",
+  "entityType.composite_invoice_line": "Invoice line",
+  "entityType.composite_invoice_line.invoice_line": "Invoice line",
+  "entityType.composite_invoice_line.invoice": "Invoice"
 }

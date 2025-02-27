@@ -178,10 +178,10 @@ public class FromClauseUtils {
         )
       );
     EntityTypeColumn targetColumn = EntityTypeUtils
-      .findColumnByName(flattenedEntityType, source.getTargetField())
+      .findColumnByName(flattenedEntityType, source.getAlias() + "." + source.getTargetField())
       .orElseThrow(() ->
         new InvalidEntityTypeDefinitionException(
-          "Column " + source.getTargetField() + " could not be found",
+          "Column " + source.getAlias() + "." + source.getTargetField() + " could not be found",
           flattenedEntityType
         )
       );

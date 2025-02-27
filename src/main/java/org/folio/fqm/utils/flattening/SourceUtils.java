@@ -230,22 +230,7 @@ public class SourceUtils {
           .orElse(null)
       )
       .targetId(source.getTargetId())
-      .targetField(
-        Optional
-          .ofNullable(source.getTargetField())
-          .map(EntityTypeUtils::splitFieldIntoAliasAndField)
-          .map(p -> {
-            if (renamedAliases.containsKey(p.getLeft())) {
-              // simplest case, our left side is already known
-              return renamedAliases.get(p.getLeft()) + "." + p.getRight();
-            } else {
-              // we're referring to an inner field potentially within our inner entity type(s),
-              // so we append the whole shebang. Appending only p.getRight() could cause us to drop subsource aliases.
-              return renamedAliases.get(source.getAlias()) + "." + source.getTargetField();
-            }
-          })
-          .orElse(null)
-      )
+      .targetField(source.getTargetField())
       .joinedViaEntityType(getParentAlias(sourceFromParent, source, renamedAliases))
       .useIdColumns(source.getUseIdColumns())
       .essentialOnly(source.getEssentialOnly());

@@ -11,6 +11,7 @@
       },
       sourceAlias: 'voucher_lines',
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       isIdColumn: true,
       valueGetter: ':sourceAlias.id',
@@ -22,7 +23,8 @@
       },
       sourceAlias: 'voucher_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb -> 'amount')::float",
       valueFunction: '(:value)::float',
     },
@@ -34,6 +36,7 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
@@ -44,6 +47,7 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
     },
     {
@@ -54,6 +58,8 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
     },
     {
@@ -64,6 +70,8 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
     },
     {
@@ -75,24 +83,13 @@
         },
       },
       sourceAlias: 'voucher_lines',
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: "( SELECT array_agg(src_id.value::text) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'sourceIds'::text) src_id(value))",
       filterValueGetter: "( SELECT array_agg(lower(src_id.value::text)) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'sourceIds'::text) src_id(value))",
       valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'sub_transaction_id',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      sourceAlias: 'voucher_lines',
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'subTransactionId'",
     },
     {
       name: 'voucher_id',
@@ -102,6 +99,8 @@
       sourceAlias: 'voucher_lines',
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb ->> 'voucherId'",
       joinsTo: [
         {
@@ -119,7 +118,8 @@
       },
       sourceAlias: 'voucher_lines',
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNumber'",
       joinsTo: [
         {
@@ -226,7 +226,8 @@
         },
       },
       sourceAlias: 'voucher_lines',
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'fundDistributions'",
     },
   ],

@@ -8,6 +8,7 @@
       type: 'entity-type',
       targetId: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb', // simple_voucher_line
       useIdColumns: true,
+      essentialOnly: true,
     },
     {
       alias: 'voucher',
@@ -15,6 +16,7 @@
       targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
       targetField: 'id',
       sourceField: 'voucher_line.voucher_id',
+      essentialOnly: true
     },
     {
       alias: 'ledger_fund',
@@ -23,6 +25,7 @@
       targetField: 'fund.external_account_no',
       sourceField: 'voucher_line.external_account_number',
       useIdColumns: true,
+      essentialOnly: true
     },
   ],
   defaultSort: [

@@ -8,6 +8,7 @@
       type: 'entity-type',
       targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
       useIdColumns: true,
+      essentialOnly: true,
     },
     {
       alias: 'ledger',
@@ -15,6 +16,7 @@
       targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
       targetField: 'id',
       sourceField: 'fund.ledger_id',
+      essentialOnly: true,
     },
     {
       alias: 'fund_type',

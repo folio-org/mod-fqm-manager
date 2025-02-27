@@ -35,48 +35,11 @@
     //      },
     //    },
     {
-      alias: 'holdings',
-      type: 'entity-type',
-      targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
-      essentialOnly: true,
-      // Because there could theoretically be multiple holdings associated with a single POL ID, we need to include that ID to avoid ID collisions
-      useIdColumns: true,
-      targetField: 'id',
-      sourceField: 'pol._locations_for_join_only',
-    },
-    {
       alias: 'instance',
       type: 'entity-type',
       targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       targetField: 'id',
       sourceField: 'pol.instance_id',
-      essentialOnly: true,
-    },
-    //    {
-    //      alias: 'holdings_permanent_location',
-    //      type: 'entity-type',
-    //      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
-    //      essentialOnly: true,
-    //      join: {
-    //        type: 'LEFT JOIN',
-    //        joinTo: 'holdings',
-    //        condition: "(:that.jsonb ->> 'permanentLocationId')::uuid = :this.id",
-    //      },
-    //    },
-    {
-      alias: 'bill_to',
-      type: 'entity-type',
-      targetId: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
-      targetField: 'id',
-      sourceField: 'purchase_order.bill_to',
-      essentialOnly: true,
-    },
-    {
-      alias: 'ship_to',
-      type: 'entity-type',
-      targetId: 'abb28bac-e090-48c1-a48b-3fe805638041', // simple_config_data
-      targetField: 'id',
-      sourceField: 'purchase_order.ship_to',
       essentialOnly: true,
     },
     {
@@ -94,28 +57,6 @@
       targetField: 'id',
       sourceField: 'purchase_order.vendor',
       essentialOnly: true,
-    },
-  ],
-  columns: [
-    {
-      name: 'bill_to_name',
-      sourceAlias: 'bill_to.config',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: "json_extract_path_text((:sourceAlias.jsonb->>'value')::json, 'name')",
-    },
-    {
-      name: 'ship_to_name',
-      sourceAlias: 'ship_to.config',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: "json_extract_path_text((:sourceAlias.jsonb->>'value')::json, 'name')",
     },
   ],
 }

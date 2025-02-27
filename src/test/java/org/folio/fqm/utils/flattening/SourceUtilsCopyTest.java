@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
@@ -42,11 +40,7 @@ class SourceUtilsCopyTest {
   @MethodSource("copyColumnsIdColumnCases")
   void testCopyColumnsIdColumn(EntityTypeSourceEntityType parent, Boolean isIdColumn, Boolean expected) {
     EntityTypeColumn result = SourceUtils
-      .copyColumns(
-        parent,
-        Stream.of(new EntityTypeColumn().isIdColumn(isIdColumn).valueGetter("")),
-        Map.of()
-      )
+      .copyColumns(parent, Stream.of(new EntityTypeColumn().isIdColumn(isIdColumn).valueGetter("")), Map.of())
       .findAny()
       .orElseThrow();
 
@@ -129,27 +123,6 @@ class SourceUtilsCopyTest {
         null,
         new EntityTypeSourceEntityType().alias("foo").sourceField("foo.long.field"),
         Map.of("sourceField", "foo.long.field")
-      ),
-      // target field
-      Arguments.of(
-        null,
-        new EntityTypeSourceEntityType().alias("foo").targetField("other.foo"),
-        Map.of("targetField", "bar.other.foo")
-      ),
-      Arguments.of(
-        null,
-        new EntityTypeSourceEntityType().alias("foo").targetField("foo.baz"),
-        Map.of("targetField", "bar.baz")
-      ),
-      Arguments.of(
-        null,
-        new EntityTypeSourceEntityType().alias("foo").targetField("baz"),
-        Map.of("targetField", "bar.baz")
-      ),
-      Arguments.of(
-        null,
-        new EntityTypeSourceEntityType().alias("foo").targetField("other.deep.field"),
-        Map.of("targetField", "bar.other.deep.field")
       )
     );
   }

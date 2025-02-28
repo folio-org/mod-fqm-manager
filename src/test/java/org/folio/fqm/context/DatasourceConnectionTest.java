@@ -22,10 +22,10 @@ import static java.lang.String.format;
 @SpringBootTest
 class DatasourceConnectionTest {
   @Container
-  public static PostgreSQLContainer<?> readerDbContainer = new PostgreSQLContainer<>("postgres:12-alpine");
+  public static PostgreSQLContainer<?> readerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Container
-  public static PostgreSQLContainer<?> writerDbContainer = new PostgreSQLContainer<>("postgres:12-alpine");
+  public static PostgreSQLContainer<?> writerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Autowired
   @Qualifier("readerDataSource")

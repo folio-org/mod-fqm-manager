@@ -11,22 +11,20 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       isIdColumn: true,
-      valueGetter: ':sourceAlias.id',
+      valueGetter: ':transaction.id',
     },
     {
       name: '_version',
       dataType: {
         dataType: 'integerType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueGetter: "(:transaction.jsonb ->> '_version')::integer",
       valueFunction: '(:value)::integer'
     },
     {
@@ -34,11 +32,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: "(:sourceAlias.jsonb ->> 'amount')::float",
+      valueGetter: "(:transaction.jsonb ->> 'amount')::float",
       valueFunction: '(:value::float)'
     },
     {
@@ -46,20 +43,18 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'encumbranceId'",
+      valueGetter: ":transaction.jsonb -> 'awaitingPayment' ->> 'encumbranceId'",
     },
     {
       name: 'release_encumbrance',
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
+      valueGetter: ":transaction.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
       values: [
         {
           label: 'True',
@@ -76,69 +71,63 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'currency'",
+      valueGetter: ":transaction.jsonb ->> 'currency'",
     },
     {
       name: 'description',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'description'",
+      valueGetter: ":transaction.jsonb ->> 'description'",
     },
     {
       name: 'expense_class_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.expenseclassid",
+      valueGetter: ":transaction.expenseclassid",
     },
     {
       name: 'fiscal_year_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.fiscalyearid',
+      valueGetter: ':transaction.fiscalyearid',
     },
     {
       name: 'from_fund_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.fromfundid',
+      valueGetter: ':transaction.fromfundid',
     },
     {
       name: 'invoice_cancelled',
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCancelled'",
+      valueGetter: ":transaction.jsonb ->> 'invoiceCancelled'",
       values: [
         {
           label: 'True',
@@ -155,21 +144,19 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'paymentEncumbranceId'",
+      valueGetter: ":transaction.jsonb ->> 'paymentEncumbranceId'",
     },
     {
       name: 'source',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'source'",
+      valueGetter: ":transaction.jsonb ->> 'source'",
       values: [
         {
           label: 'Fiscal year',
@@ -194,36 +181,33 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.sourcefiscalyearid',
+      valueGetter: ':transaction.sourcefiscalyearid',
     },
     {
       name: 'source_invoice_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceId'",
+      valueGetter: ":transaction.jsonb ->> 'sourceInvoiceId'",
     },
     {
       name: 'source_invoice_line_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceLineId'",
+      valueGetter: ":transaction.jsonb ->> 'sourceInvoiceLineId'",
     },
     {
       name: 'tags',
@@ -244,7 +228,7 @@
               (elems.value::text) IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          jsonb_array_elements_text(:transaction.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       filterValueGetter: "(\
         SELECT\
@@ -253,7 +237,7 @@
               (elems.value::text) IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          jsonb_array_elements_text(:transaction.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       valueFunction: 'lower(:value)',
     },
@@ -262,23 +246,21 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':sourceAlias.tofundid',
+      valueGetter: ':transaction.tofundid',
     },
     {
       name: 'transaction_type',
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'transactionType'::text",
+      valueGetter: ":transaction.jsonb ->> 'transactionType'::text",
       values: [
         {
           label: 'Allocation',
@@ -315,10 +297,9 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb ->> 'voidedAmount')::float",
+      valueGetter: "(:transaction.jsonb ->> 'voidedAmount')::float",
       valueFunction: '(:value::float)',
     },
     // starts here
@@ -327,57 +308,52 @@
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
       name: 'created_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'createdByUserId'",
     },
     {
       name: 'updated_date',
       dataType: {
         dataType: 'dateType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'updatedDate'",
     },
     {
       name: 'updated_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'updatedByUserId'",
     },
     {
       name: 'amount_awaiting_payment',
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountAwaitingPayment')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountAwaitingPayment')::float",
       valueFunction: '(:value::float)',
     },
     {
@@ -385,11 +361,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountCredited')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountCredited')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -397,11 +372,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountExpended')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountExpended')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -409,11 +383,10 @@
       dataType: {
         dataType: 'numberType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'initialAmountEncumbered')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'initialAmountEncumbered')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -421,11 +394,10 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'status'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'status'",
       valueFunction: 'lower(:value)'
     },
     {
@@ -433,11 +405,10 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderType'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'orderType'",
       valueFunction: 'lower(:value)'
     },
     {
@@ -445,11 +416,10 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderStatus'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'orderStatus'",
       valueFunction: 'lower(:value)'
     },
     {
@@ -457,11 +427,10 @@
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'subscription'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'subscription'",
       values: [
         {
           label: 'True',
@@ -478,11 +447,10 @@
       dataType: {
         dataType: 'booleanType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'reEncumber'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'reEncumber'",
       values: [
         {
           label: 'True',
@@ -499,24 +467,22 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePurchaseOrderId'::text"
+      valueGetter: "(:transaction.jsonb -> 'encumbrance'::text) ->> 'sourcePurchaseOrderId'::text"
     },
     {
       name: 'source_po_line_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePoLineId'::text",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance'::text) ->> 'sourcePoLineId'::text",
     }
   ],
   sources: [

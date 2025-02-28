@@ -54,12 +54,22 @@
     {
       name: 'release_encumbrance',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'booleanType',
       },
       sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
     },
     {
       name: 'currency',
@@ -129,6 +139,16 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb ->> 'invoiceCancelled'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
     },
     {
       name: 'payment_encumbrance_id',
@@ -442,6 +462,16 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'subscription'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
     },
     {
       name: 're_encumber',
@@ -453,6 +483,16 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'reEncumber'",
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
     },
     {
       name: 'source_purchase_order_id',

@@ -1,6 +1,5 @@
 package org.folio.fqm.config;
 
-import javax.inject.Provider;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.service.PermissionsBypassService;
 import org.folio.fqm.service.PermissionsRegularService;
@@ -19,7 +18,7 @@ public class PermissionsConfiguration {
   private boolean bypassPermissionChecks;
 
   @Bean
-  @Autowired
+//  @Autowired
   public PermissionsService permissionsService(
     // lazy-loading here to avoid instantiation of the unused one
     ApplicationContext applicationContext

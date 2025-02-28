@@ -27,7 +27,7 @@
       sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "'implement'",
+      valueGetter: ":sourceAlias.jsonb ->> 'version'",
     },
     {
       name: 'amount',
@@ -45,12 +45,12 @@
     {
       name: 'awaiting_payment',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'stringType',
       },
       sourceAlias: 'transaction',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "'implement'",
+      valueGetter: ":sourceAlias.jsonb ->> 'awaitingPayment'",
     },
     {
       name: 'currency',

@@ -680,7 +680,7 @@
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'rangedUUIDType',
+          dataType: 'stringType',
         },
       },
       queryable: true,

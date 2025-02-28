@@ -18,16 +18,16 @@
       isIdColumn: true,
       valueGetter: ':sourceAlias.id',
     },
-    // TODO: couldn't find this field
     {
       name: '_version',
       dataType: {
-        dataType: 'numberType',
+        dataType: 'integerType',
       },
       sourceAlias: 'transaction',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'version'",
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
     },
     {
       name: 'amount',
@@ -41,16 +41,25 @@
       valueGetter: "(:sourceAlias.jsonb ->> 'amount')::float",
       valueFunction: '(:value::float)'
     },
-    // TODO: this is an object
     {
-      name: 'awaiting_payment',
+      name: 'awaiting_payment_encumbrance_id',
       dataType: {
         dataType: 'stringType',
       },
       sourceAlias: 'transaction',
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb ->> 'awaitingPayment'",
+      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'encumbranceId'",
+    },
+    {
+      name: 'release_encumbrance',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'transaction',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
     },
     {
       name: 'currency',
@@ -96,7 +105,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ',:sourceAlias.fiscalyearid',
+      valueGetter: ':sourceAlias.fiscalyearid',
     },
     {
       name: 'from_fund_id',
@@ -199,13 +208,34 @@
     {
       name: 'tags',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
       },
-      sourceAlias: 'transaction',
+      isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'tags'",
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text)) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+      )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'to_fund_id',

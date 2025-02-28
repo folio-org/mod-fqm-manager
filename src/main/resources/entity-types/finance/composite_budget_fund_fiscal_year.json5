@@ -1,0 +1,36 @@
+{
+  id: '592f6e78-51f0-40d5-9857-5b47976afb8e',
+  name: 'composite_budget_fund_fiscal_year',
+  private: false,
+  sources: [
+    {
+      alias: 'budget',
+      type: 'entity-type',
+      targetId: '71525bf3-ea51-47c4-bb18-7ab6f07d2b42', // simple_budget
+      useIdColumns: true,
+      essentialOnly: true
+    },
+    {
+      alias: 'fiscal_year',
+      type: 'entity-type',
+      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+      targetField: 'id',
+      essentialOnly: true,
+      sourceField: 'budget.fiscal_year_id',
+    },
+    {
+      alias: 'fund',
+      type: 'entity-type',
+      targetId: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9', // composite_fund
+      targetField: 'fund.id',
+      essentialOnly: true,
+      sourceField: 'budget.fund_id',
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"budget.budget".id',
+      direction: 'ASC',
+    },
+  ],
+}

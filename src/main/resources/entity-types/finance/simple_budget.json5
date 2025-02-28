@@ -1,0 +1,471 @@
+{
+  id: '71525bf3-ea51-47c4-bb18-7ab6f07d2b42',
+  name: 'simple_budget',
+  private: true,
+  requiredPermissions: [
+    'finance.budgets.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      essential: true,
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'budget',
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'acq_unit_ids',
+      sourceAlias: 'budget',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: true,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+    },
+//    {
+//      name: 'acquisition_unit',
+//      sourceAlias: 'budget',
+//      dataType: {
+//        dataType: 'jsonbArrayType',
+//        itemDataType: {
+//          dataType: 'stringType',
+//        },
+//      },
+//      idColumnName: 'acq_unit_ids',
+//      queryable: true,
+//      visibleByDefault: true,
+//      essential: true,
+//      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+//      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+//      valueFunction: "lower(:value)",
+//      source: {
+//        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+//        columnName: 'name'
+//      },
+//      valueSourceApi: {
+//        path: 'acquisitions-units/units',
+//        valueJsonPath: '$.acquisitionsUnits.*.id',
+//        labelJsonPath: '$.acquisitionsUnits.*.name'
+//      }
+//    },
+    {
+      name: 'fiscal_year_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      essential: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'fiscalYearId'",
+      filterValueGetter: ":sourceAlias.jsonb ->> 'fiscalYearId'",
+      joinsTo: [
+        {
+          targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        }
+      ]
+    },
+    {
+      name: 'fund_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'budget',
+      queryable: true,
+      essential: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb ->> 'fundId'",
+      filterValueGetter: ":sourceAlias.jsonb ->> 'fundId'",
+      joinsTo: [
+        {
+          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        }
+      ]
+    },
+    {
+      name: 'budget_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'budget',
+      values: [
+        {
+          label: 'Active',
+          value: 'Active',
+        },
+        {
+          label: 'Frozen',
+          value: 'Frozen',
+        },
+        {
+          label: 'Inactive',
+          value: 'Inactive',
+        },
+        {
+          label: 'Planned',
+          value: 'Planned',
+        },
+        {
+          label: 'Closed',
+          value: 'Closed',
+        }
+      ],
+      queryable: true,
+      essential: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'budgetStatus'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> \'budgetStatus\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'allowable_encumbrance',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'allowableEncumbrance')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'allowable_expenditure',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'allowableExpenditure')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'allocated',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      visibleByDefault: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'allocated')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'awaiting_payment',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'awaitingPayment')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'available',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'available')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'credits',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'credits')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'encumbered',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'encumbered')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'expenditures',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'expenditures')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'net_transfers',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      visibleByDefault: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'netTransfers')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'unavailable',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      visibleByDefault: true,
+      valueGetter:  "(:sourceAlias.jsonb ->> 'unavailable')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'over_encumbrance',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'overEncumbrance')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'over_expended',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'overExpended')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'initial_allocation',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'initialAllocation')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'allocation_to',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'allocationTo')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'allocation_from',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'allocationTo')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'total_funding',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'totalFunding')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'cash_balance',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      essential: true,
+      sourceAlias: 'budget',
+      valueGetter:  "(:sourceAlias.jsonb ->> 'cashBalance')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'tags',
+      sourceAlias: 'budget',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'budget',
+      target: 'src_finance_budget'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

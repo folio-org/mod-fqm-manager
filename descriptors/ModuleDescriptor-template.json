@@ -444,6 +444,10 @@
     {
       "id": "finance.groups",
       "version": "2.0"
+    },
+    {
+      "id": "finance.budgets",
+      "version": "2.0"
     }
   ],
   "optional": [

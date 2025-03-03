@@ -138,6 +138,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'itemEffectiveLocationIdAtCheckOut'",
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'status_name',

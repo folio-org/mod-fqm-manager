@@ -20,6 +20,14 @@
       order: 20,
     },
     {
+      alias: 'item_effective_location',
+      type: 'entity-type',
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+      sourceField: 'loans.item_effective_location_id_at_check_out',
+      targetField: 'id',
+      essentialOnly: true,
+    },
+    {
       alias: 'cospi',
       type: 'entity-type',
       targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point

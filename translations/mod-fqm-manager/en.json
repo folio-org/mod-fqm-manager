@@ -1550,7 +1550,7 @@
   "entityType.simple_finance_group.code": "Code",
   "entityType.simple_finance_group.status": "Status",
   "entityType.simple_finance_group.version": "Version",
-  "entityType.composite_invoice_line": "Invoice line",
+  "entityType.composite_invoice_line": "Invoice lines",
   "entityType.composite_invoice_line.invoice_line": "Invoice line",
   "entityType.composite_invoice_line.invoice": "Invoice",
   "entityType.simple_budget": "Simple budget",

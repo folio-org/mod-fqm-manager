@@ -561,6 +561,7 @@
           dataType: 'rangedUUIDType',
         },
       },
+      essential: true,
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,

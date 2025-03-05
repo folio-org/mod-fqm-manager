@@ -540,7 +540,7 @@
               name: 'type_name',
               property: 'classificationType',
               dataType: {
-                dataType: 'rangedUUIDType',
+                dataType: 'stringType',
               },
               queryable: false,
               valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'classificationTypeId') \

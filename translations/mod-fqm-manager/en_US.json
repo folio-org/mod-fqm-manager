@@ -1633,5 +1633,6 @@
     "entityType.composite_transaction.source_fiscal_year": "Source fiscal year",
     "entityType.composite_transaction.expense_class": "Expense class",
     "entityType.composite_transaction.source_invoice": "Source invoice",
-    "entityType.composite_transaction.source_invoice_line": "Source invoice line"
+    "entityType.composite_transaction.source_invoice_line": "Source invoice line",
+    "entityType.composite_loan_details.item_effective_library": "Item effective library",
 }

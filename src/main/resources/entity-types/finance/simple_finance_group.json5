@@ -1,7 +1,7 @@
 {
   id: 'a01d982c-2c59-408e-8771-7ce0a07bc1a3',
   name: 'simple_finance_group',
-  private: false,
+  private: true,
   requiredPermissions: [
     "acquisitions-units.units.collection.get",
     "finance.groups.collection.get"

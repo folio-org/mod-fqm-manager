@@ -28,6 +28,14 @@
       essentialOnly: true,
     },
     {
+      alias: 'item_effective_library',
+      type: 'entity-type',
+      targetId: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loc_lib
+      sourceField: 'item_effective_location.library_id',
+      targetField: 'id',
+      essentialOnly: true,
+    },
+    {
       alias: 'cospi',
       type: 'entity-type',
       targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point

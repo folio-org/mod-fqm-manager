@@ -9,6 +9,7 @@
       targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
       essentialOnly: true,
+      order: 10
     },
     {
       alias: 'po',
@@ -17,6 +18,7 @@
       targetField: 'id',
       sourceField: 'pol.purchase_order_id',
       essentialOnly: true,
+      order: 50
     },
     {
       alias: 'po_created_by_user',
@@ -25,6 +27,7 @@
       targetField: 'id',
       sourceField: 'po.created_by',
       essentialOnly: true,
+      order: 70
     },
     {
       alias: 'po_updated_by_user',
@@ -33,6 +36,7 @@
       targetField: 'id',
       sourceField: 'po.updated_by',
       essentialOnly: true,
+      order: 80
     },
     {
       alias: 'pol_created_by_user',
@@ -41,6 +45,7 @@
       targetField: 'id',
       sourceField: 'pol.created_by',
       essentialOnly: true,
+      order: 20
     },
     {
       alias: 'pol_updated_by_user',
@@ -49,6 +54,7 @@
       targetField: 'id',
       sourceField: 'pol.updated_by',
       essentialOnly: true,
+      order: 30
     },
     {
       alias: 'vendor_organization',
@@ -57,6 +63,7 @@
       targetField: 'id',
       sourceField: 'po.vendor',
       essentialOnly: true,
+      order: 90
     },
     {
       alias: 'assigned_to_user',
@@ -65,6 +72,7 @@
       targetField: 'id',
       sourceField: 'po.assigned_to',
       essentialOnly: true,
+      order: 60
     },
     {
       alias: 'rates',
@@ -72,6 +80,7 @@
       targetId: '770a383e-c6cb-412b-abc3-6fa3c8a8795c', // simple_exchange_rate
       targetField: 'currency',
       sourceField: 'pol.cost_currency',
+      order: 40
     },
   ],
   requiredPermissions: [

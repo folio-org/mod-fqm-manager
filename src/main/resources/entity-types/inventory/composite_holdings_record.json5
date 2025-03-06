@@ -10,6 +10,7 @@
       targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_records
       useIdColumns: true,
       essentialOnly: true,
+      order: 10
     },
     {
       alias: 'effective_location',
@@ -18,6 +19,7 @@
       targetField: 'id',
       sourceField: 'holdings.effective_location_id',
       essentialOnly: true,
+      order: 30
     },
     {
       alias: 'effective_library',
@@ -26,6 +28,7 @@
       targetField: 'id',
       sourceField: 'effective_location.library_id',
       essentialOnly: true,
+      order: 20
     },
     {
       alias: 'permanent_location',
@@ -34,6 +37,7 @@
       targetField: 'id',
       sourceField: 'holdings.permanent_location_id',
       essentialOnly: true,
+      order: 40
     },
     {
       alias: 'temporary_location',
@@ -42,6 +46,7 @@
       targetField: 'id',
       sourceField: 'holdings.temporary_location_id',
       essentialOnly: true,
+      order: 50
     },
   ],
   defaultSort: [

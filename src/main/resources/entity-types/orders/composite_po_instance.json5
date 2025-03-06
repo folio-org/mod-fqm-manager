@@ -13,6 +13,7 @@
       targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
       essentialOnly: true,
+      order: 10
     },
     {
       alias: 'purchase_order',
@@ -21,6 +22,7 @@
       targetField: 'id',
       sourceField: 'pol.purchase_order_id',
       essentialOnly: true,
+      order: 30,
       overrideJoinDirection: 'right',
     },
     //    {
@@ -41,6 +43,7 @@
       targetField: 'id',
       sourceField: 'pol.instance_id',
       essentialOnly: true,
+      order: 20
     },
     {
       alias: 'created_by_user',
@@ -49,6 +52,7 @@
       targetField: 'id',
       sourceField: 'purchase_order.created_by',
       essentialOnly: true,
+      order: 40
     },
     {
       alias: 'organization',
@@ -57,6 +61,7 @@
       targetField: 'id',
       sourceField: 'purchase_order.vendor',
       essentialOnly: true,
+      order: 50
     },
   ],
 }

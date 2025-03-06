@@ -10,6 +10,7 @@
       targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
       useIdColumns: true,
       essentialOnly: true,
+      order: 10
     },
     {
       alias: 'effective_location',
@@ -18,6 +19,7 @@
       targetField: 'id',
       sourceField: 'items.effective_location_id',
       essentialOnly: true,
+      order: 80
     },
     {
       alias: 'effective_call_number',
@@ -26,6 +28,7 @@
       targetField: 'id',
       sourceField: 'items.effective_call_number_components_type_id',
       essentialOnly: true,
+      order: 30
     },
     {
       alias: 'item_level_call_number',
@@ -34,6 +37,7 @@
       targetField: 'id',
       sourceField: 'items.item_level_call_number_type_id',
       essentialOnly: true,
+      order: 20
     },
     {
       alias: 'loclibrary',
@@ -42,6 +46,7 @@
       targetField: 'id',
       sourceField: 'effective_location.library_id',
       essentialOnly: true,
+      order: 70
     },
     {
       alias: 'permanent_location',
@@ -50,6 +55,7 @@
       targetField: 'id',
       sourceField: 'items.permanent_location_id',
       essentialOnly: true,
+      order: 90
     },
     {
       alias: 'mtypes',
@@ -58,6 +64,7 @@
       targetField: 'id',
       sourceField: 'items.material_type_id',
       essentialOnly: true,
+      order: 40
     },
     {
       alias: 'temporary_location',
@@ -66,6 +73,7 @@
       targetField: 'id',
       sourceField: 'items.temporary_location_id',
       essentialOnly: true,
+      order: 100
     },
     {
       alias: 'holdings',
@@ -74,6 +82,7 @@
       targetField: 'id',
       sourceField: 'items.holdings_record_id',
       essentialOnly: true,
+      order: 60
     },
     {
       alias: 'instances',
@@ -82,6 +91,7 @@
       targetField: 'id',
       sourceField: 'holdings.instance_id',
       essentialOnly: true,
+      order: 50
     },
     {
       alias: 'permanent_loan_type',
@@ -90,6 +100,7 @@
       targetField: 'id',
       sourceField: 'items.permanent_loan_type_id',
       essentialOnly: true,
+      order: 110
     },
     {
       alias: 'temporary_loan_type',
@@ -98,6 +109,7 @@
       targetField: 'id',
       sourceField: 'items.temporary_loan_type_id',
       essentialOnly: true,
+      order: 120
     },
   ],
   defaultSort: [

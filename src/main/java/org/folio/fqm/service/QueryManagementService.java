@@ -20,7 +20,6 @@ import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -121,7 +120,6 @@ public class QueryManagementService {
    * @param limit          Maximum number of results to return. Applicable only if "includeResults" parameter is true
    * @return Details of the query
    */
-  @Transactional(readOnly = true)
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
     return queryRepository.getQuery(queryId, false)
       .map(query -> new QueryDetails().queryId(queryId)
@@ -141,7 +139,6 @@ public class QueryManagementService {
    *
    * @return IDs of the removed queries
    */
-  @Transactional
   public PurgedQueries deleteOldQueries() {
     List<UUID> queryIds = queryRepository.getQueryIdsStartedBefore(queryRetentionDuration);
     log.info("Deleting the queries with queryIds {}", queryIds);
@@ -154,7 +151,6 @@ public class QueryManagementService {
    *
    * @param queryId ID of the query to be removed
    */
-  @Transactional
   public void deleteQuery(UUID queryId) {
     log.info("Deleting the query with queryId {}", queryId);
     Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));

@@ -9,6 +9,7 @@
       type: 'entity-type',
       targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
       essentialOnly: true,
+      order: 20
     },
     {
       alias: 'voucher_line',
@@ -18,6 +19,7 @@
       sourceField: 'voucher.id',
       useIdColumns: true,
       essentialOnly: true,
+      order: 10
     },
     {
       alias: 'invoice',
@@ -26,6 +28,7 @@
       targetField: 'id',
       sourceField: 'voucher.invoice_id',
       essentialOnly: true,
+      order: 30
     },
     {
       alias: 'ledger_fund',
@@ -35,6 +38,7 @@
       sourceField: 'voucher_line.external_account_number',
       useIdColumns: true,
       essentialOnly: true,
+      order: 40
     },
     {
       alias: 'organization',
@@ -43,6 +47,7 @@
       targetField: 'id',
       sourceField: 'voucher.vendor_id',
       essentialOnly: true,
+      order: 50
     },
   ],
   defaultSort: [

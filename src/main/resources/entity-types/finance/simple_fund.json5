@@ -486,7 +486,7 @@
       },
       essential: true,
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       idColumnName: 'acq_unit_ids',
       valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",

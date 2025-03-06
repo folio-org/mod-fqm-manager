@@ -1,7 +1,7 @@
 {
   id: 'abce1078-b099-467f-811b-367bd05638e3',
   name: 'simple_ledger',
-  private: false,
+  private: true,
   requiredPermissions: [
     "finance.ledgers.collection.get",
     "acquisitions-units.units.collection.get",
@@ -166,7 +166,7 @@
       },
       idColumnName: 'acq_unit_ids',
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",

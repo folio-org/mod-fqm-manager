@@ -1,7 +1,7 @@
 {
   id: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
   name: 'simple_fiscal_year',
-  private: false,
+  private: true,
   requiredPermissions: [
     'finance.fiscal-years.collection.get',
     'acquisitions-units.units.collection.get'
@@ -70,7 +70,7 @@
       essential: true,
       idColumnName: 'acq_unit_ids',
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       valueFunction: "lower(:value)",

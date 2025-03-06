@@ -136,6 +136,20 @@
       valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
     },
     {
+      name: 'pronouns',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'pronouns'",
+      filterValueGetter: "\"left\"(lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'pronouns'::text)), 600)",
+      valueFunction: '"left"(lower(${tenant_id}_mod_users.f_unaccent(:value)), 600)',
+    },
+    {
       name: 'first_name',
       sourceAlias: 'user',
       dataType: {

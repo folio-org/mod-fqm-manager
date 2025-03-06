@@ -1424,6 +1424,7 @@
   "entityType.simple_FOLIO_user.username": "Username",
   "entityType.simple_user_details": "Simple Users",
   "entityType.simple_user_details.active": "Active",
+  "entityType.simple_user_details.pronouns": "Pronouns",
   "entityType.simple_user_details.addresses": "Address",
   "entityType.simple_user_details.addresses.address_id": "Address UUID",
   "entityType.simple_user_details.addresses.address_id._qualified": "Address UUID",

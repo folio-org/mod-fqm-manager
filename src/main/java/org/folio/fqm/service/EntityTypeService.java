@@ -30,7 +30,6 @@ import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Comparator.comparing;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
@@ -71,7 +70,6 @@ public class EntityTypeService {
    *
    * @param entityTypeIds If provided, only the entity types having the provided Ids will be included in the results
    */
-  @Transactional(readOnly = true)
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible, boolean includeAll) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
@@ -126,7 +124,6 @@ public class EntityTypeService {
    * @param searchText Nullable search text. If a search text is provided, the returned values will include only those
    *                   that contain the specified searchText.
    */
-  @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);

@@ -138,6 +138,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'itemEffectiveLocationIdAtCheckOut'",
       joinsTo: [
         {

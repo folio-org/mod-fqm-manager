@@ -23,7 +23,6 @@
       sourceField: 'pol.purchase_order_id',
       essentialOnly: true,
       order: 30,
-      overrideJoinDirection: 'right',
     },
     //    {
     //      alias: 'location',

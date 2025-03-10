@@ -65,7 +65,7 @@
   "entityType.composite_loan_details.lpolicy": "Loan policy",
   "entityType.composite_loan_details.mtypes": "Material type",
   "entityType.composite_loan_details.users": "User",
-  "entityType.composite_po_instance": "Purchase orders with titles",
+  "entityType.composite_po_instance": "Purchase order lines with titles",
   "entityType.composite_po_instance.bill_to": "Bill to",
   "entityType.composite_po_instance.bill_to_name": "Bill to - name",
   "entityType.composite_po_instance.created_by_user": "Created by user",

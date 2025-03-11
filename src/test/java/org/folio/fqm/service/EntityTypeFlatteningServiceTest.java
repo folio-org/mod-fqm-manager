@@ -41,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class EntityTypeFlatteningServiceTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final String TENANT_ID = "tenant_01";
 
   private static final EntityType SIMPLE_1;
   private static final EntityType SIMPLE_2;
@@ -393,7 +394,7 @@ class EntityTypeFlatteningServiceTest {
     lenient()
       .when(localizationService.localizeEntityTypeColumn(any(EntityType.class), any(EntityTypeColumn.class)))
       .then(invocation -> invocation.getArgument(1));
-    lenient().when(executionContext.getTenantId()).thenReturn("tenant_01");
+    lenient().when(executionContext.getTenantId()).thenReturn(TENANT_ID);
   }
 
   static List<Arguments> allEntities() {
@@ -412,11 +413,11 @@ class EntityTypeFlatteningServiceTest {
   @ParameterizedTest
   @MethodSource("allEntities")
   void testAllFlattenSuccessfully(EntityType entityType) {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType flattened = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(entityType.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -527,11 +528,11 @@ class EntityTypeFlatteningServiceTest {
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
       .sourceViewExtractor("\"source1\".some_view_extractor");
 
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actualEntityType = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(SIMPLE_1.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -540,11 +541,11 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFlattenCompositeOfSimple() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_WRAPPER.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -571,11 +572,11 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFlattenCompositeOfSimpleJoined() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_TO_2.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -629,11 +630,11 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFlattenCompositeOfSimpleNestedJoined() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1W_TO_2W.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -693,11 +694,11 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFlattenCompositeComposite() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_COMPOSITE.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -773,17 +774,17 @@ class EntityTypeFlatteningServiceTest {
 
     assertThrows(
       IllegalStateException.class,
-      () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, "tenant", false)
+      () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, TENANT_ID, false)
     );
   }
 
   @Test
   void testIncludeEcs() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 1}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 1}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_WRAPPER.getId()),
-      null,
+      TENANT_ID,
       false
     );
 
@@ -792,11 +793,11 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFieldOrderInComposites() {
-    when(userTenantService.getUserTenantsResponse("tenant_01")).thenReturn("{'totalRecords': 0}");
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     List<EntityTypeColumn> actual = entityTypeFlatteningService.getFlattenedEntityType(
       UUID.fromString(COMPOSITE_1_TO_2.getId()),
-      null,
+      TENANT_ID,
       false
     ).getColumns();
 
@@ -808,6 +809,16 @@ class EntityTypeFlatteningServiceTest {
       assertThat(prev.compareTo(alias), greaterThanOrEqualTo(0));
       prev = alias;
     }
+  }
+
+  @Test
+  void testThrowsExceptionForNullTenantId() {
+    UUID entityTypeId = UUID.randomUUID();
+    assertThrows(IllegalArgumentException.class, () -> entityTypeFlatteningService.getFlattenedEntityType(
+      entityTypeId,
+      null,
+      false
+    ));
   }
 
   @SneakyThrows

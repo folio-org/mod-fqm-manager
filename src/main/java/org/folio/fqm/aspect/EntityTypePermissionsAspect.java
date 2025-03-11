@@ -13,6 +13,7 @@ import org.folio.fqm.service.PermissionsService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ public class EntityTypePermissionsAspect {
   private final EntityTypeRepository entityTypeRepository;
   private final QueryRepository queryRepository;
   private final PermissionsService permissionsService;
+  private final FolioExecutionContext executionContext;
 
   private final Map<MethodSignature, Integer> indexCache = new ConcurrentHashMap<>();
 
@@ -81,7 +83,7 @@ public class EntityTypePermissionsAspect {
   }
 
   private EntityType getEntityTypeFromId(UUID entityTypeId) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, null)
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
   }
 

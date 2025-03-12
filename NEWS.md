@@ -1,4 +1,110 @@
+# 4.0.x - Sunflower
+
+# 4.0.0
+- [MODFQMMGR-376]: Add textbox custom fields to the Users entity type (#588)
+- [MODFQMMGR-613]: Implement optimized Contains and StartsWith operators
+- [MODFQMMGR-635]: Add Query Parameter to retrieve all the ET
+- [MODFQMMGR-642]: Use custom field UUIDs for BE custom field names (#595)
+- [MODFQMMGR-645]: Make the entity types visible for stakeholder review and feedback
+- [MODFQMMGR-655]: Fix bug in fiscal year, where it returns no results
+- Update names and translations for simple entity types
+- [MODFQMMGR-656]: Update tag list name in items
+- Remove redundant speed comparison folder (#611)
+- [MODFQMMGR-652]: Fix null/empty queries for jsonbArrayTypes (#610)
+- [MODFQMMGR-659]: Simple entity adjustment - Fiscal year
+- [MODFQMMGR-644]: Replace the DB sources in composite_po_instance with ET sources
+- [MODFQMMGR-669]: Entity adjustments: expense class (#614)
+- [MODFQMMGR-649]: Add permissions to composite_po_instance
+- [MODFQMMGR-644]: Fix and update composite_po_instance
+- [MODFQMMGR-661]: Fixing Ledger ET
+- [MODFQMMGR-610]: Use new entity type join format (#612)
+- [MODFQMMGR-668]: Create finace group ET
+- [MODFQMMGR-669]: unhide expense class id (#627)
+- [MODFQMMGR-675]: Add Custom Fields support for Order and Order Line entities (#623)
+- [MODFQMMGR-610]: Clone entity types during flattening, to prevent mutation of cached ones (#630)
+- [MODFQMMGR-672]: Entity adjustments: Invoices (#624)
+- [MODFQMMGR-543]: Add support for ordering ET sources in composites and refactor column sorting within ET sources
+- [MODFQMMGR-673]: Entity adjustments: Invoice line (#629)
+- Fix contributor_name_type ET (#634)
+- [MODFQMMGR-660]: Restructure the liquibase directory
+- [MODFQMMGR-646]: Entity adjustments: voucher line
+- [MODFQMMGR-677]: Entity adjustments: Vouchers
+- [MODFQMMGR-533]: Fix simple_loan_type and add it to composites
+- [MODFQMMGR-680]: Make Index title field in Instance ET essential
+- [MODFQMMGR-671]: Make field essential for inventory
+- [MODFQMMGR-511]: Retrieve dropdown values for Instance - Source field (#647)
+- [MODFQMMGR-692]: Unhide simple_purchase_order
+- [MODFQMMGR-158]: Entity type adjustments: simple_item
+- [MODFQMMGR-683]: adding source view for budget
+- [MODFQMMGR-684]: Make several entity types private
+- [MODFQMMGR-700]: Handle target fields more intelligently for reused names (#659)
+- [MODFQMMGR-693]: Add Composite Invoice Line ET (#657)
+- [MODFQMMGR-683]: new Budget ET
+- [FOLIO-4237]: Upgrade to Java 21
+- [MODFQMMGR-676]: Add item effective location at check out to the loan entity
+- [MODFQMMGR-685]: Add transaction entity type (#652)
+- [MODFQMMGR-694]: Composite ET adjustments (#656)
+- Change instance classification type to stringType (#665)
+- [MODFQMMGR-605]: Adding pronouns field to Users
+- [MODFQMMGR-703]: Entity adjustments
+- [MODFQMMGR-702]: Reorder sources within composite entities
+- [MODFQMMGR-705]: Remove @Transactional
+
+[MODFQMMGR-376]: https://folio-org.atlassian.net/browse/MODFQMMGR-376
+[MODFQMMGR-613]: https://folio-org.atlassian.net/browse/MODFQMMGR-613
+[MODFQMMGR-635]: https://folio-org.atlassian.net/browse/MODFQMMGR-635
+[MODFQMMGR-642]: https://folio-org.atlassian.net/browse/MODFQMMGR-642
+[MODFQMMGR-645]: https://folio-org.atlassian.net/browse/MODFQMMGR-645
+[MODFQMMGR-655]: https://folio-org.atlassian.net/browse/MODFQMMGR-655
+[MODFQMMGR-656]: https://folio-org.atlassian.net/browse/MODFQMMGR-656
+[MODFQMMGR-652]: https://folio-org.atlassian.net/browse/MODFQMMGR-652
+[MODFQMMGR-659]: https://folio-org.atlassian.net/browse/MODFQMMGR-659
+[MODFQMMGR-644]: https://folio-org.atlassian.net/browse/MODFQMMGR-644
+[MODFQMMGR-669]: https://folio-org.atlassian.net/browse/MODFQMMGR-669
+[MODFQMMGR-649]: https://folio-org.atlassian.net/browse/MODFQMMGR-649
+[MODFQMMGR-644]: https://folio-org.atlassian.net/browse/MODFQMMGR-644
+[MODFQMMGR-661]: https://folio-org.atlassian.net/browse/MODFQMMGR-661
+[MODFQMMGR-610]: https://folio-org.atlassian.net/browse/MODFQMMGR-610
+[MODFQMMGR-668]: https://folio-org.atlassian.net/browse/MODFQMMGR-668
+[MODFQMMGR-669]: https://folio-org.atlassian.net/browse/MODFQMMGR-669
+[MODFQMMGR-675]: https://folio-org.atlassian.net/browse/MODFQMMGR-675
+[MODFQMMGR-610]: https://folio-org.atlassian.net/browse/MODFQMMGR-610
+[MODFQMMGR-672]: https://folio-org.atlassian.net/browse/MODFQMMGR-672
+[MODFQMMGR-543]: https://folio-org.atlassian.net/browse/MODFQMMGR-543
+[MODFQMMGR-673]: https://folio-org.atlassian.net/browse/MODFQMMGR-673
+[MODFQMMGR-660]: https://folio-org.atlassian.net/browse/MODFQMMGR-660
+[MODFQMMGR-646]: https://folio-org.atlassian.net/browse/MODFQMMGR-646
+[MODFQMMGR-677]: https://folio-org.atlassian.net/browse/MODFQMMGR-677
+[MODFQMMGR-533]: https://folio-org.atlassian.net/browse/MODFQMMGR-533
+[MODFQMMGR-680]: https://folio-org.atlassian.net/browse/MODFQMMGR-680
+[MODFQMMGR-671]: https://folio-org.atlassian.net/browse/MODFQMMGR-671
+[MODFQMMGR-511]: https://folio-org.atlassian.net/browse/MODFQMMGR-511
+[MODFQMMGR-692]: https://folio-org.atlassian.net/browse/MODFQMMGR-692
+[MODFQMMGR-158]: https://folio-org.atlassian.net/browse/MODFQMMGR-158
+[MODFQMMGR-683]: https://folio-org.atlassian.net/browse/MODFQMMGR-683
+[MODFQMMGR-684]: https://folio-org.atlassian.net/browse/MODFQMMGR-684
+[MODFQMMGR-700]: https://folio-org.atlassian.net/browse/MODFQMMGR-700
+[MODFQMMGR-693]: https://folio-org.atlassian.net/browse/MODFQMMGR-693
+[MODFQMMGR-683]: https://folio-org.atlassian.net/browse/MODFQMMGR-683
+[MODFQMMGR-676]: https://folio-org.atlassian.net/browse/MODFQMMGR-676
+[MODFQMMGR-685]: https://folio-org.atlassian.net/browse/MODFQMMGR-685
+[MODFQMMGR-694]: https://folio-org.atlassian.net/browse/MODFQMMGR-694
+[MODFQMMGR-605]: https://folio-org.atlassian.net/browse/MODFQMMGR-605
+[MODFQMMGR-703]: https://folio-org.atlassian.net/browse/MODFQMMGR-703
+[MODFQMMGR-702]: https://folio-org.atlassian.net/browse/MODFQMMGR-702
+[MODFQMMGR-705]: https://folio-org.atlassian.net/browse/MODFQMMGR-705
+[FOLIO-4237]: https://folio-org.atlassian.net/browse/FOLIO-4237
+
 # 3.0.x - Ramsons
+
+## 3.0.12
+- [MODFQMMGR-658], [MODFQMMGR-650], [MODFQMMGR-643], [MODFQMMGR-649]: Add missing permissions to private entity types
+- [MODFQMMGR-649] additioanally tweaks some settings on composite_voucher_line_totals_per_account to make it more usable
+
+[MODFQMMGR-658]: https://folio-org.atlassian.net/browse/MODFQMMGR-658
+[MODFQMMGR-650]: https://folio-org.atlassian.net/browse/MODFQMMGR-650
+[MODFQMMGR-643]: https://folio-org.atlassian.net/browse/MODFQMMGR-643
+[MODFQMMGR-649]: https://folio-org.atlassian.net/browse/MODFQMMGR-649
 
 ## 3.0.11
 - [MODFQMMGR-657](https://folio-org.atlassian.net/browse/MODFQMMGR-657): Fix export for Organizations ET

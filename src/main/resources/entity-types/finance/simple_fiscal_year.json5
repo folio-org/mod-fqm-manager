@@ -54,6 +54,7 @@
       isIdColumn: false,
       queryable: false,
       hidden: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
       filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"

@@ -88,6 +88,7 @@ public class QueryProcessorService {
     Fql fql = fqlService.getFql(fqlQuery);
     boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
     List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
+    log.info("QUERY PROCESSOR SERVICE TENANTS TO QUERY: {}", tenantsToQuery);
     return resultSetRepository.getResultSetSync(
       UUID.fromString(entityType.getId()),
       fql,

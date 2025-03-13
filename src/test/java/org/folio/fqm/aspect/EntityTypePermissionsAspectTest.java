@@ -103,7 +103,6 @@ class EntityTypePermissionsAspectTest {
   void testMethodSignatureCanBeHandled(AspectMethodHandler methodHandler, String methodName, Function<EntityType, Object[]> paramsConverter, Class<?>... paramTypes) {
     // Create a mock ProceedingJoinPoint for a dummy method, and use it to call the aspect
     // No permission checking is performed, so we can just verify that the permission check would hav happened and that the aspect calls proceed()
-    // TODO: when executionContext here?
     EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService, executionContext);
     EntityType entityType = new EntityType(UUID.randomUUID().toString(), "name", true, false);
     when(executionContext.getTenantId()).thenReturn("beeuni");

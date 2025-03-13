@@ -145,7 +145,7 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null, false);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), executionContext.getTenantId(), false);
 
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 

@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.greaterThan;
 public class IntegrationTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestBase.class);
-  private static final boolean IS_LOG_ENABLED = false;  // for debugging set to true!
+  private static final boolean IS_LOG_ENABLED = true;  // for debugging set to true!
   private static final Network network = Network.newNetwork();
 
   public static final String TENANT_ID = "beeuni";

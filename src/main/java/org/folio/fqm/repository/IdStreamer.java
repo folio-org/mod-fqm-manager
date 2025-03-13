@@ -101,6 +101,8 @@ public class IdStreamer {
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
+      log.info("IDSTREAMER 104 TENANT ID: {}", tenantId);
+      log.info("IDSTREAMER 104 EXECUTION CONTEXT TENANT ID: {}", executionContext.getTenantId());
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
         entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);

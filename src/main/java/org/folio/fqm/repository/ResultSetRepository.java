@@ -117,7 +117,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(baseEntityType);
     var sortCriteria = EntityTypeUtils.getSortFields(baseEntityType, true);
     Condition afterIdCondition;
@@ -136,7 +136,7 @@ public class ResultSetRepository {
       // Below is a very hackish way to get around valueGetter issues in FqlToSqlConverterServiceIT
       // (due to the fact the that integration test does not select from an actual table, and instead creates a subquery
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
-      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : null;
+      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
       log.debug("idColumnValueGetters: {}", idColumnValueGetters);
@@ -151,6 +151,7 @@ public class ResultSetRepository {
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
       // the entity type with all columns preserved to build the from clause. However, we do not want to only
       // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      log.info("RESULT SET REPOSITORY 154 TENANT ID: {}", tenantId);
       EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
       String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
 

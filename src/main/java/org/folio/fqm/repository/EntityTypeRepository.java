@@ -99,13 +99,15 @@ public class EntityTypeRepository {
   }
 
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId, String tenantId) {
+    log.info("ENTITY TYPE SERVICE getEntityTypeDefinition");
     return getEntityTypeDefinitions(Collections.singleton(entityTypeId), tenantId).findFirst();
   }
 
   public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
     log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
 
-    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId, tenantIdKey -> {
+    log.info("Tenant ID: {}", tenantId);
+    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId != null ? tenantId : executionContext.getTenantId(), tenantIdKey -> {
         String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
         Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
         Map<String, EntityType> rawEntityTypes = readerJooqContext

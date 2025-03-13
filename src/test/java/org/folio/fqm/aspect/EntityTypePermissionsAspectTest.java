@@ -11,7 +11,6 @@ import org.folio.fqm.service.PermissionsService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;

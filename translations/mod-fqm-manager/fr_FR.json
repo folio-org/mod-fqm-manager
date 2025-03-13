@@ -680,7 +680,7 @@
     "entityType.composite_loan_details.loans": "Prêt",
     "entityType.composite_loan_details.mtypes": "Type de document",
     "entityType.composite_loan_details.lpolicy": "Règle de prêt",
-    "entityType.composite_po_instance": "Purchase orders with titles",
+    "entityType.composite_po_instance": "Purchase order lines with titles",
     "entityType.composite_po_instance.purchase_order": "PO",
     "entityType.composite_po_instance.pol": "POL",
     "entityType.composite_po_instance.location": "Emplacement",
@@ -1588,7 +1588,7 @@
     "entityType.composite_budget_fund_fiscal_year.budget": "Budget",
     "entityType.composite_budget_fund_fiscal_year.fiscal_year": "Fiscal Year",
     "entityType.simple_budget.tags": "Tags",
-    "entityType.composite_loan_details.item_effective_location": "Item effective location",
+    "entityType.composite_loan_details.item_effective_location": "Item effective location at checkout",
     "entityType.simple_transaction": "Transaction",
     "entityType.simple_transaction.id": "UUID",
     "entityType.simple_transaction.version": "Version",
@@ -1633,5 +1633,7 @@
     "entityType.composite_transaction.source_fiscal_year": "Source fiscal year",
     "entityType.composite_transaction.expense_class": "Expense class",
     "entityType.composite_transaction.source_invoice": "Source invoice",
-    "entityType.composite_transaction.source_invoice_line": "Source invoice line"
+    "entityType.composite_transaction.source_invoice_line": "Source invoice line",
+    "entityType.composite_loan_details.item_effective_library": "Item effective library at checkout",
+    "entityType.simple_user_details.pronouns": "Pronouns"
 }

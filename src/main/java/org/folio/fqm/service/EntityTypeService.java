@@ -28,6 +28,7 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +65,7 @@ public class EntityTypeService {
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final LanguageClient languageClient;
+  private final FolioExecutionContext executionContext;
 
   /**
    * Returns the list of all entity types.
@@ -73,7 +75,7 @@ public class EntityTypeService {
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible, boolean includeAll) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeDefinitions(entityTypeIds, null)
+      .getEntityTypeDefinitions(entityTypeIds, executionContext.getTenantId())
       .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .map(entityType -> {
@@ -104,7 +106,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
     List<EntityTypeColumn> columns = entityType
@@ -126,7 +128,7 @@ public class EntityTypeService {
    */
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
@@ -143,7 +145,7 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null, false);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), executionContext.getTenantId(), false);
 
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 

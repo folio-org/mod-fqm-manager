@@ -19,6 +19,7 @@ import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,13 +52,15 @@ class ResultSetServiceTest {
   private EntityTypeFlatteningService entityTypeFlatteningService;
   private ConfigurationClient configurationClient;
   private ResultSetService service;
+  private FolioExecutionContext executionContext;
 
   @BeforeEach
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     this.configurationClient = mock(ConfigurationClient.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, configurationClient);
+    this.executionContext = mock(FolioExecutionContext.class);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, configurationClient, executionContext);
   }
 
   @Test

@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -50,7 +52,7 @@ public class EntityTypeFlatteningService {
   private static final Comparator<EntityTypeColumn> columnComparator =
     nullsLast(
       comparing(entityTypeColumn ->
-        requireNonNullElse(entityTypeColumn.getLabelAlias(), ""),
+          requireNonNullElse(entityTypeColumn.getLabelAlias(), ""),
         String.CASE_INSENSITIVE_ORDER));
 
   @Autowired
@@ -73,10 +75,10 @@ public class EntityTypeFlatteningService {
   /**
    * Gets a flattened entity type definition, fully localized.
    *
-   * @param entityTypeId The ID of the entity type to flatten
-   * @param tenantId The tenant ID to use for fetching the entity type definition
+   * @param entityTypeId       The ID of the entity type to flatten
+   * @param tenantId           The tenant ID to use for fetching the entity type definition
    * @param preserveAllColumns If true, all columns will be preserved, even if they are marked as non-essential and should be filtered out.
-   *                             This is primary for use by methods which build the from clause, since some join-related columns aren't exposed to users.
+   *                           This is primary for use by methods which build the from clause, since some join-related columns aren't exposed to users.
    * @return The flattened entity type definition, fully localized
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
@@ -169,11 +171,11 @@ public class EntityTypeFlatteningService {
 
         // Add a prefix to each column's name and idColumnName, then add 'em to the flattened entity type
         childColumns.addAll(
-            columns.stream()
+          columns.stream()
             .filter(col ->
               preserveAllColumns ||
-              !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) ||
-              Boolean.TRUE.equals(col.getEssential())
+                !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) ||
+                Boolean.TRUE.equals(col.getEssential())
             )
             // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source alias in flattenedSourceDefinition
             .map(col ->
@@ -249,5 +251,11 @@ public class EntityTypeFlatteningService {
     UUID entityTypeId,
     List<Locale> locales,
     boolean preserveAllColumns
-  ) {}
+  ) {
+    EntityTypeCacheKey {
+      if (tenantId == null) {
+        throw new IllegalArgumentException("tenantId cannot be null");
+      }
+    }
+  }
 }

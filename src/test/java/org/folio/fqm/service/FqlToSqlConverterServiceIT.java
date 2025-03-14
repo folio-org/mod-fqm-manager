@@ -9,6 +9,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -52,13 +53,7 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
           .sourceAlias("t")
       )).sources(List.of(
         new EntityTypeSourceDatabase("db", "t")
-          .target("""
-              (select id, some_column, unused_column
-              from (values
-                     ('2af997b6-2655-459e-bdca-decbf54795ae'::uuid, 'AbCdEfGhIjKlMnOpQrStUvWxYz', 456),
-                     ('e0e4233e-fea0-4834-96ac-78739a1856d3'::uuid, 'blah blah blah', 789)
-                   ) as t (id, some_column, unused_column)
-              )"""))
+          .target("dummy_table"))
       );
 
     var json = new ObjectMapper().writeValueAsString(entityType);
@@ -68,8 +63,33 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
         (:id, :definition::json)
       """.formatted(TENANT_ID);
 
-    NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(getDataSource());
-    jdbcTemplate.update(sql, Map.of("id", UUID.fromString(entityType.getId()), "definition", json));
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getDataSource());
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
+    namedParameterJdbcTemplate.update(sql, Map.of("id", UUID.fromString(entityType.getId()), "definition", json));
+
+    String createTableSql = """
+          CREATE TABLE %s_mod_fqm_manager.dummy_table (
+              id UUID PRIMARY KEY,
+              some_column TEXT,
+              unused_column INT
+          );
+      """.formatted(TENANT_ID);
+    jdbcTemplate.execute(createTableSql);
+
+    String insertSql = """
+          INSERT INTO beeuni_mod_fqm_manager.dummy_table (id, some_column, unused_column)
+          VALUES (:id, :some_column, :unused_column);
+      """;
+    namedParameterJdbcTemplate.update(insertSql, Map.of(
+      "id", UUID.fromString("2af997b6-2655-459e-bdca-decbf54795ae"),
+      "some_column", "AbCdEfGhIjKlMnOpQrStUvWxYz",
+      "unused_column", 456
+    ));
+    namedParameterJdbcTemplate.update(insertSql, Map.of(
+      "id", UUID.fromString("e0e4233e-fea0-4834-96ac-78739a1856d3"),
+      "some_column", "blah blah blah",
+      "unused_column", 789
+    ));
 
     // When we query for a value that only actually matches the mock data when it gets run through the valueFunction
     // and is compared against the value produced by the filterValueGetter

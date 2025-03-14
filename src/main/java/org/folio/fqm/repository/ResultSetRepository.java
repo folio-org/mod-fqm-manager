@@ -58,7 +58,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
     SelectConditionStep<Record> query = null;
@@ -117,7 +117,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(baseEntityType);
     var sortCriteria = EntityTypeUtils.getSortFields(baseEntityType, true);
     Condition afterIdCondition;
@@ -136,7 +136,7 @@ public class ResultSetRepository {
       // Below is a very hackish way to get around valueGetter issues in FqlToSqlConverterServiceIT
       // (due to the fact the that integration test does not select from an actual table, and instead creates a subquery
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
-      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : null;
+      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
       log.debug("idColumnValueGetters: {}", idColumnValueGetters);

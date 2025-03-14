@@ -25,6 +25,10 @@ public class QueryResultsSorterService {
     log.debug("Getting sorted ids for query {}, offset {}, limit {}", queryId, offset, limit);
     // Sort ids based on the sort criteria defined in the entity type definition
     // Note: This does not sort right now, due to performance concerns. Instead, it just pulls straight from query_results
-    return idStreamer.getSortedIds("query_results", offset, limit, queryId);
+    // TODO: revert
+//    return idStreamer.getSortedIds("query_results", offset, limit, queryId);
+    var ids = idStreamer.getSortedIds("query_results", offset, limit, queryId);
+    log.info("\n\nIdStreamer ids: {}", ids);
+    return ids;
   }
 }

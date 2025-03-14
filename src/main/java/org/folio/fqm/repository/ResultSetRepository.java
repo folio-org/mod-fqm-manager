@@ -58,7 +58,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
     SelectConditionStep<Record> query = null;

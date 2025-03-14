@@ -151,7 +151,6 @@ public class ResultSetRepository {
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
       // the entity type with all columns preserved to build the from clause. However, we do not want to only
       // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
-      log.info("RESULT SET REPOSITORY 154 TENANT ID: {}", tenantId);
       EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
       String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
 

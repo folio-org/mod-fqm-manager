@@ -82,14 +82,10 @@ public class EntityTypeFlatteningService {
    * @return The flattened entity type definition, fully localized
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
-    log.info("FLATTENING SERVICE PUBLIC GET FLATTENED ENTITY TYPE TENANT ID: {}", tenantId);
     return entityTypeCache
       .get(
         new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
-        k -> {
-          log.info("FLATTENING SERVICE 88 CACHE KEY TENANT ID: {}", k.tenantId());
-          return getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns());
-        }
+        k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
       )
       // ensures we get a fresh copy each time, preventing any changes to the cached entity type from affecting future requests
       .toBuilder()
@@ -102,8 +98,6 @@ public class EntityTypeFlatteningService {
     String tenantId,
     boolean preserveAllColumns
   ) {
-
-    log.info("yyz FLATTENING SERVICE TENANT ID: {}", tenantId);
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
@@ -145,7 +139,6 @@ public class EntityTypeFlatteningService {
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
         // Recursively flatten the source and add it to ourselves
         UUID sourceEntityTypeId = sourceEt.getTargetId();
-        log.info("FLATTENING SERVICE 143 TENANT ID: {}", tenantId);
         EntityType flattenedSourceDefinition = getFlattenedEntityType(
           sourceEntityTypeId,
           sourceEt,

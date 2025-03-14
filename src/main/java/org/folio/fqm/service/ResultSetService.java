@@ -44,7 +44,6 @@ public class ResultSetService {
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
                                                 List<List<String>> ids, List<String> tenantsToQuery, boolean localize) {
-    log.info("ResultSetService tenants to query: {}", tenantsToQuery);
     List<Map<String, Object>> unsortedResults = resultSetRepository.getResultSet(entityTypeId, fields, ids, tenantsToQuery);
 
     // Sort the contents in Java code as sorting in DB views run very slow intermittently

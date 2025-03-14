@@ -84,7 +84,10 @@ public class EntityTypeFlatteningService {
     return entityTypeCache
       .get(
         new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
-        k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
+        k -> {
+          log.info("FLATTENING SERVICE 88 CACHE KEY TENANT ID: {}", k.tenantId());
+          return getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns());
+        }
       )
       // ensures we get a fresh copy each time, preventing any changes to the cached entity type from affecting future requests
       .toBuilder()

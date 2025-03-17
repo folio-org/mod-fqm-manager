@@ -5,6 +5,7 @@ import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ public class ResultSetService {
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final ConfigurationClient configurationClient;
+  private final FolioExecutionContext executionContext;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -49,7 +51,7 @@ public class ResultSetService {
   }
 
   private List<Map<String, Object>> getSortedContents(UUID entityTypeId, List<List<String>> contentIds, List<Map<String, Object>> unsortedResults, boolean localize) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), true);
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(entityType);
     Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> {

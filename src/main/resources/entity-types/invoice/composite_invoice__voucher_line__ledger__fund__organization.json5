@@ -1,16 +1,9 @@
 // Corresponds to MCR116
 {
   id: '8ddd1e32-5c85-46ab-8bf3-1ec9a76c18cf',
-  name: 'composite_invoice__voucher_line__ledger_fund__organization',
+  name: 'composite_invoice__voucher_line__ledger__fund__organization',
   private: false,
   sources: [
-    {
-      alias: 'voucher',
-      type: 'entity-type',
-      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
-      essentialOnly: true,
-      order: 20
-    },
     {
       alias: 'voucher_line',
       type: 'entity-type',
@@ -22,6 +15,13 @@
       order: 10
     },
     {
+      alias: 'voucher',
+      type: 'entity-type',
+      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+      essentialOnly: true,
+      order: 20
+    },
+    {
       alias: 'invoice',
       type: 'entity-type',
       targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
@@ -31,14 +31,32 @@
       order: 30
     },
     {
-      alias: 'ledger_fund',
+      alias: 'fund',
       type: 'entity-type',
-      targetId: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9', // composite_ledger_fund
-      targetField: 'fund.external_account_no',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      targetField: 'external_account_no',
       sourceField: 'voucher_line.external_account_number',
-      useIdColumns: true,
       essentialOnly: true,
+      useIdColumns: true,
       order: 40
+    },
+    {
+      alias: 'fund_type',
+      type: 'entity-type',
+      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
+      essentialOnly: true,
+      sourceField: 'fund.fund_type_id',
+      targetField: 'id',
+      order: 50
+    },
+    {
+      alias: 'ledger',
+      type: 'entity-type',
+      targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
+      targetField: 'id',
+      sourceField: 'fund.ledger_id',
+      essentialOnly: true,
+      order: 60
     },
     {
       alias: 'organization',
@@ -47,12 +65,12 @@
       targetField: 'id',
       sourceField: 'voucher.vendor_id',
       essentialOnly: true,
-      order: 50
+      order: 70
     },
   ],
   defaultSort: [
     {
-      columnName: '"ledger_fund.fund.fund".jsonb ->> \'name\'',
+      columnName: '"fund.fund".jsonb ->> \'name\'',
       direction: 'ASC',
     },
     {

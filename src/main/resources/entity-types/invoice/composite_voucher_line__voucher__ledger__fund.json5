@@ -1,6 +1,6 @@
 {
   id: '86475f57-7ee2-4b7f-b631-e1a4ead3cdc8',
-  name: 'composite_voucher_line__voucher__ledger_fund',
+  name: 'composite_voucher_line__voucher__ledger__fund',
   private: false,
   sources: [
     {
@@ -21,15 +21,33 @@
       order: 20
     },
     {
-      alias: 'ledger_fund',
+      alias: 'fund',
       type: 'entity-type',
-      targetId: 'a9afda34-3f10-48e4-8cb3-38ff9e5c9eb9', // composite_ledger_fund
-      targetField: 'fund.external_account_no',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      targetField: 'external_account_no',
       sourceField: 'voucher_line.external_account_number',
-      useIdColumns: true,
       essentialOnly: true,
+      useIdColumns: true,
       order: 30
     },
+    {
+      alias: 'fund_type',
+      type: 'entity-type',
+      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
+      essentialOnly: true,
+      sourceField: 'fund.fund_type_id',
+      targetField: 'id',
+      order: 40
+    },
+    {
+      alias: 'ledger',
+      type: 'entity-type',
+      targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
+      targetField: 'id',
+      sourceField: 'fund.ledger_id',
+      essentialOnly: true,
+      order: 50
+    }
   ],
   defaultSort: [
     {

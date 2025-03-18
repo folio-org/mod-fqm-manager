@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import static org.folio.fqm.domain.QueryStatus.FAILED;
+
 /**
  * Service class responsible for managing a query
  */
@@ -122,16 +124,22 @@ public class QueryManagementService {
    */
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
     return queryRepository.getQuery(queryId, false)
-      .map(query -> new QueryDetails().queryId(queryId)
-        .entityTypeId(query.entityTypeId())
-        .fqlQuery(query.fqlQuery())
-        .fields(query.fields())
-        .status(QueryDetails.StatusEnum.valueOf(query.status().toString()))
-        .startDate(offsetDateTimeAsDate(query.startDate()))
-        .endDate(offsetDateTimeAsDate(query.endDate()))
-        .failureReason(query.failureReason())
-        .totalRecords(queryResultsRepository.getQueryResultsCount(queryId))
-        .content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit)));
+      .map(query -> {
+        QueryDetails details = new QueryDetails()
+          .queryId(queryId)
+          .entityTypeId(query.entityTypeId())
+          .fqlQuery(query.fqlQuery())
+          .fields(query.fields())
+          .status(QueryDetails.StatusEnum.valueOf(query.status().toString()))
+          .startDate(offsetDateTimeAsDate(query.startDate()))
+          .endDate(offsetDateTimeAsDate(query.endDate()))
+          .failureReason(query.failureReason());
+        if (!query.status().equals(FAILED)) {
+          details.totalRecords(queryResultsRepository.getQueryResultsCount(queryId));
+        }
+        details.content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit));
+        return details;
+      });
   }
 
   /**

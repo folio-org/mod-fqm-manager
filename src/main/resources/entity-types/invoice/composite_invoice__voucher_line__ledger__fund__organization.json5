@@ -8,8 +8,6 @@
       alias: 'voucher_line',
       type: 'entity-type',
       targetId: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb', // simple_voucher_line
-      targetField: 'voucher_id',
-      sourceField: 'voucher.id',
       useIdColumns: true,
       essentialOnly: true,
       order: 10
@@ -18,6 +16,8 @@
       alias: 'voucher',
       type: 'entity-type',
       targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+      targetField: 'id',
+      sourceField: 'voucher_line.voucher_id',
       essentialOnly: true,
       order: 20
     },

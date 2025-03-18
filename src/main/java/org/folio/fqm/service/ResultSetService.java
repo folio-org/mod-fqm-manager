@@ -56,7 +56,7 @@ public class ResultSetService {
     Map<List<String>, Map<String, Object>> contentsMap = unsortedResults.stream()
       .collect(Collectors.toMap(content -> {
             List<String> keys = new ArrayList<>();
-            idColumnNames.forEach(columnName -> keys.add(content.containsKey(columnName) ? content.get(columnName).toString() : "NULL"));
+            idColumnNames.forEach(columnName -> keys.add((content.containsKey(columnName) && content.get(columnName) != null) ? content.get(columnName).toString() : null));
             return keys;
           },
           Function.identity())

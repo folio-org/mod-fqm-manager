@@ -191,8 +191,8 @@
           value: 'Invoice',
         },
         {
-          label: 'PO line',
-          value: 'PO line',
+          label: 'PoLine',
+          value: 'PoLine',
         },
         {
           label: 'User',

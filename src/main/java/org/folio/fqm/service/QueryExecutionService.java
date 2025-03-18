@@ -50,7 +50,10 @@ public class QueryExecutionService {
           .getQuery(query.queryId(), false)
           .orElseThrow(() -> new QueryNotFoundException(query.queryId()))
           .status();
-        if (queryStatus != QueryStatus.CANCELLED) {
+        if (queryStatus == QueryStatus.MAX_SIZE_EXCEEDED) {
+          log.info("Query executed successfully but has exceeded the maximum result size");
+        }
+        else if (queryStatus != QueryStatus.CANCELLED) {
           handleFailure(query, exception);
         }
       } catch (QueryNotFoundException e) {

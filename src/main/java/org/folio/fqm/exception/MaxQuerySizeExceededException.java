@@ -20,7 +20,7 @@ public class MaxQuerySizeExceededException extends FqmException {
   @Override
   public HttpStatus getHttpStatus() {
     return HttpStatus.BAD_REQUEST;
-  } // TODO: not sure about this 400 or 200?
+  }
 
   @Override
   public Error getError() {

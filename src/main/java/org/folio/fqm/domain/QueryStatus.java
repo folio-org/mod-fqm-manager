@@ -4,7 +4,8 @@ public enum QueryStatus {
   IN_PROGRESS("IN_PROGRESS"),
   SUCCESS("SUCCESS"),
   FAILED("FAILED"),
-  CANCELLED("CANCELLED");
+  CANCELLED("CANCELLED"),
+  MAX_SIZE_EXCEEDED("MAX_SIZE_EXCEEDED");
 
   private final String status;
 

@@ -1,6 +1,6 @@
 mod-fqm-manager:
   query-retention-duration: 3h
-  max-query-size: ${MAX_QUERY_SIZE:1250000}
+  max-query-size: ${MAX_QUERY_SIZE:2}
   bypass-permissions: false # local development ONLY
   permissions-cache-timeout-seconds: 60
   entity-type-cache-timeout-seconds: 300

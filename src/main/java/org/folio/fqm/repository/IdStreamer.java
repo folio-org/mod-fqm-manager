@@ -168,7 +168,7 @@ public class IdStreamer {
     log.info("Saving query results for queryId: {}. Count: {}", queryId, resultIds.size());
     queryResultsRepository.saveQueryResults(queryId, resultIds);
     if (total.addAndGet(resultIds.size()) > maxQuerySize) {
-      log.info("Query {} with size {} has exceeded maximum query size of {}. Marking execution as failed.",
+      log.info("Query {} with size {} has exceeded maximum query size of {}.",
         queryId, total.get(), maxQuerySize);
       idsWithCancelCallback.cancel();
       throw new MaxQuerySizeExceededException(queryId, total.get(), maxQuerySize);

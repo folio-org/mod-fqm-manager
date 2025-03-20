@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.exception.MaxQuerySizeExceededException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.repository.QueryRepository;
@@ -43,7 +44,10 @@ public class QueryExecutionService {
         maxQuerySize,
         query
       );
-    } catch (Exception exception) {
+    } catch (MaxQuerySizeExceededException exception) {
+      queryRepository.updateQuery(query.queryId(), QueryStatus.MAX_SIZE_EXCEEDED, OffsetDateTime.now(), null);
+    }
+    catch (Exception exception) {
       try {
         // Check query status. Only mark query as failed if query is not already cancelled
         QueryStatus queryStatus = queryRepository

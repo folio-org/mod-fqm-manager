@@ -180,7 +180,11 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      valueGetter: ":transaction.jsonb ->> 'source'",
+      valueGetter: "SELECT \
+                      CASE \
+                        WHEN :transaction.jsonb ->> 'source' = 'PoLine' THEN 'PO line' \
+                        ELSE :transaction.jsonb ->> 'source' \
+                      END",
       values: [
         {
           label: 'Fiscal year',
@@ -191,8 +195,8 @@
           value: 'Invoice',
         },
         {
-          label: 'PoLine',
-          value: 'PoLine',
+          label: 'PO line',
+          value: 'PO line',
         },
         {
           label: 'User',

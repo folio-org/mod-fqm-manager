@@ -158,24 +158,25 @@ class FqlToSqlConverterServiceTest {
         """
           {"field1": {"$ne": "some value"}}""",
         field("field1").notEqualIgnoreCase("some value")
+          .and(field("field1").ne(""))
       ),
       Arguments.of(
         "not equals string UUID",
         """
           {"stringUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("stringUUIDField").ne("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        field("stringUUIDField").ne("69939c9a-aa96-440a-a873-3b48f3f4f608").and(field("stringUUIDField").ne(""))
       ),
       Arguments.of(
         "not equals numeric",
         """
           {"field5": {"$ne": 10}}""",
-        field("field5").notEqual(10)
+        field("field5").notEqual(10).and(field("field5").notEqual(""))
       ),
       Arguments.of(
         "not equals boolean",
         """
           {"field2": {"$ne": true}}""",
-        field("field2").notEqual(true)
+        field("field2").notEqual(true).and(field("field2").notEqual(""))
       ),
       Arguments.of(
         "not equals date",
@@ -183,6 +184,7 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$ne": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
           .or(field("field4").lessThan("2023-06-02T00:00:00.000"))
+          .and(field("field4").notEqual(""))
       ),
       Arguments.of(
         "not equals date and time",
@@ -190,8 +192,8 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$ne": "2023-06-02T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
           .or(field("field4").lessThan("2023-06-02T04:00:00.000"))
+          .and(field("field4").notEqual(""))
       ),
-
       Arguments.of(
         "not equals ranged UUID",
         """
@@ -358,14 +360,19 @@ class FqlToSqlConverterServiceTest {
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        DSL.trueCondition().and(DSL.trueCondition())
+        DSL.trueCondition()
+          .and(DSL.trueCondition())
+          .and(cast(field("openUUIDField"), String.class).ne(""))
       ),
       Arguments.of(
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        DSL.trueCondition().and(DSL.trueCondition())
+        DSL.trueCondition()
+          .and(DSL.trueCondition())
+          .and(cast(field("rangedUUIDField"), String.class).ne(""))
       ),
+
       Arguments.of(
         "in list ranged UUID",
         """
@@ -373,6 +380,7 @@ class FqlToSqlConverterServiceTest {
         cast(field("rangedUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .or(cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
+
       Arguments.of(
         "in list open UUID",
         """
@@ -380,19 +388,23 @@ class FqlToSqlConverterServiceTest {
         cast(field("openUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
+
       Arguments.of(
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
-        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
-          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+          .and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+          .and(cast(field("rangedUUIDField"), String.class).ne(""))
       ),
+
       Arguments.of(
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
         cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
-          .and(trueCondition)
+          .and(DSL.trueCondition())
+          .and(cast(field("openUUIDField"), String.class).ne(""))
       ),
       Arguments.of(
         "complex condition",
@@ -417,13 +429,15 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and((field("field5").notEqual(5))
+          .and(field("field5").notEqual("")))
           .and(field("field5").greaterThan(9))
           .and(
             and(
               field("field3").notEqualIgnoreCase("value1"),
               field("field3").notEqualIgnoreCase("value2")
             )
+              .and(cast(field("field3"), String.class).ne(""))
           )
       ),
       Arguments.of(
@@ -449,24 +463,27 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and((field("field5").notEqual(5))
+          .and(field("field5").notEqual("")))
           .and(field("field5").greaterThan(9))
           .and(
             and(
               field("field3").notEqualIgnoreCase("value1"),
               field("field3").notEqualIgnoreCase("value2")
             )
+              .and(cast(field("field3"), String.class).ne(""))
           )
       ),
       Arguments.of(
         "not in list",
         """
-          {"field1": {"$nin": ["value1", 2, true]}}""",
+          {"field1": {"$nin": ["value1", 2, true]}}
+        """,
         and(
           field("field1").notEqualIgnoreCase("value1"),
           field("field1").notEqual(2),
           field("field1").notEqual(true)
-        )
+          ).and(cast(field("field1"), String.class).ne(""))
       ),
       Arguments.of(
         "contains all for jsonb array",
@@ -583,13 +600,15 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and((field("field5").notEqual(5))
+          .and(field("field5").notEqual("")))
           .and(field("field5").greaterThan(9))
           .and(
             and(
               field("field3").notEqualIgnoreCase("value1"),
               field("field3").notEqualIgnoreCase("value2")
             )
+              .and(cast(field("field3"), String.class).ne(""))
           )
       ),
 
@@ -631,7 +650,7 @@ class FqlToSqlConverterServiceTest {
           field("fieldWithAValueFunction").notEqualIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
-        )
+        ).and(cast(field("fieldWithAValueFunction"), String.class).ne(""))
       ),
 
       Arguments.of(

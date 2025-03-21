@@ -259,10 +259,22 @@ public class ResultSetRepository {
           .stream()
           .map(val -> val != null ? UUID.fromString(val) : null)
           .toList();
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
+        var innerClause = field(idColumnValueGetter).in(idColumnValuesAsUUIDs);
+        if (idColumnValuesAsUUIDs.contains(null)) {
+          innerClause = innerClause.or(field(idColumnValueGetter).isNull());
+          whereClause = whereClause.and(innerClause);
+        }
       } else {
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
+        var innerClause = field(idColumnValueGetter).in(idColumnValues);
+        if (idColumnValues.contains(null)) {
+          innerClause = innerClause.or(field(idColumnValueGetter).isNull());
+          whereClause = whereClause.and(innerClause);
+        }
       }
+//        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
+//      } else {
+//        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
+//      }
     }
 
     return whereClause;

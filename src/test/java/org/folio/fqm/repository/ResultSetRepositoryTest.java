@@ -15,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -87,7 +89,9 @@ class ResultSetRepositoryTest {
     List<List<String>> listIds = List.of(
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString()),
-      List.of(UUID.randomUUID().toString())
+      new ArrayList<>() {{
+        add(null);
+      }}
     );
     List<String> fields = List.of("id", "key1");
     List<Map<String, Object>> expectedFullList = ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS;
@@ -95,7 +99,10 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      new HashMap<>() {{
+        put("id", null);
+        put("key1", "value5");
+      }}
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
@@ -126,7 +133,10 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      new HashMap<>() {{
+        put("id", null);
+        put("key1", "value5");
+      }}
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
@@ -242,7 +252,10 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      new HashMap<>() {{
+        put("id", null);
+        put("key1", "value5");
+      }}
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
@@ -272,7 +285,10 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> expectedList = List.of(
       Map.of("id", expectedFullList.get(0).get("id"), "key1", "value1"),
       Map.of("id", expectedFullList.get(1).get("id"), "key1", "value3"),
-      Map.of("id", expectedFullList.get(2).get("id"), "key1", "value5")
+      new HashMap<>() {{
+        put("id", null);
+        put("key1", "value5");
+      }}
     );
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
       .thenReturn(ENTITY_TYPE);
@@ -292,7 +308,9 @@ class ResultSetRepositoryTest {
     List<List<String>> listIds = List.of(
       List.of(UUID.randomUUID().toString()),
       List.of(UUID.randomUUID().toString()),
-      List.of(UUID.randomUUID().toString())
+      new ArrayList<>() {{
+        add(null);
+      }}
     );
     List<String> fields = List.of("id");
     List<String> tenantIds = List.of("tenant_01");

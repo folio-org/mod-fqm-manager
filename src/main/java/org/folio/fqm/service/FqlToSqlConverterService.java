@@ -162,16 +162,11 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    Condition nonEmptyStringCheck = field.ne("");
-
     if (isDateCondition(notEqualsCondition, entityType)) {
-      return handleDate(notEqualsCondition, field, entityType)
-        .and(nonEmptyStringCheck);
+      return handleDate(notEqualsCondition, field, entityType);
     }
-
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
-
     if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
       try {
         UUID uuidValue = UUID.fromString((String) notEqualsCondition.value());
@@ -180,16 +175,11 @@ public class FqlToSqlConverterService {
         return trueCondition();
       }
     }
-
     if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
-      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne)
-        .and(nonEmptyStringCheck);
+      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne);
     }
-
-    return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType))
-      .and(nonEmptyStringCheck);
+    return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
   }
-
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
     String dateString = (String) fieldCondition.value();
@@ -285,9 +275,8 @@ public class FqlToSqlConverterService {
         return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
-    return and(conditionList).and(cast(field, String.class).ne(""));
+    return and(conditionList);
   }
-
 
   private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
     if (isDateCondition(greaterThanCondition, entityType)) {

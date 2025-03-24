@@ -254,15 +254,23 @@ public class ResultSetRepository {
         .map(EntityDataType::getDataType)
         .findFirst()
         .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), idColumnName));
+      Condition idFilterCondition;
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()
           .map(val -> val != null ? UUID.fromString(val) : null)
           .toList();
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
+        idFilterCondition = field(idColumnValueGetter).in(idColumnValuesAsUUIDs);
+        if (idColumnValuesAsUUIDs.contains(null)) {
+          idFilterCondition = idFilterCondition.or(field(idColumnValueGetter).isNull());
+        }
       } else {
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
+        idFilterCondition = field(idColumnValueGetter).in(idColumnValues);
+        if (idColumnValues.contains(null)) {
+          idFilterCondition = idFilterCondition.or(field(idColumnValueGetter).isNull());
+        }
       }
+      whereClause = whereClause.and(idFilterCondition);
     }
 
     return whereClause;

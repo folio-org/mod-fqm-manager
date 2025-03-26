@@ -1,5 +1,18 @@
 # 4.0.x - Sunflower
 
+# 4.0.1
+- [MODFQMMGR-714]: Fix Fiscal year - Acquisition unit names field
+- [MODFQMMGR-720]: Fix data retrieval for ledger_fund fields
+- [MODFQMMGR-695]: Fix entity type cache bug in ECS environments
+- [MODFQMMGR-709]: Fix PoLine value for Transaction - Source field
+- [MODFQMMGR-681]: Don't include a record count in query results if the query failed
+
+[MODFQMMGR-714]: https://folio-org.atlassian.net/browse/MODFQMMGR-714
+[MODFQMMGR-720]: https://folio-org.atlassian.net/browse/MODFQMMGR-720
+[MODFQMMGR-695]: https://folio-org.atlassian.net/browse/MODFQMMGR-695
+[MODFQMMGR-709]: https://folio-org.atlassian.net/browse/MODFQMMGR-709
+[MODFQMMGR-681]: https://folio-org.atlassian.net/browse/MODFQMMGR-681
+
 # 4.0.0
 - [MODFQMMGR-376]: Add textbox custom fields to the Users entity type (#588)
 - [MODFQMMGR-613]: Implement optimized Contains and StartsWith operators

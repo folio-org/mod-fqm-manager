@@ -71,40 +71,54 @@ public class CrossTenantQueryService {
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    log.debug("Retrieved ECS tenant info: {}", ecsTenantInfo);
+
     if (!ecsEnabled(ecsTenantInfo)) {
+      log.debug("ECS is not enabled. Querying only the current tenant: {}", executionContext.getTenantId());
       return List.of(executionContext.getTenantId());
     }
 
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
+    log.debug("Central Tenant ID retrieved: {}", centralTenantId);
+
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
-      // The Instances entity type is required to retrieve shared instances from the central tenant when
-      // running queries from member tenants. This means that if we are running a query for Instances, we need to
-      // query the current tenant (for local records) as well as the central tenant (for shared records).
+
       if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
+        log.debug("Entity type {} is related to instances. Querying both current and central tenant.", entityType.getId());
         return List.of(executionContext.getTenantId(), centralTenantId);
       }
+
+      log.debug("Querying only the current tenant: {}", executionContext.getTenantId());
       return List.of(executionContext.getTenantId());
     }
 
     List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
+    log.debug("Starting query with central tenant: {}", centralTenantId);
+
     List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
+    log.debug("Retrieved user tenants: {}", userTenantMaps);
+
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
       String currentUserId = userMap.get("userId");
+
       if (!tenantId.equals(centralTenantId)) {
+        log.debug("Checking permissions for user {} in tenant {}", currentUserId, tenantId);
         try {
           permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
           tenantsToQuery.add(tenantId);
+          log.debug("User {} has necessary permissions for tenant {}. Added to query list.", currentUserId, tenantId);
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
         } catch (FeignException e) {
-          log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
+          log.error("Error retrieving permissions for user ID {} in tenant {}. Skipping.", currentUserId, tenantId, e);
         }
       }
     }
 
+    log.debug("Final list of tenants to query: {}", tenantsToQuery);
     return tenantsToQuery;
   }
 
@@ -133,7 +147,9 @@ public class CrossTenantQueryService {
   }
 
   private boolean ecsEnabled(Map<String, String> ecsTenantInfo) {
-    return !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
+    boolean result = !(ecsTenantInfo == null || ecsTenantInfo.isEmpty());
+    log.info("ECS enabled: {}", result);
+    return result;
   }
 
   /**
@@ -155,10 +171,16 @@ public class CrossTenantQueryService {
   }
 
   private String getCentralTenantId(Map<String, String> ecsTenantInfo) {
-    return ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
+    String centralTenantId = ecsTenantInfo != null ? ecsTenantInfo.get("centralTenantId") : null;
+    log.info("Central Tenant ID: {}", centralTenantId);
+    return centralTenantId;
   }
 
   private boolean isCentralTenant(Map<String, String> ecsTenantInfo) {
-    return executionContext.getTenantId().equals(getCentralTenantId(ecsTenantInfo));
+    String tenantId = executionContext.getTenantId();
+    String centralTenantId = getCentralTenantId(ecsTenantInfo);
+    boolean result = tenantId.equals(centralTenantId);
+    log.info("Is Central Tenant: {}, Tenant ID: {}, Central Tenant ID: {}", result, tenantId, centralTenantId);
+    return result;
   }
 }

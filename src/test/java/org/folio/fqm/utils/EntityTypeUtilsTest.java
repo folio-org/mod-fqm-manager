@@ -99,4 +99,16 @@ class EntityTypeUtilsTest {
     List<String> actualDateFields = EntityTypeUtils.getDateFields(entityType);
     assertEquals(expectedDateFields, actualDateFields);
   }
+
+  @Test
+  void shouldOrderResultIdColumns() {
+    EntityType entityType = new EntityType()
+      .columns(List.of(
+        new EntityTypeColumn().name("tenant_id").isIdColumn(true),
+        new EntityTypeColumn().name("field2").isIdColumn(true)
+      ));
+    List<String> expectedIdColumnNames = List.of("field2", "tenant_id");
+    List<String> actualIdColumnNames = EntityTypeUtils.getIdColumnNames(entityType);
+    assertEquals(expectedIdColumnNames, actualIdColumnNames);
+  }
 }

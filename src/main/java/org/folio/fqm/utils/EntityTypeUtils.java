@@ -11,7 +11,7 @@ import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +33,10 @@ public class EntityTypeUtils {
    * @return List of id column names for the entity type
    */
   public static List<String> getIdColumnNames(EntityType entityType) {
-    return (!isEmpty(entityType.getColumns()) ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
-        .stream()
-        .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
-        .map(EntityTypeColumn::getName)
-        .toList();
+    return getIdColumns(entityType)
+      .stream()
+      .map(EntityTypeColumn::getName)
+      .toList();
   }
 
   /**
@@ -47,12 +46,8 @@ public class EntityTypeUtils {
    * @return List of value getters for the id columns of the entity type
    */
   public static List<String> getIdColumnValueGetters(EntityType entityType) {
-    var columns = entityType
-      .getColumns();
-
-      return columns
+    return getIdColumns(entityType)
       .stream()
-      .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
       .map(EntityTypeColumn::getValueGetter)
       .toList();
   }
@@ -117,14 +112,14 @@ public class EntityTypeUtils {
       .stream()
       .filter(j ->
         j.getTargetId().equals(target.getOriginalEntityTypeId()) &&
-        j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
+          j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
       )
       .findFirst();
   }
 
   /**
    * Splits a composite field name (foo.bar) into an alias and a field name.
-   * 
+   *
    * @example foo.bar -> Pair.of("foo", "bar")
    * @example bar -> Pair.of("", "bar")
    * @example foo.bar.baz -> Pair.of("foo.bar", "baz")
@@ -135,5 +130,16 @@ public class EntityTypeUtils {
       return Pair.of("", field);
     }
     return Pair.of(field.substring(0, dotIndex), field.substring(dotIndex + 1));
+  }
+
+  private static List<EntityTypeColumn> getIdColumns(EntityType entityType) {
+    return entityType
+      .getColumns()
+      .stream()
+      .filter(column -> Boolean.TRUE.equals(column.getIsIdColumn()))
+      // Ensure tenant_id column (if present) is the last entry in the id column list.
+      // Required for compatibility with bulk-edit.
+      .sorted(Comparator.comparing(column -> column.getName().contains("tenant_id") ? 1 : 0))
+      .toList();
   }
 }

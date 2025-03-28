@@ -71,45 +71,45 @@ public class CrossTenantQueryService {
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
-    log.info("Retrieved ECS tenant info: {}", ecsTenantInfo);
+    log.debug("Retrieved ECS tenant info: {}", ecsTenantInfo);
 
     if (!ecsEnabled(ecsTenantInfo)) {
-      log.info("ECS is not enabled. Querying only the current tenant: {}", executionContext.getTenantId());
+      log.debug("ECS is not enabled. Querying only the current tenant: {}", executionContext.getTenantId());
       return List.of(executionContext.getTenantId());
     }
 
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
-    log.info("Central Tenant ID retrieved: {}", centralTenantId);
+    log.debug("Central Tenant ID retrieved: {}", centralTenantId);
 
     if (!executionContext.getTenantId().equals(centralTenantId)) {
-      log.info("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
 
       if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
-        log.info("Entity type {} is related to instances. Querying both current and central tenant.", entityType.getId());
+        log.debug("Entity type {} is related to instances. Querying both current and central tenant.", entityType.getId());
         return List.of(executionContext.getTenantId(), centralTenantId);
       }
 
-      log.info("Querying only the current tenant: {}", executionContext.getTenantId());
+      log.debug("Querying only the current tenant: {}", executionContext.getTenantId());
       return List.of(executionContext.getTenantId());
     }
 
     List<String> tenantsToQuery = new ArrayList<>();
     tenantsToQuery.add(centralTenantId);
-    log.info("Starting query with central tenant: {}", centralTenantId);
+    log.debug("Starting query with central tenant: {}", centralTenantId);
 
     List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
-    log.info("Retrieved user tenants: {}", userTenantMaps);
+    log.debug("Retrieved user tenants: {}", userTenantMaps);
 
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get("tenantId");
       String currentUserId = userMap.get("userId");
 
       if (!tenantId.equals(centralTenantId)) {
-        log.info("Checking permissions for user {} in tenant {}", currentUserId, tenantId);
+        log.debug("Checking permissions for user {} in tenant {}", currentUserId, tenantId);
         try {
           permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
           tenantsToQuery.add(tenantId);
-          log.info("User {} has necessary permissions for tenant {}. Added to query list.", currentUserId, tenantId);
+          log.debug("User {} has necessary permissions for tenant {}. Added to query list.", currentUserId, tenantId);
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
         } catch (FeignException e) {
@@ -118,7 +118,7 @@ public class CrossTenantQueryService {
       }
     }
 
-    log.info("Final list of tenants to query: {}", tenantsToQuery);
+    log.debug("Final list of tenants to query: {}", tenantsToQuery);
     return tenantsToQuery;
   }
 
@@ -161,6 +161,7 @@ public class CrossTenantQueryService {
   @SuppressWarnings("unchecked") // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private Map<String, String> getEcsTenantInfo() {
     String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
+    log.info("zzz User tenant response: {}", userTenantsResponse);
     List<Map<String, String>> userTenants = JsonPath
       .parse(userTenantsResponse)
       .read("$.userTenants", List.class);

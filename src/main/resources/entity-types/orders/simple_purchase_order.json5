@@ -28,7 +28,6 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      hidden: true,
       valueGetter: ':sourceAlias.id',
     },
     {

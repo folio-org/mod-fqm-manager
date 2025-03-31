@@ -994,12 +994,13 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateType'
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'catalogedDate'",
+      valueGetter: "(:sourceAlias.jsonb->>'catalogedDate')::timestamp",
+      valueFunction: '(:value)::timestamp'
     },
     {
       name: 'previously_held',

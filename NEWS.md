@@ -1,5 +1,12 @@
 # 4.0.x - Sunflower
 
+# 4.0.2
+- [MODFQMMGR-723]: Introduce MAX_SIZE_EXCEEDED query status
+- [MODFQMMGR-728]: Ensure tenant_id column is last component of result_id
+
+[MODFQMMGR-723]: https://folio-org.atlassian.net/browse/MODFQMMGR-723
+[MODFQMMGR-728]: https://folio-org.atlassian.net/browse/MODFQMMGR-728
+
 # 4.0.1
 - [MODFQMMGR-714]: Fix Fiscal year - Acquisition unit names field
 - [MODFQMMGR-720]: Fix data retrieval for ledger_fund fields

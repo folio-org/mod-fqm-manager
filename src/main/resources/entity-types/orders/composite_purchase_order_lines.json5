@@ -21,15 +21,6 @@
       order: 50
     },
     {
-      alias: 'pol_invoice_line',
-      type: 'entity-type',
-      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
-      targetField: 'pol.id',
-      sourceField: 'pol_invoice_line.po_line_id',
-      essentialOnly: true,
-      order: 100
-    },
-    {
       alias: 'po_created_by_user',
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
@@ -113,6 +104,35 @@
       END",
       valueFunction: '(:value)::float',
     },
+    {
+      name: 'pol_funds',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: {
+            dataType: 'rangedUUIDType',
+          },
+          sourceAlias: 'pol.pol',
+          visibleByDefault: false,
+          valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+          filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+          valueFunction: 'lower(:value)',
+          joinsTo: [
+            {
+              targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+              targetField: 'id',
+              type: 'equality-simple',
+              direction: 'left',
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'"
+    }
   ],
   defaultSort: [
     {

@@ -27,6 +27,28 @@
       targetField: 'id',
     },
   ],
+  columns: [
+    {
+      name: 'fund_associated_pol',
+      dataType: {
+        dataType: 'objectType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      essential: false,
+      visibleByDefault: false,
+      hidden: false,
+      valueGetter: ":sourceAlias.id'",
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+          targetField: 'fund_distribution.fund_id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    }
+  ],
   defaultSort: [
     {
       columnName: '"fund.fund".id',

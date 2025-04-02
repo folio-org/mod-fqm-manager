@@ -21,6 +21,15 @@
       order: 50
     },
     {
+      alias: 'pol_invoice_line',
+      type: 'entity-type',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetField: 'pol.id',
+      sourceField: 'pol_invoice_line.po_line_id',
+      essentialOnly: true,
+      order: 100
+    },
+    {
       alias: 'po_created_by_user',
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,

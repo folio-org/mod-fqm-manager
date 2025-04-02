@@ -111,7 +111,6 @@
         dataType: 'arrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
-          visibleByDefault: false,
           valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
           filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
           valueFunction: 'lower(:value)',

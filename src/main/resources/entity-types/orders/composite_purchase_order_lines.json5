@@ -110,9 +110,7 @@
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: {
-            dataType: 'rangedUUIDType',
-          },
+          dataType: 'rangedUUIDType',
           sourceAlias: 'pol.pol',
           visibleByDefault: false,
           valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",

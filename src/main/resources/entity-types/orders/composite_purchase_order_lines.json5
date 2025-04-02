@@ -106,6 +106,7 @@
     },
     {
       name: 'pol_funds',
+      sourceAlias: 'pol.pol',
       dataType: {
         dataType: 'arrayType',
         itemDataType: {

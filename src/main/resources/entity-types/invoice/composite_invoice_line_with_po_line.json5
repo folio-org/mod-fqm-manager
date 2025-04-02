@@ -1,0 +1,135 @@
+{
+  id: 'ed6c06be-cffa-4e15-84f6-2fe54c452a11',
+  name: 'composite_invoice_line_with_po_line',
+  private: false,
+  sources: [
+    {
+      alias: 'invoice_line',
+      type: 'entity-type',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'invoice',
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      targetField: 'id',
+      sourceField: 'invoice_line.invoice_id',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+      targetField: 'id',
+      sourceField: 'invoice_line.po_line_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'pol.purchase_order_id',
+      essentialOnly: true,
+      order: 30,
+    },
+    {
+      alias: 'organization',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'po.vendor',
+      essentialOnly: true,
+      order: 50
+    },
+  ],
+  columns: [
+    {
+      name: 'fund_data_pol',
+      sourceAlias: 'pol.pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'fund_Id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(fund_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))"
+            },
+            {
+              name: 'fund_code',
+              property: 'fundCode',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(fund_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            },
+            {
+              name: 'ledger_id',
+              property: 'ledgerId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(ledger_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            },
+            {
+              name: 'ledger_code',
+              property: 'ledgerCode',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(ledger_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            },
+            {
+              name: 'fiscal_year_id',
+              property: 'fiscalYearId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(fiscal_year_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            },
+            {
+              name: 'fiscal_year_code',
+              property: 'fiscalYearCode',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(fiscal_year_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            },
+            {
+              name: 'budget_names',
+              property: 'budgetNames',
+              dataType: {
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(budget_name) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+            }
+          ]
+        }
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(SELECT jsonb_agg(jsonb_build_object('fundId', fund_id, 'fundCode', fund_code, 'ledgerId', ledger_id, 'ledgerCode', ledger_code, 'fiscalYearId', fiscal_year_id, 'fiscalYearCode', fiscal_year_code, 'budgetNames', budget_names))::text \
+                     FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+    }
+  ]
+}

@@ -106,6 +106,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'status'->>'date'",
     },
     {
@@ -325,6 +326,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\

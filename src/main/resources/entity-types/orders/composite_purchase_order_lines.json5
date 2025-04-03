@@ -134,6 +134,7 @@
       queryable: false,
       visibleByDefault: false,
       essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'pol_funds'",
     }
   ],
   defaultSort: [

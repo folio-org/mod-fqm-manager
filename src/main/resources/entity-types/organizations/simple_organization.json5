@@ -120,12 +120,8 @@
       idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        name: 'organization', // handled by query builder
         columnName: 'name',
-      },
-      valueSourceApi: {
-        path: 'organizations/organizations',
-        valueJsonPath: '$.organizations.*.id',
-        labelJsonPath: '$.organizations.*.name',
       },
     },
     {
@@ -144,12 +140,8 @@
       idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        name: 'organization', // handled by query builder
         columnName: 'code',
-      },
-      valueSourceApi: {
-        path: 'organizations/organizations',
-        valueJsonPath: '$.organizations.*.id',
-        labelJsonPath: '$.organizations.*.code',
       },
     },
     {

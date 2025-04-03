@@ -161,6 +161,9 @@ public class EntityTypeService {
           case "languages" -> {
             return getLanguages(searchText, tenantsToQuery);
           }
+          case "organization" -> {
+            return ColumnValues.builder().content(List.of()).build();
+          }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
           }

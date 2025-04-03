@@ -111,24 +111,23 @@
         dataType: 'arrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
-          valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
-          filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
-          valueFunction: 'lower(:value)',
-          joinsTo: [
-            {
-              targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
-              targetField: 'id',
-              type: 'equality-simple',
-              direction: 'left',
-            },
-          ],
         },
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'"
+      valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+      valueFunction: 'lower(:value)',
+      joinsTo: [
+        {
+          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ]
     }
   ],
   defaultSort: [

@@ -51,7 +51,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'name'",
+      valueGetter: ":sourceAlias.jsonb->>'code'",
       filterValueGetter: "lower(\
         ${tenant_id}_mod_users.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
       )",

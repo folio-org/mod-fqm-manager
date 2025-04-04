@@ -1,6 +1,6 @@
 {
-  id: 'a2ea9d7a-3ed3-41c7-9cdd-f433e029ea0f',
-  name: 'composite_invoice_line',
+  id: 'd1ddacfe-5e13-4926-a65e-76d5d0272a1d',
+  name: 'composite_invoice_with_po',
   private: false,
   sources: [
     {

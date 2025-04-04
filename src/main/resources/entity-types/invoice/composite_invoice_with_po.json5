@@ -23,7 +23,7 @@
   ],
   defaultSort: [
     {
-      columnName: '"invoice_line.invoice_line".id',
+      columnName: '"invoice".id',
       direction: 'ASC',
     },
   ],

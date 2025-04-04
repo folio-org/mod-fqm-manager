@@ -1,0 +1,29 @@
+{
+  id: 'd1ddacfe-5e13-4926-a65e-76d5d0272a1d',
+  name: 'composite_po_with_invoice',
+  private: false,
+  sources: [
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+  ],
+  columns: [
+    {
+      name: 'invoice',
+      dataType: {
+        dataType: 'objectType',
+      },
+      sourceAlias: 'po',
+      queryable: false,
+      visibleByDefault: true,
+      valueGetter: "SELECT * FROM src_invoice_invoices WHERE (\"jsonb\"->'poNumbers') ? (:sourceAlias.po_number)",
+      hidden: true,
+      essential: true,
+    }
+  ]
+}

@@ -21,7 +21,7 @@
       sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "SELECT * FROM purchase_orders WHERE (sourceAlias->>'poNumbers')::jsonb ?| (SELECT array_agg(po_number) FROM src_purchase_order)",
+      valueGetter: "SELECT * FROM purchase_orders WHERE (:sourceAlias->>'poNumbers')::jsonb ?| (SELECT array_agg(\"jsonb\"->>'poNumber') FROM src_purchase_order)",
       hidden: false,
       essential: true,
       originalEntityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order

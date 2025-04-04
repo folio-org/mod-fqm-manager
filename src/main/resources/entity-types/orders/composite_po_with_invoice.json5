@@ -2,14 +2,22 @@
   id: 'd1ddacfe-5e13-4926-a65e-76d5d0272a1d',
   name: 'composite_po_with_invoice',
   private: false,
+  requiredPermissions: [
+    'invoice.invoices.collection.get',
+    'acquisitions-units.units.collection.get',
+    'finance.fiscal-years.collection.get',
+    'batch-groups.collection.get',
+    'users.collection.get',
+    'configuration.entries.collection.get',
+    'invoice.invoice-lines.collection.get',
+    'organizations.organizations.collection.get'
+  ],
   sources: [
     {
       alias: 'po',
       type: 'entity-type',
       targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
       useIdColumns: true,
-      essentialOnly: true,
-      order: 10,
     },
   ],
   columns: [

@@ -31,7 +31,7 @@
     {
       name: 'fund_associated_pol',
       dataType: {
-        dataType: 'rangedUUIDType',
+        dataType: 'objectType',
       },
       sourceAlias: 'fund',
       queryable: true,

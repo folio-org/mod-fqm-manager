@@ -1,0 +1,30 @@
+{
+  id: 'a2ea9d7a-3ed3-41c7-9cdd-f433e029ea0f',
+  name: 'composite_invoice_line',
+  private: false,
+  sources: [
+    {
+      alias: 'invoice',
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10
+    },
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'invoice.purchase_order_id',
+      essentialOnly: true,
+      order: 20,
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"invoice_line.invoice_line".id',
+      direction: 'ASC',
+    },
+  ],
+}

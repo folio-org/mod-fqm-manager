@@ -15,8 +15,8 @@
       alias: 'po',
       type: 'entity-type',
       targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
-      targetField: 'id',
-      sourceField: 'invoice.purchase_order_id',
+      targetField: 'po_number',
+      sourceField: 'invoice.po_numbers',
       essentialOnly: true,
       order: 20,
     }

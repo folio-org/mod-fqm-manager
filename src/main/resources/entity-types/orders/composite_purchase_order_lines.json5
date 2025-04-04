@@ -122,10 +122,10 @@
               valueGetter: "( SELECT array_agg(elems.value->>'id') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'id')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',
-              source: {
-                columnName: 'id',
-                entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
-              },
+//              source: {
+//                columnName: 'id',
+//                entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+//              },
             }
           ]
         },

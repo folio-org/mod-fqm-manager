@@ -12,13 +12,23 @@
       order: 10
     },
     {
-      alias: 'po',
-      type: 'entity-type',
-      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
-      targetField: 'po_number',
-      sourceField: 'invoice.po_numbers',
-      essentialOnly: true,
-      order: 20,
+      type: 'db',
+      target: 'src_purchase_order',
+      alias: 'purchase_orders',
+    }
+  ],
+  columns: [
+    {
+      name: 'po',
+      dataType: {
+        dataType: 'objectType',
+      },
+      sourceAlias: 'invoice',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "SELECT * FROM purchase_orders WHERE (sourceAlias->>'poNumbers')::jsonb ?| (SELECT array_agg(po_number) FROM purchase_orders)",
+      hidden: false,
+      essential: true,
     }
   ],
   defaultSort: [

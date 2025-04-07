@@ -1,0 +1,111 @@
+{
+  id: 'ed6c06be-cffa-4e15-84f6-2fe54c452a11',
+  name: 'composite_invoice_line_with_po_line',
+  private: false,
+  sources: [
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+      targetField: 'purchase_order_id',
+      sourceField: 'po.id',
+      overrideJoinDirection: "left",
+      essentialOnly: true,
+      useIdColumns: true,
+      order: 20,
+    },
+    {
+      alias: 'invoice_line',
+      type: 'entity-type',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetField: 'po_line_id',
+      sourceField: 'pol.id',
+      overrideJoinDirection: "left",
+      essentialOnly: true,
+      useIdColumns: true,
+      order: 30,
+    },
+    {
+      alias: 'invoice',
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      targetField: 'id',
+      sourceField: 'invoice_line.invoice_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'organization',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'po.vendor',
+      essentialOnly: true,
+      order: 50
+    },
+    {
+      alias: 'invoice_fiscal_year',
+      type: 'entity-type',
+      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+      targetField: 'id',
+      sourceField: 'invoice.fiscal_year_id',
+      essentialOnly: true,
+      order: 60
+    },
+    {
+      type: 'db',
+      alias: 'fund_distribution',
+      target: 'jsonb_array_elements("invoice_line.invoice_lines".jsonb -> \'fundDistributions\')',
+      join: {
+        type: 'CROSS JOIN LATERAL',
+        joinTo: 'invoice_line.invoice_lines',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'fund_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:fund_distribution.jsonb->>'fundId')::uuid",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')::uuid",
+      valueFunction: 'lower(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'expense_class_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:fund_distribution.jsonb->>'expenseClassId')::uuid",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'expenseClassId')::uuid",
+      valueFunction: 'lower(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+  ]
+}

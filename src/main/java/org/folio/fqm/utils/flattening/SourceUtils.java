@@ -168,7 +168,7 @@ public class SourceUtils {
       });
   }
 
-  private static EntityTypeColumn copyColumn(EntityTypeColumn column) {
+  public static EntityTypeColumn copyColumn(EntityTypeColumn column) {
     return column.toBuilder().build();
   }
 

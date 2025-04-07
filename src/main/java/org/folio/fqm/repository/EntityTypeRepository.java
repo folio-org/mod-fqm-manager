@@ -8,6 +8,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -119,7 +120,9 @@ public class EntityTypeRepository {
           .map(entityType -> {
             String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
             if (customFieldsEntityTypeId != null) {
-              entityType.getColumns().addAll(fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes));
+              List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes);
+              List<EntityTypeColumn> columnsWithUniqueAliases = getColumnsWithUniqueAliases(customFieldColumns);
+              entityType.getColumns().addAll(columnsWithUniqueAliases);
             }
             return entityType;
           })
@@ -271,6 +274,20 @@ public class EntityTypeRepository {
       .queryable(true)
       .essential(true)
       .isCustomField(true);
+  }
+
+  private List<EntityTypeColumn> getColumnsWithUniqueAliases(List<EntityTypeColumn> originalList) {
+    List<EntityTypeColumn> updatedList = new ArrayList<>();
+    Map<String, Integer> aliasCounts = new HashMap<>();
+    for (EntityTypeColumn column : originalList) {
+      String baseAlias = column.getLabelAlias();
+      int count = aliasCounts.compute(baseAlias, (k, v) -> v == null ? 1 : v + 1);
+      String uniqueAlias = (count == 1) ? baseAlias : baseAlias + " (" + count + ")";
+      EntityTypeColumn updatedColumn = SourceUtils.copyColumn(column);
+      updatedColumn.labelAlias(uniqueAlias);
+      updatedList.add(updatedColumn);
+    }
+    return updatedList;
   }
 
   @SneakyThrows

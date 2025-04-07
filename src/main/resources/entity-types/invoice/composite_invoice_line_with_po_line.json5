@@ -4,12 +4,30 @@
   private: false,
   sources: [
     {
-      alias: 'invoice_line',
+      alias: 'po',
       type: 'entity-type',
-      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
       useIdColumns: true,
       essentialOnly: true,
       order: 10,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+      targetField: 'purchase_order_id',
+      sourceField: 'po.id',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'invoice_line',
+      type: 'entity-type',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetField: 'po_line_id',
+      sourceField: 'pol.id',
+      essentialOnly: true,
+      order: 30,
     },
     {
       alias: 'invoice',
@@ -18,25 +36,7 @@
       targetField: 'id',
       sourceField: 'invoice_line.invoice_id',
       essentialOnly: true,
-      order: 20,
-    },
-    {
-      alias: 'pol',
-      type: 'entity-type',
-      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
-      targetField: 'id',
-      sourceField: 'invoice_line.po_line_id',
-      essentialOnly: true,
       order: 40,
-    },
-    {
-      alias: 'po',
-      type: 'entity-type',
-      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
-      targetField: 'id',
-      sourceField: 'pol.purchase_order_id',
-      essentialOnly: true,
-      order: 30,
     },
     {
       alias: 'organization',

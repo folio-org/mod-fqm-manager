@@ -497,7 +497,7 @@
       valueFunction: 'lower(:value)',
       idColumnName: 'vendor_id',
       source: {
-Finali        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
         columnName: 'name',
       }
     },

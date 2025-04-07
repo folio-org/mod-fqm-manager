@@ -1,6 +1,6 @@
 {
-  id: 'ed6c06be-cffa-4e15-84f6-2fe54c452a11',
-  name: 'composite_invoice_line_with_po_line',
+  id: 'f3ccbf49-8e3e-4f5c-a60e-04ad80543a4a',
+  name: 'composite_order_invoice_analytics',
   private: false,
   sources: [
     {

@@ -64,7 +64,7 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(fund_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))"
+              valueGetter: "(SELECT array_agg(fund_id) FROM fund_data_pol)"
             },
             {
               name: 'fund_code',
@@ -73,7 +73,7 @@
                 dataType: 'stringType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(fund_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(fund_code) FROM fund_data_pol)",
             },
             {
               name: 'ledger_id',
@@ -82,7 +82,7 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(ledger_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(ledger_id) FROM fund_data_pol)",
             },
             {
               name: 'ledger_code',
@@ -91,7 +91,7 @@
                 dataType: 'stringType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(ledger_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(ledger_code) FROM fund_data_pol)",
             },
             {
               name: 'fiscal_year_id',
@@ -100,7 +100,7 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(fiscal_year_id) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(fiscal_year_id) FROM fund_data_pol)",
             },
             {
               name: 'fiscal_year_code',
@@ -109,7 +109,7 @@
                 dataType: 'stringType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(fiscal_year_code) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(fiscal_year_code) FROM fund_data_pol)",
             },
             {
               name: 'budget_names',
@@ -121,14 +121,15 @@
                 },
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(budget_name) FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
+              valueGetter: "(SELECT array_agg(budget_name) FROM fund_data_pol)",
             }
           ]
         }
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(SELECT jsonb_agg(jsonb_build_object('fundId', fund_id, 'fundCode', fund_code, 'ledgerId', ledger_id, 'ledgerCode', ledger_code, 'fiscalYearId', fiscal_year_id, 'fiscalYearCode', fiscal_year_code, 'budgetNames', budget_names))::text \
+      valueGetter: "(SELECT jsonb_agg(jsonb_build_object('fundId', fund_id, 'fundCode', fund_code, 'ledgerId', ledger_id, 'ledgerCode', ledger_code, 'fiscalYearId', \
+                                                          fiscal_year_id, 'fiscalYearCode', fiscal_year_code, 'budgetNames', budget_names))::text \
                      FROM drv_fund_data WHERE fund_id::uuid IN (SELECT (elem->>'fundId')::uuid FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elem))",
     }
   ]

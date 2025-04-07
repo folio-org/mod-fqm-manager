@@ -101,6 +101,32 @@ VALUES (
         }'
   ),
   (
+        '2c4e9797-422f-4962-a302-174af09b23fd',
+        '{
+           "id": "2c4e9797-422f-4962-a302-174af09b23fd",
+           "name": "custom_column_5",
+           "type": "TEXTBOX_LONG",
+           "order": 5,
+           "refId": "customColumn5",
+           "visible": true,
+           "entityType": "user",
+           "selectField": {}
+        }'
+  ),
+  (
+        '2c4e9797-422f-4962-a302-174af09b23fe',
+        '{
+           "id": "2c4e9797-422f-4962-a302-174af09b23fe",
+           "name": "custom_column_5",
+           "type": "TEXTBOX_LONG",
+           "order": 5,
+           "refId": "customColumn5",
+           "visible": true,
+           "entityType": "user",
+           "selectField": {}
+        }'
+  ),
+  (
     '2c4e9797-422f-4962-a302-174af09b23ff',
     '{
        "id": "2c4e9797-422f-4962-a302-174af09b23ff",

@@ -18,6 +18,7 @@
       targetField: 'purchase_order_id',
       sourceField: 'po.id',
       essentialOnly: true,
+      useIdColumns: true,
       order: 20,
     },
     {
@@ -27,6 +28,7 @@
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       essentialOnly: true,
+      useIdColumns: true,
       order: 30,
     },
     {

@@ -497,7 +497,7 @@
       valueFunction: 'lower(:value)',
       idColumnName: 'vendor_id',
       source: {
-        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+Finali        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
         columnName: 'name',
       }
     },
@@ -511,6 +511,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":invoice.jsonb->>'fiscalYearId'",
+      joinsTo: [
+        {
+          targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'fiscal_year',

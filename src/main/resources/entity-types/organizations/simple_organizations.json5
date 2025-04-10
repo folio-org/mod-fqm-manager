@@ -106,8 +106,14 @@
       idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
-        name: 'organization', // handled by query builder
+        name: 'organization', // shows org finder in query builder, for when we can't return all orgs via valueSourceApi
         columnName: 'name',
+      },
+      // we still want to pre-fill organizations though
+      valueSourceApi: {
+        path: 'organizations/organizations',
+        valueJsonPath: '$.organizations.*.id',
+        labelJsonPath: '$.organizations.*.name',
       },
     },
     {
@@ -126,8 +132,14 @@
       idColumnName: '_id',
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
-        name: 'organization', // handled by query builder
+        name: 'organization', // shows org finder in query builder, for when we can't return all orgs via valueSourceApi
         columnName: 'code',
+      },
+      // we still want to pre-fill organizations though
+      valueSourceApi: {
+        path: 'organizations/organizations',
+        valueJsonPath: '$.organizations.*.id',
+        labelJsonPath: '$.organizations.*.code',
       },
     },
     {

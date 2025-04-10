@@ -167,6 +167,7 @@ public class EntityTypeService {
           case "languages" -> {
             return getLanguages(searchText, tenantsToQuery);
           }
+          // instructs query builder to provide organization finder plugin
           case "organization" -> {
             return ColumnValues.builder().content(List.of()).build();
           }
@@ -202,12 +203,14 @@ public class EntityTypeService {
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
     Set<ValueWithLabel> resultSet = new HashSet<>();
+
     for (String tenantId : tenantsToQuery) {
       try {
         String rawJson = crossTenantHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
         List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
+        log.info("Obtained {} values from API {} in tenant {} for field {}", values.size(), valueSourceApi.getPath(), tenantId, field.getName());
         for (int i = 0; i < values.size(); i++) {
           String value = values.get(i);
           String label = labels.get(i);
@@ -216,10 +219,9 @@ public class EntityTypeService {
           }
         }
       } catch (FeignException.Unauthorized e) {
-        log.error("Failed to get column values from {} tenant due to exception: {}", tenantId, e.getMessage());
+        log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
       }
     }
-
 
     List<ValueWithLabel> results = new ArrayList<>(resultSet);
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));

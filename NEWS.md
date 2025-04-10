@@ -1,5 +1,15 @@
 # 4.0.x - Sunflower
 
+# 4.0.3
+- [MODFQMMGR-726]: Fix queries for 'Instance - Cataloged date' (#694)
+- [MODFQMMGR-736]: Update Item ET fields
+- [MODFQMMGR-747]: Fix export for PO entity type
+- Make 'Instance - JSONB' field essential
+
+[MODFQMMGR-726]: https://folio-org.atlassian.net/browse/MODFQMMGR-726
+[MODFQMMGR-736]: https://folio-org.atlassian.net/browse/MODFQMMGR-736
+[MODFQMMGR-747]: https://folio-org.atlassian.net/browse/MODFQMMGR-747
+
 # 4.0.2
 - [MODFQMMGR-723]: Introduce MAX_SIZE_EXCEEDED query status
 - [MODFQMMGR-728]: Ensure tenant_id column is last component of result_id

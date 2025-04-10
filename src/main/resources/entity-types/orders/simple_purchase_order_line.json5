@@ -825,13 +825,12 @@
       name: 'eresource_user_limit',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'integerType',
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->'eresource'->>'userLimit')::integer",
-      valueFunction: '(:value)::integer',
+      valueGetter: ":sourceAlias.jsonb->'eresource'->>'userLimit'",
     },
     {
       name: 'eresource_access_provider',

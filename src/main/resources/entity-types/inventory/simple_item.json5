@@ -324,7 +324,7 @@
         },
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       essential: true,
       valueGetter: "(\

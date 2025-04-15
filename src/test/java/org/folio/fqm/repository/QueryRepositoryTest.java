@@ -49,7 +49,7 @@ class QueryRepositoryTest {
     Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
       createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
-    Query actualQuery = repo.getQuery(queryIdentifier.getQueryId(), false).orElse(null);
+    Query actualQuery = repo.getQuery(queryIdentifier.getQueryId()).orElse(null);
     assertEquals(expectedQuery.queryId(), actualQuery.queryId());
     assertEquals(expectedQuery.entityTypeId(), actualQuery.entityTypeId());
     assertEquals(expectedQuery.createdBy(), actualQuery.createdBy());
@@ -119,5 +119,47 @@ class QueryRepositoryTest {
     assertFalse(repo.getQuery(queryIdentifier.getQueryId(), false).isEmpty());
     repo.deleteQueries(List.of(queryId));
     assertTrue(repo.getQuery(queryIdentifier.getQueryId(), false).isEmpty());
+  }
+
+  @Test
+  void shouldFailQueriesThatArentActuallyRunning() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    // Given a query which is saved with the in-progress status, but doesn't have an actual running SQL query backing it
+    QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
+    // When you retrieve it with getQuery(id, false)
+    Query actual = repo.getQuery(queryIdentifier.getQueryId(), false).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should be marked as failed
+    assertEquals(QueryStatus.FAILED, actual.status());
+    // When you retrieve it again, with getQuery(id) (to circumvent the logic that marked it as failed),
+    actual = repo.getQuery(queryIdentifier.getQueryId(), false).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should still be marked as failed, since the first getQuery() call changed its status
+    assertEquals(QueryStatus.FAILED, actual.status());
+  }
+
+  @Test
+  void shouldNotFailNonInProgressQueriesThatArentActuallyRunning() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.SUCCESS, null);
+    // Given a query which is saved with the in-progress status, but doesn't have an actual running SQL query backing it
+    QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
+    // When you retrieve it with getQuery(id, false)
+    Query actual = repo.getQuery(queryIdentifier.getQueryId(), false).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should be returned as-is, without changing its status
+    assertEquals(QueryStatus.SUCCESS, actual.status());
   }
 }

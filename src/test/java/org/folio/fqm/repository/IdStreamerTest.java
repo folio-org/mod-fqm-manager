@@ -120,7 +120,7 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
-    QueryRepository queryRepository = new QueryRepository(context);
+    QueryRepository queryRepository = new QueryRepository(context, context);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
@@ -251,20 +251,8 @@ class IdStreamerTest {
   void shouldCancelQuery() {
     // This test uses a mocked DSLContext because our test DSLContext doesn't behave nicely in separate threads
     DSLContext mockJooqContext = mock(DSLContext.class);
-    SelectSelectStep mockSelectStep = mock(SelectSelectStep.class);
-    SelectJoinStep mockJoinStep = mock(SelectJoinStep.class);
-    SelectConditionStep mockConditionStep = mock(SelectConditionStep.class);
-    SelectConditionStep mockConditionStep2 = mock(SelectConditionStep.class);
-    List<Integer> mockPids = List.of(123, 456);
-
-    when(mockJooqContext.select(field("pid", Integer.class))).thenReturn(mockSelectStep);
-    when(mockSelectStep.from(table("pg_stat_activity"))).thenReturn(mockJoinStep);
-    when(mockJoinStep.where(field("state").eq("active"))).thenReturn(mockConditionStep);
-    when(mockConditionStep.and(any(Condition.class))).thenReturn(mockConditionStep2);
-    when(mockConditionStep2.fetchInto(Integer.class)).thenReturn(mockPids);
-    when(mockJooqContext.execute(anyString(), anyInt())).thenReturn(1);
-
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
+    when(mockQueryRepository.getQueryPids(any())).thenReturn(List.of(123, 456));
 
     IdStreamer newIdStreamer = new IdStreamer(
       mockJooqContext,

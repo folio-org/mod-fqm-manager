@@ -123,7 +123,7 @@ public class QueryManagementService {
    * @return Details of the query
    */
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
-    return queryRepository.getQuery(queryId, false)
+    return queryRepository.getPotentialZombieQuery(queryId)
       .map(query -> {
         QueryDetails details = new QueryDetails()
           .queryId(queryId)
@@ -179,7 +179,7 @@ public class QueryManagementService {
 
   @SuppressWarnings("java:S2201") // we just use orElseThrow to conveniently throw an exception, we don't want the value
   public List<List<String>> getSortedIds(UUID queryId, int offset, int limit) {
-    Query query = queryRepository.getQuery(queryId, false).orElseThrow(() -> new QueryNotFoundException(queryId));
+    Query query = queryRepository.getPotentialZombieQuery(queryId).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
     entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);

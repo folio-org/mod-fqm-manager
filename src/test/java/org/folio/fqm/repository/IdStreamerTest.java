@@ -1,8 +1,6 @@
 package org.folio.fqm.repository;
 
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -30,11 +28,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.spring.FolioExecutionContext;
-import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSelectStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +114,7 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
-    QueryRepository queryRepository = new QueryRepository(context, context);
+    QueryRepository queryRepository = new QueryRepository(context, context, 0);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);

@@ -157,7 +157,7 @@ public class IdStreamer {
   }
 
   void handleBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback, Integer maxQuerySize, AtomicInteger total) {
-    Query query = queryRepository.getQuery(queryId, true)
+    Query query = queryRepository.getQuery(queryId, false)
       .orElseThrow(() -> new QueryNotFoundException(queryId));
     if (query.status() == QueryStatus.CANCELLED) {
       log.info("Query {} has been cancelled, closing id stream", queryId);

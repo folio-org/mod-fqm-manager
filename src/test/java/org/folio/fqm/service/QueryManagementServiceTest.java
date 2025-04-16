@@ -206,7 +206,7 @@ class QueryManagementServiceTest {
       .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
       .totalRecords(5)
       .content(List.of()));
-    when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
+    when(queryRepository.getPotentialZombieQuery(expectedQuery.queryId())).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(5);
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
@@ -236,7 +236,7 @@ class QueryManagementServiceTest {
       .startDate(offsetDateTimeAsDate(expectedQuery.startDate()))
       .totalRecords(2)
       .content(contents));
-    when(queryRepository.getQuery(expectedQuery.queryId(), false)).thenReturn(Optional.of(expectedQuery));
+    when(queryRepository.getPotentialZombieQuery(expectedQuery.queryId())).thenReturn(Optional.of(expectedQuery));
     when(queryResultsRepository.getQueryResultsCount(expectedQuery.queryId())).thenReturn(2);
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
     when(crossTenantQueryService.getTenantsToQuery(any())).thenReturn(tenantIds);
@@ -414,7 +414,7 @@ class QueryManagementServiceTest {
       List.of(UUID.randomUUID().toString())
     );
 
-    when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
+    when(queryRepository.getPotentialZombieQuery(query.queryId())).thenReturn(Optional.of(query));
     when(entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true)).thenReturn(new EntityType());
     when(queryResultsSorterService.getSortedIds(query.queryId(), offset, limit)).thenReturn(expectedIds);
 
@@ -441,7 +441,7 @@ class QueryManagementServiceTest {
     UUID queryId = query.queryId();
     int offset = 0;
     int limit = 0;
-    when(queryRepository.getQuery(query.queryId(), false)).thenThrow(new QueryNotFoundException(query.queryId()));
+    when(queryRepository.getPotentialZombieQuery(query.queryId())).thenThrow(new QueryNotFoundException(query.queryId()));
     assertThrows(QueryNotFoundException.class, () -> queryManagementService.getSortedIds(queryId, offset, limit));
   }
 

@@ -662,6 +662,7 @@
   "entityType.simple_instance": "Instances",
   "entityType.simple_instance.administrative_notes": "Administrative notes",
   "entityType.simple_instance.alternative_titles": "Alternative titles",
+  "entityType.simple_instance.flag_for_deletion": "Flag for deletion",
   "entityType.simple_instance.alternative_titles_ids": "Alternative titles - Type UUID",
   "entityType.simple_instance.cataloged_date": "Cataloged date",
   "entityType.simple_instance.classifications": "Classifications",

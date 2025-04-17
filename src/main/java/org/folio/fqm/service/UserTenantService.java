@@ -18,7 +18,7 @@ public class UserTenantService {
 
   private final SimpleHttpClient userTenantsClient;
 
-//  @Cacheable(value="userTenantCache", key="#tenantId")
+  @Cacheable(value="userTenantCache", key="#tenantId")
   public String getUserTenantsResponse(String tenantId) {
     log.info("Retrieving user-tenants information for tenant {}", tenantId);
     return userTenantsClient.get("user-tenants", Map.of("limit", String.valueOf(1)));

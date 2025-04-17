@@ -1639,5 +1639,6 @@
   "entityType.composite_transaction.source_invoice": "Source invoice",
   "entityType.composite_transaction.source_invoice_line": "Source invoice line",
   "entityType.composite_loan_details.item_effective_library": "Item effective library at checkout",
-  "entityType.simple_user_details.pronouns": "Pronouns"
+  "entityType.simple_user_details.pronouns": "Pronouns",
+  "entityType.simple_instance.flag_for_deletion": "Flag for deletion"
 }

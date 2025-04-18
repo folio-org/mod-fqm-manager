@@ -1,5 +1,21 @@
 # 4.0.x - Sunflower
 
+# 4.0.4
+- [MODFQMMGR-749] Handle duplicate custom field aliases (#702)
+- [MODORDSTOR-448] Change type of eresource.userLimit to string; udpated po-lines interface (#703)
+- [MODFQMMGR-648] Add special source with not-so-special value source for org name/code (#704)
+- Accept po-lines 12.0 and 13.0 (#706)
+- [MODFQMMGR-758] Make 'Item - Former IDs' field non-queryable (#708)
+- [MODFQMMGR-765] Add Flag for deletion field to Instance records
+- Update translation strings
+
+[MODFQMMGR-749]: https://folio-org.atlassian.net/browse/MODFQMMGR-749
+[MODORDSTOR-448]: https://folio-org.atlassian.net/browse/MODORDSTOR-448
+[MODFQMMGR-648]: https://folio-org.atlassian.net/browse/MODFQMMGR-648
+[MODFQMMGR-758]: https://folio-org.atlassian.net/browse/MODFQMMGR-758
+[MODFQMMGR-765]: https://folio-org.atlassian.net/browse/MODFQMMGR-765
+
+
 # 4.0.3
 - [MODFQMMGR-726]: Fix queries for 'Instance - Cataloged date' (#694)
 - [MODFQMMGR-736]: Update Item ET fields

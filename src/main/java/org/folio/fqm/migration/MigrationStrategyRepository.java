@@ -55,7 +55,8 @@ public class MigrationStrategyRepository {
         new V10OrganizationStatusValueChange(),
         new V11OrganizationNameCodeOperatorChange(organizationsClient),
         new V12PurchaseOrderIdFieldRemoval(),
-        new V13CustomFieldRename(executionContext, jooqContext)
+        new V13CustomFieldRename(executionContext, jooqContext),
+        new V14AlertsAndReportingCodesRemoval()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

@@ -21,6 +21,7 @@ import org.folio.fqm.migration.strategies.V6ModeOfIssuanceValueChange;
 import org.folio.fqm.migration.strategies.V7PatronGroupsValueChange;
 import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
+import org.folio.fqm.migration.strategies.V14AlertsAndReportingCodesRemoval;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -55,7 +56,8 @@ public class MigrationStrategyRepository {
         new V10OrganizationStatusValueChange(),
         new V11OrganizationNameCodeOperatorChange(organizationsClient),
         new V12PurchaseOrderIdFieldRemoval(),
-        new V13CustomFieldRename(executionContext, jooqContext)
+        new V13CustomFieldRename(executionContext, jooqContext),
+        new V14AlertsAndReportingCodesRemoval()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

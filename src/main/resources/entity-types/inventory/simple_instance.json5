@@ -1268,5 +1268,27 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.jsonb::text',
     },
+    {
+      name: 'flag_for_deletion',
+      sourceAlias: 'inst',
+      essential: true,
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'deleted'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    }
   ],
 }

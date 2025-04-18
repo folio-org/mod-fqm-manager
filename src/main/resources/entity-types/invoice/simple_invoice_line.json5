@@ -281,7 +281,7 @@
       valueGetter: ":invoice_lines.jsonb->>'poLineId'",
       joinsTo: [
         {
-          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',

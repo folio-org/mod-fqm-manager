@@ -21,6 +21,7 @@ import org.folio.fqm.migration.strategies.V6ModeOfIssuanceValueChange;
 import org.folio.fqm.migration.strategies.V7PatronGroupsValueChange;
 import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
+import org.folio.fqm.migration.strategies.V14AlertsAndReportingCodesRemoval;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;

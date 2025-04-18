@@ -43,8 +43,8 @@ public class V14AlertsAndReportingCodesRemoval extends AbstractSimpleMigrationSt
       Map.entry(
         PURCHASE_ORDER_LINE_ENTITY_TYPE_ID,
         Map.ofEntries(
-          Map.entry("pol.alerts", RemovedFieldWarning),
-          Map.entry("pol.reporting_codes", RemovedFieldWarning)
+          Map.entry("pol.alerts", RemovedFieldWarning.withoutAlternative()),
+          Map.entry("pol.reporting_codes", RemovedFieldWarning.withoutAlternative())
         )
       )
     );

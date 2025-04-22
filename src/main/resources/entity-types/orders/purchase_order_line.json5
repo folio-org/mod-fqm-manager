@@ -1,6 +1,6 @@
 {
   id: '58148257-bfb0-4687-8c42-d2833d772f3e',
-  name: 'simple_purchase_order_line',
+  name: 'purchase_order_line',
   root: true,
   private: true,
   customFieldEntityTypeId: '58148257-bfb0-4687-8c42-d2833d772f3e', // This entity type
@@ -162,31 +162,6 @@
           label: 'False',
         },
       ],
-    },
-    {
-      name: 'alerts',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      isIdColumn: false,
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'alerts') AS elems\
-      )",
     },
     {
       name: 'cancellation_restriction',
@@ -1473,31 +1448,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'renewalNote'",
-    },
-    {
-      name: 'reporting_codes',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      isIdColumn: false,
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'reportingCodes') AS elems\
-      )",
     },
     {
       name: 'requester',

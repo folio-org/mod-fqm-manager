@@ -1,5 +1,8 @@
 # 4.0.x - Sunflower
 
+# 4.0.5
+- Revert MODORDSTOR-448
+
 # 4.0.4
 - [MODFQMMGR-749] Handle duplicate custom field aliases (#702)
 - [MODORDSTOR-448] Change type of eresource.userLimit to string; udpated po-lines interface (#703)
@@ -14,7 +17,6 @@
 [MODFQMMGR-648]: https://folio-org.atlassian.net/browse/MODFQMMGR-648
 [MODFQMMGR-758]: https://folio-org.atlassian.net/browse/MODFQMMGR-758
 [MODFQMMGR-765]: https://folio-org.atlassian.net/browse/MODFQMMGR-765
-
 
 # 4.0.3
 - [MODFQMMGR-726]: Fix queries for 'Instance - Cataloged date' (#694)

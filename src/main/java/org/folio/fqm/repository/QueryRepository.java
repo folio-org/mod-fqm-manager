@@ -26,6 +26,7 @@ public class QueryRepository {
 
   private static final String QUERY_DETAILS_TABLE = "query_details";
   private static final String QUERY_ID = "query_id";
+  private static final int MULTIPLE_FOR_STUCK_QUERIES = 3;
 
   private final DSLContext jooqContext;
 
@@ -59,15 +60,23 @@ public class QueryRepository {
       .fetchOneInto(Query.class));
   }
 
-  public List<UUID> getQueryIdsStartedBefore(Duration duration) {
+  public List<UUID> getQueryIdsForDeletion(Duration retentionDuration) {
     return jooqContext.select(field(QUERY_ID))
       .from(table(QUERY_DETAILS_TABLE))
-      .where(field("start_date").
-        lessOrEqual(OffsetDateTime.now().minus(duration)))
+      .where(
+        field("end_date").lessThan(
+          field("CURRENT_TIMESTAMP - INTERVAL '{0} seconds'", OffsetDateTime.class, retentionDuration.getSeconds())
+        ).or(
+          field("start_date").lessThan(
+            field("CURRENT_TIMESTAMP - INTERVAL '{0} seconds'", OffsetDateTime.class,
+              retentionDuration.multipliedBy(MULTIPLE_FOR_STUCK_QUERIES).getSeconds())
+          )
+        )
+      )
       .fetchInto(UUID.class);
   }
 
-  public void deleteQueries(List<UUID> queryId) {
+    public void deleteQueries(List<UUID> queryId) {
     jooqContext.deleteFrom(table(QUERY_DETAILS_TABLE))
       .where(field(QUERY_ID).in(queryId))
       .execute();

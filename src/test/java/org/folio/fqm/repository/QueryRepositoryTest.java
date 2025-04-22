@@ -98,7 +98,7 @@ class QueryRepositoryTest {
 
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
     UUID expectedId = queryId;
-    List<UUID> actualIds = repo.getQueryIdsStartedBefore(Duration.ofMillis(0));
+    List<UUID> actualIds = repo.getQueryIdsForDeletion(Duration.ofMillis(0));
 
     assertTrue(actualIds.contains(expectedId));
     assertFalse(actualIds.contains(queryId2));

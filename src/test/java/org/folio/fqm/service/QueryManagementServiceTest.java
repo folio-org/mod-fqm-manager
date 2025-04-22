@@ -373,7 +373,7 @@ class QueryManagementServiceTest {
   void shouldPurgeQueries() {
     List<UUID> queryIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     PurgedQueries expectedPurgedQueries = new PurgedQueries().deletedQueryIds(queryIds);
-    when(queryRepository.getQueryIdsStartedBefore(Mockito.any())).thenReturn(queryIds);
+    when(queryRepository.getQueryIdsForDeletion(Mockito.any())).thenReturn(queryIds);
     PurgedQueries actualPurgedQueries = queryManagementService.deleteOldQueries();
     verify(queryResultsRepository, times(1)).deleteQueryResults(queryIds);
     verify(queryRepository, times(1)).deleteQueries(queryIds);

@@ -1,5 +1,7 @@
 package org.folio.fqm.service;
 
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
@@ -18,16 +20,14 @@ import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
-
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 
 import static org.folio.fqm.domain.QueryStatus.FAILED;
 
@@ -35,7 +35,6 @@ import static org.folio.fqm.domain.QueryStatus.FAILED;
  * Service class responsible for managing a query
  */
 @Service
-@RequiredArgsConstructor
 @Log4j2
 public class QueryManagementService {
 
@@ -49,12 +48,47 @@ public class QueryManagementService {
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
   private final CrossTenantQueryService crossTenantQueryService;
+  private final RetryTemplate zombieQueryRetry;
 
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
   @Setter
   @Value("${mod-fqm-manager.max-query-size}")
   private int maxConfiguredQuerySize;
+
+
+  @Autowired
+  public QueryManagementService(EntityTypeService entityTypeService,
+                                FolioExecutionContext executionContext,
+                                QueryRepository queryRepository,
+                                QueryResultsRepository queryResultsRepository,
+                                QueryExecutionService queryExecutionService,
+                                QueryProcessorService queryProcessorService,
+                                QueryResultsSorterService queryResultsSorterService,
+                                ResultSetService resultSetService,
+                                FqlValidationService fqlValidationService,
+                                CrossTenantQueryService crossTenantQueryService,
+                                @Value("${mod-fqm-manager.zombie-query-max-wait-seconds:30}") int zombieQueryMaxWaitSeconds) {
+    this.entityTypeService = entityTypeService;
+    this.executionContext = executionContext;
+    this.queryRepository = queryRepository;
+    this.queryResultsRepository = queryResultsRepository;
+    this.queryExecutionService = queryExecutionService;
+    this.queryProcessorService = queryProcessorService;
+    this.queryResultsSorterService = queryResultsSorterService;
+    this.resultSetService = resultSetService;
+    this.fqlValidationService = fqlValidationService;
+    this.crossTenantQueryService = crossTenantQueryService;
+    var retryBuilder = RetryTemplate.builder()
+      .retryOn(ZombieQueryException.class);
+    if (zombieQueryMaxWaitSeconds != 0) {
+      retryBuilder = retryBuilder.exponentialBackoff(Duration.ofSeconds(1), 1.5, Duration.ofSeconds(zombieQueryMaxWaitSeconds))
+        .withTimeout(Duration.ofSeconds(zombieQueryMaxWaitSeconds));
+    } else { // The max wait == 0, so only retry once
+      retryBuilder = retryBuilder.maxAttempts(2);
+    }
+    this.zombieQueryRetry = retryBuilder.build();
+  }
 
   /**
    * Initiates the asynchronous execution of a query and returns the corresponding query ID.
@@ -123,7 +157,7 @@ public class QueryManagementService {
    * @return Details of the query
    */
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
-    return queryRepository.getPotentialZombieQuery(queryId)
+    return getPotentialZombieQuery(queryId)
       .map(query -> {
         QueryDetails details = new QueryDetails()
           .queryId(queryId)
@@ -140,6 +174,48 @@ public class QueryManagementService {
         details.content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit));
         return details;
       });
+  }
+
+  /**
+   * Retrieves a Query by its ID, with validation that fails queries with no backing DB query
+   * <p>
+   * This method performs the following steps:
+   * 1. Attempts to retrieve the query from the database.
+   * 2. If the query is found and its status is IN_PROGRESS, it checks for corresponding running SQL queries.
+   * 3. If no running SQL queries are found, it double-checks the query status to account for potential race conditions.
+   * 4. If the query is still IN_PROGRESS but no running SQL query is found, it updates the query status to FAILED.
+   *
+   * @param queryId The UUID of the query to retrieve.
+   * @return An Optional containing the Query if found, or empty if not found.
+   */
+  public Optional<Query> getPotentialZombieQuery(UUID queryId) {
+
+    return zombieQueryRetry.execute(
+      context -> getAndValidateQuery(queryId),
+      context -> handleZombieQuery(queryId)
+    );
+  }
+
+  private Optional<Query> getAndValidateQuery(UUID queryId) {
+    Optional<Query> query = queryRepository.getQuery(queryId, false);
+    if (query.filter(q -> q.status() == QueryStatus.IN_PROGRESS).isPresent()
+        && queryRepository.getQueryPids(queryId).isEmpty()) {
+      log.warn("Query {} has an in-progress status, but no corresponding running SQL query was found. Retrying...", queryId);
+      throw new ZombieQueryException(); // This exception is the trigger to retry in the RetryTemplate
+    }
+    return query;
+  }
+
+  private Optional<Query> handleZombieQuery(UUID queryId) {
+    log.error("Query {} still has an in-progress status, but no corresponding running SQL query. Marking it as failed", queryId);
+    queryRepository.updateQuery(queryId, FAILED, OffsetDateTime.now(), "No corresponding running SQL query was found.");
+    return queryRepository.getQuery(queryId, false);
+  }
+
+  private static class ZombieQueryException extends RuntimeException {
+    public ZombieQueryException() {
+      super("🧟"); // BRAAAAAAAAAINS!!!!!!
+    }
   }
 
   /**
@@ -179,7 +255,7 @@ public class QueryManagementService {
 
   @SuppressWarnings("java:S2201") // we just use orElseThrow to conveniently throw an exception, we don't want the value
   public List<List<String>> getSortedIds(UUID queryId, int offset, int limit) {
-    Query query = queryRepository.getPotentialZombieQuery(queryId).orElseThrow(() -> new QueryNotFoundException(queryId));
+    Query query = getPotentialZombieQuery(queryId).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
     entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);

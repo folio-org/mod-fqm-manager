@@ -114,7 +114,7 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
-    QueryRepository queryRepository = new QueryRepository(context, context, 0);
+    QueryRepository queryRepository = new QueryRepository(context, context);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);

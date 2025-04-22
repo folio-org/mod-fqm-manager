@@ -7,9 +7,7 @@ import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
@@ -31,24 +29,12 @@ public class QueryRepository {
 
   private final DSLContext jooqContext;
   private final DSLContext readerJooqContext;
-  private final RetryTemplate zombieQueryRetry;
 
   @Autowired
   public QueryRepository(DSLContext jooqContext,
-                         @Qualifier("readerJooqContext") DSLContext readerJooqContext,
-                         @Value("${mod-fqm-manager.zombie-query-max-wait-seconds:30}") int zombieQueryMaxWaitSeconds) {
+                         @Qualifier("readerJooqContext") DSLContext readerJooqContext) {
     this.jooqContext = jooqContext;
     this.readerJooqContext = readerJooqContext;
-
-    var retryBuilder = RetryTemplate.builder()
-      .retryOn(ZombieQueryException.class);
-    if (zombieQueryMaxWaitSeconds != 0) {
-      retryBuilder = retryBuilder.exponentialBackoff(Duration.ofSeconds(1), 1.5, Duration.ofSeconds(zombieQueryMaxWaitSeconds))
-        .withTimeout(Duration.ofSeconds(zombieQueryMaxWaitSeconds));
-    } else { // The max wait == 0, so just disable retrying.
-      retryBuilder = retryBuilder.maxAttempts(1);
-    }
-    this.zombieQueryRetry = retryBuilder.build();
   }
 
   public QueryIdentifier saveQuery(Query query) {
@@ -73,51 +59,7 @@ public class QueryRepository {
       .execute();
   }
 
-  /**
-   * Retrieves a Query by its ID, with optional caching and status validation.
-   * <p>
-   * This method performs the following steps:
-   * 1. Attempts to retrieve the query from the database.
-   * 2. If the query is found and its status is IN_PROGRESS, it checks for corresponding running SQL queries.
-   * 3. If no running SQL queries are found, it double-checks the query status to account for potential race conditions.
-   * 4. If the query is still IN_PROGRESS but no running SQL query is found, it updates the query status to FAILED.
-   * <p>
-   * Note: This method contains business logic in the repository layer, which might not be ideal
-   * but is currently the most convenient place for this logic.
-   *
-   * @param queryId The UUID of the query to retrieve.
-   * @return An Optional containing the Query if found, or empty if not found.
-   */
-  public Optional<Query> getPotentialZombieQuery(UUID queryId) {
-
-    return zombieQueryRetry.execute(
-      context -> getAndValidateQuery(queryId),
-      context -> handleZombieQuery(queryId)
-    );
-  }
-
-  private Optional<Query> getAndValidateQuery(UUID queryId) {
-    Optional<Query> query = getQuery(queryId);
-    if (query.filter(q -> q.status() == QueryStatus.IN_PROGRESS).isPresent()
-        && getQueryPids(queryId).isEmpty()) {
-      log.warn("Query {} has an in-progress status, but no corresponding running SQL query was found. Retrying...", queryId);
-      throw new ZombieQueryException(); // This exception is the trigger to retry in the RetryTemplate
-    }
-    return query;
-  }
-
-  private Optional<Query> handleZombieQuery(UUID queryId) {
-    log.error("Query {} still has an in-progress status, but no corresponding running SQL query. Marking it as failed", queryId);
-    updateQuery(queryId, QueryStatus.FAILED, OffsetDateTime.now(), "No corresponding running SQL query was found.");
-    return getQuery(queryId);
-  }
-
-  private static class ZombieQueryException extends RuntimeException {
-    public ZombieQueryException() {
-      super("🧟");
-    }
-  }
-
+  // Public wrapper around getQuery(UUID), to expose the cached version
   @Cacheable(value = "queryCache", condition = "#useCache==true")
   public Optional<Query> getQuery(UUID queryId, boolean useCache) {
     return getQuery(queryId);

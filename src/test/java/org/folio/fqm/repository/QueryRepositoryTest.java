@@ -24,7 +24,6 @@ class QueryRepositoryTest {
 
   @Autowired
   private QueryRepository repo;
-
   private UUID queryId;
 
   @BeforeEach
@@ -49,7 +48,7 @@ class QueryRepositoryTest {
     Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
       createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
-    Query actualQuery = repo.getQuery(queryIdentifier.getQueryId(), false).orElse(null);
+    Query actualQuery = repo.getQuery(queryIdentifier.getQueryId(), false).get();
     assertEquals(expectedQuery.queryId(), actualQuery.queryId());
     assertEquals(expectedQuery.entityTypeId(), actualQuery.entityTypeId());
     assertEquals(expectedQuery.createdBy(), actualQuery.createdBy());
@@ -89,7 +88,7 @@ class QueryRepositoryTest {
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(queryToDelete);
     Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null);
+      UUID.randomUUID(), null, OffsetDateTime.now().minusHours(1), QueryStatus.SUCCESS, null);
 
     UUID queryId2 = UUID.randomUUID();
     Query queryToNotDelete = new Query(queryId2, UUID.randomUUID(), fqlQuery, fields,
@@ -116,8 +115,8 @@ class QueryRepositoryTest {
     Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(query);
-    assertFalse(repo.getQuery(queryIdentifier.getQueryId(), false).isEmpty());
+    assertFalse(repo.getQuery(queryIdentifier.getQueryId()).isEmpty());
     repo.deleteQueries(List.of(queryId));
-    assertTrue(repo.getQuery(queryIdentifier.getQueryId(), false).isEmpty());
+    assertTrue(repo.getQuery(queryIdentifier.getQueryId()).isEmpty());
   }
 }

@@ -37,24 +37,25 @@ By utilizing the combination of source views, computed views, and other relevant
 mvn clean install
 ```
 ## Environment Variables
-| Name                                              | Default Value | Description                                       |
-|---------------------------------------------------|---------------|---------------------------------------------------|
-| DB_HOST                                           | localhost     | Postgres hostname                                 |
-| DB_PORT                                           | 5432          | Postgres port                                     |
-| DB_HOST_READER                                    | localhost     | Postgres hostname                                 |
-| DB_PORT_READER                                    | 5432          | Postgres port                                     |
-| DB_USERNAME                                       | postgres      | Postgres username                                 |
-| DB_PASSWORD                                       | postgres      | Postgres password                                 |
-| DB_DATABASE                                       | postgres      | Postgres database name                            |
-| IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA |
-| MAX_QUERY_SIZE                                    | 1250000       | max result count per query                        |
-| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions               |
-| mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions        |
-| server.port                                       | 8081          | Server port                                       |
-| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted                         |
-| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks             |
-| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks              |
-| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                            |
+| Name                                              | Default Value | Description                                                                                    |
+|---------------------------------------------------|---------------|------------------------------------------------------------------------------------------------|
+| DB_HOST                                           | localhost     | Postgres hostname                                                                              |
+| DB_PORT                                           | 5432          | Postgres port                                                                                  |
+| DB_HOST_READER                                    | localhost     | Postgres hostname                                                                              |
+| DB_PORT_READER                                    | 5432          | Postgres port                                                                                  |
+| DB_USERNAME                                       | postgres      | Postgres username                                                                              |
+| DB_PASSWORD                                       | postgres      | Postgres password                                                                              |
+| DB_DATABASE                                       | postgres      | Postgres database name                                                                         |
+| IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA                                              |
+| MAX_QUERY_SIZE                                    | 1250000       | max result count per query                                                                     |
+| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions                                                            |
+| mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions                                                     |
+| mod-fqm-manager.zombie-query-max-wait-seconds     | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie |
+| server.port                                       | 8081          | Server port                                                                                    |
+| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted                                                                      |
+| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks                                                          |
+| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks                                                           |
+| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                                                                         |
 
 > **Note regarding `mod-fqm-manager.entity-type-cache-timeout-seconds`:** The default value defined in the project's
 > module descriptor is `300`, as this value is more appropriate for development environments while still being reasonable

@@ -60,7 +60,7 @@ public class QueryProcessorService {
   }
 
   public void handleSuccess(Query query) {
-    Query savedQuery = queryRepository.getQuery(query.queryId(), true)
+    Query savedQuery = queryRepository.getQuery(query.queryId(), false)
       .orElseThrow(() -> new QueryNotFoundException(query.queryId()));
     if (savedQuery.status() == QueryStatus.CANCELLED) {
       log.info("Query {} has been cancelled, therefore not updating", query.queryId());

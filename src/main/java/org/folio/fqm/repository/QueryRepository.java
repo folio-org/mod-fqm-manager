@@ -1,11 +1,12 @@
 package org.folio.fqm.repository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
@@ -20,15 +21,21 @@ import static org.jooq.impl.DSL.table;
 
 
 @Repository
-@RequiredArgsConstructor
 @Log4j2
 public class QueryRepository {
-
   private static final String QUERY_DETAILS_TABLE = "query_details";
   private static final String QUERY_ID = "query_id";
   private static final int MULTIPLE_FOR_STUCK_QUERIES = 3;
 
   private final DSLContext jooqContext;
+  private final DSLContext readerJooqContext;
+
+  @Autowired
+  public QueryRepository(DSLContext jooqContext,
+                         @Qualifier("readerJooqContext") DSLContext readerJooqContext) {
+    this.jooqContext = jooqContext;
+    this.readerJooqContext = readerJooqContext;
+  }
 
   public QueryIdentifier saveQuery(Query query) {
     jooqContext.insertInto(table(QUERY_DETAILS_TABLE))
@@ -52,12 +59,29 @@ public class QueryRepository {
       .execute();
   }
 
+  // Public wrapper around getQuery(UUID), to expose the cached version
   @Cacheable(value = "queryCache", condition = "#useCache==true")
   public Optional<Query> getQuery(UUID queryId, boolean useCache) {
-    return Optional.ofNullable(jooqContext.select()
+    return getQuery(queryId);
+  }
+
+  // Package-private, to make this visible for tests
+  Optional<Query> getQuery(UUID queryId) {
+    Query query = jooqContext.select()
       .from(table(QUERY_DETAILS_TABLE))
       .where(field(QUERY_ID).eq(queryId))
-      .fetchOneInto(Query.class));
+      .fetchOneInto(Query.class);
+    return Optional.ofNullable(query);
+  }
+
+  public List<Integer> getQueryPids(UUID queryId) {
+    String querySearchText = "%Query ID: " + queryId + "%";
+    return readerJooqContext
+      .select(field("pid", Integer.class))
+      .from(table("pg_stat_activity"))
+      .where(field("state").eq("active"))
+      .and(field("query").like(querySearchText))
+      .fetchInto(Integer.class);
   }
 
   public List<UUID> getQueryIdsForDeletion(Duration retentionDuration) {

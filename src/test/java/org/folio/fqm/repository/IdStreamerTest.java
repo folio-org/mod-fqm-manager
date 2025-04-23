@@ -1,8 +1,6 @@
 package org.folio.fqm.repository;
 
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.table;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
@@ -30,11 +28,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.spring.FolioExecutionContext;
-import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSelectStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +114,7 @@ class IdStreamerTest {
 
   @BeforeEach
   void setup() {
-    QueryRepository queryRepository = new QueryRepository(context);
+    QueryRepository queryRepository = new QueryRepository(context, context);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
@@ -251,20 +245,8 @@ class IdStreamerTest {
   void shouldCancelQuery() {
     // This test uses a mocked DSLContext because our test DSLContext doesn't behave nicely in separate threads
     DSLContext mockJooqContext = mock(DSLContext.class);
-    SelectSelectStep mockSelectStep = mock(SelectSelectStep.class);
-    SelectJoinStep mockJoinStep = mock(SelectJoinStep.class);
-    SelectConditionStep mockConditionStep = mock(SelectConditionStep.class);
-    SelectConditionStep mockConditionStep2 = mock(SelectConditionStep.class);
-    List<Integer> mockPids = List.of(123, 456);
-
-    when(mockJooqContext.select(field("pid", Integer.class))).thenReturn(mockSelectStep);
-    when(mockSelectStep.from(table("pg_stat_activity"))).thenReturn(mockJoinStep);
-    when(mockJoinStep.where(field("state").eq("active"))).thenReturn(mockConditionStep);
-    when(mockConditionStep.and(any(Condition.class))).thenReturn(mockConditionStep2);
-    when(mockConditionStep2.fetchInto(Integer.class)).thenReturn(mockPids);
-    when(mockJooqContext.execute(anyString(), anyInt())).thenReturn(1);
-
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
+    when(mockQueryRepository.getQueryPids(any())).thenReturn(List.of(123, 456));
 
     IdStreamer newIdStreamer = new IdStreamer(
       mockJooqContext,

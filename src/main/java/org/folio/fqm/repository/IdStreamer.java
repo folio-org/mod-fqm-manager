@@ -157,7 +157,7 @@ public class IdStreamer {
   }
 
   void handleBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback, Integer maxQuerySize, AtomicInteger total) {
-    Query query = queryRepository.getQuery(queryId, true)
+    Query query = queryRepository.getQuery(queryId, false)
       .orElseThrow(() -> new QueryNotFoundException(queryId));
     if (query.status() == QueryStatus.CANCELLED) {
       log.info("Query {} has been cancelled, closing id stream", queryId);
@@ -201,13 +201,7 @@ public class IdStreamer {
 
   void cancelQuery(UUID queryId) {
     log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
-    String querySearchText = "%Query ID: " + queryId + "%";
-    List<Integer> pids = jooqContext
-      .select(field("pid", Integer.class))
-      .from(table("pg_stat_activity"))
-      .where(field("state").eq("active"))
-      .and(field("query").like(querySearchText))
-      .fetchInto(Integer.class);
+    List<Integer> pids = queryRepository.getQueryPids(queryId);
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);
       jooqContext.execute("SELECT pg_cancel_backend(?)", pid);

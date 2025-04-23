@@ -22,13 +22,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +37,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class QueryManagementServiceTest {
@@ -81,11 +79,11 @@ class QueryManagementServiceTest {
 
   private final int maxConfiguredQuerySize = 1000;
 
-  @InjectMocks
   private QueryManagementService queryManagementService;
 
   @BeforeEach
   void setup() {
+    queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlValidationService, crossTenantQueryService, 0);
     queryManagementService.setMaxConfiguredQuerySize(maxConfiguredQuerySize);
   }
 
@@ -519,6 +517,102 @@ class QueryManagementServiceTest {
     when(resultSetService.getResultSet(entityTypeId, fields, ids, tenantIds, false)).thenReturn(expectedContents);
     List<Map<String, Object>> actualContents = queryManagementService.getContents(entityTypeId, fields, ids, userId, false, true);
     assertEquals(expectedContents, actualContents);
+  }
+  @Test
+  void shouldFailQueriesThatArentActuallyRunning() {
+    UUID queryId = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    // Given a query which is saved with the in-progress status, but doesn't have an actual running SQL query backing it
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
+    when(queryRepository.getQueryPids(queryId)).thenReturn(Collections.emptyList());
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should be marked as failed
+    verify(queryRepository, times(1)).updateQuery(eq(queryId), eq(QueryStatus.FAILED), any(OffsetDateTime.class), anyString());
+    Query failedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.FAILED, null);
+
+    // When you retrieve it again
+    reset(queryRepository);
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(failedQuery));
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should not be updated
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  }
+
+  @Test
+  void shouldNotFailNonInProgressQueriesThatArentActuallyRunning() {
+    UUID queryId = UUID.randomUUID();
+
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.SUCCESS, null);
+    // Given a query which is saved with the success status
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should not update anything
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  }
+
+  @Test
+  void shouldNotFailQueriesThatAreStillRunning() {
+    UUID queryId = UUID.randomUUID();
+
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    // Given a query which is saved with the in-progress status and has a running SQL query backing it
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
+    when(queryRepository.getQueryPids(eq(queryId))).thenReturn(List.of(123));
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should not update anything
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  }
+
+  @Test
+  void shouldNotFailQueriesThatAreStillRunningIfTheStatusChanges() {
+    UUID queryId = UUID.randomUUID();
+
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query inProgressQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    Query successQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.SUCCESS, null);
+    // Given a query which is saved with the in-progress status and does not have a running SQL query backing it, but then switches to another status
+    when(queryRepository.getQuery(eq(queryId), anyBoolean())).thenReturn(Optional.of(inProgressQuery))
+      .thenReturn(Optional.of(successQuery));
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    // Then it should not try to update the status, since it eventually switched its status after retrying
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
   }
 
   private static Date offsetDateTimeAsDate(OffsetDateTime offsetDateTime) {

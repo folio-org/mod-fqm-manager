@@ -4,6 +4,7 @@ mod-fqm-manager:
   bypass-permissions: false # local development ONLY
   permissions-cache-timeout-seconds: 60
   entity-type-cache-timeout-seconds: 300
+  zombie-query-max-wait-seconds: 300
 server:
   port: 8081
 spring:

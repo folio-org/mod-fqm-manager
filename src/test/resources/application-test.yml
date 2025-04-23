@@ -3,6 +3,7 @@ server:
 mod-fqm-manager:
   permissions-cache-timeout-seconds: 60
   entity-type-cache-timeout-seconds: 3600
+  zombie-query-max-wait-seconds: 0
 spring:
   application:
     name: mod-fqm-manager

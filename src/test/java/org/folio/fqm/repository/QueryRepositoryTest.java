@@ -88,7 +88,7 @@ class QueryRepositoryTest {
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(queryToDelete);
     Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), null, OffsetDateTime.now(), QueryStatus.SUCCESS, null);
+      UUID.randomUUID(), null, OffsetDateTime.now().minusHours(1), QueryStatus.SUCCESS, null);
 
     UUID queryId2 = UUID.randomUUID();
     Query queryToNotDelete = new Query(queryId2, UUID.randomUUID(), fqlQuery, fields,

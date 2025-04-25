@@ -55,7 +55,7 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("field4").dataType(new DateType().dataType("dateType")),
           new EntityTypeColumn().name("field5").dataType(new EntityDataType().dataType("integerType")),
           new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
-          new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("StringUUIDType")),
+          new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
@@ -129,7 +129,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not equals ranged UUID",
         "{\"rangedUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
-        trueCondition
+        trueCondition.or(field("rangedUUIDField").isNull())
       ),
       Arguments.of(
         "equals open UUID",
@@ -139,7 +139,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not equals open UUID",
         "{\"openUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
-        trueCondition
+        trueCondition.or(field("openUUIDField").isNull())
       ),
       Arguments.of(
         "equals open UUID",
@@ -151,31 +151,31 @@ class FqlToSqlConverterServiceTest {
         "equals string UUID",
         """
           {"stringUUIDField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("stringUUIDField").eq("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("stringUUIDField"), String.class).equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
       ),
       Arguments.of(
         "not equals string",
         """
           {"field1": {"$ne": "some value"}}""",
-        field("field1").notEqualIgnoreCase("some value")
+        field("field1").notEqualIgnoreCase("some value").or(field("field1").isNull())
       ),
       Arguments.of(
         "not equals string UUID",
         """
           {"stringUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        field("stringUUIDField").ne("69939c9a-aa96-440a-a873-3b48f3f4f608")
+        cast(field("stringUUIDField"), String.class).notEqualIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608").or(field("stringUUIDField").isNull())
       ),
       Arguments.of(
         "not equals numeric",
         """
           {"field5": {"$ne": 10}}""",
-        field("field5").notEqual(10)
+        field("field5").notEqual(10).or(field("field5").isNull())
       ),
       Arguments.of(
         "not equals boolean",
         """
           {"field2": {"$ne": true}}""",
-        field("field2").notEqual(true)
+        field("field2").notEqual(true).or(field("field2").isNull())
       ),
       Arguments.of(
         "not equals date",
@@ -183,6 +183,7 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$ne": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
           .or(field("field4").lessThan("2023-06-02T00:00:00.000"))
+          .or(field("field4").isNull())
       ),
       Arguments.of(
         "not equals date and time",
@@ -190,19 +191,20 @@ class FqlToSqlConverterServiceTest {
           {"field4": {"$ne": "2023-06-02T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
           .or(field("field4").lessThan("2023-06-02T04:00:00.000"))
+          .or(field("field4").isNull())
       ),
 
       Arguments.of(
         "not equals ranged UUID",
         """
           {"rangedUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).or(field("rangedUUIDField").isNull())
       ),
       Arguments.of(
         "not equals open UUID",
         """
           {"openUUIDField": {"$ne": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
-        cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+        cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).or(field("openUUIDField").isNull())
       ),
       Arguments.of(
         "greater than string",
@@ -395,7 +397,7 @@ class FqlToSqlConverterServiceTest {
           .and(trueCondition)
       ),
       Arguments.of(
-        "complex condition",
+        "complex condition 1",
         """
           {
             "$and": [
@@ -417,7 +419,7 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
             and(
@@ -427,7 +429,7 @@ class FqlToSqlConverterServiceTest {
           )
       ),
       Arguments.of(
-        "complex condition",
+        "complex condition 2",
         """
           {
             "$and": [
@@ -449,7 +451,7 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
             and(
@@ -561,7 +563,7 @@ class FqlToSqlConverterServiceTest {
       ),
 
       Arguments.of(
-        "complex condition",
+        "complex condition 3",
         """
           {
             "$and": [
@@ -583,7 +585,7 @@ class FqlToSqlConverterServiceTest {
               field("field2").eq(true)
             )
           )
-          .and(field("field5").notEqual(5))
+          .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
             and(

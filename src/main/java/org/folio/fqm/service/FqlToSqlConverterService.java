@@ -162,23 +162,31 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (isDateCondition(notEqualsCondition, entityType)) {
-      return handleDate(notEqualsCondition, field, entityType);
-    }
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
-    if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+    Condition baseCondition;
+    if (DATE_TYPE.equals(filterFieldDataType)) {
+      baseCondition = handleDate(notEqualsCondition, field, entityType);
+    } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
       try {
         UUID uuidValue = UUID.fromString((String) notEqualsCondition.value());
-        return cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
+        baseCondition = cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
       } catch (IllegalArgumentException e) {
-        return trueCondition();
+        baseCondition = trueCondition();
       }
+    } else if (STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
+      baseCondition = caseInsensitiveComparison(
+        notEqualsCondition,
+        entityType,
+        field,
+        (String) notEqualsCondition.value(),
+        org.jooq.Field::notEqualIgnoreCase,
+        org.jooq.Field::ne
+      );
+    } else {
+      baseCondition = field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
     }
-    if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
-      return caseInsensitiveComparison(notEqualsCondition, entityType, field, (String) notEqualsCondition.value(), org.jooq.Field::notEqualIgnoreCase, org.jooq.Field::ne);
-    }
-    return field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
+    return baseCondition.or(field.isNull());
   }
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
@@ -308,7 +316,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleContainsAll(ContainsAllCondition containsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType  = getFieldDataType(entityType, containsAllCondition);
+    String dataType = getFieldDataType(entityType, containsAllCondition);
     if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
       var jsonbConditions = containsAllCondition
         .value()
@@ -331,7 +339,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotContainsAll(NotContainsAllCondition notContainsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType  = getFieldDataType(entityType, notContainsAllCondition);
+    String dataType = getFieldDataType(entityType, notContainsAllCondition);
     if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
       var jsonbConditions = notContainsAllCondition
         .value()
@@ -352,8 +360,9 @@ public class FqlToSqlConverterService {
       return cast(field, String[].class).notContains(valueArray);
     }
   }
+
   private static Condition handleContainsAny(ContainsAnyCondition containsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType  = getFieldDataType(entityType, containsAnyCondition);
+    String dataType = getFieldDataType(entityType, containsAnyCondition);
     if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
       var jsonbConditions = containsAnyCondition
         .value()
@@ -376,7 +385,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotContainsAny(NotContainsAnyCondition notContainsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType  = getFieldDataType(entityType, notContainsAnyCondition);
+    String dataType = getFieldDataType(entityType, notContainsAnyCondition);
     if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
       var jsonbConditions = notContainsAnyCondition
         .value()
@@ -405,6 +414,7 @@ public class FqlToSqlConverterService {
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
     return field.startsWith(valueField(startsWithCondition.value(), startsWithCondition, entityType));
   }
+
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String fieldType = getFieldDataType(entityType, emptyCondition);
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());

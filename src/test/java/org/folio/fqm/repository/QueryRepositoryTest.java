@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ class QueryRepositoryTest {
   @Autowired
   private QueryRepository repo;
   private UUID queryId;
+
 
   @BeforeEach
   public void setUp() {
@@ -79,41 +81,46 @@ class QueryRepositoryTest {
   }
 
   @Test
-  void shouldGetQueriesForDeletion() throws InterruptedException {
+  void shouldGetQueriesForDeletion() {
     String fqlQuery = """
-      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-      """;
+    {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5"] }}
+    """;
     List<String> fields = List.of("id", "field1");
-    Query queryToDelete = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+
+    UUID queryIdToDelete = UUID.randomUUID();
+    UUID queryIdToKeep = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    Query queryToDelete = new Query(queryIdToDelete, entityTypeId, fqlQuery, fields, createdBy, now.minusHours(2), null,
+      QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(queryToDelete);
-    Query updatedQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), null, OffsetDateTime.now().minusHours(1), QueryStatus.SUCCESS, null);
 
-    UUID queryId2 = UUID.randomUUID();
-    Query queryToNotDelete = new Query(queryId2, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now().plusHours(1), null, QueryStatus.IN_PROGRESS, null);
-    repo.saveQuery(queryToNotDelete);
+    OffsetDateTime endDate = now.minusHours(1);
+    repo.updateQuery(queryIdToDelete, QueryStatus.SUCCESS, endDate, null);
 
-    repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
-    UUID expectedId = queryId;
-    List<UUID> actualIds = repo.getQueryIdsForDeletion(Duration.ofMillis(0));
+    Query queryToKeep = new Query(queryIdToKeep, UUID.randomUUID(), fqlQuery, fields,
+      UUID.randomUUID(), now.plusMinutes(10), null, QueryStatus.IN_PROGRESS, null);
+    repo.saveQuery(queryToKeep);
 
-    assertTrue(actualIds.contains(expectedId));
-    assertFalse(actualIds.contains(queryId2));
+    List<UUID> actualIds = repo.getQueryIdsForDeletion(Duration.ofMinutes(1));
 
-    // Clean up
-    repo.deleteQueries(List.of(queryId2));
+    assertTrue(actualIds.contains(queryIdToDelete), "Expected queryIdToDelete to be eligible for deletion");
+    assertFalse(actualIds.contains(queryIdToKeep), "Expected queryIdToKeep to not be eligible for deletion");
+
+    repo.deleteQueries(List.of(queryIdToDelete, queryIdToKeep));
   }
 
   @Test
   void shouldDeleteQueries() {
+    OffsetDateTime testNowUtc = OffsetDateTime.now(ZoneOffset.UTC);
     String fqlQuery = """
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
     List<String> fields = List.of("id", "field1");
     Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
-      UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+      UUID.randomUUID(), testNowUtc, null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(query);
     assertFalse(repo.getQuery(queryIdentifier.getQueryId()).isEmpty());
     repo.deleteQueries(List.of(queryId));

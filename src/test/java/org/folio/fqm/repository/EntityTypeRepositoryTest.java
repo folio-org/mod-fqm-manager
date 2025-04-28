@@ -47,11 +47,13 @@ class EntityTypeRepositoryTest {
   @Test
   void shouldGetEntityTypeDefinitionWithCustomFields() {
     String genericValueGetter = "custom_fields_source_view.jsonb -> 'customFields' ->> '%s'";
+    String booleanFilterValueGetter = "lower(%s)";
     String refId1 = "customColumn1";
     String refId2 = "customColumn2";
     String refId3 = "customColumn3";
     String refId4 = "customColumn4";
     String refId5 = "customColumn5";
+    String valueGetter1 = String.format(genericValueGetter, refId1);
     String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId2, "custom_fields_source_view.jsonb -> 'customFields'", refId2);
     String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId3, "custom_fields_source_view.jsonb -> 'customFields'", refId3);
     var radioButtonValues = List.of(
@@ -81,7 +83,9 @@ class EntityTypeRepositoryTest {
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23f8")
         .dataType(new BooleanType().dataType("booleanType"))
-        .valueGetter(String.format(genericValueGetter, refId1))
+        .valueGetter(valueGetter1 )
+        .filterValueGetter(String.format(booleanFilterValueGetter, valueGetter1))
+        .valueFunction(String.format(booleanFilterValueGetter, ":value"))
         .labelAlias("custom_column_1")
         .values(CUSTOM_FIELD_BOOLEAN_VALUES)
         .visibleByDefault(false)

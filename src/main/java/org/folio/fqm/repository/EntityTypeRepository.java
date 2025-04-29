@@ -221,12 +221,16 @@ public class EntityTypeRepository {
                                                     String name,
                                                     String refId,
                                                     String sourceViewExtractor) {
+    String valueGetter = String.format(STRING_EXTRACTOR, sourceViewExtractor, refId);
+    String filterValueGetter = "lower(%s)";
     return new EntityTypeColumn()
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new BooleanType().dataType("booleanType"))
       .values(CUSTOM_FIELD_BOOLEAN_VALUES)
       .visibleByDefault(false)
-      .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
+      .valueGetter(valueGetter)
+      .filterValueGetter(String.format(filterValueGetter, valueGetter))
+      .valueFunction(String.format(filterValueGetter, ":value"))
       .labelAlias(name)
       .queryable(true)
       .essential(true)

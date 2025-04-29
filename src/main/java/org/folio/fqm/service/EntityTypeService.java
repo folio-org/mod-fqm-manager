@@ -20,12 +20,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.querytool.domain.dto.ColumnValues;
-import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.Field;
-import org.folio.querytool.domain.dto.SourceColumn;
-import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.querytool.domain.dto.*;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -169,7 +164,10 @@ public class EntityTypeService {
           }
           // instructs query builder to provide organization finder plugin
           case "organization" -> {
-            return ColumnValues.builder().content(List.of()).build();
+            // In Sunflower, this is "ColumnValues.builder().content(List.of()).build()" which isn't available in
+            // Ramsons. However, the content is the only value contained in a ColumnValues object, and it defaults to
+            // an empty list, so this works just as well.
+            return new ColumnValues();
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -210,7 +208,7 @@ public class EntityTypeService {
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
         List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
-        log.info("Obtained {} values from API {} in tenant {} for field {}", values.size(), valueSourceApi.getPath(), tenantId, field.getName());
+        log.info("Obtained {} values from API {} in tenant {} for field {}", values.size(), field.getValueSourceApi().getPath(), tenantId, field.getName());
         for (int i = 0; i < values.size(); i++) {
           String value = values.get(i);
           String label = labels.get(i);

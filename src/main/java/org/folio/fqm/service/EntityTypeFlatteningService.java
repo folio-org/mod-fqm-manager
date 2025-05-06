@@ -110,7 +110,6 @@ public class EntityTypeFlatteningService {
       .idView(originalEntityType.getIdView())
       .customFieldEntityTypeId(originalEntityType.getCustomFieldEntityTypeId())
       .labelAlias(originalEntityType.getLabelAlias())
-      .root(originalEntityType.getRoot())
       .groupByFields(originalEntityType.getGroupByFields())
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor())

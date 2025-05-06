@@ -31,7 +31,6 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
       .id(UUID.randomUUID().toString())
       .name("test")
       .labelAlias("test alias")
-      .root(true)
       ._private(false)
       .columns(List.of(
         new EntityTypeColumn()

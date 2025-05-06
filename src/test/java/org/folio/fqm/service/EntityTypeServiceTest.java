@@ -109,8 +109,8 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", true, false)));
+      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
+      new EntityType(id2.toString(), "translation_label_02", false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
@@ -136,8 +136,8 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", true, false)));
+      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
+      new EntityType(id2.toString(), "translation_label_02", false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
@@ -154,8 +154,8 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
+      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
@@ -184,8 +184,8 @@ class EntityTypeServiceTest {
     );
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, true).requiredPermissions(List.of("perm1")), // Private entity
-      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2")) // Non-private entity
+      new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")), // Private entity
+      new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")) // Non-private entity
     ));
 
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2", "perm1"));
@@ -215,8 +215,8 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
+      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));

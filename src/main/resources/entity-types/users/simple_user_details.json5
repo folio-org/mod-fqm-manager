@@ -1,7 +1,6 @@
 {
   id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
   name: 'simple_user_details',
-  root: false,
   private: true,
   sources: [
     {

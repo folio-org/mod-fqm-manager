@@ -1,7 +1,6 @@
 {
   id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
   name: 'simple_loan_policy',
-  root: true,
   private: true,
   sources: [
     {

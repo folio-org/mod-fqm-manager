@@ -18,14 +18,18 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
@@ -66,6 +70,8 @@ public class EntityTypeService {
   private final CrossTenantQueryService crossTenantQueryService;
   private final LanguageClient languageClient;
   private final FolioExecutionContext executionContext;
+  private final FolioExecutionContext folioExecutionContext;
+  private final ClockService clockService;
 
   /**
    * Returns the list of all entity types.
@@ -343,5 +349,68 @@ public class EntityTypeService {
 
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
+  }
+
+  public CustomEntityType getCustomEntityType(UUID entityTypeId) {
+    var customET = entityTypeRepository.getCustomEntityType(entityTypeId);
+    if (customET == null) {
+      throw new EntityTypeNotFoundException(entityTypeId);
+    }
+    return customET;
+  }
+
+  public CustomEntityType createCustomEntityType(CustomEntityType customEntityType) {
+    validateCustomEntityType(null, customEntityType);
+    var now = clockService.now();
+    var updatedCustomEntityType = customEntityType.toBuilder()
+      .createdAt(now)
+      .updatedAt(now)
+      .owner(folioExecutionContext.getUserId())
+      ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
+      .idView(null) // We don't want to let users do stuff that deals directly with the DB
+      .build();
+    entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
+    return updatedCustomEntityType;
+  }
+
+  public CustomEntityType updateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    validateCustomEntityType(entityTypeId, customEntityType);
+    var oldET = getCustomEntityType(entityTypeId);
+
+    // Only the owner can edit a private ET
+    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
+      // Note: The ET's owner can update the ET to have a different owner
+      throw new CustomEntityTypeOwnershipException("A custom entity type can only be modified by its owner");
+    }
+
+    var updatedCustomEntityType = customEntityType.toBuilder()
+      .updatedAt(clockService.now())
+      .build();
+    entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
+    return updatedCustomEntityType;
+  }
+
+  // Package-private to make Visible for testing
+  static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", entityTypeId);
+    }
+    if (!customEntityType.getColumns().isEmpty()) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", entityTypeId);
+    }
+    if (entityTypeId != null && !entityTypeId.toString().equals(customEntityType.getId())) {
+      throw new InvalidEntityTypeDefinitionException("The entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
+    }
+  }
+
+  public void deleteCustomEntityType(UUID entityTypeId) {
+    var oldET = getCustomEntityType(entityTypeId);
+
+    // Only the owner can edit a private ET
+    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
+      throw new CustomEntityTypeOwnershipException("A custom entity type can only be deleted by its owner");
+    }
+
+    entityTypeRepository.deleteEntityType(entityTypeId);
   }
 }

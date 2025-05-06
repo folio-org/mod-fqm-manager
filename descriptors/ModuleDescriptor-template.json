@@ -47,6 +47,26 @@
           "pathPattern": "/entity-types/materialized-views/refresh",
           "permissionsRequired": ["fqm.materializedViews.post"],
           "modulePermissions": ["configuration.entries.collection.get", "finance.exchange-rate.item.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/entity-types/custom",
+          "permissionsRequired": ["fqm.entityTypes.custom.collection.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/entity-types/custom/{entity-type-id}",
+          "permissionsRequired": ["fqm.entityTypes.custom.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/entity-types/custom/{entity-type-id}",
+          "permissionsRequired": ["fqm.entityTypes.custom.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/entity-types/custom/{entity-type-id}",
+          "permissionsRequired": ["fqm.entityTypes.custom.item.delete"]
         }
       ]
     },

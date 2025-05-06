@@ -1,7 +1,6 @@
 {
   id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
   name: 'simple_organization',
-  root: true,
   private: false,
   sources: [
     {

@@ -1,7 +1,6 @@
 {
   id: 'deadbeef-dead-dead-dead-deaddeadbeef',
   name: 'removed',
-  root: true,
   private: true,
   sources: [
     {

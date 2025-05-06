@@ -117,7 +117,7 @@ class CrossTenantQueryServiceTest {
 
   @Test
   void shouldRunIntraTenantQueryForNonInstanceEntityTypes() {
-    EntityType nonEcsEntityType = new EntityType(UUID.randomUUID().toString(), "test_entity_type", true, false);
+    EntityType nonEcsEntityType = new EntityType(UUID.randomUUID().toString(), "test_entity_type", true);
 
     List<String> expectedTenants = List.of("tenant_01");
     when(executionContext.getTenantId()).thenReturn("tenant_01");

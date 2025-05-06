@@ -72,7 +72,7 @@ class QueryProcessorServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnPaginatedResults() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true, false);
+    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true);
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;

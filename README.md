@@ -52,7 +52,7 @@ mvn clean install
 | mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions                                                     |
 | mod-fqm-manager.zombie-query-max-wait-seconds     | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie |
 | server.port                                       | 8081          | Server port                                                                                    |
-| QUERY_RETENTION_DURATION                          | 3h            | Older queries get deleted                                                                      |
+| MOD_FQM_MANAGER_QUERY_RETENTION_DURATION          | 3h            | Older queries get deleted                                                                      |
 | task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks                                                          |
 | task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks                                                           |
 | task.execution.pool.queue-capacity                | 1000          | Size of the task queue                                                                         |

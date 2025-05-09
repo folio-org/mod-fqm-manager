@@ -90,6 +90,12 @@ class FqlToSqlConverterServiceTest {
         field("field1").equalIgnoreCase("some value")
       ),
       Arguments.of(
+        "equals string (long)",
+        """
+          {"field1": {"$eq": "this string contains more than 32 characters."}}""",
+        field("field1").equalIgnoreCase("this string contains more than 32 characters.")
+      ),
+      Arguments.of(
         "equals numeric",
         """
           {"field5": {"$eq": 10}}""",

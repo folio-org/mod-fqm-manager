@@ -1,20 +1,23 @@
 package org.folio.fqm.repository;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.*;
 
@@ -22,6 +25,8 @@ import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -32,11 +37,12 @@ class EntityTypeRepositoryTest {
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
   private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0294");
 
+  @MockitoSpyBean
+  private ObjectMapper objectMapper;
+
   @Autowired
   private EntityTypeRepository repo;
 
-  @Mock
-  @Qualifier("readerJooqContext") private DSLContext jooqContext;
 
   @Test
   void shouldReturnValidEntityTypeDefinition() {
@@ -83,7 +89,7 @@ class EntityTypeRepositoryTest {
       new EntityTypeColumn()
         .name(CUSTOM_FIELD_PREPENDER + "2c4e9797-422f-4962-a302-174af09b23f8")
         .dataType(new BooleanType().dataType("booleanType"))
-        .valueGetter(valueGetter1 )
+        .valueGetter(valueGetter1)
         .filterValueGetter(String.format(booleanFilterValueGetter, valueGetter1))
         .valueFunction(String.format(booleanFilterValueGetter, ":value"))
         .labelAlias("custom_column_1")
@@ -162,4 +168,107 @@ class EntityTypeRepositoryTest {
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }
+
+  @Test
+  void shouldCreateRetrieveUpdateAndDeleteCustomEntityType() {
+    // Generate a random UUID for the test
+    UUID entityTypeId = UUID.randomUUID();
+
+    try {
+      // 1. Create a custom entity type
+      CustomEntityType customEntityType = new CustomEntityType()
+        .id(entityTypeId.toString())
+        .name("test-custom-entity")
+        .labelAlias("Test Custom Entity")
+        ._private(false)
+        .sources(Collections.emptyList())
+        .columns(Collections.emptyList());
+
+      repo.createCustomEntityType(customEntityType);
+
+      // 2. Retrieve and verify
+      CustomEntityType retrievedEntityType = repo.getCustomEntityType(entityTypeId);
+
+      assertNotNull(retrievedEntityType);
+      assertEquals(entityTypeId.toString(), retrievedEntityType.getId());
+      assertEquals("test-custom-entity", retrievedEntityType.getName());
+      assertEquals("Test Custom Entity", retrievedEntityType.getLabelAlias());
+      assertEquals(false, retrievedEntityType.getPrivate());
+
+      // 3. Update the entity type
+      CustomEntityType updatedEntityType = new CustomEntityType()
+        .id(entityTypeId.toString())
+        .name("updated-custom-entity")
+        .labelAlias("Updated Custom Entity")
+        ._private(true)
+        .sources(Collections.emptyList())
+        .columns(Collections.emptyList());
+
+      repo.updateCustomEntityType(updatedEntityType);
+
+      // 4. Retrieve and verify the update
+      CustomEntityType retrievedUpdatedType = repo.getCustomEntityType(entityTypeId);
+
+      assertNotNull(retrievedUpdatedType);
+      assertEquals(entityTypeId.toString(), retrievedUpdatedType.getId());
+      assertEquals("updated-custom-entity", retrievedUpdatedType.getName());
+      assertEquals("Updated Custom Entity", retrievedUpdatedType.getLabelAlias());
+      assertEquals(true, retrievedUpdatedType.getPrivate());
+
+      // 5. Delete the entity type
+      repo.deleteEntityType(entityTypeId);
+
+      // 6. Verify it's gone
+      CustomEntityType retrievedAfterDelete = repo.getCustomEntityType(entityTypeId);
+      assertNull(retrievedAfterDelete);
+
+    } finally {
+      // Clean up in case a test step fails
+      try {
+        repo.deleteEntityType(entityTypeId);
+      } catch (Exception e) {
+        // Ignore exceptions during cleanup
+      }
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void createCustomEntityType_shouldHandleInvalidJson() {
+    // Since we can't easily create an unserializable object directly,
+    // we'll test the exception path by mocking ObjectMapper only for this test
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .name("test-invalid-entity");
+
+    when(objectMapper.writeValueAsString(any(CustomEntityType.class)))
+      .thenThrow(new JsonParseException("Test JSON processing failure"));
+
+    // This should throw an InvalidEntityTypeDefinitionException
+    assertThrows(InvalidEntityTypeDefinitionException.class, () ->
+      repo.createCustomEntityType(customEntityType));
+  }
+
+  @Test
+  @SneakyThrows
+  void updateCustomEntityType_shouldHandleInvalidJson() {
+    // Similar approach as above but for updating
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .name("test-invalid-update-entity");
+
+    // First create a valid entity
+    repo.createCustomEntityType(customEntityType);
+
+    // Use a spy on our actual ObjectMapper to cause a JsonProcessingException
+    when(objectMapper.writeValueAsString(any(CustomEntityType.class)))
+      .thenThrow(new JsonParseException("Test JSON processing failure"));
+
+    // This should throw an InvalidEntityTypeDefinitionException
+    assertThrows(InvalidEntityTypeDefinitionException.class, () ->
+      repo.updateCustomEntityType(customEntityType));
+  }
+
 }

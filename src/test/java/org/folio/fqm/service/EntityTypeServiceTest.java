@@ -4,21 +4,26 @@ import feign.FeignException;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
-import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
@@ -26,14 +31,9 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceTest {
@@ -69,6 +69,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private FolioExecutionContext executionContext;
+
+  @Spy
+  private ClockService clockService;
 
   @InjectMocks
   private EntityTypeService entityTypeService;
@@ -705,4 +708,242 @@ class EntityTypeServiceTest {
     // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
     assertEquals(List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("central").label("central")), actualColumnValues);
   }
+
+  @Test
+  void shouldGetCustomEntityTypeForValidId() {
+    UUID customEntityTypeId = UUID.randomUUID();
+    CustomEntityType expectedCustomEntityType = new CustomEntityType().id(customEntityTypeId.toString()).shared(false);
+
+    when(repo.getCustomEntityType(customEntityTypeId)).thenReturn(expectedCustomEntityType);
+
+    CustomEntityType result = entityTypeService.getCustomEntityType(customEntityTypeId);
+
+    assertEquals(expectedCustomEntityType, result, "Should return the expected custom entity type");
+    verify(repo, times(1)).getCustomEntityType(customEntityTypeId);
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomEntityTypeNotFound() {
+    UUID customEntityTypeId = UUID.randomUUID();
+
+    when(repo.getCustomEntityType(customEntityTypeId)).thenReturn(null);
+
+    assertThrows(EntityTypeNotFoundException.class,
+      () -> entityTypeService.getCustomEntityType(customEntityTypeId),
+      "Should throw exception when custom entity type is not found");
+
+    verify(repo, times(1)).getCustomEntityType(customEntityTypeId);
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void shouldCreateCustomEntityType() {
+    UUID customEntityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date now = new Date();
+    CustomEntityType inputCustomEntityType = new CustomEntityType().id(customEntityTypeId.toString()).shared(false);
+    CustomEntityType expectedCustomEntityType = inputCustomEntityType.toBuilder()
+      .createdAt(now)
+      .updatedAt(now)
+      .owner(ownerId)
+      ._private(false)
+      .idView(null)
+      .build();
+
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    when(clockService.now()).thenReturn(now);
+
+    var actual = entityTypeService.createCustomEntityType(inputCustomEntityType);
+
+    verify(repo, times(1)).createCustomEntityType(refEq(expectedCustomEntityType, "createdAt", "updatedAt"));
+    verifyNoMoreInteractions(repo);
+    assertEquals(expectedCustomEntityType, actual, "Should return the expected custom entity type");
+  }
+
+  @Test
+  void updateCustomEntityType_shouldUpdateEntityTypeSuccessfully() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(clockService.now()).thenReturn(updatedDate);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    assertEquals("Updated name", result.getName());
+    verify(repo).updateCustomEntityType(result);
+  }
+
+  @Test
+  void updateCustomEntityType_shouldThrowNotFoundException_whenEntityTypeDoesNotExist() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Test Entity", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
+
+    // Act & Assert
+    assertThrows(EntityTypeNotFoundException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldThrowOwnershipException_whenNonOwnerModifiesPrivateEntityType() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID differentUserId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(differentUserId); // Different user ID
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeOwnershipException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldAllowUpdate_whenEntityTypeIsShared() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(clockService.now()).thenReturn(updatedDate);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    verify(repo).updateCustomEntityType(result);
+  }
+
+  @Test
+  void updateCustomEntityType_shouldValidateCustomEntityType() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID differentEntityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, differentEntityTypeId.toString(), "Test Entity", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    // Act & Assert
+    assertThrows(InvalidEntityTypeDefinitionException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).getCustomEntityType(any());
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldUpdateTimestamp() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date originalDate = new Date(System.currentTimeMillis() - 10000); // 10 seconds ago
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .updatedAt(originalDate);
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .updatedAt(originalDate); // This should be overwritten
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    when(clockService.now()).thenReturn(updatedDate);
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    verify(repo).updateCustomEntityType(argThat(entity ->
+      entity.getUpdatedAt().equals(updatedDate) && !entity.getUpdatedAt().equals(originalDate)));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldDeleteEntityTypeSuccessfully() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+
+    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, times(1)).deleteEntityType(entityTypeId);
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowNotFoundException_whenEntityTypeDoesNotExist() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
+
+    assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, never()).deleteEntityType(any());
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowOwnershipException_whenDeletedByNonOwner() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID differentUserId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(differentUserId);
+
+    assertThrows(CustomEntityTypeOwnershipException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, never()).deleteEntityType(any());
+  }
+
+
 }

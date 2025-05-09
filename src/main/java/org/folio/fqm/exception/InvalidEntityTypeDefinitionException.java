@@ -5,17 +5,19 @@ import org.folio.fqm.domain.dto.Parameter;
 import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.http.HttpStatus;
 
-public class InvalidEntityTypeDefinitionException extends FqmException {
-  private final EntityType entityType;
+import java.util.UUID;
 
-  public InvalidEntityTypeDefinitionException(String message, Throwable cause, EntityType entityType) {
-    super(message, cause);
-    this.entityType = entityType;
+public class InvalidEntityTypeDefinitionException extends FqmException {
+  private final String entityTypeId;
+
+  public InvalidEntityTypeDefinitionException(String message, UUID entityTypeId) {
+    super(message);
+    this.entityTypeId = entityTypeId.toString();
   }
 
   public InvalidEntityTypeDefinitionException(String message, EntityType entityType) {
     super(message);
-    this.entityType = entityType;
+    this.entityTypeId = entityType.getId();
   }
 
   @Override
@@ -25,7 +27,7 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityType.getId()));
+    return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityTypeId));
   }
 
 }

@@ -1,6 +1,9 @@
 package org.folio.fqm.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -8,7 +11,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
@@ -16,10 +23,12 @@ import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
@@ -35,6 +44,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class EntityTypeControllerTest {
 
   private static final String GET_DEFINITION_URL = "/entity-types/{entity-type-id}";
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
   private MockMvc mockMvc;
@@ -288,6 +298,97 @@ class EntityTypeControllerTest {
     when(entityTypeService.getFieldValues(entityTypeId, columnName, null))
       .thenThrow(new EntityTypeNotFoundException(entityTypeId));
     mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldReturnCustomEntityTypeWithValidRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .updatedAt(Date.from(Instant.now()));
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .get("/entity-types/custom/{id}", entityTypeId)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01");
+    when(entityTypeService.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    var result = mockMvc.perform(requestBuilder)
+      .andExpect(status().is2xxSuccessful())
+      .andReturn();
+    CustomEntityType actual = objectMapper.readValue(result.getResponse().getContentAsString(), CustomEntityType.class);
+    assertEquals(customEntityType, actual);
+  }
+
+  @Test
+  void shouldCreateCustomEntityTypeWithValidRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
+      .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .post("/entity-types/custom")
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(customEntityType));
+    when(entityTypeService.createCustomEntityType(customEntityType)).thenReturn(customEntityType.toBuilder().createdAt(Date.from(Instant.now())).updatedAt(Date.from(Instant.now())).build());
+    var result = mockMvc.perform(requestBuilder)
+      .andExpect(status().isCreated())
+      .andReturn();
+    CustomEntityType actual = objectMapper.readValue(result.getResponse().getContentAsString(), CustomEntityType.class);
+    // Everything except the update timestamp should be the same
+    assertThat(actual).usingRecursiveComparison()
+      .ignoringFields("createdAt", "updatedAt").isEqualTo(customEntityType);
+    assertNotEquals(actual.getUpdatedAt(), customEntityType.getUpdatedAt());
+    assertNotEquals(actual.getCreatedAt(), customEntityType.getCreatedAt());
+  }
+
+  @Test
+  void shouldUpdateCustomEntityTypeWithValidRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
+      .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .put("/entity-types/custom/" + entityTypeId)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(customEntityType));
+    when(entityTypeService.updateCustomEntityType(entityTypeId, customEntityType)).thenReturn(customEntityType.toBuilder().updatedAt(Date.from(Instant.now())).build());
+    var result = mockMvc.perform(requestBuilder)
+      .andExpect(status().is2xxSuccessful())
+      .andReturn();
+    CustomEntityType actual = objectMapper.readValue(result.getResponse().getContentAsString(), CustomEntityType.class);
+    // Everything except the update timestamp should be the same
+    assertThat(actual).usingRecursiveComparison()
+      .ignoringFields("updatedAt").isEqualTo(customEntityType);
+    assertNotEquals(actual.getUpdatedAt(), customEntityType.getUpdatedAt());
+  }
+
+  @Test
+  void shouldDeleteCustomEntityTypeWithValidRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
+      .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .delete("/entity-types/custom/" + entityTypeId)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(objectMapper.writeValueAsString(customEntityType));
+    mockMvc.perform(requestBuilder)
+      .andExpect(status().is2xxSuccessful());
   }
 
   private static EntityType getEntityType(EntityTypeColumn col) {

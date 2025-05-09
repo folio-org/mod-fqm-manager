@@ -8,11 +8,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.StringType;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -292,6 +294,54 @@ public class EntityTypeRepository {
       updatedList.add(updatedColumn);
     }
     return updatedList;
+  }
+
+  public CustomEntityType getCustomEntityType(UUID entityTypeId) {
+    var definition = field(DEFINITION_FIELD_NAME, String.class);
+    String rawCustomEntityType = jooqContext
+      .select(definition)
+      .from(table(TABLE_NAME))
+      .where(field(ID_FIELD_NAME, UUID.class).eq(entityTypeId))
+      .fetchOne(definition, String.class);
+    if (rawCustomEntityType == null) {
+      return null;
+    }
+    try {
+      return objectMapper.readValue(rawCustomEntityType, CustomEntityType.class);
+    } catch (JsonProcessingException e) {
+      throw new InvalidEntityTypeDefinitionException(e.getMessage(), entityTypeId);
+    }
+  }
+
+  public void createCustomEntityType(CustomEntityType customEntityType) {
+    try {
+      jooqContext
+        .insertInto(table(TABLE_NAME))
+        .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class))
+        .values(UUID.fromString(customEntityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
+        .execute();
+    } catch (JsonProcessingException e) {
+      throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
+    }
+  }
+
+  public void updateCustomEntityType(CustomEntityType customEntityType) {
+    try {
+      jooqContext
+        .update(table(TABLE_NAME))
+        .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
+        .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(customEntityType.getId())))
+        .execute();
+    } catch (JsonProcessingException e) {
+      throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
+    }
+  }
+
+  public void deleteEntityType(UUID entityTypeId) {
+    log.info("Deleting entity type with ID: {}", entityTypeId);
+    jooqContext.deleteFrom(table(TABLE_NAME))
+      .where(field(ID_FIELD_NAME, UUID.class).eq(entityTypeId))
+      .execute();
   }
 
   @SneakyThrows

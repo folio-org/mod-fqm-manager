@@ -77,8 +77,10 @@ public class FqlToSqlConverterService {
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String STRING_UUID_TYPE = "stringUUIDType";
   private static final String OPEN_UUID_TYPE = "openUUIDType";
+  private static final String ARRAY_TYPE = "arrayType";
   private static final String JSONB_ARRAY_TYPE = "jsonbArrayType";
   private static final String DATE_TYPE = "dateType";
+  private static final int INLINE_STRING_CHARACTER_LIMIT = 32;
   public static final String ALL_NULLS = """
     true = ALL(
       SELECT(
@@ -129,9 +131,11 @@ public class FqlToSqlConverterService {
         case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
         case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
         case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
-        case "NotContainsAllCondition" -> handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
+        case "NotContainsAllCondition" ->
+          handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
         case "ContainsAnyCondition" -> handleContainsAny((ContainsAnyCondition) fqlCondition, entityType, field);
-        case "NotContainsAnyCondition" -> handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
+        case "NotContainsAnyCondition" ->
+          handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
         case "StartsWithCondition" -> handleStartsWith((StartsWithCondition) fqlCondition, entityType, field);
         case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
@@ -413,7 +417,7 @@ public class FqlToSqlConverterService {
     return switch (fieldType) {
       case STRING_TYPE ->
         isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
-      case "arrayType" -> {
+      case ARRAY_TYPE -> {
         var cardinality = cardinality(cast(field, String[].class));
         if (isEmpty) {
           yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
@@ -472,9 +476,43 @@ public class FqlToSqlConverterService {
   @SuppressWarnings("unchecked")
   private static <T> org.jooq.Field<T> valueField(T value, FieldCondition<?> condition, EntityType entityType) {
     Field field = getField(condition, entityType);
+    boolean inline = shouldInlineValue(entityType, condition, value);
+
     if (field.getValueFunction() != null) {
-      return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), param("value", value));
+      if (inline) {
+        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.inline(value));
+      } else {
+        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.param("value", value));
+      }
     }
-    return val(value);
+    return inline ? DSL.inline(value) : DSL.val(value);
+  }
+
+  // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a
+  // performance benefit without much drawback.
+  private static <T> boolean shouldInlineValue(EntityType entityType, FieldCondition<?> condition, T value) {
+    var dataType = getFieldDataType(entityType, condition);
+    switch (dataType) {
+      case STRING_TYPE:
+        // inline small strings only, due to potential performance hit for large strings
+        return value != null && value.toString().length() < INLINE_STRING_CHARACTER_LIMIT;
+
+      case OPEN_UUID_TYPE,
+           RANGED_UUID_TYPE,
+           STRING_UUID_TYPE,
+           DATE_TYPE,
+           "enumType",
+           "booleanType",
+           "integerType",
+           "numberType":
+        return true;
+
+      // Don't inline arrays or objects since there is very little benefit to doing so
+      case ARRAY_TYPE,
+           JSONB_ARRAY_TYPE,
+           "objectType":
+      default:
+        return false;
+    }
   }
 }

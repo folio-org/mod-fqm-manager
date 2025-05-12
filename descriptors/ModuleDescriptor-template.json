@@ -188,6 +188,30 @@
       "visible":  true
     },
     {
+      "permissionName": "fqm.entityTypes.custom.collection.post",
+      "displayName": "FQM - Create custom entity type",
+      "description": "Create a custom entity type",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.custom.item.get",
+      "displayName": "FQM - Get custom entity type",
+      "description": "Get a custom entity type definition",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.custom.item.put",
+      "displayName": "FQM - Update custom entity type",
+      "description": "Update a custom entity type definition",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.custom.item.delete",
+      "displayName": "FQM - Delete custom entity type",
+      "description": "Delete a custom entity type definition",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.query.async.post",
       "displayName": "FQM - Submit query asynchronously",
       "description": "Submit a query asynchronously",

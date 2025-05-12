@@ -1,392 +1,66 @@
 {
   id: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf',
   name: 'composite_po_instance',
-  private: true,
+  private: false,
+  requiredPermissions: [
+    // This inherited from simple_config_data, but is also included here because of the added columns here that also retrieve config data
+    'configuration.entries.collection.get',
+  ],
   sources: [
     {
-      type: 'db',
       alias: 'pol',
-      target: 'src_purchase_order_line',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10
     },
     {
-      type: 'db',
       alias: 'purchase_order',
-      target: 'src_purchase_order',
-      join: {
-        type: 'RIGHT JOIN',
-        joinTo: 'pol',
-        condition: ":this.id = (:that.jsonb ->> 'purchaseOrderId')::uuid",
-      },
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'pol.purchase_order_id',
+      essentialOnly: true,
+      order: 30,
     },
+    //    {
+    //      alias: 'location',
+    //      type: 'entity-type',
+    //      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+    //      essentialOnly: true,
+    //      join: {
+    //        type: 'LEFT JOIN',
+    //        joinTo: 'pol.pol',
+    //        condition: "jsonb_extract_path_text(:that.jsonb, 'locations', 'locationId')::uuid = :this.id",
+    //      },
+    //    },
     {
-      type: 'db',
-      alias: 'location',
-      target: 'src_inventory_location',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'locations', 'locationId')::uuid = :this.id",
-      },
-    },
-    {
-      type: 'db',
-      alias: 'holdings',
-      target: 'src_inventory_holdings_record',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'locations', 'holdingId')::uuid = :this.id",
-      },
-    },
-    {
-      type: 'db',
       alias: 'instance',
-      target: 'src_inventory_instance',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol',
-        condition: "(:that.jsonb ->> 'instanceId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetField: 'id',
+      sourceField: 'pol.instance_id',
+      essentialOnly: true,
+      order: 20
     },
     {
-      type: 'db',
-      alias: 'holdings_permanent_location',
-      target: 'src_inventory_location',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'holdings',
-        condition: "(:that.jsonb ->> 'permanentLocationId')::uuid = :this.id",
-      },
-    },
-    {
-      type: 'db',
-      alias: 'bill_to',
-      target: 'src_configuration_config_data',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'billTo')::uuid = :this.id",
-      },
-    },
-    {
-      type: 'db',
-      alias: 'ship_to',
-      target: 'src_configuration_config_data',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'shipTo')::uuid = :this.id",
-      },
-    },
-    {
-      type: 'db',
       alias: 'created_by_user',
-      target: 'src_users_users',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'purchase_order',
-        condition: "jsonb_extract_path_text(:that.jsonb, 'metadata', 'createdByUserId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'purchase_order.created_by',
+      essentialOnly: true,
+      order: 40
     },
     {
-      type: 'db',
       alias: 'organization',
-      target: 'src_organizations',
-      join: {
-        type: 'left join',
-        joinTo: 'purchase_order',
-        condition: "(:that.jsonb ->> 'vendor')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'purchase_order.vendor',
+      essentialOnly: true,
+      order: 50
     },
-  ],
-  columns: [
-    {
-      name: 'purchase_order_id',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: true,
-      valueGetter: ':sourceAlias.id',
-    },
-    {
-      name: 'pol_id',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: true,
-      valueGetter: ':sourceAlias.id',
-    },
-    {
-      name: 'pol_po_line_number',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'poLineNumber'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'poLineNumber'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'purchase_order_po_number',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'poNumber'",
-    },
-    {
-      name: 'created_by_user_username',
-      sourceAlias: 'created_by_user',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'username'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_users.f_unaccent (:sourceAlias.jsonb->>'username'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_users.f_unaccent (:value))',
-    },
-    {
-      name: 'purchase_order_manual_po',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'booleanType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'manualPo'",
-      values: [
-        {
-          label: 'True',
-          value: 'true',
-        },
-        {
-          label: 'False',
-          value: 'false',
-        },
-      ],
-    },
-    {
-      name: 'purchase_order_created_date',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'dateType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
-    },
-    {
-      name: 'purchase_order_workflow_status',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'workflowStatus'",
-      values: [
-        {
-          label: 'Pending',
-          value: 'Pending',
-        },
-        {
-          label: 'Open',
-          value: 'Open',
-        },
-        {
-          label: 'Closed',
-          value: 'Closed',
-        },
-      ],
-    },
-    {
-      name: 'purchase_order_approved',
-      sourceAlias: 'purchase_order',
-      dataType: {
-        dataType: 'booleanType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'approved'",
-      values: [
-        {
-          label: 'True',
-          value: 'true',
-        },
-        {
-          label: 'False',
-          value: 'false',
-        },
-      ],
-    },
-    {
-      name: 'pol_rush',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'booleanType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'rush'",
-      values: [
-        {
-          label: 'True',
-          value: 'true',
-        },
-        {
-          label: 'False',
-          value: 'false',
-        },
-      ],
-    },
-    {
-      name: 'holdings_id',
-      sourceAlias: 'holdings',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ':sourceAlias.id',
-    },
-    {
-      name: 'pol_publisher',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'publisher'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'publisher'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'pol_publication_date',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'publicationDate'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'publicationDate'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'instance_id',
-      sourceAlias: 'instance',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      valueGetter: ':sourceAlias.id',
-    },
-    {
-      name: 'instance_hrid',
-      sourceAlias: 'instance',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'hrid'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'hrid'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'pol_selector',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'selector'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'selector'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'pol_requester',
-      sourceAlias: 'pol',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'requester'",
-      filterValueGetter: "lower(\
-        fs09000000_mod_orders_storage.f_unaccent (:sourceAlias.jsonb->>'requester'::text)\
-      )",
-      valueFunction: 'lower(fs09000000_mod_orders_storage.f_unaccent (:value))',
-    },
-    {
-      name: 'instance_title',
-      sourceAlias: 'instance',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'title'",
-      filterValueGetter: '"left" (\
-        lower(\
-          fs09000000_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>\'title\'::text)\
-        ),\
-        600\
-      )',
-      valueFunction: '"left" (\
-        lower(fs09000000_mod_inventory_storage.f_unaccent (:value)),\
-        600\
-      )',
-    },
-    {
-      name: 'bill_to_name',
-      sourceAlias: 'bill_to',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: "json_extract_path_text((:sourceAlias.jsonb->>'value')::json, 'name')",
-    },
-    {
-      name: 'ship_to_name',
-      sourceAlias: 'ship_to',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: "json_extract_path_text((:sourceAlias.jsonb->>'value')::json, 'name')",
-    },
-    {
-      name: 'organization_code',
-      sourceAlias: 'organization',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'code'",
-    }
   ],
 }

@@ -9,6 +9,9 @@ import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Locale;
+
 /**
  * Small wrapper class for {@link TranslationService TranslationService} to provide reusable templates for translations,
  * particularly for entity type definitions.
@@ -29,7 +32,7 @@ public class LocalizationService {
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
   private static final String ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s._custom_field_possessive";
-  
+
   // provides locale-specific way of joining `Source name — Field name`, to account for different separators or RTL
   // see MODFQMMGR-409 for more details
   private static final String ENTITY_TYPE_SOURCE_PREFIX_JOINER = "mod-fqm-manager.entityType._sourceLabelJoiner";
@@ -42,42 +45,54 @@ public class LocalizationService {
 
   private TranslationService translationService;
 
+  public List<Locale> getCurrentLocales() {
+    return translationService.getCurrentLocales();
+  }
+
   public EntityType localizeEntityType(EntityType entityType) {
     entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
 
-    entityType.getColumns().forEach(column -> localizeEntityTypeColumn(entityType, column));
+    var localizedColumns = entityType.getColumns().stream()
+      .map(column -> localizeEntityTypeColumn(entityType, column))
+      .toList();
 
-    return entityType;
+    return entityType.columns(localizedColumns);
   }
 
-  void localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
-    if (column.getLabelAlias() == null) {
+  public EntityTypeColumn localizeEntityTypeColumn(EntityType entityType, EntityTypeColumn column) {
+    var newColumn = column.toBuilder().build();
+    if (newColumn.getLabelAlias() == null) {
       // Custom field names are already localized as they are user-defined, so they require special handling
-      if (Boolean.TRUE.equals(column.getIsCustomField())) {
-        column.setLabelAlias(getEntityTypeCustomFieldLabel(entityType.getName(), column.getName()));
-        return;
+      if (Boolean.TRUE.equals(newColumn.getIsCustomField())) {
+        newColumn.setLabelAlias(getEntityTypeCustomFieldLabel(entityType.getName(), newColumn.getName()));
+        return newColumn;
       }
 
-      column.setLabelAlias(getEntityTypeColumnLabel(entityType.getName(), column.getName()));
-      if (column.getDataType() instanceof ObjectType objectColumn) {
-        localizeObjectColumn(entityType, column, objectColumn);
-      } else if (column.getDataType() instanceof ArrayType arrayColumn) {
-        localizeArrayColumn(entityType, column, arrayColumn);
+      newColumn.setLabelAlias(getEntityTypeColumnLabel(entityType.getName(), newColumn.getName()));
+      if (newColumn.getDataType() instanceof ObjectType objectColumn) {
+        localizeObjectColumn(entityType, newColumn, objectColumn);
+      } else if (newColumn.getDataType() instanceof ArrayType arrayColumn) {
+        localizeArrayColumn(entityType, newColumn, arrayColumn);
       }
     } else {
       // column has been previously translated, so just append source translations to it
-      String sourceTranslation = getTranslationWithSourcePrefix(entityType, column.getName(), column.getLabelAlias());
-      column.setLabelAlias(sourceTranslation);
+      String sourceTranslation = getTranslationWithSourcePrefix(entityType, newColumn.getName(), newColumn.getLabelAlias());
+      newColumn.setLabelAlias(sourceTranslation);
     }
+    return newColumn;
+  }
+
+  String localizeSourceLabel(EntityType entityType, String sourceAlias) {
+    return translationService.format(
+      ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), sourceAlias)
+    );
   }
 
   private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {
     int currentSourceIndex = columnName.indexOf(".");
     if (currentSourceIndex > 0) {
       String currentSource = columnName.substring(0, currentSourceIndex);
-      String sourceLabel = translationService.format(
-        ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), currentSource)
-      );
+      String sourceLabel = localizeSourceLabel(entityType, currentSource);
 
       return translationService.format(
         ENTITY_TYPE_SOURCE_PREFIX_JOINER,

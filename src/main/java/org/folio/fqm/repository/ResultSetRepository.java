@@ -14,6 +14,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 
@@ -57,7 +58,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
     SelectConditionStep<Record> query = null;
@@ -66,8 +67,13 @@ public class ResultSetRepository {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
       var currentWhereClause = buildWhereClause(entityTypeDefinition, ids, idColumnNames, idColumnValueGetters);
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
@@ -111,7 +117,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(null, entityTypeId);
+    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(baseEntityType);
     var sortCriteria = EntityTypeUtils.getSortFields(baseEntityType, true);
     Condition afterIdCondition;
@@ -130,7 +136,7 @@ public class ResultSetRepository {
       // Below is a very hackish way to get around valueGetter issues in FqlToSqlConverterServiceIT
       // (due to the fact the that integration test does not select from an actual table, and instead creates a subquery
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
-      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : null;
+      String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
       log.debug("idColumnValueGetters: {}", idColumnValueGetters);
@@ -141,7 +147,13 @@ public class ResultSetRepository {
         }
       }
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
-      var currentFromClause = entityTypeFlatteningService.getJoinClause(entityTypeDefinition, tenantId);
+
+      // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
+      // the entity type with all columns preserved to build the from clause. However, we do not want to only
+      // use this version, though, as we want to ensure excluded columns are not used in queries. so we need both.
+      EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
+      String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
+
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
           .from(currentFromClause)
@@ -181,7 +193,7 @@ public class ResultSetRepository {
   }
 
   private EntityType getEntityType(String tenantId, UUID entityTypeId) {
-    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId);
+    return entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
   }
 
   private List<Map<String, Object>> recordToMap(EntityType entityType, Result<Record> result) {
@@ -242,15 +254,23 @@ public class ResultSetRepository {
         .map(EntityDataType::getDataType)
         .findFirst()
         .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), idColumnName));
+      Condition idFilterCondition;
       if (columnDataType.equals("rangedUUIDType") || columnDataType.equals("openUUIDType")) {
         List<UUID> idColumnValuesAsUUIDs = idColumnValues
           .stream()
           .map(val -> val != null ? UUID.fromString(val) : null)
           .toList();
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValuesAsUUIDs));
+        idFilterCondition = field(idColumnValueGetter).in(idColumnValuesAsUUIDs);
+        if (idColumnValuesAsUUIDs.contains(null)) {
+          idFilterCondition = idFilterCondition.or(field(idColumnValueGetter).isNull());
+        }
       } else {
-        whereClause = whereClause.and(field(idColumnValueGetter).in(idColumnValues));
+        idFilterCondition = field(idColumnValueGetter).in(idColumnValues);
+        if (idColumnValues.contains(null)) {
+          idFilterCondition = idFilterCondition.or(field(idColumnValueGetter).isNull());
+        }
       }
+      whereClause = whereClause.and(idFilterCondition);
     }
 
     return whereClause;

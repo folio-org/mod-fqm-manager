@@ -7,42 +7,33 @@
     {
       alias: 'instance',
       type: 'entity-type',
-      id: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
     },
     {
       alias: 'inst_stat',
       type: 'entity-type',
-      id: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
+      targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
+      targetField: 'id',
+      sourceField: 'instance.status_id',
       // essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'instance.inst',
-        condition: ":this.id = (:that.jsonb ->> 'statusId')::uuid",
-      },
     },
     {
       alias: 'instance_type',
       type: 'entity-type',
-      id: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
+      targetId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
+      targetField: 'id',
+      sourceField: 'instance.instance_type_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'instance.inst',
-        condition: ':this.id = :that.instanceTypeId',
-      },
     },
     {
       alias: 'date_type',
       type: 'entity-type',
-      id: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
+      targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
+      targetField: 'id',
+      sourceField: 'instance.instance_date_type_id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'instance.inst',
-        condition: ":this.id = ((:that.jsonb -> 'dates') ->> 'dateTypeId')::uuid",
-      },
     },
   ],
   defaultSort: [

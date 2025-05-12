@@ -1,0 +1,84 @@
+{
+  id: '98f13395-6790-42e7-b392-045b4e2770ec',
+  name: 'composite_transaction',
+  private: false,
+  sources: [
+    {
+      alias: 'transaction',
+      type: 'entity-type',
+      targetId: 'f73e67e8-ee2d-41e1-978a-3de7b961bac0', // simple_transaction
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'to_fund',
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'transaction.to_fund_id',
+      order: 20,
+    },
+    {
+      alias: 'from_fund',
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'transaction.from_fund_id',
+      order: 30,
+    },
+    {
+      alias: 'fiscal_year',
+      type: 'entity-type',
+      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+      essentialOnly: true,
+      sourceField: 'transaction.fiscal_year_id',
+      targetField: 'id',
+      order: 40,
+    },
+//    {
+//      alias: 'source_fiscal_year',
+//      type: 'entity-type',
+//      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+//      essentialOnly: true,
+//      sourceField: 'transaction.source_fiscal_year_id',
+//      targetField: 'id',
+//      order: 50,
+//    },
+//    {
+//      alias: 'expense_class',
+//      type: 'entity-type',
+//      targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+//      essentialOnly: true,
+//      sourceField: 'transaction.expense_class_id',
+//      targetField: 'id',
+//      order: 60,
+//    },
+//    {
+//      alias: 'source_invoice',
+//      type: 'entity-type',
+//      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+//      essentialOnly: true,
+//      sourceField: 'transaction.source_invoice_id',
+//      targetField: 'id',
+//      order: 70,
+//    },
+//    {
+//      alias: 'source_invoice_line',
+//      type: 'entity-type',
+//      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+//      essentialOnly: true,
+//      sourceField: 'transaction.source_invoice_line_id',
+//      targetField: 'id',
+//      order: 80,
+//    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"transaction.transaction".id',
+      direction: 'ASC',
+    },
+  ],
+}

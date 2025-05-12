@@ -14,7 +14,7 @@ public class TestcontainerBeanFactoryPostProcessor implements BeanFactoryPostPro
   private static final int POSTGRES_PORT = 5432;
 
   @Container
-  public static PostgreSQLContainer<?> dbContainer = new PostgreSQLContainer<>("postgres:12-alpine");
+  public static PostgreSQLContainer<?> dbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {

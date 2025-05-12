@@ -1,64 +1,41 @@
-// Corresponds to MCR114
 {
   id: '2028a343-5603-4e86-99d5-c7de322c1709',
   name: 'composite_invoice__voucher_line__organization',
   private: true,
   sources: [
     {
-      id: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab',
-      type: 'entity-type',
       alias: 'voucher_line__fund_distribution',
+      type: 'entity-type',
+      targetId: 'b4c76df5-d730-4ede-8a98-ab04c5e222ab', // composite_voucher_line__fund_distribution
       useIdColumns: true,
     },
     {
-      id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
-      type: 'entity-type',
       alias: 'voucher',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher_line__fund_distribution.voucher_line',
-        condition: "(:that.jsonb ->> 'voucherId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+      targetField: 'id',
+      sourceField: 'voucher_line__fund_distribution.voucher_line.voucher_id',
     },
     {
-      id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
-      type: 'entity-type',
       alias: 'invoice',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher',
-        condition: "(:that.jsonb ->> 'invoiceId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      targetField: 'id',
+      sourceField: 'voucher.invoice_id',
     },
     {
-      id: '1373f063-8b86-48cc-832d-68b4d0dd44fc',
-      type: 'entity-type',
       alias: 'invoice_line',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'voucher_line__fund_distribution.fund_distribution',
-        condition: "(:that.jsonb ->> 'invoiceLineId')::uuid = :this.id",
-      },
+      type: 'entity-type',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetField: 'id',
+      sourceField: 'voucher_line__fund_distribution.invoice_line_id',
     },
     {
-      id: '58148257-bfb0-4687-8c42-d2833d772f3e',
-      type: 'entity-type',
-      alias: 'pol',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'invoice_line',
-        condition: ":this.id = (:that.jsonb ->> 'poLineId')::uuid",
-      },
-    },
-    {
-      id: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf',
-      type: 'entity-type',
       alias: 'po_instance',
-      join: {
-        type: 'LEFT JOIN',
-        joinTo: 'pol',
-        condition: ":this.jsonb ->> 'poLineNumber' = :that.jsonb ->> 'poLineNumber'",
-      },
+      type: 'entity-type',
+      targetId: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf', // composite_po_instance
+      targetField: 'pol.id',
+      sourceField: 'invoice_line.po_line_id',
     },
   ],
   defaultSort: [

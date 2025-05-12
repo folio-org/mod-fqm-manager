@@ -47,9 +47,9 @@ class PermissionsRegularServiceTest {
 
 
   private EntityType getTestEntityType() {
-    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true, false)
+    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true)
       .sources(List.of(new EntityTypeSource("db", "source_alias")));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(null))).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(TENANT_ID), eq(false))).thenReturn(entityType);
     return entityType;
   }
 

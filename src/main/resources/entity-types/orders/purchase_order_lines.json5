@@ -1,0 +1,114 @@
+{
+  id: 'abc777d3-2a45-43e6-82cb-71e8c96d13d2',
+  name: 'purchase_order_lines',
+  private: false,
+  sources: [
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10
+    },
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'pol.purchase_order_id',
+      essentialOnly: true,
+      order: 50
+    },
+    {
+      alias: 'po_created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
+      targetField: 'id',
+      sourceField: 'po.created_by',
+      essentialOnly: true,
+      order: 70
+    },
+    {
+      alias: 'po_updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
+      targetField: 'id',
+      sourceField: 'po.updated_by',
+      essentialOnly: true,
+      order: 80
+    },
+    {
+      alias: 'pol_created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
+      targetField: 'id',
+      sourceField: 'pol.created_by',
+      essentialOnly: true,
+      order: 20
+    },
+    {
+      alias: 'pol_updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
+      targetField: 'id',
+      sourceField: 'pol.updated_by',
+      essentialOnly: true,
+      order: 30
+    },
+    {
+      alias: 'vendor_organization',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'po.vendor',
+      essentialOnly: true,
+      order: 90
+    },
+    {
+      alias: 'assigned_to_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user_details,
+      targetField: 'id',
+      sourceField: 'po.assigned_to',
+      essentialOnly: true,
+      order: 60
+    },
+    {
+      alias: 'rates',
+      type: 'entity-type',
+      targetId: '770a383e-c6cb-412b-abc3-6fa3c8a8795c', // simple_exchange_rate
+      targetField: 'currency',
+      sourceField: 'pol.cost_currency',
+      order: 40
+    },
+  ],
+  requiredPermissions: [
+    // Technically, these 2 permissions get inherited from the exchange rate source, but since the table is used directly here, too, the permissions are included here
+    // If we can remove the explicit reference to the currency_exchange_rates table, then we can remove these from this entity type and just inherit them
+    'finance.exchange-rate.item.get',
+    'configuration.entries.collection.get', // This isn't directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
+  ],
+  columns: [
+    {
+      name: 'pol_exchange_rate',
+      sourceAlias: 'pol.pol',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "CASE WHEN (:sourceAlias.jsonb -> 'cost' ->> 'exchangeRate') IS NOT NULL \
+        THEN (:sourceAlias.jsonb -> 'cost' -> 'exchangeRate')::float \
+        ELSE (select exchange_rate from currency_exchange_rates where currency_exchange_rates.currency = :sourceAlias.jsonb -> 'cost' ->> 'currency') \
+      END",
+      valueFunction: '(:value)::float',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"pol.pol".id',
+      direction: 'ASC',
+    },
+  ],
+}

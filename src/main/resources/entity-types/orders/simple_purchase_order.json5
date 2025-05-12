@@ -1,8 +1,10 @@
 {
   id: '48de4796-11a2-44e9-abb7-01e84af87234',
   name: 'simple_purchase_order',
-  root: true,
-  private: true,
+  private: false,
+  customFieldEntityTypeId: '48de4796-11a2-44e9-abb7-01e84af87234', // This entity type
+  sourceView: 'src_purchase_order_custom_fields',
+  sourceViewExtractor: ":po.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'po',
@@ -11,8 +13,8 @@
     },
   ],
   requiredPermissions: [
-    "orders.item.get",
-    "acquisitions-units.units.collection.get", // For API access to retrieve acq unit names
+    'orders.item.get',
+    'acquisitions-units.units.collection.get', // For API access to retrieve acq unit names
   ],
   columns: [
     {
@@ -25,7 +27,6 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      hidden: true,
       valueGetter: ':sourceAlias.id',
     },
     {
@@ -40,6 +41,20 @@
       hidden: true,
       essential: true,
       valueGetter: ':sourceAlias.created_by',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid', // this column is actually `text`
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid', // this column is actually `text`
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'created_at',
@@ -53,7 +68,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
       filterValueGetter: "\"left\"(lower(${tenant_id}_mod_orders_storage.f_unaccent((:sourceAlias.jsonb -> 'metadata'::text) ->> 'createdDate'::text)), 600)",
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'approved',
@@ -100,6 +115,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'billTo'",
+      joinsTo: [
+        {
+          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'close_reason',
@@ -182,7 +205,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'notes') AS elems\
       )",
-      valueFunction: 'lower(:value)'
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'po_number',
@@ -264,7 +287,7 @@
         },
       ],
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'reEncumber\'::text)), 600)',
-      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)'
+      valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
     },
     {
       name: 'ship_to',
@@ -276,6 +299,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'shipTo'",
+      joinsTo: [
+        {
+          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'template',
@@ -299,6 +330,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'vendor'",
+      joinsTo: [
+        {
+          targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'workflow_status',
@@ -341,7 +380,7 @@
       essential: true,
       visibleByDefault: false,
       valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
-      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
     },
     {
       name: 'acquisition_unit',
@@ -358,16 +397,16 @@
       visibleByDefault: false,
       valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
       filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
-      valueFunction: "lower(:value)",
+      valueFunction: 'lower(:value)',
       source: {
         entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
-        columnName: 'name'
+        columnName: 'name',
       },
       valueSourceApi: {
         path: 'acquisitions-units/units',
         valueJsonPath: '$.acquisitionsUnits.*.id',
-        labelJsonPath: '$.acquisitionsUnits.*.name'
-      }
+        labelJsonPath: '$.acquisitionsUnits.*.name',
+      },
     },
     {
       name: 'next_pol_number',
@@ -431,6 +470,20 @@
       essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'assigned_to',
@@ -444,6 +497,20 @@
       essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'assignedTo'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'jsonb',
@@ -455,7 +522,7 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb::text",
-    }
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
   ],
 }

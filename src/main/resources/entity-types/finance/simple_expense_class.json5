@@ -1,0 +1,179 @@
+{
+  id: '6e11cd39-a34e-4afc-90db-957dd45d139e',
+  name: 'simple_expense_class',
+  private: true,
+  requiredPermissions: [
+    'finance.expense-classes.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    }
+  ,
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',
+      idColumnName: 'id',
+      source: {
+        entityTypeId: '6e11cd39-a34e-4afc-90db-957dd45d139e',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'finance/expense-classes',
+        valueJsonPath: '$.expenseClasses.*.id',
+        labelJsonPath: '$.expenseClasses.*.name',
+      },
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',
+      idColumnName: 'id',
+      source: {
+        entityTypeId: '6e11cd39-a34e-4afc-90db-957dd45d139e',
+        columnName: 'code',
+      },
+      valueSourceApi: {
+        path: 'finance/expense-classes',
+        valueJsonPath: '$.expenseClasses.*.id',
+        labelJsonPath: '$.expenseClasses.*.code',
+      },
+    },
+    {
+      name: 'external_account_number_ext',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNumberExt'"
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'expense_class',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'expense_class',
+      target: 'src_finance_expense_class'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

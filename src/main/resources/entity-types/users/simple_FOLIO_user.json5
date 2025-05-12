@@ -1,0 +1,154 @@
+{
+  id: 'f2615ea6-450b-425d-804d-6a495afd9308',
+  name: 'simple_FOLIO_user',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      target: 'src_users_users',
+      alias: 'user',
+    },
+  ],
+  requiredPermissions: [
+    'users.collection.get',
+    'users.item.get',
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'active',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb->>'active'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'active'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'user_created_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'user_updated_date',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'email',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->'personal'->>'email'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'email'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+    },
+    {
+      name: 'last_name_first_name',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "concat_ws(', '::text, NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'lastName', ''::text), NULLIF((:sourceAlias.jsonb -> 'personal'::text) ->> 'firstName', ''::text))",
+    },
+    {
+      name: 'username',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'username'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

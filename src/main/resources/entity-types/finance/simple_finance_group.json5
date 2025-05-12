@@ -1,0 +1,228 @@
+{
+  id: 'a01d982c-2c59-408e-8771-7ce0a07bc1a3',
+  name: 'simple_finance_group',
+  private: true,
+  requiredPermissions: [
+    "acquisitions-units.units.collection.get",
+    "finance.groups.collection.get"
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'description'"
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'f_group',
+      values: [
+        {
+          label: 'Active',
+          value: 'Active',
+        },
+        {
+          label: 'Frozen',
+          value: 'Frozen',
+        },
+        {
+          label: 'Inactive',
+          value: 'Inactive',
+        },
+      ],
+      queryable: true,
+      essential: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'status'",
+      filterValueGetter: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> \'status\'::text)), 600)',
+      valueFunction: '"left"(lower(${tenant_id}_mod_finance_storage.f_unaccent(:value)), 600)'
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      essential: true,
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))'
+    },
+    {
+      name: 'acq_unit_ids',
+      sourceAlias: 'f_group',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+    },
+    {
+      name: 'acquisition_unit',
+      sourceAlias: 'f_group',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'acq_unit_ids',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN ${tenant_id}_mod_fqm_manager.src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name'
+      }
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'"
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'"
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'f_group',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'f_group',
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'f_group',
+      target: 'src_finance_groups'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

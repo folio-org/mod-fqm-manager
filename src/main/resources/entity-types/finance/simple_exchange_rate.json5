@@ -1,0 +1,41 @@
+{
+  id: '770a383e-c6cb-412b-abc3-6fa3c8a8795c',
+  name: 'simple_exchange_rate',
+  private: true,
+  sources: [
+    {
+      alias: 'rates',
+      type: 'db',
+      target: 'currency_exchange_rates',
+    },
+  ],
+  requiredPermissions: [
+    "finance.exchange-rate.item.get",
+    "configuration.entries.collection.get", // Not directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
+  ],
+  columns: [
+    {
+      name: 'currency',
+      sourceAlias: 'rates',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.currency',
+    },
+    {
+      name: 'rate',
+      sourceAlias: 'rates',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.exchange_rate)::float",
+      valueFunction: '(:value)::float'
+    },
+  ],
+}

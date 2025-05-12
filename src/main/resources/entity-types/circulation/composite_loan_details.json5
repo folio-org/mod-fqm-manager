@@ -5,107 +5,124 @@
     {
       alias: 'loans',
       type: 'entity-type',
-      id: '00349126-c923-4045-a29f-3b6db4c6bea9',
+      targetId: '00349126-c923-4045-a29f-3b6db4c6bea9', // simple_loan
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
+      order: 10,
     },
     {
       alias: 'lpolicy',
       type: 'entity-type',
-      id: '64d7b5fb-2ead-444c-a9bd-b9db831f4132',
+      targetId: '64d7b5fb-2ead-444c-a9bd-b9db831f4132', // simple_loan_policy
+      sourceField: 'loans.loan_policy_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'loans.loan',
-        condition: "(:that.jsonb ->> 'loanPolicyId')::uuid = :this.id",
-      },
+      order: 20,
+    },
+    {
+      alias: 'item_effective_location',
+      type: 'entity-type',
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+      sourceField: 'loans.item_effective_location_id_at_check_out',
+      targetField: 'id',
+      essentialOnly: true,
+    },
+    {
+      alias: 'item_effective_library',
+      type: 'entity-type',
+      targetId: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loc_lib
+      sourceField: 'item_effective_location.library_id',
+      targetField: 'id',
+      essentialOnly: true,
     },
     {
       alias: 'cospi',
       type: 'entity-type',
-      id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point
+      sourceField: 'loans.checkout_service_point_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        condition: "(:that.jsonb ->> 'checkoutServicePointId')::uuid = :this.id",
-        type: 'left join',
-        joinTo: 'loans.loan',
-      },
+      order: 100,
     },
     {
       alias: 'cispi',
       type: 'entity-type',
-      id: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5',
+      targetId: '1fdcc2e8-1ff8-4a99-b4ad-7d6bf564aec5', // simple_service_point
+      sourceField: 'loans.checkin_service_point_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        joinTo: 'loans.loan',
-        condition: "(:that.jsonb ->> 'checkinServicePointId')::uuid = :this.id",
-        type: 'left join',
-      },
+      order: 90,
     },
     {
       alias: 'items',
       type: 'entity-type',
-      id: '372e025a-9444-473a-9ffd-fa0f63db1674',
+      targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
+      sourceField: 'loans.item_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        condition: "(:that.jsonb ->> 'itemId')::uuid = :this.id",
-        joinTo: 'loans.loan',
-        type: 'left join',
-      },
+      order: 60,
+    },
+    {
+      alias: 'item_permanent_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.permanent_loan_type_id',
+      essentialOnly: true,
+      order: 64,
+    },
+    {
+      alias: 'item_temporary_loan_type',
+      type: 'entity-type',
+      targetId: '04107b49-ad2f-47ad-879f-6737b3018027', // simple_loan_type
+      targetField: 'id',
+      sourceField: 'items.temporary_loan_type_id',
+      essentialOnly: true,
+      order: 65,
     },
     {
       alias: 'mtypes',
       type: 'entity-type',
-      id: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
+      sourceField: 'items.material_type_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'items.item',
-        condition: "(:that.jsonb ->> 'materialTypeId')::uuid = :this.id",
-      },
+      order: 50,
     },
     {
       alias: 'users',
       type: 'entity-type',
-      id: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      sourceField: 'loans.user_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'loans.loan',
-        condition: "(:that.jsonb ->> 'userId')::uuid = :this.id",
-      },
+      order: 30,
     },
     {
       alias: 'groups',
       type: 'entity-type',
-      id: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      sourceField: 'users.group_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'users.user',
-        condition: "(:that.jsonb ->> 'patronGroup')::uuid = :this.id",
-      },
+      order: 40,
     },
     {
       alias: 'holdings',
       type: 'entity-type',
-      id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+      sourceField: 'items.holdings_record_id',
+      targetField: 'id',
       essentialOnly: true,
-      join: {
-        type: 'left join',
-        joinTo: 'items.item',
-        condition: "(:that.jsonb ->> 'holdingsRecordId')::uuid = :this.id",
-      },
+      order: 80,
     },
     {
       alias: 'instance',
       type: 'entity-type',
-      id: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      join: {
-        type: 'left join',
-        joinTo: 'holdings.hrd',
-        condition: "(:that.jsonb ->> 'instanceId')::uuid = :this.id",
-      },
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+      sourceField: 'holdings.instance_id',
+      targetField: 'id',
+      order: 70,
     },
   ],
   defaultSort: [

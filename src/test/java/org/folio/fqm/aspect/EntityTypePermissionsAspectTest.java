@@ -11,6 +11,7 @@ import org.folio.fqm.service.PermissionsService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -28,6 +29,7 @@ class EntityTypePermissionsAspectTest {
   private final EntityTypeRepository entityTypeRepository = mock(EntityTypeRepository.class);
   private final QueryRepository queryRepository = mock(QueryRepository.class);
   private final PermissionsService permissionsService = mock(PermissionsService.class);
+  private final FolioExecutionContext executionContext = mock(FolioExecutionContext.class);
 
   @Test
   void testUuidsCanBeHandled() {
@@ -101,8 +103,8 @@ class EntityTypePermissionsAspectTest {
   void testMethodSignatureCanBeHandled(AspectMethodHandler methodHandler, String methodName, Function<EntityType, Object[]> paramsConverter, Class<?>... paramTypes) {
     // Create a mock ProceedingJoinPoint for a dummy method, and use it to call the aspect
     // No permission checking is performed, so we can just verify that the permission check would hav happened and that the aspect calls proceed()
-    EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService);
-    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "name", true, false);
+    EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService, executionContext);
+    EntityType entityType = new EntityType(UUID.randomUUID().toString(), "name", true);
     when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), any(String.class))).thenReturn(Optional.of(entityType));
     when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), eq(null))).thenReturn(Optional.of(entityType));
     ProceedingJoinPoint joinPoint = mockJoinPoint(this.getClass().getDeclaredMethod(methodName, paramTypes), paramsConverter.apply(entityType));

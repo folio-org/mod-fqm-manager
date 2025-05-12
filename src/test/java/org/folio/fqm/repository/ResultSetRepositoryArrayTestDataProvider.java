@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.jooq.*;
 import org.jooq.Record;
@@ -61,7 +61,7 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
     .name("TEST_ARRAY_ENTITY_TYPE")
     .fromClause("TEST_ARRAY_ENTITY_TYPE")
     .sources(List.of(
-      new EntityTypeSource()
+      new EntityTypeSourceDatabase()
         .type("db")
         .alias("source1")
         .target("target1")

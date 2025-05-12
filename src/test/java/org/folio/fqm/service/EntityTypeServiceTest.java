@@ -4,20 +4,26 @@ import feign.FeignException;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
-import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
@@ -25,17 +31,14 @@ import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceTest {
+
+  private static final String TENANT_ID = "tenant_01";
 
   @Mock
   private EntityTypeRepository repo;
@@ -64,6 +67,12 @@ class EntityTypeServiceTest {
   @Mock
   private LanguageClient languageClient;
 
+  @Mock
+  private FolioExecutionContext executionContext;
+
+  @Spy
+  private ClockService clockService;
+
   @InjectMocks
   private EntityTypeService entityTypeService;
 
@@ -80,15 +89,15 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .columns(columns);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true, true);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     List<EntityTypeColumn> expectedColumns = columns.stream()
       .sorted(nullsLast(comparing(EntityTypeColumn::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
       .toList();
 
     assertEquals(expectedColumns, result.getColumns(), "Columns should include hidden ones and be sorted");
 
-    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null);
+    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
     verifyNoMoreInteractions(entityTypeFlatteningService);
   }
 
@@ -103,12 +112,12 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", true, false)));
+      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
+      new EntityType(id2.toString(), "translation_label_02", false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
@@ -130,13 +139,13 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", true, false)));
+      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
+      new EntityType(id2.toString(), "translation_label_02", false)));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
     assertEquals(expectedSummary, actualSummary);
   }
 
@@ -148,14 +157,14 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
+      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
@@ -166,6 +175,38 @@ class EntityTypeServiceTest {
     verifyNoMoreInteractions(repo, localizationService);
   }
 
+  @Test
+  void testEntityTypeSummaryIncludesAllWhenRequested() {
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    Set<UUID> ids = Set.of(id1, id2);
+
+    List<EntityTypeSummary> expectedSummary = List.of(
+      new EntityTypeSummary().id(id1).label("label_01"),
+      new EntityTypeSummary().id(id2).label("label_02")
+    );
+
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
+      new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")), // Private entity
+      new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")) // Non-private entity
+    ));
+
+    when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2", "perm1"));
+    when(permissionsService.getRequiredPermissions(any(EntityType.class)))
+      .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
+
+    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, true);
+
+    assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
+
+    verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
+    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verifyNoMoreInteractions(repo, localizationService);
+  }
 
   @Test
   void testEntityTypeSummaryIncludesInaccessible() {
@@ -177,15 +218,15 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
 
     when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true, false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", true, false).requiredPermissions(List.of("perm2"))));
+      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
+      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
     when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
     when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
 
-    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, true);
+    List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, true, false);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
@@ -223,7 +264,7 @@ class EntityTypeServiceTest {
           Map.of("id", "value_02", valueColumnName, "label_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(expectedColumnValueLabel, actualColumnValueLabel);
@@ -247,7 +288,7 @@ class EntityTypeServiceTest {
           Map.of(valueColumnName, "value_02")
         )
       );
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues expectedColumnValues = new ColumnValues().content(
       List.of(
@@ -272,7 +313,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     String searchText = "search text";
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
     verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
@@ -289,7 +330,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
     List<String> fields = List.of("id", valueColumnName);
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
     verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
   }
@@ -307,7 +348,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(new ColumnValues().content(values), actualColumnValueLabel);
@@ -329,7 +370,7 @@ class EntityTypeServiceTest {
       .name("the entity type")
       .columns(List.of(new EntityTypeColumn().name(valueColumnName).values(values)));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
     assertEquals(new ColumnValues().content(expectedValues), actualColumnValueLabel);
@@ -339,7 +380,7 @@ class EntityTypeServiceTest {
   void shouldReturnValuesFromApi() {
     UUID entityTypeId = UUID.randomUUID();
     String valueColumnName = "column_name";
-    List<String> tenantList = List.of("tenant_01", "tenant_02");
+    List<String> tenantList = List.of(TENANT_ID, "tenant_02");
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("the entity type")
@@ -353,8 +394,8 @@ class EntityTypeServiceTest {
       ));
 
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_01"))).thenReturn("""
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenReturn("""
            {
              "what": {
                "ever": {
@@ -390,7 +431,7 @@ class EntityTypeServiceTest {
   @Test
   void shouldReturnLanguagesFromApi() {
     UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of("tenant_01");
+    List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -402,9 +443,9 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(languageClient.get("tenant_01")).thenReturn("""
+    when(languageClient.get(TENANT_ID)).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -444,9 +485,8 @@ class EntityTypeServiceTest {
 
   @Test
   void shouldReturnLocalizedLanguagesFromApi() {
-    String tenantId = "tenant_01";
     UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of(tenantId);
+    List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -458,9 +498,10 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(languageClient.get("tenant_01")).thenReturn("""
+    when(languageClient.get(TENANT_ID)).thenReturn("""
            {
              "facets": {
                "languages": {
@@ -515,7 +556,7 @@ class EntityTypeServiceTest {
   @Test
   void shouldCatchExceptionFromLanguagesApi() {
     UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of("tenant_01");
+    List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -527,9 +568,9 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(languageClient.get("tenant_01")).thenThrow(FeignException.BadRequest.class);
+    when(languageClient.get(TENANT_ID)).thenThrow(FeignException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
@@ -539,11 +580,11 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     EntityType expectedEntityType = TestDataFixture.getEntityDefinition();
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false))
       .thenReturn(expectedEntityType);
 
     EntityType actualDefinition = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualDefinition);
   }
@@ -558,12 +599,12 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .crossTenantQueriesEnabled(true);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false))
       .thenReturn(entityType);
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
     EntityType actualEntityType = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -578,12 +619,13 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .crossTenantQueriesEnabled(false);
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null))
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false))
       .thenReturn(entityType);
     when(crossTenantQueryService.isCentralTenant()).thenReturn(false);
 
     EntityType actualEntityType = entityTypeService
-      .getEntityTypeDefinition(entityTypeId, false, false);
+      .getEntityTypeDefinition(entityTypeId, false);
 
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -602,7 +644,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -630,7 +672,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
@@ -656,7 +698,7 @@ class EntityTypeServiceTest {
           .type(SourceColumn.TypeEnum.FQM))
       ));
 
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(List.of("tenant1", "central"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
@@ -666,4 +708,242 @@ class EntityTypeServiceTest {
     // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
     assertEquals(List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("central").label("central")), actualColumnValues);
   }
+
+  @Test
+  void shouldGetCustomEntityTypeForValidId() {
+    UUID customEntityTypeId = UUID.randomUUID();
+    CustomEntityType expectedCustomEntityType = new CustomEntityType().id(customEntityTypeId.toString()).shared(false);
+
+    when(repo.getCustomEntityType(customEntityTypeId)).thenReturn(expectedCustomEntityType);
+
+    CustomEntityType result = entityTypeService.getCustomEntityType(customEntityTypeId);
+
+    assertEquals(expectedCustomEntityType, result, "Should return the expected custom entity type");
+    verify(repo, times(1)).getCustomEntityType(customEntityTypeId);
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCustomEntityTypeNotFound() {
+    UUID customEntityTypeId = UUID.randomUUID();
+
+    when(repo.getCustomEntityType(customEntityTypeId)).thenReturn(null);
+
+    assertThrows(EntityTypeNotFoundException.class,
+      () -> entityTypeService.getCustomEntityType(customEntityTypeId),
+      "Should throw exception when custom entity type is not found");
+
+    verify(repo, times(1)).getCustomEntityType(customEntityTypeId);
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void shouldCreateCustomEntityType() {
+    UUID customEntityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date now = new Date();
+    CustomEntityType inputCustomEntityType = new CustomEntityType().id(customEntityTypeId.toString()).shared(false);
+    CustomEntityType expectedCustomEntityType = inputCustomEntityType.toBuilder()
+      .createdAt(now)
+      .updatedAt(now)
+      .owner(ownerId)
+      ._private(false)
+      .idView(null)
+      .build();
+
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    when(clockService.now()).thenReturn(now);
+
+    var actual = entityTypeService.createCustomEntityType(inputCustomEntityType);
+
+    verify(repo, times(1)).createCustomEntityType(refEq(expectedCustomEntityType, "createdAt", "updatedAt"));
+    verifyNoMoreInteractions(repo);
+    assertEquals(expectedCustomEntityType, actual, "Should return the expected custom entity type");
+  }
+
+  @Test
+  void updateCustomEntityType_shouldUpdateEntityTypeSuccessfully() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(clockService.now()).thenReturn(updatedDate);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    assertEquals("Updated name", result.getName());
+    verify(repo).updateCustomEntityType(result);
+  }
+
+  @Test
+  void updateCustomEntityType_shouldThrowNotFoundException_whenEntityTypeDoesNotExist() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Test Entity", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
+
+    // Act & Assert
+    assertThrows(EntityTypeNotFoundException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldThrowOwnershipException_whenNonOwnerModifiesPrivateEntityType() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID differentUserId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(differentUserId); // Different user ID
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeOwnershipException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldAllowUpdate_whenEntityTypeIsShared() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(clockService.now()).thenReturn(updatedDate);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    verify(repo).updateCustomEntityType(result);
+  }
+
+  @Test
+  void updateCustomEntityType_shouldValidateCustomEntityType() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID differentEntityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, differentEntityTypeId.toString(), "Test Entity", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+
+    // Act & Assert
+    assertThrows(InvalidEntityTypeDefinitionException.class, () ->
+      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
+
+    verify(repo, never()).getCustomEntityType(any());
+    verify(repo, never()).updateCustomEntityType(any());
+  }
+
+  @Test
+  void updateCustomEntityType_shouldUpdateTimestamp() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    Date originalDate = new Date(System.currentTimeMillis() - 10000); // 10 seconds ago
+    Date updatedDate = new Date();
+
+    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .updatedAt(originalDate);
+
+    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .updatedAt(originalDate); // This should be overwritten
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+    when(clockService.now()).thenReturn(updatedDate);
+
+    // Act
+    CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
+
+    // Assert
+    assertEquals(updatedDate, result.getUpdatedAt());
+    verify(repo).updateCustomEntityType(argThat(entity ->
+      entity.getUpdatedAt().equals(updatedDate) && !entity.getUpdatedAt().equals(originalDate)));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldDeleteEntityTypeSuccessfully() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(ownerId);
+
+    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, times(1)).deleteEntityType(entityTypeId);
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowNotFoundException_whenEntityTypeDoesNotExist() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
+
+    assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, never()).deleteEntityType(any());
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowOwnershipException_whenDeletedByNonOwner() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID differentUserId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(differentUserId);
+
+    assertThrows(CustomEntityTypeOwnershipException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, never()).deleteEntityType(any());
+  }
+
+
 }

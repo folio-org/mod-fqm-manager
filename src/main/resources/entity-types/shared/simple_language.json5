@@ -1,0 +1,23 @@
+{
+  id: 'a435d29f-ff11-4b7a-8a5f-3c5505452208',
+  name: 'simple_language',
+  private: true,
+  sources: [
+    {
+      alias: 'languages',
+      type: 'db',
+      target: 'drv_languages',
+    }
+  ],
+  columns: [
+    {
+      name: 'languages',
+      sourceAlias: 'languages',
+      dataType: {
+        dataType: 'stringType',
+      },
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.languages',
+    },
+  ],
+}

@@ -1,0 +1,247 @@
+{
+  id: '5db5fbd8-0dfa-4e87-a7fc-a3568e83effb',
+  name: 'simple_voucher_line',
+  private: true,
+  requiredPermissions: ['voucher.voucher-lines.collection.get'],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'amount')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+    },
+    {
+      name: 'source_ids',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "( SELECT array_agg(src_id.value::text) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'sourceIds'::text) src_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(src_id.value::text)) FILTER (WHERE (src_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'sourceIds'::text) src_id(value))",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'voucher_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'voucherId'",
+      joinsTo: [
+        {
+          targetId: 'e90473d9-00c3-4b84-919b-a4caa0b07450', // simple_voucher
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'external_account_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'voucher_lines',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNumber'",
+      joinsTo: [
+        {
+          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+          targetField: 'external_account_no',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'fund_distribution',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'code') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'code')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'distribution_type',
+              property: 'distributionType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              values: [
+                {
+                  label: 'percentage',
+                  value: 'percentage',
+                },
+                {
+                  label: 'amount',
+                  value: 'amount',
+                },
+              ],
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'encumbrance',
+              property: 'encumbrance',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'invoice_line_id',
+              property: 'invoiceLineId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_id',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value -> 'value') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS elems)",
+            },
+          ],
+        },
+      },
+      sourceAlias: 'voucher_lines',
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'fundDistributions'",
+    },
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'voucher_lines',
+      target: 'src_invoice_voucher_lines',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

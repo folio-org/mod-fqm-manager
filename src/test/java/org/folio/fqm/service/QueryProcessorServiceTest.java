@@ -72,7 +72,7 @@ class QueryProcessorServiceTest {
   @Test
   void shouldRunSynchronousQueryAndReturnPaginatedResults() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true, false);
+    EntityType entityType = new EntityType(entityTypeId.toString(), "test_ET", true);
     String fqlQuery = """
       {"field1": {"eq": "value1" }}
       """;
@@ -95,7 +95,7 @@ class QueryProcessorServiceTest {
   @Test
   void shouldHandleSuccess() {
     Query query = TestDataFixture.getMockQuery();
-    when(queryRepository.getQuery(query.queryId(), true)).thenReturn(Optional.of(query));
+    when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     service.handleSuccess(query);
     verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.SUCCESS), any(), eq(null));
   }
@@ -104,7 +104,7 @@ class QueryProcessorServiceTest {
   void successHandlerShouldHandleCancelledQuery() {
     Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
       OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
-    when(queryRepository.getQuery(query.queryId(), true)).thenReturn(Optional.of(query));
+    when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     service.handleSuccess(query);
     verify(queryRepository, times(0)).updateQuery(query.queryId(), query.status(), query.endDate(), query.failureReason());
   }

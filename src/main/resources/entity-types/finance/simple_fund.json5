@@ -1,0 +1,518 @@
+{
+  id: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+  name: 'simple_fund',
+  private: true,
+  requiredPermissions: [
+    'finance.funds.collection.get',
+    'acquisitions-units.units.collection.get',
+    'organizations.organizations.collection.get',
+    'inventory-storage.locations.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'allocated_from_ids',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'allocatedFromIds'::text)",
+    },
+    {
+      name: 'allocated_from',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType'
+        }
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      sourceAlias: 'fund',
+      valueGetter: "COALESCE(( \
+                      SELECT jsonb_agg(fund_name) \
+                      FROM ( \
+                            SELECT jsonb ->> 'name' AS fund_name \
+                            FROM ${tenant_id}_mod_fqm_manager.src_finance_fund \
+                            WHERE id IN (SELECT jsonb_array_elements_text(:sourceAlias.jsonb -> 'allocatedFromIds')::uuid) \
+                            ) sub \
+                    ), '[]'::jsonb)",
+      valueFunction: 'lower(:value)',
+      filterValueGetter: "COALESCE(( \
+                            SELECT lower(jsonb_agg(fund_name)) \
+                            FROM ( \
+                                  SELECT jsonb ->> 'name' AS fund_name \
+                                  FROM ${tenant_id}_mod_fqm_manager.src_finance_fund \
+                                  WHERE id IN (SELECT jsonb_array_elements_text(:sourceAlias.jsonb -> 'allocatedFromIds')::uuid) \
+                                  ) sub \
+                          ), '[]'::jsonb)",
+      idColumnName: "allocated_from_ids",
+      source: {
+        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+        columnName: 'allocated_from',
+      },
+      valueSourceApi: {
+        path: 'finance/funds',
+        valueJsonPath: '$.funds.*.id',
+        labelJsonPath: '$.funds.*.name',
+      },
+    },
+    {
+      name: 'allocated_to_ids',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'allocatedToIds'::text)",
+    },
+    {
+      name: 'allocated_to',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType'
+        }
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      sourceAlias: 'fund',
+      valueGetter: "COALESCE(( \
+                      SELECT jsonb_agg(fund_name) \
+                      FROM ( \
+                            SELECT jsonb ->> 'name' AS fund_name \
+                            FROM ${tenant_id}_mod_fqm_manager.src_finance_fund \
+                            WHERE id IN (SELECT jsonb_array_elements_text(:sourceAlias.jsonb -> 'allocatedToIds')::uuid) \
+                            ) sub \
+                    ), '[]'::jsonb)",
+      valueFunction: 'lower(:value)',
+      filterValueGetter: "COALESCE(( \
+                            SELECT lower(jsonb_agg(fund_name)) \
+                            FROM ( \
+                                  SELECT jsonb ->> 'name' AS fund_name \
+                                  FROM ${tenant_id}_mod_fqm_manager.src_finance_fund \
+                                  WHERE id IN (SELECT jsonb_array_elements_text(:sourceAlias.jsonb -> 'allocatedFromIds')::uuid) \
+                                  ) sub \
+                          ), '[]'::jsonb)",
+      idColumnName: "allocated_to_ids",
+      source: {
+        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+        columnName: 'allocated_to',
+      },
+      valueSourceApi: {
+        path: 'finance/funds',
+        valueJsonPath: '$.funds.*.id',
+        labelJsonPath: '$.funds.*.name',
+      }
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'description'",
+    },
+    {
+      name: 'external_account_no',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'externalAccountNo'",
+    },
+    {
+      name: 'fund_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund',
+      values: [
+        {
+          label: 'Active',
+          value: 'Active',
+        },
+        {
+          label: 'Frozen',
+          value: 'Frozen',
+        },
+        {
+          label: 'Inactive',
+          value: 'Inactive',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'fundStatus'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'fundStatus'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',
+    },
+    {
+      name: 'fund_type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":fund.jsonb ->> 'fundTypeId'",
+      joinsTo: [
+        {
+          targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'ledger_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":fund.jsonb ->> 'ledgerId'",
+      joinsTo: [
+        {
+          targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+    },
+    {
+      name: 'donor_organization_ids',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'donorOrganizationIds'::text)",
+    },
+    {
+      name: 'donor_organizations',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      idColumnName: "donor_organization_ids",
+      source: {
+        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        columnName: 'name'
+      },
+      valueGetter: "( SELECT jsonb_agg(org.jsonb ->> 'name') FILTER (WHERE (org.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'donorOrganizationIds') record(value) JOIN src_organizations org ON record.value::text = org.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(org.jsonb ->> 'name')) FILTER (WHERE (org.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'donorOrganizationIds') record(value) JOIN src_organizations org ON record.value::text = org.id::text )",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'restrict_by_locations',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      sourceAlias: 'fund',
+      values: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'restrictByLocations'",
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'tag_list',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( SELECT array_agg(tnt_id.value::text) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
+      filterValueGetter: "( SELECT array_agg(lower(tnt_id.value::text)) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
+      valueFunction: 'lower(:value)',
+    },
+    {
+      name: 'locations',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'location_id',
+              property: 'locationId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'locationId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'locationId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'tenant_id',
+              property: 'tenantId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value ->> 'tenantId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'tenantId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'location_name',
+              property: 'locationName',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "(SELECT array_agg(lower(loc.jsonb ->> 'name') ORDER BY record.value ->> 'locationId') \
+                             FILTER (WHERE (loc.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                               JOIN src_inventory_location loc \
+                                 ON (record.value ->> 'locationId') = loc.id::text \
+                            )",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      sourceAlias: 'fund',
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "( SELECT jsonb_agg( \
+                        record.value || jsonb_build_object('locationName', loc.jsonb ->> 'name') \
+                        ORDER BY record.value ->> 'locationId' \
+                      ) \
+                      FROM jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                      LEFT JOIN src_inventory_location loc \
+                      ON (record.value ->> 'locationId') = loc.id::text \
+                    )::text",
+    },
+    {
+      name: 'acq_unit_ids',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      sourceAlias: 'fund',
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+    },
+    {
+      name: 'acquisition_unit',
+      sourceAlias: 'fund',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      idColumnName: 'acq_unit_ids',
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name',
+      },
+    },
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'fund',
+      target: 'src_finance_fund',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

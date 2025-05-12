@@ -1,0 +1,254 @@
+{
+  id: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+  name: 'simple_fiscal_year',
+  private: true,
+  requiredPermissions: [
+    'finance.fiscal-years.collection.get',
+    'acquisitions-units.units.collection.get'
+  ],
+  sources: [
+    {
+      type: 'db',
+      target: 'src_finance_fiscal_year',
+      alias: 'fiscal_year',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'id'
+      }
+    },
+    {
+      name: 'version',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->>'_version')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'acq_unit_ids',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'acqUnitIds'::text)"
+    },
+    {
+      name: 'acquisition_unit',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      essential: true,
+      idColumnName: 'acq_unit_ids',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(acq_unit.jsonb ->> 'name')) FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'acquisitions-units/units',
+        valueJsonPath: '$.acquisitionsUnits.*.id',
+        labelJsonPath: '$.acquisitionsUnits.*.name'
+      }
+    },
+    {
+      name: 'name',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'name'
+      },
+      idColumnName: 'id',
+      valueSourceApi: {
+        path: 'finance/fiscal-years',
+        valueJsonPath: '$.fiscalYears.*.id',
+        labelJsonPath: '$.fiscalYears.*.name'
+      }
+    },
+    {
+      name: 'code',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'code'",
+    },
+    {
+      name: 'currency',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'currency'",
+    },
+    {
+      name: 'description',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+    },
+    {
+      name: 'period_begin_date',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'dateType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'periodStart'",
+    },
+    {
+      name: 'period_end_date',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'dateType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'periodEnd'",
+    },
+    {
+      name: 'series',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'series'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'dateType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'dateType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'fiscal_year',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      hidden: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

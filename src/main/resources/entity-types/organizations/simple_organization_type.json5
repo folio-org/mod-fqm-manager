@@ -1,0 +1,143 @@
+{
+  id: '85a2b008-af8d-4890-9490-421cabcb7bad',
+  name: 'simple_organization_type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'otype',
+      target: 'src_organization_types',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'created_at',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.creation_date',
+    },
+    {
+      name: 'created_by',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by',
+    },
+    {
+      name: 'updated_at',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'updated_by',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'version',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'integerType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'_version'",
+    },
+    {
+      name: 'name',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      source: {
+        entityTypeId: '85a2b008-af8d-4890-9490-421cabcb7bad',
+        columnName: 'name',
+        type: 'entity-type',
+      },
+    },
+    {
+      name: 'status',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'status'",
+      values: [
+        {
+          value: 'Active',
+          label: 'Active',
+        },
+        {
+          value: 'Inactive',
+          label: 'Inactive',
+        },
+      ],
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'otype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
+  ],
+}

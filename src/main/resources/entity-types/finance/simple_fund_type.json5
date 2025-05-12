@@ -1,0 +1,73 @@
+{
+  id: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
+  name: 'simple_fund_type',
+  private: true,
+  requiredPermissions: [
+    'finance.fund-types.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'fund_type',
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.id"
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      sourceAlias: 'fund_type',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueFunction: '(:value)::integer'
+    }
+  ,
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      sourceAlias: 'fund_type',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb ->> 'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',
+      idColumnName: 'id',
+      source: {
+        entityTypeId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'finance/fund-types',
+        valueJsonPath: '$.fundTypes.*.id',
+        labelJsonPath: '$.fundTypes.*.name',
+      }
+    }
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'fund_type',
+      target: 'src_finance_fund_type'
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

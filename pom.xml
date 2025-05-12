@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.3</version>
+    <version>3.4.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>3.1.0-SNAPSHOT</version>
+  <version>4.1.0-SNAPSHOT</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
@@ -23,16 +23,17 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-base.version>8.2.1</folio-spring-base.version>
-    <folio-query-tool-metadata.version>3.1.0-SNAPSHOT</folio-query-tool-metadata.version>
+    <folio-spring-base.version>9.0.0</folio-spring-base.version>
+    <folio-query-tool-metadata.version>4.0.0-SNAPSHOT</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
-    <lib-fqm-query-processor.version>3.1.0-SNAPSHOT</lib-fqm-query-processor.version>
+    <lib-fqm-query-processor.version>4.1.0-SNAPSHOT</lib-fqm-query-processor.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <snakeyaml.version>2.0</snakeyaml.version>
     <org.postgresql.version>42.5.4</org.postgresql.version>
     <org.jooq.version>3.18.4</org.jooq.version>
     <org.apache.commons.version>4.4</org.apache.commons.version>
     <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
+    <spring-retry.version>2.0.10</spring-retry.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.2.0</wiremock.version>
@@ -45,7 +46,7 @@
     <lombok.version>1.18.30</lombok.version>
 
     <!-- other properties -->
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <mod-fqm-manager.yaml.file>${project.basedir}/src/main/resources/swagger.api/mod-fqm-manager.yaml</mod-fqm-manager.yaml.file>
@@ -71,7 +72,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-query-tool-metadata</artifactId>
-      <version>3.1.0-SNAPSHOT</version>
+      <version>${folio-query-tool-metadata.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
@@ -170,6 +171,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.retry</groupId>
+      <artifactId>spring-retry</artifactId>
+      <version>${spring-retry.version}</version>
     </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>

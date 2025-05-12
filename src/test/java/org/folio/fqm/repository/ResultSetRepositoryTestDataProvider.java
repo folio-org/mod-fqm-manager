@@ -6,7 +6,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.DSLContext;
@@ -19,6 +19,7 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,7 +31,6 @@ import static org.jooq.impl.DSL.field;
  * Mock data provider that returns query results for Repository tests.
  */
 public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
-  public static final List<UUID> TEST_CONTENT_IDS = List.of(UUID.randomUUID(), UUID.randomUUID());
   public static final EntityType TEST_ENTITY_TYPE_DEFINITION = new EntityType()
     .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .columns(
@@ -43,7 +43,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     .name("TEST_ENTITY_TYPE")
     .fromClause("TEST_ENTITY_TYPE")
     .sources(List.of(
-      new EntityTypeSource()
+      new EntityTypeSourceDatabase()
         .type("db")
         .alias("source1")
         .target("target1"))
@@ -64,7 +64,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     )
     .fromClause("TEST_GROUP_BY_ENTITY_TYPE")
     .sources(List.of(
-      new EntityTypeSource()
+      new EntityTypeSourceDatabase()
         .type("db")
         .alias("source1")
         .target("target1"))
@@ -72,7 +72,11 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
   public static final List<Map<String, Object>> TEST_ENTITY_CONTENTS = List.of(
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value1", "key2", "value2"),
     Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value3", "key2", "value4"),
-    Map.of(ID_FIELD_NAME, UUID.randomUUID(), "key1", "value5", "key2", "value6")
+    new HashMap<>() {{
+      put(ID_FIELD_NAME, null);
+      put("key1", "value5");
+      put("key2", "value6");
+    }}
   );
 
   public static final EntityType ENTITY_TYPE = new EntityType()
@@ -86,7 +90,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     .fromClause("TEST_ENTITY_TYPE")
     .sources(
       List.of(
-        new EntityTypeSource()
+        new EntityTypeSourceDatabase()
           .type("db")
           .alias("source1")
           .target("target1")

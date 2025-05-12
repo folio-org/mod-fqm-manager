@@ -18,21 +18,25 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.CustomEntityType;
+import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Comparator.comparing;
-import static java.util.Comparator.nullsLast;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.io.IOException;
@@ -65,18 +69,20 @@ public class EntityTypeService {
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final LanguageClient languageClient;
+  private final FolioExecutionContext executionContext;
+  private final FolioExecutionContext folioExecutionContext;
+  private final ClockService clockService;
 
   /**
    * Returns the list of all entity types.
    *
    * @param entityTypeIds If provided, only the entity types having the provided Ids will be included in the results
    */
-  @Transactional(readOnly = true)
-  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible) {
+  public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible, boolean includeAll) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeDefinitions(entityTypeIds, null)
-      .filter(entityType -> !Boolean.TRUE.equals(entityType.getPrivate()))
+      .getEntityTypeDefinitions(entityTypeIds, executionContext.getTenantId())
+      .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
@@ -103,11 +109,10 @@ public class EntityTypeService {
    * @param entityTypeId  the ID to search for
    * @param includeHidden Indicates whether the hidden column should be displayed.
    *                      If set to true, the hidden column will be included in the output
-   * @param sortColumns   If true, columns will be alphabetically sorted by their translations
    * @return the entity type definition if found, empty otherwise
    */
-  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden, boolean sortColumns) {
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+  public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
     List<EntityTypeColumn> columns = entityType
@@ -115,11 +120,6 @@ public class EntityTypeService {
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
       .toList();
-    if (sortColumns) {
-      columns = columns.stream()
-        .sorted(nullsLast(comparing(Field::getLabelAlias, String.CASE_INSENSITIVE_ORDER)))
-        .toList();
-    }
     return entityType
       .columns(columns)
       .crossTenantQueriesEnabled(crossTenantEnabled);
@@ -132,10 +132,9 @@ public class EntityTypeService {
    * @param searchText Nullable search text. If a search text is provided, the returned values will include only those
    *                   that contain the specified searchText.
    */
-  @Transactional(readOnly = true)
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
@@ -152,7 +151,7 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), null);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), executionContext.getTenantId(), false);
 
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 
@@ -167,6 +166,10 @@ public class EntityTypeService {
           }
           case "languages" -> {
             return getLanguages(searchText, tenantsToQuery);
+          }
+          // instructs query builder to provide organization finder plugin
+          case "organization" -> {
+            return ColumnValues.builder().content(List.of()).build();
           }
           default -> {
             throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
@@ -200,12 +203,19 @@ public class EntityTypeService {
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
     Set<ValueWithLabel> resultSet = new HashSet<>();
+
     for (String tenantId : tenantsToQuery) {
       try {
-        String rawJson = crossTenantHttpClient.get(field.getValueSourceApi().getPath(), Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE)), tenantId);
+        ValueSourceApi valueSourceApi = field.getValueSourceApi();
+        Map<String, String> queryParams = Objects.requireNonNullElseGet(
+          valueSourceApi.getQueryParams(),
+          () -> Map.of("limit", String.valueOf(COLUMN_VALUE_DEFAULT_PAGE_SIZE))
+        );
+        String rawJson = crossTenantHttpClient.get(valueSourceApi.getPath(), queryParams, tenantId);
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read(field.getValueSourceApi().getValueJsonPath());
         List<String> labels = parsedJson.read(field.getValueSourceApi().getLabelJsonPath());
+        log.info("Obtained {} values from API {} in tenant {} for field {}", values.size(), valueSourceApi.getPath(), tenantId, field.getName());
         for (int i = 0; i < values.size(); i++) {
           String value = values.get(i);
           String label = labels.get(i);
@@ -214,10 +224,9 @@ public class EntityTypeService {
           }
         }
       } catch (FeignException.Unauthorized e) {
-        log.error("Failed to get column values from {} tenant due to exception: {}", tenantId, e.getMessage());
+        log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
       }
     }
-
 
     List<ValueWithLabel> results = new ArrayList<>(resultSet);
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
@@ -340,5 +349,68 @@ public class EntityTypeService {
 
   private static String getFieldValue(Map<String, Object> allValues, String fieldName) {
     return allValues.get(fieldName).toString();
+  }
+
+  public CustomEntityType getCustomEntityType(UUID entityTypeId) {
+    var customET = entityTypeRepository.getCustomEntityType(entityTypeId);
+    if (customET == null) {
+      throw new EntityTypeNotFoundException(entityTypeId);
+    }
+    return customET;
+  }
+
+  public CustomEntityType createCustomEntityType(CustomEntityType customEntityType) {
+    validateCustomEntityType(null, customEntityType);
+    var now = clockService.now();
+    var updatedCustomEntityType = customEntityType.toBuilder()
+      .createdAt(now)
+      .updatedAt(now)
+      .owner(folioExecutionContext.getUserId())
+      ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
+      .idView(null) // We don't want to let users do stuff that deals directly with the DB
+      .build();
+    entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
+    return updatedCustomEntityType;
+  }
+
+  public CustomEntityType updateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    validateCustomEntityType(entityTypeId, customEntityType);
+    var oldET = getCustomEntityType(entityTypeId);
+
+    // Only the owner can edit a private ET
+    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
+      // Note: The ET's owner can update the ET to have a different owner
+      throw new CustomEntityTypeOwnershipException("A custom entity type can only be modified by its owner");
+    }
+
+    var updatedCustomEntityType = customEntityType.toBuilder()
+      .updatedAt(clockService.now())
+      .build();
+    entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
+    return updatedCustomEntityType;
+  }
+
+  // Package-private to make Visible for testing
+  static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", entityTypeId);
+    }
+    if (!customEntityType.getColumns().isEmpty()) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", entityTypeId);
+    }
+    if (entityTypeId != null && !entityTypeId.toString().equals(customEntityType.getId())) {
+      throw new InvalidEntityTypeDefinitionException("The entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
+    }
+  }
+
+  public void deleteCustomEntityType(UUID entityTypeId) {
+    var oldET = getCustomEntityType(entityTypeId);
+
+    // Only the owner can edit a private ET
+    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
+      throw new CustomEntityTypeOwnershipException("A custom entity type can only be deleted by its owner");
+    }
+
+    entityTypeRepository.deleteEntityType(entityTypeId);
   }
 }

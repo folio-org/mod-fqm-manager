@@ -1,0 +1,11 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+  <changeSet id="MODFQMMGR-723-add-max-size-exceeded-query-status" author="bsharp@ebsco.com" runOnChange="true">
+    <sql>
+      ALTER TABLE query_details DROP CONSTRAINT IF EXISTS query_details_status_check;
+      ALTER TABLE query_details ADD CONSTRAINT query_details_status_check CHECK (status IN ('IN_PROGRESS', 'SUCCESS', 'FAILED', 'CANCELLED', 'MAX_SIZE_EXCEEDED'));
+    </sql>
+  </changeSet>
+</databaseChangeLog>

@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.deserializer.FqlParsingException;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.exception.MaxQuerySizeExceededException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.FqlQueryWithContext;
 import org.folio.fqm.repository.QueryRepository;
@@ -88,6 +89,27 @@ class QueryExecutionServiceTest {
 
     assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
     verify(queryRepository, times(0)).updateQuery(any(), any(), any(), any());
+  }
+
+  @Test
+  void shouldHandleMaxQuerySizeExceeded() {
+    String tenantId = "tenant_01";
+    EntityType entityType = new EntityType();
+    String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
+    List<String> fields = List.of();
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+
+    int maxSize = 100;
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+
+    doThrow(MaxQuerySizeExceededException.class).when(queryProcessorService).getIdsInBatch(
+      any(),
+      anyInt(),
+      anyInt(),
+      any());
+
+    assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.MAX_SIZE_EXCEEDED), any(), eq(null));
   }
 
   @Test

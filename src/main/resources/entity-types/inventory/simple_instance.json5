@@ -1276,7 +1276,7 @@
         dataType: 'booleanType',
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'deleted'",
       values: [

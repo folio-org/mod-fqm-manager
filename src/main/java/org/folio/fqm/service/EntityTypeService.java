@@ -385,6 +385,8 @@ public class EntityTypeService {
 
     var updatedCustomEntityType = customEntityType.toBuilder()
       .updatedAt(clockService.now())
+      ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
+      .idView(null) // We don't want to let users do stuff that deals directly with the DB
       .build();
     entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;

@@ -1610,7 +1610,7 @@
     "entityType.purchase_order_line.physical_expected_receipt_date": "Data de recebimento prevista do físico",
     "entityType.purchase_order_line.physical_material_supplier": "Fornecedor de material físico",
     "entityType.purchase_order_line.physical_material_type": "Tipo de material físico",
-    "entityType.purchase_order_line.physical_receipt_due": "Recebimento físico devido",
+    "entityType.purchase_order_line.physical_receipt_due": "Recebimento físico esperado",
     "entityType.purchase_order_line.physical_volumes": "Volumes físicos",
     "entityType.purchase_order_line.po_line_description": "Descrição da linha do pedido de compra",
     "entityType.purchase_order_line.po_line_number": "Número da linha de pedido de compra",

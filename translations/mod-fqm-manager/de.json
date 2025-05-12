@@ -290,7 +290,7 @@
     "entityType.simple_loans.item_status": "Item status",
     "entityType.simple_loans.loan_policy_id": "Loan policy UUID",
     "entityType.simple_loans.lost_item_policy_id": "Lost item policy UUID",
-    "entityType.simple_loans.overdue_fine_policy_id": "Overdue fine policy UUID",
+    "entityType.simple_loans.overdue_fine_policy_id": "Säumnisgebühren-Richtlinie UUID",
     "entityType.simple_loans.patron_group_id_at_checkout": "Patron group UUID at checkout",
     "entityType.simple_loans.proxy_user_id": "Proxy user UUID",
     "entityType.simple_loans.reminders_last_date": "Reminders last date",

@@ -190,7 +190,7 @@
     "entityType.simple_instance.languages": "Мови",
     "entityType.simple_instance.match_key": "Ключ збігу",
     "entityType.simple_instance.mode_of_issuance_id": "UUID режиму випуску",
-    "entityType.simple_instance.nature_of_content_term_ids": "UUID терміну природи змісту",
+    "entityType.simple_instance.nature_of_content_term_ids": "UUID терміну характеру змісту",
     "entityType.simple_instance.notes": "Примітки",
     "entityType.simple_instance.notes.instance_note_type_id": "UUID типу",
     "entityType.simple_instance.notes.instance_note_type_id._qualified": "UUID типу приміток",

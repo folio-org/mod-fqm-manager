@@ -1,0 +1,97 @@
+// Auxiliary entity created for Order Invoice Analysis composite entity
+{
+  id: '4999bd5f-3898-4b44-b283-e37bc9261ad8',
+  name: 'composite_invoice_line_fund_distribution',
+  private: true,
+  sources: [
+    {
+      type: 'entity-type',
+      alias: 'invoice_line',
+      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+    },
+    {
+      type: 'db',
+      alias: 'fund_distribution',
+      target: 'jsonb_array_elements("invoice_line_fund_distribution.invoice_line.invoice_lines".jsonb -> \'fundDistributions\')',
+      join: {
+        type: 'CROSS JOIN LATERAL',
+        joinTo: 'invoice_line.invoice_lines',
+      }
+    },
+  ],
+  columns: [
+    {
+      name: 'invoice_id',
+      sourceAlias: 'invoice_line.invoice_lines',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: ":sourceAlias.invoiceid",
+      filterValueGetter: "lower(:sourceAlias.invoiceid)",
+      valueFunction: 'lower(:value)',
+      joinsTo: [
+        {
+          targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'po_line_id',
+      sourceAlias: 'invoice_line.invoice_lines',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:sourceAlias.jsonb->>'poLineId')::uuid",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'poLineId')::uuid",
+      valueFunction: 'lower(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'fund_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      valueGetter: "(:fund_distribution.jsonb->>'fundId')::uuid",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')::uuid",
+      valueFunction: 'lower(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'expense_class_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      valueGetter: "(:fund_distribution.jsonb->>'expenseClassId')",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'expenseClassId')",
+      valueFunction: 'lower(:value)',
+      joinsTo: [
+        {
+          targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+  ],
+}

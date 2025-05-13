@@ -19,18 +19,16 @@
       sourceField: 'po.id',
       overrideJoinDirection: "left",
       essentialOnly: true,
-      useIdColumns: true,
       order: 20,
     },
     {
-      alias: 'invoice_line',
+      alias: 'invoice_line_fund_distribution',
       type: 'entity-type',
-      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      targetId: '4999bd5f-3898-4b44-b283-e37bc9261ad8', // composite_invoice_line_fund_distribution
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
       essentialOnly: true,
-      useIdColumns: true,
       order: 30,
     },
     {
@@ -38,7 +36,7 @@
       type: 'entity-type',
       targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
       targetField: 'id',
-      sourceField: 'invoice_line.invoice_id',
+      sourceField: 'invoice_line_fund_distribution.invoice_id',
       essentialOnly: true,
       order: 40,
     },
@@ -61,57 +59,31 @@
       order: 60
     },
     {
-      type: 'db',
-      alias: 'fund_distribution',
-      target: 'jsonb_array_elements("invoice_line.invoice_lines".jsonb -> \'fundDistributions\')',
-      join: {
-        type: 'CROSS JOIN LATERAL',
-        joinTo: 'invoice_line.invoice_lines',
-      },
-    },
-  ],
-  columns: [
-    {
-      name: 'fund_id',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: true,
-      queryable: true,
-      essential: true,
-      visibleByDefault: true,
-      valueGetter: "(:fund_distribution.jsonb->>'fundId')::uuid",
-      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')::uuid",
-      valueFunction: 'lower(:value)::uuid',
-      joinsTo: [
-        {
-          targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
-          targetField: 'id',
-          type: 'equality-simple',
-          direction: 'left',
-        },
-      ],
+      alias: 'fund',
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.fund_id',
+      order: 80,
     },
     {
-      name: 'expense_class_id',
-      dataType: {
-        dataType: 'rangedUUIDType',
-      },
-      isIdColumn: true,
-      queryable: true,
-      essential: true,
-      visibleByDefault: true,
-      valueGetter: "(:fund_distribution.jsonb->>'expenseClassId')::uuid",
-      filterValueGetter: "lower(:fund_distribution.jsonb->>'expenseClassId')::uuid",
-      valueFunction: 'lower(:value)::uuid',
-      joinsTo: [
-        {
-          targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
-          targetField: 'id',
-          type: 'equality-simple',
-          direction: 'left',
-        },
-      ],
+      alias: 'fund_type',
+      type: 'entity-type',
+      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'fund.fund_type_id',
+      order: 90
+    },
+    {
+      alias: 'expense_class',
+      type: 'entity-type',
+      targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.expense_class_id',
+      order: 100
     },
   ]
 }

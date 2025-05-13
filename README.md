@@ -66,12 +66,19 @@ mvn clean install
 
 ### Resource requirements
 
+#### Short version
+- Small/medium institutions: Allocate 2 gigabytes of memory for the heap (`-Xmx2g`)
+- Large institutions: Allocate 5 gigabytes of memory for the heap (`-Xmx5g`)
+
+#### Long version
 Most operations in the mod-fqm-module use very little memory. However, more memory is required when running queries
 that return large amounts of data. Since mod-fqm-manager iterates over results in batches, sufficient memory is necessary
-for good and consistent performance.With the default settings, you should allocate at least 1 gigabyte of heap space
+for good and consistent performance. With the default settings, you should allocate at least 1 gigabyte of heap space
 to mod-fqm-manager to ensure optimal performance and query handling. For larger instances where mod-fqm-manager is heavily
 used, allocate at least 2 gigabytes. In extreme cases with extremely large responses and concurrent usage, 5 gigabytes of
 heap space should be sufficient to maintain performance and stability.
+
+Note: "memory" here refers to heap space memory (set with the `-Xmx` parameter on the JVM), not total system memory.
 
 ### Local development only environment variables
 

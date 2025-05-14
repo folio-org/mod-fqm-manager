@@ -52,7 +52,7 @@
     {
       alias: 'invoice_fiscal_year',
       type: 'entity-type',
-      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
       targetField: 'id',
       sourceField: 'invoice.fiscal_year_id',
       essentialOnly: true,
@@ -65,7 +65,7 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.fund_id',
-      order: 80,
+      order: 70,
     },
     {
       alias: 'fund_type',
@@ -74,7 +74,7 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'fund.fund_type_id',
-      order: 90
+      order: 80
     },
     {
       alias: 'expense_class',
@@ -83,7 +83,7 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.expense_class_id',
-      order: 100
+      order: 90
     },
   ]
 }

@@ -18,6 +18,7 @@
       targetField: 'purchase_order_id',
       sourceField: 'po.id',
       overrideJoinDirection: "left",
+      useIdColumns: true,
       essentialOnly: true,
       order: 20,
     },
@@ -28,6 +29,7 @@
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
+      useIdColumns: true,
       essentialOnly: true,
       order: 30,
     },
@@ -62,6 +64,7 @@
       alias: 'fund',
       type: 'entity-type',
       targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      useIdColumns: true,
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.fund_id',
@@ -80,6 +83,7 @@
       alias: 'expense_class',
       type: 'entity-type',
       targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+      useIdColumns: true,
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.expense_class_id',

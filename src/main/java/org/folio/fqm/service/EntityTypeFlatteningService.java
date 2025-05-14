@@ -69,7 +69,7 @@ public class EntityTypeFlatteningService {
     this.userTenantService = userTenantService;
 
     this.entityTypeCache =
-      Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
+      Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
   /**

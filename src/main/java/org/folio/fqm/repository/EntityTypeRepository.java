@@ -98,7 +98,7 @@ public class EntityTypeRepository {
     this.jooqContext = jooqContext;
     this.objectMapper = objectMapper;
     this.executionContext = executionContext;
-    this.entityTypeCache = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
+    this.entityTypeCache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId, String tenantId) {

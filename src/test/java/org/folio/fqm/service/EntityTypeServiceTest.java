@@ -776,7 +776,6 @@ class EntityTypeServiceTest {
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
-    when(executionContext.getUserId()).thenReturn(ownerId);
     doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
 
     // Act
@@ -807,29 +806,6 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void updateCustomEntityType_shouldThrowOwnershipException_whenNonOwnerModifiesPrivateEntityType() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-    UUID differentUserId = UUID.randomUUID();
-
-    CustomEntityType existingEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Original name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
-
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "Updated name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
-
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(executionContext.getUserId()).thenReturn(differentUserId); // Different user ID
-
-    // Act & Assert
-    assertThrows(CustomEntityTypeOwnershipException.class, () ->
-      entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
-
-    verify(repo, never()).updateCustomEntityType(any());
-  }
-
-  @Test
   void updateCustomEntityType_shouldAllowUpdate_whenEntityTypeIsShared() {
     // Arrange
     UUID entityTypeId = UUID.randomUUID();
@@ -844,7 +820,6 @@ class EntityTypeServiceTest {
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
-    when(executionContext.getUserId()).thenReturn(ownerId);
     doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
 
     // Act
@@ -890,7 +865,6 @@ class EntityTypeServiceTest {
       .updatedAt(originalDate); // This should be overwritten
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(executionContext.getUserId()).thenReturn(ownerId);
     when(clockService.now()).thenReturn(updatedDate);
 
     // Act
@@ -912,7 +886,6 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(executionContext.getUserId()).thenReturn(ownerId);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).deleteEntityType(entityTypeId);
@@ -927,23 +900,5 @@ class EntityTypeServiceTest {
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, never()).deleteEntityType(any());
   }
-
-  @Test
-  void deleteCustomEntityType_shouldThrowOwnershipException_whenDeletedByNonOwner() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-    UUID differentUserId = UUID.randomUUID();
-
-    CustomEntityType existingEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId);
-
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(executionContext.getUserId()).thenReturn(differentUserId);
-
-    assertThrows(CustomEntityTypeOwnershipException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, never()).deleteEntityType(any());
-  }
-
 
 }

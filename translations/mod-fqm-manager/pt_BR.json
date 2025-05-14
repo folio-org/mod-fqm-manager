@@ -1640,5 +1640,5 @@
     "entityType.composite_voucher_line__voucher__ledger__fund.ledger": "Livro razão",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher": "Comprovante",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher_line": "Linha do comprovante",
-    "entityType.simple_instance.flag_for_deletion": "Flag for deletion"
+    "entityType.simple_instance.flag_for_deletion": "Marcar para exclusão",
 }

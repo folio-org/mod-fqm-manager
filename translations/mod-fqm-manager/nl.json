@@ -1640,5 +1640,5 @@
     "entityType.composite_voucher_line__voucher__ledger__fund.ledger": "Grootboek",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher": "Tegoedbon",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher_line": "Tegoedbon regel",
-    "entityType.simple_instance.flag_for_deletion": "Flag for deletion"
+    "entityType.simple_instance.flag_for_deletion": "Vlag voor verwijdering",
 }

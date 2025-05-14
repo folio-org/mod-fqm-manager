@@ -1640,5 +1640,5 @@
     "entityType.composite_voucher_line__voucher__ledger__fund.ledger": "Ledger",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher": "Voucher",
     "entityType.composite_voucher_line__voucher__ledger__fund.voucher_line": "Voucher line",
-    "entityType.simple_instance.flag_for_deletion": "Flag for deletion"
+    "entityType.simple_instance.flag_for_deletion": "Позначити для видалення",
 }

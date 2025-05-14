@@ -1,5 +1,20 @@
 # 4.0.x - Sunflower
 
+# 4.0.6
+- [MODFQMMGR-518] Handle zombie queries
+- [MODFQMMGR-750] Inline certain SQL conditions to improve performance
+- [MODFQMMGR-760] Improve query purging logic to avoid deletion of active long-running queries
+- [MODFQMMGR-776] Use case-insensitive comparison for boolean query fields
+- [MODFQMMGR-779] Allow Instance's `Flag for deletion` field to be queried
+- [MODFQMMGR-781] Update `QUERY_RETENTION_DURATION` to new `MOD_FQM_MANAGER_QUERY_RETENTION_DURATION`
+
+[MODFQMMGR-518]: https://folio-org.atlassian.net/browse/MODFQMMGR-518
+[MODFQMMGR-750]: https://folio-org.atlassian.net/browse/MODFQMMGR-750
+[MODFQMMGR-760]: https://folio-org.atlassian.net/browse/MODFQMMGR-760
+[MODFQMMGR-776]: https://folio-org.atlassian.net/browse/MODFQMMGR-776
+[MODFQMMGR-779]: https://folio-org.atlassian.net/browse/MODFQMMGR-779
+[MODFQMMGR-781]: https://folio-org.atlassian.net/browse/MODFQMMGR-781
+
 # 4.0.5
 - Revert MODORDSTOR-448
 
@@ -181,11 +196,11 @@
 
 ## 3.0.7
 - [MODFQMMGR-548]: Add new `jsonbArrayType` data type
-- [MODFQMMGR-552]: Increase thread pool size to 12
+- [MODFQMMGR-522]: Increase thread pool size to 12
 - [MODFQMMGR-606]: Support migration of old organization code field operators
 
 [MODFQMMGR-548]: https://folio-org.atlassian.net/browse/MODFQMMGR-548
-[MODFQMMGR-552]: https://folio-org.atlassian.net/browse/MODFQMMGR-552
+[MODFQMMGR-522]: https://folio-org.atlassian.net/browse/MODFQMMGR-522
 [MODFQMMGR-606]: https://folio-org.atlassian.net/browse/MODFQMMGR-606
 
 ## 3.0.6

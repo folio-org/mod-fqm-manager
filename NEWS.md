@@ -1,5 +1,8 @@
 # 4.0.x - Sunflower
 
+# 4.0.7
+- Update translations
+
 # 4.0.6
 - [MODFQMMGR-518] Handle zombie queries
 - [MODFQMMGR-750] Inline certain SQL conditions to improve performance

@@ -10,14 +10,14 @@
   </changeSet>
 
   <changeSet id="MODFQMMGR-752" author="saba_zedginidze@epam.com" runOnChange="true">
-    <sql>
+    <createProcedure>
       CREATE OR REPLACE FUNCTION ${tenant_id}_mod_fqm_manager.jsonb_array_elements(input jsonb)
       RETURNS SETOF jsonb
       AS $$
       BEGIN
         RETURN QUERY SELECT * FROM jsonb_array_elements(input);
       END;
-      $$ LANGUAGE plpgsql IMMUTABLE;
-    </sql>
+      $$ LANGUAGE 'plpgsql';
+    </createProcedure>
   </changeSet>
 </databaseChangeLog>

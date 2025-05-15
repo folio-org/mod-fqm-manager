@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.spring.FolioExecutionContext;
@@ -22,7 +21,6 @@ import java.util.UUID;
 @Log4j2
 public class CrossTenantQueryService {
 
-  private final SimpleHttpClient ecsClient;
   private final CrossTenantHttpClient crossTenantClient;
   private final FolioExecutionContext executionContext;
   private final PermissionsService permissionsService;
@@ -58,7 +56,7 @@ public class CrossTenantQueryService {
       && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
-    return getTenants(entityType, userId);
+    return getTenantIds(entityType, userId);
   }
 
   /**
@@ -70,95 +68,53 @@ public class CrossTenantQueryService {
    * @return List of tenants to query
    */
   public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
-    return getTenants(entityType, executionContext.getUserId());
+    return getTenantIds(entityType, executionContext.getUserId());
   }
 
-  private List<String> getTenants(EntityType entityType, UUID userId) {
+  public List<Pair<String, String>> getTenantIdNamePairs(EntityType entityType, UUID userId) {
     log.info("Getting tenants to query for user {}", userId);
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    Pair<String, String> currentTenantPair = Pair.of(executionContext.getTenantId(), null);
     if (!ecsEnabled(ecsTenantInfo)) {
-      return List.of(executionContext.getTenantId());
+      // Tenant name is null here, but that's ok because tenant name is only relevant in ECS environments
+      return List.of(currentTenantPair);
     }
 
-    String centralTenantId = getCentralTenantId(ecsTenantInfo);
-    if (!executionContext.getTenantId().equals(centralTenantId)) {
-      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
-      // The Instances entity type is required to retrieve shared instances from the central tenant when
-      // running queries from member tenants. This means that if we are running a query for Instances, we need to
-      // query the current tenant (for local records) as well as the central tenant (for shared records).
-      if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
-        return List.of(executionContext.getTenantId(), centralTenantId);
-      }
-      return List.of(executionContext.getTenantId());
-    }
-
-    List<String> tenantsToQuery = new ArrayList<>();
-    tenantsToQuery.add(centralTenantId);
-    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
-    for (var userMap : userTenantMaps) {
-      String tenantId = userMap.get(TENANT_ID);
-      String currentUserId = userMap.get("userId");
-      if (!tenantId.equals(centralTenantId)) {
-        try {
-          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
-          tenantsToQuery.add(tenantId);
-        } catch (MissingPermissionsException e) {
-          log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
-        } catch (FeignException e) {
-          log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
-        }
-      }
-    }
-
-    return tenantsToQuery;
-  }
-
-  // TODO: move if stays public
-  public List<Pair<String, String>> getTenantIdsWithNames(EntityType entityType, UUID userId) {
-    log.info("Getting tenants to query for user {}", userId);
-    // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
-    // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
-    Map<String, String> ecsTenantInfo = getEcsTenantInfo();
-    var consortiumId = ecsTenantInfo.get("consortiumId");
-    String centralTenantId = getCentralTenantId(ecsTenantInfo);
-    log.info("Central tenant ID: {}", centralTenantId);
-    List<Map<String, String>> userTenantMaps = getUserTenants(consortiumId, userId.toString(), centralTenantId);
-    log.info("User tenant maps: {}", userTenantMaps);
     String currentTenantId = executionContext.getTenantId();
+    String centralTenantId = getCentralTenantId(ecsTenantInfo);
+    String consortiumId = ecsTenantInfo.get("consortiumId");
+    List<Map<String, String>> userTenantMaps = getUserTenants(consortiumId, userId.toString(), centralTenantId);
     String currentTenantName = userTenantMaps
       .stream()
       .filter(individualMap -> individualMap.get(TENANT_ID).equals(currentTenantId))
       .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
+    currentTenantPair = Pair.of(currentTenantId, currentTenantName);
+
     String centralTenantName = userTenantMaps
       .stream()
       .filter(individualMap -> individualMap.get(TENANT_ID).equals(centralTenantId))
       .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
-    Pair<String, String> singleTenantMap = Pair.of(currentTenantId, currentTenantName);
-    if (!ecsEnabled(ecsTenantInfo)) {
-      return List.of(singleTenantMap);
-    }
+    Pair<String, String> centralTenantPair = Pair.of(centralTenantId, centralTenantName);
 
-    Pair<String, String> centralTenantMap = Pair.of(centralTenantId, centralTenantName);
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
       if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
-        return List.of(singleTenantMap, centralTenantMap);
+        return List.of(currentTenantPair, centralTenantPair);
       }
-      return List.of(singleTenantMap);
+      return List.of(currentTenantPair);
     }
 
     List<Pair<String, String>> tenantsToQuery = new ArrayList<>();
     for (var userMap : userTenantMaps) {
-      log.info("User map: {}", userMap);
       String tenantId = userMap.get(TENANT_ID);
       String currentUserId = userMap.get("userId");
       String tenantName = userMap.get(TENANT_NAME);
@@ -176,20 +132,16 @@ public class CrossTenantQueryService {
     return tenantsToQuery;
   }
 
-  @SuppressWarnings("unchecked")
-  // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
-  private List<Map<String, String>> getUserTenants(String consortiumId, String userId) {
-    String userTenantResponse = ecsClient.get(
-      "consortia/" + consortiumId + "/user-tenants",
-      Map.of("userId", userId, "limit", "1000")
-    );
-    return JsonPath
-      .parse(userTenantResponse)
-      .read("$.userTenants", List.class);
+  private List<String> getTenantIds(EntityType entityType, UUID userId) {
+    return getTenantIdNamePairs(entityType, userId)
+      .stream()
+      .map(Pair::getLeft)
+      .toList();
   }
 
+  @SuppressWarnings("unchecked")
+  // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private List<Map<String, String>> getUserTenants(String consortiumId, String userId, String tenantId) {
-    log.info("GET USER TENANTS (CROSS-TENANT)");
     String userTenantResponse = crossTenantClient.get(
       "consortia/" + consortiumId + "/user-tenants",
       Map.of("userId", userId, "limit", "1000"),

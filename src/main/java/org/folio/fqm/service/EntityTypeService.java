@@ -19,7 +19,6 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
-import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -166,7 +165,6 @@ public class EntityTypeService {
             return getTenantIds(entityType);
           }
           case "tenant_name" -> {
-            log.info("HANDLING TENANT NAME");
             return getTenantNames(entityType);
           }
           case "languages" -> {
@@ -196,8 +194,10 @@ public class EntityTypeService {
   }
 
   private ColumnValues getTenantNames(EntityType entityType) {
-    List<Pair<String, String>> tenantMaps = crossTenantQueryService.getTenantIdsWithNames(entityType, executionContext.getUserId());
-    log.info("Tenants to query for tenant names: {}", tenantMaps);
+    List<Pair<String, String>> tenantMaps = crossTenantQueryService.getTenantIdNamePairs(
+      entityType,
+      executionContext.getUserId()
+    );
     List<ValueWithLabel> tenantValues = tenantMaps
       .stream()
       .map(tenant -> new ValueWithLabel().value(tenant.getKey()).label(tenant.getValue()))

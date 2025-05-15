@@ -5,6 +5,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.fqm.exception.MissingPermissionsException;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class CrossTenantQueryService {
 
   private final SimpleHttpClient ecsClient;
+  private final CrossTenantHttpClient crossTenantClient;
   private final FolioExecutionContext executionContext;
   private final PermissionsService permissionsService;
   private final UserTenantService userTenantService;
@@ -34,8 +36,9 @@ public class CrossTenantQueryService {
 
   /**
    * Retrieve list of tenants to run query against.
+   *
    * @param entityType Entity type definition
-   * @return           List of tenants to query
+   * @return List of tenants to query
    */
   public List<String> getTenantsToQuery(EntityType entityType) {
     return getTenantsToQuery(entityType, executionContext.getUserId());
@@ -45,7 +48,7 @@ public class CrossTenantQueryService {
    * Retrieve list of tenants to run query against for a specified user.
    *
    * @param entityType Entity type definition
-   * @param userId ID of user to retrieve tenant affiliations for
+   * @param userId     ID of user to retrieve tenant affiliations for
    * @return List of tenants to query
    */
   public List<String> getTenantsToQuery(EntityType entityType, UUID userId) {
@@ -60,8 +63,9 @@ public class CrossTenantQueryService {
    * Retrieve list of tenants to retrieve column values from. This method skips the cross-tenant query check, since the
    * column values API uses simple entity type definitions, which don't have cross-tenant queries enabled.
    * method skips the cross-tenant query check
+   *
    * @param entityType Entity type definition
-   * @return           List of tenants to query
+   * @return List of tenants to query
    */
   public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
     return getTenants(entityType, executionContext.getUserId());
@@ -115,13 +119,42 @@ public class CrossTenantQueryService {
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
-    Pair<String, String> singleTenantMap = Pair.of(executionContext.getTenantId(), "TODO: HANDLE SINGLE TENANT");
+    var consortiumId = ecsTenantInfo.get("consortiumId");
+    String centralTenantId = getCentralTenantId(ecsTenantInfo);
+    log.info("Central tenant ID: {}", centralTenantId);
+    List<Map<String, String>> userTenantMaps = getUserTenants(consortiumId, userId.toString(), centralTenantId);
+    log.info("User tenant maps: {}", userTenantMaps);
+    String currentTenantId = executionContext.getTenantId();
+    String currentTenantName = userTenantMaps
+      .stream()
+      .filter(individualMap -> individualMap.get("tenantId").equals(currentTenantId))
+      .map(individualMap -> individualMap.get("tenantName"))
+      .findFirst()
+      .orElse(null);
+    String centralTenantName = userTenantMaps
+      .stream()
+      .filter(individualMap -> individualMap.get("tenantId").equals(centralTenantId))
+      .map(individualMap -> individualMap.get("tenantName"))
+      .findFirst()
+      .orElse(null);
+
+//    if (currentTenantName == null) {
+//      log.info("Current tenant name is null, trying workaround...");
+//      var userTenantResponse = crossTenantClient.get("consortia/" + consortiumId + "/user-tenants",
+//        Map.of("userId", userId.toString(), "limit", "1000"),
+//        centralTenantId
+//      );
+//      var userTenant = JsonPath
+//        .parse(userTenantResponse)
+//        .read("$.userTenants", List.class);
+//      log.info("User tenant: {}", userTenant);
+//    }
+    Pair<String, String> singleTenantMap = Pair.of(currentTenantId, currentTenantName);
     if (!ecsEnabled(ecsTenantInfo)) {
       return List.of(singleTenantMap);
     }
 
-    String centralTenantId = getCentralTenantId(ecsTenantInfo);
-    Pair<String, String> centralTenantMap = Pair.of(centralTenantId, "TODO: HANDLE CENTRAL TENANT FOR MEMBER INSTANCES");
+    Pair<String, String> centralTenantMap = Pair.of(centralTenantId, centralTenantName);
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
@@ -134,23 +167,19 @@ public class CrossTenantQueryService {
     }
 
     List<Pair<String, String>> tenantsToQuery = new ArrayList<>();
-    tenantsToQuery.add(centralTenantMap);
-    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
     for (var userMap : userTenantMaps) {
       log.info("User map: {}", userMap);
       String tenantId = userMap.get("tenantId");
       String currentUserId = userMap.get("userId");
       String tenantName = userMap.get("tenantName");
       Pair<String, String> currentTenantMap = Pair.of(tenantId, tenantName);
-      if (!tenantId.equals(centralTenantId)) {
-        try {
-          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
-          tenantsToQuery.add(currentTenantMap);
-        } catch (MissingPermissionsException e) {
-          log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
-        } catch (FeignException e) {
-          log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
-        }
+      try {
+        permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
+        tenantsToQuery.add(currentTenantMap);
+      } catch (MissingPermissionsException e) {
+        log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
+      } catch (FeignException e) {
+        log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
       }
     }
 
@@ -163,6 +192,18 @@ public class CrossTenantQueryService {
     String userTenantResponse = ecsClient.get(
       "consortia/" + consortiumId + "/user-tenants",
       Map.of("userId", userId, "limit", "1000")
+    );
+    return JsonPath
+      .parse(userTenantResponse)
+      .read("$.userTenants", List.class);
+  }
+
+  private List<Map<String, String>> getUserTenants(String consortiumId, String userId, String tenantId) {
+    log.info("GET USER TENANTS (CROSS-TENANT)");
+    String userTenantResponse = crossTenantClient.get(
+      "consortia/" + consortiumId + "/user-tenants",
+      Map.of("userId", userId, "limit", "1000"),
+      tenantId
     );
     return JsonPath
       .parse(userTenantResponse)
@@ -191,7 +232,8 @@ public class CrossTenantQueryService {
    * In ECS environments, this will return data for a user (in member tenants, it's a dummy user, but that works)
    * In non-ECS environments, this will return null
    */
-  @SuppressWarnings("unchecked") // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
+  @SuppressWarnings("unchecked")
+  // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private Map<String, String> getEcsTenantInfo() {
     String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
     List<Map<String, String>> userTenants = JsonPath

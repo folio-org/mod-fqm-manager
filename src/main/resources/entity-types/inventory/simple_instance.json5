@@ -28,16 +28,6 @@
         condition: ':this.id = :that.instanceTypeId',
       },
     },
-    {
-      type: 'db',
-      alias: 'tenant',
-      target: 'src_consortia_tenant',
-      join: {
-        type: 'left join',
-        joinTo: 'inst',
-        condition: ":this.id = '${tenant_id}'",
-      },
-    }
   ],
   requiredPermissions: [
     'inventory-storage.classification-types.collection.get',
@@ -1266,14 +1256,16 @@
     },
     {
       name: 'tenant_name',
-      sourceAlias: 'tenant',
+      sourceAlias: 'inst',
       essential: true,
       dataType: {
         dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ":sourceAlias.name",
+      valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      valueFunction: 'lower(:value)',
       source: {
         columnName: 'tenant_name',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',

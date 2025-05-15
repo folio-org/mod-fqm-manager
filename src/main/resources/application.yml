@@ -101,4 +101,4 @@ management:
       enabled: false
     readinessstate:
       enabled: true
-debug: false
+debug: true

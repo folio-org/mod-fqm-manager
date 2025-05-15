@@ -166,6 +166,7 @@ public class EntityTypeService {
             return getTenantIds(entityType);
           }
           case "tenant_name" -> {
+            log.info("HANDLING TENANT NAME");
             return getTenantNames(entityType);
           }
           case "languages" -> {

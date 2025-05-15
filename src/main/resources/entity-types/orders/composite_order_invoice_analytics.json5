@@ -46,7 +46,7 @@
       type: 'entity-type',
       targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
       targetField: 'id',
-      sourceField: 'po.vendor',
+      sourceField: 'invoice.vendor_id',
       essentialOnly: true,
       order: 50
     },

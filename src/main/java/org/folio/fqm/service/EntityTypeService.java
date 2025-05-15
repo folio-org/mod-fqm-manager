@@ -11,6 +11,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
@@ -163,6 +164,9 @@ public class EntityTypeService {
           case "tenant_id" -> {
             return getTenantIds(entityType);
           }
+          case "tenant_name" -> {
+            return getTenantNames(entityType);
+          }
           case "languages" -> {
             return getLanguages(searchText, tenantsToQuery);
           }
@@ -185,6 +189,18 @@ public class EntityTypeService {
     List<ValueWithLabel> tenantValues = tenants
       .stream()
       .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))
+      .toList();
+    return new ColumnValues().content(tenantValues);
+  }
+
+  private ColumnValues getTenantNames(EntityType entityType) {
+    List<Pair<String, String>> tenantMaps = crossTenantQueryService.getTenantIdNamePairs(
+      entityType,
+      executionContext.getUserId()
+    );
+    List<ValueWithLabel> tenantValues = tenantMaps
+      .stream()
+      .map(tenant -> new ValueWithLabel().value(tenant.getKey()).label(tenant.getValue()))
       .toList();
     return new ColumnValues().content(tenantValues);
   }

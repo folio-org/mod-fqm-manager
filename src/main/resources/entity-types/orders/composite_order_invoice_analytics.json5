@@ -51,7 +51,7 @@
       order: 50
     },
     {
-      alias: 'invoice_fiscal_year',
+      alias: 'fiscal_year',
       type: 'entity-type',
       targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
       targetField: 'id',

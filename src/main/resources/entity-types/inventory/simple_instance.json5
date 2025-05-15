@@ -1256,7 +1256,6 @@
     },
     {
       name: 'tenant_name',
-      sourceAlias: 'inst',
       essential: true,
       dataType: {
         dataType: 'stringType',

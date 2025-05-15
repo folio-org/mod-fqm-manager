@@ -28,6 +28,8 @@ public class CrossTenantQueryService {
   private final PermissionsService permissionsService;
   private final UserTenantService userTenantService;
 
+  private static final String TENANT_ID = "tenantId";
+  private static final String TENANT_NAME = "tenantName";
   private static final String COMPOSITE_INSTANCES_ID = "6b08439b-4f8e-4468-8046-ea620f5cfb74";
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
   private static final String SIMPLE_INSTANCE_STATUS_ID = "9c239bfd-198f-4013-bbc4-4551c0cbdeaa";
@@ -96,7 +98,7 @@ public class CrossTenantQueryService {
     tenantsToQuery.add(centralTenantId);
     List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
     for (var userMap : userTenantMaps) {
-      String tenantId = userMap.get("tenantId");
+      String tenantId = userMap.get(TENANT_ID);
       String currentUserId = userMap.get("userId");
       if (!tenantId.equals(centralTenantId)) {
         try {
@@ -127,28 +129,16 @@ public class CrossTenantQueryService {
     String currentTenantId = executionContext.getTenantId();
     String currentTenantName = userTenantMaps
       .stream()
-      .filter(individualMap -> individualMap.get("tenantId").equals(currentTenantId))
-      .map(individualMap -> individualMap.get("tenantName"))
+      .filter(individualMap -> individualMap.get(TENANT_ID).equals(currentTenantId))
+      .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
     String centralTenantName = userTenantMaps
       .stream()
-      .filter(individualMap -> individualMap.get("tenantId").equals(centralTenantId))
-      .map(individualMap -> individualMap.get("tenantName"))
+      .filter(individualMap -> individualMap.get(TENANT_ID).equals(centralTenantId))
+      .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
-
-//    if (currentTenantName == null) {
-//      log.info("Current tenant name is null, trying workaround...");
-//      var userTenantResponse = crossTenantClient.get("consortia/" + consortiumId + "/user-tenants",
-//        Map.of("userId", userId.toString(), "limit", "1000"),
-//        centralTenantId
-//      );
-//      var userTenant = JsonPath
-//        .parse(userTenantResponse)
-//        .read("$.userTenants", List.class);
-//      log.info("User tenant: {}", userTenant);
-//    }
     Pair<String, String> singleTenantMap = Pair.of(currentTenantId, currentTenantName);
     if (!ecsEnabled(ecsTenantInfo)) {
       return List.of(singleTenantMap);
@@ -169,9 +159,9 @@ public class CrossTenantQueryService {
     List<Pair<String, String>> tenantsToQuery = new ArrayList<>();
     for (var userMap : userTenantMaps) {
       log.info("User map: {}", userMap);
-      String tenantId = userMap.get("tenantId");
+      String tenantId = userMap.get(TENANT_ID);
       String currentUserId = userMap.get("userId");
-      String tenantName = userMap.get("tenantName");
+      String tenantName = userMap.get(TENANT_NAME);
       Pair<String, String> currentTenantMap = Pair.of(tenantId, tenantName);
       try {
         permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);

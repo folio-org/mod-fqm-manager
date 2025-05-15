@@ -1255,6 +1255,24 @@
       ecsOnly: true,
     },
     {
+      name: 'tenant_name',
+      sourceAlias: 'inst',
+      essential: true,
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "'${tenant_id}'",
+      source: {
+        columnName: 'tenant_name',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        type: 'fqm',
+        name: 'tenant_name',
+      },
+      ecsOnly: true,
+    },
+    {
       name: 'jsonb',
       sourceAlias: 'inst',
       dataType: {

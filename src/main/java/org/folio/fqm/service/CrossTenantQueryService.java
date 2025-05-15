@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.fqm.exception.MissingPermissionsException;
@@ -97,6 +98,54 @@ public class CrossTenantQueryService {
         try {
           permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
           tenantsToQuery.add(tenantId);
+        } catch (MissingPermissionsException e) {
+          log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
+        } catch (FeignException e) {
+          log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
+        }
+      }
+    }
+
+    return tenantsToQuery;
+  }
+
+  // TODO: move if stays public
+  public List<Pair<String, String>> getTenantIdsWithNames(EntityType entityType, UUID userId) {
+    log.info("Getting tenants to query for user {}", userId);
+    // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
+    // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
+    Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    Pair<String, String> singleTenantMap = Pair.of(executionContext.getTenantId(), "TODO: HANDLE SINGLE TENANT");
+    if (!ecsEnabled(ecsTenantInfo)) {
+      return List.of(singleTenantMap);
+    }
+
+    String centralTenantId = getCentralTenantId(ecsTenantInfo);
+    Pair<String, String> centralTenantMap = Pair.of(centralTenantId, "TODO: HANDLE CENTRAL TENANT FOR MEMBER INSTANCES");
+    if (!executionContext.getTenantId().equals(centralTenantId)) {
+      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+      // The Instances entity type is required to retrieve shared instances from the central tenant when
+      // running queries from member tenants. This means that if we are running a query for Instances, we need to
+      // query the current tenant (for local records) as well as the central tenant (for shared records).
+      if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
+        return List.of(singleTenantMap, centralTenantMap);
+      }
+      return List.of(singleTenantMap);
+    }
+
+    List<Pair<String, String>> tenantsToQuery = new ArrayList<>();
+    tenantsToQuery.add(centralTenantMap);
+    List<Map<String, String>> userTenantMaps = getUserTenants(ecsTenantInfo.get("consortiumId"), userId.toString());
+    for (var userMap : userTenantMaps) {
+      log.info("User map: {}", userMap);
+      String tenantId = userMap.get("tenantId");
+      String currentUserId = userMap.get("userId");
+      String tenantName = userMap.get("tenantName");
+      Pair<String, String> currentTenantMap = Pair.of(tenantId, tenantName);
+      if (!tenantId.equals(centralTenantId)) {
+        try {
+          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
+          tenantsToQuery.add(currentTenantMap);
         } catch (MissingPermissionsException e) {
           log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
         } catch (FeignException e) {

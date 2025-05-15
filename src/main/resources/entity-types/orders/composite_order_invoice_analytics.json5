@@ -29,7 +29,6 @@
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
-      useIdColumns: true,
       essentialOnly: true,
       order: 30,
     },

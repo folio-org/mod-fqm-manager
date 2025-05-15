@@ -8,6 +8,7 @@
       type: 'entity-type',
       alias: 'invoice_line',
       targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+      useIdColumns: true,
     },
     {
       type: 'db',

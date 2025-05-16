@@ -5,7 +5,6 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
-import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -896,6 +895,15 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
+
+    assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, never()).deleteEntityType(any());
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowNotFoundException_whenEntityTypeIsNotCustom() {
+    UUID entityTypeId = UUID.randomUUID();
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(new CustomEntityType(null, null, entityTypeId.toString(), "Test Entity", false).isCustom(null));
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, never()).deleteEntityType(any());

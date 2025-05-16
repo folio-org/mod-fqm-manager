@@ -18,7 +18,6 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
-import org.folio.fqm.exception.CustomEntityTypeOwnershipException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -389,6 +388,9 @@ public class EntityTypeService {
 
   // Package-private to make Visible for testing
   static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    if (customEntityType.getIsCustom() == null) {
+      throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type");
+    }
     if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", entityTypeId);
     }
@@ -401,9 +403,11 @@ public class EntityTypeService {
   }
 
   public void deleteCustomEntityType(UUID entityTypeId) {
-    // Load the ET, so that we return the appropriate error if it doesn't exist
-    getCustomEntityType(entityTypeId);
-
+    var customEntityType = getCustomEntityType(entityTypeId);
+    // We don't need full validation, but we definitely need to make sure this is a custom ET...
+    if (customEntityType.getIsCustom() == null) {
+      throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
+    }
     entityTypeRepository.deleteEntityType(entityTypeId);
   }
 }

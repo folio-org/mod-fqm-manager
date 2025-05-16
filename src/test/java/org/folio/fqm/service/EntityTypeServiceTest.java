@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import feign.FeignException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
@@ -681,6 +682,38 @@ class EntityTypeServiceTest {
 
     // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
     assertEquals(actualColumnValues, List.of(new ValueWithLabel("tenant1").label("tenant1"), new ValueWithLabel("tenant2").label("tenant2")));
+  }
+
+  @Test
+  void shouldReturnTenantNames() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID userId = UUID.randomUUID();
+    String valueColumnName = "this_is_a_tenant_name_column";
+    List<Pair<String, String>> expectedIdNamePairs = List.of(
+      Pair.of("tenant1", "Tenant 1"),
+      Pair.of("tenant2", "Tenant 2")
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("tenant-name-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("tenant_name")  // The special FQM source uses "tenant_id" as the name of the currency value source
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(executionContext.getUserId()).thenReturn(userId);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantIdNamePairs(entityType, userId)).thenReturn(expectedIdNamePairs);
+
+    List<ValueWithLabel> actualColumnValues = entityTypeService
+      .getFieldValues(entityTypeId, valueColumnName, "")
+      .getContent();
+
+
+    // Check the response from the cross-tenant query service has been turned into a list of ValueWithLabels
+    assertEquals(actualColumnValues, List.of(new ValueWithLabel("tenant1").label("Tenant 1"), new ValueWithLabel("tenant2").label("Tenant 2")));
   }
 
   @Test

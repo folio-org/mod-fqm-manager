@@ -1255,6 +1255,25 @@
       ecsOnly: true,
     },
     {
+      name: 'tenant_name',
+      essential: true,
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      valueFunction: 'lower(:value)',
+      source: {
+        columnName: 'tenant_name',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        type: 'fqm',
+        name: 'tenant_name',
+      },
+      ecsOnly: true,
+    },
+    {
       name: 'jsonb',
       sourceAlias: 'inst',
       dataType: {

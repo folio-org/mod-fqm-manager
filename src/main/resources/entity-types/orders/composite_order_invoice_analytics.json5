@@ -1,6 +1,8 @@
 {
   id: 'f3ccbf49-8e3e-4f5c-a60e-04ad80543a4a',
   name: 'composite_order_invoice_analytics',
+  description: "Compound entity type that allows concurrent querying of PO/PO Line, Invoice/Invoice Line, Organization, \
+                Fund, Expense class, Fiscal Year to generate certain types of acquisitions-related reports",
   private: false,
   sources: [
     {

@@ -1,4 +1,9 @@
-// Auxiliary entity created for Order Invoice Analysis composite entity
+// NOTE: This auxiliary entity is tightly coupled to the main 'composite_order_invoice_analytics' entity and is not independently reusable.
+// It exists solely to normalize the 'fundDistributions' array in invoice line records by transforming each element into its own row.
+// The entity includes 'invoice_line' as a source and applies a CROSS JOIN LATERAL with jsonb_array_elements,
+// allowing fund distribution elements to be extracted cleanly and used for joins (e.g., to fund and expense class).
+// While this design means the auxiliary entity is dependent on the structure of the main entity and can't function on its own,
+// it provides a clean and maintainable solution to the array normalization problem within the overall entity model.
 {
   id: '4999bd5f-3898-4b44-b283-e37bc9261ad8',
   name: 'composite_invoice_line_fund_distribution',
@@ -47,14 +52,14 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      valueGetter: "(:sourceAlias.jsonb->>'poLineId')::uuid",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'poLineId')::uuid",
-      valueFunction: 'lower(:value)::uuid',
+      valueGetter: "(:sourceAlias.jsonb->>'poLineId')",
+      filterValueGetter: "lower(:sourceAlias.jsonb->>'poLineId')",
+      valueFunction: 'lower(:value)',
       joinsTo: [
         {
           targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
           targetField: 'id',
-          type: 'equality-simple',
+          type: 'equality-cast-uuid',
           direction: 'left',
         },
       ],
@@ -65,14 +70,14 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      valueGetter: "(:fund_distribution.jsonb->>'fundId')::uuid",
-      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')::uuid",
-      valueFunction: 'lower(:value)::uuid',
+      valueGetter: "(:fund_distribution.jsonb->>'fundId')",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')",
+      valueFunction: 'lower(:value)',
       joinsTo: [
         {
           targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
           targetField: 'id',
-          type: 'equality-simple',
+          type: 'equality-cast-uuid',
           direction: 'left',
         },
       ],

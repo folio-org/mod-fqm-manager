@@ -469,6 +469,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":invoice.jsonb->>'vendorId'",
+      joinsTo: [
+        {
+          targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'vendor_name',

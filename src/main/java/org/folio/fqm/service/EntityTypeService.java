@@ -377,13 +377,8 @@ public class EntityTypeService {
     validateCustomEntityType(entityTypeId, customEntityType);
     var oldET = getCustomEntityType(entityTypeId);
 
-    // Only the owner can edit a private ET
-    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
-      // Note: The ET's owner can update the ET to have a different owner
-      throw new CustomEntityTypeOwnershipException("A custom entity type can only be modified by its owner");
-    }
-
     var updatedCustomEntityType = customEntityType.toBuilder()
+      .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
       ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
       .idView(null) // We don't want to let users do stuff that deals directly with the DB
@@ -406,12 +401,8 @@ public class EntityTypeService {
   }
 
   public void deleteCustomEntityType(UUID entityTypeId) {
-    var oldET = getCustomEntityType(entityTypeId);
-
-    // Only the owner can edit a private ET
-    if (!folioExecutionContext.getUserId().equals(oldET.getOwner())) {
-      throw new CustomEntityTypeOwnershipException("A custom entity type can only be deleted by its owner");
-    }
+    // Load the ET, so that we return the appropriate error if it doesn't exist
+    getCustomEntityType(entityTypeId);
 
     entityTypeRepository.deleteEntityType(entityTypeId);
   }

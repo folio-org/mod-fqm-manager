@@ -20,8 +20,9 @@
       alias: 'fund_distribution',
       target: 'jsonb_array_elements("invoice_line_fund_distribution.invoice_line.invoice_lines".jsonb -> \'fundDistributions\')',
       join: {
-        type: 'CROSS JOIN LATERAL',
+        type: 'LEFT JOIN LATERAL',
         joinTo: 'invoice_line.invoice_lines',
+        condition: 'TRUE',
       }
     },
   ],

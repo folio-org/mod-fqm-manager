@@ -469,6 +469,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":invoice.jsonb->>'vendorId'",
+      joinsTo: [
+        {
+          targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'vendor_name',
@@ -511,6 +519,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":invoice.jsonb->>'fiscalYearId'",
+      joinsTo: [
+        {
+          targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'fiscal_year',

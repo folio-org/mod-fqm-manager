@@ -1,0 +1,94 @@
+{
+  id: 'f3ccbf49-8e3e-4f5c-a60e-04ad80543a4a',
+  name: 'composite_order_invoice_analytics',
+  description: "Compound entity type that allows concurrent querying of PO/PO Line, Invoice/Invoice Line, Organization, \
+                Fund, Expense class, Fiscal Year to generate certain types of acquisitions-related reports",
+  private: false,
+  sources: [
+    {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+      targetField: 'purchase_order_id',
+      sourceField: 'po.id',
+      overrideJoinDirection: "left",
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'invoice_line_fund_distribution',
+      type: 'entity-type',
+      targetId: '4999bd5f-3898-4b44-b283-e37bc9261ad8', // composite_invoice_line_fund_distribution
+      targetField: 'po_line_id',
+      sourceField: 'pol.id',
+      overrideJoinDirection: "left",
+      essentialOnly: true,
+      order: 30,
+    },
+    {
+      alias: 'invoice',
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.invoice_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'organization',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      targetField: 'id',
+      sourceField: 'invoice.vendor_id',
+      essentialOnly: true,
+      order: 50
+    },
+    {
+      alias: 'fiscal_year',
+      type: 'entity-type',
+      targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+      targetField: 'id',
+      sourceField: 'invoice.fiscal_year_id',
+      essentialOnly: true,
+      order: 60
+    },
+    {
+      alias: 'fund',
+      type: 'entity-type',
+      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
+      useIdColumns: true,
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.fund_id',
+      order: 70,
+    },
+    {
+      alias: 'fund_type',
+      type: 'entity-type',
+      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'fund.fund_type_id',
+      order: 80
+    },
+    {
+      alias: 'expense_class',
+      type: 'entity-type',
+      targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+      useIdColumns: true,
+      essentialOnly: true,
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.expense_class_id',
+      order: 90
+    },
+  ]
+}

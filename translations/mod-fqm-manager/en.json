@@ -1649,5 +1649,6 @@
   "entityType.composite_order_invoice_analytics.fiscal_year": "Fiscal year",
   "entityType.composite_order_invoice_analytics.fund": "Fund",
   "entityType.composite_order_invoice_analytics.fund_type": "Fund type",
+  "entityType.composite_invoice_line_fund_distribution.fund_total_value": "Line — Fund distribution value",
   "entityType.composite_order_invoice_analytics.expense_class": "Expense class"
 }

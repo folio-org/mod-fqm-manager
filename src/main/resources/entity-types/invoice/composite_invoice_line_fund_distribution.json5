@@ -100,5 +100,20 @@
         },
       ],
     },
+    {
+      name: 'fund_total_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "(\
+        CASE WHEN (:fund_distribution.jsonb->>'distributionType') = 'percentage' \
+          THEN (:fund_distribution.jsonb->>'value') || '%' \
+          ELSE (:fund_distribution.jsonb->>'value') \
+        END \
+      )",
+      queryable: false,
+      visibleByDefault: true,
+      essential: true,
+    },
   ],
 }

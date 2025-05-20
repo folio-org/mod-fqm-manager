@@ -26,16 +26,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PermissionsRegularService implements PermissionsService {
 
-  // package-private for visibility in unit tests
-
-  @Value("${folio.is-eureka}")
-  boolean isEureka;
-
   @Value("${mod-fqm-manager.permissions-cache-timeout-seconds:60}")
   private long cacheDurationSeconds;
 
   private final FolioExecutionContext context;
-  private final ModPermissionsClient modPermissionsClient;
   private final ModRolesKeycloakClient modRolesKeycloakClient;
   private final Cache<TenantUserPair, Set<String>> cache = Caffeine.newBuilder()
     .expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS)
@@ -55,7 +49,7 @@ public class PermissionsRegularService implements PermissionsService {
 
   public Set<String> getUserPermissions(String tenantId, UUID userId) {
     TenantUserPair key = new TenantUserPair(tenantId, userId);
-    return cache.get(key, k -> isEureka ? getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId()) : getUserPermissionsFromModPermissions(k.tenant(), k.userId()));
+    return cache.get(key, k -> getUserPermissionsFromRolesKeycloak(k.tenant(), k.userId()));
   }
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
@@ -91,12 +85,6 @@ public class PermissionsRegularService implements PermissionsService {
       log.warn("User {} is missing permissions that are required for this operation: [{}]", userId, missingPermissions);
       throw new MissingPermissionsException(missingPermissions);
     }
-  }
-
-  private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {
-    return modPermissionsClient
-      .getPermissionsForUser(tenantId, userId.toString())
-      .getPermissionNames();
   }
 
   private Set<String> getUserPermissionsFromRolesKeycloak(String tenantId, UUID userId) {

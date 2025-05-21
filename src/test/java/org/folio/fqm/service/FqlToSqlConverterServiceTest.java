@@ -366,13 +366,13 @@ class FqlToSqlConverterServiceTest {
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        DSL.trueCondition().and(DSL.trueCondition())
+        field("openUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
       ),
       Arguments.of(
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
-        DSL.trueCondition().and(DSL.trueCondition())
+        field("rangedUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
       ),
       Arguments.of(
         "in list ranged UUID",
@@ -392,15 +392,15 @@ class FqlToSqlConverterServiceTest {
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
-        cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
-          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class)))
+        field("rangedUUIDField").isNull().or(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
+          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class))))
       ),
       Arguments.of(
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
-        cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
-          .and(trueCondition)
+        field("openUUIDField").isNull().or(cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+          .and(trueCondition))
       ),
       Arguments.of(
         "complex condition 1",
@@ -428,9 +428,11 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            and(
-              field("field3").notEqualIgnoreCase("value1"),
-              field("field3").notEqualIgnoreCase("value2")
+            field("field3").isNull().or(
+              and(
+                field("field3").notEqualIgnoreCase("value1"),
+                field("field3").notEqualIgnoreCase("value2")
+              )
             )
           )
       ),
@@ -460,9 +462,11 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            and(
-              field("field3").notEqualIgnoreCase("value1"),
-              field("field3").notEqualIgnoreCase("value2")
+            field("field3").isNull().or(
+              and(
+                field("field3").notEqualIgnoreCase("value1"),
+                field("field3").notEqualIgnoreCase("value2")
+              )
             )
           )
       ),
@@ -470,10 +474,12 @@ class FqlToSqlConverterServiceTest {
         "not in list",
         """
           {"field1": {"$nin": ["value1", 2, true]}}""",
-        and(
-          field("field1").notEqualIgnoreCase("value1"),
-          field("field1").notEqual(2),
-          field("field1").notEqual(true)
+        field("field1").isNull().or(
+          and(
+            field("field1").notEqualIgnoreCase("value1"),
+            field("field1").notEqual(2),
+            field("field1").notEqual(true)
+          )
         )
       ),
       Arguments.of(
@@ -594,9 +600,11 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            and(
-              field("field3").notEqualIgnoreCase("value1"),
-              field("field3").notEqualIgnoreCase("value2")
+            field("field3").isNull().or(
+              and(
+                field("field3").notEqualIgnoreCase("value1"),
+                field("field3").notEqualIgnoreCase("value2")
+              )
             )
           )
       ),
@@ -635,10 +643,12 @@ class FqlToSqlConverterServiceTest {
         "not-in operator on a field with a valueFunction",
         """
           {"fieldWithAValueFunction": {"$nin": ["value1", 2, true]}}""",
-        and(
-          field("fieldWithAValueFunction").notEqualIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
-          field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
-          field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
+        field("fieldWithAValueFunction").isNull().or(
+          and(
+            field("fieldWithAValueFunction").notEqualIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
+            field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
+            field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
+          )
         )
       ),
 

@@ -641,7 +641,7 @@ class FqlToSqlConverterServiceTest {
           field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
         )
       ),
-
+      //
       Arguments.of(
         "contains_all condition on a field with a filter value getter and a value function",
         """

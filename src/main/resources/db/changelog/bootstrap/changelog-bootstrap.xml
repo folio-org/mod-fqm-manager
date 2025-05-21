@@ -9,4 +9,5 @@
   <include file="harvested-views-quenelia.xml" relativeToChangelogFile="true"/>
   <include file="harvested-views-ramsons.xml" relativeToChangelogFile="true"/>
   <include file="harvested-views-sunflower.xml" relativeToChangelogFile="true"/>
+  <include file="harvested-views-trillium.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

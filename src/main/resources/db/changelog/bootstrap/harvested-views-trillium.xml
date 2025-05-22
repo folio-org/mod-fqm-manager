@@ -8,4 +8,15 @@
     <sqlFile path="sql/create-view-src-consortia-tenant.sql" relativeToChangelogFile="true" splitStatements="false"/>
   </changeSet>
 
+  <changeSet id="create_view_inventory_identifier_type" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="identifier_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+            replaceIfExists="true"
+            viewName="src_inventory_identifier_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.identifier_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

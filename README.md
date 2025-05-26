@@ -39,25 +39,25 @@ mvn clean install
 ## Environment Variables
 | Name                                              | Default Value | Description                                                                                    |
 |---------------------------------------------------|---------------|------------------------------------------------------------------------------------------------|
-| DB_HOST                                           | localhost     | Postgres hostname                                                                              |
-| DB_PORT                                           | 5432          | Postgres port                                                                                  |
-| DB_HOST_READER                                    | localhost     | Postgres hostname                                                                              |
-| DB_PORT_READER                                    | 5432          | Postgres port                                                                                  |
-| DB_USERNAME                                       | postgres      | Postgres username                                                                              |
-| DB_PASSWORD                                       | postgres      | Postgres password                                                                              |
-| DB_DATABASE                                       | postgres      | Postgres database name                                                                         |
-| IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA                                              |
-| MAX_QUERY_SIZE                                    | 1250000       | max result count per query                                                                     |
-| mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions                                                            |
-| mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions                                                     |
-| mod-fqm-manager.zombie-query-max-wait-seconds     | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie |
-| server.port                                       | 8081          | Server port                                                                                    |
-| MOD_FQM_MANAGER_QUERY_RETENTION_DURATION          | 3h            | Older queries get deleted                                                                      |
-| task.execution.pool.core-size                     | 9             | Core number of concurrent async tasks                                                          |
-| task.execution.pool.max-size                      | 10            | Max number of concurrent async tasks                                                           |
-| task.execution.pool.queue-capacity                | 1000          | Size of the task queue                                                                         |
+| DB\_HOST                                          | localhost     | Postgres hostname                                                                              |
+| DB\_PORT                                          | 5432          | Postgres port                                                                                  |
+| DB\_HOST\_READER                                  | localhost     | Postgres hostname                                                                              |
+| DB\_PORT\_READER                                  | 5432          | Postgres port                                                                                  |
+| DB\_USERNAME                                      | postgres      | Postgres username                                                                              |
+| DB\_PASSWORD                                      | postgres      | Postgres password                                                                              |
+| DB\_DATABASE                                      | postgres      | Postgres database name                                                                         |
+| IS\_EUREKA                                        | false         | Specifies if environment is configured for EUREKA                                              |
+| MAX\_QUERY\_SIZE                                  | 1250000       | max result count per query                                                                     |
+| MODFQMMANAGER\_PERMISSIONSCACHETIMEOUTSECONDS     | 60            | Cache duration for user permissions                                                            |
+| MODFQMMANAGER\_ENTITYTYPECACHETIMEOUTSECONDS      | 300           | Cache duration for entity type definitions                                                     |
+| MODFQMMANAGER\_ZOMBIEQUERYMAXWAITSECONDS          | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie |
+| SERVER\_PORT                                      | 8081          | Server port                                                                                    |
+| MOD\_FQM\_MANAGER\_QUERY\_RETENTION\_DURATION     | 3h            | Older queries get deleted                                                                      |
+| TASK\_EXECUTION\_POOL\_CORESIZE                   | 9             | Core number of concurrent async tasks                                                          |
+| TASK\_EXECUTION\_POOL\_MAXSIZE                    | 10            | Max number of concurrent async tasks                                                           |
+| TASK\_EXECUTION\_POOL\_QUEUECAPACITY              | 1000          | Size of the task queue                                                                         |
 
-> **Note regarding `mod-fqm-manager.entity-type-cache-timeout-seconds`:** The default value defined in the project's
+> **Note regarding `MODFQMMANAGER\_ENTITYTYPECACHETIMEOUTSECONDS`:** The default value defined in the project's
 > module descriptor is `300`, as this value is more appropriate for development environments while still being reasonable
 > for production. In general, production environments will see more benefit with higher values, since entity type
 > definitions are very static and normally only change with module upgrades. `86400` (1 day) or `604800` (1 week) would
@@ -88,7 +88,7 @@ Note: "memory" here refers to heap space memory (set with the `-Xmx` parameter o
 
 | Name                               | Default Value | Description                   |
 |------------------------------------|---------------|-------------------------------|
-| mod-fqm-manager.bypass-permissions | false         | Disable all permission checks |
+| MODFQMMANAGER\_BYPASSPERMISSIONS   | false         | Disable all permission checks |
 
 ## Installing the module
 Follow the guide of Deploying Modules sections of the [Okapi Guide](https://github.com/folio-org/okapi/blob/master/doc/guide.md#example-1-deploying-and-using-a-simple-module) and Reference, which describe the process in detail.

@@ -1,0 +1,21 @@
+on:
+  repository_dispatch:
+    types: [test]
+
+jobs:
+  test:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "hi" > test.txt
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          title: 'Test PR'
+          body: 'This is a test pull request.'
+          branch: 'test-branch'
+          commit-message: 'Add test.txt'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sign-commits: true

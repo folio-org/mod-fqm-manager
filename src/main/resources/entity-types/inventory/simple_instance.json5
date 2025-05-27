@@ -384,13 +384,41 @@
             //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'identifierTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
             //              valueFunction: 'lower(:value)',
             //            },
+            {
+              name: 'identifier_type',
+              property: 'identifierType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(identifier_type.jsonb ->> 'name' ORDER BY record.value ->> 'identifierTypeId') \
+                                FILTER (WHERE (identifier_type.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'identifiers')) record(value) \
+                                join ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type \
+                                ON (record.value ->> 'identifierTypeId') = identifier_type.id::text \
+                            )",
+            }
           ],
         },
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'identifiers'",
+      valueGetter: "( \
+                      SELECT \
+                        jsonb_agg(\
+                          record.value || \
+                          jsonb_build_object('identifierType', identifier_type.jsonb ->> 'name') \
+                          ORDER BY record.value ->> 'identifierTypeId') \
+                      FROM \
+                        jsonb_array_elements((:sourceAlias.jsonb -> 'identifiers')) record(value) \
+                        LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type \
+                        ON (record.value ->> 'identifierTypeId') = identifier_type.id::text\
+                    )::text"
     },
     {
       name: 'contributors',
@@ -431,7 +459,7 @@
               valueGetter: "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
                          FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                           JOIN src_inventory_contributor_type contributor_type \
+                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_type contributor_type \
                              ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
                         )",
             },
@@ -455,7 +483,7 @@
               valueGetter: "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
                          FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                           JOIN src_inventory_contributor_name_type contributor_name_type \
+                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
                              ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text \
                         )",
             },
@@ -481,9 +509,9 @@
                                                      'contributorNameType', contributor_name_type.jsonb ->> 'name') \
                    ORDER BY record.value ->> 'contributorTypeId', record.value ->> 'contributorNameTypeId') \
                  FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                   LEFT JOIN src_inventory_contributor_type contributor_type \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_type contributor_type \
                      ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
-                   LEFT JOIN src_inventory_contributor_name_type contributor_name_type \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
                      ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text)::text",
     },
     {
@@ -545,7 +573,7 @@
               valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'classificationTypeId') \
                              FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                              FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-                               JOIN src_inventory_classification_type class_type \
+                               join ${tenant_id}_mod_fqm_manager.src_inventory_classification_type class_type \
                                  ON (record.value ->> 'classificationTypeId') = class_type.id::text \
                             )",
             },
@@ -582,7 +610,7 @@
                                       jsonb_build_object('classificationType', class_type.jsonb ->> 'name') \
                        ORDER BY record.value ->> 'classificationTypeId') \
                      FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-                       LEFT JOIN src_inventory_classification_type class_type \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_classification_type class_type \
                          ON (record.value ->> 'classificationTypeId') = class_type.id::text)::text",
     },
     {
@@ -847,8 +875,8 @@
       idColumnName: 'instance_format_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT jsonb_agg(format.jsonb ->> 'name') FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
-      filterValueGetter: "( SELECT jsonb_agg(lower(format.jsonb ->> 'name')) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) JOIN src_inventory_instance_format format ON record.value::text = format.id::text )",
+      valueGetter: "( SELECT jsonb_agg(format.jsonb ->> 'name') FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) join ${tenant_id}_mod_fqm_manager.src_inventory_instance_format format ON record.value::text = format.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(format.jsonb ->> 'name')) FROM jsonb_array_elements_text(:inst.jsonb -> 'instanceFormatIds') record(value) join ${tenant_id}_mod_fqm_manager.src_inventory_instance_format format ON record.value::text = format.id::text )",
       source: {
         entityTypeId: '5e8f16c7-086e-4a3f-a8ec-a55237f061be',
         columnName: 'name',
@@ -1251,6 +1279,25 @@
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
         type: 'fqm',
         name: 'tenant_id',
+      },
+      ecsOnly: true,
+    },
+    {
+      name: 'tenant_name',
+      essential: true,
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      valueFunction: 'lower(:value)',
+      source: {
+        columnName: 'tenant_name',
+        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+        type: 'fqm',
+        name: 'tenant_name',
       },
       ecsOnly: true,
     },

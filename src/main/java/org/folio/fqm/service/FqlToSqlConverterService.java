@@ -287,7 +287,7 @@ public class FqlToSqlConverterService {
         return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
-    return and(conditionList);
+    return field.isNull().or(and(conditionList));
   }
 
   private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {

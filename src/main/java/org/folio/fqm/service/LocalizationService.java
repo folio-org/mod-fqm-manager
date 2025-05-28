@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Small wrapper class for {@link TranslationService TranslationService} to provide reusable templates for translations,
@@ -50,7 +52,11 @@ public class LocalizationService {
   }
 
   public EntityType localizeEntityType(EntityType entityType) {
-    entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
+    if (!Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom"))) {
+      entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
+    } else {
+      entityType.setLabelAlias(entityType.getName());
+    }
 
     var localizedColumns = entityType.getColumns().stream()
       .map(column -> localizeEntityTypeColumn(entityType, column))
@@ -83,9 +89,16 @@ public class LocalizationService {
   }
 
   String localizeSourceLabel(EntityType entityType, String sourceAlias) {
-    return translationService.format(
-      ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), sourceAlias)
-    );
+    return entityType.getSources()
+      .stream()
+      .filter(source -> source.getAlias().equals(sourceAlias))
+      .map(EntityTypeSource::getName)
+      .filter(Objects::nonNull)
+      .findFirst().orElse(
+        translationService.format(
+          ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), sourceAlias)
+        )
+      );
   }
 
   private String getTranslationWithSourcePrefix(EntityType entityType, String columnName, String fieldLabel) {

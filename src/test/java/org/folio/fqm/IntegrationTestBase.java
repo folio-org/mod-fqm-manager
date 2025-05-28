@@ -47,6 +47,7 @@ public class IntegrationTestBase {
     Testcontainers.exposeHostPorts(mokapi.getPort());
   }
 
+  @SuppressWarnings("resource")
   @Container
   private static final PostgreSQLContainer<?> postgres =
     new PostgreSQLContainer<>("postgres:16-alpine")
@@ -55,7 +56,8 @@ public class IntegrationTestBase {
       .withExposedPorts(5432)
       .withUsername("myusername")
       .withPassword("mypassword")
-      .withDatabaseName("mypostgres");
+      .withDatabaseName("mypostgres")
+      .withStartupAttempts(3);
 
   @Container
   private static final GenericContainer<?> module =

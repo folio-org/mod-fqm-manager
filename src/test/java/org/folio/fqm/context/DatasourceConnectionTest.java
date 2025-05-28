@@ -21,11 +21,15 @@ import static java.lang.String.format;
 @Testcontainers
 @SpringBootTest
 class DatasourceConnectionTest {
+  @SuppressWarnings("resource")
   @Container
-  public static PostgreSQLContainer<?> readerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+  public static PostgreSQLContainer<?> readerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine")
+      .withStartupAttempts(3);
 
+  @SuppressWarnings("resource")
   @Container
-  public static PostgreSQLContainer<?> writerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+  public static PostgreSQLContainer<?> writerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine")
+      .withStartupAttempts(3);
 
   @Autowired
   @Qualifier("readerDataSource")

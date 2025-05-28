@@ -13,8 +13,10 @@ import org.testcontainers.junit.jupiter.Container;
 public class TestcontainerBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
   private static final int POSTGRES_PORT = 5432;
 
+  @SuppressWarnings("resource")
   @Container
-  public static PostgreSQLContainer<?> dbContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+  public static PostgreSQLContainer<?> dbContainer = new PostgreSQLContainer<>("postgres:16-alpine")
+      .withStartupAttempts(3);
 
   @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {

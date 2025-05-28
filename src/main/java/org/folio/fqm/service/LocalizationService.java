@@ -89,6 +89,7 @@ public class LocalizationService {
   }
 
   String localizeSourceLabel(EntityType entityType, String sourceAlias) {
+    // If the source has a "name" property, then use it. Otherwise, translate the sourceAlias
     return entityType.getSources()
       .stream()
       .filter(source -> source.getAlias().equals(sourceAlias))

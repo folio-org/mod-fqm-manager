@@ -46,7 +46,6 @@ mvn clean install
 | DB_USERNAME                                       | postgres      | Postgres username                                                                              |
 | DB_PASSWORD                                       | postgres      | Postgres password                                                                              |
 | DB_DATABASE                                       | postgres      | Postgres database name                                                                         |
-| IS_EUREKA                                         | false         | Specifies if environment is configured for EUREKA                                              |
 | MAX_QUERY_SIZE                                    | 1250000       | max result count per query                                                                     |
 | mod-fqm-manager.permissions-cache-timeout-seconds | 60            | Cache duration for user permissions                                                            |
 | mod-fqm-manager.entity-type-cache-timeout-seconds | 300           | Cache duration for entity type definitions                                                     |

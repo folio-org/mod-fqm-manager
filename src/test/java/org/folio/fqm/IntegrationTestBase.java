@@ -165,19 +165,19 @@ public class IntegrationTestBase {
     @NotNull
     @Override
     public MockResponse dispatch(@NotNull RecordedRequest recordedRequest) {
-      if (recordedRequest.getPath().matches("/perms/users/[-0-9a-f]+/permissions\\?expanded=true&indexField=userId")) {
+      if (recordedRequest.getPath().matches("/permissions/users/.+")) {
         return new MockResponse().setBody("""
           {
-            "permissionNames": [ "organizations.organizations.collection.get",
-                                 "organizations-storage.organization-types.collection.get",
-                                 "acquisitions-units.units.collection.get"
-            ],
-            "totalRecords": 3
+            "permissions": [ "organizations.organizations.collection.get",
+                             "organizations-storage.organization-types.collection.get",
+                             "acquisitions-units.units.collection.get"
+            ]
           }
           """).setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
       if (recordedRequest.getPath().matches("/user-tenants.*")) {
-        return new MockResponse().setBody("{\"userTenants\": [], \"totalRecords\": 0}").setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        return new MockResponse().setBody("{\"userTenants\": [], \"totalRecords\": 0}")
+            .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
       }
       throw new RuntimeException("Unexpected request: " + recordedRequest.getPath());
     }

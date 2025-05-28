@@ -53,7 +53,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   @Override
   public ResponseEntity<CustomEntityType> getCustomEntityType(UUID entityTypeId) {
-    return ResponseEntity.ok(entityTypeService.getCustomEntityType(entityTypeId));
+    return ResponseEntity.ok(entityTypeService.getCustomEntityTypeWithAccessCheck(entityTypeId));
   }
 
   @Override

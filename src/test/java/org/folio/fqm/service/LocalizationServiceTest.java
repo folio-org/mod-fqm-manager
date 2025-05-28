@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +47,7 @@ class LocalizationServiceTest {
       .name("table_name")
       .addColumnsItem(new EntityTypeColumn().name("column_name"));
 
-    EntityType actual = localizationService.localizeEntityType(entityType);
+    EntityType actual = localizationService.localizeEntityType(entityType, null);
     assertEquals(expectedTableTranslation, actual.getLabelAlias());
     assertEquals(expectedColumnTranslation, actual.getColumns().get(0).getLabelAlias());
     verify(translationService, times(numInvocations)).format(anyString());
@@ -104,7 +106,7 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerSourceTranslationKey)).thenReturn(expectedInnerSourceTranslation);
     mockSourceLabelJoiner();
 
-    EntityType result = localizationService.localizeEntityType(entityType);
+    EntityType result = localizationService.localizeEntityType(entityType, List.of(new EntityTypeSource().alias("nested_source")));
     assertEquals("Inner Source Name | Field from a simple entity!", result.getColumns().get(0).getLabelAlias());
 
     verify(translationService, times(2)).format(anyString());
@@ -124,7 +126,7 @@ class LocalizationServiceTest {
     when(translationService.format(expectedTranslationKey, "customField", "Custom Field"))
       .thenReturn("Test's Custom Field");
 
-    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, List.of(), entityType.getColumns().get(0));
 
     assertEquals(expectedTranslation, localizedColumn.getLabelAlias());
 
@@ -156,7 +158,7 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
     when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
 
-    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
 
     assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
     assertEquals(
@@ -211,7 +213,7 @@ class LocalizationServiceTest {
     when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
     when(translationService.format(expectedInnermostQualifiedTranslationKey)).thenReturn(expectedInnermostQualifiedTranslation);
 
-    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, entityType.getColumns().get(0));
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null , entityType.getColumns().get(0));
 
     assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
     assertEquals(expectedInnerTranslation, inner.getLabelAlias());
@@ -226,4 +228,39 @@ class LocalizationServiceTest {
     verify(translationService, times(1)).format(expectedInnermostQualifiedTranslationKey);
     verifyNoMoreInteractions(translationService);
   }
+
+  @Test
+  void testLocalizeSourceLabel() {
+    // Setup
+    var source1 = new EntityTypeSource().alias("source1").name("Source One");
+    var source2 = new EntityTypeSource().alias("source2");
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addSourcesItem(source1)
+      .addSourcesItem(source2);
+
+    // Case 1: Source found with non-null name
+    String result1 = localizationService.localizeSourceLabel(entityType, "source1", source1);
+    assertEquals("Source One", result1);
+
+    // Case 2: Source found with null name - should translate the alias
+    when(translationService.format("mod-fqm-manager.entityType.table_name.source2"))
+      .thenReturn("Translated Source Two");
+
+    String result2 = localizationService.localizeSourceLabel(entityType, "source2", source2);
+    assertEquals("Translated Source Two", result2);
+
+    // Case 3: Source not found - should translate the alias
+    when(translationService.format("mod-fqm-manager.entityType.table_name.unknown_source"))
+      .thenReturn("Translated Unknown Source");
+
+    String result3 = localizationService.localizeSourceLabel(entityType, "unknown_source", new EntityTypeSource());
+    assertEquals("Translated Unknown Source", result3);
+
+    // Verify
+    verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.source2");
+    verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.unknown_source");
+    verifyNoMoreInteractions(translationService);
+  }
+
 }

@@ -320,6 +320,7 @@ public class EntityTypeRepository {
         .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class))
         .values(UUID.fromString(customEntityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
         .execute();
+      entityTypeCache.invalidate(executionContext.getTenantId());
     } catch (JsonProcessingException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
     }
@@ -332,6 +333,7 @@ public class EntityTypeRepository {
         .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
         .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(customEntityType.getId())))
         .execute();
+      entityTypeCache.invalidate(executionContext.getTenantId());
     } catch (JsonProcessingException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
     }
@@ -342,6 +344,7 @@ public class EntityTypeRepository {
     jooqContext.deleteFrom(table(TABLE_NAME))
       .where(field(ID_FIELD_NAME, UUID.class).eq(entityTypeId))
       .execute();
+    entityTypeCache.invalidate(executionContext.getTenantId());
   }
 
   @SneakyThrows

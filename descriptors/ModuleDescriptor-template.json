@@ -569,9 +569,6 @@
       },
       { "name": "MODFQMMANAGER_ENTITYTYPECACHETIMEOUTSECONDS",
         "value": "300"
-      },
-      { "name": "IS_EUREKA",
-        "value": "false"
       }
     ]
   }

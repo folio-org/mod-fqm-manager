@@ -525,7 +525,7 @@
       { "name": "JAVA_OPTIONS",
         "value": "-XX:MaxRAMPercentage=66.0"
       },
-      { "name": "server.port",
+      { "name": "SERVER_PORT",
         "value": "8081"
       },
       { "name": "DB_HOST",
@@ -558,16 +558,16 @@
       { "name": "DB_MAXPOOLSIZE",
         "value": "5"
       },
-      { "name": "MOD_FQM_MANAGER_QUERY_RETENTION_DURATION",
+      { "name": "MODFQMMANAGER_QUERYRETENTIONDURATION",
         "value": "3h"
       },
-      { "name": "spring.task.execution.pool.max-size",
+      { "name": "SPRING_TASK_EXECUTION_POOL_MAXSIZE",
         "value": "12"
       },
       { "name": "MAX_QUERY_SIZE",
         "value": "1250000"
       },
-      { "name": "mod-fqm-manager.entity-type-cache-timeout-seconds",
+      { "name": "MODFQMMANAGER_ENTITYTYPECACHETIMEOUTSECONDS",
         "value": "300"
       }
     ]

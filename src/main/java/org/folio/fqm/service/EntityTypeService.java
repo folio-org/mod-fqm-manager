@@ -434,19 +434,19 @@ public class EntityTypeService {
     return customET.getShared() || folioExecutionContext.getUserId().equals(customET.getOwner());
   }
 
-  private boolean currentUserCanAccessCustomEntityType(String entityTypeId) {
+  boolean currentUserCanAccessCustomEntityType(String entityTypeId) {
     var customET = getCustomEntityType(UUID.fromString(entityTypeId));
     return currentUserCanAccessCustomEntityType(customET);
   }
 
-  private void enforceAccessForPossibleCustomEntityType(UUID entityTypeId) {
+  void enforceAccessForPossibleCustomEntityType(UUID entityTypeId) {
     entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
       .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
       .map(et -> getCustomEntityType(entityTypeId))
       .ifPresent(this::enforceCustomEntityTypeAccess);
   }
 
-  private void enforceCustomEntityTypeAccess(CustomEntityType customET) {
+  void enforceCustomEntityTypeAccess(CustomEntityType customET) {
     if (!currentUserCanAccessCustomEntityType(customET)) {
       throw new CustomEntityTypeAccessDeniedException("Entity type " + customET.getId() + " is not shared. It can only be accessed by its owner");
     }

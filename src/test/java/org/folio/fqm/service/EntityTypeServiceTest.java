@@ -6,6 +6,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeAccessDeniedException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -943,4 +944,209 @@ class EntityTypeServiceTest {
     verify(repo, never()).deleteEntityType(any());
   }
 
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsShared_shouldReturnTrue() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(true)
+      .isCustom(true);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertTrue(result, "User should be able to access a shared custom entity type");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsOwnedByCurrentUser_shouldReturnTrue() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(ownerId); // Same user ID as owner
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertTrue(result, "User should be able to access their own custom entity type");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsNotSharedAndNotOwned_shouldReturnFalse() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertFalse(result, "User should not be able to access a non-shared custom entity type they don't own");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsNotCustom_shouldNotEnforceAccess() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", false);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+
+    // Act
+    entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId);
+
+    // Assert
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    // No further interaction should happen - not getting the custom entity type
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsCustomAndAccessible_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", true);
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(currentUserId)
+      .shared(false)
+      .isCustom(true);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId);
+
+    // Verify the expected method calls
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsCustomAndNotAccessible_shouldThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different from owner
+
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", true);
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeAccessDeniedException.class,
+      () -> entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId),
+      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible");
+
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsShared_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(true)
+      .isCustom(true);
+
+    // Act & Assert
+    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
+    // No exception should be thrown
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsOwnedByCurrentUser_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(ownerId); // Same as owner
+
+    // Act & Assert
+    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
+    // No exception should be thrown
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsNotSharedAndNotOwned_shouldThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeAccessDeniedException.class,
+      () -> entityTypeService.enforceCustomEntityTypeAccess(customEntityType),
+      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible");
+  }
 }

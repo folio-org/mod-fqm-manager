@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
@@ -226,4 +227,37 @@ class LocalizationServiceTest {
     verify(translationService, times(1)).format(expectedInnermostQualifiedTranslationKey);
     verifyNoMoreInteractions(translationService);
   }
+
+  @Test
+  void testLocalizeSourceLabel() {
+    // Setup
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addSourcesItem(new EntityTypeSource().alias("source1").name("Source One"))
+      .addSourcesItem(new EntityTypeSource().alias("source2"));
+
+    // Case 1: Source found with non-null name
+    String result1 = localizationService.localizeSourceLabel(entityType, "source1");
+    assertEquals("Source One", result1);
+
+    // Case 2: Source found with null name - should translate the alias
+    when(translationService.format("mod-fqm-manager.entityType.table_name.source2"))
+      .thenReturn("Translated Source Two");
+
+    String result2 = localizationService.localizeSourceLabel(entityType, "source2");
+    assertEquals("Translated Source Two", result2);
+
+    // Case 3: Source not found - should translate the alias
+    when(translationService.format("mod-fqm-manager.entityType.table_name.unknown_source"))
+      .thenReturn("Translated Unknown Source");
+
+    String result3 = localizationService.localizeSourceLabel(entityType, "unknown_source");
+    assertEquals("Translated Unknown Source", result3);
+
+    // Verify
+    verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.source2");
+    verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.unknown_source");
+    verifyNoMoreInteractions(translationService);
+  }
+
 }

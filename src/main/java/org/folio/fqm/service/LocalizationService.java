@@ -95,7 +95,8 @@ public class LocalizationService {
       .filter(source -> source.getAlias().equals(sourceAlias))
       .map(EntityTypeSource::getName)
       .filter(Objects::nonNull)
-      .findFirst().orElse(
+      .findFirst()
+      .orElseGet(() ->
         translationService.format(
           ENTITY_TYPE_COLUMN_AND_SOURCE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName(), sourceAlias)
         )

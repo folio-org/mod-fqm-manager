@@ -52,11 +52,7 @@ public class LocalizationService {
   }
 
   public EntityType localizeEntityType(EntityType entityType) {
-    if (!Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom"))) {
-      entityType.setLabelAlias(getEntityTypeLabel(entityType.getName()));
-    } else {
-      entityType.setLabelAlias(entityType.getName());
-    }
+    entityType.setLabelAlias(getEntityTypeLabel(entityType));
 
     var localizedColumns = entityType.getColumns().stream()
       .map(column -> localizeEntityTypeColumn(entityType, column))
@@ -147,8 +143,12 @@ public class LocalizationService {
     }
   }
 
-  String getEntityTypeLabel(String tableName) {
-    return translationService.format(ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE.formatted(tableName));
+  String getEntityTypeLabel(EntityType entityType) {
+    if (!Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom"))) {
+      return translationService.format(ENTITY_TYPE_LABEL_TRANSLATION_TEMPLATE.formatted(entityType.getName()));
+    } else {
+      return entityType.getName();
+    }
   }
 
   private String getEntityTypeColumnLabel(String tableName, String columnName) {

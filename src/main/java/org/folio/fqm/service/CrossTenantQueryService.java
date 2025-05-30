@@ -114,14 +114,17 @@ public class CrossTenantQueryService {
     }
 
     List<Pair<String, String>> tenantsToQuery = new ArrayList<>();
+    tenantsToQuery.add(currentTenantPair);
     for (var userMap : userTenantMaps) {
       String tenantId = userMap.get(TENANT_ID);
       String currentUserId = userMap.get("userId");
       String tenantName = userMap.get(TENANT_NAME);
       Pair<String, String> currentTenantMap = Pair.of(tenantId, tenantName);
       try {
-        permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
-        tenantsToQuery.add(currentTenantMap);
+        if (!currentTenantId.equals(tenantId)) {
+          permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
+          tenantsToQuery.add(currentTenantMap);
+        }
       } catch (MissingPermissionsException e) {
         log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
       } catch (FeignException e) {

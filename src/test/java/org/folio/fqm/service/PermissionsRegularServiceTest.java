@@ -7,20 +7,24 @@ import static org.mockito.Mockito.*;
 
 import java.util.*;
 
+import org.folio.fqm.client.ModPermissionsClient;
 import org.folio.fqm.client.ModRolesKeycloakClient;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class PermissionsRegularServiceTest {
 
   private final FolioExecutionContext context = mock(FolioExecutionContext.class);
+  private final ModPermissionsClient modPermissionsClient = mock(ModPermissionsClient.class);
   private final ModRolesKeycloakClient modRolesKeycloakClient = mock(ModRolesKeycloakClient.class);
   private final EntityTypeFlatteningService entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
   private final PermissionsRegularService permissionsService = new PermissionsRegularService(
     context,
+    modPermissionsClient,
     modRolesKeycloakClient,
     entityTypeFlatteningService
   );
@@ -28,10 +32,17 @@ class PermissionsRegularServiceTest {
   private static final UUID USER_ID = UUID.randomUUID();
 
   void setUpMocks(String... permissions) {
+
     when(context.getUserId()).thenReturn(USER_ID);
     when(context.getTenantId()).thenReturn(TENANT_ID);
-    when(modRolesKeycloakClient.getPermissionsUser(TENANT_ID, USER_ID))
-      .thenReturn(new ModRolesKeycloakClient.UserPermissions(List.of(permissions), USER_ID));
+
+    if (permissionsService.isEureka) {
+      when(modRolesKeycloakClient.getPermissionsUser(TENANT_ID, USER_ID))
+        .thenReturn(new ModRolesKeycloakClient.UserPermissions(List.of(permissions), USER_ID));
+    } else {
+      when(modPermissionsClient.getPermissionsForUser(TENANT_ID, USER_ID.toString()))
+        .thenReturn(new ModPermissionsClient.UserPermissions(List.of(permissions), permissions.length));
+    }
   }
 
 
@@ -131,12 +142,31 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void shouldCheckPermissionsUser() {
+  void WhenEurekaIsTrue() {
+    permissionsService.isEureka = true;
     setUpMocks("permission1", "permission2");
     Set<String> userPermissions = permissionsService.getUserPermissions();
 
-    verify(modRolesKeycloakClient).getPermissionsUser(TENANT_ID, USER_ID);
+    ArgumentCaptor<UUID> userIdCaptor = ArgumentCaptor.forClass(UUID.class);
+    verify(modRolesKeycloakClient).getPermissionsUser(eq(TENANT_ID), userIdCaptor.capture());
     assertEquals(2, userPermissions.size());
+
+    // Ensure no interactions with modPermissionsClient
+    verifyNoInteractions(modPermissionsClient);
+  }
+
+  @Test
+  void WhenEurekaIsFalse() {
+    permissionsService.isEureka = false;
+    setUpMocks("permission1", "permission2");
+    Set<String> userPermissions = permissionsService.getUserPermissions();
+
+    ArgumentCaptor<String> userIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(modPermissionsClient).getPermissionsForUser(eq(TENANT_ID), userIdCaptor.capture());
+    assertEquals(2, userPermissions.size());
+
+    // Ensure no interactions with modRolesKeyclockClient
+    verifyNoInteractions(modRolesKeycloakClient);
   }
 
 }

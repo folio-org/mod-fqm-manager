@@ -112,11 +112,12 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", false)));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false);
+
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
@@ -124,8 +125,8 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -138,12 +139,12 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01").crossTenantQueriesEnabled(true),
       new EntityTypeSummary().id(id2).label("label_02"));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false);
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", false)));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
@@ -156,14 +157,14 @@ class EntityTypeServiceTest {
     UUID id2 = UUID.randomUUID();
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
@@ -171,7 +172,7 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -186,26 +187,25 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02")
     );
+    var et1 = new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")); // Private entity
+    var et2 = new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")); // Non-private entity
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")), // Private entity
-      new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")) // Non-private entity
-    ));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
 
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2", "perm1"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
 
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, true);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
     verifyNoMoreInteractions(repo, localizationService);
   }
 
@@ -217,15 +217,15 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, true, false);
 
@@ -233,8 +233,8 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -950,7 +950,6 @@ class EntityTypeServiceTest {
     // Arrange
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
-    UUID currentUserId = UUID.randomUUID(); // Different user ID
 
     CustomEntityType customEntityType = new CustomEntityType()
       .id(entityTypeId.toString())
@@ -1097,7 +1096,6 @@ class EntityTypeServiceTest {
     // Arrange
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
-    UUID currentUserId = UUID.randomUUID(); // Different user ID
 
     CustomEntityType customEntityType = new CustomEntityType()
       .id(entityTypeId.toString())

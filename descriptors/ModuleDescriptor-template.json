@@ -452,6 +452,10 @@
     {
       "id": "finance.transactions",
       "version": "6.0"
+    },
+    {
+      "id": "source-storage-records",
+      "version": "3.4"
     }
   ],
   "optional": [

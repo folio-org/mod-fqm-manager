@@ -114,6 +114,7 @@ public class EntityTypeFlatteningService {
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
       .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
+      .filterConditions(originalEntityType.getFilterConditions())
       .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions());
 
     // If we have a parent, this will be `parent.`, otherwise empty

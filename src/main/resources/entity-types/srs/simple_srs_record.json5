@@ -45,6 +45,16 @@
       valueGetter: ':record_lb.snapshot_id',
     },
     {
+      name: 'matched_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.matched_id',
+    },
+    {
       name: 'generation',
             dataType: {
         dataType: 'integerType',

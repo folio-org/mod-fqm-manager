@@ -1,9 +1,11 @@
 package org.folio.fqm.utils.flattening;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -47,7 +49,7 @@ public class SourceUtils {
    * @param renamedAliases The map of old aliases to new aliases.
    * @param sourceAlias    [deprecated] The explicitly provided sourceAlias property on the column, for legacy support
    * @param finalPass      If this is the final pass of injection (the top-most entity type). If this is false,
-   *                         we will use psuedo-aliases (:[intermediate-alias]) to keep track of new names as we progress up the tree.
+   *                       we will use psuedo-aliases (:[intermediate-alias]) to keep track of new names as we progress up the tree.
    * @return The column with the injected source aliases.
    */
   public static <T extends Field> T injectSourceAlias(
@@ -70,35 +72,13 @@ public class SourceUtils {
   ) {
     getAliasReplacementOrder(renamedAliases)
       .forEach(alias -> {
-        // only replaces things on the first pass
-        String oldAliasReference = ':' + alias;
-        // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
-        String intermediateAliasReference = ":[%s]".formatted(alias);
-        // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
-        String newAliasReference = (finalPass ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(alias));
 
-        column.valueGetter(
-          column
-            .getValueGetter()
-            .replace(oldAliasReference, newAliasReference)
-            .replace(intermediateAliasReference, newAliasReference)
-        );
-
+        column.valueGetter(applyAliasReplacement(column.getValueGetter(), alias, renamedAliases, finalPass));
         if (column.getFilterValueGetter() != null) {
-          column.filterValueGetter(
-            column
-              .getFilterValueGetter()
-              .replace(oldAliasReference, newAliasReference)
-              .replace(intermediateAliasReference, newAliasReference)
-          );
+          column.filterValueGetter(applyAliasReplacement(column.getFilterValueGetter(), alias, renamedAliases, finalPass));
         }
         if (column.getValueFunction() != null) {
-          column.valueFunction(
-            column
-              .getValueFunction()
-              .replace(oldAliasReference, newAliasReference)
-              .replace(intermediateAliasReference, newAliasReference)
-          );
+          column.valueFunction(applyAliasReplacement(column.getValueFunction(), alias, renamedAliases, finalPass));
         }
         if (column.getDataType() instanceof ObjectType objectType) {
           injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
@@ -136,6 +116,43 @@ public class SourceUtils {
     }
   }
 
+  public static List<String> injectSourceAliasIntoFilterConditions(
+    List<String> filterConditions,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+    List<String> orderedAliases = getAliasReplacementOrder(renamedAliases).toList();
+    List<String> updatedConditions = new ArrayList<>(filterConditions.size());
+
+    for (String condition : filterConditions) {
+      String updatedCondition = condition;
+      for (String alias : orderedAliases) {
+        updatedCondition = applyAliasReplacement(updatedCondition, alias, renamedAliases, finalPass);
+      }
+      updatedConditions.add(updatedCondition);
+    }
+
+    return updatedConditions;
+  }
+
+  public static String applyAliasReplacement(
+    String input,
+    String alias,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+    // only replaces things on the first pass
+    String oldAliasReference = ':' + alias;
+    // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
+    String intermediateAliasReference = ":[%s]".formatted(alias);
+    // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
+    String newAliasReference = (finalPass ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(alias));
+
+    return input
+      .replace(oldAliasReference, newAliasReference)
+      .replace(intermediateAliasReference, newAliasReference);
+  }
+
   private static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
     // Sort longer aliases before others, since the map was created in prefix order and we want to use the most recently added aliases first
     // If we don't do this, then we might replace with "abc" before "abc.def" when handling an alias reference like ":abc.def".
@@ -158,7 +175,7 @@ public class SourceUtils {
             .ofNullable(newColumn.getIsIdColumn())
             .map(isIdColumn ->
               Boolean.TRUE.equals(isIdColumn) &&
-              (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
+                (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
             )
             .orElse(null)
         );

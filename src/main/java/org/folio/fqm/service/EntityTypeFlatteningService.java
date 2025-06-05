@@ -211,12 +211,25 @@ public class EntityTypeFlatteningService {
       log.info("YYZ ORIGINAL FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
       log.info("ALIASES: ");
       for (String oldAlias : renamedAliases.keySet()) {
-        log.info("Old: {} | New: {}", oldAlias,  renamedAliases.get(oldAlias));
+        log.info("Old: {} | New: {}", oldAlias, renamedAliases.get(oldAlias));
       }
       List<String> newFilterConditions = new ArrayList<>();
       for (String condition : flattenedEntityType.getFilterConditions()) {
         for (String oldAlias : renamedAliases.keySet()) {
-          condition = condition.replace(oldAlias, renamedAliases.get(oldAlias));
+
+          // NEW STUFF TO FIX REPLACEMENT HERE
+          String oldAliasReference = ':' + oldAlias;
+          // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
+          String intermediateAliasReference = ":[%s]".formatted(oldAlias);
+          // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
+          String newAliasReference = (sourceFromParent == null ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(oldAlias));
+          condition = condition
+            .replace(oldAliasReference, newAliasReference)
+            .replace(intermediateAliasReference, newAliasReference);
+          // END NEW STUFF
+
+
+//          condition = condition.replace(":" + oldAlias, renamedAliases.get(oldAlias));
           newFilterConditions.add(condition);
         }
       }

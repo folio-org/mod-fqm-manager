@@ -1,7 +1,7 @@
 {
   id: 'd5449a05-fd57-45e5-9383-ea615246f6f9',
   name: 'simple_srs_record',
-  private: true,
+  private: false,
   sources: [
     {
       alias: 'record_lb',

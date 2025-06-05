@@ -219,10 +219,15 @@ public class EntityTypeFlatteningService {
 
           // NEW STUFF TO FIX REPLACEMENT HERE
           String oldAliasReference = ':' + oldAlias;
+          log.info("Old alias reference: {}", oldAliasReference);
           // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
           String intermediateAliasReference = ":[%s]".formatted(oldAlias);
+          log.info("Intermediate alias reference: {}", intermediateAliasReference);
           // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
           String newAliasReference = (sourceFromParent == null ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(oldAlias));
+          log.info("New alias reference: {}", newAliasReference);
+
+
           condition = condition
             .replace(oldAliasReference, newAliasReference)
             .replace(intermediateAliasReference, newAliasReference);

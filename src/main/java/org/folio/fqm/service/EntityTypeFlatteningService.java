@@ -208,6 +208,11 @@ public class EntityTypeFlatteningService {
 
     // HERE
     if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {
+      log.info("YYZ ORIGINAL FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
+      log.info("ALIASES: ");
+      for (String oldAlias : renamedAliases.keySet()) {
+        log.info("Old: {} | New: {}", oldAlias,  renamedAliases.get(oldAlias));
+      }
       List<String> newFilterConditions = new ArrayList<>();
       for (String condition : flattenedEntityType.getFilterConditions()) {
         for (String oldAlias : renamedAliases.keySet()) {
@@ -215,6 +220,8 @@ public class EntityTypeFlatteningService {
           newFilterConditions.add(condition);
         }
       }
+      log.info("YYZ NEW FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
+
 //      flattenedEntityType.sourceViewExtractor(
 //        SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
 //      );

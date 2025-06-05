@@ -32,6 +32,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
@@ -203,6 +204,23 @@ public class EntityTypeFlatteningService {
       flattenedEntityType.sourceViewExtractor(
         SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
       );
+    }
+
+    // HERE
+    if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {
+      List<String> newFilterConditions = new ArrayList<>();
+      for (String condition : flattenedEntityType.getFilterConditions()) {
+        for (String oldAlias : renamedAliases.keySet()) {
+          condition = condition.replace(oldAlias, renamedAliases.get(oldAlias));
+          newFilterConditions.add(condition);
+        }
+      }
+//      flattenedEntityType.sourceViewExtractor(
+//        SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
+//      );
+
+      flattenedEntityType.filterConditions(newFilterConditions);
+
     }
 
     // Copy and localize all of the columns defined directly in the entity type separately, so that they can be sorted

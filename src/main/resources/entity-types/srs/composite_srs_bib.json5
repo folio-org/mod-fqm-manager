@@ -11,6 +11,7 @@
       essentialOnly: true,
     }
   ],
+  // TODO: need to replace source alias here
   filterConditions: [
     ":srs_record.record_type = 'MARC_BIB'"
   ]

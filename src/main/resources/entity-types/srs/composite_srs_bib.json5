@@ -12,6 +12,6 @@
     }
   ],
   filterConditions: [
-    "srs_record.record_type = 'MARC_BIB'"
+    ":srs_record.record_type = 'MARC_BIB'"
   ]
 }

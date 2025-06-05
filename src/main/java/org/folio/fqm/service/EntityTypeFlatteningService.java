@@ -208,7 +208,7 @@ public class EntityTypeFlatteningService {
 
     // HERE
     if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {
-      log.info("YYZ ORIGINAL FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
+      log.info("ORIGINAL FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
       log.info("ALIASES: ");
       for (String oldAlias : renamedAliases.keySet()) {
         log.info("Old: {} | New: {}", oldAlias, renamedAliases.get(oldAlias));
@@ -218,14 +218,15 @@ public class EntityTypeFlatteningService {
         for (String oldAlias : renamedAliases.keySet()) {
 
           // NEW STUFF TO FIX REPLACEMENT HERE
+          log.info("YYZ Condition: {}\n", condition);
           String oldAliasReference = ':' + oldAlias;
-          log.info("Old alias reference: {}", oldAliasReference);
+          log.info("Old alias reference: {}\n", oldAliasReference);
           // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
           String intermediateAliasReference = ":[%s]".formatted(oldAlias);
-          log.info("Intermediate alias reference: {}", intermediateAliasReference);
+          log.info("Intermediate alias reference: {}\n", intermediateAliasReference);
           // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
           String newAliasReference = (sourceFromParent == null ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(oldAlias));
-          log.info("New alias reference: {}", newAliasReference);
+          log.info("New alias reference: {}\n", newAliasReference);
 
 
           condition = condition

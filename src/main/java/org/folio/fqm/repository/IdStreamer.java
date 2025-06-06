@@ -113,11 +113,18 @@ public class IdStreamer {
 
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
+
+      if (!CollectionUtils.isEmpty(entityType.getFilterConditions())) {
+        for (String condition : entityType.getFilterConditions()) {
+          whereClause = whereClause.and(condition);
+        }
+      }
       if (ecsEnabled && !CollectionUtils.isEmpty(entityType.getAdditionalEcsConditions())) {
         for (String condition : entityType.getAdditionalEcsConditions()) {
           whereClause = whereClause.and(condition);
         }
       }
+
       ResultQuery<Record1<String[]>> innerQuery = buildQuery(
         entityTypeDefinition,
         currentIdValueGetter,

@@ -1,9 +1,11 @@
 package org.folio.fqm.utils.flattening;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -39,7 +41,7 @@ public class SourceUtils {
   /**
    * This method injects the source alias into the column's value getter and filter value getter.
    * It also recursively injects the source alias into nested object types and array types.
-   *
+   * <p>
    * Only one of renamedAliases or sourceAlias should be provided. If both are provided, renamedAliases will be ignored.
    *
    * @param <T>            The type of the column, which must extend the Field interface.
@@ -47,7 +49,7 @@ public class SourceUtils {
    * @param renamedAliases The map of old aliases to new aliases.
    * @param sourceAlias    [deprecated] The explicitly provided sourceAlias property on the column, for legacy support
    * @param finalPass      If this is the final pass of injection (the top-most entity type). If this is false,
-   *                         we will use psuedo-aliases (:[intermediate-alias]) to keep track of new names as we progress up the tree.
+   *                       we will use psuedo-aliases (:[intermediate-alias]) to keep track of new names as we progress up the tree.
    * @return The column with the injected source aliases.
    */
   public static <T extends Field> T injectSourceAlias(
@@ -136,6 +138,44 @@ public class SourceUtils {
     }
   }
 
+  public static List<String> injectSourceAliasIntoFilterConditions(
+    List<String> filterConditions,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+    List<String> aliases = getAliasReplacementOrder(renamedAliases).toList();
+    log.info("ALIASES: ");
+    for (String oldAlias : aliases) {
+      log.info("Old: {} | New: {}", oldAlias, renamedAliases.get(oldAlias));
+    }
+    List<String> newConditions = new ArrayList<>();
+    for (String filterCondition : filterConditions) {
+      String newFilterCondition = filterCondition;
+      for (String oldAlias : aliases) {
+        newFilterCondition = SourceUtils.getAliasedCondition(newFilterCondition, oldAlias, renamedAliases, finalPass);
+      }
+      newConditions.add(newFilterCondition);
+    }
+    return newConditions;
+  }
+
+  private static String getAliasedCondition(String condition, String alias, Map<String, String> renamedAliases, boolean finalPass) {
+    String oldAliasReference = ':' + alias;
+    log.info("Old alias reference: {}\n", oldAliasReference);
+    // we use this to ensure we don't replace prefixes of aliases without the rest of the alias
+    String intermediateAliasReference = ":[%s]".formatted(alias);
+    log.info("Intermediate alias reference: {}\n", intermediateAliasReference);
+    // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
+    String newAliasReference = (finalPass ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(alias));
+    log.info("New alias reference: {}\n", newAliasReference);
+    log.info("Condition before replacement: {}\n", condition);
+    var newCondition = condition
+      .replace(oldAliasReference, newAliasReference)
+      .replace(intermediateAliasReference, newAliasReference);
+    log.info("Condition after replacement: {}\n", newCondition);
+    return newCondition;
+  }
+
   private static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
     // Sort longer aliases before others, since the map was created in prefix order and we want to use the most recently added aliases first
     // If we don't do this, then we might replace with "abc" before "abc.def" when handling an alias reference like ":abc.def".
@@ -158,7 +198,7 @@ public class SourceUtils {
             .ofNullable(newColumn.getIsIdColumn())
             .map(isIdColumn ->
               Boolean.TRUE.equals(isIdColumn) &&
-              (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
+                (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
             )
             .orElse(null)
         );

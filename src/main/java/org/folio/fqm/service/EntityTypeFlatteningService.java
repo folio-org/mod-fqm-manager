@@ -236,8 +236,8 @@ public class EntityTypeFlatteningService {
 
 
 //          condition = condition.replace(":" + oldAlias, renamedAliases.get(oldAlias));
-          newFilterConditions.add(condition);
         }
+        newFilterConditions.add(condition);
       }
 
 //      flattenedEntityType.sourceViewExtractor(

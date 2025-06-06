@@ -210,12 +210,13 @@ public class EntityTypeFlatteningService {
     if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {
       log.info("ORIGINAL FILTER CONDITIONS: {}", flattenedEntityType.getFilterConditions());
       log.info("ALIASES: ");
-      for (String oldAlias : renamedAliases.keySet()) {
+      var sortedAliases = SourceUtils.getAliasReplacementOrder(renamedAliases).toList();
+      for (String oldAlias : sortedAliases) {
         log.info("Old: {} | New: {}", oldAlias, renamedAliases.get(oldAlias));
       }
       List<String> newFilterConditions = new ArrayList<>();
       for (String condition : flattenedEntityType.getFilterConditions()) {
-        for (String oldAlias : renamedAliases.keySet()) {
+        for (String oldAlias : sortedAliases) {
 
           // NEW STUFF TO FIX REPLACEMENT HERE
 

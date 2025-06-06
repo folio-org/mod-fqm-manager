@@ -136,7 +136,8 @@ public class SourceUtils {
     }
   }
 
-  private static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
+//  private static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
+  public static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
     // Sort longer aliases before others, since the map was created in prefix order and we want to use the most recently added aliases first
     // If we don't do this, then we might replace with "abc" before "abc.def" when handling an alias reference like ":abc.def".
 

@@ -239,8 +239,6 @@ public class EntityTypeFlatteningService {
             .replace(intermediateAliasReference, newAliasReference);
           log.info("YYZ Condition after replacement: {}\n", condition);
 
-
-//          condition = condition.replace(":" + oldAlias, renamedAliases.get(oldAlias));
         }
         newFilterConditions.add(condition);
       }

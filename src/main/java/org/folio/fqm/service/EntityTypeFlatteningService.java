@@ -167,6 +167,10 @@ public class EntityTypeFlatteningService {
             flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSource, renamedAliases))
           );
 
+        // NEW
+        flattenedSourceDefinition.getFilterConditions().forEach(originalEntityType::addFilterConditionsItem);
+        // END NEW
+
         List<EntityTypeColumn> columns = flattenedSourceDefinition
           .getColumns();
 

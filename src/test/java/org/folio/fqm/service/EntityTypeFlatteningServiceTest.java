@@ -156,7 +156,8 @@ class EntityTypeFlatteningServiceTest {
               }
             ],
             "requiredPermissions": ["simple_permission1", "simple_permission2"],
-            "sourceViewExtractor": ":source1.some_view_extractor"
+            "sourceViewExtractor": ":source1.some_view_extractor",
+            "filterConditions": [":source1.field1 != 'xyz'"]
           }
           """,
           EntityType.class
@@ -209,7 +210,8 @@ class EntityTypeFlatteningServiceTest {
                 "alias": "simple_1",
                 "targetId": "00000000-0000-0000-0000-000000000001"
               }
-            ]
+            ],
+            "filterConditions": [":simple_1.source1.field2 != 'abc'"]
           }
           """,
           EntityType.class
@@ -526,7 +528,8 @@ class EntityTypeFlatteningServiceTest {
       )
       .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("source1_target")))
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
-      .sourceViewExtractor("\"source1\".some_view_extractor");
+      .sourceViewExtractor("\"source1\".some_view_extractor")
+      .filterConditions(List.of("\"source1\".field1 != 'xyz'"));
 
     when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
@@ -541,6 +544,10 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testFlattenCompositeOfSimple() {
+    List<String> expectedFilterConditions = List.of(
+      "\"simple_1.source1\".field2 != 'abc'",
+      "\"simple_1.source1\".field1 != 'xyz'"
+    );
     when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
 
     EntityType actual = entityTypeFlatteningService.getFlattenedEntityType(
@@ -568,6 +575,7 @@ class EntityTypeFlatteningServiceTest {
       assertThat(column.getFilterValueGetter(), is(anyOf(nullValue(), stringContainsInOrder("\"simple_1.source1\""))));
       assertThat(column.getValueFunction(), is(anyOf(nullValue(), stringContainsInOrder("\"simple_1.source1\""))));
     }
+    assertEquals(expectedFilterConditions, actual.getFilterConditions());
   }
 
   @Test

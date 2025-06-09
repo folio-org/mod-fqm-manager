@@ -1799,5 +1799,7 @@
     "entityType.simple_srs_record.updated_by_user_id": "Updated by user UUID",
     "entityType.simple_srs_record.updated_date": "Updated date",
     "entityType.simple_srs_record.external_hrid": "External HRID",
-    "entityType.simple_srs_record.content": "MARC jsonb"
+    "entityType.simple_srs_record.content": "MARC jsonb",
+    "entityType.composite_srs_bib": "SRS Bib",
+    "entityType.composite_srs_bib.srs_record": "SRS record"
 }

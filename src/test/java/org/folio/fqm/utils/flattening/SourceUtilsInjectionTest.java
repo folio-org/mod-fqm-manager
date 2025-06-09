@@ -3,6 +3,7 @@ package org.folio.fqm.utils.flattening;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -101,6 +102,29 @@ class SourceUtilsInjectionTest {
     assertThat(result.getValueGetter(), is("VG " + expected));
     assertThat(result.getFilterValueGetter(), is("FVG " + expected));
     assertThat(result.getValueFunction(), is("VF " + expected));
+  }
+
+  @Test
+  void testInjectSourceAliasIntoFilterConditions() {
+    List<String> filterConditions = List.of(
+      ":foo.field1 != 'abc'",
+      ":bar.field2 != 'xyz'"
+    );
+    Map<String, String> renamedAliases = Map.of("foo", "source1", "bar", "source2");
+
+    List<String> expectedNonFinalPass = List.of(
+      ":[source1].field1 != 'abc'",
+      ":[source2].field2 != 'xyz'"
+    );
+    List<String> actualNonFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, false);
+    assertEquals(expectedNonFinalPass, actualNonFinalPass);
+
+    List<String> expectedFinalPass = List.of(
+      "\"source1\".field1 != 'abc'",
+      "\"source2\".field2 != 'xyz'"
+    );
+    List<String> actualFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, true);
+    assertEquals(expectedFinalPass, actualFinalPass);
   }
 
   @Test

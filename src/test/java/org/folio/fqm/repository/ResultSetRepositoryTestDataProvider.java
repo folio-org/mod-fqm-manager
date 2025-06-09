@@ -103,6 +103,7 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
           .columnName("key1")
       )
     )
+    .filterConditions(List.of("true = true"))
     .additionalEcsConditions(List.of("condition 1"));
 
   private static final String DERIVED_TABLE_NAME_QUERY_REGEX = "SELECT DERIVED_TABLE_NAME FROM ENTITY_TYPE_DEFINITION WHERE ID = .*";

@@ -141,11 +141,18 @@ public class ResultSetRepository {
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
       log.debug("idColumnValueGetters: {}", idColumnValueGetters);
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
+
+      if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
+        for (String condition : baseEntityType.getFilterConditions()) {
+          currentCondition = currentCondition.and(condition);
+        }
+      }
       if (ecsEnabled && !CollectionUtils.isEmpty(baseEntityType.getAdditionalEcsConditions())) {
         for (String condition : baseEntityType.getAdditionalEcsConditions()) {
           currentCondition = currentCondition.and(condition);
         }
       }
+
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch

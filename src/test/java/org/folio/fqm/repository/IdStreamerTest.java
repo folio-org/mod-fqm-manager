@@ -81,6 +81,7 @@ class IdStreamerTest {
         .valueGetter("column_01")
     ))
     .sources(List.of(new EntityTypeSource().alias("source_1")))
+    .filterConditions(List.of("false = false"))
     .additionalEcsConditions(List.of("true = true"));
   private static final EntityType GROUP_BY_ENTITY_TYPE = new EntityType()
     .name("group_by_entity_type")

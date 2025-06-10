@@ -496,6 +496,10 @@
     {
       "id": "finance.transactions",
       "version": "6.0"
+    },
+    {
+      "id": "source-storage-records",
+      "version": "3.3"
     }
   ],
   "optional": [
@@ -569,6 +573,9 @@
       },
       { "name": "MODFQMMANAGER_ENTITYTYPECACHETIMEOUTSECONDS",
         "value": "300"
+      },
+      { "name": "IS_EUREKA",
+        "value": "false"
       }
     ]
   }

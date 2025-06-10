@@ -19,4 +19,26 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_srs_records_lb" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="records_lb" schemaName="${tenant_id}_mod_source_record_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_srs_records_lb">
+      SELECT * FROM ${tenant_id}_mod_source_record_storage.records_lb where state != 'OLD'
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_srs_marc_records_lb" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="marc_records_lb" schemaName="${tenant_id}_mod_source_record_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_srs_marc_records_lb">
+      SELECT * FROM ${tenant_id}_mod_source_record_storage.marc_records_lb
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

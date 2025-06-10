@@ -32,6 +32,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.nullsLast;
@@ -114,6 +115,7 @@ public class EntityTypeFlatteningService {
       .sourceView(originalEntityType.getSourceView())
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
       .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
+      .filterConditions(originalEntityType.getFilterConditions())
       .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions());
 
     // If we have a parent, this will be `parent.`, otherwise empty
@@ -165,6 +167,8 @@ public class EntityTypeFlatteningService {
             flattenedEntityType.addSourcesItem(SourceUtils.copySource(sourceEt, subSource, renamedAliases))
           );
 
+        flattenedSourceDefinition.getFilterConditions().forEach(originalEntityType::addFilterConditionsItem);
+
         List<EntityTypeColumn> columns = flattenedSourceDefinition
           .getColumns();
 
@@ -202,6 +206,15 @@ public class EntityTypeFlatteningService {
       flattenedEntityType.sourceViewExtractor(
         SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
       );
+    }
+
+    if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {
+      List<String> newFilterConditions = SourceUtils.injectSourceAliasIntoFilterConditions(
+        flattenedEntityType.getFilterConditions(),
+        renamedAliases,
+        sourceFromParent == null
+      );
+      flattenedEntityType.filterConditions(newFilterConditions);
     }
 
     // Copy and localize all of the columns defined directly in the entity type separately, so that they can be sorted

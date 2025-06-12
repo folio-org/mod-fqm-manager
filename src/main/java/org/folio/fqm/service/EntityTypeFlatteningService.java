@@ -220,7 +220,7 @@ public class EntityTypeFlatteningService {
     // Copy and localize all of the columns defined directly in the entity type separately, so that they can be sorted
     // by localized label alias before adding them to the flattened entity type
     Stream<EntityTypeColumn> selfColumns = originalEntityType.getColumns().stream()
-      .map(column -> localizationService.localizeEntityTypeColumn(originalEntityType, column))
+      .map(column -> localizationService.localizeEntityTypeColumn(originalEntityType, originalEntityType.getSources(), column))
       .sorted(columnComparator);
     Stream<EntityTypeColumn> allColumns = Stream.concat(
       SourceUtils.copyColumns(sourceFromParent, selfColumns, renamedAliases),
@@ -229,7 +229,7 @@ public class EntityTypeFlatteningService {
 
     flattenedEntityType.columns(filterEcsColumns(allColumns).toList());
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
-    return localizationService.localizeEntityType(flattenedEntityType);
+    return localizationService.localizeEntityType(flattenedEntityType, originalEntityType.getSources());
   }
 
   private Stream<EntityTypeColumn> filterEcsColumns(Stream<EntityTypeColumn> unfilteredColumns) {
@@ -254,7 +254,7 @@ public class EntityTypeFlatteningService {
       source instanceof EntityTypeSourceEntityType etSource
         ? etSource.getOrder()
         : Integer.MAX_VALUE) // Right now this only affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
-      .thenComparing(source -> Objects.toString(localizationService.localizeSourceLabel(entityType, source.getAlias()))); // Use Objects.toString(), to handle nulls gracefully
+      .thenComparing(source -> Objects.toString(localizationService.localizeSourceLabel(entityType, source.getAlias(), source))); // Use Objects.toString(), to handle nulls gracefully
   }
 
   // translations are included as part of flattening, so we must cache based on locales, too

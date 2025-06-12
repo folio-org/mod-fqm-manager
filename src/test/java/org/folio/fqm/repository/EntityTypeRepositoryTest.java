@@ -12,6 +12,7 @@ import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -42,6 +43,9 @@ class EntityTypeRepositoryTest {
 
   @Autowired
   private EntityTypeRepository repo;
+
+  @MockitoSpyBean
+  private FolioExecutionContext folioExecutionContext;
 
 
   @Test
@@ -173,11 +177,14 @@ class EntityTypeRepositoryTest {
   void shouldCreateRetrieveUpdateAndDeleteCustomEntityType() {
     // Generate a random UUID for the test
     UUID entityTypeId = UUID.randomUUID();
-
+    UUID owner = UUID.randomUUID();
+    when(folioExecutionContext.getUserId()).thenReturn(owner);
+    when(folioExecutionContext.getTenantId()).thenReturn("diku");
     try {
       // 1. Create a custom entity type
       CustomEntityType customEntityType = new CustomEntityType()
         .id(entityTypeId.toString())
+        .owner(owner)
         .name("test-custom-entity")
         .labelAlias("Test Custom Entity")
         ._private(false)
@@ -255,9 +262,13 @@ class EntityTypeRepositoryTest {
   void updateCustomEntityType_shouldHandleInvalidJson() {
     // Similar approach as above but for updating
     UUID entityTypeId = UUID.randomUUID();
+    UUID owner = UUID.randomUUID();
     CustomEntityType customEntityType = new CustomEntityType()
       .id(entityTypeId.toString())
+      .owner(owner)
       .name("test-invalid-update-entity");
+    when(folioExecutionContext.getUserId()).thenReturn(owner);
+    when(folioExecutionContext.getTenantId()).thenReturn("diku");
 
     // First create a valid entity
     repo.createCustomEntityType(customEntityType);

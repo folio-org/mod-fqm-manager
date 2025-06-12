@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -391,11 +392,11 @@ class EntityTypeFlatteningServiceTest {
         .thenReturn(Optional.of(copyEntityType(et)));
     }
     lenient()
-      .when(localizationService.localizeEntityType(any(EntityType.class)))
+      .when(localizationService.localizeEntityType(any(EntityType.class), any()))
       .thenAnswer(invocation -> invocation.getArgument(0));
     lenient()
-      .when(localizationService.localizeEntityTypeColumn(any(EntityType.class), any(EntityTypeColumn.class)))
-      .then(invocation -> invocation.getArgument(1));
+      .when(localizationService.localizeEntityTypeColumn(any(EntityType.class), any(), any(EntityTypeColumn.class)))
+      .then(invocation -> invocation.getArgument(2));
     lenient().when(executionContext.getTenantId()).thenReturn(TENANT_ID);
   }
 

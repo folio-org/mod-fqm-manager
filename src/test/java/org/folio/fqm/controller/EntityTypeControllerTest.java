@@ -312,7 +312,7 @@ class EntityTypeControllerTest {
       .get("/entity-types/custom/{id}", entityTypeId)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01");
-    when(entityTypeService.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    when(entityTypeService.getCustomEntityTypeWithAccessCheck(entityTypeId)).thenReturn(customEntityType);
     var result = mockMvc.perform(requestBuilder)
       .andExpect(status().is2xxSuccessful())
       .andReturn();

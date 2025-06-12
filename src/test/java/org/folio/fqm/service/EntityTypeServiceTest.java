@@ -6,6 +6,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeAccessDeniedException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -111,11 +112,12 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", false)));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false);
+
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
@@ -123,8 +125,8 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -137,12 +139,12 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01").crossTenantQueriesEnabled(true),
       new EntityTypeSummary().id(id2).label("label_02"));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false);
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true),
-      new EntityType(id2.toString(), "translation_label_02", false)));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
     when(crossTenantQueryService.isCentralTenant()).thenReturn(true);
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
@@ -155,14 +157,14 @@ class EntityTypeServiceTest {
     UUID id2 = UUID.randomUUID();
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, false);
 
@@ -170,7 +172,7 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -185,26 +187,25 @@ class EntityTypeServiceTest {
       new EntityTypeSummary().id(id1).label("label_01"),
       new EntityTypeSummary().id(id2).label("label_02")
     );
+    var et1 = new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")); // Private entity
+    var et2 = new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")); // Non-private entity
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")), // Private entity
-      new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")) // Non-private entity
-    ));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
 
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2", "perm1"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
 
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, false, true);
 
     assertEquals(expectedSummary, actualSummary, "Expected Summary should equal Actual Summary");
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
     verifyNoMoreInteractions(repo, localizationService);
   }
 
@@ -216,15 +217,15 @@ class EntityTypeServiceTest {
     List<EntityTypeSummary> expectedSummary = List.of(
       new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
       new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
+    var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
+    var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 
-    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(
-      new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1")),
-      new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"))));
+    when(repo.getEntityTypeDefinitions(ids, null)).thenReturn(Stream.of(et1, et2));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of("perm2"));
     when(permissionsService.getRequiredPermissions(any(EntityType.class)))
       .then(invocationOnMock -> new HashSet<>(invocationOnMock.<EntityType>getArgument(0).getRequiredPermissions()));
-    when(localizationService.getEntityTypeLabel("translation_label_01")).thenReturn("label_01");
-    when(localizationService.getEntityTypeLabel("translation_label_02")).thenReturn("label_02");
+    when(localizationService.getEntityTypeLabel(et1)).thenReturn("label_01");
+    when(localizationService.getEntityTypeLabel(et2)).thenReturn("label_02");
 
     List<EntityTypeSummary> actualSummary = entityTypeService.getEntityTypeSummary(ids, true, false);
 
@@ -232,8 +233,8 @@ class EntityTypeServiceTest {
 
     verify(repo, times(1)).getEntityTypeDefinitions(ids, null);
 
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_01");
-    verify(localizationService, times(1)).getEntityTypeLabel("translation_label_02");
+    verify(localizationService, times(1)).getEntityTypeLabel(et1);
+    verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
   }
@@ -918,6 +919,7 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(executionContext.getUserId()).thenReturn(ownerId);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).deleteEntityType(entityTypeId);
@@ -942,4 +944,207 @@ class EntityTypeServiceTest {
     verify(repo, never()).deleteEntityType(any());
   }
 
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsShared_shouldReturnTrue() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(true)
+      .isCustom(true);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertTrue(result, "User should be able to access a shared custom entity type");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsOwnedByCurrentUser_shouldReturnTrue() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(ownerId); // Same user ID as owner
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertTrue(result, "User should be able to access their own custom entity type");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void currentUserCanAccessCustomEntityType_whenEntityTypeIsNotSharedAndNotOwned_shouldReturnFalse() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    // Act
+    boolean result = entityTypeService.currentUserCanAccessCustomEntityType(entityTypeId.toString());
+
+    // Assert
+    assertFalse(result, "User should not be able to access a non-shared custom entity type they don't own");
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsNotCustom_shouldNotEnforceAccess() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", false);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+
+    // Act
+    entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId);
+
+    // Assert
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    // No further interaction should happen - not getting the custom entity type
+    verifyNoMoreInteractions(repo);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsCustomAndAccessible_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", true);
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(currentUserId)
+      .shared(false)
+      .isCustom(true);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId);
+
+    // Verify the expected method calls
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceAccessForPossibleCustomEntityType_whenEntityTypeIsCustomAndNotAccessible_shouldThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different from owner
+
+    EntityType entityType = new EntityType().id(entityTypeId.toString());
+    entityType.putAdditionalProperty("isCustom", true);
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(repo.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId()))
+      .thenReturn(Optional.of(entityType));
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeAccessDeniedException.class,
+      () -> entityTypeService.enforceAccessForPossibleCustomEntityType(entityTypeId),
+      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible");
+
+    verify(repo).getEntityTypeDefinition(entityTypeId, executionContext.getTenantId());
+    verify(repo).getCustomEntityType(entityTypeId);
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsShared_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(true)
+      .isCustom(true);
+
+    // Act & Assert
+    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
+    // No exception should be thrown
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsOwnedByCurrentUser_shouldNotThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(ownerId); // Same as owner
+
+    // Act & Assert
+    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
+    // No exception should be thrown
+  }
+
+  @Test
+  void enforceCustomEntityTypeAccess_whenEntityTypeIsNotSharedAndNotOwned_shouldThrowException() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    UUID currentUserId = UUID.randomUUID(); // Different user ID
+
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .shared(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(currentUserId);
+
+    // Act & Assert
+    assertThrows(CustomEntityTypeAccessDeniedException.class,
+      () -> entityTypeService.enforceCustomEntityTypeAccess(customEntityType),
+      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible");
+  }
 }

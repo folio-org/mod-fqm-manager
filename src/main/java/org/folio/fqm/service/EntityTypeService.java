@@ -19,6 +19,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.CustomEntityTypeAccessDeniedException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -84,10 +85,11 @@ public class EntityTypeService {
       .getEntityTypeDefinitions(entityTypeIds, executionContext.getTenantId())
       .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
       .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
           .id(UUID.fromString(entityType.getId()))
-          .label(localizationService.getEntityTypeLabel(entityType.getName()))
+          .label(localizationService.getEntityTypeLabel(entityType))
           .crossTenantQueriesEnabled(Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled()) && crossTenantQueryService.isCentralTenant());
         if (includeInaccessible) {
           return result.missingPermissions(
@@ -112,6 +114,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
+    enforceAccessForPossibleCustomEntityType(entityTypeId);
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
@@ -134,6 +137,7 @@ public class EntityTypeService {
    */
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
+    enforceAccessForPossibleCustomEntityType(entityTypeId);
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
 
     Field field = FqlValidationService
@@ -366,11 +370,18 @@ public class EntityTypeService {
     return allValues.get(fieldName).toString();
   }
 
-  public CustomEntityType getCustomEntityType(UUID entityTypeId) {
+  CustomEntityType getCustomEntityType(UUID entityTypeId) {
     var customET = entityTypeRepository.getCustomEntityType(entityTypeId);
-    if (customET == null) {
-      throw new EntityTypeNotFoundException(entityTypeId);
+    if (customET == null || !Boolean.TRUE.equals(customET.getIsCustom())) {
+      throw new EntityTypeNotFoundException(entityTypeId,  "Entity type " + entityTypeId + " could not be found or is not a custom entity type.");
     }
+
+    return customET;
+  }
+
+  public CustomEntityType getCustomEntityTypeWithAccessCheck(UUID entityTypeId) {
+    var customET = getCustomEntityType(entityTypeId);
+    enforceCustomEntityTypeAccess(customET);
     return customET;
   }
 
@@ -391,6 +402,7 @@ public class EntityTypeService {
   public CustomEntityType updateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
     validateCustomEntityType(entityTypeId, customEntityType);
     var oldET = getCustomEntityType(entityTypeId);
+    enforceCustomEntityTypeAccess(oldET);
 
     var updatedCustomEntityType = customEntityType.toBuilder()
       .createdAt(oldET.getCreatedAt())
@@ -418,12 +430,35 @@ public class EntityTypeService {
     }
   }
 
+  private boolean currentUserCanAccessCustomEntityType(CustomEntityType customET) {
+    return customET.getShared() || folioExecutionContext.getUserId().equals(customET.getOwner());
+  }
+
+  boolean currentUserCanAccessCustomEntityType(String entityTypeId) {
+    var customET = getCustomEntityType(UUID.fromString(entityTypeId));
+    return currentUserCanAccessCustomEntityType(customET);
+  }
+
+  void enforceAccessForPossibleCustomEntityType(UUID entityTypeId) {
+    entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
+      .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
+      .map(et -> getCustomEntityType(entityTypeId))
+      .ifPresent(this::enforceCustomEntityTypeAccess);
+  }
+
+  void enforceCustomEntityTypeAccess(CustomEntityType customET) {
+    if (!currentUserCanAccessCustomEntityType(customET)) {
+      throw new CustomEntityTypeAccessDeniedException("Entity type " + customET.getId() + " is not shared. It can only be accessed by its owner");
+    }
+  }
+
   public void deleteCustomEntityType(UUID entityTypeId) {
     var customEntityType = getCustomEntityType(entityTypeId);
     // We don't need full validation, but we definitely need to make sure this is a custom ET...
     if (customEntityType.getIsCustom() == null) {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
     }
+    enforceCustomEntityTypeAccess(customEntityType);
     entityTypeRepository.deleteEntityType(entityTypeId);
   }
 }

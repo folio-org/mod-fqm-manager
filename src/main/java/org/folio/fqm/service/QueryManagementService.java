@@ -9,6 +9,7 @@ import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
+import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -48,6 +49,7 @@ public class QueryManagementService {
   private final ResultSetService resultSetService;
   private final FqlValidationService fqlValidationService;
   private final CrossTenantQueryService crossTenantQueryService;
+  private final MigrationService migrationService;
   private final RetryTemplate zombieQueryRetry;
 
   @Value("${mod-fqm-manager.query-retention-duration}")
@@ -68,6 +70,7 @@ public class QueryManagementService {
                                 ResultSetService resultSetService,
                                 FqlValidationService fqlValidationService,
                                 CrossTenantQueryService crossTenantQueryService,
+                                MigrationService migrationService,
                                 @Value("${mod-fqm-manager.zombie-query-max-wait-seconds:30}") int zombieQueryMaxWaitSeconds) {
     this.entityTypeService = entityTypeService;
     this.executionContext = executionContext;
@@ -79,6 +82,7 @@ public class QueryManagementService {
     this.resultSetService = resultSetService;
     this.fqlValidationService = fqlValidationService;
     this.crossTenantQueryService = crossTenantQueryService;
+    this.migrationService = migrationService;
     var retryBuilder = RetryTemplate.builder()
       .retryOn(ZombieQueryException.class);
     if (zombieQueryMaxWaitSeconds != 0) {
@@ -111,9 +115,14 @@ public class QueryManagementService {
       submitQuery.getFqlQuery(),
       fields,
       executionContext.getUserId());
-    int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
+
+    // Verify that the query is up to date before execution
+    MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery(), fields);
+    migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
+
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
+    int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
     queryExecutionService.executeQueryAsync(query, entityType, maxQuerySize);
     return queryIdentifier;
   }
@@ -142,6 +151,11 @@ public class QueryManagementService {
         fields.add(idColumn);
       }
     }
+
+    // Verify that the query is up to date before execution
+    MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(entityTypeId, query, fields);
+    migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
+
     List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, afterId, limit);
     return new ResultsetPage().content(queryResults);
   }

@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
@@ -62,6 +64,68 @@ public class MigrationService {
         .orElse(migrationConfiguration.getDefaultVersion());
     } catch (JsonProcessingException e) {
       return migrationConfiguration.getDefaultVersion();
+    }
+  }
+
+  /**
+   * Migrates the query information and verifies that only the version has changed.
+   * If anything other than the version changes, throws a MigrationQueryChangedException.
+   *
+   * @param migratableQueryInformation the query information to migrate
+   * @throws MigrationQueryChangedException if anything other than the version changes
+   */
+  public void throwExceptionIfQueryNeedsMigration(MigratableQueryInformation migratableQueryInformation) {
+    MigratableQueryInformation migratedQueryInformation = migrate(migratableQueryInformation);
+
+    // If the query doesn't need migration, return early
+    if (!isMigrationNeeded(migratableQueryInformation)) {
+      return;
+    }
+
+    if (!onlyVersionChanged(migratableQueryInformation, migratedQueryInformation)) {
+      throw new MigrationQueryChangedException(migratedQueryInformation);
+    }
+  }
+
+  /**
+   * Checks if only the version has changed between the original and migrated query information.
+   *
+   * @param original the original query information
+   * @param migrated the migrated query information
+   * @return true if only the version has changed, false otherwise
+   */
+  private boolean onlyVersionChanged(MigratableQueryInformation original, MigratableQueryInformation migrated) {
+    // Check if basic fields are equal
+    if (!Objects.equals(original.entityTypeId(), migrated.entityTypeId()) ||
+        !Objects.equals(original.fields(), migrated.fields()) ||
+        !Objects.equals(original.warnings(), migrated.warnings())) {
+      return false;
+    }
+
+    // If FQL queries are null or one of them is null, we've already checked all fields
+    if (original.fqlQuery() == null && migrated.fqlQuery() == null) {
+      return true;
+    }
+
+    if (original.fqlQuery() == null || migrated.fqlQuery() == null) {
+      return false;
+    }
+
+
+
+    // Compare FQL queries without version
+    try {
+      ObjectNode originalNode = (ObjectNode) objectMapper.readTree(original.fqlQuery());
+      ObjectNode migratedNode = (ObjectNode) objectMapper.readTree(migrated.fqlQuery());
+
+      // Remove version for comparison
+      originalNode.remove(MigrationConfiguration.VERSION_KEY);
+      migratedNode.remove(MigrationConfiguration.VERSION_KEY);
+
+      return originalNode.equals(migratedNode);
+    } catch (JsonProcessingException e) {
+      // If we can't parse the JSON, assume something changed
+      return false;
     }
   }
 }

@@ -8,6 +8,7 @@ import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
+import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.querytool.domain.dto.EntityType;
@@ -77,14 +78,21 @@ class QueryManagementServiceTest {
   @Mock
   private CrossTenantQueryService crossTenantQueryService;
 
+  @Mock
+  private MigrationService migrationService;
+
   private final int maxConfiguredQuerySize = 1000;
 
   private QueryManagementService queryManagementService;
 
   @BeforeEach
   void setup() {
-    queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlValidationService, crossTenantQueryService, 0);
+    queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlValidationService, crossTenantQueryService, migrationService, 0);
     queryManagementService.setMaxConfiguredQuerySize(maxConfiguredQuerySize);
+
+    // Mock the behavior of migrationService.verifyQueryIsUpToDate() to do nothing
+    // Use lenient() to avoid UnnecessaryStubbingException for tests that don't use this mock
+    lenient().doNothing().when(migrationService).throwExceptionIfQueryNeedsMigration(any());
   }
 
   @Test
@@ -298,6 +306,82 @@ class QueryManagementServiceTest {
       .thenReturn(expectedContent);
     ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
     assertEquals(expectedResults, actualResults);
+  }
+
+  @Test
+  void shouldVerifyQueryIsUpToDateWhenRunningAsyncQuery() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("field1", "id");
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(new ArrayList<>(fields));
+
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(new QueryIdentifier().queryId(UUID.randomUUID()));
+
+    // Reset the mock to clear the lenient stubbing from setup
+    reset(migrationService);
+
+    queryManagementService.runFqlQueryAsync(submitQuery);
+
+    // Verify that verifyQueryIsUpToDate was called with the correct parameters
+    ArgumentCaptor<MigratableQueryInformation> captor = ArgumentCaptor.forClass(MigratableQueryInformation.class);
+    verify(migrationService).throwExceptionIfQueryNeedsMigration(captor.capture());
+
+    MigratableQueryInformation capturedInfo = captor.getValue();
+    assertEquals(entityTypeId, capturedInfo.entityTypeId());
+    assertEquals(fqlQuery, capturedInfo.fqlQuery());
+    assertEquals(fields, capturedInfo.fields());
+  }
+
+  @Test
+  void shouldVerifyQueryIsUpToDateWhenRunningSynchronousQuery() {
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("field1", "id");
+    Integer defaultLimit = 100;
+
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), isNull(), eq(defaultLimit)))
+      .thenReturn(List.of());
+
+    // Reset the mock to clear the lenient stubbing from setup
+    reset(migrationService);
+
+    queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
+
+    // Verify that verifyQueryIsUpToDate was called with the correct parameters
+    ArgumentCaptor<MigratableQueryInformation> captor = ArgumentCaptor.forClass(MigratableQueryInformation.class);
+    verify(migrationService).throwExceptionIfQueryNeedsMigration(captor.capture());
+
+    MigratableQueryInformation capturedInfo = captor.getValue();
+    assertEquals(entityTypeId, capturedInfo.entityTypeId());
+    assertEquals(fqlQuery, capturedInfo.fqlQuery());
+    assertEquals(fields, capturedInfo.fields());
   }
 
   @Test

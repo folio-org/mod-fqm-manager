@@ -1,1 +1,5 @@
-[]
+[
+  "src__users__users__departments",
+  "src__users__users__groups",
+  "src__users__users__users"
+]

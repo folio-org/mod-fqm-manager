@@ -147,11 +147,6 @@ public class EntityTypeFlatteningService {
           preserveAllColumns
         );
 
-        // If the original entity type already supports cross-tenant queries, we can skip this. Otherwise, copy the nested source's setting
-        // This effectively means that if any nested source supports cross-tenant queries, the flattened entity type will too
-        if (!Boolean.TRUE.equals(flattenedEntityType.getCrossTenantQueriesEnabled())) {
-          flattenedEntityType.crossTenantQueriesEnabled(flattenedSourceDefinition.getCrossTenantQueriesEnabled());
-        }
         finalPermissions.addAll(flattenedSourceDefinition.getRequiredPermissions());
 
         // we must pre-populate this to ensure all sub-sources are added to the map before their parents are processed

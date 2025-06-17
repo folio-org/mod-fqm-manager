@@ -73,25 +73,34 @@ public class CrossTenantQueryService {
 
   public List<Pair<String, String>> getTenantIdNamePairs(EntityType entityType, UUID userId) {
     log.info("Getting tenants to query for user {}", userId);
-    // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
-    // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
+
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    log.info("ECS tenant info: {}", ecsTenantInfo);
+
     Pair<String, String> currentTenantPair = Pair.of(executionContext.getTenantId(), null);
+    log.info("Current tenant ID: {}", executionContext.getTenantId());
+
     if (!ecsEnabled(ecsTenantInfo)) {
-      // Tenant name is null here, but that's ok because tenant name is only relevant in ECS environments
+      log.info("ECS not enabled. Returning only current tenant: {}", currentTenantPair);
       return List.of(currentTenantPair);
     }
 
     String currentTenantId = executionContext.getTenantId();
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
     String consortiumId = ecsTenantInfo.get("consortiumId");
+    log.info("Current tenant ID: {}, Central tenant ID: {}, Consortium ID: {}", currentTenantId, centralTenantId, consortiumId);
+
     List<Map<String, String>> userTenantMaps = getUserTenants(consortiumId, userId.toString(), centralTenantId);
+    log.info("User tenant maps: {}", userTenantMaps);
+
     String currentTenantName = userTenantMaps
       .stream()
       .filter(individualMap -> individualMap.get(TENANT_ID).equals(currentTenantId))
       .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
+    log.info("Current tenant name: {}", currentTenantName);
+
     currentTenantPair = Pair.of(currentTenantId, currentTenantName);
 
     String centralTenantName = userTenantMaps
@@ -100,16 +109,17 @@ public class CrossTenantQueryService {
       .map(individualMap -> individualMap.get(TENANT_NAME))
       .findFirst()
       .orElse(null);
+    log.info("Central tenant name: {}", centralTenantName);
+
     Pair<String, String> centralTenantPair = Pair.of(centralTenantId, centralTenantName);
 
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
-      // The Instances entity type is required to retrieve shared instances from the central tenant when
-      // running queries from member tenants. This means that if we are running a query for Instances, we need to
-      // query the current tenant (for local records) as well as the central tenant (for shared records).
       if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
+        log.info("Entity type {} is instance-related. Returning current and central tenant pairs: {}, {}", entityType.getId(), currentTenantPair, centralTenantPair);
         return List.of(currentTenantPair, centralTenantPair);
       }
+      log.info("Returning only current tenant pair: {}", currentTenantPair);
       return List.of(currentTenantPair);
     }
 
@@ -119,16 +129,19 @@ public class CrossTenantQueryService {
       String currentUserId = userMap.get("userId");
       String tenantName = userMap.get(TENANT_NAME);
       Pair<String, String> currentTenantMap = Pair.of(tenantId, tenantName);
+      log.info("Checking permissions for user {} on tenant {} ({})", currentUserId, tenantId, tenantName);
       try {
         permissionsService.verifyUserHasNecessaryPermissions(tenantId, entityType, UUID.fromString(currentUserId), true);
         tenantsToQuery.add(currentTenantMap);
+        log.info("User {} has permissions for tenant {}. Added to tenantsToQuery.", currentUserId, tenantId);
       } catch (MissingPermissionsException e) {
         log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
       } catch (FeignException e) {
-        log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
+        log.error("Error retrieving permissions for user ID {} in tenant {}. Skipping.", currentUserId, tenantId, e);
       }
     }
 
+    log.info("Final tenants to query: {}", tenantsToQuery);
     return tenantsToQuery;
   }
 

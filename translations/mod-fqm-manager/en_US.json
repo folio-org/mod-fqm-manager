@@ -1677,5 +1677,7 @@
     "entityType.composite_srs_bib": "SRS Bib",
     "entityType.composite_srs_bib.srs_record": "SRS record",
     "entityType.composite_srs_authority": "SRS Authority",
-    "entityType.composite_srs_authority.srs_record": "SRS record"
+    "entityType.composite_srs_authority.srs_record": "SRS record",
+    "entityType.composite_srs_authority.srs_record.external_id": "Authority UUID",
+    "entityType.composite_srs_authority.srs_record.external_hrid": "Authority HRID"
 }

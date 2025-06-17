@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - changeSet:
+      id: drop_old_generated_views
+      author: generated-by-fqm-tools
+      runAlways: true
+      changes: []

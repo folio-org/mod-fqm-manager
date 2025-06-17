@@ -1,7 +1,7 @@
 {
   id: 'c47c6e6c-a897-4dd4-938c-ad5fea981a19',
   name: 'composite_srs_bib',
-  private: false,
+  private: true,
   sources: [
     {
       alias: 'srs_record',

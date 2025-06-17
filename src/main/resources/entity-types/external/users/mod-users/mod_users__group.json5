@@ -1,0 +1,139 @@
+{
+  id: 'd28ade2d-5b88-5fb4-91c2-32c20766da76',
+  name: 'mod_users__group',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__users__users__groups',
+      target: 'src__users__users__groups',
+    },
+  ],
+  requiredPermissions: [],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'group',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->>'group'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:group.jsonb->>'group'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'desc',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->>'desc'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:group.jsonb->>'desc'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":group.jsonb->>'id'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:group.jsonb->>'id'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'expiration_offset_in_days',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:group.jsonb->>'expirationOffsetInDays')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'source',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->>'source'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:group.jsonb->>'source'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'metadata_created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'metadata_updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":group.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':group.jsonb::text',
+    },
+  ],
+}

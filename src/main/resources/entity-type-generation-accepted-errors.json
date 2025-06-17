@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "severity": "warning",
+    "metadata": {
+      "team": "test-team",
+      "domain": "users",
+      "module": "mod-users"
+    },
+    "type": "translations",
+    "missingTranslations": {
+      "fqm.entityType.user": "User",
+      "fqm.entityType.user.username": "Username",
+      "fqm.entityType.user.id": "UUID",
+      "fqm.entityType.user.external_system_id": "External system id",
+      "fqm.entityType.user.barcode": "Barcode",
+      "fqm.entityType.user.active": "Active",
+      "fqm.entityType.user.type": "Type",
+      "fqm.entityType.user.patron_group": "Patron group",
+      "fqm.entityType.user.departments": "Departments",
+      "fqm.entityType.user.proxy_for": "Proxy for",
+      "fqm.entityType.user.personal_pronouns": "Personal pronouns",
+      "fqm.entityType.user.personal_last_name": "Personal last name",
+      "fqm.entityType.user.personal_first_name": "Personal first name",
+      "fqm.entityType.user.personal_middle_name": "Personal middle name",
+      "fqm.entityType.user.personal_preferred_first_name": "Personal preferred first name",
+      "fqm.entityType.user.personal_email": "Personal email",
+      "fqm.entityType.user.personal_phone": "Personal phone",
+      "fqm.entityType.user.personal_mobile_phone": "Personal mobile phone",
+      "fqm.entityType.user.personal_date_of_birth": "Personal date of birth",
+      "fqm.entityType.user.personal_addresses": "Personal addresses",
+      "fqm.entityType.user.personal_preferred_contact_type_id": "Personal preferred contact type id",
+      "fqm.entityType.user.personal_profile_picture_link": "Personal profile picture link",
+      "fqm.entityType.user.enrollment_date": "Enrollment date",
+      "fqm.entityType.user.expiration_date": "Expiration date",
+      "fqm.entityType.user.created_date": "Created date",
+      "fqm.entityType.user.updated_date": "Updated date",
+      "fqm.entityType.user.metadata_created_date": "Metadata created date",
+      "fqm.entityType.user.metadata_created_by_user_id": "Metadata created by user UUID",
+      "fqm.entityType.user.metadata_created_by_username": "Metadata created by username",
+      "fqm.entityType.user.metadata_updated_date": "Metadata updated date",
+      "fqm.entityType.user.metadata_updated_by_user_id": "Metadata updated by user UUID",
+      "fqm.entityType.user.metadata_updated_by_username": "Metadata updated by username",
+      "fqm.entityType.user.tags_tag_list": "Tags tag list",
+      "fqm.entityType.user.preferred_email_communication": "Preferred email communication",
+      "fqm.entityType.user.jsonb": "JSONB",
+      "fqm.entityType.group": "Group",
+      "fqm.entityType.group.group": "Group",
+      "fqm.entityType.group.desc": "Desc",
+      "fqm.entityType.group.id": "Id",
+      "fqm.entityType.group.expiration_offset_in_days": "Expiration offset in days",
+      "fqm.entityType.group.source": "Source",
+      "fqm.entityType.group.metadata_created_date": "Metadata created date",
+      "fqm.entityType.group.metadata_created_by_user_id": "Metadata created by user UUID",
+      "fqm.entityType.group.metadata_created_by_username": "Metadata created by username",
+      "fqm.entityType.group.metadata_updated_date": "Metadata updated date",
+      "fqm.entityType.group.metadata_updated_by_user_id": "Metadata updated by user UUID",
+      "fqm.entityType.group.metadata_updated_by_username": "Metadata updated by username",
+      "fqm.entityType.group.jsonb": "JSONB",
+      "fqm.entityType.department.id": "UUID"
+    }
+  },
+  {
+    "severity": "error",
+    "type": "unknown-team",
+    "teamName": "test-team"
+  }
+]

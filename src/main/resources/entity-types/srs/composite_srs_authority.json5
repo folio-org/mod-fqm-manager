@@ -1,7 +1,7 @@
 {
   id: '232fdf7c-679c-4706-81eb-78d7d43264a8',
   name: 'composite_srs_authority',
-  private: true,
+  private: false,
   sources: [
     {
       alias: 'srs_record',

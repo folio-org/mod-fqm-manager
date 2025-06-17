@@ -1,0 +1,141 @@
+{
+  id: '3247bd59-cef3-594f-a449-0427115c77f5',
+  name: 'mod_users__department',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__users__users__departments',
+      target: 'src__users__users__departments',
+    },
+  ],
+  requiredPermissions: [
+    'department.read',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":dept.jsonb->>'id'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:dept.jsonb->>'id'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:dept.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->>'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:dept.jsonb->>'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'usage_number',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:dept.jsonb->>'usageNumber')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'source',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->>'source'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:dept.jsonb->>'source'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'createdByUserId'",
+    },
+    {
+      name: 'metadata_created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'updatedByUserId'",
+    },
+    {
+      name: 'metadata_updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":dept.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':dept.jsonb::text',
+    },
+  ],
+}

@@ -15,6 +15,7 @@ import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -1214,5 +1215,71 @@ class EntityTypeServiceTest {
       "Should throw InvalidEntityTypeDefinitionException when customFieldEntityTypeId refers to itself");
 
     assertEquals("Custom entity types must not refer to themselves with the customFieldEntityTypeId property", exception.getMessage());
+  }
+
+  @Test
+  void validateCustomEntityType_shouldThrowException_whenIsCustomIsNull() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .isCustom(null); // isCustom is null
+
+    // Act & Assert
+    EntityTypeNotFoundException exception = assertThrows(EntityTypeNotFoundException.class,
+      () -> EntityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
+      "Should throw EntityTypeNotFoundException when isCustom is null");
+
+    assertEquals("Entity type " + entityTypeId + " is not a custom entity type", exception.getMessage());
+  }
+
+  @Test
+  void validateCustomEntityType_shouldThrowException_whenIsCustomIsFalse() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .isCustom(false); // isCustom is false
+
+    // Act & Assert
+    EntityTypeNotFoundException exception = assertThrows(EntityTypeNotFoundException.class,
+      () -> EntityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
+      "Should throw EntityTypeNotFoundException when isCustom is false");
+
+    assertEquals("Entity type " + entityTypeId + " is not a custom entity type", exception.getMessage());
+  }
+
+  @Test
+  void validateCustomEntityType_shouldThrowException_whenSourcesAreNotEntityTypeSourceEntityType() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .isCustom(true)
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1"))); // Not an EntityTypeSourceEntityType
+
+    // Act & Assert
+    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
+      "Should throw InvalidEntityTypeDefinitionException when sources are not all EntityTypeSourceEntityType");
+
+    assertEquals("Custom entity types must contain only entity-type sources", exception.getMessage());
+  }
+
+  @Test
+  void validateCustomEntityType_shouldThrowException_whenColumnsAreNotEmpty() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .isCustom(true)
+      .columns(List.of(new EntityTypeColumn().name("test_column"))); // Non-empty columns
+
+    // Act & Assert
+    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
+      "Should throw InvalidEntityTypeDefinitionException when columns are not empty");
+
+    assertEquals("Custom entity types must not contain columns", exception.getMessage());
   }
 }

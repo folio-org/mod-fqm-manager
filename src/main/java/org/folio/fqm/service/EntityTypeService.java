@@ -415,7 +415,7 @@ public class EntityTypeService {
 
   // Package-private to make Visible for testing
   static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
-    if (customEntityType.getIsCustom() == null) {
+    if (!Boolean.TRUE.equals(customEntityType.getIsCustom())) {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type");
     }
     if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {

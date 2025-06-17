@@ -222,8 +222,9 @@ public class EntityTypeService {
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
     Set<ValueWithLabel> resultSet = new HashSet<>();
-
+    log.info("YYZ getting API values for field {} with search text \"{}\" from tenants: {}", field.getName(), searchText, tenantsToQuery);
     for (String tenantId : tenantsToQuery) {
+      log.info("Checking tenant {}", tenantId);
       try {
         ValueSourceApi valueSourceApi = field.getValueSourceApi();
         Map<String, String> queryParams = Objects.requireNonNullElseGet(

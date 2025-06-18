@@ -439,6 +439,9 @@ public class EntityTypeService {
     if (customEntityType.getIdView() != null) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a idView property", customEntityType);
     }
+    if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
+    }
   }
 
   private boolean currentUserCanAccessCustomEntityType(CustomEntityType customET) {

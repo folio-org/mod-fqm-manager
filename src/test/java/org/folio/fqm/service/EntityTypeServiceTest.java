@@ -1282,4 +1282,21 @@ class EntityTypeServiceTest {
 
     assertEquals("Custom entity types must not contain columns", exception.getMessage());
   }
+
+  @Test
+  void validateCustomEntityType_shouldThrowException_whenCrossTenantQueriesEnabled() {
+    // Arrange
+    UUID entityTypeId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .isCustom(true)
+      .crossTenantQueriesEnabled(true); // Cross-tenant queries enabled
+
+    // Act & Assert
+    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
+      "Should throw InvalidEntityTypeDefinitionException when crossTenantQueriesEnabled is true");
+
+    assertEquals("Custom entity must not have cross-tenant queries enabled", exception.getMessage());
+  }
 }

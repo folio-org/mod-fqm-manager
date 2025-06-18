@@ -434,7 +434,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)',
@@ -502,7 +502,7 @@
       },
       isIdColumn: false,
       essential: true,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
                                   jsonb_build_object('contributorType', contributor_type.jsonb ->> 'name', \

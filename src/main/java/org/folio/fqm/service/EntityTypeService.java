@@ -389,11 +389,11 @@ public class EntityTypeService {
     validateCustomEntityType(null, customEntityType);
     var now = clockService.now();
     var updatedCustomEntityType = customEntityType.toBuilder()
+      .id(customEntityType.getId() == null ? UUID.randomUUID().toString() : customEntityType.getId())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
       ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
-      .idView(null) // We don't want to let users do stuff that deals directly with the DB
       .build();
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
@@ -408,7 +408,6 @@ public class EntityTypeService {
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
       ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
-      .idView(null) // We don't want to let users do stuff that deals directly with the DB
       .build();
     entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
@@ -416,7 +415,7 @@ public class EntityTypeService {
 
   // Package-private to make Visible for testing
   static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
-    if (customEntityType.getIsCustom() == null) {
+    if (!Boolean.TRUE.equals(customEntityType.getIsCustom())) {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type");
     }
     if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
@@ -427,6 +426,21 @@ public class EntityTypeService {
     }
     if (entityTypeId != null && !entityTypeId.toString().equals(customEntityType.getId())) {
       throw new InvalidEntityTypeDefinitionException("The entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
+    }
+    if (customEntityType.getCustomFieldEntityTypeId() != null && customEntityType.getCustomFieldEntityTypeId().equals(customEntityType.getId())) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not refer to themselves with the customFieldEntityTypeId property", customEntityType);
+    }
+    if (customEntityType.getSourceView() != null) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceView property", customEntityType);
+    }
+    if (customEntityType.getSourceViewExtractor() != null) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceViewExtractor property", customEntityType);
+    }
+    if (customEntityType.getIdView() != null) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a idView property", customEntityType);
+    }
+    if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
     }
   }
 

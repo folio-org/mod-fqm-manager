@@ -1,5 +1,14 @@
 # 4.0.x - Sunflower
 
+# 4.0.8
+- [MODFQMMGR-786] Create SRS authority ET
+- [MODFQMMGR-788] Add support for entity-type-level filters
+- [MODFQMMGR-804] Create simple SRS record entity in FQM
+
+[MODFQMMGR-786]: https://folio-org.atlassian.net/browse/MODFQMMGR-786
+[MODFQMMGR-788]: https://folio-org.atlassian.net/browse/MODFQMMGR-788
+[MODFQMMGR-804]: https://folio-org.atlassian.net/browse/MODFQMMGR-804
+
 # 4.0.7
 - Update translations
 

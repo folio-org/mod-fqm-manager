@@ -205,9 +205,9 @@ class MigrationServiceTest {
 
   @Test
   void testThrowExceptionIfQueryNeedsMigrationThrowsExceptionWhenFieldsChange() {
-    // Test when fields change
+    // Test when fields are removed during migration (should throw exception)
     testMigrationException(
-      // Strategy that changes fields
+      // Strategy that changes fields and removes original fields
       (fqlService, info) -> MigratableQueryInformation.builder()
         .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
         .fields(List.of("newField1", "newField2"))
@@ -221,6 +221,55 @@ class MigrationServiceTest {
       exception -> {
         assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
         assertThat(exception.getMigratedQueryInformation().fields(), is(List.of("newField1", "newField2")));
+      }
+    );
+
+    // Test when fields are added but original fields are preserved (should not throw exception)
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1) {
+      @Override
+      public MigratableQueryInformation apply(
+        FqlService fqlService,
+        MigratableQueryInformation migratableQueryInformation
+      ) {
+        // Return a new object with original fields plus new ones
+        return MigratableQueryInformation.builder()
+          .entityTypeId(migratableQueryInformation.entityTypeId())
+          .fields(List.of("field1", "field2", "newField1", "newField2"))
+          .fqlQuery(migratableQueryInformation.fqlQuery().replace("source", migrationService.getLatestVersion()))
+          .build();
+      }
+    });
+
+    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
+
+    // Create input with fields
+    MigratableQueryInformation input = MigratableQueryInformation.builder()
+      .entityTypeId(UUID.randomUUID())
+      .fields(List.of("field1", "field2"))
+      .fqlQuery(TEST_FQL)
+      .build();
+
+    // This should not throw an exception because all original fields are preserved
+    assertDoesNotThrow(() -> migrationService.throwExceptionIfQueryNeedsMigration(input));
+
+    // Test when migrated.fields() is null but original.fields() is not null (should throw exception)
+    testMigrationException(
+      // Strategy that sets fields to null
+      (fqlService, info) -> MigratableQueryInformation.builder()
+        .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
+        .entityTypeId(info.entityTypeId())
+        .fields(null)
+        .build(),
+      // Input query with fields
+      MigratableQueryInformation.builder()
+        .fqlQuery(TEST_FQL)
+        .entityTypeId(UUID.randomUUID())
+        .fields(List.of("field1", "field2"))
+        .build(),
+      // Verification
+      exception -> {
+        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
+        assertThat(exception.getMigratedQueryInformation().fields(), is(nullValue()));
       }
     );
   }

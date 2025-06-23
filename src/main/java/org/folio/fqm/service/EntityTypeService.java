@@ -421,7 +421,7 @@ public class EntityTypeService {
     if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", entityTypeId);
     }
-    if (!customEntityType.getColumns().isEmpty()) {
+    if (customEntityType.getColumns() != null && !customEntityType.getColumns().isEmpty()) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", entityTypeId);
     }
     if (entityTypeId != null && !entityTypeId.toString().equals(customEntityType.getId())) {

@@ -304,10 +304,16 @@ class EntityTypeControllerTest {
   void shouldReturnCustomEntityTypeWithValidRequest() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(false)
+      .id(entityTypeId.toString())
+      .name("test ET")
+      ._private(false)
       .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
       .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
-      .updatedAt(Date.from(Instant.now()));
+      .updatedAt(Date.from(Instant.now()))
+      .build();
     RequestBuilder requestBuilder = MockMvcRequestBuilders
       .get("/entity-types/custom/{id}", entityTypeId)
       .accept(MediaType.APPLICATION_JSON)
@@ -324,10 +330,16 @@ class EntityTypeControllerTest {
   void shouldCreateCustomEntityTypeWithValidRequest() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(false)
+      .id(entityTypeId.toString())
+      .name("test ET")
+      ._private(false)
       .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
       .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
-      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .build();
     RequestBuilder requestBuilder = MockMvcRequestBuilders
       .post("/entity-types/custom")
       .accept(MediaType.APPLICATION_JSON)
@@ -350,10 +362,16 @@ class EntityTypeControllerTest {
   void shouldUpdateCustomEntityTypeWithValidRequest() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(false)
+      .id(entityTypeId.toString())
+      .name("test ET")
+      ._private(false)
       .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
       .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
-      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
+      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
+      .build();
 
     RequestBuilder requestBuilder = MockMvcRequestBuilders
       .put("/entity-types/custom/" + entityTypeId)
@@ -375,18 +393,12 @@ class EntityTypeControllerTest {
   @Test
   void shouldDeleteCustomEntityTypeWithValidRequest() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, false, entityTypeId.toString(), "test ET", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").alias("test_source").targetId(UUID.randomUUID()).build()))
-      .createdAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)))
-      .updatedAt(Date.from(Instant.now().minus(2, ChronoUnit.DAYS)));
 
     RequestBuilder requestBuilder = MockMvcRequestBuilders
       .delete("/entity-types/custom/" + entityTypeId)
       .accept(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, "tenant_01")
-      .contentType(MediaType.APPLICATION_JSON)
-      .content(objectMapper.writeValueAsString(customEntityType));
+      .contentType(MediaType.APPLICATION_JSON);
     mockMvc.perform(requestBuilder)
       .andExpect(status().is2xxSuccessful());
   }

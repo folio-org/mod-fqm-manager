@@ -802,11 +802,25 @@ class EntityTypeServiceTest {
     UUID ownerId = UUID.randomUUID();
     Date updatedDate = new Date();
 
-    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType existingEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Original name")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Updated name")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
@@ -827,8 +841,15 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
 
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Test Entity", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Test Entity")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
 
@@ -846,11 +867,25 @@ class EntityTypeServiceTest {
     UUID ownerId = UUID.randomUUID();
     Date updatedDate = new Date();
 
-    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType existingEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Original name")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Updated name")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
@@ -871,8 +906,15 @@ class EntityTypeServiceTest {
     UUID differentEntityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
 
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, differentEntityTypeId.toString(), "Test Entity", false)
-      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()));
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(differentEntityTypeId.toString())
+      .name("Test Entity")
+      ._private(false)
+      .shared(true)
+      .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
+      .build();
 
     // Act & Assert
     assertThrows(InvalidEntityTypeDefinitionException.class, () ->
@@ -890,13 +932,27 @@ class EntityTypeServiceTest {
     Date originalDate = new Date(System.currentTimeMillis() - 10000); // 10 seconds ago
     Date updatedDate = new Date();
 
-    CustomEntityType existingEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Original name", false)
+    CustomEntityType existingEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Original name")
+      ._private(false)
+      .shared(true)
       .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
-      .updatedAt(originalDate);
+      .updatedAt(originalDate)
+      .build();
 
-    CustomEntityType customEntityType = new CustomEntityType(ownerId, true, entityTypeId.toString(), "Updated name", false)
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .owner(ownerId)
+      .isCustom(true)
+      .id(entityTypeId.toString())
+      .name("Updated name")
+      ._private(false)
+      .shared(true)
       .sources(List.of(EntityTypeSourceEntityType.builder().type("entity-type").build()))
-      .updatedAt(originalDate); // This should be overwritten
+      .updatedAt(originalDate) // This should be overwritten
+      .build();
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
@@ -939,7 +995,13 @@ class EntityTypeServiceTest {
   @Test
   void deleteCustomEntityType_shouldThrowNotFoundException_whenEntityTypeIsNotCustom() {
     UUID entityTypeId = UUID.randomUUID();
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(new CustomEntityType(null, null, entityTypeId.toString(), "Test Entity", false).isCustom(null));
+    CustomEntityType customEntityType = CustomEntityType.builder()
+      .id(entityTypeId.toString())
+      .name("Test Entity")
+      ._private(false)
+      .build()
+      .isCustom(null);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, never()).deleteEntityType(any());

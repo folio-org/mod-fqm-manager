@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
@@ -97,7 +99,7 @@ public class MigrationService {
   private boolean onlyVersionChanged(MigratableQueryInformation original, MigratableQueryInformation migrated) {
     // Check if basic fields are equal
     if (!Objects.equals(original.entityTypeId(), migrated.entityTypeId()) ||
-        !Objects.equals(original.fields(), migrated.fields()) ||
+        (original.fields() != null && (migrated.fields() == null || !new HashSet<>(migrated.fields()).containsAll(original.fields()))) ||
         !Objects.equals(original.warnings(), migrated.warnings())) {
       return false;
     }
@@ -110,8 +112,6 @@ public class MigrationService {
     if (original.fqlQuery() == null || migrated.fqlQuery() == null) {
       return false;
     }
-
-
 
     // Compare FQL queries without version
     try {

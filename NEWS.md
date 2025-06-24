@@ -1,5 +1,8 @@
 # 4.0.x - Sunflower
 
+# 4.0.9
+- Make composite SRS ETs private
+
 # 4.0.8
 - [MODFQMMGR-786] Create SRS authority ET
 - [MODFQMMGR-788] Add support for entity-type-level filters

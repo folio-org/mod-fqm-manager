@@ -1,5 +1,10 @@
 # 3.0.x - Ramsons
 
+## 3.0.14
+- [UXPROD-5315] Backport SRS entity types to Ramsons
+
+[UXPROD-5315]: https://folio-org.atlassian.net/browse/UXPROD-5315
+
 ## 3.0.13
 - [MODFQMMGR-748] Add special source for organization
 

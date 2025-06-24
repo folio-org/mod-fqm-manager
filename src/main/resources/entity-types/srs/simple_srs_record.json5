@@ -1,0 +1,236 @@
+{
+  id: 'd5449a05-fd57-45e5-9383-ea615246f6f9',
+  name: 'simple_srs_record',
+  private: true,
+  sources: [
+    {
+      alias: 'record_lb',
+      type: 'db',
+      target: 'src_srs_records_lb',
+    },
+    {
+      type: 'db',
+      alias: 'marc_record_lb',
+      target: 'src_srs_marc_records_lb',
+      join: {
+        type: 'left join',
+        joinTo: 'record_lb',
+        condition: ':this.id = :that.matched_id',
+      },
+    },
+  ],
+  requiredPermissions: [
+    'source-storage.records.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.id',
+    },
+    {
+      name: 'snapshot_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.snapshot_id',
+    },
+    {
+      name: 'matched_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.matched_id',
+    },
+    {
+      name: 'generation',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.generation',
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'record_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.record_type',
+      values: [
+        {
+          value: 'EDIFACT',
+          label: 'EDIFACT',
+        },
+        {
+          value: 'MARC_AUTHORITY',
+          label: 'MARC_AUTHORITY',
+        },
+        {
+          value: 'MARC_BIB',
+          label: 'MARC_BIB',
+        },
+        {
+          value: 'MARC_HOLDING',
+          label: 'MARC_HOLDING',
+        },
+      ],
+    },
+    {
+      name: 'external_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.external_id',
+    },
+    {
+      name: 'state',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.state',
+      values: [
+        {
+          value: 'ACTUAL',
+          label: 'ACTUAL',
+        },
+        {
+          value: 'DELETED',
+          label: 'DELETED',
+        },
+        {
+          value: 'DRAFT',
+          label: 'DRAFT',
+        },
+      ],
+    },
+    {
+      name: 'leader_record_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.leader_record_status',
+    },
+    {
+      name: 'order',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.order',
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'suppress_discovery',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.suppress_discovery',
+      valueFunction: '(:value)::boolean',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.created_by_user_id',
+    },
+    {
+      name: 'created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.created_date',
+      valueFunction: '(:value)::timestamp',
+    },
+    {
+      name: 'updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.updated_by_user_id',
+    },
+    {
+      name: 'updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':record_lb.updated_date',
+      valueFunction: '(:value)::timestamp',
+      essential: true,
+    },
+    {
+      name: 'external_hrid',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ':record_lb.external_hrid',
+    },
+    {
+      name: 'content',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':marc_record_lb.content::text',
+    },
+  ],
+}

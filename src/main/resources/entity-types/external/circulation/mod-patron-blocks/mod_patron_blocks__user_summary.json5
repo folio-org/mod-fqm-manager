@@ -1,0 +1,293 @@
+{
+  id: 'f5443525-d2a9-5e59-8f4a-4ac526ec8528',
+  name: 'mod_patron_blocks__user_summary',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__patron_blocks__user_summary',
+      target: 'src__circulation__patron_blocks__user_summary',
+    },
+  ],
+  requiredPermissions: [
+    'patron-blocks.user-summary.item.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ":user_summary.jsonb->>'id'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'id'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:user_summary.jsonb->>'_version')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":user_summary.jsonb->>'userId'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'userId'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'open_loans',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'loan_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'loanId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'due_date',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'dueDate',
+              dataType: {
+                dataType: 'dateType',
+              },
+            },
+            {
+              name: 'recall',
+              queryable: false,
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'recall') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'recall')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'recall',
+              dataType: {
+                dataType: 'booleanType',
+              },
+            },
+            {
+              name: 'item_lost',
+              queryable: false,
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'itemLost') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemLost')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'itemLost',
+              dataType: {
+                dataType: 'booleanType',
+              },
+            },
+            {
+              name: 'item_claimed_returned',
+              queryable: false,
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'itemClaimedReturned') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemClaimedReturned')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'itemClaimedReturned',
+              dataType: {
+                dataType: 'booleanType',
+              },
+            },
+            {
+              name: 'grace_period',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'gracePeriod') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'gracePeriod')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'gracePeriod',
+              dataType: {
+                dataType: 'objectType',
+                properties: [
+                  {
+                    name: 'duration',
+                    queryable: false,
+                    valueGetter: "(:user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'duration')::integer",
+                    valueFunction: '(:value)::integer',
+                    property: 'duration',
+                    dataType: {
+                      dataType: 'integerType',
+                    },
+                  },
+                  {
+                    name: 'interval_id',
+                    queryable: false,
+                    values: [
+                      {
+                        value: 'Minutes',
+                        label: 'Minutes',
+                      },
+                      {
+                        value: 'Hours',
+                        label: 'Hours',
+                      },
+                      {
+                        value: 'Days',
+                        label: 'Days',
+                      },
+                      {
+                        value: 'Weeks',
+                        label: 'Weeks',
+                      },
+                      {
+                        value: 'Months',
+                        label: 'Months',
+                      },
+                    ],
+                    valueGetter: ":user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'intervalId'",
+                    property: 'intervalId',
+                    dataType: {
+                      dataType: 'stringType',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":user_summary.jsonb->>'openLoans'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'openLoans'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+    },
+    {
+      name: 'open_fees_fines',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'fee_fine_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'feeFineId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'feeFineId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'fee_fine_type_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'feeFineTypeId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineTypeId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'feeFineTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'loan_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'loanId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'balance',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'balance')::float) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: '(:value)::float',
+              property: 'balance',
+              dataType: {
+                dataType: 'numberType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":user_summary.jsonb->>'openFeesFines'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'openFeesFines'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':user_summary.jsonb::text',
+    },
+  ],
+}

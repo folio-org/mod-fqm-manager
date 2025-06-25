@@ -175,6 +175,16 @@
 
 # 3.0.x - Ramsons
 
+## 3.0.14
+- [UXPROD-5315] Backport SRS entity types to Ramsons
+
+[UXPROD-5315]: https://folio-org.atlassian.net/browse/UXPROD-5315
+
+## 3.0.13
+- [MODFQMMGR-748] Add special source for organization
+
+[MODFQMMGR-748]: https://folio-org.atlassian.net/browse/MODFQMMGR-748
+
 ## 3.0.12
 - [MODFQMMGR-658], [MODFQMMGR-650], [MODFQMMGR-643], [MODFQMMGR-649]: Add missing permissions to private entity types
 - [MODFQMMGR-649] additioanally tweaks some settings on composite_voucher_line_totals_per_account to make it more usable

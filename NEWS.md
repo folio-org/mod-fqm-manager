@@ -1,5 +1,8 @@
 # 4.0.x - Sunflower
 
+# 4.0.10
+- Remove trillium harvested views, move backported trillium views to sunflower script
+
 # 4.0.9
 - Make composite SRS ETs private
 

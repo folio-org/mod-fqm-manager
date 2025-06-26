@@ -26,7 +26,8 @@ public class QueryResultsRepository {
   private static final Table<Record> QUERY_RESULTS_TABLE = table("query_results");
   private static final Field<UUID> QUERY_ID_FIELD = field("query_id", UUID.class);
 
-  @Qualifier("readerJooqContext") private final DSLContext readerJooqContext;
+  @Qualifier("readerJooqContext")
+  private final DSLContext readerJooqContext;
   private final DSLContext jooqContext;
 
 
@@ -37,9 +38,11 @@ public class QueryResultsRepository {
     List<Record2<UUID, String[]>> records = resultIds.stream()
       .map(resultId -> jooqContext.newRecord(QUERY_ID_FIELD, RESULT_ID_FIELD).values(queryId, resultId))
       .toList();
-    jooqContext.insertInto(QUERY_RESULTS_TABLE, QUERY_ID_FIELD, RESULT_ID_FIELD)
-      .valuesOfRecords(records)
-      .execute();
+    String queryIdComment = String.format("/* Query ID: %s */ {0}", queryId);
+    jooqContext.query(
+      queryIdComment,
+      jooqContext.insertInto(QUERY_RESULTS_TABLE, QUERY_ID_FIELD, RESULT_ID_FIELD).valuesOfRecords(records)
+    ).execute();
   }
 
   public int getQueryResultsCount(UUID queryId) {

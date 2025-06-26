@@ -616,7 +616,8 @@ class QueryManagementServiceTest {
       createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     // Given a query which is saved with the in-progress status, but doesn't have an actual running SQL query backing it
     when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
-    when(queryRepository.getQueryPids(queryId)).thenReturn(Collections.emptyList());
+    when(queryRepository.getSelectQueryPids(queryId)).thenReturn(Collections.emptyList());
+    when(queryRepository.getInsertQueryPids(queryId)).thenReturn(Collections.emptyList());
     // When you retrieve it with getPotentialZombieQuery()
     queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
     // Then it should be marked as failed
@@ -655,24 +656,12 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldNotFailQueriesThatAreStillRunning() {
-    UUID queryId = UUID.randomUUID();
+    runActivelyRunningQueryTest(true, false);
+  }
 
-    UUID entityTypeId = UUID.randomUUID();
-    UUID createdBy = UUID.randomUUID();
-    String fqlQuery = """
-      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
-      """;
-    List<String> fields = List.of("id", "field1", "field2");
-
-    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
-      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
-    // Given a query which is saved with the in-progress status and has a running SQL query backing it
-    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
-    when(queryRepository.getQueryPids(eq(queryId))).thenReturn(List.of(123));
-    // When you retrieve it with getPotentialZombieQuery()
-    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
-    // Then it should not update anything
-    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  @Test
+  void shouldNotFailQueriesThatAreImportingResults() {
+    runActivelyRunningQueryTest(false, true);
   }
 
   @Test
@@ -697,6 +686,28 @@ class QueryManagementServiceTest {
     queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
     // Then it should not try to update the status, since it eventually switched its status after retrying
     verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  }
+
+  private void runActivelyRunningQueryTest(boolean hasSelectPids, boolean hasInsertPids) {
+    UUID queryId = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+    {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+    """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(expectedQuery));
+    when(queryRepository.getSelectQueryPids(queryId)).thenReturn(hasSelectPids ? List.of(123) : List.of());
+    if (hasInsertPids) {
+      when(queryRepository.getInsertQueryPids(queryId)).thenReturn(List.of(456));
+    }
+
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(), any(), any());
   }
 
   private static Date offsetDateTimeAsDate(OffsetDateTime offsetDateTime) {

@@ -213,7 +213,9 @@ public class QueryManagementService {
   private Optional<Query> getAndValidateQuery(UUID queryId) {
     Optional<Query> query = queryRepository.getQuery(queryId, false);
     if (query.filter(q -> q.status() == QueryStatus.IN_PROGRESS).isPresent()
-        && queryRepository.getQueryPids(queryId).isEmpty()) {
+      && queryRepository.getSelectQueryPids(queryId).isEmpty()
+      && queryRepository.getInsertQueryPids(queryId).isEmpty()
+    ) {
       log.warn("Query {} has an in-progress status, but no corresponding running SQL query was found. Retrying...", queryId);
       throw new ZombieQueryException(); // This exception is the trigger to retry in the RetryTemplate
     }

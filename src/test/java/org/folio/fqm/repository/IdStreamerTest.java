@@ -247,7 +247,7 @@ class IdStreamerTest {
     // This test uses a mocked DSLContext because our test DSLContext doesn't behave nicely in separate threads
     DSLContext mockJooqContext = mock(DSLContext.class);
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
-    when(mockQueryRepository.getQueryPids(any())).thenReturn(List.of(123, 456));
+    when(mockQueryRepository.getSelectQueryPids(any())).thenReturn(List.of(123, 456));
 
     IdStreamer newIdStreamer = new IdStreamer(
       mockJooqContext,

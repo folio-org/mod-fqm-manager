@@ -74,13 +74,21 @@ public class QueryRepository {
     return Optional.ofNullable(query);
   }
 
-  public List<Integer> getQueryPids(UUID queryId) {
-    String querySearchText = "%Query ID: " + queryId + "%";
-    return readerJooqContext
+  public List<Integer> getSelectQueryPids(UUID queryId) {
+    return getQueryPids(readerJooqContext, queryId);
+  }
+
+  public List<Integer> getInsertQueryPids(UUID queryId) {
+    return getQueryPids(jooqContext, queryId);
+  }
+
+  private List<Integer> getQueryPids(DSLContext context, UUID queryId) {
+    String pattern = "%/* Query ID: " + queryId + " */%";
+    return context
       .select(field("pid", Integer.class))
       .from(table("pg_stat_activity"))
       .where(field("state").eq("active"))
-      .and(field("query").like(querySearchText))
+      .and(field("query").like(pattern))
       .fetchInto(Integer.class);
   }
 

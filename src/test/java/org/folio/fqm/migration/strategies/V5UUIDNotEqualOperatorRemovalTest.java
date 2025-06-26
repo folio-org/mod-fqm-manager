@@ -28,7 +28,7 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
-          .fqlQuery("{\"users.id\": {\"$ne\": \"cf1baaa9-a55c-5ac7-bcbd-d27fbc477303\"},\"_version\":\"6\"}")
+          .fqlQuery("{\"users.id\": {\"$ne\": \"cf1baaa9-a55c-5ac7-bcbd-d27fbc477303\"}}")
           .fields(List.of())
           .build()
       ),
@@ -43,7 +43,7 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"users.username\": {\"$ne\": \"admin\"},\"_version\":\"6\"}")
+          .fqlQuery("{\"users.username\": {\"$ne\": \"admin\"}}")
           .fields(List.of())
           .build()
       ),
@@ -58,7 +58,7 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"_version\":\"6\"}")
+          .fqlQuery("{}")
           .fields(List.of())
           .warning(
             OperatorBreakingWarning
@@ -90,7 +90,7 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"_version\": \"6\", \"users.id\": {\"$le\": \"ffffffff-a55c-5ac7-bcbd-d27fbc477303\"}}")
+          .fqlQuery("{\"users.id\": {\"$le\": \"ffffffff-a55c-5ac7-bcbd-d27fbc477303\"}}")
           .fields(List.of())
           .warning(
             OperatorBreakingWarning
@@ -130,7 +130,6 @@ class V5UUIDNotEqualOperatorRemovalTest extends TestTemplate {
           .fqlQuery(
             """
             {
-              "_version": "6",
               "groups.id": {
                 "$eq": "cf1baaa9-a55c-5ac7-bcbd-d27fbc477303"
               },

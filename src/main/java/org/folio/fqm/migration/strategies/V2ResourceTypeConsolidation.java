@@ -18,13 +18,8 @@ public class V2ResourceTypeConsolidation extends AbstractSimpleMigrationStrategy
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "2";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "3";
   }
 
   @Override

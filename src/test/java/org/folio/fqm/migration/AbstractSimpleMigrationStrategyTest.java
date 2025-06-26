@@ -58,13 +58,8 @@ class AbstractSimpleMigrationStrategyTest {
     }
 
     @Override
-    public String getSourceVersion() {
+    public String getMaximumApplicableVersion() {
       return "source";
-    }
-
-    @Override
-    public String getTargetVersion() {
-      return "target";
     }
 
     @Override
@@ -104,34 +99,18 @@ class AbstractSimpleMigrationStrategyTest {
     }
   }
 
-  static List<Arguments> sourcesWithShouldApply() {
-    return List.of(
-      Arguments.of("", false),
-      Arguments.of("0", false),
-      Arguments.of("1", false),
-      Arguments.of("-1", false),
-      Arguments.of("source", true)
-    );
-  }
-
-  @ParameterizedTest(name = "{0} applies={1}")
-  @MethodSource("sourcesWithShouldApply")
-  void testAppliesToMatchingVersions(String version, boolean shouldApply) {
-    assertThat(new Impl().applies(version), is(shouldApply));
-  }
-
   static List<Arguments> sourcesForMigrationResults() {
     return List.of(
       // ET change, no FQL changes
       Arguments.of(
         new MigratableQueryInformation(
           UUID_A,
-          "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"test\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "foo", "also_unrelated")
         ),
         new MigratableQueryInformation(
           UUID_B,
-          "{\"_version\":\"target\",\"test\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"test\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "bar", "also_unrelated")
         )
       ),
@@ -139,12 +118,12 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_A,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "foo", "also_unrelated")
         ),
         new MigratableQueryInformation(
           UUID_B,
-          "{\"_version\":\"target\",\"bar\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"bar\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "bar", "also_unrelated")
         )
       ),
@@ -153,7 +132,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_A,
           """
-          {"_version":"source","$and":[
+          {"_version":"version","$and":[
             {"field1": {"$eq": true}},
             {"field2": {"$lte": 3}}
           ]}
@@ -163,7 +142,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_B,
           """
-          {"_version":"target","$and":[
+          {"_version":"version","$and":[
             {"field1": {"$eq": true}},
             {"field2": {"$lte": 3}}
           ]}
@@ -176,7 +155,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_A,
           """
-          {"_version":"source","$and":[
+          {"_version":"version","$and":[
             {"field1": {"$eq": true}},
             {"$and": [
               {"field2": {"$gte": 2}},
@@ -190,7 +169,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_B,
           """
-          {"_version":"target","$and":[
+          {"_version":"version","$and":[
             {"field1": {"$eq": true}},
             {"$and": [
               {"field2": {"$gte": 2}},
@@ -206,12 +185,12 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_C,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "foo", "also_unrelated")
         ),
         new MigratableQueryInformation(
           UUID_D,
-          "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "foo", "also_unrelated")
         )
       ),
@@ -219,12 +198,12 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_E,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "foo", "also_unrelated")
         ),
         new MigratableQueryInformation(
           UUID_E,
-          "{\"_version\":\"target\",\"bar\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"bar\":{\"$eq\":\"foo\"}}",
           List.of("unrelated", "bar", "also_unrelated")
         )
       ),
@@ -232,12 +211,12 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_F,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
         ),
         new MigratableQueryInformation(
           UUID_F,
-          "{\"_version\":\"target\",\"bar.foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"bar.foo\":{\"$eq\":\"foo\"}}",
           List.of("bar.field1", "bar.foo", "bar.field2")
         )
       ),
@@ -245,12 +224,12 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_0,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
         ),
         new MigratableQueryInformation(
           UUID_0,
-          "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
         )
       ),
@@ -258,30 +237,34 @@ class AbstractSimpleMigrationStrategyTest {
       Arguments.of(
         new MigratableQueryInformation(
           UUID_0A,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
         ),
         new MigratableQueryInformation(
           UUID_0A,
-          "{\"_version\":\"target\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2"),
-          List.of(DeprecatedEntityWarning.withoutAlternative("0a").apply(null))
+          List.of(DeprecatedEntityWarning.withoutAlternative("0a").apply(null)),
+          null,
+          false
         )
       ),
       // Removed ET
       Arguments.of(
         new MigratableQueryInformation(
           UUID_0B,
-          "{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}",
+          "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2")
         ),
         new MigratableQueryInformation(
           MigrationConfiguration.REMOVED_ENTITY_TYPE_ID,
-          "{\"_version\":\"target\"}",
+          "",
           List.of(),
           List.of(
-            RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"source\",\"foo\":{\"$eq\":\"foo\"}}")
-          )
+            RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}")
+          ),
+          null,
+          true
         )
       ),
       // field-level warnings
@@ -289,7 +272,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_0C,
           """
-          {"_version":"source","$and":[
+          {"_version":"version","$and":[
             {"unrelated": {"$eq": true}},
             {"removed": {"$lte": 3}},
             {"deprecated": {"$lte": 2}},
@@ -301,7 +284,7 @@ class AbstractSimpleMigrationStrategyTest {
         new MigratableQueryInformation(
           UUID_0C,
           """
-          {"_version":"target","$and":[
+          {"_version":"version","$and":[
             {"unrelated": {"$eq": true}},
             {"deprecated": {"$lte": 2}}
           ]}
@@ -313,7 +296,9 @@ class AbstractSimpleMigrationStrategyTest {
             QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}"),
             RemovedFieldWarning.withAlternative("alt").apply("removed", "{\n  \"$lte\" : 3\n}"),
             RemovedFieldWarning.withAlternative("alt").apply("removed", null)
-          )
+          ),
+          null,
+          false
         )
       ),
       // removed top-level query field
@@ -322,7 +307,7 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_0C,
           """
           {
-            "_version":"source",
+            "_version":"version",
             "query_breaking": {"$ne": 2}
           }
           """,
@@ -330,9 +315,11 @@ class AbstractSimpleMigrationStrategyTest {
         ),
         new MigratableQueryInformation(
           UUID_0C,
-          "{\"_version\":\"target\"}",
+          "{\"_version\":\"version\"}",
           List.of("query_breaking"),
-          List.of(QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}"))
+          List.of(QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}")),
+          null,
+          false
         )
       )
     );

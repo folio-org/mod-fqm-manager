@@ -28,13 +28,8 @@ public class V3RamsonsFieldCleanup extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "3";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "4";
   }
 
   @Override

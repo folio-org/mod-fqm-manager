@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.HashSet;
-import java.util.Objects;
+import java.io.UncheckedIOException;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
@@ -17,6 +16,7 @@ import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
+import org.folio.fqm.migration.MigrationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,16 +43,33 @@ public class MigrationService {
   }
 
   public MigratableQueryInformation migrate(MigratableQueryInformation migratableQueryInformation) {
-    while (isMigrationNeeded(migratableQueryInformation)) {
+    if (migratableQueryInformation.version() == null) {
+      migratableQueryInformation = migratableQueryInformation.withVersion(migrationConfiguration.getDefaultVersion());
+    }
+
+    boolean hadBreakingChanges = false;
+    if (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (strategy.applies(getVersion(migratableQueryInformation.fqlQuery()))) {
+        if (MigrationUtils.compareVersions(migratableQueryInformation.version(), strategy.getMaximumApplicableVersion()) <= 0
+            && strategy.applies(migratableQueryInformation)
+        ) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
           migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
+          hadBreakingChanges |= migratableQueryInformation.hadBreakingChanges();
         }
       }
     }
 
-    return migratableQueryInformation;
+    try {
+      ObjectNode fql = (ObjectNode) objectMapper.readTree(migratableQueryInformation.fqlQuery());
+      fql.set(MigrationConfiguration.VERSION_KEY, objectMapper.valueToTree(migrationConfiguration.getCurrentVersion()));
+      migratableQueryInformation = migratableQueryInformation.withFqlQuery(objectMapper.writeValueAsString(fql));
+    } catch (JsonProcessingException e) {
+      log.error("Unable to process JSON", e);
+      throw new UncheckedIOException(e);
+    }
+
+    return migratableQueryInformation.withHadBreakingChanges(hadBreakingChanges);
   }
 
   public String getVersion(@CheckForNull String fqlQuery) {
@@ -84,48 +101,10 @@ public class MigrationService {
       return;
     }
 
-    if (!onlyVersionChanged(migratableQueryInformation, migratedQueryInformation)) {
+    if (migratedQueryInformation.hadBreakingChanges()) {
       throw new MigrationQueryChangedException(migratedQueryInformation);
     }
+
   }
 
-  /**
-   * Checks if only the version has changed between the original and migrated query information.
-   *
-   * @param original the original query information
-   * @param migrated the migrated query information
-   * @return true if only the version has changed, false otherwise
-   */
-  private boolean onlyVersionChanged(MigratableQueryInformation original, MigratableQueryInformation migrated) {
-    // Check if basic fields are equal
-    if (!Objects.equals(original.entityTypeId(), migrated.entityTypeId()) ||
-        (original.fields() != null && (migrated.fields() == null || !new HashSet<>(migrated.fields()).containsAll(original.fields()))) ||
-        !Objects.equals(original.warnings(), migrated.warnings())) {
-      return false;
-    }
-
-    // If FQL queries are null or one of them is null, we've already checked all fields
-    if (original.fqlQuery() == null && migrated.fqlQuery() == null) {
-      return true;
-    }
-
-    if (original.fqlQuery() == null || migrated.fqlQuery() == null) {
-      return false;
-    }
-
-    // Compare FQL queries without version
-    try {
-      ObjectNode originalNode = (ObjectNode) objectMapper.readTree(original.fqlQuery());
-      ObjectNode migratedNode = (ObjectNode) objectMapper.readTree(migrated.fqlQuery());
-
-      // Remove version for comparison
-      originalNode.remove(MigrationConfiguration.VERSION_KEY);
-      migratedNode.remove(MigrationConfiguration.VERSION_KEY);
-
-      return originalNode.equals(migratedNode);
-    } catch (JsonProcessingException e) {
-      // If we can't parse the JSON, assume something changed
-      return false;
-    }
-  }
 }

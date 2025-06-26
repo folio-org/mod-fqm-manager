@@ -27,6 +27,7 @@ import org.folio.fqm.client.PatronGroupsClient.PatronGroupsResponse;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.warnings.ValueBreakingWarning;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
@@ -87,7 +88,12 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
       }
 
       @Override
-      public boolean applies(String version) {
+      public String getMaximumApplicableVersion() {
+        return "source";
+      }
+
+      @Override
+      public boolean applies(@NotNull MigratableQueryInformation queryInformation) {
         throw new UnsupportedOperationException("Unimplemented method 'applies'");
       }
 
@@ -181,7 +187,7 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
               MigratableQueryInformation
                 .builder()
                 .entityTypeId(UUID.fromString(pair.getLeft()))
-                .fqlQuery("{\"" + pair.getRight() + "\": {\"$ne\": \"invalid\"}, \"_version\":\"10\"}")
+                .fqlQuery("{\"" + pair.getRight() + "\": {\"$ne\": \"invalid\"}}")
                 .fields(List.of())
                 .build(),
               (Consumer<MigratableQueryInformation>) (
@@ -221,8 +227,7 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
                       """
                       {
                         "%s": {"$ne": "name1"},
-                        "not_a_relevant_field": {"$ne": "id1"},
-                        "_version": "10"
+                        "not_a_relevant_field": {"$ne": "id1"}
                       }
                       """.formatted(
                           triple.getMiddle()
@@ -248,7 +253,7 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
                     .builder()
                     .entityTypeId(UUID.fromString(triple.getLeft()))
                     .fqlQuery(
-                      "{\"%s\": {\"$eq\": \"name1\", \"$ne\": \"name1\", \"$in\": [\"name2\"]}, \"_version\":\"10\"}".formatted(
+                      "{\"%s\": {\"$eq\": \"name1\", \"$ne\": \"name1\", \"$in\": [\"name2\"]}}".formatted(
                           triple.getMiddle()
                         )
                     )

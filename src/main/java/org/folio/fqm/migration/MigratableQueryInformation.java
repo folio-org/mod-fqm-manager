@@ -14,9 +14,11 @@ public record MigratableQueryInformation(
   UUID entityTypeId,
   @CheckForNull String fqlQuery,
   List<String> fields,
-  @Singular List<Warning> warnings
+  @Singular List<Warning> warnings,
+  String version,
+  boolean hadBreakingChanges
 ) {
   public MigratableQueryInformation(UUID entityTypeId, String fqlQuery, List<String> fields) {
-    this(entityTypeId, fqlQuery, fields, List.of());
+    this(entityTypeId, fqlQuery, fields, List.of(), null, false);
   }
 }

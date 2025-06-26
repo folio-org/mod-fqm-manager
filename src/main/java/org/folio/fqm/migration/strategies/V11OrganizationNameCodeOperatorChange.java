@@ -37,23 +37,21 @@ import org.folio.fqm.migration.warnings.Warning;
 @RequiredArgsConstructor
 public class V11OrganizationNameCodeOperatorChange implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "11";
-  public static final String TARGET_VERSION = "12";
-
   private static final UUID ORGANIZATIONS_ENTITY_TYPE_ID = UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503");
   private static final List<String> FIELD_NAMES = List.of("code", "name");
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final OrganizationsClient organizationsClient;
 
+
   @Override
-  public String getLabel() {
-    return "V11 -> V12 Organizations name/code operator/value transformation (MODFQMMGR-606)";
+  public String getMaximumApplicableVersion() {
+    return "11";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V11 -> V12 Organizations name/code operator/value transformation (MODFQMMGR-606)";
   }
 
   @Override
@@ -66,7 +64,6 @@ public class V11OrganizationNameCodeOperatorChange implements MigrationStrategy 
       .withFqlQuery(
         MigrationUtils.migrateFql(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           (result, key, value) -> {
             if (!ORGANIZATIONS_ENTITY_TYPE_ID.equals(query.entityTypeId()) || !FIELD_NAMES.contains(key)) {
               result.set(key, value); // no-op
@@ -141,6 +138,7 @@ public class V11OrganizationNameCodeOperatorChange implements MigrationStrategy 
           }
         )
       )
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
       .withWarnings(warnings);
   }
 }

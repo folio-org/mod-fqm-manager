@@ -64,7 +64,7 @@ class V0POCMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f"))
           .fqlQuery(
-            "{\"_version\":\"1\",\"items.status_name\":{\"$in\":[\"missing\",\"aged to lost\",\"claimed returned\",\"declared lost\",\"long missing\"]}}"
+            "{\"items.status_name\":{\"$in\":[\"missing\",\"aged to lost\",\"claimed returned\",\"declared lost\",\"long missing\"]}}"
           )
           .fields(
             List.of(
@@ -136,7 +136,7 @@ class V0POCMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("d6729885-f2fb-4dc7-b7d0-a865a7f461e4"))
           .fqlQuery(
-            "{\"_version\":\"1\",\"$and\":[{\"loans.status_name\":{\"$eq\":\"Open\"}},{\"users.active\":{\"$eq\":\"false\"}}]}"
+            "{\"$and\":[{\"loans.status_name\":{\"$eq\":\"Open\"}},{\"users.active\":{\"$eq\":\"false\"}}]}"
           )
           .fields(
             List.of(

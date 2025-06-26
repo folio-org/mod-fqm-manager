@@ -5,15 +5,14 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
+
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -27,13 +26,12 @@ class MigrationUtilsTest {
   static List<Arguments> functionCallTestCases() {
     return List.of(
       // query, version transformation expected calls, list of field transformation calls
-      Arguments.of("{}", null, List.of()),
-      Arguments.of("{\"_version\":\"1\"}", "1", List.of()),
+      Arguments.of("{}", List.of()),
+      Arguments.of("{\"_version\":\"1\"}", List.of()),
       // basic single-field query
-      Arguments.of("{\"field\":{\"$eq\":\"foo\"}}", null, List.of(Pair.of("field", "{\"$eq\":\"foo\"}"))),
+      Arguments.of("{\"field\":{\"$eq\":\"foo\"}}", List.of(Pair.of("field", "{\"$eq\":\"foo\"}"))),
       Arguments.of(
         "{\"_version\":\"1\", \"field\":{\"$eq\":\"foo\"}}",
-        "1",
         List.of(Pair.of("field", "{\"$eq\":\"foo\"}"))
       ),
       // multi-field query, without $and
@@ -45,7 +43,6 @@ class MigrationUtilsTest {
             "field3": {"$ne": "baz"}
           }
           """,
-        null,
         List.of(
           Pair.of("field1", "{\"$eq\":\"foo\"}"),
           Pair.of("field2", "{\"$le\":\"bar\"}"),
@@ -61,7 +58,6 @@ class MigrationUtilsTest {
             "field3": {"$ne": "baz"}
           }
           """,
-        "newest and coolest",
         List.of(
           Pair.of("field1", "{\"$eq\":\"foo\"}"),
           Pair.of("field2", "{\"$le\":\"bar\"}"),
@@ -76,7 +72,6 @@ class MigrationUtilsTest {
             "$ge": 100
           }}
           """,
-        null,
         List.of(Pair.of("field1", "{\"$le\":500,\"$ge\":100}"))
       ),
       // query with $and
@@ -87,7 +82,6 @@ class MigrationUtilsTest {
             { "field": {"$ne": "bar"} }
           ]}
           """,
-        null,
         List.of(Pair.of("field", "{\"$ne\":\"foo\"}"), Pair.of("field", "{\"$ne\":\"bar\"}"))
       ),
       // putting everything together
@@ -110,7 +104,6 @@ class MigrationUtilsTest {
             ]
           }
           """,
-        "1",
         List.of(
           Pair.of("field1", "{\"$eq\":\"foo\"}"),
           Pair.of("field2", "{\"$le\":\"bar\"}"),
@@ -124,20 +117,13 @@ class MigrationUtilsTest {
 
   @ParameterizedTest
   @MethodSource("functionCallTestCases")
-  void testFunctionCalls(String query, String versionArgument, List<Pair<String, String>> fieldArguments) {
-    AtomicInteger versionTransformationCalls = new AtomicInteger(0);
-    UnaryOperator<String> versionTransformer = input -> {
-      assertThat(input, is(versionArgument));
-      versionTransformationCalls.incrementAndGet();
-      return "newVersion";
-    };
+  void testFunctionCalls(String query, List<Pair<String, String>> fieldArguments) {
 
     List<Pair<String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
 
     MigrationUtils.migrateFql(
       query,
-      versionTransformer,
-      (node, field, value) -> {
+        (node, field, value) -> {
         assertThat(node, is(notNullValue()));
         assertThat(field, is(notNullValue()));
         assertThat(value, is(notNullValue()));
@@ -151,23 +137,22 @@ class MigrationUtilsTest {
       }
     );
 
-    assertThat(versionTransformationCalls.get(), is(1));
     assertThat(fieldArgumentsLeftToGet, is(empty()));
   }
 
   @Test
   void testReturnedResultWithNoFieldsOrVersion() {
     assertThat(
-      MigrationUtils.migrateFql("{}", v -> "new version", (r, k, v) -> {}),
-      is(equalTo("{\"_version\":\"new version\"}"))
+      MigrationUtils.migrateFql("{}", (r, k, v) -> {}),
+      is(equalTo("{}"))
     );
   }
 
   @Test
   void testReturnedResultWithVersionAndNoFields() {
     assertThat(
-      MigrationUtils.migrateFql("{\"_version\":\"old\"}", v -> "new version", (r, k, v) -> {}),
-      is(equalTo("{\"_version\":\"new version\"}"))
+      MigrationUtils.migrateFql("{\"_version\":\"old\"}", (r, k, v) -> {}),
+      is(equalTo("{\"_version\":\"old\"}"))
     );
   }
 
@@ -176,12 +161,11 @@ class MigrationUtilsTest {
     assertThat(
       MigrationUtils.migrateFql(
         "{\"_version\":\"old\",\"test\":{}}",
-        v -> "new version",
-        // this is solely responsible for determining what gets set back into the query
+          // this is solely responsible for determining what gets set back into the query
         // (excluding the special _version)
         (result, k, v) -> result.set("foo", new TextNode("bar"))
       ),
-      is(equalTo("{\"_version\":\"new version\",\"foo\":\"bar\"}"))
+      is(equalTo("{\"_version\":\"old\",\"foo\":\"bar\"}"))
     );
   }
 
@@ -190,17 +174,74 @@ class MigrationUtilsTest {
     assertThat(
       MigrationUtils.migrateFql(
         "{\"_version\":\"old\",\"$and\":[{\"test\":{}}]}",
-        v -> "new version",
-        // this is solely responsible for determining what gets set back into the query
+          // this is solely responsible for determining what gets set back into the query
         // (excluding the special _version)
         (result, k, v) -> result.set("foo", new TextNode("bar"))
       ),
-      is(equalTo("{\"_version\":\"new version\",\"$and\":[{\"foo\":\"bar\"}]}"))
+      is(equalTo("{\"_version\":\"old\",\"$and\":[{\"foo\":\"bar\"}]}"))
     );
   }
 
   @Test
   void testInvalidJson() {
-    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql("invalid", v -> null, (r, k, v) -> {}));
+    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql("invalid", (r, k, v) -> {}));
+  }
+
+  @Test
+  void testEqualVersions() {
+    assertEquals(0, MigrationUtils.compareVersions("1.2.3", "1.2.3"));
+    assertEquals(0, MigrationUtils.compareVersions("alpha.beta", "alpha.beta"));
+  }
+
+  @Test
+  void testNumericComparison() {
+    assertTrue(MigrationUtils.compareVersions("1.2.10", "1.2.2") > 0);
+    assertTrue(MigrationUtils.compareVersions("2.0.0", "10.0.0") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.10.1", "1.2.9") > 0);
+  }
+
+  @Test
+  void testLexicalComparison() {
+    assertTrue(MigrationUtils.compareVersions("1.2.alpha", "1.2.beta") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.beta", "1.2.alpha") > 0);
+    assertTrue(MigrationUtils.compareVersions("1.alpha.3", "1.beta.3") < 0);
+  }
+
+  @Test
+  void testMixedNumericAndString() {
+    assertTrue(MigrationUtils.compareVersions("1.2.10", "1.2.alpha") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.alpha", "1.2.10") > 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.0", "1.2.beta") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.beta", "1.2.0") > 0);
+  }
+
+  @Test
+  void testPrefixCases() {
+    assertEquals(0, MigrationUtils.compareVersions("1.2", "1.2.0"));
+    assertEquals(0, MigrationUtils.compareVersions("1.2.0", "1.2"));
+    assertEquals(0, MigrationUtils.compareVersions("1", "1.0.0"));
+    assertEquals(0, MigrationUtils.compareVersions("1.0.0", "1"));
+  }
+
+  @Test
+  void testDifferentLengthsAndContent() {
+    assertTrue(MigrationUtils.compareVersions("1.2.3", "1.2.3.4") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.3.4", "1.2.3") > 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.3.alpha", "1.2.3.alpha.1") < 0);
+    assertTrue(MigrationUtils.compareVersions("1.2.3.alpha.1", "1.2.3.alpha") > 0);
+  }
+
+  @Test
+  void testEmptyStrings() {
+    assertEquals(0, MigrationUtils.compareVersions("", ""));
+    assertTrue(MigrationUtils.compareVersions("", "1") < 0);
+    assertTrue(MigrationUtils.compareVersions("1", "") > 0);
+  }
+
+  @Test
+  void testSingleSegment() {
+    assertTrue(MigrationUtils.compareVersions("1", "2") < 0);
+    assertTrue(MigrationUtils.compareVersions("b", "a") > 0);
+    assertEquals(0, MigrationUtils.compareVersions("x", "x"));
   }
 }

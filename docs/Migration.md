@@ -45,7 +45,7 @@ Any change to an entity type that results in a field being removed or renamed sh
 
 1. Create a new migration strategy in `src/main/java/org/folio/fqm/migration/strategies` that extends `AbstractSimpleMigrationStrategy`
    - Your migration strategy should start with `V#`, where `#` is the version being migrated **from**.
-1. Implement `getSourceVersion` and `getTargetMigration` to return the version queries should be at before they are ran through this migration, and the version the query should be at once this migration is complete. Currently, this is the current integer version, and the next ascending integer.
+1. Implement `getMaximumApplicableVersion` to return the last version to which the migration should be applied. Currently, this is the current integer version.
 1. Implement `getLabel` with a developer-friendly description of what is happening; this will be logged and will be useful for debugging any errors. It is recommended to include ticket numbers or other references to make it easy to track down why this migration/change occurred in the first place, too.
 1. Describe the [changes](#changes) in this migration by implementing any of the applicable methods.
 1. Describe the [warnings](#warnings) in this migration by implementing any of the applicable methods.
@@ -53,6 +53,7 @@ Any change to an entity type that results in a field being removed or renamed sh
 1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/config/MigrationConfiguration.java`.
 1. If something fancy is being done, or you want to go above and beyond, write a custom test. You can see `src/test/java/org/folio/fqm/migration/strategies/TestTemplate` and `V0POCMigrationTest` for a framework that can easily be extended for common test case formats.
    - Implementations of `AbstractSimpleMigrationStrategy` are automatically tested via `MigrationStrategyRepositoryTest`, however, this is just for basic smoke tests and contains no logic to test specifics of an actual migration.
+   - See [Advanced migrations](#advanced-migrations) for more information
 
 Not all use cases can be covered with `AbstractSimpleMigrationStrategy`; in that case, a custom migration will be needed. See [advanced migrations](#advanced-migrations) for more details.
 
@@ -203,8 +204,11 @@ Warnings for more complex use cases include `OperatorBreakingWarning` and `Value
 Advanced migrations that need to do more advanced logic or conditionals, or apply to a range of migration versions, require custom implementations of `MigrationStrategy`. Tutorials for this is outside the scope of this document, however, there are three methods to be implemented here which should unlock full power:
 
 - `getLabel` should return a descriptive label for logging, just like `AbstractSimpleMigrationStrategy`
-- `applies` should return `true` if this migration logic should be run on a given `version`
-- `apply` is responsible for the full transformation of the query, adding warnings if applicable, updating the `_version`, and anything else necessary.
+- `applies` can optionally be implemented to only run migration logic on matching queries
+- `apply` is responsible for the full transformation of the query, adding warnings if applicable, and anything else necessary.
+  - If the migration results in a breaking change, then make sure to set `hadBreakingChanges` to `true` on the
+    `MigrationQueryInformtaion` object returned from `apply`. This prevents queries from running if they are simply not
+    compatible with the running FQM release.
 
 Helper functions are available in `MigrationUtils`; it is highly recommend to build off one of the existing migrations if possible.
 

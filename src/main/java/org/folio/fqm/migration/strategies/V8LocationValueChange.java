@@ -28,9 +28,6 @@ import org.folio.fqm.migration.warnings.Warning;
 @RequiredArgsConstructor
 public class V8LocationValueChange implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "8";
-  public static final String TARGET_VERSION = "9";
-
   private static final UUID HOLDINGS_ENTITY_TYPE_ID = UUID.fromString("8418e512-feac-4a6a-a56d-9006aab31e33");
   private static final UUID ITEMS_ENTITY_TYPE_ID = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
   private static final List<String> FIELD_NAMES = List.of(
@@ -42,13 +39,13 @@ public class V8LocationValueChange implements MigrationStrategy {
   private final LocationsClient locationsClient;
 
   @Override
-  public String getLabel() {
-    return "V8 -> V9 item and holdings location name value transformation (MODFQMMGR-602)";
+  public String getMaximumApplicableVersion() {
+    return "8";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V8 -> V9 item and holdings location name value transformation (MODFQMMGR-602)";
   }
 
   @Override
@@ -61,7 +58,6 @@ public class V8LocationValueChange implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFqlValues(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           key ->
             (
               HOLDINGS_ENTITY_TYPE_ID.equals(query.entityTypeId()) || ITEMS_ENTITY_TYPE_ID.equals(query.entityTypeId())
@@ -96,6 +92,7 @@ public class V8LocationValueChange implements MigrationStrategy {
           }
         )
       )
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
       .withWarnings(warnings);
   }
 }

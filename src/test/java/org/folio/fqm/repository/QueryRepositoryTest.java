@@ -126,4 +126,10 @@ class QueryRepositoryTest {
     repo.deleteQueries(List.of(queryId));
     assertTrue(repo.getQuery(queryIdentifier.getQueryId()).isEmpty());
   }
+
+  @Test
+  void shouldGetQueryPids() {
+    assertNotNull(repo.getSelectQueryPids(queryId));
+    assertNotNull(repo.getInsertQueryPids(queryId));
+  }
 }

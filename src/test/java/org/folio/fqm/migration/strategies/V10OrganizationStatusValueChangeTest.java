@@ -27,7 +27,7 @@ class V10OrganizationStatusValueChangeTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
-          .fqlQuery("{\"status\": {\"$ne\": \"active\"}, \"_version\":\"11\"}")
+          .fqlQuery("{\"status\": {\"$ne\": \"active\"}}")
           .fields(List.of())
           .build()
       ),
@@ -54,7 +54,6 @@ class V10OrganizationStatusValueChangeTest extends TestTemplate {
           .fqlQuery(
             """
             {
-              "_version": "11",
               "$and": [
                 { "status": { "$eq": "Active" }},
                 { "status": { "$eq": "what" }},

@@ -94,7 +94,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
-          .fqlQuery("{\"code\": {\"$ne\": \"active\"}, \"_version\":\"14\"}")
+          .fqlQuery("{\"code\": {\"$ne\": \"active\"}}")
           .fields(List.of())
           .build()
       ),
@@ -110,7 +110,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$ne\": \"active\"}, \"_version\":\"14\"}")
+          .fqlQuery("{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$ne\": \"active\"}}")
           .fields(List.of())
           .build()
       ),
@@ -126,7 +126,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$in\": [\"active\", \"inactive\"]}, \"_version\":\"14\"}")
+          .fqlQuery("{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$in\": [\"active\", \"inactive\"]}}")
           .fields(List.of())
           .build()
       ),
@@ -142,7 +142,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"$and\": [{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$ne\": \"val1\"}}, {\"not_a_custom_field\": {\"$ne\": \"val2\"}}, {\"_custom_field_48e035c3-d2fe-4575-b387-e7fdc07dde58\": {\"$eq\": \"val3\"}}], \"_version\":\"14\"}")
+          .fqlQuery("{\"$and\": [{\"_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07\": {\"$ne\": \"val1\"}}, {\"not_a_custom_field\": {\"$ne\": \"val2\"}}, {\"_custom_field_48e035c3-d2fe-4575-b387-e7fdc07dde58\": {\"$eq\": \"val3\"}}]}")
           .fields(List.of())
           .build()
       ),
@@ -158,7 +158,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf"))
-          .fqlQuery("{\"not_a_custom_field\": {\"$in\": [\"active\", \"inactive\"]}, \"_version\":\"14\"}")
+          .fqlQuery("{\"not_a_custom_field\": {\"$in\": [\"active\", \"inactive\"]}}")
           .fields(List.of("not_a_custom_field", "_custom_field_97ebe38d-4733-4631-b264-5d29f4f50b07", "_custom_field_48e035c3-d2fe-4575-b387-e7fdc07dde58"))
           .build()
       )

@@ -30,22 +30,19 @@ import org.folio.fqm.migration.warnings.Warning;
 @RequiredArgsConstructor
 public class V6ModeOfIssuanceValueChange implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "6";
-  public static final String TARGET_VERSION = "7";
-
   private static final UUID INSTANCES_ENTITY_TYPE_ID = UUID.fromString("6b08439b-4f8e-4468-8046-ea620f5cfb74");
   private static final String FIELD_NAME = "instance.mode_of_issuance_name";
 
   private final ModesOfIssuanceClient modesOfIssuanceClient;
 
   @Override
-  public String getLabel() {
-    return "V6 -> V7 mode of issuance value transformation (MODFQMMGR-602)";
+  public String getMaximumApplicableVersion() {
+    return "6";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V6 -> V7 mode of issuance value transformation (MODFQMMGR-602)";
   }
 
   @Override
@@ -58,7 +55,6 @@ public class V6ModeOfIssuanceValueChange implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFqlValues(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           key -> INSTANCES_ENTITY_TYPE_ID.equals(query.entityTypeId()) && FIELD_NAME.equals(key),
           (String key, String value, Supplier<String> fql) -> {
             if (modesOfIssuance.get() == null) {
@@ -89,6 +85,7 @@ public class V6ModeOfIssuanceValueChange implements MigrationStrategy {
           }
         )
       )
-      .withWarnings(warnings);
+      .withWarnings(warnings)
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty());
   }
 }

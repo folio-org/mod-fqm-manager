@@ -9,15 +9,22 @@ public interface MigrationStrategy
   /** For logging purposes */
   String getLabel();
 
+  /** Get the version after which this migration doesn't apply.
+   * If the current version &gt; this value, then the migration can be skipped
+   */
+  String getMaximumApplicableVersion();
+
   /**
    * Determine if a query should be migrated by this strategy (if this strategy "applies" to a query)
    */
-  boolean applies(@Nonnull String version);
+  default boolean applies(@Nonnull MigratableQueryInformation migratableQueryInformation) {
+    return true;
+  }
 
   /**
-   * Migrate the query. This method will be called iff {@link #applies(FqlService, MigratableQueryInformation)} returns true.
+   * Migrate the query. This method will be called iff {@link #applies(MigratableQueryInformation)} returns true.
    *
-   * After this method is called, {@link #applies(FqlService, MigratableQueryInformation)} MUST return false. Otherwise, an infinite
+   * After this method is called, {@link #applies(MigratableQueryInformation)} MUST return false. Otherwise, an infinite
    * loop will occur.
    */
   @Override // respecified to add docblock

@@ -5,8 +5,11 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
@@ -51,7 +54,7 @@ class MigrationStrategyRepositoryTest {
   List<Arguments> migrationStrategiesAndQueries() {
     List<MigrationStrategy> strategies = migrationStrategyRepository.getMigrationStrategies();
     List<Pair<String, MigratableQueryInformation>> queries = List.of(
-      Pair.of("null FQL", new MigratableQueryInformation(new UUID(0, 0), null, List.of())),
+      Pair.of("null FQL", new MigratableQueryInformation(new UUID(0, 0), "{}", List.of())),
       Pair.of("empty FQL", new MigratableQueryInformation(new UUID(0, 0), "{}", List.of())),
       Pair.of(
         "FQL without version",
@@ -90,7 +93,7 @@ class MigrationStrategyRepositoryTest {
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("migrationStrategiesAndQueries")
   void testStrategies(String label, MigrationStrategy strategy, MigratableQueryInformation query) {
-    boolean applies = strategy.applies(migrationService.getVersion(query.fqlQuery()));
+    boolean applies = strategy.applies(query);
 
     log.info("{} applies={}", label, applies);
 
@@ -104,8 +107,7 @@ class MigrationStrategyRepositoryTest {
       abstractStrategy.getEntityTypeChanges();
       abstractStrategy.getFieldChanges();
       assertThat(abstractStrategy.getLabel(), is(notNullValue()));
-      assertThat(abstractStrategy.getSourceVersion(), is(notNullValue()));
-      assertThat(abstractStrategy.getTargetVersion(), is(notNullValue()));
+      assertThat(abstractStrategy.getMaximumApplicableVersion(), is(notNullValue()));
       abstractStrategy
         .getEntityTypeWarnings()
         .forEach((k, v) -> {
@@ -119,5 +121,17 @@ class MigrationStrategyRepositoryTest {
           })
         );
     }
+  }
+
+  @Test
+  void testMigrationStrategiesAreOrdered() {
+    // It'd be easy to accidentally miss something and not have strategies in the right order. This test is a safety net to prevent that.
+    // We could probably just sort these in MigrationService, but we have to have them listed in the repository anyway, so we might as
+    // well just insist that they are properly ordered there instead
+    List<MigrationStrategy> strategies = migrationStrategyRepository.getMigrationStrategies();
+    List<MigrationStrategy> sortedStrategies = strategies.stream()
+      .sorted(Comparator.comparing(MigrationStrategy::getMaximumApplicableVersion, MigrationUtils::compareVersions))
+      .toList();
+    assertEquals(sortedStrategies, strategies);
   }
 }

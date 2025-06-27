@@ -6,15 +6,13 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -22,13 +20,16 @@ import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
+import org.folio.fqm.migration.strategies.V4DateFieldTimezoneAddition;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.spring.i18n.service.TranslationService;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -119,28 +120,7 @@ class MigrationServiceTest {
           .fqlQuery()
       )
     );
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).build());
-  }
-
-  @Test
-  void testMigrationWorksWithMultipleIterations() {
-    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
-
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 3));
-
-    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
-
-    assertThat(
-      migrationService.migrate(MigratableQueryInformation.builder().fqlQuery(fql).build()).fqlQuery(),
-      is(
-        MigratableQueryInformation
-          .builder()
-          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
-          .build()
-          .fqlQuery()
-      )
-    );
-    verify(migrationStrategy, times(3)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).build());
+    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
   }
 
   @Test
@@ -164,10 +144,12 @@ class MigrationServiceTest {
       )
     );
     verify(migrationStrategyApplicable, times(1))
-      .apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).build());
+      .apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
     verify(migrationStrategyApplicable, times(1)).getLabel();
-    verify(migrationStrategyApplicable, times(1)).applies(anyString());
-    verify(migrationStrategyInapplicable, times(2)).applies(anyString());
+    verify(migrationStrategyApplicable, times(1)).applies(any(MigratableQueryInformation.class));
+    verify(migrationStrategyApplicable, times(1)).getMaximumApplicableVersion();
+    verify(migrationStrategyInapplicable, times(2)).applies(any(MigratableQueryInformation.class));
+    verify(migrationStrategyInapplicable, times(2)).getMaximumApplicableVersion();
 
     verifyNoMoreInteractions(migrationStrategyApplicable, migrationStrategyInapplicable);
   }
@@ -176,7 +158,7 @@ class MigrationServiceTest {
   private static final String TEST_FQL = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
 
   @Test
-  void testThrowExceptionIfQueryNeedsMigrationOnlyVersionChanges() {
+  void testThrowExceptionIfQueryNeedsMigrationWithNoBreakingChanges() {
     // Use the default strategy that only changes the version
     MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
@@ -184,7 +166,7 @@ class MigrationServiceTest {
     // This should not throw an exception because only the version changes
     migrationService.throwExceptionIfQueryNeedsMigration(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build());
 
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build());
+    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build());
   }
 
   @Test
@@ -193,188 +175,14 @@ class MigrationServiceTest {
     testMigrationException(
       // Strategy that changes entityTypeId
       (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
+        .fqlQuery(info.fqlQuery())
         .entityTypeId(UUID.randomUUID())
+        .hadBreakingChanges(true)
         .build(),
       // Input query
       MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(),
       // Verification
       exception -> assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true))
-    );
-  }
-
-  @Test
-  void testThrowExceptionIfQueryNeedsMigrationThrowsExceptionWhenFieldsChange() {
-    // Test when fields are removed during migration (should throw exception)
-    testMigrationException(
-      // Strategy that changes fields and removes original fields
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
-        .fields(List.of("newField1", "newField2"))
-        .build(),
-      // Input query with fields
-      MigratableQueryInformation.builder()
-        .fqlQuery(TEST_FQL)
-        .fields(List.of("field1", "field2"))
-        .build(),
-      // Verification
-      exception -> {
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
-        assertThat(exception.getMigratedQueryInformation().fields(), is(List.of("newField1", "newField2")));
-      }
-    );
-
-    // Test when fields are added but original fields are preserved (should not throw exception)
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1) {
-      @Override
-      public MigratableQueryInformation apply(
-        FqlService fqlService,
-        MigratableQueryInformation migratableQueryInformation
-      ) {
-        // Return a new object with original fields plus new ones
-        return MigratableQueryInformation.builder()
-          .entityTypeId(migratableQueryInformation.entityTypeId())
-          .fields(List.of("field1", "field2", "newField1", "newField2"))
-          .fqlQuery(migratableQueryInformation.fqlQuery().replace("source", migrationService.getLatestVersion()))
-          .build();
-      }
-    });
-
-    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
-
-    // Create input with fields
-    MigratableQueryInformation input = MigratableQueryInformation.builder()
-      .entityTypeId(UUID.randomUUID())
-      .fields(List.of("field1", "field2"))
-      .fqlQuery(TEST_FQL)
-      .build();
-
-    // This should not throw an exception because all original fields are preserved
-    assertDoesNotThrow(() -> migrationService.throwExceptionIfQueryNeedsMigration(input));
-
-    // Test when migrated.fields() is null but original.fields() is not null (should throw exception)
-    testMigrationException(
-      // Strategy that sets fields to null
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
-        .entityTypeId(info.entityTypeId())
-        .fields(null)
-        .build(),
-      // Input query with fields
-      MigratableQueryInformation.builder()
-        .fqlQuery(TEST_FQL)
-        .entityTypeId(UUID.randomUUID())
-        .fields(List.of("field1", "field2"))
-        .build(),
-      // Verification
-      exception -> {
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
-        assertThat(exception.getMigratedQueryInformation().fields(), is(nullValue()));
-      }
-    );
-  }
-
-  @Test
-  void testThrowExceptionIfQueryNeedsMigrationThrowsExceptionWhenWarningsChange() {
-    // Test when warnings change
-    testMigrationException(
-      // Strategy that adds a warning
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery().replace("source", migrationService.getLatestVersion()))
-        .warning(new Warning() {
-          @Override
-          public WarningType getType() {
-            return WarningType.DEPRECATED_FIELD;
-          }
-
-          @Override
-          public String getDescription(TranslationService translationService) {
-            return "Test warning";
-          }
-        })
-        .build(),
-      // Input query
-      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(),
-      // Verification
-      exception -> {
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
-        assertThat(exception.getMigratedQueryInformation().warnings().size(), is(1));
-        assertThat(exception.getMigratedQueryInformation().warnings().get(0).getType(), is(Warning.WarningType.DEPRECATED_FIELD));
-      }
-    );
-  }
-
-  @Test
-  void testThrowExceptionIfQueryIsUpToDateThrowsExceptionWhenFqlQueryContentChanges() {
-    // Test when FQL query content changes
-    testMigrationException(
-      // Strategy that changes FQL query content
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery("{\"_version\":\"" + migrationService.getLatestVersion() + "\",\"newTest\":{\"$eq\":\"bar\"}}")
-        .build(),
-      // Input query
-      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(),
-      // Verification
-      exception -> {
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains("newTest"), is(true));
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains("bar"), is(true));
-      }
-    );
-  }
-
-  @Test
-  void testOnlyVersionChangedWithNullFqlQueries() {
-    // Create a strategy that doesn't change the FQL query (keeps it null)
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1) {
-      @Override
-      public MigratableQueryInformation apply(
-        FqlService fqlService,
-        MigratableQueryInformation migratableQueryInformation
-      ) {
-        // Return a new object with the same null FQL query
-        return MigratableQueryInformation.builder()
-          .entityTypeId(migratableQueryInformation.entityTypeId())
-          .fields(migratableQueryInformation.fields())
-          .fqlQuery("{\"_version\":\"" + migrationService.getLatestVersion() + "\"}")
-          .build();
-      }
-    });
-
-    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
-
-    // Create input with null FQL query
-    MigratableQueryInformation input = MigratableQueryInformation.builder()
-      .entityTypeId(UUID.randomUUID())
-      .fields(List.of("field1", "field2"))
-      .fqlQuery(null)
-      .build();
-
-    // This should not throw an exception because both FQL queries are null
-    assertThrows(MigrationQueryChangedException.class, () -> migrationService.throwExceptionIfQueryNeedsMigration(input));
-  }
-
-  @Test
-  void testOnlyVersionChangedWithOneNullFqlQuery() {
-    // Test with one null FQL query and one non-null FQL query
-    testMigrationException(
-      // Strategy that changes a null FQL query to a non-null one
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .entityTypeId(info.entityTypeId())
-        .fields(info.fields())
-        .fqlQuery("{\"_version\":\"" + migrationService.getLatestVersion() + "\",\"test\":{\"$eq\":\"foo\"}}")
-        .build(),
-      // Input query with null FQL query
-      MigratableQueryInformation.builder()
-        .entityTypeId(UUID.randomUUID())
-        .fields(List.of("field1", "field2"))
-        .fqlQuery(null)
-        .build(),
-      // Verification
-      exception -> {
-        assertThat(exception.getMigratedQueryInformation().fqlQuery(), is(not(nullValue())));
-        assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true));
-      }
     );
   }
 
@@ -421,7 +229,7 @@ class MigrationServiceTest {
     int count = 0;
 
     @Override
-    public boolean applies(String version) {
+    public boolean applies(@NotNull MigratableQueryInformation migratableQueryInformation) {
       return applies;
     }
 
@@ -442,6 +250,11 @@ class MigrationServiceTest {
     @Override
     public String getLabel() {
       return "Test";
+    }
+
+    @Override
+    public String getMaximumApplicableVersion() {
+      return "99999";
     }
   }
 }

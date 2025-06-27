@@ -53,7 +53,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("a9112682-958f-576c-b46c-d851abc62cd1"))
-          .fqlQuery("{\"code\": {\"$ne\": \"active\"}, \"_version\":\"12\"}")
+          .fqlQuery("{\"code\": {\"$ne\": \"active\"}}")
           .fields(List.of())
           .build()
       ),
@@ -72,7 +72,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery(
             """
-            { "_version": "12", "code": { "$eq": "id1" }, "name": { "$eq": "id1" } }
+            { "code": { "$eq": "id1" }, "name": { "$eq": "id1" } }
             """
           )
           .fields(List.of())
@@ -95,7 +95,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery(
             """
-            { "_version": "12", "code": { "$ne": "id1", "$empty": true, "$unknown": 1234 } }
+            { "code": { "$ne": "id1", "$empty": true, "$unknown": 1234 } }
             """
           )
           .fields(List.of())
@@ -118,7 +118,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
           .builder()
           .entityTypeId(UUID.fromString("b5ffa2e9-8080-471a-8003-a8c5a1274503"))
           .fqlQuery("""
-            { "ignore_me": { "$eq": "z" }, "_version": "12" }
+            { "ignore_me": { "$eq": "z" } }
             """)
           .fields(List.of())
           .warning(

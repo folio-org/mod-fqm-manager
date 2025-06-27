@@ -25,10 +25,12 @@ import org.folio.fqm.migration.warnings.Warning;
 @SuppressWarnings({ "java:S115", "java:S1192" })
 public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "5";
-  public static final String TARGET_VERSION = "6";
-
   private static final String $NE = "$ne";
+
+  @Override
+  public String getMaximumApplicableVersion() {
+    return "5";
+  }
 
   // must snapshot this point in time, as the entity types stored within may change past this migration
   private static final Map<UUID, Set<String>> UUID_FIELDS = Map.ofEntries(
@@ -192,11 +194,6 @@ public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
-  }
-
-  @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
     Set<String> fieldsToTarget = UUID_FIELDS.getOrDefault(query.entityTypeId(), Set.of());
 
@@ -206,7 +203,6 @@ public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFql(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           (result, key, value) -> {
             if (!fieldsToTarget.contains(key)) {
               result.set(key, value); // no-op
@@ -234,6 +230,7 @@ public class V5UUIDNotEqualOperatorRemoval implements MigrationStrategy {
           }
         )
       )
-      .withWarnings(warnings);
+      .withWarnings(warnings)
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty());
   }
 }

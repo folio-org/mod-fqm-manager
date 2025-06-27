@@ -350,13 +350,8 @@ public class V0POCMigration extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "0";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "1";
   }
 
   @Override

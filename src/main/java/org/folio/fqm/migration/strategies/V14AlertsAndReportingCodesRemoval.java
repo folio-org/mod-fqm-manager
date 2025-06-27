@@ -28,13 +28,8 @@ public class V14AlertsAndReportingCodesRemoval extends AbstractSimpleMigrationSt
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "14";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "15";
   }
 
   @Override

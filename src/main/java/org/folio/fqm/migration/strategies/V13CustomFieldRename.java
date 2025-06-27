@@ -36,9 +36,6 @@ import static org.jooq.impl.DSL.field;
 @RequiredArgsConstructor
 public class V13CustomFieldRename implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "13";
-  public static final String TARGET_VERSION = "14";
-
   static final UUID USERS_ENTITY_TYPE_ID = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
   static final String CUSTOM_FIELD_SOURCE_VIEW = "src_user_custom_fields"; // Only user entity type currently supports custom fields
 
@@ -48,13 +45,13 @@ public class V13CustomFieldRename implements MigrationStrategy {
   private final Map<String, List<Pair<String, String>>> tenantCustomFieldNamePairs = new ConcurrentHashMap<>();
 
   @Override
-  public String getLabel() {
-    return "V13 -> V14 Custom field renaming (MODFQMMGR-642)";
+  public String getMaximumApplicableVersion() {
+    return "13";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V13 -> V14 Custom field renaming (MODFQMMGR-642)";
   }
 
   @Override
@@ -65,7 +62,6 @@ public class V13CustomFieldRename implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFql(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           (result, key, value) -> {
             if (!USERS_ENTITY_TYPE_ID.equals(query.entityTypeId())) {
               result.set(key, value); // no-op
@@ -92,6 +88,7 @@ public class V13CustomFieldRename implements MigrationStrategy {
           .orElse(oldName)
         ).toList()
       )
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
       .withWarnings(warnings);
   }
 

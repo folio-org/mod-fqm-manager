@@ -28,9 +28,6 @@ import org.folio.fqm.migration.warnings.Warning;
 @RequiredArgsConstructor
 public class V7PatronGroupsValueChange implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "7";
-  public static final String TARGET_VERSION = "8";
-
   private static final UUID LOANS_ENTITY_TYPE_ID = UUID.fromString("d6729885-f2fb-4dc7-b7d0-a865a7f461e4");
   private static final UUID USERS_ENTITY_TYPE_ID = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
   private static final String FIELD_NAME = "groups.group";
@@ -38,13 +35,13 @@ public class V7PatronGroupsValueChange implements MigrationStrategy {
   private final PatronGroupsClient patronGroupsClient;
 
   @Override
-  public String getLabel() {
-    return "V7 -> V8 patron group name value transformation (MODFQMMGR-602)";
+  public String getMaximumApplicableVersion() {
+    return "7";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V7 -> V8 patron group name value transformation (MODFQMMGR-602)";
   }
 
   @Override
@@ -57,7 +54,6 @@ public class V7PatronGroupsValueChange implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFqlValues(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           key ->
             (LOANS_ENTITY_TYPE_ID.equals(query.entityTypeId()) || USERS_ENTITY_TYPE_ID.equals(query.entityTypeId())) &&
             FIELD_NAME.equals(key),
@@ -90,6 +86,7 @@ public class V7PatronGroupsValueChange implements MigrationStrategy {
           }
         )
       )
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
       .withWarnings(warnings);
   }
 }

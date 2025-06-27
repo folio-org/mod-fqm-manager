@@ -29,8 +29,10 @@ import org.folio.fqm.service.FqlToSqlConverterService;
 @RequiredArgsConstructor
 public class V4DateFieldTimezoneAddition implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "4";
-  public static final String TARGET_VERSION = "5";
+  @Override
+  public String getMaximumApplicableVersion() {
+    return "4";
+  }
 
   // must snapshot this point in time, as the entity types stored within may change past this migration
   // these names are unique enough that we don't need a per-ET listing
@@ -91,11 +93,6 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
-  }
-
-  @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
     // avoid initializing this if we don't actually need it
     AtomicReference<ZoneId> timezone = new AtomicReference<>();
@@ -103,7 +100,6 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
     return query.withFqlQuery(
       MigrationUtils.migrateFqlValues(
         query.fqlQuery(),
-        originalVersion -> TARGET_VERSION,
         DATE_FIELDS::contains,
         (String key, String value, Supplier<String> fql) -> {
           // no-op, we already have a time component

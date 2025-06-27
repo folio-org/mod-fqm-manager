@@ -48,7 +48,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(UUID.fromString("3ad4b672-a69c-5a80-b483-bbc77c29cbfd"))
-          .fqlQuery("{\"name\": {\"$eq\":\"foo\"}, \"_version\": \"5\"}")
+          .fqlQuery("{\"name\": {\"$eq\":\"foo\"}}")
           .fields(List.of())
           .build(),
         (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(configurationClient)
@@ -101,8 +101,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
               },
               "unrelated.field": {
                 "$contains": "2024-07-01"
-              },
-              "_version": "5"
+              }
             }
             """
           )

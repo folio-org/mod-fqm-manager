@@ -160,8 +160,7 @@ class MigrationUtilsValuesTest {
 
     String actualQuery = MigrationUtils.migrateFqlValues(
       query,
-      v -> "1",
-      predicate,
+        predicate,
       (String key, String value, Supplier<String> fql) -> {
         assertThat(key, is(notNullValue()));
         assertThat(value, is(notNullValue()));
@@ -219,8 +218,7 @@ class MigrationUtilsValuesTest {
 
     String actualQuery = MigrationUtils.migrateFqlValues(
       originalQuery,
-      v -> "1",
-      k -> !k.equals("do-not-touch"),
+        k -> !k.equals("do-not-touch"),
       (String key, String value, Supplier<String> fql) -> "keep-me".equals(value) ? value : null
     );
 

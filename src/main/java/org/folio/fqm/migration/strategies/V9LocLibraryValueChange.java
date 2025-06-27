@@ -28,22 +28,19 @@ import org.folio.fqm.migration.warnings.Warning;
 @RequiredArgsConstructor
 public class V9LocLibraryValueChange implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "9";
-  public static final String TARGET_VERSION = "10";
-
   private static final UUID HOLDINGS_ENTITY_TYPE_ID = UUID.fromString("8418e512-feac-4a6a-a56d-9006aab31e33");
   private static final List<String> FIELD_NAMES = List.of("effective_library.code", "effective_library.name");
 
   private final LocationUnitsClient locationUnitsClient;
 
   @Override
-  public String getLabel() {
-    return "V9 -> V10 holdings effective library name/code value transformation (MODFQMMGR-602)";
+  public String getMaximumApplicableVersion() {
+    return "9";
   }
 
   @Override
-  public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+  public String getLabel() {
+    return "V9 -> V10 holdings effective library name/code value transformation (MODFQMMGR-602)";
   }
 
   @Override
@@ -56,7 +53,6 @@ public class V9LocLibraryValueChange implements MigrationStrategy {
       .withFqlQuery(
         MigrationUtils.migrateFqlValues(
           query.fqlQuery(),
-          originalVersion -> TARGET_VERSION,
           key -> HOLDINGS_ENTITY_TYPE_ID.equals(query.entityTypeId()) && FIELD_NAMES.contains(key),
           (String key, String value, Supplier<String> fql) -> {
             if (records.get() == null) {
@@ -99,6 +95,7 @@ public class V9LocLibraryValueChange implements MigrationStrategy {
           }
         )
       )
+      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
       .withWarnings(warnings);
   }
 }

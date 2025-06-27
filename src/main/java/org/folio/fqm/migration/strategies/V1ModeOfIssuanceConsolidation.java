@@ -18,13 +18,8 @@ public class V1ModeOfIssuanceConsolidation extends AbstractSimpleMigrationStrate
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "1";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "2";
   }
 
   @Override

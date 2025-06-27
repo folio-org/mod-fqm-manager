@@ -30,13 +30,8 @@ public class V12PurchaseOrderIdFieldRemoval extends AbstractSimpleMigrationStrat
   }
 
   @Override
-  public String getSourceVersion() {
+  public String getMaximumApplicableVersion() {
     return "12";
-  }
-
-  @Override
-  public String getTargetVersion() {
-    return "13";
   }
 
   @Override

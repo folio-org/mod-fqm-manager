@@ -208,7 +208,7 @@ public class IdStreamer {
 
   void cancelQuery(UUID queryId) {
     log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
-    List<Integer> pids = queryRepository.getQueryPids(queryId);
+    List<Integer> pids = queryRepository.getSelectQueryPids(queryId);
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);
       jooqContext.execute("SELECT pg_cancel_backend(?)", pid);

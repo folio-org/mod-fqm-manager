@@ -71,7 +71,7 @@ public abstract class AbstractSimpleMigrationStrategy implements MigrationStrate
       return MigratableQueryInformation
         .builder()
         .entityTypeId(MigrationConfiguration.REMOVED_ENTITY_TYPE_ID)
-        .fqlQuery("")
+        .fqlQuery("{}")
         .fields(List.of())
         .warning(getEntityTypeWarnings().get(src.entityTypeId()).apply(src.fqlQuery()))
         .hadBreakingChanges(true)

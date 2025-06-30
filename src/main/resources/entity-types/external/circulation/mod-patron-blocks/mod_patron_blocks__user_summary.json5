@@ -5,7 +5,7 @@
   sources: [
     {
       type: 'db',
-      alias: 'src__circulation__patron_blocks__user_summary',
+      alias: 'user_summary',
       target: 'src__circulation__patron_blocks__user_summary',
     },
   ],

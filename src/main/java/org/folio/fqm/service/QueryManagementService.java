@@ -118,7 +118,8 @@ public class QueryManagementService {
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
 
     // Verify that the query is up to date before execution
-    MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery(), fields);
+    // Note: Use the actual requested fields, not the default ones from the entity type
+    MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery(), submitQuery.getFields() != null ? submitQuery.getFields() : List.of());
     migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
 
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);

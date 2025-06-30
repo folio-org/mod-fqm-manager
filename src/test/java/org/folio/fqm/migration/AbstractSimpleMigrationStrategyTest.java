@@ -258,7 +258,7 @@ class AbstractSimpleMigrationStrategyTest {
         ),
         new MigratableQueryInformation(
           MigrationConfiguration.REMOVED_ENTITY_TYPE_ID,
-          "",
+          "{}",
           List.of(),
           List.of(
             RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}")

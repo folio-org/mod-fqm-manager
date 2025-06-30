@@ -5,7 +5,7 @@
   sources: [
     {
       type: 'db',
-      alias: 'user_summary',
+      alias: 'src__circulation__patron_blocks__user_summary',
       target: 'src__circulation__patron_blocks__user_summary',
     },
   ],
@@ -27,8 +27,8 @@
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
-      valueGetter: ":user_summary.jsonb->>'id'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'id'::text))",
+      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'id'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'id'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
     },
     {
@@ -38,7 +38,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:user_summary.jsonb->>'_version')::integer",
+      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'_version')::integer",
       valueFunction: '(:value)::integer',
     },
     {
@@ -48,8 +48,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":user_summary.jsonb->>'userId'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'userId'::text))",
+      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'userId'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'userId'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
       joinsTo: [
         {
@@ -76,8 +76,8 @@
             {
               name: 'loan_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'loanId',
               dataType: {
@@ -87,8 +87,8 @@
             {
               name: 'due_date',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'dueDate',
               dataType: {
@@ -108,8 +108,8 @@
                   label: 'False',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'recall') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'recall')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'recall') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'recall')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'recall',
               dataType: {
@@ -129,8 +129,8 @@
                   label: 'False',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'itemLost') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemLost')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'itemLost') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemLost')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'itemLost',
               dataType: {
@@ -150,8 +150,8 @@
                   label: 'False',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'itemClaimedReturned') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemClaimedReturned')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'itemClaimedReturned') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemClaimedReturned')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'itemClaimedReturned',
               dataType: {
@@ -161,8 +161,8 @@
             {
               name: 'grace_period',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'gracePeriod') FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'gracePeriod')) FROM jsonb_array_elements(:user_summary.jsonb->'openLoans') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'gracePeriod') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'gracePeriod')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'gracePeriod',
               dataType: {
@@ -171,7 +171,7 @@
                   {
                     name: 'duration',
                     queryable: false,
-                    valueGetter: "(:user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'duration')::integer",
+                    valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'duration')::integer",
                     valueFunction: '(:value)::integer',
                     property: 'duration',
                     dataType: {
@@ -203,7 +203,7 @@
                         label: 'Months',
                       },
                     ],
-                    valueGetter: ":user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'intervalId'",
+                    valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'intervalId'",
                     property: 'intervalId',
                     dataType: {
                       dataType: 'stringType',
@@ -217,8 +217,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":user_summary.jsonb->>'openLoans'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'openLoans'::text))",
+      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
     },
     {
@@ -231,8 +231,8 @@
             {
               name: 'fee_fine_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'feeFineId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'feeFineId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'feeFineId',
               dataType: {
@@ -242,8 +242,8 @@
             {
               name: 'fee_fine_type_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'feeFineTypeId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineTypeId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineTypeId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'feeFineTypeId',
               dataType: {
@@ -253,8 +253,8 @@
             {
               name: 'loan_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'loanId',
               dataType: {
@@ -264,7 +264,7 @@
             {
               name: 'balance',
               queryable: false,
-              valueGetter: "(SELECT array_agg((elems.value->>'balance')::float) FROM jsonb_array_elements(:user_summary.jsonb->'openFeesFines') AS elems)",
+              valueGetter: "(SELECT array_agg((elems.value->>'balance')::float) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::float',
               property: 'balance',
               dataType: {
@@ -276,8 +276,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":user_summary.jsonb->>'openFeesFines'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:user_summary.jsonb->>'openFeesFines'::text))",
+      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'",
+      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
     },
     {
@@ -287,7 +287,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':user_summary.jsonb::text',
+      valueGetter: ':src__circulation__patron_blocks__user_summary.jsonb::text',
     },
   ],
 }

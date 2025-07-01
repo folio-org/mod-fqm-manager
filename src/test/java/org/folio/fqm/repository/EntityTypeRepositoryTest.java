@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -13,6 +14,7 @@ import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,13 +23,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -46,6 +50,14 @@ class EntityTypeRepositoryTest {
 
   @MockitoSpyBean
   private FolioExecutionContext folioExecutionContext;
+
+  @BeforeEach
+  void setUp() {
+    // Clear cache before each test to ensure fresh data
+    repo.clearCache();
+    // Reset the mock object mapper to avoid side effects from previous tests
+    reset(objectMapper);
+  }
 
 
   @Test
@@ -171,6 +183,48 @@ class EntityTypeRepositoryTest {
       .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
+  }
+
+  @Test
+  @SneakyThrows
+  void getEntityTypeDefinitions_shouldHandleJsonProcessingErrors() {
+    // Mock ObjectMapper to throw exception when reading value
+    doThrow(new JsonProcessingException("Test JSON processing failure") {})
+      .when(objectMapper).readValue(any(String.class), eq(EntityType.class));
+
+    // This should return empty stream instead of throwing exception
+    Stream<EntityType> result = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_01_ID), "");
+
+    assertTrue(result.findAny().isEmpty());
+  }
+
+  @Test
+  @SneakyThrows
+  void getEntityTypeDefinitions_shouldHandleCustomFieldProcessingErrors() {
+    // Create a partial mock that succeeds for basic entity type but fails for custom fields
+    doReturn(new EntityType()
+      .id(ENTITY_TYPE_02_ID.toString())
+      .name("test-entity")
+      .customFieldEntityTypeId(UUID.randomUUID().toString()) // Point to an invalid ET, to cause custom field processing to fail
+      .columns(new ArrayList<>()))
+      .when(objectMapper).readValue(argThat(((String arg) -> arg.contains(ENTITY_TYPE_02_ID.toString()))), eq(EntityType.class));
+
+    // Should handle the error gracefully and filter out the failed entity
+    Stream<EntityType> result = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_02_ID), "");
+
+    assertTrue(result.findAny().isEmpty());
+  }
+
+  @Test
+  void getEntityTypeDefinitions_shouldFilterOutNullEntities() {
+    // Test that the filter(Objects::nonNull) works correctly
+    // This test ensures the existing behavior is maintained
+    Optional<EntityType> validEntity = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID, "");
+    assertTrue(validEntity.isPresent());
+
+    // Test with non-existent entity ID
+    Optional<EntityType> invalidEntity = repo.getEntityTypeDefinition(UUID.randomUUID(), "");
+    assertTrue(invalidEntity.isEmpty());
   }
 
   @Test

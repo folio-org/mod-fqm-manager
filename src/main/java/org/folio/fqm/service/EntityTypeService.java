@@ -393,7 +393,6 @@ public class EntityTypeService {
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
-      ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
       .build();
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
@@ -407,7 +406,6 @@ public class EntityTypeService {
     var updatedCustomEntityType = customEntityType.toBuilder()
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
-      ._private(false) // It doesn't make sense to hide custom ETs. Maybe some day...
       .build();
     entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;

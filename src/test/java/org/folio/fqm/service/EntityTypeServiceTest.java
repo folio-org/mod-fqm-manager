@@ -781,7 +781,6 @@ class EntityTypeServiceTest {
       .createdAt(now)
       .updatedAt(now)
       .owner(ownerId)
-      ._private(false)
       .idView(null)
       .build();
 

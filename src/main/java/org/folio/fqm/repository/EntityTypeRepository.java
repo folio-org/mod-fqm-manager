@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -115,19 +114,33 @@ public class EntityTypeRepository {
           .from(table(tableName))
           .fetch(definitionField)
           .stream()
-          .map(this::unmarshallEntityType)
+          .map(str -> {
+            try {
+              return objectMapper.readValue(str, EntityType.class);
+            } catch (Exception e) {
+              log.error("Error processing raw entity type definition: {}", str, e);
+              return null;
+            }
+          })
+          .filter(Objects::nonNull)
           .collect(Collectors.toMap(EntityType::getId, Function.identity()));
 
         return rawEntityTypes.values().stream()
           .map(entityType -> {
             String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
             if (customFieldsEntityTypeId != null) {
-              List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes);
-              List<EntityTypeColumn> columnsWithUniqueAliases = getColumnsWithUniqueAliases(customFieldColumns);
-              entityType.getColumns().addAll(columnsWithUniqueAliases);
+              try {
+                List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes);
+                List<EntityTypeColumn> columnsWithUniqueAliases = getColumnsWithUniqueAliases(customFieldColumns);
+                entityType.getColumns().addAll(columnsWithUniqueAliases);
+              } catch (Exception e) {
+                log.error("Error processing custom fields for entity type {} ({})", entityType.getName(), entityType.getId(), e);
+                return null;
+              }
             }
             return entityType;
           })
+          .filter(Objects::nonNull)
           .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
       }
     );
@@ -347,8 +360,8 @@ public class EntityTypeRepository {
     entityTypeCache.invalidate(executionContext.getTenantId());
   }
 
-  @SneakyThrows
-  private EntityType unmarshallEntityType(String str) {
-    return objectMapper.readValue(str, EntityType.class);
+  // Clear the ET cache for testing
+  void clearCache() {
+    entityTypeCache.invalidateAll();
   }
 }

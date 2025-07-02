@@ -406,6 +406,7 @@ public class EntityTypeService {
     var updatedCustomEntityType = customEntityType.toBuilder()
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
+      .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))
       .build();
     entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;

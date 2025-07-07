@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -25,25 +25,25 @@
     <!-- runtime dependencies -->
     <folio-spring-support.version>10.0.0-SNAPSHOT</folio-spring-support.version>
     <folio-query-tool-metadata.version>4.0.0-SNAPSHOT</folio-query-tool-metadata.version>
-    <mapstruct.version>1.5.2.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
     <lib-fqm-query-processor.version>4.1.0-SNAPSHOT</lib-fqm-query-processor.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <snakeyaml.version>2.0</snakeyaml.version>
-    <org.postgresql.version>42.5.4</org.postgresql.version>
-    <org.jooq.version>3.18.4</org.jooq.version>
-    <org.apache.commons.version>4.4</org.apache.commons.version>
+    <snakeyaml.version>2.4</snakeyaml.version>
+    <org.postgresql.version>42.7.7</org.postgresql.version>
+    <org.jooq.version>3.20.5</org.jooq.version>
+    <org.apache.commons.version>4.5.0</org.apache.commons.version>
     <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
-    <spring-retry.version>2.0.10</spring-retry.version>
+    <spring-retry.version>2.0.12</spring-retry.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.13.1</wiremock.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
 
     <!-- plugins -->
-    <openapi-generator.version>7.4.0</openapi-generator.version>
+    <openapi-generator.version>7.14.0</openapi-generator.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
-    <lombok.version>1.18.30</lombok.version>
+    <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
+    <lombok.version>1.18.38</lombok.version>
 
     <!-- other properties -->
     <java.version>21</java.version>

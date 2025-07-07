@@ -336,4 +336,21 @@ class EntityTypeRepositoryTest {
       repo.updateCustomEntityType(customEntityType));
   }
 
+  @Test
+  void throwIfEntityTypeInvalid_shouldThrowForInvalidId() {
+    EntityType invalidEntityType = new EntityType().id("not-a-uuid");
+    InvalidEntityTypeDefinitionException ex = assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeRepository.throwIfEntityTypeInvalid(invalidEntityType)
+    );
+    assertTrue(ex.getMessage().contains("Invalid entity type ID"));
+    assertEquals("not-a-uuid", ex.getError().getParameters().get(0).getValue());
+  }
+
+  @Test
+  void throwIfEntityTypeInvalid_shouldNotThrowForValidId() {
+    EntityType validEntityType = new EntityType().id(UUID.randomUUID().toString());
+    assertDoesNotThrow(() -> EntityTypeRepository.throwIfEntityTypeInvalid(validEntityType));
+  }
+
 }

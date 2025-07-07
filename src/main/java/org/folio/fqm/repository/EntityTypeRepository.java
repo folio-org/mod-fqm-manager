@@ -116,7 +116,9 @@ public class EntityTypeRepository {
           .stream()
           .map(str -> {
             try {
-              return objectMapper.readValue(str, EntityType.class);
+              EntityType entityType = objectMapper.readValue(str, EntityType.class);
+              throwIfEntityTypeInvalid(entityType);
+              return entityType;
             } catch (Exception e) {
               log.error("Error processing raw entity type definition: {}", str, e);
               return null;
@@ -149,6 +151,22 @@ public class EntityTypeRepository {
       return entityTypes.values().stream();
     }
     return entityTypeIds.stream().filter(entityTypes::containsKey).map(entityTypes::get);
+  }
+
+  /**
+   * Basic validation to ensure the entity type is structurally sound enough to function.
+   *
+   * @implSpec
+   * Full validation should happen in the service layer, this is just a quick check to avoid issues that could arise from
+   * the entity type being malformed in a way that would cause the system to crash or behave unexpectedly.
+   */
+  static void throwIfEntityTypeInvalid(EntityType entityType) {
+    try {
+      //Attempt to parse UUID to ensure it's valid
+      UUID.fromString(entityType.getId());
+    } catch (Exception e) {
+      throw new InvalidEntityTypeDefinitionException("Invalid entity type ID: " + entityType.getId(), entityType, e);
+    }
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {

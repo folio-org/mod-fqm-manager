@@ -946,7 +946,7 @@
     "entityType.simple_invoice.status": "Status",
     "entityType.simple_invoice.sub_total": "Sub-total",
     "entityType.simple_invoice.tag_list": "Tags",
-    "entityType.simple_invoice.total": "Total calculated amount",
+    "entityType.simple_invoice.total": "計算済合計額",
     "entityType.simple_invoice.updated_by_user_id": "Updated by user UUID",
     "entityType.simple_invoice.updated_by_username": "Updated by username",
     "entityType.simple_invoice.updated_date": "Updated date",
@@ -1026,7 +1026,7 @@
     "entityType.simple_voucher.export_to_accounting": "Export to accounting",
     "entityType.simple_voucher.id": "UUID",
     "entityType.simple_voucher.invoice_currency": "Invoice currency",
-    "entityType.simple_voucher.invoice_id": "Invoice UUID",
+    "entityType.simple_voucher.invoice_id": "請求書UUID",
     "entityType.simple_voucher.status": "Status",
     "entityType.simple_voucher.system_currency": "System currency",
     "entityType.simple_voucher.type": "Type",
@@ -1353,7 +1353,7 @@
     "entityType.simple_ledger.fiscal_year_one": "Fiscal year one",
     "entityType.simple_invoice.acquisition_unit": "Acquisition unit names",
     "entityType.simple_invoice.approved_by_id": "Approved by UUID",
-    "entityType.simple_invoice.batch_group": "Batch group",
+    "entityType.simple_invoice.batch_group": "バッチグループ",
     "entityType.simple_invoice.bill_to_id": "Bill to UUID",
     "entityType.simple_invoice.fiscal_year": "Fiscal year",
     "entityType.simple_invoice.total_units": "Total units",
@@ -1673,5 +1673,9 @@
     "entityType.simple_srs_record.updated_by_user_id": "Updated by user UUID",
     "entityType.simple_srs_record.updated_date": "Updated date",
     "entityType.simple_srs_record.external_hrid": "External HRID",
-    "entityType.simple_srs_record.content": "MARC jsonb"
+    "entityType.simple_srs_record.content": "MARC jsonb",
+    "entityType.composite_srs_bib": "SRS Bib",
+    "entityType.composite_srs_bib.srs_record": "SRS record",
+    "entityType.composite_srs_authority": "SRS Authority",
+    "entityType.composite_srs_authority.srs_record": "SRS record"
 }

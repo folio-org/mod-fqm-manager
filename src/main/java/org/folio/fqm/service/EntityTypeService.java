@@ -24,13 +24,16 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.querytool.domain.dto.AvailableJoins;
 import org.folio.querytool.domain.dto.ColumnValues;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.Join;
+import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.SourceColumn;
-import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
@@ -43,6 +46,9 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -473,5 +479,321 @@ public class EntityTypeService {
     }
     enforceCustomEntityTypeAccess(customEntityType);
     entityTypeRepository.deleteEntityType(entityTypeId);
+  }
+
+  /**
+   * Get all entity types that the current user has access to, including both simples and flattened composites.
+   */
+  Map<UUID, EntityType> getAccessibleEntityTypesById() {
+    Set<String> userPermissions = permissionsService.getUserPermissions();
+    return entityTypeRepository
+      .getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
+      .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), executionContext.getTenantId(), true))
+      .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
+      .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a));
+  }
+
+  public AvailableJoins getAvailableJoins(CustomEntityType customEntityType, String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField) {
+    // See https://folio-org.atlassian.net/browse/MODFQMMGR-608 for details on what this should return
+    // TL;DR - It returns the possible options for the properties that aren't provided in the request (the method parameters)
+    var builder = AvailableJoins.builder();
+
+    // Special case where all parameters are provided. The user already has everything they need to build a join, so return an empty AvailableJoins object
+    if (customEntityType != null && customEntityTypeField != null && targetEntityTypeId != null && targetEntityTypeField != null) {
+      return builder.build();
+    }
+
+    EntityType flattenedCustomEntityType = customEntityType == null ? null : entityTypeFlatteningService.getFlattenedEntityType(customEntityType, executionContext.getTenantId(), true);
+    Map<UUID, EntityType> accessibleEntityTypesById = getAccessibleEntityTypesById();
+
+    if (targetEntityTypeId == null || flattenedCustomEntityType == null) {
+      builder.targetEntityTypes(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById));
+      // Special case where the custom ET isn't provided: Only provide the target entity types
+      if (flattenedCustomEntityType == null) {
+        return builder.build();
+      }
+    }
+
+    if (customEntityTypeField == null) {
+      builder.customEntityTypeFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, accessibleEntityTypesById));
+    }
+
+    // Only provide target ET fields when the target ET has been provided
+    if (targetEntityTypeField == null && targetEntityTypeId != null) {
+      builder.availableTargetEntityTypeFields(discoverTargetEntityTypeFields(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById.get(targetEntityTypeId)));
+    }
+
+    return builder.build();
+  }
+
+  /**
+   * Identifies joinable entity types by analyzing both direct joins from fields within the customEntityType
+   * and reverse joins from other entity types that can join to this customEntityType.
+   */
+  private static List<LabeledValue> discoverTargetEntityTypes(EntityType customEntityType, String customEntityTypeField, Map<UUID, EntityType> accessibleEntityTypesById) {
+    // Special case where the custom ET isn't provided: All accessible entity types are returned
+    if (customEntityType == null) {
+      return entityTypesToSortedLabeledValues(accessibleEntityTypesById.values().stream());
+    }
+
+    Set<UUID> targetEntityTypeIds = new HashSet<>();
+
+    // Find direct joins from custom entity type fields
+    if (customEntityTypeField != null) {
+      findDirectJoins(customEntityType, customEntityTypeField).forEach(targetEntityTypeIds::add);
+    }
+
+    // Find reverse joins (entity types that can join to this custom entity type)
+    findReverseJoins(customEntityType, accessibleEntityTypesById).forEach(targetEntityTypeIds::add);
+
+    targetEntityTypeIds.remove(null);
+
+    return entityTypesToSortedLabeledValues(targetEntityTypeIds.stream()
+      .map(accessibleEntityTypesById::get)
+      .filter(Objects::nonNull));
+  }
+
+  /**
+   * Identifies fields within the custom entity type that can be used for joining by analyzing direct joins
+   * and reverse joins from other entity types.
+   */
+  private static List<LabeledValue> discoverCustomEntityTypeFields(EntityType customEntityType, UUID targetEntityTypeId, Map<UUID, EntityType> accessibleEntityTypesById) {
+    if (CollectionUtils.isEmpty(customEntityType.getColumns())) {
+      return List.of();
+    }
+
+    Set<UUID> potentialTargetEntityTypes = Optional.ofNullable(targetEntityTypeId)
+      .map(Set::of)
+      .orElseGet(accessibleEntityTypesById::keySet);
+
+    Set<EntityTypeColumn> joinableFields = new HashSet<>();
+
+    // Find direct joins from the custom entity type to target entity types
+    findDirectJoinableFields(customEntityType, potentialTargetEntityTypes).forEach(joinableFields::add);
+
+    // Find reverse joinable fields (fields that can be joined to by target entity types)
+    findReverseJoinableFields(customEntityType, accessibleEntityTypesById, potentialTargetEntityTypes)
+      .forEach(joinableFields::add);
+
+    return columnsToSortedLabeledValues(joinableFields.stream());
+  }
+
+  /**
+   * Identifies joinable fields in the target entity type based on direct or reverse joins with the source entity type.
+   */
+  private static List<LabeledValue> discoverTargetEntityTypeFields(EntityType customEntityType, String customEntityTypeField, EntityType targetEntityType) {
+    if (CollectionUtils.isEmpty(targetEntityType.getColumns())) {
+      return List.of();
+    }
+
+    Set<String> targetEntityTypeFieldNames = new HashSet<>();
+
+    if (customEntityTypeField != null) {
+      // Find specific field matches
+      findSpecificFieldMatches(customEntityType, customEntityTypeField, targetEntityType)
+        .forEach(targetEntityTypeFieldNames::add);
+    } else {
+      // Find all possible field matches
+      findAllFieldMatches(customEntityType, targetEntityType)
+        .forEach(targetEntityTypeFieldNames::add);
+    }
+
+    return columnsToSortedLabeledValues(
+      targetEntityType.getColumns().stream()
+        .filter(col -> targetEntityTypeFieldNames.contains(col.getName()))
+    );
+  }
+
+  /**
+   * Helper method to find direct joins from a specific field.
+   * Now returns a stream of found target entity type IDs.
+   */
+  private static Stream<UUID> findDirectJoins(EntityType entityType, String fieldName) {
+    Map<String, EntityTypeColumn> columnsByName = entityType.getColumns().stream()
+      .collect(Collectors.toMap(EntityTypeColumn::getName, Function.identity(), (a, b) -> a));
+
+    return Optional.ofNullable(columnsByName.get(fieldName))
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldName))
+      .getJoinsTo()
+      .stream()
+      .map(Join::getTargetId);
+  }
+
+  /**
+   * Helper method to find reverse joins (entity types that can join to the given entity type).
+   * Now returns a stream of found target entity type IDs.
+   */
+  private static Stream<UUID> findReverseJoins(EntityType entityType, Map<UUID, EntityType> accessibleEntityTypes) {
+    Set<UUID> underlyingEntityTypeIds = getJoinTargetEntityTypes(entityType);
+
+    return accessibleEntityTypes.values().stream()
+      .flatMap(et -> et.getColumns().stream())
+      .filter(column -> column.getJoinsTo() != null)
+      .filter(column -> column.getJoinsTo().stream().anyMatch(join -> underlyingEntityTypeIds.contains(join.getTargetId())))
+      .distinct()
+      .map(EntityTypeColumn::getOriginalEntityTypeId);
+  }
+
+  /**
+   * Helper method to find fields that can directly join to target entity types.
+   */
+  private static Stream<EntityTypeColumn> findDirectJoinableFields(EntityType entityType, Set<UUID> potentialTargetEntityTypes) {
+    return entityType.getColumns().stream()
+      .filter(col -> col.getJoinsTo() != null)
+      .filter(col -> col.getJoinsTo().stream().anyMatch(join -> potentialTargetEntityTypes.contains(join.getTargetId())));
+  }
+
+  /**
+   * Helper method to find fields that can be joined to by target entity types.
+   */
+  private static Stream<EntityTypeColumn> findReverseJoinableFields(EntityType entityType, Map<UUID, EntityType> accessibleEntityTypes,
+                                        Set<UUID> potentialTargetEntityTypes) {
+    Set<UUID> originalEntityTypeIds = getJoinTargetEntityTypes(entityType);
+
+    Map<UUID, EntityType> filteredTargetEntityTypes = accessibleEntityTypes.entrySet().stream()
+      .filter(entry -> potentialTargetEntityTypes.contains(entry.getKey()))
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    Set<String> targetFields = filteredTargetEntityTypes.values().stream()
+      .flatMap(et -> et.getColumns().stream())
+      .filter(targetCol -> targetCol.getJoinsTo() != null)
+      .flatMap(targetCol -> targetCol.getJoinsTo().stream())
+      .filter(join -> originalEntityTypeIds.contains(join.getTargetId()))
+      .map(Join::getTargetField)
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
+
+    // Find corresponding columns in the custom entity type
+    return entityType.getColumns().stream()
+      .filter(customETCol -> targetFields.stream().anyMatch(targetField -> customETCol.getName().endsWith(targetField)));
+  }
+
+  /**
+   * Helper method to find specific field matches between custom and target entity types.
+   */
+  private static Stream<String> findSpecificFieldMatches(EntityType customEntityType, String customEntityTypeFieldName,
+                                       EntityType targetEntityType) {
+    EntityTypeColumn customEntityTypeColumn = customEntityType.getColumns().stream()
+      .filter(col -> col.getName().equals(customEntityTypeFieldName))
+      .findFirst()
+      .orElseThrow(() -> new FieldNotFoundException(customEntityType.getName(), customEntityTypeFieldName));
+
+    // Find target entity type fields that can join with the specified custom entity type field
+    return targetEntityType.getColumns().stream()
+      .filter(targetEntityTypeCol -> canColumnsJoin(customEntityTypeColumn, targetEntityTypeCol, targetEntityType))
+      .map(EntityTypeColumn::getName);
+  }
+
+  /**
+   * Helper method to find all possible field matches between custom and target entity types.
+   * Now returns a set of matching field names instead of modifying a parameter.
+   */
+  private static Stream<String> findAllFieldMatches(EntityType customEntityType, EntityType targetEntityType) {
+    Stream.Builder<String> targetEntityTypeFieldNames = Stream.builder();
+
+    Set<EntityTypeColumn> joinableColumnsFromTargetEntityType = getColumnsForJoin(targetEntityType, customEntityType);
+    Set<EntityTypeColumn> columnsFromCustomEntityType = getColumnsForJoin(customEntityType, targetEntityType);
+
+    // Add all joinable columns from target entity type
+    joinableColumnsFromTargetEntityType.stream()
+      .map(EntityTypeColumn::getName)
+      .forEach(targetEntityTypeFieldNames::add);
+
+    // Add columns that can be joined to by custom entity type columns
+    Map<UUID, Set<EntityTypeColumn>> originalEntityTypeIdsFromCustomEntityType = columnsFromCustomEntityType.stream()
+      .collect(Collectors.groupingBy(
+        entityTypeColumn -> entityTypeColumn.getOriginalEntityTypeId() != null
+          ? entityTypeColumn.getOriginalEntityTypeId()
+          : UUID.fromString(targetEntityType.getId()),
+        Collectors.toSet()));
+
+    targetEntityType.getColumns().stream()
+      .filter(col -> col.getJoinsTo() != null)
+      .filter(col -> col.getJoinsTo().stream()
+        .anyMatch(join -> originalEntityTypeIdsFromCustomEntityType.getOrDefault(join.getTargetId(), Set.of())
+          .stream()
+          .anyMatch(customEtCol -> customEtCol.getName().endsWith(join.getTargetField()))))
+      .map(EntityTypeColumn::getName)
+      .forEach(targetEntityTypeFieldNames::add);
+
+    return targetEntityTypeFieldNames.build();
+  }
+
+  /**
+   * Helper method to determine if two columns can be joined together.
+   */
+  private static boolean canColumnsJoin(EntityTypeColumn customEntityTypeColumn, EntityTypeColumn targetEntityTypeColumn,
+                                        EntityType targetEntityType) {
+    // Check if target column can join to custom column
+    boolean targetCanJoinToCustom =
+      targetEntityTypeColumn.getJoinsTo() != null
+      && targetEntityTypeColumn.getJoinsTo().stream()
+        .anyMatch(join -> join.getTargetId().equals(customEntityTypeColumn.getOriginalEntityTypeId())
+                          && join.getTargetField() != null
+                          && customEntityTypeColumn.getName().endsWith(join.getTargetField()));
+
+    // Check if custom column can join to target column
+    boolean customCanJoinToTarget =
+      customEntityTypeColumn.getJoinsTo() != null
+      && customEntityTypeColumn.getJoinsTo().stream()
+        .anyMatch(join -> (join.getTargetId().equals(targetEntityTypeColumn.getOriginalEntityTypeId())
+                           || join.getTargetId().toString().equals(targetEntityType.getId()))
+                          && join.getTargetField() != null
+                          && targetEntityTypeColumn.getName().endsWith(join.getTargetField()));
+
+    return targetCanJoinToCustom || customCanJoinToTarget;
+  }
+
+  /**
+   * Gets the original entity type IDs from an entity type's columns. Additionally, it includes the entity type's own ID.
+   */
+  private static Set<UUID> getJoinTargetEntityTypes(EntityType entityType) {
+    Set<UUID> originalEntityTypeIds = new HashSet<>();
+    originalEntityTypeIds.add(UUID.fromString(entityType.getId()));
+    entityType.getColumns().stream()
+      .map(EntityTypeColumn::getOriginalEntityTypeId)
+      .forEach(originalEntityTypeIds::add);
+    return originalEntityTypeIds;
+  }
+
+  /**
+   * Converts a stream of entity type columns to sorted labeled values.
+   */
+  private static List<LabeledValue> columnsToSortedLabeledValues(Stream<EntityTypeColumn> columns) {
+    return columns
+      .map(col -> new LabeledValue(col.getLabelAlias()).value(col.getName()))
+      .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .toList();
+  }
+
+  /**
+   * Converts a collection of entity types to sorted labeled values.
+   */
+  private static List<LabeledValue> entityTypesToSortedLabeledValues(Stream<EntityType> entityTypes) {
+    return entityTypes
+      .map(entityType -> new LabeledValue(entityType.getLabelAlias()).value(entityType.getId()))
+      .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .toList();
+  }
+
+  /**
+   * Get the columns that can be used to join two entity types together.
+   * @return columns from the left entity type that can be used to join to the right entity type.
+   */
+  // Visible for testing
+  static Set<EntityTypeColumn> getColumnsForJoin(EntityType left, EntityType right) {
+    Map<UUID, Set<EntityTypeColumn>> rightColumnsByOrigEtId = right.getColumns().stream()
+      .collect(Collectors.groupingBy(
+        entityTypeColumn -> entityTypeColumn.getOriginalEntityTypeId() != null
+          ? entityTypeColumn.getOriginalEntityTypeId()
+          : UUID.fromString(right.getId()),
+        Collectors.toSet()));
+
+    return left.getColumns().stream()
+      .filter(col -> col.getJoinsTo() != null)
+      .filter(col -> col.getJoinsTo().stream()
+        .anyMatch(join -> rightColumnsByOrigEtId.containsKey(join.getTargetId())))
+      .collect(Collectors.toSet());
   }
 }

@@ -93,6 +93,16 @@ public class EntityTypeFlatteningService {
       .build();
   }
 
+  /**
+   * Gets a flattened entity type definition, fully localized, without retrieving it from the cache.
+   *
+   * This is the same as {@link #getFlattenedEntityType(UUID, String, boolean)}, but does not use the cache, and it uses the provided
+   * EntityType, rather than fetching it from the repository.
+   */
+  public EntityType getFlattenedEntityType(EntityType entityType, String tenantId, boolean preserveAllColumns) {
+    return getFlattenedEntityType(entityType, null, tenantId, preserveAllColumns);
+  }
+
   private EntityType getFlattenedEntityType(
     UUID entityTypeId,
     @CheckForNull EntityTypeSourceEntityType sourceFromParent,
@@ -102,7 +112,15 @@ public class EntityTypeFlatteningService {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
+    return getFlattenedEntityType(originalEntityType, sourceFromParent, tenantId, preserveAllColumns);
+  }
 
+  private EntityType getFlattenedEntityType(
+    EntityType originalEntityType,
+    @CheckForNull EntityTypeSourceEntityType sourceFromParent,
+    String tenantId,
+    boolean preserveAllColumns
+  ) {
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
       .name(originalEntityType.getName())

@@ -186,6 +186,19 @@ public class FqlToSqlConverterService {
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     Condition baseCondition;
+
+    // Handle repeatable fields (arrays) - does NOT match if any element equals the
+    // value
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueArray = cast(array(valueField(notEqualsCondition.value(), notEqualsCondition, entityType)),
+          String[].class);
+      return not(arrayOverlap(cast(field, String[].class), valueArray)).or(field.isNull());
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      var jsonbValue = DSL.inline("[\"" + notEqualsCondition.value() + "\"]");
+      return not(DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue)).or(field.isNull());
+    }
+
     if (DATE_TYPE.equals(filterFieldDataType)) {
       baseCondition = handleDate(notEqualsCondition, field, entityType);
     } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
@@ -266,6 +279,11 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    String dataType = getFieldDataType(entityType, inCondition);
+
+    // Handle repeatable fields (arrays) - equivalent to OR operator across multiple
+    // values
+
     List<Condition> conditionList = inCondition.value().stream()
         .map(val -> {
           String filterFieldDataType = getFieldForFiltering(inCondition, entityType).getDataType().getDataType();
@@ -287,6 +305,8 @@ public class FqlToSqlConverterService {
 
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType,
       org.jooq.Field<Object> field) {
+    String dataType = getFieldDataType(entityType, notInCondition);
+
     List<Condition> conditionList = notInCondition
         .value().stream()
         .map(val -> {

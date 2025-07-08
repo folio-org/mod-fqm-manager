@@ -225,6 +225,32 @@ class FqlToSqlConverterServiceTest {
                 .ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
                 .or(field("openUUIDField").isNull())),
         Arguments.of(
+            "not equals arrayType",
+            """
+                {"arrayField": {"$ne": "value1"}}""",
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value1"), String[].class)))
+                .or(field("arrayField").isNull())),
+        Arguments.of(
+            "not equals jsonbArrayType",
+            """
+                {"jsonbArrayField": {"$ne": "value1"}}""",
+            not(DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                DSL.inline("[\"value1\"]")))
+                .or(field("jsonbArrayField").isNull())),
+        Arguments.of(
+            "not equals arrayType with language example - French",
+            """
+                {"arrayField": {"$ne": "French"}}""",
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("French"), String[].class)))
+                .or(field("arrayField").isNull())),
+        Arguments.of(
+            "not equals jsonbArrayType with language example - German",
+            """
+                {"jsonbArrayField": {"$ne": "German"}}""",
+            not(DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                DSL.inline("[\"German\"]")))
+                .or(field("jsonbArrayField").isNull())),
+        Arguments.of(
             "greater than string",
             """
                 {"field1": {"$gt": "some value"}}""",
@@ -337,6 +363,23 @@ class FqlToSqlConverterServiceTest {
                 field("field1").equalIgnoreCase("value1"),
                 field("field1").eq(2),
                 field("field1").eq(true))),
+        Arguments.of(
+            "in list for arrayType",
+            """
+                {"arrayField": {"$in": ["French", "German", "English"]}}""",
+            or(
+                arrayOverlap(cast(field("arrayField"), String[].class), cast(array("French"), String[].class)),
+                arrayOverlap(cast(field("arrayField"), String[].class), cast(array("German"), String[].class)),
+                arrayOverlap(cast(field("arrayField"), String[].class), cast(array("English"), String[].class)))),
+        Arguments.of(
+            "in list for jsonbArrayType",
+            """
+                {"jsonbArrayField": {"$in": ["Dutch", "Italian"]}}""",
+            or(
+                DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                    DSL.inline("[\"Dutch\"]")),
+                DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                    DSL.inline("[\"Italian\"]")))),
         Arguments.of(
             "in list open UUID",
             """
@@ -457,6 +500,25 @@ class FqlToSqlConverterServiceTest {
                     field("field1").notEqualIgnoreCase("value1"),
                     field("field1").notEqual(2),
                     field("field1").notEqual(true)))),
+        Arguments.of(
+            "not in list for arrayType",
+            """
+                {"arrayField": {"$nin": ["French", "German", "English"]}}""",
+            field("arrayField").isNull().or(
+                not(or(
+                    arrayOverlap(cast(field("arrayField"), String[].class), cast(array("French"), String[].class)),
+                    arrayOverlap(cast(field("arrayField"), String[].class), cast(array("German"), String[].class)),
+                    arrayOverlap(cast(field("arrayField"), String[].class), cast(array("English"), String[].class)))))),
+        Arguments.of(
+            "not in list for jsonbArrayType",
+            """
+                {"jsonbArrayField": {"$nin": ["Dutch", "Italian"]}}""",
+            field("jsonbArrayField").isNull().or(
+                not(or(
+                    DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                        DSL.inline("[\"Dutch\"]")),
+                    DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class),
+                        DSL.inline("[\"Italian\"]")))))),
         Arguments.of(
             "contains all for jsonb array",
             """

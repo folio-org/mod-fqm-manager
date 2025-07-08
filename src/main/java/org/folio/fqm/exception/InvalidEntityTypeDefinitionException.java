@@ -20,6 +20,11 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
     this.entityTypeId = entityType.getId();
   }
 
+  public InvalidEntityTypeDefinitionException(String message, EntityType entityType, Throwable cause) {
+    super(message, cause);
+    this.entityTypeId = entityType.getId();
+  }
+
   @Override
   public HttpStatus getHttpStatus() {
     return HttpStatus.INTERNAL_SERVER_ERROR;

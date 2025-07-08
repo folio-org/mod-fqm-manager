@@ -99,5 +99,36 @@
       sourceField: 'invoice_line_fund_distribution.expense_class_id',
       order: 100
     },
+  ],
+  columns: [
+    {
+      name: 'allFiscalYears',
+      sourceAlias: 'invoice',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                      FROM src_invoice_invoices invoice ON (invoice.jsonb->'poNumbers')::jsonb ? (:sourceAlias.jsonb->>'poNumber') \
+                      JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(fy.jsonb ->> 'name')) FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                            FROM src_invoice_invoices invoice ON (invoice.jsonb->'poNumbers')::jsonb ? (:sourceAlias.jsonb->>'poNumber') \
+                            JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text )",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'finance/fiscal-years',
+        valueJsonPath: '$.fiscalYears.*.id',
+        labelJsonPath: '$.fiscalYears.*.name'
+      }
+    }
   ]
 }

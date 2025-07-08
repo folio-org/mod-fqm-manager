@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
@@ -280,9 +281,24 @@ public class FqlToSqlConverterService {
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, inCondition);
-
-    // Handle repeatable fields (arrays) - equivalent to OR operator across multiple
-    // values
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueList = inCondition
+          .value()
+          .stream()
+          .map(val -> valueField(val, inCondition, entityType))
+          .toArray(org.jooq.Field[]::new);
+      var valueArray = cast(array(valueList), String[].class);
+      return arrayOverlap(cast(field, String[].class), valueArray);
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      var jsonbArrayValues = inCondition
+          .value()
+          .stream()
+          .map(val -> "\"" + val + "\"")
+          .collect(Collectors.joining(", "));
+      var jsonbArray = DSL.inline("[" + jsonbArrayValues + "]");
+      return DSL.condition("{0} && {1}::jsonb", field.cast(JSONB.class), jsonbArray);
+    }
 
     List<Condition> conditionList = inCondition.value().stream()
         .map(val -> {
@@ -306,6 +322,25 @@ public class FqlToSqlConverterService {
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType,
       org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, notInCondition);
+
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueList = notInCondition
+          .value()
+          .stream()
+          .map(val -> valueField(val, notInCondition, entityType))
+          .toArray(org.jooq.Field[]::new);
+      var valueArray = cast(array(valueList), String[].class);
+      return field.isNull().or(not(arrayOverlap(cast(field, String[].class), valueArray)));
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      var jsonbArrayValues = notInCondition
+          .value()
+          .stream()
+          .map(val -> "\"" + val + "\"")
+          .collect(Collectors.joining(", "));
+      var jsonbArray = DSL.inline("[" + jsonbArrayValues + "]");
+      return field.isNull().or(not(DSL.condition("{0} && {1}::jsonb", field.cast(JSONB.class), jsonbArray)));
+    }
 
     List<Condition> conditionList = notInCondition
         .value().stream()

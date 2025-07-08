@@ -27,9 +27,8 @@
       queryable: true,
       visibleByDefault: false,
       isIdColumn: true,
-      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'id'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'id'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
     },
     {
       name: 'version',
@@ -48,9 +47,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'userId'",
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'userId'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'userId')::uuid",
+      valueFunction: '(:value)::uuid',
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
@@ -76,9 +74,8 @@
             {
               name: 'loan_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
+              valueFunction: '(:value)::uuid',
               property: 'loanId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -231,9 +228,8 @@
             {
               name: 'fee_fine_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'feeFineId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueGetter: "(SELECT array_agg((elems.value->>'feeFineId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: '(:value)::uuid',
               property: 'feeFineId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -242,9 +238,8 @@
             {
               name: 'fee_fine_type_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'feeFineTypeId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueGetter: "(SELECT array_agg((elems.value->>'feeFineTypeId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: '(:value)::uuid',
               property: 'feeFineTypeId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -253,9 +248,8 @@
             {
               name: 'loan_id',
               queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'loanId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'loanId')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
+              valueFunction: '(:value)::uuid',
               property: 'loanId',
               dataType: {
                 dataType: 'rangedUUIDType',

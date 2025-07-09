@@ -450,8 +450,8 @@
       "version": "1.1"
     },
     {
-      "id": "search",
-      "version": "1.2"
+      "id": "search-facets",
+      "version": "1.0"
     },
     {
       "id": "voucher",

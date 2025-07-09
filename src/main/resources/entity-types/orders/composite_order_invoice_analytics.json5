@@ -102,23 +102,44 @@
   ],
   columns: [
     {
-      name: 'allFiscalYears',
-      sourceAlias: 'invoice',
+      name: 'all_fiscal_years_ids',
+      sourceAlias: 'po.po',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid FROM src_invoice_invoices invoice \
+                      WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )",
+      filterValueGetter: "( SELECT DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid FROM src_invoice_invoices invoice \
+                            WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )"
+    },
+    {
+      name: 'all_fiscal_years',
+      sourceAlias: 'po.po',
       dataType: {
         dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
       },
+      idColumnName: 'all_fiscal_years_ids',
       essential: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT jsonb_agg(fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
-                      FROM src_invoice_invoices invoice ON (invoice.jsonb->'poNumbers')::jsonb ? (:sourceAlias.jsonb->>'poNumber') \
-                      JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text )",
-      filterValueGetter: "( SELECT jsonb_agg(lower(fy.jsonb ->> 'name')) FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
-                            FROM src_invoice_invoices invoice ON (invoice.jsonb->'poNumbers')::jsonb ? (:sourceAlias.jsonb->>'poNumber') \
-                            JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text )",
+      valueGetter: "( SELECT jsonb_agg(DISTINCT fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                      FROM src_invoice_invoices invoice \
+                      JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text \
+                      WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )",
+      filterValueGetter: "( SELECT jsonb_agg(DISTINCT fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                            FROM src_invoice_invoices invoice \
+                            JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text \
+                            WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )",
       valueFunction: "lower(:value)",
       source: {
         entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',

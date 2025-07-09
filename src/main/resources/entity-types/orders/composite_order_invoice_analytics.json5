@@ -114,9 +114,10 @@
       queryable: false,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid FROM src_invoice_invoices invoice \
+      hidden: true,
+      valueGetter: "( SELECT jsonb_agg(DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid) FROM src_invoice_invoices invoice \
                       WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )",
-      filterValueGetter: "( SELECT DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid FROM src_invoice_invoices invoice \
+      filterValueGetter: "( SELECT jsonb_agg(DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid) FROM src_invoice_invoices invoice \
                             WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') )"
     },
     {

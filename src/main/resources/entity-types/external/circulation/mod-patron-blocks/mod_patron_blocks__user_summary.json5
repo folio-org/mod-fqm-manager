@@ -67,7 +67,7 @@
     {
       name: 'open_loans',
       dataType: {
-        dataType: 'jsonbArrayType',
+        dataType: 'arrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -212,7 +212,7 @@
           ],
         },
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'",
       filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'::text))",
@@ -221,7 +221,7 @@
     {
       name: 'open_fees_fines',
       dataType: {
-        dataType: 'jsonbArrayType',
+        dataType: 'arrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -268,7 +268,7 @@
           ],
         },
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'",
       filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'::text))",

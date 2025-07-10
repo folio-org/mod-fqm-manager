@@ -180,6 +180,7 @@ public class EntityTypeFlatteningService {
                 !Boolean.TRUE.equals(sourceEt.getEssentialOnly()) ||
                 Boolean.TRUE.equals(col.getEssential())
             )
+            .filter(col -> !Boolean.TRUE.equals(col.getIsCustomField()) || Boolean.TRUE.equals(sourceEt.getInheritCustomFields()))
             // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source alias in flattenedSourceDefinition
             .map(col ->
               SourceUtils.injectSourceAlias(

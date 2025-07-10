@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.BooleanType;
+import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -40,7 +42,6 @@ class EntityTypeRepositoryTest {
   // Data pre-configured in postgres test container DB.
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
-  private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0294");
 
   @MockitoSpyBean
   private ObjectMapper objectMapper;
@@ -179,8 +180,7 @@ class EntityTypeRepositoryTest {
       .id(ENTITY_TYPE_02_ID.toString())
       ._private(false)
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
-      .columns(expectedColumns)
-      .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
+      .columns(expectedColumns);
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }
@@ -201,18 +201,31 @@ class EntityTypeRepositoryTest {
   @Test
   @SneakyThrows
   void getEntityTypeDefinitions_shouldHandleCustomFieldProcessingErrors() {
-    // Create a partial mock that succeeds for basic entity type but fails for custom fields
-    doReturn(new EntityType()
+    EntityType entityTypeWithBadCustomField = new EntityType()
       .id(ENTITY_TYPE_02_ID.toString())
       .name("test-entity")
-      .customFieldEntityTypeId(UUID.randomUUID().toString()) // Point to an invalid ET, to cause custom field processing to fail
-      .columns(new ArrayList<>()))
-      .when(objectMapper).readValue(argThat(((String arg) -> arg.contains(ENTITY_TYPE_02_ID.toString()))), eq(EntityType.class));
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("custom_field_column")
+          .dataType(new CustomFieldType()
+            .dataType("customFieldType")
+            .customFieldMetadata(new CustomFieldMetadata()
+              .configurationView("non_existent_view")
+              .dataExtractionPath("jsonb -> 'customFields'")
+            )
+          )
+      ));
 
-    // Should handle the error gracefully and filter out the failed entity
-    Stream<EntityType> result = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_02_ID), "");
+    doReturn(entityTypeWithBadCustomField)
+      .when(objectMapper).readValue(
+        argThat((String arg) -> arg.contains(ENTITY_TYPE_02_ID.toString())),
+        eq(EntityType.class)
+      );
 
-    assertTrue(result.findAny().isEmpty());
+    Optional<EntityType> entityType = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_02_ID), "").findAny();
+
+    assertTrue(entityType.isPresent());
+    assertTrue(entityType.get().getColumns().isEmpty());
   }
 
   @Test
@@ -352,5 +365,4 @@ class EntityTypeRepositoryTest {
     EntityType validEntityType = new EntityType().id(UUID.randomUUID().toString());
     assertDoesNotThrow(() -> EntityTypeRepository.throwIfEntityTypeInvalid(validEntityType));
   }
-
 }

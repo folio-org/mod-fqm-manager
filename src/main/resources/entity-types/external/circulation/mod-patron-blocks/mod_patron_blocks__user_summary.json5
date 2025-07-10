@@ -279,6 +279,9 @@
       dataType: {
         dataType: 'stringType',
       },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':src__circulation__patron_blocks__user_summary.jsonb::text',

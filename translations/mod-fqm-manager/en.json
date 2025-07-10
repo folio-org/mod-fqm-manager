@@ -1646,6 +1646,7 @@
   "entityType.composite_transaction.source_invoice_line": "Source invoice line",
   "entityType.composite_order_invoice_analytics": "Order — Invoice Analysis",
   "entityType.composite_order_invoice_analytics.po": "PO",
+  "entityType.composite_order_invoice_analytics.all_fiscal_years": "PO — Related fiscal years",
   "entityType.composite_order_invoice_analytics.pol": "PO line",
   "entityType.composite_order_invoice_analytics.instance": "Instance",
   "entityType.composite_order_invoice_analytics.invoice_line_fund_distribution": "Invoice",

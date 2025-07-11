@@ -160,6 +160,72 @@ class FqlToSqlConverterServiceTest {
         cast(field("stringUUIDField"), String.class).equalIgnoreCase("69939c9a-aa96-440a-a873-3b48f3f4f608")
       ),
       Arguments.of(
+        "equals array string",
+        """
+          {"arrayField": {"$eq": "value1"}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value1"), String[].class))
+      ),
+      Arguments.of(
+        "equals array numeric",
+        """
+          {"arrayField": {"$eq": 123}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(123), String[].class))
+      ),
+      Arguments.of(
+        "equals array boolean",
+        """
+          {"arrayField": {"$eq": true}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(true), String[].class))
+      ),
+      Arguments.of(
+        "equals jsonb array string",
+        """
+          {"jsonbArrayField": {"$eq": "value1"}}""",
+        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]"))
+      ),
+      Arguments.of(
+        "equals jsonb array numeric",
+        """
+          {"jsonbArrayField": {"$eq": 123}}""",
+        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]"))
+      ),
+      Arguments.of(
+        "equals jsonb array boolean",
+        """
+          {"jsonbArrayField": {"$eq": false}}""",
+        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+      ),
+      Arguments.of(
+        "equals array string with special characters",
+        """
+          {"arrayField": {"$eq": "value with spaces & special chars!"}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value with spaces & special chars!"), String[].class))
+      ),
+      Arguments.of(
+        "equals jsonb array string with special characters",
+        """
+          {"jsonbArrayField": {"$eq": "value with spaces & special chars!"}}""",
+        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value with spaces & special chars!\"]"))
+      ),
+      Arguments.of(
+        "equals array empty string",
+        """
+          {"arrayField": {"$eq": ""}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(""), String[].class))
+      ),
+      Arguments.of(
+        "equals jsonb array empty string",
+        """
+          {"jsonbArrayField": {"$eq": ""}}""",
+        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"\"]"))
+      ),
+      Arguments.of(
+        "equals array with value function",
+        """
+          {"arrayFieldWithValueFunction": {"$eq": "testValue"}}""",
+        arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "testValue"))), String[].class))
+      ),
+      Arguments.of(
         "not equals string",
         """
           {"field1": {"$ne": "some value"}}""",

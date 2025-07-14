@@ -124,6 +124,24 @@
       targetField: 'id',
       order: 70,
     },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'loans.created_by',
+      essentialOnly: true,
+      order: 110
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'loans.updated_by',
+      essentialOnly: true,
+      order: 120
+    }
   ],
   defaultSort: [
     {

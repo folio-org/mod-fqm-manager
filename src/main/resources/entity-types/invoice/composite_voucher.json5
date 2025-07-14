@@ -20,6 +20,24 @@
       essentialOnly: true,
       order: 20,
     },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'voucher.created_by_user_id',
+      essentialOnly: true,
+      order: 30
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'voucher.updated_by_user_id',
+      essentialOnly: true,
+      order: 40
+    }
   ],
   defaultSort: [
     {

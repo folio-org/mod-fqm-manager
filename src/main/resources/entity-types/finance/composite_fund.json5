@@ -9,6 +9,7 @@
       targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
       useIdColumns: true,
       essentialOnly: true,
+      order: 10,
     },
     {
       alias: 'ledger',
@@ -17,6 +18,7 @@
       targetField: 'id',
       sourceField: 'fund.ledger_id',
       essentialOnly: true,
+      order: 20,
     },
     {
       alias: 'fund_type',
@@ -25,7 +27,26 @@
       essentialOnly: true,
       sourceField: 'fund.fund_type_id',
       targetField: 'id',
+      order: 30,
     },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'fund.created_by_user_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'fund.updated_by_user_id',
+      essentialOnly: true,
+      order: 50,
+    }
   ],
   defaultSort: [
     {

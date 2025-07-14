@@ -8,7 +8,8 @@
       type: 'entity-type',
       targetId: '71525bf3-ea51-47c4-bb18-7ab6f07d2b42', // simple_budget
       useIdColumns: true,
-      essentialOnly: true
+      essentialOnly: true,
+      order: 10,
     },
     {
       alias: 'fiscal_year',
@@ -17,6 +18,7 @@
       targetField: 'id',
       essentialOnly: true,
       sourceField: 'budget.fiscal_year_id',
+      order: 20,
     },
     {
       alias: 'fund',
@@ -25,7 +27,44 @@
       targetField: 'fund.id',
       essentialOnly: true,
       sourceField: 'budget.fund_id',
-    }
+      order: 30,
+    },
+    {
+      alias: 'budget_created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'budget.created_by_user_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'budget_updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'budget.updated_by_user_id',
+      essentialOnly: true,
+      order: 45,
+    },
+    {
+      alias: 'fiscal_year_created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'fiscal_year.created_by_user_id',
+      essentialOnly: true,
+      order: 50,
+    },
+    {
+      alias: 'fiscal_year_updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'fiscal_year.updated_by_user_id',
+      essentialOnly: true,
+      order: 55,
+    },
   ],
   defaultSort: [
     {

@@ -54,6 +54,33 @@
       order: 40
     },
     {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'purchase_order.updated_by',
+      essentialOnly: true,
+      order: 41
+    },
+    {
+      alias: 'pol_created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pol.created_by',
+      essentialOnly: true,
+      order: 42
+    },
+    {
+      alias: 'pol_updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pol.updated_by',
+      essentialOnly: true,
+      order: 43
+    },
+    {
       alias: 'organization',
       type: 'entity-type',
       targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization

@@ -1,0 +1,33 @@
+{
+  id: 'e0ea4212-4023-458a-adce-8003ff6c5d9e',
+  name: 'composite_organization',
+  private: false,
+  sources: [
+    {
+      alias: 'organization',
+      type: 'entity-type',
+      targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'organization.created_by',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'organization.updated_by',
+      essentialOnly: true,
+      order: 30,
+    }
+  ],
+}

@@ -8,6 +8,7 @@
       type: 'entity-type',
       targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
       useIdColumns: true,
+      order: 10,
     },
     {
       alias: 'groups',
@@ -16,7 +17,26 @@
       sourceField: 'users.group_id',
       targetField: 'id',
       essentialOnly: true,
+      order: 20,
     },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'users.created_by_user_id',
+      essentialOnly: true,
+      order: 30
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'users.updated_by_user_id',
+      essentialOnly: true,
+      order: 40
+    }
   ],
   columns: [
     {

@@ -1,7 +1,7 @@
 {
   id: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
   name: 'simple_organization',
-  private: false,
+  private: true,
   sources: [
     {
       alias: 'org',
@@ -65,6 +65,20 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ':sourceAlias.created_by',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_at',

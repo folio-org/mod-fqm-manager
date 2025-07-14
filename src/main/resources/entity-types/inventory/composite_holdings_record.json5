@@ -48,6 +48,15 @@
       essentialOnly: true,
       order: 50
     },
+    {
+      alias: 'instance',
+      type: 'entity-type',
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instances
+      targetField: 'id',
+      sourceField: 'holdings.instance_id',
+      essentialOnly: true,
+      order: 60
+    }
   ],
   defaultSort: [
     {

@@ -25,6 +25,15 @@
       order: 20,
     },
     {
+      alias: 'instance',
+      type: 'entity-type',
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetField: 'id',
+      sourceField: 'pol.instance_id',
+      essentialOnly: true,
+      order: 30
+    },
+    {
       alias: 'invoice_line_fund_distribution',
       type: 'entity-type',
       targetId: '4999bd5f-3898-4b44-b283-e37bc9261ad8', // composite_invoice_line_fund_distribution
@@ -32,7 +41,7 @@
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
       essentialOnly: true,
-      order: 30,
+      order: 40,
     },
     {
       alias: 'invoice',
@@ -41,7 +50,7 @@
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.invoice_id',
       essentialOnly: true,
-      order: 40,
+      order: 50,
     },
     {
       alias: 'organization',
@@ -50,7 +59,7 @@
       targetField: 'id',
       sourceField: 'invoice.vendor_id',
       essentialOnly: true,
-      order: 50
+      order: 60
     },
     {
       alias: 'fiscal_year',
@@ -59,7 +68,7 @@
       targetField: 'id',
       sourceField: 'invoice.fiscal_year_id',
       essentialOnly: true,
-      order: 60
+      order: 70
     },
     {
       alias: 'fund',
@@ -69,7 +78,7 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.fund_id',
-      order: 70,
+      order: 80,
     },
     {
       alias: 'fund_type',
@@ -78,7 +87,7 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'fund.fund_type_id',
-      order: 80
+      order: 90
     },
     {
       alias: 'expense_class',
@@ -88,7 +97,68 @@
       essentialOnly: true,
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.expense_class_id',
-      order: 90
+      order: 100
     },
+  ],
+  columns: [
+    {
+      name: 'all_fiscal_years_ids',
+      sourceAlias: 'po.po',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'rangedUUIDType',
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      hidden: true,
+      valueGetter: "COALESCE(( \
+                      SELECT jsonb_agg(DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid) FROM src_invoice_invoices invoice \
+                      WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') \
+                    ), '[]'::jsonb)",
+      filterValueGetter: "COALESCE(( \
+                            SELECT jsonb_agg(DISTINCT (invoice.jsonb->>'fiscalYearId')::uuid) FROM src_invoice_invoices invoice \
+                            WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') \
+                          ), '[]'::jsonb)",
+    },
+    {
+      name: 'all_fiscal_years',
+      sourceAlias: 'po.po',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      idColumnName: 'all_fiscal_years_ids',
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "COALESCE(( \
+                      SELECT jsonb_agg(DISTINCT fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                      FROM src_invoice_invoices invoice \
+                      JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text \
+                      WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') \
+                    ), '[]'::jsonb)",
+      filterValueGetter: "COALESCE(( \
+                            SELECT jsonb_agg(DISTINCT fy.jsonb ->> 'name') FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                            FROM src_invoice_invoices invoice \
+                            JOIN src_finance_fiscal_year fy ON invoice.jsonb->>'fiscalYearId' = fy.id::text \
+                            WHERE (invoice.jsonb->'poNumbers')::jsonb ?? (:sourceAlias.jsonb->>'poNumber') \
+                          ), '[]'::jsonb)",
+      valueFunction: "lower(:value)",
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
+        columnName: 'name'
+      },
+      valueSourceApi: {
+        path: 'finance/fiscal-years',
+        valueJsonPath: '$.fiscalYears.*.id',
+        labelJsonPath: '$.fiscalYears.*.name'
+      }
+    }
   ]
 }

@@ -1,10 +1,13 @@
 package org.folio.fqm.repository;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.BooleanType;
+import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -13,6 +16,7 @@ import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,13 +25,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
@@ -36,7 +42,6 @@ class EntityTypeRepositoryTest {
   // Data pre-configured in postgres test container DB.
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");
   private static final UUID ENTITY_TYPE_02_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0292");
-  private static final UUID CUSTOM_FIELD_ENTITY_TYPE_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0294");
 
   @MockitoSpyBean
   private ObjectMapper objectMapper;
@@ -46,6 +51,14 @@ class EntityTypeRepositoryTest {
 
   @MockitoSpyBean
   private FolioExecutionContext folioExecutionContext;
+
+  @BeforeEach
+  void setUp() {
+    // Clear cache before each test to ensure fresh data
+    repo.clearCache();
+    // Reset the mock object mapper to avoid side effects from previous tests
+    reset(objectMapper);
+  }
 
 
   @Test
@@ -167,10 +180,64 @@ class EntityTypeRepositoryTest {
       .id(ENTITY_TYPE_02_ID.toString())
       ._private(false)
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
-      .columns(expectedColumns)
-      .customFieldEntityTypeId(CUSTOM_FIELD_ENTITY_TYPE_ID.toString());
+      .columns(expectedColumns);
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
+  }
+
+  @Test
+  @SneakyThrows
+  void getEntityTypeDefinitions_shouldHandleJsonProcessingErrors() {
+    // Mock ObjectMapper to throw exception when reading value
+    doThrow(new JsonProcessingException("Test JSON processing failure") {})
+      .when(objectMapper).readValue(any(String.class), eq(EntityType.class));
+
+    // This should return empty stream instead of throwing exception
+    Stream<EntityType> result = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_01_ID), "");
+
+    assertTrue(result.findAny().isEmpty());
+  }
+
+  @Test
+  @SneakyThrows
+  void getEntityTypeDefinitions_shouldHandleCustomFieldProcessingErrors() {
+    EntityType entityTypeWithBadCustomField = new EntityType()
+      .id(ENTITY_TYPE_02_ID.toString())
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("custom_field_column")
+          .dataType(new CustomFieldType()
+            .dataType("customFieldType")
+            .customFieldMetadata(new CustomFieldMetadata()
+              .configurationView("non_existent_view")
+              .dataExtractionPath("jsonb -> 'customFields'")
+            )
+          )
+      ));
+
+    doReturn(entityTypeWithBadCustomField)
+      .when(objectMapper).readValue(
+        argThat((String arg) -> arg.contains(ENTITY_TYPE_02_ID.toString())),
+        eq(EntityType.class)
+      );
+
+    Optional<EntityType> entityType = repo.getEntityTypeDefinitions(Set.of(ENTITY_TYPE_02_ID), "").findAny();
+
+    assertTrue(entityType.isPresent());
+    assertTrue(entityType.get().getColumns().isEmpty());
+  }
+
+  @Test
+  void getEntityTypeDefinitions_shouldFilterOutNullEntities() {
+    // Test that the filter(Objects::nonNull) works correctly
+    // This test ensures the existing behavior is maintained
+    Optional<EntityType> validEntity = repo.getEntityTypeDefinition(ENTITY_TYPE_01_ID, "");
+    assertTrue(validEntity.isPresent());
+
+    // Test with non-existent entity ID
+    Optional<EntityType> invalidEntity = repo.getEntityTypeDefinition(UUID.randomUUID(), "");
+    assertTrue(invalidEntity.isEmpty());
   }
 
   @Test
@@ -282,4 +349,20 @@ class EntityTypeRepositoryTest {
       repo.updateCustomEntityType(customEntityType));
   }
 
+  @Test
+  void throwIfEntityTypeInvalid_shouldThrowForInvalidId() {
+    EntityType invalidEntityType = new EntityType().id("not-a-uuid");
+    InvalidEntityTypeDefinitionException ex = assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeRepository.throwIfEntityTypeInvalid(invalidEntityType)
+    );
+    assertTrue(ex.getMessage().contains("Invalid entity type ID"));
+    assertEquals("not-a-uuid", ex.getError().getParameters().get(0).getValue());
+  }
+
+  @Test
+  void throwIfEntityTypeInvalid_shouldNotThrowForValidId() {
+    EntityType validEntityType = new EntityType().id(UUID.randomUUID().toString());
+    assertDoesNotThrow(() -> EntityTypeRepository.throwIfEntityTypeInvalid(validEntityType));
+  }
 }

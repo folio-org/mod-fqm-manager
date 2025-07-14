@@ -6,6 +6,7 @@
   "entityType.composite_holdings_record.holdings": "Holdings",
   "entityType.composite_holdings_record.permanent_location": "Permanent location",
   "entityType.composite_holdings_record.temporary_location": "Temporary location",
+  "entityType.composite_holdings_record.instance": "Instance",
   "entityType.composite_instances": "Instances",
   "entityType.composite_instances.date_type": "Instance date type",
   "entityType.composite_instances.inst_stat": "Instance status",

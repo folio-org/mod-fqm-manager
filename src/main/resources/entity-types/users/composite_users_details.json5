@@ -2,9 +2,6 @@
   id: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf',
   name: 'composite_user_details',
   private: false,
-  customFieldEntityTypeId: 'ddc93926-d15a-4a45-9d9c-93eadc3d9bbf', // This entity type
-  sourceView: 'src_user_custom_fields',
-  sourceViewExtractor: ":users.user.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'users',
@@ -20,6 +17,21 @@
       targetField: 'id',
       essentialOnly: true,
     },
+  ],
+  columns: [
+    {
+      name: 'user_custom_fields',
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'customFieldType',
+        customFieldMetadata: {
+          configurationView: 'src_user_custom_fields',
+          dataExtractionPath: ":users.user.jsonb -> 'customFields'",
+        },
+      },
+    }
   ],
   defaultSort: [
     {

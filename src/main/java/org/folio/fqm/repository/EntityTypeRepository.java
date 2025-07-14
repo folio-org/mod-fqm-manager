@@ -5,12 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.BooleanType;
+import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.StringType;
@@ -24,6 +24,7 @@ import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.Record5;
 import org.jooq.Result;
+import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,18 +116,28 @@ public class EntityTypeRepository {
           .from(table(tableName))
           .fetch(definitionField)
           .stream()
-          .map(this::unmarshallEntityType)
+          .map(str -> {
+            try {
+              EntityType entityType = objectMapper.readValue(str, EntityType.class);
+              throwIfEntityTypeInvalid(entityType);
+              return entityType;
+            } catch (Exception e) {
+              log.error("Error processing raw entity type definition: {}", str, e);
+              return null;
+            }
+          })
+          .filter(Objects::nonNull)
           .collect(Collectors.toMap(EntityType::getId, Function.identity()));
 
         return rawEntityTypes.values().stream()
           .map(entityType -> {
-            String customFieldsEntityTypeId = entityType.getCustomFieldEntityTypeId();
-            if (customFieldsEntityTypeId != null) {
-              List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(customFieldsEntityTypeId, entityType, rawEntityTypes);
-              List<EntityTypeColumn> columnsWithUniqueAliases = getColumnsWithUniqueAliases(customFieldColumns);
-              entityType.getColumns().addAll(columnsWithUniqueAliases);
-            }
-            return entityType;
+            List<EntityTypeColumn> newColumns = entityType.getColumns().stream()
+              .flatMap(column -> column.getDataType().getDataType().equals("customFieldType")
+                ? processCustomFieldColumn(entityType, column).stream()
+                : Stream.of(column)
+              )
+              .toList();
+            return entityType.columns(newColumns);
           })
           .collect(Collectors.toMap(entityType -> UUID.fromString(entityType.getId()), Function.identity()));
       }
@@ -136,6 +147,22 @@ public class EntityTypeRepository {
       return entityTypes.values().stream();
     }
     return entityTypeIds.stream().filter(entityTypes::containsKey).map(entityTypes::get);
+  }
+
+  /**
+   * Basic validation to ensure the entity type is structurally sound enough to function.
+   *
+   * @implSpec
+   * Full validation should happen in the service layer, this is just a quick check to avoid issues that could arise from
+   * the entity type being malformed in a way that would cause the system to crash or behave unexpectedly.
+   */
+  static void throwIfEntityTypeInvalid(EntityType entityType) {
+    try {
+      //Attempt to parse UUID to ensure it's valid
+      UUID.fromString(entityType.getId());
+    } catch (Exception e) {
+      throw new InvalidEntityTypeDefinitionException("Invalid entity type ID: " + entityType.getId(), entityType, e);
+    }
   }
 
   public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {
@@ -162,21 +189,29 @@ public class EntityTypeRepository {
     });
   }
 
-  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId,
-                                                                 EntityType entityType,
-                                                                 Map<String, EntityType> rawEntityTypes) {
-    log.info("Getting custom field columns for entity type ID: {}", entityTypeId);
-    EntityType entityTypeDefinition = entityTypeId.equals(entityType.getId()) ? entityType :
-      Optional.ofNullable(rawEntityTypes.get(entityTypeId))
-        .orElseThrow(() -> new EntityTypeNotFoundException(UUID.fromString(entityTypeId)));
-    String sourceViewName = entityTypeDefinition.getSourceView();
-    String sourceViewExtractor = entityTypeDefinition.getSourceViewExtractor();
+  private List<EntityTypeColumn> processCustomFieldColumn(EntityType entityType, EntityTypeColumn column) {
+    log.debug("Extracting custom fields for column: {} of entity type {}", column.getName(), entityType.getName());
+    List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(entityType.getId(), column);
+    return getColumnsWithUniqueAliases(customFieldColumns);
+  }
 
-    Result<Record5<Object, Object, Object, Object, Object>> results = readerJooqContext
-      .select(field("id"), field(CUSTOM_FIELD_NAME), field(CUSTOM_FIELD_REF_ID), field(CUSTOM_FIELD_TYPE), field(CUSTOM_FIELD_FILTER_VALUE_GETTER))
-      .from(sourceViewName)
-      .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
-      .fetch();
+  private List<EntityTypeColumn> fetchColumnNamesForCustomFields(String entityTypeId,
+                                                                 EntityTypeColumn entityTypeColumn) {
+    CustomFieldMetadata customFieldMetadata = ((CustomFieldType) entityTypeColumn.getDataType()).getCustomFieldMetadata();
+    String configurationView = customFieldMetadata.getConfigurationView();
+    String dataExtractionPath = customFieldMetadata.getDataExtractionPath();
+
+    Result<Record5<Object, Object, Object, Object, Object>> results;
+    try {
+      results = readerJooqContext
+        .select(field("id"), field(CUSTOM_FIELD_NAME), field(CUSTOM_FIELD_REF_ID), field(CUSTOM_FIELD_TYPE), field(CUSTOM_FIELD_FILTER_VALUE_GETTER))
+        .from(configurationView)
+        .where(field(CUSTOM_FIELD_TYPE).in(SUPPORTED_CUSTOM_FIELD_TYPES))
+        .fetch();
+    } catch (Exception e) {
+      log.error("Error fetching custom fields for entity type ID: {}. This entity type's custom field metadata may not be configured correctly.", entityTypeId, e);
+      return Collections.emptyList();
+    }
 
     return results.stream()
       .map(row -> {
@@ -188,15 +223,21 @@ public class EntityTypeRepository {
           String type = row.get(CUSTOM_FIELD_TYPE, String.class);
           String customFieldValueJson = row.get(CUSTOM_FIELD_FILTER_VALUE_GETTER, String.class);
 
-          if (CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN.equals(type) || CUSTOM_FIELD_TYPE_RADIO_BUTTON.equals(type)) {
-            List<ValueWithLabel> columnValues = parseCustomFieldValues(customFieldValueJson);
-            return handleSingleSelectCustomField(id, name, refId, sourceViewName, sourceViewExtractor, columnValues);
-          } else if (CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX.equals(type)) {
-            return handleBooleanCustomField(id, name, refId, sourceViewExtractor);
-          } else if (CUSTOM_FIELD_TYPE_TEXTBOX_SHORT.equals(type) || CUSTOM_FIELD_TYPE_TEXTBOX_LONG.equals(type)) {
-            return handleTextboxCustomField(id, name, refId, sourceViewExtractor);
-          }
-          return null;
+          return switch (type) {
+            case CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN, CUSTOM_FIELD_TYPE_RADIO_BUTTON -> {
+              List<ValueWithLabel> columnValues = parseCustomFieldValues(customFieldValueJson);
+              yield handleSingleSelectCustomField(entityTypeColumn, id, name, refId, configurationView, dataExtractionPath, columnValues);
+            }
+            case CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX ->
+              handleBooleanCustomField(entityTypeColumn, id, name, refId, dataExtractionPath);
+            case CUSTOM_FIELD_TYPE_TEXTBOX_SHORT, CUSTOM_FIELD_TYPE_TEXTBOX_LONG ->
+              handleTextboxCustomField(entityTypeColumn, id, name, refId, dataExtractionPath);
+            // Should never be reached due to prior filtering
+            default -> {
+              log.error("Custom field {} of entity type {} uses an unsupported datatype: {}. Ignoring this custom field", name, entityTypeId, type);
+              yield null;
+            }
+          };
         } catch (Exception e) {
           log.error("Error processing custom field {} for entity type ID: {}", name, entityTypeId, e);
           return null;
@@ -205,7 +246,6 @@ public class EntityTypeRepository {
       .filter(Objects::nonNull)
       .toList();
   }
-
 
   private List<ValueWithLabel> parseCustomFieldValues(String customFieldValueJson) throws JsonProcessingException {
     List<Map<String, String>> optionList = objectMapper.readValue(customFieldValueJson, new TypeReference<>() {
@@ -219,7 +259,8 @@ public class EntityTypeRepository {
       .toList();
   }
 
-  private EntityTypeColumn handleBooleanCustomField(String id,
+  private EntityTypeColumn handleBooleanCustomField(EntityTypeColumn customFieldColumn,
+                                                    String id,
                                                     String name,
                                                     String refId,
                                                     String sourceViewExtractor) {
@@ -229,17 +270,18 @@ public class EntityTypeRepository {
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new BooleanType().dataType("booleanType"))
       .values(CUSTOM_FIELD_BOOLEAN_VALUES)
-      .visibleByDefault(false)
+      .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
       .valueGetter(valueGetter)
       .filterValueGetter(String.format(filterValueGetter, valueGetter))
       .valueFunction(String.format(filterValueGetter, ":value"))
       .labelAlias(name)
-      .queryable(true)
-      .essential(true)
+      .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
+      .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))
       .isCustomField(true);
   }
 
-  private EntityTypeColumn handleSingleSelectCustomField(String id,
+  private EntityTypeColumn handleSingleSelectCustomField(EntityTypeColumn customFieldColumn,
+                                                         String id,
                                                          String name,
                                                          String refId,
                                                          String sourceViewName,
@@ -258,27 +300,28 @@ public class EntityTypeRepository {
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new StringType().dataType("stringType"))
       .values(columnValues)
-      .visibleByDefault(false)
+      .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
       .valueGetter(valueGetter)
       .filterValueGetter(filterValueGetter)
       .labelAlias(name)
-      .queryable(true)
-      .essential(true)
+      .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
+      .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))
       .isCustomField(true);
   }
 
-  private EntityTypeColumn handleTextboxCustomField(String id,
+  private EntityTypeColumn handleTextboxCustomField(EntityTypeColumn customFieldColumn,
+                                                    String id,
                                                     String name,
                                                     String refId,
                                                     String sourceViewExtractor) {
     return new EntityTypeColumn()
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new StringType().dataType("stringType"))
-      .visibleByDefault(false)
+      .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
       .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
-      .queryable(true)
-      .essential(true)
+      .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
+      .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))
       .isCustomField(true);
   }
 
@@ -347,8 +390,8 @@ public class EntityTypeRepository {
     entityTypeCache.invalidate(executionContext.getTenantId());
   }
 
-  @SneakyThrows
-  private EntityType unmarshallEntityType(String str) {
-    return objectMapper.readValue(str, EntityType.class);
+  // Clear the ET cache for testing
+  void clearCache() {
+    entityTypeCache.invalidateAll();
   }
 }

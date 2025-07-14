@@ -2,9 +2,6 @@
   id: '58148257-bfb0-4687-8c42-d2833d772f3e',
   name: 'purchase_order_line',
   private: true,
-  customFieldEntityTypeId: '58148257-bfb0-4687-8c42-d2833d772f3e', // This entity type
-  sourceView: 'src_purchase_order_line_custom_fields',
-  sourceViewExtractor: ":pol.jsonb -> 'customFields'",
   sources: [
     {
       alias: 'pol',
@@ -1737,6 +1734,19 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.jsonb::text',
+    },
+    {
+      name: 'pol_custom_fields',
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'customFieldType',
+        customFieldMetadata: {
+          configurationView: 'src_purchase_order_line_custom_fields',
+          dataExtractionPath: ":pol.jsonb -> 'customFields'",
+        },
+      },
     },
   ],
 }

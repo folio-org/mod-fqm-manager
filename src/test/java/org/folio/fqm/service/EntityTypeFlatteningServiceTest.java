@@ -830,6 +830,89 @@ class EntityTypeFlatteningServiceTest {
     ));
   }
 
+  @Test
+  void testCustomFieldInheritanceFiltering() {
+    EntityType sourceEntityWithCustomFields = new EntityType()
+      .id("11111111-1111-1111-1111-111111111111")
+      .name("source_with_custom_fields")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("regular_field_1")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":source.regular_field"),
+        new EntityTypeColumn()
+          .name("custom_field")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":source.custom_field")
+          .isCustomField(true),
+        new EntityTypeColumn()
+          .name("regular_field_2")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":source.regular_field_2")
+          .isCustomField(false)
+      ))
+      .sources(List.of(
+        new EntityTypeSourceDatabase().type("db").alias("source").target("source_table")
+      ));
+
+    // Should inherit custom fields
+    EntityType compositeInheritsCustomFields = new EntityType()
+      .id("22222222-2222-2222-2222-222222222222")
+      .name("composite_inherits_custom_fields")
+      .columns(List.of())
+      .sources(List.of(
+        new EntityTypeSourceEntityType()
+          .type("entity-type")
+          .alias("source_alias")
+          .targetId(UUID.fromString(sourceEntityWithCustomFields.getId()))
+          .inheritCustomFields(true)
+      ));
+
+    // Should not inherit custom fields
+    EntityType compositeExcludesCustomFields = new EntityType()
+      .id("33333333-3333-3333-3333-333333333333")
+      .name("composite_excludes_custom_fields")
+      .columns(List.of())
+      .sources(List.of(
+        new EntityTypeSourceEntityType()
+          .type("entity-type")
+          .alias("source_alias")
+          .targetId(UUID.fromString(sourceEntityWithCustomFields.getId()))
+          .inheritCustomFields(false)
+      ));
+
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(sourceEntityWithCustomFields.getId())), any()))
+      .thenReturn(Optional.of(sourceEntityWithCustomFields));
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(compositeInheritsCustomFields.getId())), any()))
+      .thenReturn(Optional.of(compositeInheritsCustomFields));
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(compositeExcludesCustomFields.getId())), any()))
+      .thenReturn(Optional.of(compositeExcludesCustomFields));
+
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
+
+    EntityType flattenedWithCustomFields = entityTypeFlatteningService.getFlattenedEntityType(
+      UUID.fromString(compositeInheritsCustomFields.getId()),
+      TENANT_ID,
+      false
+    );
+
+    assertThat(flattenedWithCustomFields.getColumns(), hasSize(3));
+    assertThat(flattenedWithCustomFields.getColumns(), hasItem(hasProperty("name", equalTo("source_alias.regular_field_1"))));
+    assertThat(flattenedWithCustomFields.getColumns(), hasItem(hasProperty("name", equalTo("source_alias.regular_field_2"))));
+    assertThat(flattenedWithCustomFields.getColumns(), hasItem(hasProperty("name", equalTo("source_alias.custom_field"))));
+
+    EntityType flattenedWithoutCustomFields = entityTypeFlatteningService.getFlattenedEntityType(
+      UUID.fromString(compositeExcludesCustomFields.getId()),
+      TENANT_ID,
+      false
+    );
+
+    assertThat(flattenedWithoutCustomFields.getColumns(), hasSize(2));
+    assertThat(flattenedWithoutCustomFields.getColumns(), hasItem(hasProperty("name", equalTo("source_alias.regular_field_1"))));
+    assertThat(flattenedWithoutCustomFields.getColumns(), hasItem(hasProperty("name", equalTo("source_alias.regular_field_2"))));
+    assertThat(flattenedWithoutCustomFields.getColumns(), not(hasItem(hasProperty("name", equalTo("source_alias.custom_field")))));
+  }
+
   @SneakyThrows
   private EntityType copyEntityType(EntityType originalEntityType) {
     ObjectMapper objectMapper = new ObjectMapper();

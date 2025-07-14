@@ -4,6 +4,10 @@
 
 When possible, please use the following guidelines when translating field names:
 
+- All labels should be in sentence case, with only the first word capitalized.
+  - _Example_: `First name` instead of `First Name` or `first name`
+  - _Exception_: Qualified names that use an em-dash for heirarchy should use sentence case within each component
+    - _Example_: `User record — First name`
 - Entity type names should **not** be included in the label, when it is redundant
   - _Example_: `First name` instead of `User first name`
 - Field names should have only their first word capitalized, per FOLIO UI guidelines

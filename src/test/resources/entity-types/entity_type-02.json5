@@ -2,7 +2,6 @@
   id: '0cb79a4c-f7eb-4941-a104-745224ae0292',
   name: 'entity_type-02',
   labelAlias: 'entity_type-02',
-  customFieldEntityTypeId: '0cb79a4c-f7eb-4941-a104-745224ae0294',
   private: false,
   columns: [
     {
@@ -29,6 +28,19 @@
       labelAlias: 'Column 2',
       visibleByDefault: true,
     },
+    {
+      name: 'custom',
+      dataType: {
+        dataType: 'customFieldType',
+        customFieldMetadata: {
+          configurationView: 'custom_fields_source_view',
+          dataExtractionPath: "custom_fields_source_view.jsonb -> 'customFields'",
+        },
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+    }
   ],
   defaultSort: [
     {

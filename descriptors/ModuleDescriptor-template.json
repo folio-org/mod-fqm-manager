@@ -303,7 +303,7 @@
   "requires": [
     {
       "id": "item-storage",
-      "version": "10.0"
+      "version": "10.0 11.0"
     },
     {
       "id": "holdings-storage",

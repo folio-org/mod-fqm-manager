@@ -154,6 +154,20 @@ public class FqlToSqlConverterService {
       return handleDate(equalsCondition, field, entityType);
     }
     String dataType = getFieldDataType(entityType, equalsCondition);
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueArray = cast(array(valueField(equalsCondition.value(), equalsCondition, entityType)), String[].class);
+      return arrayOverlap(cast(field, String[].class), valueArray);
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      Field entityField = getField(equalsCondition, entityType);
+      if (entityField.getValueFunction() != null) {
+        var transformedValue = valueField(equalsCondition.value(), equalsCondition, entityType);
+        return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
+      } else {
+        var jsonbValue = DSL.inline("[\"" + equalsCondition.value() + "\"]");
+        return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
+      }
+    }
     String filterFieldDataType = getFieldForFiltering(equalsCondition, entityType).getDataType().getDataType();
     if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
       String value = (String) equalsCondition.value();

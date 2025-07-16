@@ -26,8 +26,8 @@
       },
       valueSourceApi: {
         path: 'contributor-name-types',
-        labelJsonPath: '$.contributor-name-types.*.id',
-        valueJsonPath: '$.contributor-name-types.*.id',
+        labelJsonPath: '$.contributorNameTypes.*.id',
+        valueJsonPath: '$.contributorNameTypes.*.id',
       }
     },
     {
@@ -44,8 +44,8 @@
       },
       valueSourceApi: {
         path: 'contributor-name-types',
-        labelJsonPath: '$.contributor-name-types.*.id',
-        valueJsonPath: '$.contributor-name-types.*.name',
+        labelJsonPath: '$.contributorNameTypes.*.name',
+        valueJsonPath: '$.contributorNameTypes.*.id',
       },
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",

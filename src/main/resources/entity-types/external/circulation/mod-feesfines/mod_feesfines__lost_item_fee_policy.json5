@@ -1,0 +1,529 @@
+{
+  id: '8e8b251d-4220-54c0-8396-76cd6cd83a95',
+  name: 'mod_feesfines__lost_item_fee_policy',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__feesfines__lost_item_fee_policy',
+      target: 'src__circulation__feesfines__lost_item_fee_policy',
+    },
+  ],
+  requiredPermissions: [],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'description'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'description'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'item_aged_lost_overdue_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'itemAgedLostOverdue'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'item_aged_lost_overdue_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'itemAgedLostOverdue'->>'intervalId'",
+    },
+    {
+      name: 'patron_billed_after_aged_lost_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'patronBilledAfterAgedLost'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'patron_billed_after_aged_lost_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'patronBilledAfterAgedLost'->>'intervalId'",
+    },
+    {
+      name: 'recalled_item_aged_lost_overdue_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'recalledItemAgedLostOverdue'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'recalled_item_aged_lost_overdue_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'recalledItemAgedLostOverdue'->>'intervalId'",
+    },
+    {
+      name: 'patron_billed_after_recalled_item_aged_lost_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'patronBilledAfterRecalledItemAgedLost'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'patron_billed_after_recalled_item_aged_lost_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'patronBilledAfterRecalledItemAgedLost'->>'intervalId'",
+    },
+    {
+      name: 'charge_amount_item_charge_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'chargeAmountItem'->>'chargeType'",
+    },
+    {
+      name: 'charge_amount_item_amount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'chargeAmountItem'->>'amount')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'lost_item_processing_fee',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemProcessingFee')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'charge_amount_item_patron',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemPatron'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemPatron'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'charge_amount_item_system',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemSystem'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemSystem'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'lost_item_charge_fee_fine_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'lostItemChargeFeeFine'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'lost_item_charge_fee_fine_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'lostItemChargeFeeFine'->>'intervalId'",
+    },
+    {
+      name: 'returned_lost_item_processing_fee',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'returnedLostItemProcessingFee'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'returnedLostItemProcessingFee'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'replaced_lost_item_processing_fee',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacedLostItemProcessingFee'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacedLostItemProcessingFee'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'replacement_processing_fee',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementProcessingFee')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'replacement_allowed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementAllowed'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementAllowed'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'lost_item_returned',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemReturned'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemReturned'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'fees_fines_shall_refunded_duration',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'feesFinesShallRefunded'->>'duration')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'fees_fines_shall_refunded_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'Minutes',
+          label: 'Minutes',
+        },
+        {
+          value: 'Hours',
+          label: 'Hours',
+        },
+        {
+          value: 'Days',
+          label: 'Days',
+        },
+        {
+          value: 'Weeks',
+          label: 'Weeks',
+        },
+        {
+          value: 'Months',
+          label: 'Months',
+        },
+        {
+          value: 'Years',
+          label: 'Years',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'feesFinesShallRefunded'->>'intervalId'",
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__feesfines__lost_item_fee_policy.jsonb::text',
+    },
+  ],
+}

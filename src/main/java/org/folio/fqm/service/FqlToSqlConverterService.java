@@ -179,10 +179,21 @@ public class FqlToSqlConverterService {
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
   }
 
-  private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
+  private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType,
+                                           org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     Condition baseCondition;
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueArray = cast(array(valueField(notEqualsCondition.value(), notEqualsCondition, entityType)),
+        String[].class);
+      return not(arrayOverlap(cast(field, String[].class), valueArray)).or(field.isNull());
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      var jsonbValue = DSL.inline("[\"" + notEqualsCondition.value() + "\"]");
+      return not(DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue)).or(field.isNull());
+    }
+
     if (DATE_TYPE.equals(filterFieldDataType)) {
       baseCondition = handleDate(notEqualsCondition, field, entityType);
     } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
@@ -199,13 +210,13 @@ public class FqlToSqlConverterService {
         field,
         (String) notEqualsCondition.value(),
         org.jooq.Field::notEqualIgnoreCase,
-        org.jooq.Field::ne
-      );
+        org.jooq.Field::ne);
     } else {
       baseCondition = field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
     }
     return baseCondition.or(field.isNull());
   }
+
 
   private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
     String dateString = (String) fieldCondition.value();

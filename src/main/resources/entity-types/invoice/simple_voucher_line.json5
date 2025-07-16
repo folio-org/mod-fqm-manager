@@ -61,6 +61,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'updated_by_user_id',
@@ -73,6 +81,14 @@
       essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'source_ids',

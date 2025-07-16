@@ -10,6 +10,7 @@
       targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       useIdColumns: true,
       essentialOnly: true,
+      order: 10,
     },
     {
       alias: 'inst_stat',
@@ -17,6 +18,7 @@
       targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
       targetField: 'id',
       sourceField: 'instance.status_id',
+      order: 20,
       // essentialOnly: true,
     },
     {
@@ -26,6 +28,7 @@
       targetField: 'id',
       sourceField: 'instance.instance_type_id',
       essentialOnly: true,
+      order: 30,
     },
     {
       alias: 'date_type',
@@ -34,7 +37,26 @@
       targetField: 'id',
       sourceField: 'instance.instance_date_type_id',
       essentialOnly: true,
+      order: 40,
     },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'instance.created_by',
+      essentialOnly: true,
+      order: 50
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'instance.updated_by',
+      essentialOnly: true,
+      order: 60
+    }
   ],
   defaultSort: [
     {

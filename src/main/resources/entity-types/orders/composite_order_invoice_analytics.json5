@@ -99,6 +99,42 @@
       sourceField: 'invoice_line_fund_distribution.expense_class_id',
       order: 100
     },
+    {
+      alias: 'po_created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'po.created_by_user_id',
+      essentialOnly: true,
+      order: 110
+    },
+    {
+      alias: 'po_updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'po.updated_by_user_id',
+      essentialOnly: true,
+      order: 115
+    },
+    {
+      alias: 'pol_created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pol.created_by_user_id',
+      essentialOnly: true,
+      order: 120
+    },
+    {
+      alias: 'pol_updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pol.updated_by_user_id',
+      essentialOnly: true,
+      order: 125
+    }
   ],
   columns: [
     {

@@ -38,6 +38,24 @@
       targetField: 'id',
       order: 40,
     },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'transaction.created_by_user_id',
+      essentialOnly: true,
+      order: 90
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'transaction.updated_by_user_id',
+      essentialOnly: true,
+      order: 100
+    }
 //    {
 //      alias: 'source_fiscal_year',
 //      type: 'entity-type',

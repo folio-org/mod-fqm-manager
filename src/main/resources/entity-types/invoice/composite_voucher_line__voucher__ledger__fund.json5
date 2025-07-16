@@ -47,7 +47,25 @@
       sourceField: 'fund.ledger_id',
       essentialOnly: true,
       order: 50
-    }
+    },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'voucher_line.created_by_user_id',
+      essentialOnly: true,
+      order: 60,
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'voucher_line.updated_by_user_id',
+      essentialOnly: true,
+      order: 70,
+    },
   ],
   defaultSort: [
     {

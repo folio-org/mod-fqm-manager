@@ -111,6 +111,24 @@
       essentialOnly: true,
       order: 120
     },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'items.created_by_user_id',
+      essentialOnly: true,
+      order: 130
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'items.updated_by_user_id',
+      essentialOnly: true,
+      order: 140
+    }
   ],
   defaultSort: [
     {

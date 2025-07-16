@@ -9,7 +9,7 @@
       type: 'entity-type',
       targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       useIdColumns: true,
-      essentialOnly: true,
+      essentialOnly: false,
     },
     {
       alias: 'inst_stat',

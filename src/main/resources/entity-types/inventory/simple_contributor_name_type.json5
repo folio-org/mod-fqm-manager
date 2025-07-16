@@ -20,6 +20,15 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+      },
+      valueSourceApi: {
+        path: 'contributor-name-types',
+        labelJsonPath: '$.contributor-name-types.*.id',
+        valueJsonPath: '$.contributor-name-types.*.id',
+      }
     },
     {
       name: 'name',
@@ -27,7 +36,17 @@
       dataType: {
         dataType: 'stringType',
       },
+      idColumnName: 'id',
       queryable: true,
+      source: {
+        columnName: 'name',
+        entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+      },
+      valueSourceApi: {
+        path: 'contributor-name-types',
+        labelJsonPath: '$.contributor-name-types.*.id',
+        valueJsonPath: '$.contributor-name-types.*.name',
+      },
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\

@@ -463,29 +463,48 @@
                              ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
                         )",
             },
-            //            {
-            //              name: 'contributor_name_type_id',
-            //              property: 'contributorNameTypeId',
-            //              dataType: {
-            //                dataType: 'rangedUUIDType',
-            //              },
-            //              queryable: false,
-            //              valueGetter: "(SELECT array_agg(elems.value->>'contributorNameTypeId' ORDER BY elems.value->>'contributorNameTypeId') \
-            //                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
-            //            },
+            {
+              name: 'contributor_name_type_id',
+              property: 'contributorNameTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: false,
+              source: {
+                columnName: 'id',
+                entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+              },
+              valueGetter: "(SELECT array_agg(elems.value->>'contributorNameTypeId' ORDER BY elems.value->>'contributorNameTypeId') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'contributorNameTypeId') ORDER BY elems.value->>'contributorNameTypeId') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)'
+            },
             {
               name: 'contributor_name_type',
               property: 'contributorNameType',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              idColumnName: 'contributor_name_type_id',
+              source: {
+                columnName: 'name',
+                entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+              },
+              queryable: true,
               valueGetter: "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
                          FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
                            join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
                              ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text \
                         )",
+              filterValueGetter: "(SELECT array_agg(lower(contributor_name_type.jsonb ->> 'name') ORDER BY record.value ->> 'contributorNameTypeId') \
+                         FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
+                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
+                             ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text \
+                        )",
+              valueFunction: 'lower(:value)'
             },
             {
               name: 'primary',
@@ -493,16 +512,29 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'primary') \
                          FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'primary') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ]
             },
           ],
         },
       },
       isIdColumn: false,
       essential: true,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
                                   jsonb_build_object('contributorType', contributor_type.jsonb ->> 'name', \

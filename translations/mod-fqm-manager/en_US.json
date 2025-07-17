@@ -557,7 +557,7 @@
     "entityType.composite_po_instance.holdings_permanent_location": "Holdings permanent location",
     "entityType.composite_po_instance.bill_to": "Bill to",
     "entityType.composite_po_instance.ship_to": "Ship to",
-    "entityType.composite_po_instance.created_by_user": "Created by user",
+    "entityType.composite_po_instance.created_by_user": "PO created by",
     "entityType.composite_po_instance.organization": "Organization",
     "entityType.composite_po_instance.bill_to_name": "Bill to - name",
     "entityType.composite_po_instance.created_by_user_username": "Created by user",

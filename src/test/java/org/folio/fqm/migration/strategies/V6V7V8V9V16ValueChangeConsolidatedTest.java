@@ -79,7 +79,7 @@ class V6V7V8V9V16ValueChangeConsolidatedTest extends TestTemplate {
       new V7PatronGroupsValueChange(patronGroupsClient),
       new V8LocationValueChange(locationsClient),
       new V9LocLibraryValueChange(locationUnitsClient),
-      new V16ItemLocLibraryValueChange(locationUnitsClient)
+      new V14ItemLocLibraryValueChange(locationUnitsClient)
     );
 
     return new MigrationStrategy() {

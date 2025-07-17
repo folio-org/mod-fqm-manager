@@ -5,19 +5,19 @@ import java.util.UUID;
 import org.folio.fqm.client.LocationUnitsClient;
 
 /**
- * Version 16 -> 17, handles a change in the effective library name and code fields in the items entity type.
+ * Version 14 -> 15, handles a change in the effective library name and code fields in the items entity type.
  *
  * Originally, values for this field were stored as the library's ID, however, this was changed to use the
  * name/code itself. As such, we need to update queries to map the original IDs to their corresponding values.
  *
  * @see https://folio-org.atlassian.net/browse/MODFQMMGR-883 for adding this migration
  */
-public class V16ItemLocLibraryValueChange extends AbstractLibraryValueChangeMigration {
+public class V14ItemLocLibraryValueChange extends AbstractLibraryValueChangeMigration {
 
   private static final UUID ITEMS_ENTITY_TYPE_ID = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
   private static final List<String> FIELD_NAMES = List.of("effective_library.code", "effective_library.name");
 
-  public V16ItemLocLibraryValueChange(LocationUnitsClient locationUnitsClient) {
+  public V14ItemLocLibraryValueChange(LocationUnitsClient locationUnitsClient) {
     super(locationUnitsClient);
   }
 
@@ -33,11 +33,11 @@ public class V16ItemLocLibraryValueChange extends AbstractLibraryValueChangeMigr
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "16";
+    return "14";
   }
 
   @Override
   public String getLabel() {
-    return "V16 -> V17 item effective library name/code value transformation (MODFQMMGR-883)";
+    return "V14 -> V15 item effective library name/code value transformation (MODFQMMGR-883)";
   }
 }

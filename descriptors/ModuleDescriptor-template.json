@@ -504,6 +504,10 @@
     {
       "id": "user-summary",
       "version": "0.1"
+    },
+    {
+      "id": "feesfines",
+      "version": "19.1"
     }
   ],
   "optional": [

@@ -1,0 +1,192 @@
+{
+  id: 'cd21b75f-0e16-5ae2-98b4-7937b26e4e7b',
+  name: 'mod_feesfines__manual_block_templates',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__feesfines__manual_block_templates',
+      target: 'src__circulation__feesfines__manual_block_templates',
+    },
+  ],
+  requiredPermissions: [
+    'manual-block-templates.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manual_block_templates.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->>'code'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manual_block_templates.jsonb->>'code'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'desc',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->>'desc'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manual_block_templates.jsonb->>'desc'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'block_template_desc',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'desc'",
+    },
+    {
+      name: 'block_template_patron_message',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'patronMessage'",
+    },
+    {
+      name: 'block_template_borrowing',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'borrowing'",
+    },
+    {
+      name: 'block_template_renewals',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'renewals'",
+    },
+    {
+      name: 'block_template_requests',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'requests'",
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__feesfines__manual_block_templates.jsonb::text',
+    },
+  ],
+}

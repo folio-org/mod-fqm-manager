@@ -1,0 +1,478 @@
+{
+  id: '1b84ae2f-75f3-5533-9300-c740fb4a86f6',
+  name: 'mod_feesfines__overdue_fine_policies',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__feesfines__overdue_fine_policy',
+      target: 'src__circulation__feesfines__overdue_fine_policy',
+    },
+  ],
+  requiredPermissions: [
+    'overdue-fines-policies.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'description'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'description'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+    },
+    {
+      name: 'overdue_fine_quantity',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueFine'->>'quantity')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'overdue_fine_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'minute',
+          label: 'Minute',
+        },
+        {
+          value: 'hour',
+          label: 'Hour',
+        },
+        {
+          value: 'day',
+          label: 'Day',
+        },
+        {
+          value: 'week',
+          label: 'Week',
+        },
+        {
+          value: 'month',
+          label: 'Month',
+        },
+        {
+          value: 'year',
+          label: 'Year',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueFine'->>'intervalId'",
+    },
+    {
+      name: 'count_closed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'countClosed'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'countClosed'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'max_overdue_fine',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'maxOverdueFine')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'forgive_overdue_fine',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'forgiveOverdueFine'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'forgiveOverdueFine'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'overdue_recall_fine_quantity',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueRecallFine'->>'quantity')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'overdue_recall_fine_interval_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'minute',
+          label: 'Minute',
+        },
+        {
+          value: 'hour',
+          label: 'Hour',
+        },
+        {
+          value: 'day',
+          label: 'Day',
+        },
+        {
+          value: 'week',
+          label: 'Week',
+        },
+        {
+          value: 'month',
+          label: 'Month',
+        },
+        {
+          value: 'year',
+          label: 'Year',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueRecallFine'->>'intervalId'",
+    },
+    {
+      name: 'grace_period_recall',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'gracePeriodRecall'",
+      filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'gracePeriodRecall'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'max_overdue_recall_fine',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'maxOverdueRecallFine')::float",
+      valueFunction: '(:value)::float',
+    },
+    {
+      name: 'reminder_fees_policy_count_closed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'countClosed'",
+    },
+    {
+      name: 'reminder_fees_policy_ignore_grace_period_recall',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'ignoreGracePeriodRecall'",
+    },
+    {
+      name: 'reminder_fees_policy_ignore_grace_period_holds',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'ignoreGracePeriodHolds'",
+    },
+    {
+      name: 'reminder_fees_policy_allow_renewal_of_items_with_reminder_fees',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'allowRenewalOfItemsWithReminderFees'",
+    },
+    {
+      name: 'reminder_fees_policy_clear_patron_block_when_paid',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'clearPatronBlockWhenPaid'",
+    },
+    {
+      name: 'reminder_fees_policy_reminder_schedule',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'interval',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'interval')::integer) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: '(:value)::integer',
+              property: 'interval',
+              dataType: {
+                dataType: 'integerType',
+              },
+            },
+            {
+              name: 'time_unit_id',
+              queryable: false,
+              values: [
+                {
+                  value: 'day',
+                  label: 'Day',
+                },
+                {
+                  value: 'week',
+                  label: 'Week',
+                },
+                {
+                  value: 'minute',
+                  label: 'Minute',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'timeUnitId') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'timeUnitId')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'timeUnitId',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'reminder_fee',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'reminderFee')::float) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: '(:value)::float',
+              property: 'reminderFee',
+              dataType: {
+                dataType: 'numberType',
+              },
+            },
+            {
+              name: 'notice_format',
+              queryable: false,
+              values: [
+                {
+                  value: 'Email',
+                  label: 'Email',
+                },
+                {
+                  value: 'Print',
+                  label: 'Print',
+                },
+                {
+                  value: 'None',
+                  label: 'None',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'noticeFormat') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'noticeFormat')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'noticeFormat',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'notice_template_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'noticeTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'noticeTemplateId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'block_template_id',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'blockTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'blockTemplateId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'reminderSchedule'",
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__feesfines__overdue_fine_policy.jsonb::text',
+    },
+  ],
+}

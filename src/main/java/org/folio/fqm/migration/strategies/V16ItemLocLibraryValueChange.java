@@ -5,25 +5,25 @@ import java.util.UUID;
 import org.folio.fqm.client.LocationUnitsClient;
 
 /**
- * Version 9 -> 10, handles a change in the effective library name and code fields in the holdings entity type.
+ * Version 16 -> 17, handles a change in the effective library name and code fields in the items entity type.
  *
  * Originally, values for this field were stored as the library's ID, however, this was changed to use the
  * name/code itself. As such, we need to update queries to map the original IDs to their corresponding values.
  *
- * @see https://folio-org.atlassian.net/browse/MODFQMMGR-602 for adding this migration
+ * @see https://folio-org.atlassian.net/browse/MODFQMMGR-883 for adding this migration
  */
-public class V9LocLibraryValueChange extends AbstractLibraryValueChangeMigration {
+public class V16ItemLocLibraryValueChange extends AbstractLibraryValueChangeMigration {
 
-  private static final UUID HOLDINGS_ENTITY_TYPE_ID = UUID.fromString("8418e512-feac-4a6a-a56d-9006aab31e33");
+  private static final UUID ITEMS_ENTITY_TYPE_ID = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
   private static final List<String> FIELD_NAMES = List.of("effective_library.code", "effective_library.name");
 
-  public V9LocLibraryValueChange(LocationUnitsClient locationUnitsClient) {
+  public V16ItemLocLibraryValueChange(LocationUnitsClient locationUnitsClient) {
     super(locationUnitsClient);
   }
 
   @Override
   protected UUID getEntityTypeId() {
-    return HOLDINGS_ENTITY_TYPE_ID;
+    return ITEMS_ENTITY_TYPE_ID;
   }
 
   @Override
@@ -33,11 +33,11 @@ public class V9LocLibraryValueChange extends AbstractLibraryValueChangeMigration
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "9";
+    return "16";
   }
 
   @Override
   public String getLabel() {
-    return "V9 -> V10 holdings effective library name/code value transformation (MODFQMMGR-602)";
+    return "V16 -> V17 item effective library name/code value transformation (MODFQMMGR-883)";
   }
 }

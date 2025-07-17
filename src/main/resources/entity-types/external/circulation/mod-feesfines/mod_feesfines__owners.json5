@@ -1,0 +1,157 @@
+{
+  id: 'a49dc8b4-8316-534d-94af-c5ca7748d6e9',
+  name: 'mod_feesfines__owners',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__feesfines__owners',
+      target: 'src__circulation__feesfines__owners',
+    },
+  ],
+  requiredPermissions: [
+    'owners.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'owner',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__owners.jsonb->>'owner'",
+    },
+    {
+      name: 'desc',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__owners.jsonb->>'desc'",
+    },
+    {
+      name: 'service_point_owner',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'value',
+              queryable: false,
+              valueGetter: "(SELECT array_agg((elems.value->>'value')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'value',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'label',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'label') FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'label')) FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'label',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__owners.jsonb->>'servicePointOwner'",
+    },
+    {
+      name: 'default_charge_notice_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'defaultChargeNoticeId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'default_action_notice_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'defaultActionNoticeId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__owners.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__owners.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__owners.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__owners.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__feesfines__owners.jsonb::text',
+    },
+  ],
+}

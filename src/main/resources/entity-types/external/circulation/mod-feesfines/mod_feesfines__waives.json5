@@ -1,0 +1,112 @@
+{
+  id: '202fcf7f-ac7f-5ead-b73f-6513a47430e9',
+  name: 'mod_feesfines__waives',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__feesfines__waives',
+      target: 'src__circulation__feesfines__waives',
+    },
+  ],
+  requiredPermissions: [
+    'waives.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'name_reason',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__waives.jsonb->>'nameReason'",
+    },
+    {
+      name: 'description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__waives.jsonb->>'description'",
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__waives.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__waives.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__feesfines__waives.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__waives.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'account_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__feesfines__waives.jsonb->>'accountId')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__feesfines__waives.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__feesfines__waives.jsonb::text',
+    },
+  ],
+}

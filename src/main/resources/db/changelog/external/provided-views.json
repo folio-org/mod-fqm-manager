@@ -1,3 +1,16 @@
 [
-  "src__circulation__patron_blocks__user_summary"
+  "src__circulation__patron_blocks__user_summary",
+  "src__circulation__feesfines__feefines",
+  "src__circulation__feesfines__lost_item_fee_policy",
+  "src__circulation__feesfines__comments",
+  "src__circulation__feesfines__waives",
+  "src__circulation__feesfines__feefineactions",
+  "src__circulation__feesfines__manualblocks",
+  "src__circulation__feesfines__transfers",
+  "src__circulation__feesfines__manual_block_templates",
+  "src__circulation__feesfines__accounts",
+  "src__circulation__feesfines__overdue_fine_policy",
+  "src__circulation__feesfines__owners",
+  "src__circulation__feesfines__refunds",
+  "src__circulation__feesfines__payments"
 ]

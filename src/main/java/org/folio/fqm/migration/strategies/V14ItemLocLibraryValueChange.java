@@ -15,7 +15,7 @@ import org.folio.fqm.client.LocationUnitsClient;
 public class V14ItemLocLibraryValueChange extends AbstractLibraryValueChangeMigration {
 
   private static final UUID ITEMS_ENTITY_TYPE_ID = UUID.fromString("d0213d22-32cf-490f-9196-d81c3c66e53f");
-  private static final List<String> FIELD_NAMES = List.of("effective_library.code", "effective_library.name");
+  private static final List<String> FIELD_NAMES = List.of("loclibrary.code", "loclibrary.name");
 
   public V14ItemLocLibraryValueChange(LocationUnitsClient locationUnitsClient) {
     super(locationUnitsClient);

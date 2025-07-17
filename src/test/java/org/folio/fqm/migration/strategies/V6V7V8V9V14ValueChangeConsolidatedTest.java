@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 // tests all five together, as they're all very similar
-class V6V7V8V9V16ValueChangeConsolidatedTest extends TestTemplate {
+class V6V7V8V9V14ValueChangeConsolidatedTest extends TestTemplate {
 
   @Mock
   LocationsClient locationsClient;
@@ -152,12 +152,12 @@ class V6V7V8V9V16ValueChangeConsolidatedTest extends TestTemplate {
       ),
       Triple.of(
         "d0213d22-32cf-490f-9196-d81c3c66e53f",
-        "effective_library.name",
+        "loclibrary.name",
         () -> verify(locationUnitsClient, times(1)).getLibraries()
       ),
       Triple.of(
         "d0213d22-32cf-490f-9196-d81c3c66e53f",
-        "effective_library.code",
+        "loclibrary.code",
         () -> verify(locationUnitsClient, times(1)).getLibraries()
       ),
       Triple.of(

@@ -52,8 +52,6 @@ import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
-import static org.jooq.impl.DSL.param;
-import static org.jooq.impl.DSL.val;
 import static org.jooq.impl.DSL.trueCondition;
 
 /**
@@ -342,6 +340,13 @@ public class FqlToSqlConverterService {
 
   private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, org.jooq.Field<Object> field) {
     // perform case-insensitive regex search
+    String dataType = getFieldDataType(entityType, regexCondition);
+    if (ARRAY_TYPE.equals(dataType)) {
+      return condition("exists (select 1 from unnest({0}) where unnest ~* {1})", field, valueField(regexCondition.value(), regexCondition, entityType));
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ~* {1})", field.cast(JSONB.class), valueField(regexCondition.value(), regexCondition, entityType));
+    }
     return condition("{0} ~* {1}", field, valueField(regexCondition.value(), regexCondition, entityType));
   }
 

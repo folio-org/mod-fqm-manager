@@ -35,8 +35,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-// tests all four together, as they're all very similar
-class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
+// tests all five together, as they're all very similar
+class V6V7V8V9V14ValueChangeConsolidatedTest extends TestTemplate {
 
   @Mock
   LocationsClient locationsClient;
@@ -51,7 +51,7 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
   PatronGroupsClient patronGroupsClient;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     lenient()
       .when(locationsClient.getLocations())
       .thenReturn(new LocationsResponse(List.of(new Location("id1", "name1"), new Location("id2", "name2"))));
@@ -78,7 +78,8 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
       new V6ModeOfIssuanceValueChange(modesOfIssuanceClient),
       new V7PatronGroupsValueChange(patronGroupsClient),
       new V8LocationValueChange(locationsClient),
-      new V9LocLibraryValueChange(locationUnitsClient)
+      new V9LocLibraryValueChange(locationUnitsClient),
+      new V14ItemLocLibraryValueChange(locationUnitsClient)
     );
 
     return new MigrationStrategy() {
@@ -148,6 +149,16 @@ class V6V7V8V9ValueChangeConsolidatedTest extends TestTemplate {
         "d0213d22-32cf-490f-9196-d81c3c66e53f",
         "temporary_location.name",
         () -> verify(locationsClient, times(1)).getLocations()
+      ),
+      Triple.of(
+        "d0213d22-32cf-490f-9196-d81c3c66e53f",
+        "loclibrary.name",
+        () -> verify(locationUnitsClient, times(1)).getLibraries()
+      ),
+      Triple.of(
+        "d0213d22-32cf-490f-9196-d81c3c66e53f",
+        "loclibrary.code",
+        () -> verify(locationUnitsClient, times(1)).getLibraries()
       ),
       Triple.of(
         "8418e512-feac-4a6a-a56d-9006aab31e33",

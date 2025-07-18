@@ -11,7 +11,8 @@ import org.folio.fqm.migration.strategies.V0POCMigration;
 import org.folio.fqm.migration.strategies.V10OrganizationStatusValueChange;
 import org.folio.fqm.migration.strategies.V11OrganizationNameCodeOperatorChange;
 import org.folio.fqm.migration.strategies.V12PurchaseOrderIdFieldRemoval;
-import org.folio.fqm.migration.strategies.V13CustomFieldRename;
+import org.folio.fqm.migration.strategies.V13_5CustomFieldRename;
+import org.folio.fqm.migration.strategies.V14ItemLocLibraryValueChange;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
@@ -55,7 +56,8 @@ public class MigrationStrategyRepository {
         new V10OrganizationStatusValueChange(),
         new V11OrganizationNameCodeOperatorChange(organizationsClient),
         new V12PurchaseOrderIdFieldRemoval(),
-        new V13CustomFieldRename(executionContext, jooqContext)
+        new V13_5CustomFieldRename(executionContext, jooqContext),
+        new V14ItemLocLibraryValueChange(locationUnitsClient)
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

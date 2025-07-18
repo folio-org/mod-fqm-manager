@@ -26,7 +26,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.SUPPORTED_CUSTOM_FIE
 import static org.jooq.impl.DSL.field;
 
 /**
- * Version 13 -> 14, handles custom field renaming.
+ * Version 13 / V13.5 -> 14, handles custom field renaming.
  *
  * The custom field naming scheme was changed in MODFQMMGR-376. This migration handles updating custom field names to match the new scheme.
  *
@@ -46,12 +46,12 @@ public class V13CustomFieldRename implements MigrationStrategy {
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "13";
+    return "13.5";
   }
 
   @Override
   public String getLabel() {
-    return "V13 -> V14 Custom field renaming (MODFQMMGR-642)";
+    return "V13 / V13.5 -> V14 Custom field renaming (MODFQMMGR-642)";
   }
 
   @Override

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
+import org.folio.querytool.domain.dto.AvailableJoins;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -72,6 +73,11 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   public ResponseEntity<Void> deleteCustomEntityType(UUID entityTypeId) {
     entityTypeService.deleteCustomEntityType(entityTypeId);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<AvailableJoins> getAvailableJoins(String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField, CustomEntityType customEntityType) {
+    return ResponseEntity.ok(entityTypeService.getAvailableJoins(customEntityType, customEntityTypeField, targetEntityTypeId, targetEntityTypeField));
   }
 
   @Override

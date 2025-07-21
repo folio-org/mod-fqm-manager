@@ -299,6 +299,7 @@
     "entityType.simple_loans.return_date": "Return date",
     "entityType.simple_loans.status_name": "Status name",
     "entityType.simple_loans.system_return_date": "System return date",
+    "entityType.simple_loans.created_by": "Updated by user UUID",
     "entityType.simple_loans.user_id": "User UUID",
     "entityType.simple_loclibrary": "Library locations",
     "entityType.simple_loclibrary.campus_id": "Campus UUID",

@@ -36,7 +36,6 @@ import static org.jooq.impl.DSL.field;
 @RequiredArgsConstructor
 public class V13_5CustomFieldRename implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "13.5";
   public static final String TARGET_VERSION = "14";
 
   static final UUID USERS_ENTITY_TYPE_ID = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
@@ -54,7 +53,7 @@ public class V13_5CustomFieldRename implements MigrationStrategy {
 
   @Override
   public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+    return "13".equals(version) || "13.5".equals(version);
   }
 
   @Override

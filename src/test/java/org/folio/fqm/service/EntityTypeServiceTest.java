@@ -75,6 +75,7 @@ class EntityTypeServiceTest {
   @Spy
   private ClockService clockService;
 
+  @Spy
   @InjectMocks
   private EntityTypeService entityTypeService;
 

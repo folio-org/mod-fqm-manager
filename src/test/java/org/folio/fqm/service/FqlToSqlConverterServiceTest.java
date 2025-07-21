@@ -456,6 +456,18 @@ class FqlToSqlConverterServiceTest {
         condition("{0} ~* {1}", field("field1"), val("some_text"))
       ),
       Arguments.of(
+        "regex array string",
+        """
+          {"arrayField": {"$regex": "value1"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest ~* {1})", field("arrayField"), "value1")
+      ),
+      Arguments.of(
+        "regex jsonb array string",
+        """
+          {"jsonbArrayField": {"$regex": "value1"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ~* {1})", field("jsonbArrayField").cast(JSONB.class), "value1")
+      ),
+      Arguments.of(
         "regex",
         """
           {"fieldWithAValueFunction": {"$regex": "some_text"}}""",

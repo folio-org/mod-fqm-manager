@@ -46,6 +46,16 @@
       },
       queryable: true,
       visibleByDefault: false,
+      values: [
+        {
+          value: 'Open',
+          label: 'Open',
+        },
+        {
+          value: 'Closed',
+          label: 'Closed',
+        },
+      ],
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'status'->>'name'",
     },
     {

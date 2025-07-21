@@ -10,13 +10,13 @@ import org.folio.fqm.migration.warnings.FieldWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 
 /**
- * Version 14 -> 15, remove POL alerts and reporting codes.
+ * Version 15 -> 16, remove POL alerts and reporting codes.
  *
  * @see https://folio-org.atlassian.net/browse/MODORDERS-1269 for the addition of this migration
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V14AlertsAndReportingCodesRemoval extends AbstractSimpleMigrationStrategy {
+public class V15AlertsAndReportingCodesRemoval extends AbstractSimpleMigrationStrategy {
 
   private static final UUID PURCHASE_ORDER_LINE_ENTITY_TYPE_ID = UUID.fromString(
     "58148257-bfb0-4687-8c42-d2833d772f3e"
@@ -24,12 +24,12 @@ public class V14AlertsAndReportingCodesRemoval extends AbstractSimpleMigrationSt
 
   @Override
   public String getLabel() {
-    return "V14 -> V15 Alerts and reporting codes removal (MODORDERS-1269)";
+    return "V15 -> V16 Alerts and reporting codes removal (MODORDERS-1269)";
   }
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "14";
+    return "15";
   }
 
   @Override

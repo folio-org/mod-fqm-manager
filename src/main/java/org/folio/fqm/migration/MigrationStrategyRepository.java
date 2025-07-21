@@ -12,6 +12,7 @@ import org.folio.fqm.migration.strategies.V10OrganizationStatusValueChange;
 import org.folio.fqm.migration.strategies.V11OrganizationNameCodeOperatorChange;
 import org.folio.fqm.migration.strategies.V12PurchaseOrderIdFieldRemoval;
 import org.folio.fqm.migration.strategies.V13CustomFieldRename;
+import org.folio.fqm.migration.strategies.V14ItemLocLibraryValueChange;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
@@ -21,8 +22,8 @@ import org.folio.fqm.migration.strategies.V6ModeOfIssuanceValueChange;
 import org.folio.fqm.migration.strategies.V7PatronGroupsValueChange;
 import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
-import org.folio.fqm.migration.strategies.V14AlertsAndReportingCodesRemoval;
-import org.folio.fqm.migration.strategies.V15OrganizationSimpleToCompositeMigration;
+import org.folio.fqm.migration.strategies.V15AlertsAndReportingCodesRemoval;
+import org.folio.fqm.migration.strategies.V16OrganizationSimpleToCompositeMigration;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -58,8 +59,9 @@ public class MigrationStrategyRepository {
         new V11OrganizationNameCodeOperatorChange(organizationsClient),
         new V12PurchaseOrderIdFieldRemoval(),
         new V13CustomFieldRename(executionContext, jooqContext),
-        new V14AlertsAndReportingCodesRemoval(),
-        new V15OrganizationSimpleToCompositeMigration()
+        new V14ItemLocLibraryValueChange(locationUnitsClient),
+        new V15AlertsAndReportingCodesRemoval(),
+        new V16OrganizationSimpleToCompositeMigration()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

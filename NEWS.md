@@ -1,5 +1,10 @@
 # 4.0.x - Sunflower
 
+# 4.0.12
+- [MODFQMMGR-884] Migrate effective library fields for Items ET (Sunflower backport)
+
+[MODFQMMGR-884]: https://folio-org.atlassian.net/browse/MODFQMMGR-884
+
 # 4.0.11
 -  [MODFQMMGR-838] Check for insert statements when checking for zombie queries
 

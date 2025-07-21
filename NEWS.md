@@ -183,6 +183,11 @@
 
 # 3.0.x - Ramsons
 
+# 3.0.15
+- [MODFQMMGR-885] Migrate effective library fields for Items ET
+
+[MODFQMMGR-885]: https://folio-org.atlassian.net/browse/MODFQMMGR-885
+
 ## 3.0.14
 - [UXPROD-5315] Backport SRS entity types to Ramsons
 

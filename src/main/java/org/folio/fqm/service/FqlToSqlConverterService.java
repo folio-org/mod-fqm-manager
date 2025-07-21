@@ -290,6 +290,36 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    String dataType = getFieldDataType(entityType, notInCondition);
+    
+    if (ARRAY_TYPE.equals(dataType)) {
+      List<Condition> conditionList = notInCondition
+        .value().stream()
+        .map(val -> {
+          var valueArray = cast(array(valueField(val, notInCondition, entityType)), String[].class);
+          return not(arrayOverlap(cast(field, String[].class), valueArray));
+        })
+        .toList();
+      return field.isNull().or(and(conditionList));
+    }
+    
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      Field entityField = getField(notInCondition, entityType);
+      List<Condition> conditionList = notInCondition
+        .value().stream()
+        .map(val -> {
+          if (entityField.getValueFunction() != null) {
+            var transformedValue = valueField(val, notInCondition, entityType);
+            return DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
+          } else {
+            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            return DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
+          }
+        })
+        .toList();
+      return field.isNull().or(and(conditionList));
+    }
+    
     List<Condition> conditionList = notInCondition
       .value().stream()
       .map(val -> {

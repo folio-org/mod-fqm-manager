@@ -890,6 +890,72 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$empty": false}}""",
         field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
+      ),
+      Arguments.of(
+        "not in list array string",
+        """
+          {"arrayField": {"$nin": ["value1", "value2"]}}""",
+        field("arrayField").isNull().or(
+          and(
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value1"), String[].class))),
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value2"), String[].class)))
+          )
+        )
+      ),
+      Arguments.of(
+        "not in list array numeric",
+        """
+          {"arrayField": {"$nin": [123, 456]}}""",
+        field("arrayField").isNull().or(
+          and(
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(123), String[].class))),
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(456), String[].class)))
+          )
+        )
+      ),
+      Arguments.of(
+        "not in list array boolean",
+        """
+          {"arrayField": {"$nin": [true, false]}}""",
+        field("arrayField").isNull().or(
+          and(
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(true), String[].class))),
+            not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(false), String[].class)))
+          )
+        )
+      ),
+      Arguments.of(
+        "not in list jsonb array string",
+        """
+          {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
+        field("jsonbArrayField").isNull().or(
+          and(
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          )
+        )
+      ),
+      Arguments.of(
+        "not in list jsonb array numeric",
+        """
+          {"jsonbArrayField": {"$nin": [123, 456]}}""",
+        field("jsonbArrayField").isNull().or(
+          and(
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")),
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"456\"]"))
+          )
+        )
+      ),
+      Arguments.of(
+        "not in list jsonb array boolean",
+        """
+          {"jsonbArrayField": {"$nin": [true, false]}}""",
+        field("jsonbArrayField").isNull().or(
+          and(
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"true\"]")),
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+          )
+        )
       )
     );
   }

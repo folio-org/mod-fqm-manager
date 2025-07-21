@@ -1,7 +1,7 @@
 {
   id: '8e8b251d-4220-54c0-8396-76cd6cd83a95',
   name: 'mod_feesfines__lost_item_fee_policy',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

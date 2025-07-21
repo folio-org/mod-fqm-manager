@@ -1,7 +1,7 @@
 {
   id: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc',
   name: 'mod_feesfines__accounts',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -46,6 +46,16 @@
       },
       queryable: true,
       visibleByDefault: false,
+      values: [
+        {
+          value: 'Open',
+          label: 'Open',
+        },
+        {
+          value: 'Closed',
+          label: 'Closed',
+        },
+      ],
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'status'->>'name'",
     },
     {

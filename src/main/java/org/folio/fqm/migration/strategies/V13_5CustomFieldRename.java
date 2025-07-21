@@ -26,7 +26,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.SUPPORTED_CUSTOM_FIE
 import static org.jooq.impl.DSL.field;
 
 /**
- * Version 13 -> 14, handles custom field renaming.
+ * Version 13.5 -> 14, handles custom field renaming.
  *
  * The custom field naming scheme was changed in MODFQMMGR-376. This migration handles updating custom field names to match the new scheme.
  *
@@ -34,9 +34,8 @@ import static org.jooq.impl.DSL.field;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V13CustomFieldRename implements MigrationStrategy {
+public class V13_5CustomFieldRename implements MigrationStrategy {
 
-  public static final String SOURCE_VERSION = "13";
   public static final String TARGET_VERSION = "14";
 
   static final UUID USERS_ENTITY_TYPE_ID = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
@@ -49,12 +48,12 @@ public class V13CustomFieldRename implements MigrationStrategy {
 
   @Override
   public String getLabel() {
-    return "V13 -> V14 Custom field renaming (MODFQMMGR-642)";
+    return "V13.5 -> V14 Custom field renaming (MODFQMMGR-642)";
   }
 
   @Override
   public boolean applies(String version) {
-    return SOURCE_VERSION.equals(version);
+    return "13".equals(version) || "13.5".equals(version);
   }
 
   @Override

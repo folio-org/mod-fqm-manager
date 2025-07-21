@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.fqm.migration.strategies.V13CustomFieldRename.CUSTOM_FIELD_SOURCE_VIEW;
+import static org.folio.fqm.migration.strategies.V13_5CustomFieldRename.CUSTOM_FIELD_SOURCE_VIEW;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_NAME;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_TYPE;
 import static org.folio.fqm.repository.EntityTypeRepository.SUPPORTED_CUSTOM_FIELD_TYPES;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class V13CustomFieldRenameTest extends TestTemplate {
+class V135CustomFieldRenameTest extends TestTemplate {
 
   private static final String CUSTOM_FIELD_ID_1 = "97ebe38d-4733-4631-b264-5d29f4f50b07";
   private static final String CUSTOM_FIELD_ID_2 = "48e035c3-d2fe-4575-b387-e7fdc07dde58";
@@ -77,7 +77,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
 
   @Override
   public MigrationStrategy getStrategy() {
-    return new V13CustomFieldRename(executionContext, jooqContext);
+    return new V13_5CustomFieldRename(executionContext, jooqContext);
   }
 
   @Override

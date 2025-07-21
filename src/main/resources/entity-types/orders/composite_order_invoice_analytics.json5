@@ -104,7 +104,7 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'po.created_by_user_id',
+      sourceField: 'po.created_by',
       essentialOnly: true,
       order: 110
     },
@@ -113,7 +113,7 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'po.updated_by_user_id',
+      sourceField: 'po.updated_by',
       essentialOnly: true,
       order: 115
     },
@@ -122,7 +122,7 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'pol.created_by_user_id',
+      sourceField: 'pol.created_by',
       essentialOnly: true,
       order: 120
     },
@@ -131,7 +131,7 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'pol.updated_by_user_id',
+      sourceField: 'pol.updated_by',
       essentialOnly: true,
       order: 125
     }

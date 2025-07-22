@@ -262,7 +262,6 @@ public class EntityTypeService {
       entityType,
       fql,
       List.of(ID_FIELD_NAME, fieldName),
-      null,
       COLUMN_VALUE_DEFAULT_PAGE_SIZE
     );
     List<ValueWithLabel> valueWithLabels = results

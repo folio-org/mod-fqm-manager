@@ -260,7 +260,7 @@ class EntityTypeServiceTest {
         )
       );
 
-    when(queryProcessorService.processQuery(any(), any(), any(), any(), any()))
+    when(queryProcessorService.processQuery(any(), any(), any(), any()))
       .thenReturn(
         List.of(
           Map.of("id", "value_01", valueColumnName, "label_01"),
@@ -284,7 +284,7 @@ class EntityTypeServiceTest {
         .source(new SourceColumn(entityTypeId, valueColumnName)
           .type(SourceColumn.TypeEnum.ENTITY_TYPE))));
 
-    when(queryProcessorService.processQuery(any(EntityType.class), any(), any(), any(), any()))
+    when(queryProcessorService.processQuery(any(EntityType.class), any(), any(), any()))
       .thenReturn(
         List.of(
           Map.of(valueColumnName, "value_01"),
@@ -318,7 +318,7 @@ class EntityTypeServiceTest {
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"" + searchText + "\"}}";
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, searchText);
-    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
+    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, 1000);
   }
 
   @Test
@@ -335,7 +335,7 @@ class EntityTypeServiceTest {
     String expectedFql = "{\"" + valueColumnName + "\": {\"$regex\": " + "\"\"}}";
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     entityTypeService.getFieldValues(entityTypeId, valueColumnName, null);
-    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, null, 1000);
+    verify(queryProcessorService).processQuery(entityType, expectedFql, fields, 1000);
   }
 
   @Test

@@ -34,7 +34,6 @@ public class QueryProcessorService {
   private final CrossTenantQueryService crossTenantQueryService;
   private final QueryRepository queryRepository;
 
-
   /**
    * Process the FQL query and return the result IDs in batches.
    *
@@ -78,13 +77,10 @@ public class QueryProcessorService {
    * @param entityType Entity type
    * @param fqlQuery   FQL query
    * @param fields     fields to return in query results
-   * @param afterId    A cursor used for pagination. 'afterId' is the ID representing your place in the paginated list.
-   *                   This parameter should be omitted in the first call. All subsequent pagination call should
-   *                   include 'afterId'
    * @param limit      Count of records to be returned.
    * @return Results matching the query
    */
-  public List<Map<String, Object>> processQuery(EntityType entityType, String fqlQuery, List<String> fields, List<String> afterId, Integer limit) {
+  public List<Map<String, Object>> processQuery(EntityType entityType, String fqlQuery, List<String> fields, Integer limit) {
     Fql fql = fqlService.getFql(fqlQuery);
     boolean ecsEnabled = crossTenantQueryService.ecsEnabled();
     List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
@@ -92,7 +88,6 @@ public class QueryProcessorService {
       UUID.fromString(entityType.getId()),
       fql,
       fields,
-      afterId,
       limit,
       tenantsToQuery,
       ecsEnabled

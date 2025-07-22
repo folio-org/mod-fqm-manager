@@ -42,7 +42,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -274,8 +273,8 @@ class QueryManagementServiceTest {
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId,true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), isNull(), eq(defaultLimit))).thenReturn(expectedContent);
-    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), eq(defaultLimit))).thenReturn(expectedContent);
+    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, defaultLimit);
     assertEquals(expectedResults, actualResults);
   }
 
@@ -302,9 +301,9 @@ class QueryManagementServiceTest {
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("field1", "field2", "id")), isNull(), eq(defaultLimit)))
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("field1", "field2", "id")), eq(defaultLimit)))
       .thenReturn(expectedContent);
-    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
+    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, defaultLimit);
     assertEquals(expectedResults, actualResults);
   }
 
@@ -366,13 +365,13 @@ class QueryManagementServiceTest {
 
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), isNull(), eq(defaultLimit)))
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), eq(defaultLimit)))
       .thenReturn(List.of());
 
     // Reset the mock to clear the lenient stubbing from setup
     reset(migrationService);
 
-    queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, null, defaultLimit);
+    queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fields, defaultLimit);
 
     // Verify that verifyQueryIsUpToDate was called with the correct parameters
     ArgumentCaptor<MigratableQueryInformation> captor = ArgumentCaptor.forClass(MigratableQueryInformation.class);
@@ -405,9 +404,9 @@ class QueryManagementServiceTest {
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
-    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("id")), isNull(), eq(defaultLimit)))
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("id")), eq(defaultLimit)))
       .thenReturn(expectedContent);
-    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, null, null, defaultLimit);
+    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, null, defaultLimit);
     assertEquals(expectedResults, actualResults);
   }
 

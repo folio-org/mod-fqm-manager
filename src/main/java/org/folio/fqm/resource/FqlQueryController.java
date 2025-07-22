@@ -73,7 +73,7 @@ public class FqlQueryController implements FqlQueryApi {
   @Override
   public ResponseEntity<ResultsetPage> runFqlQuery(String query, UUID entityTypeId, List<String> fields,
                                                    List<String> afterId, Integer limit) {
-    return ResponseEntity.ok(queryManagementService.runFqlQuery(query, entityTypeId, fields, afterId, limit));
+    return ResponseEntity.ok(queryManagementService.runFqlQuery(query, entityTypeId, fields, limit));
   }
   @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override

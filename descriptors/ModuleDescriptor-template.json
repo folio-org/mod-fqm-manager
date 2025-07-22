@@ -211,7 +211,7 @@
       "visible":  true
     },
     {
-      "permissionName": ["fqm.entityTypes.custom.available-joins.collection.post"],
+      "permissionName": "fqm.entityTypes.custom.available-joins.collection.post",
       "displayName": "FQM - Retrieve available joins",
       "description": "Retrieve available joins for a custom entity type",
       "visible":  true

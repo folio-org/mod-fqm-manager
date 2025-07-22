@@ -67,6 +67,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/entity-types/custom/{entity-type-id}",
           "permissionsRequired": ["fqm.entityTypes.custom.item.delete"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/entity-types/custom/available-joins",
+          "permissionsRequired": ["fqm.entityTypes.custom.available-joins.collection.post"]
         }
       ]
     },

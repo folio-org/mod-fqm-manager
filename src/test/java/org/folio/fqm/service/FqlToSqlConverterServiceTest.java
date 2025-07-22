@@ -538,6 +538,51 @@ class FqlToSqlConverterServiceTest {
           .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
       Arguments.of(
+        "in list array string",
+        """
+          {"arrayField": {"$in": ["value1", "value2"]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value1", "value2"), String[].class))
+      ),
+      Arguments.of(
+        "in list array numeric",
+        """
+          {"arrayField": {"$in": [123, 456]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(123, 456), String[].class))
+      ),
+      Arguments.of(
+        "in list array boolean",
+        """
+          {"arrayField": {"$in": [true, false]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(true, false), String[].class))
+      ),
+      Arguments.of(
+        "in list jsonb array string",
+        """
+          {"jsonbArrayField": {"$in": ["value1", "value2"]}}""",
+        or(
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+        )
+      ),
+      Arguments.of(
+        "in list jsonb array numeric",
+        """
+          {"jsonbArrayField": {"$in": [123, 456]}}""",
+        or(
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"456\"]"))
+        )
+      ),
+      Arguments.of(
+        "in list jsonb array boolean",
+        """
+          {"jsonbArrayField": {"$in": [true, false]}}""",
+        or(
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"true\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+        )
+      ),
+      Arguments.of(
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",

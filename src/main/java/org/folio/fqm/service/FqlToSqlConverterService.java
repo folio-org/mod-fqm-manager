@@ -271,6 +271,34 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    String dataType = getFieldDataType(entityType, inCondition);
+    
+    if (ARRAY_TYPE.equals(dataType)) {
+      var valueList = inCondition
+        .value().stream()
+        .map(val -> valueField(val, inCondition, entityType))
+        .toArray(org.jooq.Field[]::new);
+      var valueArray = cast(array(valueList), String[].class);
+      return arrayOverlap(cast(field, String[].class), valueArray);
+    }
+    
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      Field entityField = getField(inCondition, entityType);
+      List<Condition> conditionList = inCondition
+        .value().stream()
+        .map(val -> {
+          if (entityField.getValueFunction() != null) {
+            var transformedValue = valueField(val, inCondition, entityType);
+            return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
+          } else {
+            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
+          }
+        })
+        .toList();
+      return or(conditionList);
+    }
+    
     List<Condition> conditionList = inCondition.value().stream()
       .map(val -> {
         String filterFieldDataType = getFieldForFiltering(inCondition, entityType).getDataType().getDataType();

@@ -211,6 +211,12 @@
       "visible":  true
     },
     {
+      "permissionName": ["fqm.entityTypes.custom.available-joins.collection.post"],
+      "displayName": "FQM - Retrieve available joins",
+      "description": "Retrieve available joins for a custom entity type",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.entityTypes.custom.item.delete",
       "displayName": "FQM - Delete custom entity type",
       "description": "Delete a custom entity type definition",

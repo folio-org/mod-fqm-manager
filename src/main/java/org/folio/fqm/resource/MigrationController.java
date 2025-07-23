@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class MigrationController implements FqmVersionApi {
+public class MigrationController implements org.folio.fqm.resource.FqmVersionApi {
   private final MigrationService migrationService;
 
   private final TranslationService translationService;

@@ -10,7 +10,7 @@
       targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
       useIdColumns: true,
       essentialOnly: true,
-      order: 10
+      order: 10,
     },
     {
       alias: 'effective_location',
@@ -19,7 +19,7 @@
       targetField: 'id',
       sourceField: 'items.effective_location_id',
       essentialOnly: true,
-      order: 80
+      order: 80,
     },
     {
       alias: 'effective_call_number',
@@ -28,7 +28,7 @@
       targetField: 'id',
       sourceField: 'items.effective_call_number_components_type_id',
       essentialOnly: true,
-      order: 30
+      order: 30,
     },
     {
       alias: 'item_level_call_number',
@@ -37,7 +37,7 @@
       targetField: 'id',
       sourceField: 'items.item_level_call_number_type_id',
       essentialOnly: true,
-      order: 20
+      order: 20,
     },
     {
       alias: 'loclibrary',
@@ -46,7 +46,7 @@
       targetField: 'id',
       sourceField: 'effective_location.library_id',
       essentialOnly: true,
-      order: 70
+      order: 70,
     },
     {
       alias: 'permanent_location',
@@ -55,7 +55,7 @@
       targetField: 'id',
       sourceField: 'items.permanent_location_id',
       essentialOnly: true,
-      order: 90
+      order: 90,
     },
     {
       alias: 'mtypes',
@@ -64,7 +64,7 @@
       targetField: 'id',
       sourceField: 'items.material_type_id',
       essentialOnly: true,
-      order: 40
+      order: 40,
     },
     {
       alias: 'temporary_location',
@@ -73,7 +73,7 @@
       targetField: 'id',
       sourceField: 'items.temporary_location_id',
       essentialOnly: true,
-      order: 100
+      order: 100,
     },
     {
       alias: 'holdings',
@@ -82,7 +82,7 @@
       targetField: 'id',
       sourceField: 'items.holdings_record_id',
       essentialOnly: true,
-      order: 60
+      order: 60,
     },
     {
       alias: 'instances',
@@ -91,7 +91,16 @@
       targetField: 'id',
       sourceField: 'holdings.instance_id',
       essentialOnly: true,
-      order: 50
+      order: 50,
+    },
+    {
+      alias: 'instance_status',
+      type: 'entity-type',
+      targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
+      targetField: 'id',
+      sourceField: 'instance.status_id',
+      order: 55,
+      essentialOnly: true,
     },
     {
       alias: 'permanent_loan_type',
@@ -100,7 +109,7 @@
       targetField: 'id',
       sourceField: 'items.permanent_loan_type_id',
       essentialOnly: true,
-      order: 110
+      order: 110,
     },
     {
       alias: 'temporary_loan_type',
@@ -109,7 +118,7 @@
       targetField: 'id',
       sourceField: 'items.temporary_loan_type_id',
       essentialOnly: true,
-      order: 120
+      order: 120,
     },
     {
       alias: 'created_by_user',
@@ -118,7 +127,7 @@
       targetField: 'id',
       sourceField: 'items.created_by_user_id',
       essentialOnly: true,
-      order: 130
+      order: 130,
     },
     {
       alias: 'updated_by_user',
@@ -127,8 +136,8 @@
       targetField: 'id',
       sourceField: 'items.updated_by_user_id',
       essentialOnly: true,
-      order: 140
-    }
+      order: 140,
+    },
   ],
   defaultSort: [
     {

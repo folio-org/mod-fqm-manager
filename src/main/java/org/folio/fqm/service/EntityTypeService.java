@@ -24,7 +24,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
-import org.folio.querytool.domain.dto.AvailableJoins;
+import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -492,10 +492,10 @@ public class EntityTypeService {
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a));
   }
 
-  public AvailableJoins getAvailableJoins(CustomEntityType customEntityType, String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField) {
+  public AvailableJoinsResponse getAvailableJoins(CustomEntityType customEntityType, String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField) {
     // See https://folio-org.atlassian.net/browse/MODFQMMGR-608 for details on what this should return
     // TL;DR - It returns the possible options for the properties that aren't provided in the request (the method parameters)
-    var builder = AvailableJoins.builder();
+    var builder = AvailableJoinsResponse.builder();
 
     // Special case where all parameters are provided. The user already has everything they need to build a join, so return an empty AvailableJoins object
     if (customEntityType != null && customEntityTypeField != null && targetEntityTypeId != null && targetEntityTypeField != null) {
@@ -506,7 +506,7 @@ public class EntityTypeService {
     Map<UUID, EntityType> accessibleEntityTypesById = getAccessibleEntityTypesById();
 
     if (targetEntityTypeId == null || flattenedCustomEntityType == null) {
-      builder.targetEntityTypes(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById));
+      builder.availableTargetIds(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById));
       // Special case where the custom ET isn't provided: Only provide the target entity types
       if (flattenedCustomEntityType == null) {
         return builder.build();
@@ -514,12 +514,12 @@ public class EntityTypeService {
     }
 
     if (customEntityTypeField == null) {
-      builder.customEntityTypeFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, accessibleEntityTypesById));
+      builder.availableSourceFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, accessibleEntityTypesById));
     }
 
     // Only provide target ET fields when the target ET has been provided
     if (targetEntityTypeField == null && targetEntityTypeId != null) {
-      builder.availableTargetEntityTypeFields(discoverTargetEntityTypeFields(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById.get(targetEntityTypeId)));
+      builder.availableTargetFields(discoverTargetEntityTypeFields(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById.get(targetEntityTypeId)));
     }
 
     return builder.build();

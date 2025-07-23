@@ -773,7 +773,7 @@
       queryable: true,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ":inst.jsonb->'date'->>'dateTypeId'",
+      valueGetter: ":inst.jsonb->'dates'->>'dateTypeId'",
       joinsTo: [
         {
           targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type

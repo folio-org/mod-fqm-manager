@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
-import org.folio.querytool.domain.dto.AvailableJoins;
+import org.folio.fqm.domain.dto.EntityTypeSummaries;
+import org.folio.querytool.domain.dto.AvailableJoinsRequest;
+import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.fqm.domain.dto.EntityTypeSummaries;
 import org.folio.querytool.rest.resource.EntityTypesApi;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.http.ResponseEntity;
@@ -75,9 +76,18 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     return ResponseEntity.noContent().build();
   }
 
+
   @Override
-  public ResponseEntity<AvailableJoins> getAvailableJoins(String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField, CustomEntityType customEntityType) {
-    return ResponseEntity.ok(entityTypeService.getAvailableJoins(customEntityType, customEntityTypeField, targetEntityTypeId, targetEntityTypeField));
+  public ResponseEntity<AvailableJoinsResponse> getAvailableJoins(AvailableJoinsRequest availableJoinsRequest) {
+    if (availableJoinsRequest == null) {
+      return ResponseEntity.ok(entityTypeService.getAvailableJoins(null, null, null, null));
+    }
+    return ResponseEntity.ok(entityTypeService.getAvailableJoins(
+      availableJoinsRequest.getCustomEntityType(),
+      availableJoinsRequest.getSourceField(),
+      availableJoinsRequest.getTargetId(),
+      availableJoinsRequest.getTargetField()
+    ));
   }
 
   @Override

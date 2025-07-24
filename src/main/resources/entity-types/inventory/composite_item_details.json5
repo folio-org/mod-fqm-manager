@@ -98,7 +98,7 @@
       type: 'entity-type',
       targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa', // simple_instance_status
       targetField: 'id',
-      sourceField: 'instance.status_id',
+      sourceField: 'instances.status_id',
       order: 55,
       essentialOnly: true,
     },

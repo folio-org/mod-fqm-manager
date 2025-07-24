@@ -145,7 +145,7 @@ class FqlQueryControllerTest {
     String fields = "field1,field2";
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fieldsList, null,  defaultLimit)).thenReturn(expectedResults);
+    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fieldsList, defaultLimit)).thenReturn(expectedResults);
     RequestBuilder builder = get("/query").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .queryParam("query", fqlQuery)
@@ -170,7 +170,7 @@ class FqlQueryControllerTest {
     );
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, null, null, defaultLimit)).thenReturn(expectedResults);
+    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, null, defaultLimit)).thenReturn(expectedResults);
     RequestBuilder builder = get("/query").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .queryParam("query", fqlQuery)
@@ -184,7 +184,6 @@ class FqlQueryControllerTest {
   void shouldRunSynchronousQueryWithOptionalParametersAndReturnResults() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
     UUID afterUUID = UUID.randomUUID();
-    List<String> afterId = List.of(afterUUID.toString());
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
@@ -198,7 +197,7 @@ class FqlQueryControllerTest {
     String fields = "id,field1,field2";
     ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fieldsList, afterId, limit)).thenReturn(expectedResults);
+    when(queryManagementService.runFqlQuery(fqlQuery, entityTypeId, fieldsList, limit)).thenReturn(expectedResults);
     RequestBuilder builder = get("/query").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
       .queryParam("query", fqlQuery)
@@ -238,7 +237,7 @@ class FqlQueryControllerTest {
     UUID entityTypeId = UUID.randomUUID();
 
     doThrow(new InvalidFqlException(fqlQuery, Map.of("field1", "Field not present")))
-      .when(queryManagementService).runFqlQuery(fqlQuery, entityTypeId, null, null, 100);
+      .when(queryManagementService).runFqlQuery(fqlQuery, entityTypeId, null, 100);
 
     RequestBuilder builder = get("/query").contentType(MediaType.APPLICATION_JSON)
       .header(XOkapiHeaders.TENANT, TENANT_ID)
@@ -423,5 +422,4 @@ class FqlQueryControllerTest {
     mockMvc.perform(builder)
       .andExpect(status().isBadRequest());
   }
-
 }

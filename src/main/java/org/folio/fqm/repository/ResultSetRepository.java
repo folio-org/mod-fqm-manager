@@ -108,7 +108,6 @@ public class ResultSetRepository {
   public List<Map<String, Object>> getResultSetSync(UUID entityTypeId,
                                                     Fql fql,
                                                     List<String> fields,
-                                                    List<String> afterId,
                                                     int limit,
                                                     List<String> tenantsToQuery,
                                                     boolean ecsEnabled) {
@@ -118,28 +117,15 @@ public class ResultSetRepository {
     }
 
     EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
-    Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(baseEntityType);
-    var sortCriteria = EntityTypeUtils.getSortFields(baseEntityType, true);
-    Condition afterIdCondition;
+    List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
+    List<Select<Record>> partialQueries = new ArrayList<>();
 
-    // TODO: this doesn't exactly work when tenant_id is used as an id column, look into this
-    if (afterId != null) {
-      String[] afterIdArray = afterId.toArray(new String[0]);
-      afterIdCondition = field(idValueGetter).greaterThan(afterIdArray);
-    } else {
-      afterIdCondition = DSL.noCondition();
-    }
-
-    SelectConditionStep<Record> query = null;
-    SelectLimitPercentStep<Record> fullQuery = null;
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       // Below is a very hackish way to get around valueGetter issues in FqlToSqlConverterServiceIT
       // (due to the fact the that integration test does not select from an actual table, and instead creates a subquery
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
-      log.debug("idColumnValueGetters: {}", idColumnValueGetters);
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
 
       if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
@@ -161,27 +147,32 @@ public class ResultSetRepository {
       EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
       String currentFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
 
-      if (i == 0) {
-        query = jooqContext.select(currentFieldsToSelect)
-          .from(currentFromClause)
-          .where(currentCondition)
-          .and(afterIdCondition);
-      } else {
-        var partialQuery = jooqContext.select(currentFieldsToSelect)
-          .from(currentFromClause)
-          .where(currentCondition)
-          .and(afterIdCondition);
-        query = (SelectConditionStep<Record>) query.unionAll(partialQuery);
-      }
+      Select<Record> partialQuery = jooqContext.select(currentFieldsToSelect)
+        .from(currentFromClause)
+        .where(currentCondition);
+      partialQueries.add(partialQuery);
     }
 
-    fullQuery = query
+    if (partialQueries.isEmpty()) {
+      return List.of();
+    }
+
+    String unionFormatter = "\"unioned\".\"%s\"";
+    List<Field<Object>> sortCriteria = idColumnNames.stream()
+      .map(f -> DSL.field(String.format(unionFormatter, f)))
+      .toList();
+
+    Select<Record> unionQuery = partialQueries.stream()
+      .reduce(Select::unionAll)
+      .orElseThrow();
+    Table<?> unionTable = unionQuery.asTable("unioned");
+    var limitedQuery = jooqContext.selectFrom(unionTable)
       .orderBy(sortCriteria)
       .limit(limit);
 
     Result<Record> result;
     if (isEmpty(baseEntityType.getGroupByFields())) {
-      result = fullQuery.fetch();
+      result = (Result<Record>) limitedQuery.fetch();
     } else {
       throw new IllegalArgumentException("Synchronous queries are not currently supported for entity types with GROUP BY clauses.");
     }

@@ -134,13 +134,11 @@ public class QueryManagementService {
    * @param query        Query to execute
    * @param entityTypeId ID of the entity type corresponding to the query
    * @param fields       List of fields to return for each element in the result set
-   * @param afterId      ID of the element to begin retrieving results after (e.g. if the id of 100th element
-   *                     is provided, the first element retrieved in the result set will be the 101st element)
    * @param limit        Maximum number of results to retrieves
    * @return Page containing the results of the query
    */
   public ResultsetPage runFqlQuery(String query, UUID entityTypeId, List<String> fields,
-                                   List<String> afterId, Integer limit) {
+                                   Integer limit) {
     validateQuery(entityTypeId, query);
     if (CollectionUtils.isEmpty(fields)) {
       fields = new ArrayList<>();
@@ -157,7 +155,7 @@ public class QueryManagementService {
     MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(entityTypeId, query, fields);
     migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
 
-    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, afterId, limit);
+    List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, limit);
     return new ResultsetPage().content(queryResults);
   }
 

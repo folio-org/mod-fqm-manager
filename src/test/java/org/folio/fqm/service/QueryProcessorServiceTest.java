@@ -77,7 +77,6 @@ class QueryProcessorServiceTest {
       {"field1": {"eq": "value1" }}
       """;
     List<String> tenantIds = List.of("tenant_01");
-    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
     Fql expectedFql = new Fql("", new EqualsCondition(new FqlField("status"), "value1"));
     List<String> fields = List.of("field1", "field2");
@@ -87,8 +86,8 @@ class QueryProcessorServiceTest {
     );
     when(fqlService.getFql(fqlQuery)).thenReturn(expectedFql);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantIds);
-    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, afterId, limit, tenantIds, false)).thenReturn(expectedContent);
-    List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, afterId, limit);
+    when(resultSetRepository.getResultSetSync(entityTypeId, expectedFql, fields, limit, tenantIds, false)).thenReturn(expectedContent);
+    List<Map<String, Object>> actualContent = service.processQuery(entityType, fqlQuery, fields, limit);
     assertEquals(expectedContent, actualContent);
   }
 

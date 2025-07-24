@@ -124,7 +124,6 @@ class ResultSetRepositoryTest {
   @Test
   void shouldRunSynchronousQueryAndReturnContents() {
     UUID entityTypeId = UUID.randomUUID();
-    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of("id", "key1");
@@ -148,7 +147,7 @@ class ResultSetRepositoryTest {
       fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
         .thenReturn("TEST_ENTITY_TYPE");
 
-      List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, List.of("tenant_01"), false);
+      List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, limit, List.of("tenant_01"), false);
 
       assertEquals(expectedList, actualList);
     }
@@ -157,47 +156,22 @@ class ResultSetRepositoryTest {
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithEmptyFields() {
     UUID entityTypeId = UUID.randomUUID();
-    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<String> fields = List.of();
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, afterId, limit, null, false);
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, limit, null, false);
     assertEquals(expectedList, actualList);
   }
 
   @Test
   void shouldReturnEmptyResultSetForSynchronousQueryWithNullFields() {
     UUID entityTypeId = UUID.randomUUID();
-    List<String> afterId = List.of(UUID.randomUUID().toString());
     int limit = 100;
     Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
     List<Map<String, Object>> expectedList = List.of();
-    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, null, afterId, limit, null, false);
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, null, limit, null, false);
     assertEquals(expectedList, actualList);
-  }
-
-  @Test
-  void shouldRunSynchronousQueryAndHandleNullAfterIdParameter() {
-    UUID entityTypeId = UUID.randomUUID();
-    int limit = 100;
-    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
-    List<String> fields = List.of("id", "key1", "key2");
-    List<String> tenantIds = List.of("tenant_01");
-    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
-      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq("tenant_01"), anyBoolean()))
-      .thenReturn(ResultSetRepositoryTestDataProvider.ENTITY_TYPE);
-    try (MockedStatic<FromClauseUtils> fromClauseUtils = mockStatic(FromClauseUtils.class)) {
-      fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, null))
-        .thenReturn("TEST_ENTITY_TYPE");
-      fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
-        .thenReturn("TEST_ENTITY_TYPE");
-
-      List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, false);
-
-      assertEquals(ResultSetRepositoryTestDataProvider.TEST_ENTITY_CONTENTS, actualList);
-    }
   }
 
   @Test
@@ -216,7 +190,7 @@ class ResultSetRepositoryTest {
         .thenReturn("TEST_GROUP_BY_ENTITY_TYPE");
       fromClauseUtils.when(() -> getFromClause(TEST_GROUP_BY_ENTITY_TYPE_DEFINITION, "tenant_01"))
         .thenReturn("TEST_GROUP_BY_ENTITY_TYPE");
-      assertThrows(IllegalArgumentException.class, () -> repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, false));
+      assertThrows(IllegalArgumentException.class, () -> repo.getResultSetSync(entityTypeId, fql, fields, limit, tenantIds, false));
     }
   }
 
@@ -236,7 +210,7 @@ class ResultSetRepositoryTest {
       fromClauseUtils.when(() -> getFromClause(eq(ENTITY_TYPE), any(String.class)))
         .thenReturn("TEST_ENTITY_TYPE");
 
-      List<Map<String, Object>> actualResults = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, tenantIds, true);
+      List<Map<String, Object>> actualResults = repo.getResultSetSync(entityTypeId, fql, fields, limit, tenantIds, true);
       assertEquals(expectedResults, actualResults);
     }
   }
@@ -266,7 +240,7 @@ class ResultSetRepositoryTest {
         .thenReturn("TEST_ENTITY_TYPE");
       fromClauseUtils.when(() -> getFromClause(ResultSetRepositoryTestDataProvider.ENTITY_TYPE, "tenant_01"))
         .thenReturn("TEST_ENTITY_TYPE");
-      List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, null, limit, List.of("tenant_01"), true);
+      List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, limit, List.of("tenant_01"), true);
       assertEquals(expectedList, actualList);
     }
   }
@@ -325,5 +299,23 @@ class ResultSetRepositoryTest {
         .thenReturn("TEST_GROUP_BY_ENTITY_TYPE");
       assertDoesNotThrow(() -> repo.getResultSet(entityTypeId, fields, listIds, tenantIds));
     }
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenPartialQueriesIsEmpty() {
+    UUID entityTypeId = UUID.randomUUID();
+    int limit = 100;
+    Fql fql = new Fql("", new EqualsCondition(new FqlField("key1"), "value1"));
+    List<String> fields = List.of("id", "key1");
+    List<String> emptyTenantIds = List.of();
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), eq(null), anyBoolean()))
+      .thenReturn(ENTITY_TYPE);
+    when(entityTypeFlatteningService.getFlattenedEntityType(eq(entityTypeId), any(String.class), anyBoolean()))
+      .thenReturn(ENTITY_TYPE);
+
+    List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, limit, emptyTenantIds, false);
+
+    assertEquals(List.of(), actualList);
   }
 }

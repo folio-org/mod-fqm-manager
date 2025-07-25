@@ -12,7 +12,7 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
 
   public InvalidEntityTypeDefinitionException(String message, UUID entityTypeId) {
     super(message);
-    this.entityTypeId = entityTypeId.toString();
+    this.entityTypeId = entityTypeId != null ? entityTypeId.toString() : null;
   }
 
   public InvalidEntityTypeDefinitionException(String message, EntityType entityType) {
@@ -23,11 +23,6 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
   public InvalidEntityTypeDefinitionException(String message, EntityType entityType, Throwable cause) {
     super(message, cause);
     this.entityTypeId = entityType.getId();
-  }
-
-  @Override
-  public HttpStatus getHttpStatus() {
-    return HttpStatus.INTERNAL_SERVER_ERROR;
   }
 
   @Override

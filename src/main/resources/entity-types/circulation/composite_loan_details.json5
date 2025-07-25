@@ -1,6 +1,7 @@
 {
   id: 'd6729885-f2fb-4dc7-b7d0-a865a7f461e4',
   name: 'composite_loan_details',
+  private: false,
   sources: [
     {
       alias: 'loans',

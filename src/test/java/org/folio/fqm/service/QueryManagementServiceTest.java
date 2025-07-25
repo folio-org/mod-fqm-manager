@@ -270,7 +270,7 @@ class QueryManagementServiceTest {
       Map.of("id", resultIds.get(1).toString(), "field1", "value3", "field2", "value4")
     );
     List<String> fields = List.of("id", "field1", "field2");
-    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
+    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent).totalRecords(expectedContent.size());
     when(entityTypeService.getEntityTypeDefinition(entityTypeId,true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(fields), eq(defaultLimit))).thenReturn(expectedContent);
@@ -298,7 +298,7 @@ class QueryManagementServiceTest {
       Map.of("id", resultIds.get(1).toString(), "field1", "value3", "field2", "value4")
     );
     List<String> fields = new ArrayList<>(List.of("field1", "field2"));
-    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
+    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent).totalRecords(expectedContent.size());
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("field1", "field2", "id")), eq(defaultLimit)))
@@ -401,7 +401,7 @@ class QueryManagementServiceTest {
       Map.of("id", resultIds.get(0).toString()),
       Map.of("id", resultIds.get(1).toString())
     );
-    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent);
+    ResultsetPage expectedResults = new ResultsetPage().content(expectedContent).totalRecords(expectedContent.size());
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
     when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(List.of("id")), eq(defaultLimit)))

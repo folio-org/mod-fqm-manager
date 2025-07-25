@@ -156,7 +156,10 @@ public class QueryManagementService {
     migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
 
     List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, limit);
-    return new ResultsetPage().content(queryResults);
+    // NOTE: unlike the async query, which returns the total number of records matching the query, the synchronous query
+    // API returns the number of records included in this individual response, which may be less than the total number
+    // of records matching the query.
+    return new ResultsetPage().content(queryResults).totalRecords(queryResults.size());
   }
 
   /**

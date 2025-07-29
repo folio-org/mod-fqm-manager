@@ -448,7 +448,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)',
@@ -469,7 +469,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
                          FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
@@ -493,7 +493,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
                          FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
@@ -507,7 +507,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'primary') \
                          FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
             },
@@ -516,7 +516,7 @@
       },
       isIdColumn: false,
       essential: true,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
                                   jsonb_build_object('contributorType', contributor_type.jsonb ->> 'name', \

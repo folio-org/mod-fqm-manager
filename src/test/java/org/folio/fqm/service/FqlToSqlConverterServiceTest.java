@@ -1001,6 +1001,42 @@ class FqlToSqlConverterServiceTest {
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
           )
         )
+      ),
+      Arguments.of(
+        "starts_with array field",
+        """
+          {"arrayField": {"$starts_with": "prefix"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat("prefix", "%"))
+      ),
+      Arguments.of(
+        "starts_with array field with value function",
+        """
+          {"arrayFieldWithValueFunction": {"$starts_with": "prefix"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("foo(valueGetter)"), DSL.concat(field("foo(:value)", String.class, param("value", "prefix")), "%"))
+      ),
+      Arguments.of(
+        "starts_with jsonb array field",
+        """
+          {"jsonbArrayField": {"$starts_with": "prefix"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat("prefix", "%"))
+      ),
+      Arguments.of(
+        "starts_with jsonb array field with value function",
+        """
+          {"jsonbArrayFieldWithValueFunction": {"$starts_with": "prefix"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(field("lower(:value)", String.class, param("value", "prefix")), "%"))
+      ),
+      Arguments.of(
+        "starts_with array field with special characters",
+        """
+          {"arrayField": {"$starts_with": "test & special! chars"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(val("test & special! chars"), "%"))
+      ),
+      Arguments.of(
+        "starts_with jsonb array field with special characters",
+        """
+          {"jsonbArrayField": {"$starts_with": "test & special! chars"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(val("test & special! chars"), "%"))
       )
     );
   }

@@ -505,6 +505,13 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    String dataType = getFieldDataType(entityType, startsWithCondition);
+    if (ARRAY_TYPE.equals(dataType)) {
+      return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+    }
+    if (JSONB_ARRAY_TYPE.equals(dataType)) {
+      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+    }
     return field.startsWith(valueField(startsWithCondition.value(), startsWithCondition, entityType));
   }
 

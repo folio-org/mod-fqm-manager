@@ -513,7 +513,7 @@ public class EntityTypeService {
     }
 
     if (customEntityTypeField == null) {
-      builder.availableSourceFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, accessibleEntityTypesById));
+      builder.availableSourceFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, targetEntityTypeField, accessibleEntityTypesById));
     }
 
     // Only provide target ET fields when the target ET has been provided
@@ -555,7 +555,7 @@ public class EntityTypeService {
    * Identifies fields within the custom entity type that can be used for joining by analyzing direct joins
    * and reverse joins from other entity types.
    */
-  static List<LabeledValue> discoverCustomEntityTypeFields(EntityType customEntityType, UUID targetEntityTypeId, Map<UUID, EntityType> accessibleEntityTypesById) {
+  static List<LabeledValue> discoverCustomEntityTypeFields(EntityType customEntityType, UUID targetEntityTypeId, String targetEntityTypeField, Map<UUID, EntityType> accessibleEntityTypesById) {
     if (CollectionUtils.isEmpty(customEntityType.getColumns())) {
       return List.of();
     }
@@ -568,6 +568,9 @@ public class EntityTypeService {
       .filter(column -> {
         for (EntityType potentialTargetEntityType : potentialTargetEntityTypes) {
           for (EntityTypeColumn potentialTargetEntityTypeColumn : potentialTargetEntityType.getColumns()) {
+            if (targetEntityTypeField != null && !potentialTargetEntityTypeColumn.getName().equals(targetEntityTypeField)) {
+              continue;
+            }
             if (canColumnsJoin(column, potentialTargetEntityTypeColumn, potentialTargetEntityType)) {
               return true;
             }
@@ -623,8 +626,7 @@ public class EntityTypeService {
     boolean customCanJoinToTarget =
       customEntityTypeColumn.getJoinsTo() != null
       && customEntityTypeColumn.getJoinsTo().stream()
-        .anyMatch(join -> (join.getTargetId().equals(targetEntityTypeColumn.getOriginalEntityTypeId())
-                           || join.getTargetId().toString().equals(targetEntityType.getId()))
+        .anyMatch(join -> (join.getTargetId().equals(targetEntityTypeColumn.getOriginalEntityTypeId()) || join.getTargetId().toString().equals(targetEntityType.getId()))
                           && join.getTargetField() != null
                           && (targetEntityTypeColumn.getName().equals(join.getTargetField()) || targetEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
 

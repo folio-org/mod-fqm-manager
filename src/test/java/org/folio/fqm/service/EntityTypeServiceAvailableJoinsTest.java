@@ -592,7 +592,161 @@ class EntityTypeServiceAvailableJoinsTest {
   void discoverCustomEntityTypeFields_shouldReturnEmptyIfCustomHasNoColumns() {
     EntityType customEt = new EntityType().id(UUID.randomUUID().toString()).columns(List.of());
     Map<UUID, EntityType> accessible = Map.of(UUID.randomUUID(), new EntityType());
-    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, null, accessible);
+    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, null, null, accessible);
     assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void discoverCustomEntityTypeFields_shouldReturnOnlyFieldsThatCanJoinWithTarget() {
+    // Setup: custom entity type with two fields, only one can join with the target entity type
+    UUID customEtId = UUID.randomUUID();
+    UUID targetEtId = UUID.randomUUID();
+
+    EntityType customEt = new EntityType()
+      .id(customEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("joinableField")
+          .labelAlias("Joinable Field")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(targetEtId)
+            .targetField("targetField"))),
+        new EntityTypeColumn()
+          .name("selfJoinableField")
+          .labelAlias("Self-Joinable Field")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(customEtId)
+            .targetField("joinableField"))),
+        new EntityTypeColumn()
+          .name("nonJoinableField")
+          .labelAlias("Non-Joinable Field")
+          .originalEntityTypeId(customEtId)
+      ));
+
+    EntityType targetEt = new EntityType()
+      .id(targetEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("targetField")
+          .labelAlias("Target Field")
+          .originalEntityTypeId(targetEtId)
+      ));
+
+    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt, customEtId, customEt);
+
+    // When discoverCustomEntityTypeFields is called with the target entity type selected
+    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, null, accessible);
+
+    // Expect only the joinable field to be returned
+    assertEquals(
+      List.of(new LabeledValue("Joinable Field").value("joinableField")),
+      result,
+      "Should only return fields from the custom entity type that can join with the selected target entity type");
+  }
+
+  @Test
+  void discoverCustomEntityTypeFields_shouldReturnOnlyFieldsThatCanJoinWithTargetField() {
+    // Setup: custom entity type with two fields, both join to the same target entity type, but only one joins to the specific target field
+    UUID customEtId = UUID.randomUUID();
+    UUID targetEtId = UUID.randomUUID();
+
+    EntityType customEt = new EntityType()
+      .id(customEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("joinableField")
+          .labelAlias("Joinable Field")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(targetEtId)
+            .targetField("targetField"))),
+        new EntityTypeColumn()
+          .name("notJoinableField")
+          .labelAlias("Not Joinable Field")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(targetEtId)
+            .targetField("otherField")))
+      ));
+
+    EntityType targetEt = new EntityType()
+      .id(targetEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("targetField")
+          .labelAlias("Target Field")
+          .originalEntityTypeId(targetEtId),
+        new EntityTypeColumn()
+          .name("otherField")
+          .labelAlias("Other Field")
+          .originalEntityTypeId(targetEtId)
+      ));
+
+    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
+
+    // When discoverCustomEntityTypeFields is called with the target entity type and target field selected
+    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, "targetField", accessible);
+
+    // Expect only the joinable field to be returned
+    assertEquals(
+      List.of(new LabeledValue("Joinable Field").value("joinableField")),
+      result,
+      "Should only return fields from the custom entity type that can join with the selected target entity type field"
+    );
+  }
+
+  @Test
+  void discoverCustomEntityTypeFields_shouldReturnAllJoinableFieldsIfTargetFieldIsNull() {
+    // Setup: custom entity type with two fields, both join to the same target entity type, but to different fields
+    UUID customEtId = UUID.randomUUID();
+    UUID targetEtId = UUID.randomUUID();
+
+    EntityType customEt = new EntityType()
+      .id(customEtId.toString())
+      .columns(List.of(new EntityTypeColumn()
+          .name("joinableField1")
+          .labelAlias("Joinable Field 1")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(targetEtId)
+            .targetField("targetField1"))),
+        new EntityTypeColumn()
+          .name("joinableField2")
+          .labelAlias("Joinable Field 2")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join()
+            .targetId(targetEtId)
+            .targetField("targetField2")))
+      ));
+
+    EntityType targetEt = new EntityType()
+      .id(targetEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("targetField1")
+          .labelAlias("Target Field 1")
+          .originalEntityTypeId(targetEtId),
+        new EntityTypeColumn()
+          .name("targetField2")
+          .labelAlias("Target Field 2")
+          .originalEntityTypeId(targetEtId)
+      ));
+
+    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
+
+    // When discoverCustomEntityTypeFields is called with the target entity type and no target field
+    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, null, accessible);
+
+    // Expect both joinable fields to be returned
+    assertEquals(
+      List.of(
+        new LabeledValue("Joinable Field 1").value("joinableField1"),
+        new LabeledValue("Joinable Field 2").value("joinableField2")
+      ),
+      result,
+      "Should return all fields from the custom entity type that can join with the selected target entity type"
+    );
   }
 }

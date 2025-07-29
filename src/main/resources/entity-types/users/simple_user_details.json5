@@ -309,7 +309,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'true',

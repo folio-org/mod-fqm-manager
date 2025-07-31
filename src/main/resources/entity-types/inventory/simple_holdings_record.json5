@@ -804,7 +804,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
@@ -815,7 +815,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',

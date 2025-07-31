@@ -28,7 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_ARRAY_VALUE_GETTER;
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
@@ -82,7 +82,7 @@ class EntityTypeRepositoryTest {
     String valueGetter1 = String.format(genericValueGetter, refId1);
     String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId2, "custom_fields_source_view.jsonb -> 'customFields'", refId2);
     String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId3, "custom_fields_source_view.jsonb -> 'customFields'", refId3);
-    String valueGetter6 = String.format(CUSTOM_FIELD_ARRAY_VALUE_GETTER, null, "custom_fields_source_view", refId6, "custom_fields_source_view.jsonb -> 'customFields'", refId6);
+    String valueGetter6 = String.format(CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER, null, "custom_fields_source_view", refId6, "custom_fields_source_view.jsonb -> 'customFields'", refId6);
     var radioButtonValues = List.of(
       new ValueWithLabel().label("label1").value("opt1"),
       new ValueWithLabel().label("label2").value("opt2")

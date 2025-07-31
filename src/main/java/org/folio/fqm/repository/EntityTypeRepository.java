@@ -72,7 +72,7 @@ public class EntityTypeRepository {
         WHERE f.entry ->> 'id' = %s ->> '%s'
       )
     """;
-  public static final String CUSTOM_FIELD_ARRAY_VALUE_GETTER = """
+  public static final String CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER = """
     (
       SELECT jsonb_agg(f.entry ->> 'value')
       FROM jsonb_array_elements(
@@ -339,7 +339,7 @@ public class EntityTypeRepository {
                                                          List<ValueWithLabel> columnValues) {
     String filterValueGetter = String.format(JSONB_ARRAY_EXTRACTOR, sourceViewExtractor, refId);
     String valueGetter = String.format(
-      CUSTOM_FIELD_ARRAY_VALUE_GETTER,
+      CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER,
       executionContext.getTenantId(),
       sourceViewName,
       refId,

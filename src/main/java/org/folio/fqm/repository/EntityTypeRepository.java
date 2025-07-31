@@ -8,7 +8,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.flattening.SourceUtils;
-import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
@@ -26,7 +25,6 @@ import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.Record5;
 import org.jooq.Result;
-import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +49,7 @@ public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
   public static final String STRING_EXTRACTOR = "%s ->> '%s'";
+  public static final String JSONB_ARRAY_EXTRACTOR = "%s -> '%s'";
   public static final String CUSTOM_FIELD_PREPENDER = "_custom_field_";
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
   public static final String CUSTOM_FIELD_REF_ID = "jsonb ->> 'refId'";
@@ -75,18 +74,17 @@ public class EntityTypeRepository {
     """;
   public static final String CUSTOM_FIELD_ARRAY_VALUE_GETTER = """
     (
-            SELECT jsonb_agg(f.entry ->> 'value')
-            FROM jsonb_array_elements(
-                (
-                    SELECT jsonb -> 'selectField' -> 'options' -> 'values'
-                    FROM fs09000000_mod_fqm_manager.src_user_custom_fields
-                    WHERE jsonb ->> 'refId' = 'field'
-                )
-            ) AS f(entry)
-            WHERE (f.entry ->> 'id') IN (
-                SELECT jsonb_array_elements_text("users.user".jsonb -> 'customFields' -> 'field')
-            )
+      SELECT jsonb_agg(f.entry ->> 'value')
+      FROM jsonb_array_elements(
+        (
+            SELECT jsonb -> 'selectField' -> 'options' -> 'values'
+            FROM %s_mod_fqm_manager.%s
+            WHERE jsonb ->> 'refId' = '%s'
         )
+      ) AS f(entry)
+      WHERE
+        (f.entry ->> 'id') IN (SELECT jsonb_array_elements_text(%s -> '%s'))
+    )
     """;
 
   public static final List<ValueWithLabel> CUSTOM_FIELD_BOOLEAN_VALUES = List.of(
@@ -339,33 +337,15 @@ public class EntityTypeRepository {
                                                          String sourceViewName,
                                                          String sourceViewExtractor,
                                                          List<ValueWithLabel> columnValues) {
-//    String filterValueGetter = String.format(STRING_EXTRACTOR, sourceViewExtractor, refId);
-
-    //    String ARRAY_EXTRACTOR = "jsonb_array_elements_text(%s -> 'selectField' -> 'options' -> 'values') ->> 'value'";
-    String ARRAY_EXTRACTOR = "(%s -> '%s')";
-    String filterValueGetter = String.format(ARRAY_EXTRACTOR, sourceViewExtractor, refId);
-
-
-
-    String valueGetterOld = String.format(
-      CUSTOM_FIELD_VALUE_GETTER,
+    String filterValueGetter = String.format(JSONB_ARRAY_EXTRACTOR, sourceViewExtractor, refId);
+    String valueGetter = String.format(
+      CUSTOM_FIELD_ARRAY_VALUE_GETTER,
       executionContext.getTenantId(),
       sourceViewName,
       refId,
       sourceViewExtractor,
       refId
     );
-
-    String valueGetter = String.format(
-      CUSTOM_FIELD_ARRAY_VALUE_GETTER
-//      ,
-//      executionContext.getTenantId(),
-//      sourceViewName,
-//      refId
-    );
-
-
-
     return new EntityTypeColumn()
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType")))

@@ -9,11 +9,6 @@ import org.folio.fql.service.FqlService;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationUtils;
-import org.folio.fqm.migration.warnings.OperatorBreakingWarning;
-import org.folio.fqm.migration.warnings.Warning;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Version 17 -> 18 migration to map legacy 'contains_any' operator to the new 'in' operator.
@@ -33,24 +28,21 @@ public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "17"; // Migrate from version 17 to 18
+    return "17"; // Assuming this is for version 12 -> 13 transition
   }
 
   @Override
   public String getLabel() {
-    return "V17 -> V18 Contains Any to In operator migration";
+    return "V17 -> V18 Contains Any to In operator migration (POC)";
   }
 
   @Override
   public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
-    List<Warning> warnings = new ArrayList<>(query.warnings());
-
     String migratedFql = MigrationUtils.migrateFql(
-      query.fqlQuery(),      (result, fieldName, fieldConditions) -> {
+      query.fqlQuery(),
+      (result, fieldName, fieldConditions) -> {
         ObjectNode conditions = (ObjectNode) fieldConditions;
         ObjectNode migratedConditions = objectMapper.createObjectNode();
-        // Track if any changes were made for this field
-        final boolean[] hasChanges = {false};
 
         // Iterate through all operators for this field
         conditions.properties().forEach(operatorEntry -> {
@@ -61,13 +53,11 @@ public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
             case "$contains_any" -> {
               // Migrate $contains_any to $in
               migratedConditions.set("$in", operatorValue);
-              hasChanges[0] = true;
               log.info("Migrated $contains_any to $in for field: {}", fieldName);
             }
             case "$not_contains_any" -> {
               // Migrate $not_contains_any to $nin
               migratedConditions.set("$nin", operatorValue);
-              hasChanges[0] = true;
               log.info("Migrated $not_contains_any to $nin for field: {}", fieldName);
             }
             default -> {
@@ -81,23 +71,9 @@ public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
         if (migratedConditions.size() > 0) {
           result.set(fieldName, migratedConditions);
         }
-
-        // Add informational warning if changes were made
-        if (hasChanges[0]) {
-          warnings.add(
-            OperatorBreakingWarning.builder()
-              .field(fieldName)
-              .operator("$contains_any/$not_contains_any")
-              .fql(fieldConditions.toPrettyString())
-              .build()
-          );
-        }
       }
     );
 
-    return query
-      .withFqlQuery(migratedFql)
-      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
-      .withWarnings(warnings);
+    return query.withFqlQuery(migratedFql);
   }
 }

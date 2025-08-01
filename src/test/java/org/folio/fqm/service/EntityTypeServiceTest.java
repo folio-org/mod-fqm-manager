@@ -803,6 +803,52 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void createCustomEntityType_shouldGenerateId_whenIdIsNull() {
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(null)
+      .shared(false)
+      .owner(ownerId)
+      .name("test")
+      ._private(false)
+      .isCustom(true);
+
+    when(clockService.now()).thenReturn(new Date());
+    when(executionContext.getUserId()).thenReturn(ownerId);
+
+    CustomEntityType result = entityTypeService.createCustomEntityType(customEntityType);
+
+    assertNotNull(result.getId(), "ID should be generated when input ID is null");
+    assertDoesNotThrow(() -> UUID.fromString(result.getId()), "Generated ID should be a valid UUID");
+    verify(repo).createCustomEntityType(result);
+  }
+
+  @Test
+  void createCustomEntityType_shouldThrowInvalidEntityTypeDefinitionException_whenIdIsInvalidUUID() {
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id("not-a-uuid")
+      .shared(false)
+      .owner(UUID.randomUUID())
+      .name("test")
+      ._private(false)
+      .isCustom(true);
+
+    InvalidEntityTypeDefinitionException ex = assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> entityTypeService.createCustomEntityType(customEntityType)
+    );
+    assertEquals("Invalid string provided for entity type ID", ex.getMessage());
+
+    // Provide a truncated UUID to ensure it's not accepted and 0-padded
+    customEntityType.id("12343ca1-b910-4e57-9187-d29d0");
+    ex = assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> entityTypeService.createCustomEntityType(customEntityType)
+    );
+    assertEquals("Invalid string provided for entity type ID", ex.getMessage());
+  }
+
+  @Test
   void updateCustomEntityType_shouldUpdateEntityTypeSuccessfully() {
     // Arrange
     UUID entityTypeId = UUID.randomUUID();

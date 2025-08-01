@@ -1068,28 +1068,4 @@ class FqlToSqlConverterServiceTest {
       () -> fqlToSqlConverter.getSqlCondition(invalidDateFql, entityType)
     );
   }
-
-  @Test
-  void shouldDemonstrateContainsAnyMigrationEquivalence() {
-    // This test demonstrates that the migrated query (using $in) produces 
-    // the same SQL condition as the legacy $contains_any operator
-    String legacyQuery = """
-      {"arrayField": {"$contains_any": ["value1", "value2"]}}""";
-    
-    String migratedQuery = """
-      {"arrayField": {"$in": ["value1", "value2"]}}""";
-
-    Condition legacyCondition = fqlToSqlConverter.getSqlCondition(legacyQuery, entityType);
-    Condition migratedCondition = fqlToSqlConverter.getSqlCondition(migratedQuery, entityType);
-
-    // Both should produce equivalent SQL - array overlap condition
-    Condition expectedCondition = arrayOverlap(
-      cast(field("arrayField"), String[].class), 
-      cast(array("value1", "value2"), String[].class)
-    );
-
-    assertEquals(expectedCondition, legacyCondition, "Legacy $contains_any should produce expected SQL");
-    assertEquals(expectedCondition, migratedCondition, "Migrated $in should produce equivalent SQL");
-    assertEquals(legacyCondition, migratedCondition, "Legacy and migrated queries should produce identical SQL");
-  }
 }

@@ -393,15 +393,31 @@ public class EntityTypeService {
 
   public CustomEntityType createCustomEntityType(CustomEntityType customEntityType) {
     var now = clockService.now();
-    String customEntityTypeId = customEntityType.getId() == null ? UUID.randomUUID().toString() : customEntityType.getId();
+    UUID customEntityTypeId;
+    String customEntityTypeIdString = customEntityType.getId();
+    // UUID.fromString() will pad 0's onto invalid UUID strings to make valid UUIDs, which can lead to unexpected behavior.
+    // This block ensures that the service accepts only valid UUID strings
+    try {
+      if (customEntityTypeIdString == null) {
+        customEntityTypeId = UUID.randomUUID();
+      } else {
+        customEntityTypeId = UUID.fromString(customEntityTypeIdString);
+        if (!customEntityTypeId.toString().equals(customEntityTypeIdString)) {
+          throw new IllegalArgumentException("Invalid UUID format");
+        }
+      }
+    } catch (IllegalArgumentException e) {
+      throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", customEntityType);
+    }
+
     var updatedCustomEntityType = customEntityType.toBuilder()
-      .id(customEntityTypeId)
+      .id(customEntityTypeId.toString())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
       .build();
 
-    validateCustomEntityType(UUID.fromString(customEntityTypeId), customEntityType);
+    validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
   }

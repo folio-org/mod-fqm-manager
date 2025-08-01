@@ -138,6 +138,34 @@ VALUES (
        "entityType": "user",
        "selectField": {}
     }'
+  ),
+  (
+    '3c4e9797-422f-4962-a302-174af09b23fa',
+    '{
+       "id": "3c4e9797-422f-4962-a302-174af09b23fa",
+       "name": "custom_column_6",
+       "type": "MULTI_SELECT_DROPDOWN",
+       "order": 7,
+       "refId": "customColumn6",
+       "visible": true,
+       "entityType": "user",
+       "selectField": {
+         "options": {
+           "values": [
+              {
+                "id": "opt1",
+                "value": "multi1",
+                "default": true
+              },
+              {
+                "id": "opt2",
+                "value": "multi2",
+                "default": false
+              }
+           ]
+         }
+       }
+    }'
   );
 CREATE VIEW custom_fields_source_view AS
 SELECT *

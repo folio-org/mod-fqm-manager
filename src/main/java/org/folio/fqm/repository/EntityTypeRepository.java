@@ -13,6 +13,7 @@ import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -24,7 +25,6 @@ import org.jooq.JSONB;
 import org.jooq.Record;
 import org.jooq.Record5;
 import org.jooq.Result;
-import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +49,7 @@ public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
   public static final String STRING_EXTRACTOR = "%s ->> '%s'";
+  public static final String JSONB_ARRAY_EXTRACTOR = "%s -> '%s'";
   public static final String CUSTOM_FIELD_PREPENDER = "_custom_field_";
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
   public static final String CUSTOM_FIELD_REF_ID = "jsonb ->> 'refId'";
@@ -56,6 +57,7 @@ public class EntityTypeRepository {
   public static final String CUSTOM_FIELD_FILTER_VALUE_GETTER = "jsonb -> 'selectField' -> 'options' ->> 'values'";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX = "SINGLE_CHECKBOX";
   public static final String CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN = "SINGLE_SELECT_DROPDOWN";
+  public static final String CUSTOM_FIELD_TYPE_MULTI_SELECT_DROPDOWN = "MULTI_SELECT_DROPDOWN";
   public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";
   public static final String CUSTOM_FIELD_TYPE_TEXTBOX_SHORT = "TEXTBOX_SHORT";
   public static final String CUSTOM_FIELD_TYPE_TEXTBOX_LONG = "TEXTBOX_LONG";
@@ -70,6 +72,20 @@ public class EntityTypeRepository {
         WHERE f.entry ->> 'id' = %s ->> '%s'
       )
     """;
+  public static final String CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER = """
+    (
+      SELECT jsonb_agg(f.entry ->> 'value')
+      FROM jsonb_array_elements(
+        (
+            SELECT jsonb -> 'selectField' -> 'options' -> 'values'
+            FROM %s_mod_fqm_manager.%s
+            WHERE jsonb ->> 'refId' = '%s'
+        )
+      ) AS f(entry)
+      WHERE
+        (f.entry ->> 'id') IN (SELECT jsonb_array_elements_text(%s -> '%s'))
+    )
+    """;
 
   public static final List<ValueWithLabel> CUSTOM_FIELD_BOOLEAN_VALUES = List.of(
     new ValueWithLabel().label("True").value("true"),
@@ -78,6 +94,7 @@ public class EntityTypeRepository {
   public static final List<String> SUPPORTED_CUSTOM_FIELD_TYPES = List.of(
     CUSTOM_FIELD_TYPE_SINGLE_CHECKBOX,
     CUSTOM_FIELD_TYPE_SINGLE_SELECT_DROPDOWN,
+    CUSTOM_FIELD_TYPE_MULTI_SELECT_DROPDOWN,
     CUSTOM_FIELD_TYPE_RADIO_BUTTON,
     CUSTOM_FIELD_TYPE_TEXTBOX_SHORT,
     CUSTOM_FIELD_TYPE_TEXTBOX_LONG
@@ -232,6 +249,10 @@ public class EntityTypeRepository {
               handleBooleanCustomField(entityTypeColumn, id, name, refId, dataExtractionPath);
             case CUSTOM_FIELD_TYPE_TEXTBOX_SHORT, CUSTOM_FIELD_TYPE_TEXTBOX_LONG ->
               handleTextboxCustomField(entityTypeColumn, id, name, refId, dataExtractionPath);
+            case CUSTOM_FIELD_TYPE_MULTI_SELECT_DROPDOWN -> {
+              List<ValueWithLabel> columnValues = parseCustomFieldValues(customFieldValueJson);
+              yield handleMultiSelectCustomField(entityTypeColumn, id, name, refId, configurationView, dataExtractionPath, columnValues);
+            }
             // Should never be reached due to prior filtering
             default -> {
               log.error("Custom field {} of entity type {} uses an unsupported datatype: {}. Ignoring this custom field", name, entityTypeId, type);
@@ -299,6 +320,35 @@ public class EntityTypeRepository {
     return new EntityTypeColumn()
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new StringType().dataType("stringType"))
+      .values(columnValues)
+      .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
+      .valueGetter(valueGetter)
+      .filterValueGetter(filterValueGetter)
+      .labelAlias(name)
+      .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
+      .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))
+      .isCustomField(true);
+  }
+
+  private EntityTypeColumn handleMultiSelectCustomField(EntityTypeColumn customFieldColumn,
+                                                         String id,
+                                                         String name,
+                                                         String refId,
+                                                         String sourceViewName,
+                                                         String sourceViewExtractor,
+                                                         List<ValueWithLabel> columnValues) {
+    String filterValueGetter = String.format(JSONB_ARRAY_EXTRACTOR, sourceViewExtractor, refId);
+    String valueGetter = String.format(
+      CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER,
+      executionContext.getTenantId(),
+      sourceViewName,
+      refId,
+      sourceViewExtractor,
+      refId
+    );
+    return new EntityTypeColumn()
+      .name(CUSTOM_FIELD_PREPENDER + id)
+      .dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType")))
       .values(columnValues)
       .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
       .valueGetter(valueGetter)

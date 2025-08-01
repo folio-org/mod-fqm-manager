@@ -49,21 +49,15 @@ public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
           String operator = operatorEntry.getKey();
           JsonNode operatorValue = operatorEntry.getValue();
 
-          switch (operator) {
-            case "$contains_any" -> {
-              // Migrate $contains_any to $in
-              migratedConditions.set("$in", operatorValue);
-              log.info("Migrated $contains_any to $in for field: {}", fieldName);
-            }
-            case "$not_contains_any" -> {
-              // Migrate $not_contains_any to $nin
-              migratedConditions.set("$nin", operatorValue);
-              log.info("Migrated $not_contains_any to $nin for field: {}", fieldName);
-            }
-            default -> {
-              // Keep all other operators as-is
-              migratedConditions.set(operator, operatorValue);
-            }
+          String newOperator = switch (operator) {
+            case "$contains_any" -> "$in";
+            case "$not_contains_any" -> "$nin";
+            default -> operator;
+          };
+          migratedConditions.set(newOperator, operatorValue);
+          
+          if (!operator.equals(newOperator)) {
+            log.info("Migrated {} to {} for field: {}", operator, newOperator, fieldName);
           }
         });
 

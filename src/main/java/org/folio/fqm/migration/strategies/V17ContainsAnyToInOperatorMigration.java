@@ -23,7 +23,7 @@ import org.folio.fqm.migration.MigrationUtils;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V17ContainsAnyToInOperatorMigration extends AbstractSimpleMigrationStrategy {
+public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 

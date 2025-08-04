@@ -780,7 +780,6 @@ class EntityTypeServiceTest {
     CustomEntityType inputCustomEntityType = new CustomEntityType()
       .id(customEntityTypeId.toString())
       .shared(false)
-      .owner(ownerId)
       .name("test")
       ._private(false);
     CustomEntityType expectedCustomEntityType = inputCustomEntityType.toBuilder()
@@ -846,6 +845,26 @@ class EntityTypeServiceTest {
       () -> entityTypeService.createCustomEntityType(customEntityType)
     );
     assertEquals("Invalid string provided for entity type ID", ex.getMessage());
+  }
+
+  @Test
+  void createCustomEntityType_shouldThrowInvalidEntityTypeDefinitionException_whenOwnerIdDoesNotMatchExecutionContext() {
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(UUID.randomUUID().toString())
+      .shared(false)
+      .owner(UUID.randomUUID())
+      .name("test")
+      ._private(false)
+      .isCustom(true);
+
+    when(executionContext.getUserId()).thenReturn(ownerId);
+
+    Exception ex = assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> entityTypeService.createCustomEntityType(customEntityType)
+    );
+    assertTrue(ex.getMessage().contains("owner ID mismatch"));
   }
 
   @Test

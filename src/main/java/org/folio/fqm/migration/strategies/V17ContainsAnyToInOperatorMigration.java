@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
+import org.folio.fqm.migration.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationUtils;
@@ -22,7 +23,7 @@ import org.folio.fqm.migration.MigrationUtils;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
+public class V17ContainsAnyToInOperatorMigration extends AbstractSimpleMigrationStrategy {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 

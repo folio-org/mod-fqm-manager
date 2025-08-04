@@ -28,7 +28,7 @@ public class V17ContainsAnyToInOperatorMigration implements MigrationStrategy {
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "17"; // Assuming this is for version 12 -> 13 transition
+    return "17"; // Assuming this is for version 17 -> 18 transition
   }
 
   @Override

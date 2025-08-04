@@ -472,11 +472,11 @@ public class EntityTypeService {
     if (customEntityType.getSourceViewExtractor() != null) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceViewExtractor property", customEntityType);
     }
-    if (customEntityType.getIdView() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a idView property", customEntityType);
-    }
     if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
       throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
+    }
+    if (customEntityType.getPrivate() == null) {
+      throw new InvalidEntityTypeDefinitionException("The \"private\" property must be set", customEntityType);
     }
   }
 

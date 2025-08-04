@@ -788,7 +788,6 @@ class EntityTypeServiceTest {
       .owner(ownerId)
       .name("test")
       ._private(false)
-      .idView(null)
       .build();
 
     when(executionContext.getUserId()).thenReturn(ownerId);
@@ -1331,26 +1330,6 @@ class EntityTypeServiceTest {
       "Should throw InvalidEntityTypeDefinitionException when sourceViewExtractor is not null");
 
     assertEquals("Custom entity types must not contain a sourceViewExtractor property", exception.getMessage());
-  }
-
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenIdViewIsNotNull() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .idView("some_id_view");
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when idView is not null");
-
-    assertEquals("Custom entity types must not contain a idView property", exception.getMessage());
   }
 
   @Test

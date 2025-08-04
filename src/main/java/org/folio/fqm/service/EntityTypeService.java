@@ -410,7 +410,7 @@ public class EntityTypeService {
       throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", customEntityType);
     }
 
-    if (customEntityType.getOwner() != null && !customEntityType.getOwner().equals(executionContext.getUserId().equals()) {
+    if (customEntityType.getOwner() != null && !customEntityType.getOwner().equals(executionContext.getUserId())) {
       throw new InvalidEntityTypeDefinitionException(
         "owner ID mismatch: the provided owner ID does not match the current user's ID. This field should be omitted " +
           "or match the authenticated user.",

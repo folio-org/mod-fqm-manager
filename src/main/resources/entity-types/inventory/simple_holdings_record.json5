@@ -741,7 +741,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -799,12 +799,27 @@
           dataType: 'objectType',
           properties: [
             {
+              name: 'holdings_note_type_id',
+              property: 'holdingsNoteTypeId',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              source: {
+                entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
+                columnName: 'name',
+              },
+              valueFunction: 'lower(:value)'
+            },
+            {
               name: 'note',
               property: 'note',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
@@ -815,7 +830,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
@@ -836,7 +851,13 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'notes'",
+      valueGetter: "(\
+      SELECT jsonb_agg( jsonb_set( note, '{holdingsNoteTypeId}',\
+      to_jsonb(hnt.jsonb ->> 'name') ) ) ::text AS updated_notes\
+       FROM ${tenant_id}_mod_inventory_storage.holdings_record AS hr,\
+       jsonb_array_elements(hr.jsonb -> 'notes') AS note\
+       LEFT JOIN ${tenant_id}_mod_inventory_storage.holdings_note_type AS hnt\
+       ON (note ->> 'holdingsNoteTypeId') = (hnt.jsonb ->> 'id') GROUP BY hr.jsonb)",
     },
     {
       name: 'tenant_id',

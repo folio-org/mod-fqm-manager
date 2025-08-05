@@ -41,4 +41,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_src_holdings_note_type" author="Oleksandr_Bozhko@epam.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="holdings_note_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+            replaceIfExists="true"
+            viewName="src_inventory_holdings_note_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.holdings_note_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

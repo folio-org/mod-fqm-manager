@@ -799,14 +799,14 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'holdings_note_type_id',
-              property: 'holdingsNoteTypeId',
+              name: 'holdings_note_type_name',
+              property: 'holdingsNoteTypeName',
               dataType: {
                 dataType: 'stringType'
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeName') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeName')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               source: {
                 entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
                 columnName: 'name',
@@ -851,13 +851,12 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(\
-      SELECT jsonb_agg( jsonb_set( note, '{holdingsNoteTypeId}',\
-      to_jsonb(hnt.jsonb ->> 'name') ) ) ::text AS updated_notes\
-       FROM ${tenant_id}_mod_inventory_storage.holdings_record AS hr,\
-       jsonb_array_elements(hr.jsonb -> 'notes') AS note\
-       LEFT JOIN ${tenant_id}_mod_inventory_storage.holdings_note_type AS hnt\
-       ON (note ->> 'holdingsNoteTypeId') = (hnt.jsonb ->> 'id') GROUP BY hr.jsonb)",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                      jsonb_build_object('holdingsNoteTypeName', class_type.jsonb ->> 'name') \
+                       ORDER BY record.value ->> 'holdingsNoteTypeId') \
+                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_holdings_note_type class_type \
+                         ON (record.value ->> 'holdingsNoteTypeId') = class_type.id::text)::text"
     },
     {
       name: 'tenant_id',

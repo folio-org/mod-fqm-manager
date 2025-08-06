@@ -46,9 +46,20 @@
       <tableExists tableName="holdings_note_type" schemaName="${tenant_id}_mod_inventory_storage"/>
     </preConditions>
     <createView
-            replaceIfExists="true"
-            viewName="src_inventory_holdings_note_type">
+      replaceIfExists="true"
+      viewName="src_inventory_holdings_note_type">
       SELECT * FROM ${tenant_id}_mod_inventory_storage.holdings_note_type
+    </createView>
+  </changeSet>
+  
+  <changeSet id="create_view_src_instance_note_type" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="instance_note_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_instance_note_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_note_type
     </createView>
   </changeSet>
 

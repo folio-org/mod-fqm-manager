@@ -973,11 +973,10 @@
               queryable: false,
               hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'instanceNoteTypeId' ORDER BY elems.value->>'instanceNoteTypeId') \
-                                         FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems \
-                                        )",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'instanceNoteTypeId') ORDER BY elems.value->>'instanceNoteTypeId') \
                          FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "(SELECT COALESCE(array_agg(lower(elems.value->>'instanceNoteTypeId') ORDER BY elems.value->>'instanceNoteTypeId'), '{}') \
+                               FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)'
             },
             {
               name: 'instance_note_type',
@@ -996,18 +995,17 @@
               },
               queryable: true,
               valueGetter: "(SELECT array_agg(instance_note_type.jsonb ->> 'name' ORDER BY record.value ->> 'instanceNoteTypeId') \
-                             FILTER (WHERE (instance_note_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
-                               join ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
-                                 ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text \
-                            )",
-              filterValueGetter: "(SELECT array_agg(lower(instance_note_type.jsonb ->> 'name') ORDER BY record.value ->> 'instanceNoteTypeId') \
                          FILTER (WHERE (instance_note_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                          FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
-                           join ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
-                             ON (record.value ->> 'instanceNoteTypeId') =  instance_note_type.id::text \
-                        )",
-              valueFunction: 'lower(:value)',
+                           JOIN ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
+                             ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text)",
+              filterValueGetter: "(SELECT COALESCE(array_agg(lower(instance_note_type.jsonb ->> 'name') \
+                                ORDER BY record.value ->> 'instanceNoteTypeId') \
+                                FILTER (WHERE (instance_note_type.jsonb ->> 'name') IS NOT NULL), '{}') \
+                              FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                                JOIN ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
+                                  ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text)",
+              valueFunction: 'lower(:value)'
             },
             {
               name: 'note',
@@ -1016,8 +1014,8 @@
                 dataType: 'stringType',
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)'
             },
             {
@@ -1027,32 +1025,32 @@
                 dataType: 'booleanType',
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
               values: [
                 {
                   value: 'true',
-                  label: 'True',
+                  label: 'True'
                 },
                 {
                   value: 'false',
-                  label: 'False',
-                },
-              ],
-            },
-          ],
-        },
+                  label: 'False'
+                }
+              ]
+            }
+          ]
+        }
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
-                              jsonb_build_object('instanceNoteType', instance_note_type.jsonb ->> 'name') \
-                 ORDER BY record.value ->> 'instanceNoteTypeId') \
-               FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
-                 LEFT JOIN ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
-                   ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text)::text"
+                      jsonb_build_object('instanceNoteType', instance_note_type.jsonb ->> 'name') \
+                   ORDER BY record.value ->> 'instanceNoteTypeId') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                   LEFT JOIN ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
+                     ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text)::text"
     },
     {
       name: 'administrative_notes',

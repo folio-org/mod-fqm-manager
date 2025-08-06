@@ -521,6 +521,10 @@
       "version": "19.1"
     },
     {
+      "id": "instance-note-types",
+      "version": "1.0"
+    },
+    {
       "id": "holdings-note-types",
       "version": "1.0"
     }

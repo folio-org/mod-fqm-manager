@@ -23,15 +23,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-      source: {
-        columnName: 'id',
-        entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7',
-      },
-      valueSourceApi: {
-        path: 'instance-note-types',
-        labelJsonPath: '$.instanceNoteTypes.*.id',
-        valueJsonPath: '$.instanceNoteTypes.*.id',
-      }
     },
     {
       name: 'name',

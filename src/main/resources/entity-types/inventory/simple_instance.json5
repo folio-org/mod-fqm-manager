@@ -962,12 +962,9 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
-              valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'instanceNoteTypeId') \
-                             FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
-                               join ${tenant_id}_mod_fqm_manager.src_instance_note_type class_type \
-                                 ON (record.value ->> 'instanceNoteTypeId') = class_type.id::text \
-                            )",
+              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)'
             },
             {
               name: 'instance_note_type',
@@ -980,9 +977,12 @@
                 entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteType') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)'
+              valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'instanceNoteTypeId') \
+                             FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                               join ${tenant_id}_mod_fqm_manager.src_instance_note_type class_type \
+                                 ON (record.value ->> 'instanceNoteTypeId') = class_type.id::text \
+                            )"
             },
             {
               name: 'note',

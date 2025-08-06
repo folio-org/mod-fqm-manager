@@ -965,11 +965,19 @@
                 columnName: 'id',
                 entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
               },
+              valueSourceApi: {
+                path: 'instance-note-types',
+                labelJsonPath: '$.instanceNoteTypes.*.id',
+                valueJsonPath: '$.instanceNoteTypes.*.id',
+              },
               queryable: false,
               hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'instanceNoteTypeId' ORDER BY elems.value->>'instanceNoteTypeId') \
                                          FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems \
-                                        )"
+                                        )",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'instanceNoteTypeId') ORDER BY elems.value->>'instanceNoteTypeId') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)',
             },
             {
               name: 'instance_note_type',
@@ -981,14 +989,25 @@
                 columnName: 'name',
                 entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
               },
-              idColumnName: 'instance_note_type_id',
+              valueSourceApi: {
+                path: 'instance-note-types',
+                labelJsonPath: '$.instanceNoteTypes.*.name',
+                valueJsonPath: '$.instanceNoteTypes.*.id',
+              },
               queryable: true,
               valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'instanceNoteTypeId') \
                              FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
                              FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
                                join ${tenant_id}_mod_fqm_manager.src_instance_note_type class_type \
                                  ON (record.value ->> 'instanceNoteTypeId') = class_type.id::text \
-                            )"
+                            )",
+              filterValueGetter: "(SELECT array_agg(lower(class_type.jsonb ->> 'name') ORDER BY record.value ->> 'instanceNoteTypeId') \
+                         FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                           join ${tenant_id}_mod_fqm_manager.src_instance_note_type class_type \
+                             ON (record.value ->> 'instanceNoteTypeId') =  class_type.id::text \
+                        )",
+              valueFunction: 'lower(:value)',
             },
             {
               name: 'note',

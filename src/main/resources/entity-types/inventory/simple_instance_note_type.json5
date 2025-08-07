@@ -19,6 +19,11 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      valueSourceApi: {
+        path: 'instance-note-types',
+        labelJsonPath: '$.instanceNoteTypes.*.id',
+        valueJsonPath: '$.instanceNoteTypes.*.id',
+      },
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
@@ -45,7 +50,7 @@
       valueSourceApi: {
         path: 'instance-note-types',
         labelJsonPath: '$.instanceNoteTypes.*.name',
-        valueJsonPath: '$.instanceNoteTypes.*.name',
+        valueJsonPath: '$.instanceNoteTypes.*.id',
       }
     },
     {

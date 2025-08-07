@@ -27,8 +27,11 @@ import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
+import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.LabeledValue;
@@ -376,7 +379,7 @@ public class EntityTypeService {
   CustomEntityType getCustomEntityType(UUID entityTypeId) {
     var customET = entityTypeRepository.getCustomEntityType(entityTypeId);
     if (customET == null || !Boolean.TRUE.equals(customET.getIsCustom())) {
-      throw new EntityTypeNotFoundException(entityTypeId,  "Entity type " + entityTypeId + " could not be found or is not a custom entity type.");
+      throw new EntityTypeNotFoundException(entityTypeId, String.format("Entity type %s could not be found or is not a custom entity type.", entityTypeId));
     }
 
     return customET;
@@ -389,20 +392,45 @@ public class EntityTypeService {
   }
 
   public CustomEntityType createCustomEntityType(CustomEntityType customEntityType) {
-    validateCustomEntityType(null, customEntityType);
     var now = clockService.now();
+    UUID customEntityTypeId;
+    String customEntityTypeIdString = customEntityType.getId();
+    // UUID.fromString() will pad 0's onto invalid UUID strings to make valid UUIDs, which can lead to unexpected behavior.
+    // This block ensures that the service accepts only valid UUID strings
+    try {
+      if (customEntityTypeIdString == null) {
+        customEntityTypeId = UUID.randomUUID();
+      } else {
+        customEntityTypeId = UUID.fromString(customEntityTypeIdString);
+        if (!customEntityTypeId.toString().equals(customEntityTypeIdString)) {
+          throw new IllegalArgumentException("Invalid UUID format");
+        }
+      }
+    } catch (IllegalArgumentException e) {
+      throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", customEntityType);
+    }
+
+    if (customEntityType.getOwner() != null && !customEntityType.getOwner().equals(executionContext.getUserId())) {
+      throw new InvalidEntityTypeDefinitionException(
+        "owner ID mismatch: the provided owner ID does not match the current user's ID. This field should be omitted " +
+          "or match the authenticated user.",
+        customEntityType
+      );
+    }
+
     var updatedCustomEntityType = customEntityType.toBuilder()
-      .id(customEntityType.getId() == null ? UUID.randomUUID().toString() : customEntityType.getId())
+      .id(customEntityTypeId.toString())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
       .build();
+
+    validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
   }
 
   public CustomEntityType updateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
-    validateCustomEntityType(entityTypeId, customEntityType);
     var oldET = getCustomEntityType(entityTypeId);
     enforceCustomEntityTypeAccess(oldET);
 
@@ -411,26 +439,32 @@ public class EntityTypeService {
       .updatedAt(clockService.now())
       .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))
       .build();
+
+    validateCustomEntityType(entityTypeId, updatedCustomEntityType);
     entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
   }
 
   // Package-private to make Visible for testing
-  static void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+  void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
+    validateEntityType(entityTypeId, customEntityType, null);
+    if (customEntityType.getOwner() == null) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity type must have an owner", customEntityType);
+    }
+    if (customEntityType.getShared() == null) {
+      throw new InvalidEntityTypeDefinitionException("Custom entity type must have a shared property", customEntityType);
+    }
     if (!Boolean.TRUE.equals(customEntityType.getIsCustom())) {
-      throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type");
+      throw new EntityTypeNotFoundException(entityTypeId, String.format("Entity type %s is not a custom entity type", entityTypeId));
     }
     if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", entityTypeId);
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", customEntityType);
     }
     if (customEntityType.getColumns() != null && !customEntityType.getColumns().isEmpty()) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", entityTypeId);
+      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", customEntityType);
     }
-    if (entityTypeId != null && !entityTypeId.toString().equals(customEntityType.getId())) {
-      throw new InvalidEntityTypeDefinitionException("The entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
-    }
-    if (customEntityType.getCustomFieldEntityTypeId() != null && customEntityType.getCustomFieldEntityTypeId().equals(customEntityType.getId())) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not refer to themselves with the customFieldEntityTypeId property", customEntityType);
+    if (customEntityType.getCustomFieldEntityTypeId() != null) {
+      throw new InvalidEntityTypeDefinitionException("Custom field entity type id must not be defined for custom entity types", customEntityType);
     }
     if (customEntityType.getSourceView() != null) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceView property", customEntityType);
@@ -438,11 +472,103 @@ public class EntityTypeService {
     if (customEntityType.getSourceViewExtractor() != null) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceViewExtractor property", customEntityType);
     }
-    if (customEntityType.getIdView() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a idView property", customEntityType);
-    }
     if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
       throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
+    }
+    if (customEntityType.getPrivate() == null) {
+      throw new InvalidEntityTypeDefinitionException("The \"private\" property must be set", customEntityType);
+    }
+  }
+
+  /**
+   * Validates the structure and integrity of an {@link EntityType} definition.
+   * <p>
+   * This method checks that the entity type has a valid UUID, a non-null and non-blank name,
+   * the private property is set, and all sources and columns are valid. For sources of type
+   * {@link EntityTypeSourceEntityType}, it ensures the referenced entity type exists (unless
+   * a list of valid entity type IDs is provided, in which case it checks against that list).
+   * For columns of type {@link CustomFieldType}, it ensures that required custom field metadata
+   * properties are present and non-blank.
+   * </p>
+   *
+   * @param entityTypeId   the expected UUID of the entity type (should match entityType.getId())
+   * @param entityType     the {@link EntityType} to validate
+   * @param validTargetIds optional list of valid entity type IDs (as strings) to check source references against;
+   *                       if null, will check existence in the repository
+   * @throws InvalidEntityTypeDefinitionException if any validation check fails
+   */
+  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
+  void validateEntityType(UUID entityTypeId, EntityType entityType, List<String> validTargetIds) {
+    if (entityType.getId() == null || entityTypeId == null) {
+      throw new InvalidEntityTypeDefinitionException("Entity type ID cannot be null", entityTypeId);
+    }
+    try {
+      UUID.fromString(entityType.getId());
+    } catch (IllegalArgumentException e) {
+      throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", entityTypeId);
+    }
+    if (!entityTypeId.toString().equals(entityType.getId())) {
+      throw new InvalidEntityTypeDefinitionException("Entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
+    }
+    if (entityType.getName() == null || entityType.getName().isBlank()) {
+      throw new InvalidEntityTypeDefinitionException("Entity type name cannot be null or blank", entityTypeId);
+    }
+    if (entityType.getPrivate() == null) {
+      throw new InvalidEntityTypeDefinitionException("Entity type must have private property set", entityTypeId);
+    }
+
+    validateSources(entityType, validTargetIds);
+    validateColumns(entityType);
+  }
+
+  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
+  private void validateSources(EntityType entityType, List<String> validTargetIds) {
+    if (entityType.getSources() == null) {
+      throw new InvalidEntityTypeDefinitionException("Entity type must have at least one source defined", entityType);
+    }
+    for (EntityTypeSource source : entityType.getSources()) {
+      if (source.getAlias() == null || source.getAlias().isBlank()) {
+        throw new InvalidEntityTypeDefinitionException("Source alias cannot be null or blank", entityType);
+      }
+      if (source.getType() == null) {
+        throw new InvalidEntityTypeDefinitionException("Source type cannot be null", entityType);
+      }
+      if (!source.getType().equals("db") && !source.getType().equals("entity-type")) {
+        throw new InvalidEntityTypeDefinitionException("Source type must be either 'db' or 'entity-type'", entityType);
+      }
+      if (source instanceof EntityTypeSourceEntityType entityTypeSource) {
+        validateEntityTypeSource(entityType, entityTypeSource.getTargetId(), validTargetIds);
+      }
+    }
+  }
+
+  private void validateEntityTypeSource(EntityType entityType, UUID targetId, List<String> validTargetIds) {
+    if (targetId == null) {
+      throw new InvalidEntityTypeDefinitionException("Source entity type ID cannot be null for entity-type sources", entityType);
+    }
+    if (validTargetIds == null) {
+      if (entityTypeRepository.getEntityTypeDefinition(targetId, executionContext.getTenantId()).isEmpty()) {
+        throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
+      }
+    } else if (!validTargetIds.contains(targetId.toString())) {
+      throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
+    }
+  }
+
+  @SuppressWarnings({"java:S2589"}) // Suppress incorrect warnings about null check always returning false
+  private void validateColumns(EntityType entityType) {
+    if (entityType.getColumns() != null) {
+      for (EntityTypeColumn column : entityType.getColumns()) {
+        if (column.getDataType() instanceof CustomFieldType customFieldType) {
+          CustomFieldMetadata customFieldMetadata = customFieldType.getCustomFieldMetadata();
+          if (customFieldMetadata.getConfigurationView() == null || customFieldMetadata.getConfigurationView().isBlank()) {
+            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a configuration view defined", UUID.fromString(entityType.getId()));
+          }
+          if (customFieldMetadata.getDataExtractionPath() == null || customFieldMetadata.getDataExtractionPath().isBlank()) {
+            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a data extraction path defined", UUID.fromString(entityType.getId()));
+          }
+        }
+      }
     }
   }
 
@@ -617,19 +743,18 @@ public class EntityTypeService {
     // Check if target column can join to custom column
     boolean targetCanJoinToCustom =
       targetEntityTypeColumn.getJoinsTo() != null
-      && targetEntityTypeColumn.getJoinsTo().stream()
+        && targetEntityTypeColumn.getJoinsTo().stream()
         .anyMatch(join -> join.getTargetId().equals(customEntityTypeColumn.getOriginalEntityTypeId())
-                          && join.getTargetField() != null
-                          && (customEntityTypeColumn.getName().equals(join.getTargetField()) || customEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
+          && join.getTargetField() != null
+          && (customEntityTypeColumn.getName().equals(join.getTargetField()) || customEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
 
     // Check if custom column can join to target column
     boolean customCanJoinToTarget =
       customEntityTypeColumn.getJoinsTo() != null
-      && customEntityTypeColumn.getJoinsTo().stream()
+        && customEntityTypeColumn.getJoinsTo().stream()
         .anyMatch(join -> (join.getTargetId().equals(targetEntityTypeColumn.getOriginalEntityTypeId()) || join.getTargetId().toString().equals(targetEntityType.getId()))
-                          && join.getTargetField() != null
-                          && (targetEntityTypeColumn.getName().equals(join.getTargetField()) || targetEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
-
+          && join.getTargetField() != null
+          && (targetEntityTypeColumn.getName().equals(join.getTargetField()) || targetEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
     return targetCanJoinToCustom || customCanJoinToTarget;
   }
 

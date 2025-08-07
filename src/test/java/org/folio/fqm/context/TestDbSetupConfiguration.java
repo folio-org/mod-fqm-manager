@@ -9,6 +9,7 @@ import org.folio.fqm.IntegrationTestBase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
+import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.PermissionsService;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,9 @@ public class TestDbSetupConfiguration {
     private EntityTypeRepository entityTypeRepository;
 
     @Autowired
+    private EntityTypeService entityTypeService;
+
+    @Autowired
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
@@ -83,7 +87,8 @@ public class TestDbSetupConfiguration {
           }
         },
         resourceResolver,
-        null
+        null,
+        entityTypeService
       )
         .initializeEntityTypes("tenant_01");
     }

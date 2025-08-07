@@ -12,6 +12,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
@@ -27,6 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_BOOLEAN_VALUES;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_VALUE_GETTER;
@@ -76,9 +78,11 @@ class EntityTypeRepositoryTest {
     String refId3 = "customColumn3";
     String refId4 = "customColumn4";
     String refId5 = "customColumn5";
+    String refId6 = "customColumn6";
     String valueGetter1 = String.format(genericValueGetter, refId1);
     String valueGetter2 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId2, "custom_fields_source_view.jsonb -> 'customFields'", refId2);
     String valueGetter3 = String.format(CUSTOM_FIELD_VALUE_GETTER, null, "custom_fields_source_view", refId3, "custom_fields_source_view.jsonb -> 'customFields'", refId3);
+    String valueGetter6 = String.format(CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER, null, "custom_fields_source_view", refId6, "custom_fields_source_view.jsonb -> 'customFields'", refId6);
     var radioButtonValues = List.of(
       new ValueWithLabel().label("label1").value("opt1"),
       new ValueWithLabel().label("label2").value("opt2")
@@ -86,6 +90,10 @@ class EntityTypeRepositoryTest {
     var singleSelectValues = List.of(
       new ValueWithLabel().label("label3").value("opt3"),
       new ValueWithLabel().label("label4").value("opt4")
+    );
+    var multiSelectValues = List.of(
+      new ValueWithLabel().label("multi1").value("opt1"),
+      new ValueWithLabel().label("multi2").value("opt2")
     );
     List<EntityTypeColumn> expectedColumns = List.of(
       new EntityTypeColumn()
@@ -169,6 +177,17 @@ class EntityTypeRepositoryTest {
         .dataType(new StringType().dataType("stringType"))
         .valueGetter(String.format(genericValueGetter, refId5))
         .labelAlias("custom_column_5 (3)")
+        .visibleByDefault(false)
+        .queryable(true)
+        .essential(true)
+        .isCustomField(true),
+      new EntityTypeColumn()
+        .name(CUSTOM_FIELD_PREPENDER + "3c4e9797-422f-4962-a302-174af09b23fa")
+        .dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType")))
+        .valueGetter(valueGetter6)
+        .filterValueGetter("custom_fields_source_view.jsonb -> 'customFields' -> 'customColumn6'")
+        .labelAlias("custom_column_6")
+        .values(multiSelectValues)
         .visibleByDefault(false)
         .queryable(true)
         .essential(true)

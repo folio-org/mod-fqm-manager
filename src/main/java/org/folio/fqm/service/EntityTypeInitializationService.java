@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import lombok.extern.log4j.Log4j2;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class EntityTypeInitializationService {
 
   private final EntityTypeRepository entityTypeRepository;
+  private final EntityTypeService entityTypeService;
 
   private final FolioExecutionContext folioExecutionContext;
 
@@ -36,12 +38,13 @@ public class EntityTypeInitializationService {
     EntityTypeRepository entityTypeRepository,
     FolioExecutionContext folioExecutionContext,
     ResourcePatternResolver resourceResolver,
-    CrossTenantQueryService crossTenantQueryService
-  ) {
+    CrossTenantQueryService crossTenantQueryService,
+    EntityTypeService entityTypeService) {
     this.entityTypeRepository = entityTypeRepository;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
     this.crossTenantQueryService = crossTenantQueryService;
+    this.entityTypeService = entityTypeService;
 
     // this enables all JSON5 features, except for numeric ones (hex, starting/trailing
     // decimal points, use of NaN, etc), as those are not relevant for our use
@@ -98,6 +101,20 @@ public class EntityTypeInitializationService {
         }
       })
       .toList();
+
+    List<String> entityTypeIds = desiredEntityTypes
+      .stream()
+      .map(EntityType::getId)
+      .toList();
+
+    for (EntityType entityType : desiredEntityTypes) {
+      log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
+      entityTypeService.validateEntityType(
+        UUID.fromString(entityType.getId()),
+        entityType,
+        entityTypeIds
+      );
+    }
 
     // lambdas ensure we don't do the stream/map/etc. unless logging is enabled
     log.info(

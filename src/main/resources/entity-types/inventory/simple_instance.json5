@@ -105,7 +105,8 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',// simple_user_details
+
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -776,7 +777,8 @@
       valueGetter: ":inst.jsonb->'dates'->>'dateTypeId'",
       joinsTo: [
         {
-          targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
+          targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
+          // simple_instance_date_type
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -953,27 +955,42 @@
         itemDataType: {
           dataType: 'objectType',
           properties: [
-            //            {
-            //              name: 'instance_note_type_id',
-            //              property: 'instanceNoteTypeId',
-            //              dataType: {
-            //                dataType: 'rangedUUIDType',
-            //              },
-            //              queryable: false,
-            //              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-            //              valueFunction: 'lower(:value)',
-            //            },
+//            {
+//              name: 'instance_note_type_id',
+//              property: 'instanceNoteTypeId',
+//              dataType: {
+//                dataType: 'rangedUUIDType',
+//              },
+//              queryable: false,
+//              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              valueFunction: 'lower(:value)'
+//            },
+            {
+              name: 'instance_note_type',
+              property: 'instanceNoteType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              source: {
+                columnName: 'name',
+                entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteType') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+              valueFunction: 'lower(:value)'
+            },
             {
               name: 'note',
               property: 'note',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueFunction: 'lower(:value)'
             },
             {
               name: 'staff_only',
@@ -981,7 +998,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1002,7 +1019,12 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'notes'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                              jsonb_build_object('instanceNoteType', instance_note_type.jsonb ->> 'name') \
+                 ORDER BY record.value ->> 'instanceNoteTypeId') \
+               FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
+                 LEFT JOIN ${tenant_id}_mod_fqm_manager.src_instance_note_type instance_note_type \
+                   ON (record.value ->> 'instanceNoteTypeId') = instance_note_type.id::text)::text"
     },
     {
       name: 'administrative_notes',
@@ -1015,7 +1037,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\

@@ -45,7 +45,7 @@
       valueSourceApi: {
         path: 'instance-note-types',
         labelJsonPath: '$.instanceNoteTypes.*.name',
-        valueJsonPath: '$.instanceNoteTypes.*.id',
+        valueJsonPath: '$.instanceNoteTypes.*.name',
       }
     },
     {

@@ -982,7 +982,7 @@
               valueSourceApi: {
                 path: 'instance-note-types',
                 labelJsonPath: '$.instanceNoteTypes.*.name',
-                valueJsonPath: '$.instanceNoteTypes.*.id',
+                valueJsonPath: '$.instanceNoteTypes.*.name',
               },
               queryable: true,
               valueGetter: "(SELECT array_agg(instance_note_type.jsonb ->> 'name' ORDER BY record.value ->> 'instanceNoteTypeId') \

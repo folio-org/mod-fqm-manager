@@ -76,6 +76,7 @@ public class CrossTenantQueryService {
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments
     // We can use this for determining if it's an ECS environment, and if so, retrieving the consortium ID and central tenant ID
     Map<String, String> ecsTenantInfo = getEcsTenantInfo();
+    log.info("ECS tenant info: {}", ecsTenantInfo);
     Pair<String, String> currentTenantPair = Pair.of(executionContext.getTenantId(), null);
     if (!ecsEnabled(ecsTenantInfo)) {
       // Tenant name is null here, but that's ok because tenant name is only relevant in ECS environments
@@ -86,6 +87,7 @@ public class CrossTenantQueryService {
     String centralTenantId = getCentralTenantId(ecsTenantInfo);
     String consortiumId = ecsTenantInfo.get("consortiumId");
     List<Map<String, String>> userTenantMaps = getUserTenants(consortiumId, userId.toString(), centralTenantId);
+    log.info("userTenantMaps: {}", userTenantMaps);
     String currentTenantName = userTenantMaps
       .stream()
       .filter(individualMap -> individualMap.get(TENANT_ID).equals(currentTenantId))
@@ -103,7 +105,7 @@ public class CrossTenantQueryService {
     Pair<String, String> centralTenantPair = Pair.of(centralTenantId, centralTenantName);
 
     if (!executionContext.getTenantId().equals(centralTenantId)) {
-      log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
+      log.info("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
       // The Instances entity type is required to retrieve shared instances from the central tenant when
       // running queries from member tenants. This means that if we are running a query for Instances, we need to
       // query the current tenant (for local records) as well as the central tenant (for shared records).
@@ -147,6 +149,7 @@ public class CrossTenantQueryService {
       Map.of("userId", userId, "limit", "1000"),
       tenantId
     );
+    log.info("userTenantResponse: {}", userTenantResponse);
     return JsonPath
       .parse(userTenantResponse)
       .read("$.userTenants", List.class);

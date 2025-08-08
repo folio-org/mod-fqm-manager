@@ -1718,7 +1718,7 @@
     "entityType.composite_order_invoice_analytics.po_created_by": "PO created by",
     "entityType.composite_order_invoice_analytics.po_updated_by": "PO updated by",
     "entityType.simple_loans.updated_by": "Updated by user UUID",
-    "entityType.composite_item_details.instance_status": "Instance status"
+    "entityType.composite_item_details.instance_status": "Instance status",
     "entityType.simple_instance.notes.instance_note_type": "Note type",
     "entityType.simple_instance.notes.instance_note_type._qualified": "Instances — Notes — Note type",
     "entityType.simple_instance_note_type": "Note type",

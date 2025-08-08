@@ -965,6 +965,7 @@
                 columnName: 'name',
                 entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
               },
+              labelAlias: 'Note type',
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",

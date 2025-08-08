@@ -24,6 +24,7 @@ import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
 import org.folio.fqm.migration.strategies.V15AlertsAndReportingCodesRemoval;
 import org.folio.fqm.migration.strategies.V16OrganizationSimpleToCompositeMigration;
+import org.folio.fqm.migration.strategies.V17ContainsAnyToInOperatorMigration;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,8 @@ public class MigrationStrategyRepository {
         new V13CustomFieldRename(executionContext, jooqContext),
         new V14ItemLocLibraryValueChange(locationUnitsClient),
         new V15AlertsAndReportingCodesRemoval(),
-        new V16OrganizationSimpleToCompositeMigration()
+        new V16OrganizationSimpleToCompositeMigration(),
+        new V17ContainsAnyToInOperatorMigration()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

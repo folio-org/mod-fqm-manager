@@ -805,7 +805,6 @@
                 dataType: 'stringType'
               },
               queryable: true,
-              hidden: true,
               valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
               source: {
@@ -814,21 +813,6 @@
               },
               valueFunction: 'lower(:value)'
             },
-//            {
-//              name: 'holdings_note_type_name',
-//              property: 'holdingsNoteTypeName',
-//              dataType: {
-//                dataType: 'stringType'
-//              },
-//              queryable: true,
-//              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeName') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeName')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-//              source: {
-//                entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
-//                columnName: 'name',
-//              },
-//              valueFunction: 'lower(:value)'
-//            },
             {
               name: 'note',
               property: 'note',
@@ -868,7 +852,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
-                                      jsonb_build_object('holdingsNoteTypeName', class_type.jsonb ->> 'name') \
+                                      jsonb_build_object('holdingsNoteType', class_type.jsonb ->> 'name') \
                        ORDER BY record.value ->> 'holdingsNoteTypeId') \
                      FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
                        LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_holdings_note_type class_type \

@@ -799,8 +799,8 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'holdings_note_type_id',
-              property: 'holdingsNoteTypeId',
+              name: 'holdings_note_type',
+              property: 'holdingsNoteType',
               dataType: {
                 dataType: 'stringType'
               },
@@ -814,21 +814,21 @@
               },
               valueFunction: 'lower(:value)'
             },
-            {
-              name: 'holdings_note_type_name',
-              property: 'holdingsNoteTypeName',
-              dataType: {
-                dataType: 'stringType'
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeName') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeName')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              source: {
-                entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
-                columnName: 'name',
-              },
-              valueFunction: 'lower(:value)'
-            },
+//            {
+//              name: 'holdings_note_type_name',
+//              property: 'holdingsNoteTypeName',
+//              dataType: {
+//                dataType: 'stringType'
+//              },
+//              queryable: true,
+//              valueGetter: "( SELECT array_agg(elems.value->>'holdingsNoteTypeName') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingsNoteTypeName')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
+//              source: {
+//                entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
+//                columnName: 'name',
+//              },
+//              valueFunction: 'lower(:value)'
+//            },
             {
               name: 'note',
               property: 'note',

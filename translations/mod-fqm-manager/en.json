@@ -739,11 +739,11 @@
   "entityType.simple_instance.notes.instance_note_type_id": "Type UUID",
   "entityType.simple_instance.notes.instance_note_type_id._qualified": "Notes type UUID",
   "entityType.simple_instance.notes.note": "Note",
-  "entityType.simple_instance.notes.note._qualified": "Instances — Notes — Notes",
+  "entityType.simple_instance.notes.note._qualified": "Instance — Notes — Note",
   "entityType.simple_instance.notes.instance_note_type": "Note type",
-  "entityType.simple_instance.notes.instance_note_type._qualified": "Instances — Notes — Note type",
+  "entityType.simple_instance.notes.instance_note_type._qualified": "Instance— Notes — Note type",
   "entityType.simple_instance.notes.staff_only": "Staff only",
-  "entityType.simple_instance.notes.staff_only._qualified": "Instances — Notes — Notes staff only",
+  "entityType.simple_instance.notes.staff_only._qualified": "Instance — Notes — Staff only",
   "entityType.simple_instance.physical_descriptions": "Physical descriptions",
   "entityType.simple_instance.previously_held": "Previously held",
   "entityType.simple_instance.publication": "Publication",
@@ -1722,5 +1722,5 @@
   "entityType.composite_srs_authority": "SRS Authority",
   "entityType.composite_srs_authority.srs_record": "SRS record",
   "entityType.simple_instance_note_type": "Note type",
-  "entityType.simple_instance_note_type.id": "Id",
+  "entityType.simple_instance_note_type.id": "Id"
 }

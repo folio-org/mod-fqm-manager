@@ -1,0 +1,82 @@
+{
+  id: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
+  name: 'simple_holdings_note_type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'note_type',
+      target: 'src_inventory_holdings_note_type',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.holdings-note-types.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.id",
+    },
+    {
+      name: 'source',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'name',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'holdings-note-types',
+        valueJsonPath: '$.holdingsNoteTypes.*.id',
+        labelJsonPath: '$.holdingsNoteTypes.*.name',
+      }
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

@@ -228,6 +228,26 @@
       ],
     },
     {
+      name: 'permanent_location_name',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':hrd.permanentlocationid',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'name',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
       name: 'temporary_location_id',
       dataType: {
         dataType: 'rangedUUIDType',

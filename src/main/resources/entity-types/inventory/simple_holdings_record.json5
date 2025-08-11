@@ -229,6 +229,7 @@
     },
     {
       name: 'permanent_location_name',
+      sourceAlias: 'permanent_location',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -236,12 +237,12 @@
       hidden: true,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':hrd.permanentlocationid',
+      valueGetter: ":sourceAlias.jsonb->>'name'",
       essential: true,
       joinsTo: [
         {
           targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
-          targetField: 'name',
+          targetField: 'id',
           type: 'equality-simple',
           direction: 'left',
         },

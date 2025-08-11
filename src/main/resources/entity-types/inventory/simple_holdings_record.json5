@@ -8,6 +8,11 @@
       alias: 'hrd',
       target: 'src_inventory_holdings_record',
     },
+    {
+      type: 'db',
+      alias: 'location',
+      target: 'src_inventory_location',
+    }
   ],
   requiredPermissions: [
     'inventory-storage.holdings.item.get',
@@ -233,7 +238,7 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",

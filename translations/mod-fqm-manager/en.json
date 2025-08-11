@@ -149,6 +149,7 @@
   "entityType.composite_voucher_line__voucher__ledger__fund.fund_type": "Fund type",
   "entityType.composite_voucher_line__voucher__ledger__fund.ledger": "Ledger",
   "entityType.composite_voucher_line__voucher__ledger__fund.voucher": "Voucher",
+  "entityType.composite_voucher_line__voucher__ledger__fund.voucher_line": "Voucher line",
   "entityType.composite_voucher_line__voucher__ledger__fund.created_by": "Voucher line created by",
   "entityType.composite_voucher_line__voucher__ledger__fund.updated_by": "Voucher line updated by",
   "entityType.composite_voucher_line_totals_per_account": "Composite voucher line totals per account",

@@ -55,6 +55,7 @@
   "entityType.composite_item_details.temporary_loan_type": "Temporary loan type",
   "entityType.composite_item_details.created_by_user": "Item created by",
   "entityType.composite_item_details.updated_by_user": "Item updated by",
+  "entityType.composite_item_details.holding_permanent_location": "Holdings record permanent location",
   "entityType.composite_fund": "Fund with ledger",
   "entityType.composite_fund.fund": "Fund",
   "entityType.composite_fund.fund_type": "Fund type",

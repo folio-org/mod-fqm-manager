@@ -138,6 +138,14 @@
       essentialOnly: true,
       order: 140,
     },
+    {
+      alias: 'hrd_permanent_location',
+      type: 'entity-type',
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations
+      targetField: 'id',
+      sourceField: 'holdings.permanent_location_id',
+      essentialOnly: true,
+    }
   ],
   defaultSort: [
     {

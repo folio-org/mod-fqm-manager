@@ -1723,5 +1723,6 @@
   "entityType.composite_srs_authority": "SRS Authority",
   "entityType.composite_srs_authority.srs_record": "SRS record",
   "entityType.simple_instance_note_type": "Note type",
-  "entityType.simple_instance_note_type.id": "Id"
+  "entityType.simple_instance_note_type.id": "Id",
+  "entityType.composite_item_details.hrd_permanent_location": "Holdings - Permanent location"
 }

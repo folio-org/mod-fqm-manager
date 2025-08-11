@@ -229,7 +229,6 @@
     },
     {
       name: 'permanent_location_name',
-      sourceAlias: 'permanent_location',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -237,7 +236,7 @@
       hidden: true,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'name'",
+      valueGetter: "name",
       essential: true,
       joinsTo: [
         {

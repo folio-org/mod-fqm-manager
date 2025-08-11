@@ -232,17 +232,20 @@
       dataType: {
         dataType: 'stringType',
       },
-      sourceAlias: 'hrd',
-      queryable: false,
-      visibleByDefault: true,
+      isIdColumn: false,
+      hidden: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':hrd.permanentlocationid',
       essential: true,
-      valueGetter: ":sourceAlias.jsonb ->> 'name'",
-      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'permanentlocationid'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      source: {
-        columnName: 'name',
-        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-      }
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'name',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'temporary_location_id',

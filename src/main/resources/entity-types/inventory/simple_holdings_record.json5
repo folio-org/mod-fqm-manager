@@ -228,6 +228,23 @@
       ],
     },
     {
+      name: 'permanent_location_name',
+      sourceAlias: 'location',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb->>'name'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      source: {
+        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+        columnName: 'name',
+      },
+    },
+    {
       name: 'temporary_location_id',
       dataType: {
         dataType: 'rangedUUIDType',

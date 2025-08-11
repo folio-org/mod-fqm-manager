@@ -85,15 +85,6 @@
       order: 60,
     },
     {
-      alias: 'holdings_permanent_location',
-      type: 'entity-type',
-      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,
-      targetField: 'id',
-      sourceField: 'items.permanent_location_id',
-      essentialOnly: true,
-      order: 150,
-    },
-    {
       alias: 'instances',
       type: 'entity-type',
       targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instances

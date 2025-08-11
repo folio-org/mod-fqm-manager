@@ -50,6 +50,7 @@
   "entityType.composite_item_details.loclibrary": "Effective library",
   "entityType.composite_item_details.mtypes": "Material type",
   "entityType.composite_item_details.permanent_location": "Permanent location",
+  "entityType.composite_item_details.hrd_permanent_location": "Holdings - Permanent location",
   "entityType.composite_item_details.temporary_location": "Temporary location",
   "entityType.composite_item_details.permanent_loan_type": "Permanent loan type",
   "entityType.composite_item_details.temporary_loan_type": "Temporary loan type",

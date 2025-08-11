@@ -1722,5 +1722,6 @@
     "entityType.simple_instance.notes.instance_note_type": "Note type",
     "entityType.simple_instance.notes.instance_note_type._qualified": "Instance — Notes — Note type",
     "entityType.simple_instance_note_type": "Note type",
-    "entityType.simple_instance_note_type.id": "Id"
+    "entityType.simple_instance_note_type.id": "Id",
+    "entityType.composite_item_details.hrd_permanent_location": "Holdings - Permanent location",,
 }

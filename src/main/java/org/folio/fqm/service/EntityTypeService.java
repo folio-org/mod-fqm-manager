@@ -120,7 +120,7 @@ public class EntityTypeService {
    * @return the entity type definition if found, empty otherwise
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
-    enforceAccessForPossibleCustomEntityType(entityTypeId);
+    verifyAccessForPossibleCustomEntityType(entityTypeId);
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
@@ -143,7 +143,7 @@ public class EntityTypeService {
    */
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
-    enforceAccessForPossibleCustomEntityType(entityTypeId);
+    verifyAccessForPossibleCustomEntityType(entityTypeId);
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
 
     Field field = FqlValidationService
@@ -576,11 +576,11 @@ public class EntityTypeService {
     return permissionsService.canUserAccessCustomEntityType(customET);
   }
 
-  void enforceAccessForPossibleCustomEntityType(UUID entityTypeId) {
+  void verifyAccessForPossibleCustomEntityType(UUID entityTypeId) {
     entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
       .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
       .map(et -> getCustomEntityType(entityTypeId))
-      .ifPresent(permissionsService::canUserAccessCustomEntityType);
+      .ifPresent(permissionsService::verifyUserCanAccessCustomEntityType);
   }
 
   public void deleteCustomEntityType(UUID entityTypeId) {

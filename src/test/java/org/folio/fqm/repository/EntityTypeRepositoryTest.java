@@ -8,6 +8,7 @@ import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
+import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -188,6 +189,16 @@ class EntityTypeRepositoryTest {
         .filterValueGetter("custom_fields_source_view.jsonb -> 'customFields' -> 'customColumn6'")
         .labelAlias("custom_column_6")
         .values(multiSelectValues)
+        .visibleByDefault(false)
+        .queryable(true)
+        .essential(true)
+        .isCustomField(true),
+      new EntityTypeColumn()
+        .name(CUSTOM_FIELD_PREPENDER + "3c4e9797-422f-4962-a302-174af09b23fe")
+        .dataType(new DateType().dataType("dateType"))
+        .valueGetter("(custom_fields_source_view.jsonb -> 'customFields' ->> 'customDateColumn')::date")
+        .valueFunction("(:value)::date")
+        .labelAlias("custom_date_column")
         .visibleByDefault(false)
         .queryable(true)
         .essential(true)

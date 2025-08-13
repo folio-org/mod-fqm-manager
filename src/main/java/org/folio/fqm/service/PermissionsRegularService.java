@@ -96,7 +96,7 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public void verifyUserCanAccessCustomEntityType(CustomEntityType entityType) {
-    if (!entityType.getShared() && !context.getUserId().equals(entityType.getOwner())) {
+    if (!canUserAccessCustomEntityType(entityType)) {
       throw new CustomEntityTypeAccessDeniedException("Entity type " + entityType.getId() + " is not shared. It can only be accessed by its owner");
     }
   }

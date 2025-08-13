@@ -1236,63 +1236,6 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void enforceCustomEntityTypeAccess_whenEntityTypeIsShared_shouldNotThrowException() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId)
-      .shared(true)
-      .isCustom(true);
-
-    // Act & Assert
-    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
-    // No exception should be thrown
-  }
-
-  @Test
-  void enforceCustomEntityTypeAccess_whenEntityTypeIsOwnedByCurrentUser_shouldNotThrowException() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId)
-      .shared(false)
-      .isCustom(true);
-
-    when(executionContext.getUserId()).thenReturn(ownerId); // Same as owner
-
-    // Act & Assert
-    entityTypeService.enforceCustomEntityTypeAccess(customEntityType);
-    // No exception should be thrown
-  }
-
-  @Test
-  void enforceCustomEntityTypeAccess_whenEntityTypeIsNotSharedAndNotOwned_shouldThrowException() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-    UUID currentUserId = UUID.randomUUID(); // Different user ID
-
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId)
-      .shared(false)
-      .isCustom(true);
-
-    when(executionContext.getUserId()).thenReturn(currentUserId);
-
-    // Act & Assert
-    assertThrows(CustomEntityTypeAccessDeniedException.class,
-      () -> entityTypeService.enforceCustomEntityTypeAccess(customEntityType),
-      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible");
-  }
-
-  @Test
   void validateCustomEntityType_shouldThrowException_whenSourceViewIsNotNull() {
     // Arrange
     UUID entityTypeId = UUID.randomUUID();

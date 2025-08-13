@@ -65,33 +65,7 @@ public class SourceUtils {
     }
   }
 
-  private static <T extends Field> T injectSourceAlias(
-    T column,
-    Map<String, String> renamedAliases,
-    boolean finalPass
-  ) {
-    getAliasReplacementOrder(renamedAliases)
-      .forEach(alias -> {
-
-        column.valueGetter(applyAliasReplacement(column.getValueGetter(), alias, renamedAliases, finalPass));
-        if (column.getFilterValueGetter() != null) {
-          column.filterValueGetter(applyAliasReplacement(column.getFilterValueGetter(), alias, renamedAliases, finalPass));
-        }
-        if (column.getValueFunction() != null) {
-          column.valueFunction(applyAliasReplacement(column.getValueFunction(), alias, renamedAliases, finalPass));
-        }
-        if (column.getDataType() instanceof ObjectType objectType) {
-          injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
-        }
-        if (column.getDataType() instanceof ArrayType arrayType) {
-          injectSourceAliasForArrayType(arrayType, renamedAliases, finalPass);
-        }
-      });
-
-    return column;
-  }
-
-  public static void injectSourceAliasForObjectType(
+  public static ObjectType injectSourceAliasForObjectType(
     ObjectType objectType,
     Map<String, String> renamedAliases,
     boolean finalPass
@@ -101,19 +75,49 @@ public class SourceUtils {
       .stream()
       .map(nestedField -> injectSourceAlias(copyNestedProperty(nestedField), renamedAliases, finalPass))
       .toList();
-    objectType.properties(convertedProperties);
+    return objectType.toBuilder().properties(convertedProperties).build();
   }
 
-  public static void injectSourceAliasForArrayType(
+  public static ArrayType injectSourceAliasForArrayType(
     ArrayType arrayType,
     Map<String, String> renamedAliases,
     boolean finalPass
   ) {
     if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
-      injectSourceAliasForArrayType(nestedArrayType, renamedAliases, finalPass);
+      ArrayType updatedNestedArrayType = injectSourceAliasForArrayType(nestedArrayType, renamedAliases, finalPass);
+      return arrayType.toBuilder().itemDataType(updatedNestedArrayType).build();
     } else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
-      injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
+      ObjectType updatedObjectType = injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
+      return arrayType.toBuilder().itemDataType(updatedObjectType).build();
     }
+    return arrayType.toBuilder().build();
+  }
+
+  private static <T extends Field> T injectSourceAlias(
+    T column,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+    getAliasReplacementOrder(renamedAliases)
+      .forEach(alias -> {
+        column.valueGetter(applyAliasReplacement(column.getValueGetter(), alias, renamedAliases, finalPass));
+        if (column.getFilterValueGetter() != null) {
+          column.filterValueGetter(applyAliasReplacement(column.getFilterValueGetter(), alias, renamedAliases, finalPass));
+        }
+        if (column.getValueFunction() != null) {
+          column.valueFunction(applyAliasReplacement(column.getValueFunction(), alias, renamedAliases, finalPass));
+        }
+        if (column.getDataType() instanceof ObjectType objectType) {
+          ObjectType updatedObjectType = injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
+          column.dataType(updatedObjectType);
+        }
+        if (column.getDataType() instanceof ArrayType arrayType) {
+          ArrayType updatedArrayType = injectSourceAliasForArrayType(arrayType, renamedAliases, finalPass);
+          column.dataType(updatedArrayType);
+        }
+      });
+
+    return column;
   }
 
   public static List<String> injectSourceAliasIntoFilterConditions(

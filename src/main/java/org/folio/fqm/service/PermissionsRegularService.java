@@ -103,7 +103,7 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public boolean canUserAccessCustomEntityType(CustomEntityType entityType) {
-    return entityType.getShared() || !context.getUserId().equals(entityType.getOwner());
+    return entityType.getShared() || context.getUserId().equals(entityType.getOwner());
   }
 
   private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {

@@ -1057,7 +1057,6 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(executionContext.getUserId()).thenReturn(ownerId);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).deleteEntityType(entityTypeId);

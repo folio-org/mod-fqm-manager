@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.ModPermissionsClient;
 import org.folio.fqm.client.ModRolesKeycloakClient;
+import org.folio.fqm.exception.CustomEntityTypeAccessDeniedException;
 import org.folio.fqm.exception.MissingPermissionsException;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 public class PermissionsRegularService implements PermissionsService {
 
   // package-private for visibility in unit tests
-
   @Value("${folio.is-eureka}")
   boolean isEureka;
 
@@ -91,6 +92,18 @@ public class PermissionsRegularService implements PermissionsService {
       log.warn("User {} is missing permissions that are required for this operation: [{}]", userId, missingPermissions);
       throw new MissingPermissionsException(missingPermissions);
     }
+  }
+
+  @Override
+  public void verifyUserCanAccessCustomEntityType(CustomEntityType entityType) {
+    if (!entityType.getShared() && !context.getUserId().equals(entityType.getOwner())) {
+      throw new CustomEntityTypeAccessDeniedException("Entity type " + entityType.getId() + " is not shared. It can only be accessed by its owner");
+    }
+  }
+
+  @Override
+  public boolean canUserAccessCustomEntityType(CustomEntityType entityType) {
+    return entityType.getShared() || !context.getUserId().equals(entityType.getOwner());
   }
 
   private Set<String> getUserPermissionsFromModPermissions(String tenantId, UUID userId) {

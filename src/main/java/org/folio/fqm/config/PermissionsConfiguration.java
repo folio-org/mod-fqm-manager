@@ -18,7 +18,6 @@ public class PermissionsConfiguration {
   private boolean bypassPermissionChecks;
 
   @Bean
-//  @Autowired
   public PermissionsService permissionsService(
     // lazy-loading here to avoid instantiation of the unused one
     ApplicationContext applicationContext

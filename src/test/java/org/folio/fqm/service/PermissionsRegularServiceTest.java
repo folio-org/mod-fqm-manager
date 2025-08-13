@@ -6,10 +6,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.*;
-
 import org.folio.fqm.client.ModPermissionsClient;
 import org.folio.fqm.client.ModRolesKeycloakClient;
+import org.folio.fqm.exception.CustomEntityTypeAccessDeniedException;
 import org.folio.fqm.exception.MissingPermissionsException;
+import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.spring.FolioExecutionContext;
@@ -32,7 +33,6 @@ class PermissionsRegularServiceTest {
   private static final UUID USER_ID = UUID.randomUUID();
 
   void setUpMocks(String... permissions) {
-
     when(context.getUserId()).thenReturn(USER_ID);
     when(context.getTenantId()).thenReturn(TENANT_ID);
 
@@ -45,22 +45,22 @@ class PermissionsRegularServiceTest {
     }
   }
 
-
   private EntityType getTestEntityType() {
     EntityType entityType = new EntityType(UUID.randomUUID().toString(), "entity type name", true)
       .sources(List.of(new EntityTypeSource("db", "source_alias")));
-    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(TENANT_ID), eq(false))).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(UUID.class), eq(TENANT_ID), eq(false)))
+      .thenReturn(entityType);
     return entityType;
   }
 
   @Test
-  void thePermissionsServiceShouldUseTheModPermissionsClientByDefault() {
+  void testThePermissionsServiceShouldUseTheModPermissionsClientByDefault() {
     setUpMocks("permission1", "permission2");
     assertEquals(2, permissionsService.getUserPermissions().size());
   }
 
   @Test
-  void userWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
+  void testUserWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
     setUpMocks(); // User has no permissions
     EntityType entityType = getTestEntityType();
 
@@ -79,7 +79,7 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void userHasNecessaryPermissions() {
+  void testUserHasNecessaryPermissions() {
     // Given a user with 2 permissions
     setUpMocks("permission1", "permission2");
     // When the entity type requires various possible permissions (which the user has)
@@ -102,7 +102,7 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void userDoesNotHaveNecessaryPermissions() {
+  void testUserDoesNotHaveNecessaryPermissions() {
     setUpMocks("permission1", "permission2");
     EntityType entityType = getTestEntityType();
     UUID userId = UUID.randomUUID();
@@ -127,7 +127,7 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void shouldCheckFqmPermissionsIfRequested() {
+  void testCheckingFqmPermissionsIfRequested() {
     setUpMocks("permission1", "permission2", "fqm.entityTypes.item.get");
     EntityType entityType = getTestEntityType();
     entityType.requiredPermissions(List.of("permission1"));
@@ -142,7 +142,7 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void WhenEurekaIsTrue() {
+  void testGetPermissionsWhenEurekaIsTrue() {
     permissionsService.isEureka = true;
     setUpMocks("permission1", "permission2");
     Set<String> userPermissions = permissionsService.getUserPermissions();
@@ -156,7 +156,7 @@ class PermissionsRegularServiceTest {
   }
 
   @Test
-  void WhenEurekaIsFalse() {
+  void testGetPermissionsWhenEurekaIsFalse() {
     permissionsService.isEureka = false;
     setUpMocks("permission1", "permission2");
     Set<String> userPermissions = permissionsService.getUserPermissions();
@@ -169,4 +169,44 @@ class PermissionsRegularServiceTest {
     verifyNoInteractions(modRolesKeycloakClient);
   }
 
+  @Test
+  void testUserCanAccessCustomEntityTypeWhenShared() {
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id("8026b64b-568c-5f1a-b5a1-6743fd741335")
+      .owner(UUID.fromString("c580ad80-d30c-5be6-bf5b-e21698fda458"))
+      .shared(true)
+      .isCustom(true);
+
+    permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
+  }
+
+  @Test
+  void testUserCanAccessCustomEntityTypeWhenOwned() {
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id("34d371d2-8fbc-5eb6-bddb-ce3f1d493dba")
+      .owner(UUID.fromString("0e5221c9-ac62-5c2d-ac7c-6d38ad035418"))
+      .shared(false)
+      .isCustom(true);
+
+    when(context.getUserId()).thenReturn(UUID.fromString("0e5221c9-ac62-5c2d-ac7c-6d38ad035418")); // Same as owner
+
+    permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
+  }
+
+  @Test
+  void testUserCanNotAccessCustomEntityTypeWhenNotOwnedNorShared() {
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id("8f016369-cedf-57cf-962d-e8e5f325abc7")
+      .owner(UUID.fromString("f7d2631a-7701-554b-b9bd-ee681345e2bb"))
+      .shared(false)
+      .isCustom(true);
+
+    when(context.getUserId()).thenReturn(UUID.fromString("c682b66a-6900-5aca-8e13-ae27dba77ca4"));
+
+    assertThrows(
+      CustomEntityTypeAccessDeniedException.class,
+      () -> permissionsService.verifyUserCanAccessCustomEntityType(customEntityType),
+      "Should throw CustomEntityTypeAccessDeniedException when custom entity type is not accessible"
+    );
+  }
 }

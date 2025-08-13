@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.service.PermissionsBypassService;
 import org.folio.fqm.service.PermissionsRegularService;
 import org.folio.fqm.service.PermissionsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ public class PermissionsConfiguration {
   private boolean bypassPermissionChecks;
 
   @Bean
-//  @Autowired
   public PermissionsService permissionsService(
     // lazy-loading here to avoid instantiation of the unused one
     ApplicationContext applicationContext

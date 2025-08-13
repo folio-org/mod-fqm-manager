@@ -14,6 +14,7 @@ import org.folio.fqm.migration.strategies.V12PurchaseOrderIdFieldRemoval;
 import org.folio.fqm.migration.strategies.V13CustomFieldRename;
 import org.folio.fqm.migration.strategies.V14ItemLocLibraryValueChange;
 import org.folio.fqm.migration.strategies.V17ContainsAnyToInOperatorMigration;
+import org.folio.fqm.migration.strategies.V18NotContainsAnyToNinOperatorMigration;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
@@ -63,8 +64,9 @@ public class MigrationStrategyRepository {
         new V14ItemLocLibraryValueChange(locationUnitsClient),
         new V15AlertsAndReportingCodesRemoval(),
         new V16OrganizationSimpleToCompositeMigration(),
-        new V17ContainsAnyToInOperatorMigration()
-        // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
+        new V17ContainsAnyToInOperatorMigration(),
+        new V18NotContainsAnyToNinOperatorMigration()
+      // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }
 

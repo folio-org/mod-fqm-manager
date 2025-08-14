@@ -432,14 +432,6 @@ public class EntityTypeRepository {
     }
   }
 
-  public void deleteEntityType(UUID entityTypeId) {
-    log.info("Deleting entity type with ID: {}", entityTypeId);
-    jooqContext.deleteFrom(table(TABLE_NAME))
-      .where(field(ID_FIELD_NAME, UUID.class).eq(entityTypeId))
-      .execute();
-    entityTypeCache.invalidate(executionContext.getTenantId());
-  }
-
   // Clear the ET cache for testing
   void clearCache() {
     entityTypeCache.invalidateAll();

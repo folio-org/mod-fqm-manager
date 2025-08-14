@@ -37,6 +37,8 @@
     'inventory-storage.statistical-codes.collection.get',
     'inventory-storage.statistical-code-types.collection.get',
     'inventory-storage.instance-formats.collection.get',
+    "inventory-storage.instance-relationships.collection.get",
+    "inventory-storage.preceding-succeeding-titles.collection.get"
   ],
   columns: [
     {
@@ -1373,6 +1375,96 @@
           label: 'False',
         },
       ],
+    },
+    {
+      name: 'childInstances',
+      sourceAlias: 'inst',
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'stringType'
+      },
+      valueGetter: "(SELECT COALESCE(jsonb_agg(\
+                      jsonb_build_object(\
+                        'id', ir.id,\
+                        'subInstanceId', ir.subinstanceid,\
+                        'instanceRelationshipTypeId', ir.instancerelationshiptypeid\
+                      )\
+                    ), '[]'::jsonb)\
+                  FROM ${tenant_id}_mod_fqm_manager.src_instance_relationship ir\
+                  WHERE ir.superinstanceid = :sourceAlias.id)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'parentInstances',
+      sourceAlias: 'inst',
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "(SELECT COALESCE(jsonb_agg(\
+                      jsonb_build_object(\
+                        'id', ir.id,\
+                        'superInstanceId', ir.superinstanceid,\
+                        'instanceRelationshipTypeId', ir.instancerelationshiptypeid\
+                      )\
+                    ), '[]'::jsonb)\
+                  FROM ${tenant_id}_mod_fqm_manager.src_instance_relationship ir\
+                  WHERE ir.subinstanceid = :sourceAlias.id)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'precedingTitles',
+      sourceAlias: 'inst',
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "(SELECT COALESCE(jsonb_agg(\
+                      jsonb_build_object(\
+                        'id', pst.id,\
+                        'title', i.jsonb->>'title',\
+                        'hrid', i.jsonb->>'hrid',\
+                        'precedingInstanceId', pst.precedinginstanceid,\
+                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                      )\
+                    ), '[]'::jsonb)\
+                    FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedinginstanceid = i.id\
+                    WHERE pst.succeedinginstanceid = :sourceAlias.id)",
+      valueFunction: 'lower(:value)'
+    },
+    {
+      name: 'succeedingTitles',
+      sourceAlias: 'inst',
+      isIdColumn: false,
+      queryable: false,
+      essential: true,
+      visibleByDefault: false,
+      dataType: {
+        dataType: 'stringType',
+      },
+      valueGetter: "(SELECT COALESCE(jsonb_agg(\
+                      jsonb_build_object(\
+                        'id', pst.id,\
+                        'title', i.jsonb->>'title',\
+                        'hrid', i.jsonb->>'hrid',\
+                        'succeedingInstanceId', pst.succeedinginstanceid,\
+                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                      )\
+                    ), '[]'::jsonb)\
+                    FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
+                    WHERE pst.precedinginstanceid = :sourceAlias.id)",
+      valueFunction: 'lower(:value)'
     }
   ],
 }

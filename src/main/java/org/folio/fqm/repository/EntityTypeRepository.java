@@ -11,6 +11,7 @@ import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.BooleanType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
+import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
@@ -49,6 +50,7 @@ public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
   public static final String STRING_EXTRACTOR = "%s ->> '%s'";
+  public static final String DATE_EXTRACTOR = "(%s ->> '%s')::date";
   public static final String JSONB_ARRAY_EXTRACTOR = "%s -> '%s'";
   public static final String CUSTOM_FIELD_PREPENDER = "_custom_field_";
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
@@ -61,6 +63,7 @@ public class EntityTypeRepository {
   public static final String CUSTOM_FIELD_TYPE_RADIO_BUTTON = "RADIO_BUTTON";
   public static final String CUSTOM_FIELD_TYPE_TEXTBOX_SHORT = "TEXTBOX_SHORT";
   public static final String CUSTOM_FIELD_TYPE_TEXTBOX_LONG = "TEXTBOX_LONG";
+  public static final String CUSTOM_FIELD_TYPE_DATE = "DATE_PICKER";
   public static final String CUSTOM_FIELD_VALUE_GETTER = """
       (
         SELECT f.entry ->> 'value'
@@ -97,7 +100,8 @@ public class EntityTypeRepository {
     CUSTOM_FIELD_TYPE_MULTI_SELECT_DROPDOWN,
     CUSTOM_FIELD_TYPE_RADIO_BUTTON,
     CUSTOM_FIELD_TYPE_TEXTBOX_SHORT,
-    CUSTOM_FIELD_TYPE_TEXTBOX_LONG
+    CUSTOM_FIELD_TYPE_TEXTBOX_LONG,
+    CUSTOM_FIELD_TYPE_DATE
   );
 
   private final DSLContext readerJooqContext;
@@ -169,8 +173,7 @@ public class EntityTypeRepository {
   /**
    * Basic validation to ensure the entity type is structurally sound enough to function.
    *
-   * @implSpec
-   * Full validation should happen in the service layer, this is just a quick check to avoid issues that could arise from
+   * @implSpec Full validation should happen in the service layer, this is just a quick check to avoid issues that could arise from
    * the entity type being malformed in a way that would cause the system to crash or behave unexpectedly.
    */
   static void throwIfEntityTypeInvalid(EntityType entityType) {
@@ -253,6 +256,8 @@ public class EntityTypeRepository {
               List<ValueWithLabel> columnValues = parseCustomFieldValues(customFieldValueJson);
               yield handleMultiSelectCustomField(entityTypeColumn, id, name, refId, configurationView, dataExtractionPath, columnValues);
             }
+            case CUSTOM_FIELD_TYPE_DATE ->
+              handleDateTypeCustomField(entityTypeColumn, id, name, refId, dataExtractionPath);
             // Should never be reached due to prior filtering
             default -> {
               log.error("Custom field {} of entity type {} uses an unsupported datatype: {}. Ignoring this custom field", name, entityTypeId, type);
@@ -331,12 +336,12 @@ public class EntityTypeRepository {
   }
 
   private EntityTypeColumn handleMultiSelectCustomField(EntityTypeColumn customFieldColumn,
-                                                         String id,
-                                                         String name,
-                                                         String refId,
-                                                         String sourceViewName,
-                                                         String sourceViewExtractor,
-                                                         List<ValueWithLabel> columnValues) {
+                                                        String id,
+                                                        String name,
+                                                        String refId,
+                                                        String sourceViewName,
+                                                        String sourceViewExtractor,
+                                                        List<ValueWithLabel> columnValues) {
     String filterValueGetter = String.format(JSONB_ARRAY_EXTRACTOR, sourceViewExtractor, refId);
     String valueGetter = String.format(
       CUSTOM_FIELD_JSONB_ARRAY_VALUE_GETTER,
@@ -369,6 +374,23 @@ public class EntityTypeRepository {
       .dataType(new StringType().dataType("stringType"))
       .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
       .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
+      .labelAlias(name)
+      .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
+      .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))
+      .isCustomField(true);
+  }
+
+  private EntityTypeColumn handleDateTypeCustomField(EntityTypeColumn customFieldColumn,
+                                                     String id,
+                                                     String name,
+                                                     String refId,
+                                                     String sourceViewExtractor) {
+    return new EntityTypeColumn()
+      .name(CUSTOM_FIELD_PREPENDER + id)
+      .dataType(new DateType().dataType("dateType"))
+      .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
+      .valueGetter(String.format(DATE_EXTRACTOR, sourceViewExtractor, refId))
+      .valueFunction("(:value)::date")
       .labelAlias(name)
       .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
       .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))

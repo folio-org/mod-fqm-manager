@@ -166,6 +166,19 @@ VALUES (
          }
        }
     }'
+  ),
+  (
+    '3c4e9797-422f-4962-a302-174af09b23fe',
+    '{
+       "id": "3c4e9797-422f-4962-a302-174af09b23fe",
+       "name": "custom_date_column",
+       "type": "DATE_PICKER",
+       "order": 8,
+       "refId": "customDateColumn",
+       "visible": true,
+       "entityType": "user",
+       "selectField": {}
+    }'
   );
 CREATE VIEW custom_fields_source_view AS
 SELECT *

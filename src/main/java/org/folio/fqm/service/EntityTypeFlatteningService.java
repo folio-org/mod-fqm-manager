@@ -111,6 +111,7 @@ public class EntityTypeFlatteningService {
   ) {
     EntityType originalEntityType = entityTypeRepository
       .getEntityTypeDefinition(entityTypeId, tenantId)
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .orElseThrow(() -> new EntityTypeNotFoundException(entityTypeId));
     return getFlattenedEntityType(originalEntityType, sourceFromParent, tenantId, preserveAllColumns);
   }

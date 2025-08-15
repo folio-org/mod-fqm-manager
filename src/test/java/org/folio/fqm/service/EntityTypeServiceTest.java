@@ -1058,7 +1058,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, times(1)).deleteEntityType(entityTypeId);
+    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
   }
 
   @Test
@@ -1068,7 +1068,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, never()).deleteEntityType(any());
+    verify(repo, never()).updateCustomEntityType(any());
   }
 
   @Test
@@ -1083,7 +1083,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, never()).deleteEntityType(any());
+    verify(repo, never()).updateCustomEntityType(any());
   }
 
   @Test

@@ -1345,7 +1345,10 @@
       name: 'jsonb',
       sourceAlias: 'inst',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
       },
       isIdColumn: false,
       queryable: false,
@@ -1405,7 +1408,10 @@
       essential: true,
       visibleByDefault: false,
       dataType: {
-        dataType: 'stringType',
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
       },
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
@@ -1426,7 +1432,10 @@
       essential: true,
       visibleByDefault: false,
       dataType: {
-        dataType: 'stringType',
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
       },
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
@@ -1450,7 +1459,10 @@
       essential: true,
       visibleByDefault: false,
       dataType: {
-        dataType: 'stringType',
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
       },
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\

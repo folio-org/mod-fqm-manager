@@ -1382,7 +1382,7 @@
       sourceAlias: 'inst',
       isIdColumn: false,
       queryable: false,
-      essential: true,
+      essential: false,
       visibleByDefault: false,
       dataType: {
         dataType: 'stringType'
@@ -1403,7 +1403,7 @@
       sourceAlias: 'inst',
       isIdColumn: false,
       queryable: false,
-      essential: true,
+      essential: false,
       visibleByDefault: false,
       dataType: {
         dataType: 'jsonbArrayType',
@@ -1427,7 +1427,7 @@
       sourceAlias: 'inst',
       isIdColumn: false,
       queryable: false,
-      essential: true,
+      essential: false,
       visibleByDefault: false,
       dataType: {
         dataType: 'jsonbArrayType',
@@ -1454,7 +1454,7 @@
       sourceAlias: 'inst',
       isIdColumn: false,
       queryable: false,
-      essential: true,
+      essential: false,
       visibleByDefault: false,
       dataType: {
         dataType: 'jsonbArrayType',

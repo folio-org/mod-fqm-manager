@@ -70,8 +70,12 @@ class FromClauseUtilsBuildTest {
     try (MockedStatic<FromClauseUtils> mocked = mockStatic(FromClauseUtils.class, Mockito.CALLS_REAL_METHODS)) {
       mocked
         .when(() -> FromClauseUtils.resolveJoins(any()))
-        .thenAnswer(i -> ((EntityType) i.getArgument(0)).getSources());
-      mocked.when(() -> FromClauseUtils.orderSources(any())).thenAnswer(i -> i.getArgument(0));
+        .thenAnswer(i ->
+          ((EntityType) i.getArgument(0)).getSources()
+            .stream()
+            .filter(EntityTypeSourceDatabase.class::isInstance)
+            .toList()
+        );
 
       String clause = FromClauseUtils.getFromClause(
         new EntityType()
@@ -93,8 +97,12 @@ class FromClauseUtilsBuildTest {
     try (MockedStatic<FromClauseUtils> mocked = mockStatic(FromClauseUtils.class, Mockito.CALLS_REAL_METHODS)) {
       mocked
         .when(() -> FromClauseUtils.resolveJoins(any()))
-        .thenAnswer(i -> ((EntityType) i.getArgument(0)).getSources());
-      mocked.when(() -> FromClauseUtils.orderSources(any())).thenAnswer(i -> i.getArgument(0));
+        .thenAnswer(i ->
+          ((EntityType) i.getArgument(0)).getSources()
+            .stream()
+            .filter(EntityTypeSourceDatabase.class::isInstance)
+            .toList()
+        );
 
       String clause = FromClauseUtils.getFromClause(
         new EntityType()

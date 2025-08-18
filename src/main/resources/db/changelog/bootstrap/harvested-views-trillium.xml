@@ -63,26 +63,4 @@
     </createView>
   </changeSet>
 
-  <changeSet id="create_view_src_instance_relationship" author="siarhei_charniak@eoam.com" runAlways="true">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName="instance_relationship" schemaName="${tenant_id}_mod_inventory_storage"/>
-    </preConditions>
-    <createView
-      replaceIfExists="true"
-      viewName="src_instance_relationship">
-      SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_relationship
-    </createView>
-  </changeSet>
-
-  <changeSet id="create_view_src_preceding_succeeding_title" author="siarhei_charniak@eoam.com" runAlways="true">
-    <preConditions onFail="CONTINUE">
-      <tableExists tableName="preceding_succeeding_title" schemaName="${tenant_id}_mod_inventory_storage"/>
-    </preConditions>
-    <createView
-      replaceIfExists="true"
-      viewName="src_preceding_succeeding_title">
-      SELECT * FROM ${tenant_id}_mod_inventory_storage.preceding_succeeding_title
-    </createView>
-  </changeSet>
-
 </databaseChangeLog>

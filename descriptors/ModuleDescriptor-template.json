@@ -527,10 +527,6 @@
     {
       "id": "holdings-note-types",
       "version": "1.0"
-    },
-    {
-      "id": "instance-preceding-succeeding-titles",
-      "version": "0.2"
     }
   ],
   "optional": [

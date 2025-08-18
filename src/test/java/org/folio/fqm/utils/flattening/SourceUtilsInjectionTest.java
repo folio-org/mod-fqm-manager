@@ -50,8 +50,8 @@ class SourceUtilsInjectionTest {
       Arguments.of("", true, ""),
       Arguments.of("foo", false, "foo"),
       Arguments.of("foo", true, "foo"),
-      Arguments.of(":foo", false, ":foo"),
-      Arguments.of(":foo", true, ":foo"),
+      Arguments.of(":foo", false, ":[foo]"),
+      Arguments.of(":foo", true, "\"foo\""),
       Arguments.of(":sourceAlias", false, ":[foo]"),
       Arguments.of(":sourceAlias", true, "\"foo\""),
       Arguments.of("foo->>:sourceAlias::uuid", false, "foo->>:[foo]::uuid"),
@@ -106,24 +106,23 @@ class SourceUtilsInjectionTest {
 
   @Test
   void testInjectSourceAliasIntoFilterConditions() {
-    List<String> filterConditions = List.of(
-      ":foo.field1 != 'abc'",
-      ":bar.field2 != 'xyz'"
-    );
+    List<String> filterConditions = List.of(":foo.field1 != 'abc'", ":bar.field2 != 'xyz'");
     Map<String, String> renamedAliases = Map.of("foo", "source1", "bar", "source2");
 
-    List<String> expectedNonFinalPass = List.of(
-      ":[source1].field1 != 'abc'",
-      ":[source2].field2 != 'xyz'"
+    List<String> expectedNonFinalPass = List.of(":[source1].field1 != 'abc'", ":[source2].field2 != 'xyz'");
+    List<String> actualNonFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(
+      filterConditions,
+      renamedAliases,
+      false
     );
-    List<String> actualNonFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, false);
     assertEquals(expectedNonFinalPass, actualNonFinalPass);
 
-    List<String> expectedFinalPass = List.of(
-      "\"source1\".field1 != 'abc'",
-      "\"source2\".field2 != 'xyz'"
+    List<String> expectedFinalPass = List.of("\"source1\".field1 != 'abc'", "\"source2\".field2 != 'xyz'");
+    List<String> actualFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(
+      filterConditions,
+      renamedAliases,
+      true
     );
-    List<String> actualFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, true);
     assertEquals(expectedFinalPass, actualFinalPass);
   }
 

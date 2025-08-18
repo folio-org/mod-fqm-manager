@@ -755,6 +755,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
       )",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'tags',

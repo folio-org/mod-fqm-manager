@@ -89,6 +89,7 @@ public class EntityTypeService {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
       .getEntityTypeDefinitions(entityTypeIds, executionContext.getTenantId())
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
@@ -590,7 +591,11 @@ public class EntityTypeService {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
     }
     permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
-    entityTypeRepository.deleteEntityType(entityTypeId);
+    CustomEntityType deletedCustomEntityType = customEntityType.toBuilder()
+      .deleted(true)
+      .updatedAt(clockService.now())
+      .build();
+    entityTypeRepository.updateCustomEntityType(deletedCustomEntityType);
   }
 
   /**
@@ -600,6 +605,7 @@ public class EntityTypeService {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
       .getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+      .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
       .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), executionContext.getTenantId(), true))
       .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))

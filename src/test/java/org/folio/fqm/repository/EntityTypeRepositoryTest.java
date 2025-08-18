@@ -266,63 +266,47 @@ class EntityTypeRepositoryTest {
     UUID owner = UUID.randomUUID();
     when(folioExecutionContext.getUserId()).thenReturn(owner);
     when(folioExecutionContext.getTenantId()).thenReturn("diku");
-    try {
       // 1. Create a custom entity type
-      CustomEntityType customEntityType = new CustomEntityType()
-        .id(entityTypeId.toString())
-        .owner(owner)
-        .name("test-custom-entity")
-        .labelAlias("Test Custom Entity")
-        ._private(false)
-        .sources(Collections.emptyList())
-        .columns(Collections.emptyList());
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(owner)
+      .name("test-custom-entity")
+      .labelAlias("Test Custom Entity")
+      ._private(false)
+      .sources(Collections.emptyList())
+      .columns(Collections.emptyList());
 
-      repo.createCustomEntityType(customEntityType);
+    repo.createCustomEntityType(customEntityType);
 
-      // 2. Retrieve and verify
-      CustomEntityType retrievedEntityType = repo.getCustomEntityType(entityTypeId);
+    // 2. Retrieve and verify
+    CustomEntityType retrievedEntityType = repo.getCustomEntityType(entityTypeId);
 
-      assertNotNull(retrievedEntityType);
-      assertEquals(entityTypeId.toString(), retrievedEntityType.getId());
-      assertEquals("test-custom-entity", retrievedEntityType.getName());
-      assertEquals("Test Custom Entity", retrievedEntityType.getLabelAlias());
-      assertEquals(false, retrievedEntityType.getPrivate());
+    assertNotNull(retrievedEntityType);
+    assertEquals(entityTypeId.toString(), retrievedEntityType.getId());
+    assertEquals("test-custom-entity", retrievedEntityType.getName());
+    assertEquals("Test Custom Entity", retrievedEntityType.getLabelAlias());
+    assertEquals(false, retrievedEntityType.getPrivate());
 
-      // 3. Update the entity type
-      CustomEntityType updatedEntityType = new CustomEntityType()
-        .id(entityTypeId.toString())
-        .name("updated-custom-entity")
-        .labelAlias("Updated Custom Entity")
-        ._private(true)
-        .sources(Collections.emptyList())
-        .columns(Collections.emptyList());
+    // 3. Update the entity type
+    CustomEntityType updatedEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .name("updated-custom-entity")
+      .labelAlias("Updated Custom Entity")
+      ._private(true)
+      .sources(Collections.emptyList())
+      .columns(Collections.emptyList());
 
-      repo.updateCustomEntityType(updatedEntityType);
+    repo.updateCustomEntityType(updatedEntityType);
 
-      // 4. Retrieve and verify the update
-      CustomEntityType retrievedUpdatedType = repo.getCustomEntityType(entityTypeId);
+    // 4. Retrieve and verify the update
+    CustomEntityType retrievedUpdatedType = repo.getCustomEntityType(entityTypeId);
 
-      assertNotNull(retrievedUpdatedType);
-      assertEquals(entityTypeId.toString(), retrievedUpdatedType.getId());
-      assertEquals("updated-custom-entity", retrievedUpdatedType.getName());
-      assertEquals("Updated Custom Entity", retrievedUpdatedType.getLabelAlias());
-      assertEquals(true, retrievedUpdatedType.getPrivate());
+    assertNotNull(retrievedUpdatedType);
+    assertEquals(entityTypeId.toString(), retrievedUpdatedType.getId());
+    assertEquals("updated-custom-entity", retrievedUpdatedType.getName());
+    assertEquals("Updated Custom Entity", retrievedUpdatedType.getLabelAlias());
+    assertEquals(true, retrievedUpdatedType.getPrivate());
 
-      // 5. Delete the entity type
-      repo.deleteEntityType(entityTypeId);
-
-      // 6. Verify it's gone
-      CustomEntityType retrievedAfterDelete = repo.getCustomEntityType(entityTypeId);
-      assertNull(retrievedAfterDelete);
-
-    } finally {
-      // Clean up in case a test step fails
-      try {
-        repo.deleteEntityType(entityTypeId);
-      } catch (Exception e) {
-        // Ignore exceptions during cleanup
-      }
-    }
   }
 
   @Test

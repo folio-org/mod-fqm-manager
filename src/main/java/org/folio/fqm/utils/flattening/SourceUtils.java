@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -18,8 +19,6 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
-
-import javax.annotation.CheckForNull;
 
 @Log4j2
 @UtilityClass
@@ -61,10 +60,12 @@ public class SourceUtils {
     boolean finalPass
   ) {
     if (sourceAlias != null && renamedAliases.containsKey(sourceAlias)) {
-      column = injectSourceAlias(column, Map.of("sourceAlias", renamedAliases.get(sourceAlias)), finalPass);
+      injectSourceAlias(column, Map.of("sourceAlias", renamedAliases.get(sourceAlias)), finalPass);
     }
 
-    return injectSourceAlias(column, renamedAliases, finalPass);
+    injectSourceAlias(column, renamedAliases, finalPass);
+
+    return column;
   }
 
   public static ObjectType injectSourceAliasForObjectType(

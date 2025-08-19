@@ -1,29 +1,26 @@
 package org.folio.fqm.utils;
 
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.jooq.impl.DSL.field;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 import lombok.experimental.UtilityClass;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
-import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.Join;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.jooq.impl.DSL.field;
+
 /**
  * Class responsible for retrieving information related to the ID columns of an entity type.
  */
-@Log4j2
 @UtilityClass
 public class EntityTypeUtils {
 
@@ -36,7 +33,10 @@ public class EntityTypeUtils {
    * @return List of id column names for the entity type
    */
   public static List<String> getIdColumnNames(EntityType entityType) {
-    return getIdColumns(entityType).stream().map(EntityTypeColumn::getName).toList();
+    return getIdColumns(entityType)
+      .stream()
+      .map(EntityTypeColumn::getName)
+      .toList();
   }
 
   /**
@@ -46,7 +46,10 @@ public class EntityTypeUtils {
    * @return List of value getters for the id columns of the entity type
    */
   public static List<String> getIdColumnValueGetters(EntityType entityType) {
-    return getIdColumns(entityType).stream().map(EntityTypeColumn::getValueGetter).toList();
+    return getIdColumns(entityType)
+      .stream()
+      .map(EntityTypeColumn::getValueGetter)
+      .toList();
   }
 
   /**
@@ -56,22 +59,30 @@ public class EntityTypeUtils {
    * @return JOOQ field corresponding to the valueGetters for the id columns of the entity type
    */
   public static Field<String[]> getResultIdValueGetter(EntityType entityType) {
-    List<Field<Object>> idColumnValueGetters = getIdColumnValueGetters(entityType).stream().map(DSL::field).toList();
-    return DSL.cast(DSL.array(idColumnValueGetters.toArray(new Field[0])), String[].class);
+    List<Field<Object>> idColumnValueGetters = getIdColumnValueGetters(entityType)
+      .stream()
+      .map(DSL::field)
+      .toList();
+    return DSL.cast(
+      DSL.array(idColumnValueGetters.toArray(new Field[0])),
+      String[].class
+    );
   }
 
   public static List<SortField<Object>> getSortFields(EntityType entityType, boolean sortResults) {
     if (sortResults && !isEmpty(entityType.getDefaultSort())) {
-      return entityType.getDefaultSort().stream().map(EntityTypeUtils::toSortField).toList();
+      return entityType
+        .getDefaultSort()
+        .stream()
+        .map(EntityTypeUtils::toSortField)
+        .toList();
     }
     return List.of();
   }
 
   public static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
     Field<Object> field = field(entityTypeDefaultSort.getColumnName());
-    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC
-      ? field.desc()
-      : field.asc();
+    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
   }
 
   public static List<String> getDateFields(EntityType entityType) {
@@ -129,7 +140,7 @@ public class EntityTypeUtils {
       .stream()
       .filter(j ->
         j.getTargetId().equals(target.getOriginalEntityTypeId()) &&
-        j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
+          j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
       )
       .findFirst();
   }

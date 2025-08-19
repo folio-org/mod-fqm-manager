@@ -25,7 +25,7 @@
   columns: [
     {
       name: 'id',
-            dataType: {
+      dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
@@ -36,7 +36,7 @@
     },
     {
       name: 'snapshot_id',
-            dataType: {
+      dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
@@ -56,7 +56,7 @@
     },
     {
       name: 'generation',
-            dataType: {
+      dataType: {
         dataType: 'integerType',
       },
       queryable: true,
@@ -67,7 +67,7 @@
     },
     {
       name: 'record_type',
-            dataType: {
+      dataType: {
         dataType: 'stringType',
       },
       queryable: true,
@@ -95,7 +95,7 @@
     },
     {
       name: 'external_id',
-            dataType: {
+      dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
@@ -105,7 +105,7 @@
     },
     {
       name: 'state',
-            dataType: {
+      dataType: {
         dataType: 'stringType',
       },
       queryable: true,
@@ -129,7 +129,7 @@
     },
     {
       name: 'leader_record_status',
-            dataType: {
+      dataType: {
         dataType: 'stringType',
       },
       queryable: true,
@@ -139,7 +139,7 @@
     },
     {
       name: 'order',
-            dataType: {
+      dataType: {
         dataType: 'integerType',
       },
       queryable: true,
@@ -150,7 +150,7 @@
     },
     {
       name: 'suppress_discovery',
-            dataType: {
+      dataType: {
         dataType: 'booleanType',
       },
       queryable: true,
@@ -171,7 +171,7 @@
     },
     {
       name: 'created_by_user_id',
-            dataType: {
+      dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
@@ -181,13 +181,15 @@
       valueGetter: ':sourceAlias.created_by_user_id',
       joinsTo: [
         {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          // simple_user_details
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
         },
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -196,7 +198,7 @@
     },
     {
       name: 'created_date',
-            dataType: {
+      dataType: {
         dataType: 'dateType',
       },
       queryable: true,
@@ -207,7 +209,7 @@
     },
     {
       name: 'updated_by_user_id',
-            dataType: {
+      dataType: {
         dataType: 'rangedUUIDType',
       },
       queryable: true,
@@ -217,13 +219,15 @@
       valueGetter: ':sourceAlias.updated_by_user_id',
       joinsTo: [
         {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          // simple_user_details
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
         },
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -232,7 +236,7 @@
     },
     {
       name: 'updated_date',
-            dataType: {
+      dataType: {
         dataType: 'dateType',
       },
       isIdColumn: false,
@@ -244,7 +248,7 @@
     },
     {
       name: 'external_hrid',
-            dataType: {
+      dataType: {
         dataType: 'stringType',
       },
       queryable: true,

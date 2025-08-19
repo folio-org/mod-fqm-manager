@@ -69,7 +69,7 @@ class FromClauseUtilsBuildTest {
   void testGetFromClause() {
     try (MockedStatic<FromClauseUtils> mocked = mockStatic(FromClauseUtils.class, Mockito.CALLS_REAL_METHODS)) {
       mocked
-        .when(() -> FromClauseUtils.resolveJoins(any()))
+        .when(() -> FromClauseUtils.resolveJoins(any(), any()))
         .thenAnswer(i ->
           ((EntityType) i.getArgument(0)).getSources()
             .stream()
@@ -96,7 +96,7 @@ class FromClauseUtilsBuildTest {
   void testGetFromClauseCrossTenant() {
     try (MockedStatic<FromClauseUtils> mocked = mockStatic(FromClauseUtils.class, Mockito.CALLS_REAL_METHODS)) {
       mocked
-        .when(() -> FromClauseUtils.resolveJoins(any()))
+        .when(() -> FromClauseUtils.resolveJoins(any(), any()))
         .thenAnswer(i ->
           ((EntityType) i.getArgument(0)).getSources()
             .stream()

@@ -44,7 +44,7 @@ public class FromClauseUtils {
     List<EntityTypeSource> sourcesWithoutJoin = flattenedEntityType
       .getSources()
       .stream()
-      .filter(source -> !isJoined(source))
+      .filter(source -> !SourceUtils.isJoined(source))
       .toList();
 
     if (sourcesWithoutJoin.size() != 1) {
@@ -55,7 +55,10 @@ public class FromClauseUtils {
       );
     }
 
-    List<EntityTypeSourceDatabase> joinedSources = resolveJoins(flattenedEntityType);
+    List<EntityTypeSourceDatabase> joinedSources = resolveJoins(
+      flattenedEntityType,
+      findNecessaryJoins(flattenedEntityType)
+    );
 
     String finalJoinClause = buildFromClauseFromOrderedSources(joinedSources, tenantId);
     log.info("Final from clause string: {}", finalJoinClause);
@@ -88,17 +91,6 @@ public class FromClauseUtils {
 
     return (
       baseTables.stream().collect(Collectors.joining(", ")) + " " + joins.stream().collect(Collectors.joining(" "))
-    );
-  }
-
-  /** If a source is joined via a parent entity type, explicit DB join, or to another ET */
-  public static boolean isJoined(EntityTypeSource source) {
-    if (source.getJoinedViaEntityType() != null) {
-      return true;
-    }
-    return (
-      (source instanceof EntityTypeSourceDatabase sourceDb && sourceDb.getJoin() != null) ||
-      (source instanceof EntityTypeSourceEntityType sourceEt && sourceEt.getSourceField() != null)
     );
   }
 
@@ -141,10 +133,7 @@ public class FromClauseUtils {
     Map<String, EntityTypeSourceEntityType> sourceMap,
     EntityType flattenedEntityType
   ) {
-    EntityTypeSourceEntityType parentSource = sourceMap.get(source.getJoinedViaEntityType());
-    while (parentSource.getJoinedViaEntityType() != null && parentSource.getSourceField() == null) {
-      parentSource = sourceMap.get(parentSource.getJoinedViaEntityType());
-    }
+    EntityTypeSourceEntityType parentSource = SourceUtils.findJoiningEntityType(source, sourceMap);
 
     if (parentSource.getSourceField() == null) {
       // parent source is not joined, so we do not need to join either
@@ -171,7 +160,7 @@ public class FromClauseUtils {
   }
 
   /** Represents a join between two columns (and their sources) that must be resolved and end up in the resulting query */
-  private record NecessaryJoin(
+  protected record NecessaryJoin(
     EntityTypeColumn columnA,
     EntityTypeSourceDatabase sourceA,
     EntityTypeColumn columnB,
@@ -198,7 +187,6 @@ public class FromClauseUtils {
    * <ol>
    * <li>Find database sources that already have SQL joins declared; use these as the basis for our join
    *     dependency graph (see {@link #resolveDatabaseJoins})</li>
-   * <li>Find all necessary joins for the remaining sources (see {@link #findNecessaryJoins})</li>
    * <li>Algorithmically resolve the graph of desired joins to solve the network into dependency lists</li>
    * <li>Add SQL conditions to the database sources</li>
    * <li>Order the sources based on the created graph (see {@link #orderSources})</li>
@@ -208,7 +196,10 @@ public class FromClauseUtils {
    * @param flattenedEntityType the entity type to process
    * @return a list of ordered database sources with joins resolved
    */
-  public static List<EntityTypeSourceDatabase> resolveJoins(EntityType flattenedEntityType) {
+  public static List<EntityTypeSourceDatabase> resolveJoins(
+    EntityType flattenedEntityType,
+    List<NecessaryJoin> necessaryJoins
+  ) {
     // stores the dependencies for joining in the format `KEY must come _after_ VALUES`
     Map<String, Set<String>> dependencies = new HashMap<>();
 
@@ -222,8 +213,6 @@ public class FromClauseUtils {
       .filter(sourceDb -> sourceDb.getJoin() == null)
       .map(s -> s.getAlias())
       .collect(Collectors.toSet());
-
-    List<NecessaryJoin> necessaryJoins = findNecessaryJoins(flattenedEntityType);
 
     while (!necessaryJoins.isEmpty()) {
       // if one side of a join is already used, we must resolve the other side before potentially deadlocking ourselves.

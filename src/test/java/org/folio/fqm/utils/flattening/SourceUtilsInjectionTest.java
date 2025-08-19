@@ -104,6 +104,25 @@ class SourceUtilsInjectionTest {
     assertThat(result.getValueFunction(), is("VF " + expected));
   }
 
+  @ParameterizedTest
+  @MethodSource("injectSourceAliasWithMapCases")
+  void testIgnoresSourceAliasIfNotMapped(String input, boolean finalPass, String expected) {
+    EntityTypeColumn col = new EntityTypeColumn()
+      .valueGetter("VG " + input)
+      .filterValueGetter("FVG " + input)
+      .valueFunction("VF " + input);
+    EntityTypeColumn result = SourceUtils.injectSourceAlias(
+      col,
+      Map.of("foo", "bar", "foo.bar", "baz"),
+      "somethingElse",
+      finalPass
+    );
+
+    assertThat(result.getValueGetter(), is("VG " + expected));
+    assertThat(result.getFilterValueGetter(), is("FVG " + expected));
+    assertThat(result.getValueFunction(), is("VF " + expected));
+  }
+
   @Test
   void testInjectSourceAliasIntoFilterConditions() {
     List<String> filterConditions = List.of(":foo.field1 != 'abc'", ":bar.field2 != 'xyz'");

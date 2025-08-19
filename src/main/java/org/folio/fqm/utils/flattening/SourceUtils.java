@@ -43,8 +43,6 @@ public class SourceUtils {
    * This method injects the source alias into the column's value getter and filter value getter.
    * It also recursively injects the source alias into nested object types and array types.
    *
-   * Only one of renamedAliases or sourceAlias should be provided. If both are provided, renamedAliases will be ignored.
-   *
    * @param <T>            The type of the column, which must extend the Field interface.
    * @param column         The column to inject the source alias into.
    * @param renamedAliases The map of old aliases to new aliases.
@@ -68,7 +66,7 @@ public class SourceUtils {
     return column;
   }
 
-  public static ObjectType injectSourceAliasForObjectType(
+  private static ObjectType injectSourceAliasForObjectType(
     ObjectType objectType,
     Map<String, String> renamedAliases,
     boolean finalPass
@@ -81,7 +79,7 @@ public class SourceUtils {
     return objectType.toBuilder().properties(convertedProperties).build();
   }
 
-  public static ArrayType injectSourceAliasForArrayType(
+  private static ArrayType injectSourceAliasForArrayType(
     ArrayType arrayType,
     Map<String, String> renamedAliases,
     boolean finalPass
@@ -282,5 +280,33 @@ public class SourceUtils {
       case RIGHT -> JoinDirection.LEFT;
       default -> direction;
     };
+  }
+
+  /** If a source is joined via a parent entity type, explicit DB join, or to another ET */
+  public static boolean isJoined(EntityTypeSource source) {
+    if (source.getJoinedViaEntityType() != null) {
+      return true;
+    }
+    return (
+      (source instanceof EntityTypeSourceDatabase sourceDb && sourceDb.getJoin() != null) ||
+      (source instanceof EntityTypeSourceEntityType sourceEt && sourceEt.getSourceField() != null)
+    );
+  }
+
+  /**
+   * Finds the joinedViaEntityType at the top of the tree for a given source. This may not always be the direct
+   * parent, e.g. if entity type foo [X -> Y -> Z] is joined to bar [A -> B] then the joining source for Z is X.
+   */
+  public static EntityTypeSourceEntityType findJoiningEntityType(
+    EntityTypeSourceDatabase source,
+    Map<String, EntityTypeSourceEntityType> sourceMap
+  ) {
+    EntityTypeSourceEntityType parentSource = sourceMap.get(source.getJoinedViaEntityType());
+
+    while (parentSource.getJoinedViaEntityType() != null && parentSource.getSourceField() == null) {
+      parentSource = sourceMap.get(parentSource.getJoinedViaEntityType());
+    }
+
+    return parentSource;
   }
 }

@@ -194,6 +194,7 @@ public class FromClauseUtils {
    * </ol>
    *
    * @param flattenedEntityType the entity type to process
+   * @param necessaryJoins      the list of joins to include
    * @return a list of ordered database sources with joins resolved
    */
   public static List<EntityTypeSourceDatabase> resolveJoins(

@@ -188,9 +188,7 @@ class FromClauseUtilsComputeTest {
   @ParameterizedTest
   @MethodSource("invalidColumnPairs")
   void testComputeJoinInvalid(EntityTypeColumn a, EntityTypeColumn b) {
-    assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> FromClauseUtils.computeJoin(EntityType.builder().build(), a, b, null)
-    );
+    EntityType et = EntityType.builder().build();
+    assertThrows(InvalidEntityTypeDefinitionException.class, () -> FromClauseUtils.computeJoin(et, a, b, null));
   }
 }

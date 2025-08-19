@@ -216,7 +216,8 @@ public class FromClauseUtils {
 
     while (!necessaryJoins.isEmpty()) {
       // if one side of a join is already used, we must resolve the other side before potentially deadlocking ourselves.
-      // example: A<->B and source A is already joined to something else, so we can't use it. Therefore, we must join B ON {condition with A}
+      // for example, A joins to B and source A is already joined to something else, so we can't use it.
+      // Therefore, we must join B ON (some condition with A)
       Optional<NecessaryJoin> joinToAlreadyJoined = necessaryJoins
         .stream()
         .filter(join ->

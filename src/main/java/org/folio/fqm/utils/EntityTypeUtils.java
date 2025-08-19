@@ -1,11 +1,15 @@
 package org.folio.fqm.utils;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.log4j.Log4j2;
+
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.Join;
 import org.jooq.Field;
 import org.jooq.SortField;
@@ -21,6 +25,7 @@ import static org.jooq.impl.DSL.field;
 /**
  * Class responsible for retrieving information related to the ID columns of an entity type.
  */
+@Log4j2
 @UtilityClass
 public class EntityTypeUtils {
 

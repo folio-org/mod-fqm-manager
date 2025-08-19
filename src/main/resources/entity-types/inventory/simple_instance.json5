@@ -36,7 +36,7 @@
     'inventory-storage.contributor-types.collection.get',
     'inventory-storage.statistical-codes.collection.get',
     'inventory-storage.statistical-code-types.collection.get',
-    'inventory-storage.instance-formats.collection.get'
+    'inventory-storage.instance-formats.collection.get',
   ],
   columns: [
     {
@@ -1343,10 +1343,7 @@
       name: 'jsonb',
       sourceAlias: 'inst',
       dataType: {
-        dataType: 'jsonbArrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
+        dataType: 'stringType',
       },
       isIdColumn: false,
       queryable: false,

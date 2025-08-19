@@ -388,7 +388,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':item.materialtypeid',
+      sourceAlias: 'item',
+      valueGetter: ':sourceAlias.materialtypeid',
       joinsTo: [
         {
           targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe', // simple_material_type
@@ -589,7 +590,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':item.holdingsrecordid',
+      sourceAlias: 'item',
+      valueGetter: ':sourceAlias.holdingsrecordid',
       joinsTo: [
         {
           targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_record
@@ -674,7 +676,8 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ':item.effectivelocationid',
+      sourceAlias: 'item',
+      valueGetter: ':sourceAlias.effectivelocationid',
       joinsTo: [
         {
           targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
@@ -715,7 +718,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":item.jsonb->>'itemLevelCallNumberTypeId'",
+      sourceAlias: 'item',
+      valueGetter: ":sourceAlias.jsonb->>'itemLevelCallNumberTypeId'",
       joinsTo: [
         {
           targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
@@ -879,7 +883,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ':item.permanentlocationid',
+      sourceAlias: 'item',
+      valueGetter: ':sourceAlias.permanentlocationid',
       joinsTo: [
         {
           targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
@@ -1062,7 +1067,8 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ':item.temporarylocationid',
+      sourceAlias: 'item',
+      valueGetter: ':sourceAlias.temporarylocationid',
       joinsTo: [
         {
           targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location

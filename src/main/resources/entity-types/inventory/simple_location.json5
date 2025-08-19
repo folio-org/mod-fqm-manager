@@ -163,7 +163,8 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
-      valueGetter: ':location.libraryid',
+      sourceAlias: 'location',
+      valueGetter: ':sourceAlias.libraryid',
       joinsTo: [
         {
           targetId: '32f58888-1a7b-4840-98f8-cc69ca93fc67', // simple_loclibrary

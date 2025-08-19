@@ -1090,7 +1090,8 @@
       isIdColumn: false,
       visibleByDefault: false,
       dataType: { dataType: 'arrayType' },
-      valueGetter: "jsonb_array_elements(:pol.jsonb -> 'locations')",
+      sourceAlias: 'pol',
+      valueGetter: "jsonb_array_elements(:sourceAlias.jsonb -> 'locations')",
       joinsTo: [
         {
           targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',

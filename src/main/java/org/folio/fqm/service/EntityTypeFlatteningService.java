@@ -247,7 +247,11 @@ public class EntityTypeFlatteningService {
       childColumns.stream()
     );
 
-    flattenedEntityType.columns(filterEcsColumns(allColumns).toList());
+    flattenedEntityType.columns(
+      filterEcsColumns(allColumns)
+        .map(column -> column.sourceAlias(renamedAliases.getOrDefault(column.getSourceAlias(), null)))
+        .toList()
+    );
     flattenedEntityType.requiredPermissions(new ArrayList<>(finalPermissions));
     return localizationService.localizeEntityType(flattenedEntityType, originalEntityType.getSources());
   }

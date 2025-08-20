@@ -157,7 +157,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":voucher.jsonb ->> 'vendorId'",
+      sourceAlias: 'voucher',
+      valueGetter: ":sourceAlias.jsonb ->> 'vendorId'",
       joinsTo: [
         {
           targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
@@ -187,7 +188,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":voucher.jsonb ->> 'invoiceId'",
+      sourceAlias: 'voucher',
+      valueGetter: ":sourceAlias.jsonb ->> 'invoiceId'",
       joinsTo: [
         {
           targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',

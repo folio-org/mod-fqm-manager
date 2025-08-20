@@ -177,7 +177,8 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ':record_lb.created_by_user_id',
+      sourceAlias: 'record_lb',
+      valueGetter: ':sourceAlias.created_by_user_id',
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
@@ -212,7 +213,8 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ':record_lb.updated_by_user_id',
+      sourceAlias: 'record_lb',
+      valueGetter: ':sourceAlias.updated_by_user_id',
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details

@@ -20,8 +20,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'user',
-      valueGetter: ':sourceAlias.id',
+      valueGetter: ':user.id',
     },
     {
       name: 'active',

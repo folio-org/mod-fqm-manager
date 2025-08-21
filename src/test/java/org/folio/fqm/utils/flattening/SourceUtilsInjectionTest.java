@@ -50,8 +50,8 @@ class SourceUtilsInjectionTest {
       Arguments.of("", true, ""),
       Arguments.of("foo", false, "foo"),
       Arguments.of("foo", true, "foo"),
-      Arguments.of(":foo", false, ":[foo]"),
-      Arguments.of(":foo", true, "\"foo\""),
+      Arguments.of(":foo", false, ":foo"),
+      Arguments.of(":foo", true, ":foo"),
       Arguments.of(":sourceAlias", false, ":[foo]"),
       Arguments.of(":sourceAlias", true, "\"foo\""),
       Arguments.of("foo->>:sourceAlias::uuid", false, "foo->>:[foo]::uuid"),
@@ -104,44 +104,26 @@ class SourceUtilsInjectionTest {
     assertThat(result.getValueFunction(), is("VF " + expected));
   }
 
-  @ParameterizedTest
-  @MethodSource("injectSourceAliasWithMapCases")
-  void testIgnoresSourceAliasIfNotMapped(String input, boolean finalPass, String expected) {
-    EntityTypeColumn col = new EntityTypeColumn()
-      .valueGetter("VG " + input)
-      .filterValueGetter("FVG " + input)
-      .valueFunction("VF " + input);
-    EntityTypeColumn result = SourceUtils.injectSourceAlias(
-      col,
-      Map.of("foo", "bar", "foo.bar", "baz"),
-      "somethingElse",
-      finalPass
-    );
-
-    assertThat(result.getValueGetter(), is("VG " + expected));
-    assertThat(result.getFilterValueGetter(), is("FVG " + expected));
-    assertThat(result.getValueFunction(), is("VF " + expected));
-  }
-
   @Test
   void testInjectSourceAliasIntoFilterConditions() {
-    List<String> filterConditions = List.of(":foo.field1 != 'abc'", ":bar.field2 != 'xyz'");
+    List<String> filterConditions = List.of(
+      ":foo.field1 != 'abc'",
+      ":bar.field2 != 'xyz'"
+    );
     Map<String, String> renamedAliases = Map.of("foo", "source1", "bar", "source2");
 
-    List<String> expectedNonFinalPass = List.of(":[source1].field1 != 'abc'", ":[source2].field2 != 'xyz'");
-    List<String> actualNonFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(
-      filterConditions,
-      renamedAliases,
-      false
+    List<String> expectedNonFinalPass = List.of(
+      ":[source1].field1 != 'abc'",
+      ":[source2].field2 != 'xyz'"
     );
+    List<String> actualNonFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, false);
     assertEquals(expectedNonFinalPass, actualNonFinalPass);
 
-    List<String> expectedFinalPass = List.of("\"source1\".field1 != 'abc'", "\"source2\".field2 != 'xyz'");
-    List<String> actualFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(
-      filterConditions,
-      renamedAliases,
-      true
+    List<String> expectedFinalPass = List.of(
+      "\"source1\".field1 != 'abc'",
+      "\"source2\".field2 != 'xyz'"
     );
+    List<String> actualFinalPass = SourceUtils.injectSourceAliasIntoFilterConditions(filterConditions, renamedAliases, true);
     assertEquals(expectedFinalPass, actualFinalPass);
   }
 

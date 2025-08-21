@@ -214,8 +214,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'fund',
-      valueGetter: ":sourceAlias.jsonb ->> 'fundTypeId'",
+      valueGetter: ":fund.jsonb ->> 'fundTypeId'",
       joinsTo: [
         {
           targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
@@ -234,8 +233,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'fund',
-      valueGetter: ":sourceAlias.jsonb ->> 'ledgerId'",
+      valueGetter: ":fund.jsonb ->> 'ledgerId'",
       joinsTo: [
         {
           targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger

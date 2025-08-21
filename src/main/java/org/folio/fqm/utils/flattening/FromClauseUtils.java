@@ -1,8 +1,9 @@
 package org.folio.fqm.utils.flattening;
 
+import static org.folio.fqm.utils.EntityTypeUtils.splitFieldIntoAliasAndField;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +41,11 @@ public class FromClauseUtils {
    * @param tenantId The tenant ID to use for the table prefix
    */
   public static String getFromClause(EntityType flattenedEntityType, String tenantId) {
-    // Check that exactly 1 source is not joined via a JOIN clause or an entity type join
+    // Check that exactly 1 source does not have a JOIN clause
     List<EntityTypeSource> sourcesWithoutJoin = flattenedEntityType
       .getSources()
       .stream()
-      .filter(source -> !SourceUtils.isJoined(source))
+      .filter(source -> !isJoined(source))
       .toList();
 
     if (sourcesWithoutJoin.size() != 1) {
@@ -55,18 +56,18 @@ public class FromClauseUtils {
       );
     }
 
-    List<EntityTypeSourceDatabase> joinedSources = resolveJoins(
-      flattenedEntityType,
-      findNecessaryJoins(flattenedEntityType)
-    );
+    // fill all DB sources with JOIN clauses based on their parent ETs
+    List<EntityTypeSource> resolvedSources = resolveJoins(flattenedEntityType);
+    // Order sources so that JOIN clause makes sense
+    List<EntityTypeSource> orderedSources = orderSources(resolvedSources);
 
-    String finalJoinClause = buildFromClauseFromOrderedSources(joinedSources, tenantId);
+    String finalJoinClause = buildFromClauseFromOrderedSources(orderedSources, tenantId);
     log.info("Final from clause string: {}", finalJoinClause);
     return finalJoinClause;
   }
 
   private static String buildFromClauseFromOrderedSources(
-    Collection<EntityTypeSourceDatabase> orderedAndResolvedSources,
+    Collection<EntityTypeSource> orderedAndResolvedSources,
     String tenantId
   ) {
     String tablePrefix = tenantId != null ? tenantId + "_mod_fqm_manager." : "";
@@ -74,10 +75,14 @@ public class FromClauseUtils {
     List<String> baseTables = new ArrayList<>();
     List<String> joins = new ArrayList<>();
 
-    for (EntityTypeSourceDatabase source : orderedAndResolvedSources) {
-      EntityTypeSourceDatabaseJoin join = source.getJoin();
+    for (EntityTypeSource source : orderedAndResolvedSources) {
+      if (source instanceof EntityTypeSourceEntityType) {
+        continue;
+      }
+      EntityTypeSourceDatabase sourceDb = (EntityTypeSourceDatabase) source;
+      EntityTypeSourceDatabaseJoin join = sourceDb.getJoin();
       String alias = "\"" + source.getAlias() + "\"";
-      String target = source.getTarget();
+      String target = sourceDb.getTarget();
       if (join != null) {
         String joinClause = join.getType() + " " + tablePrefix + target + " " + alias;
         if (join.getCondition() != null) {
@@ -89,16 +94,20 @@ public class FromClauseUtils {
       }
     }
 
+    return baseTables.stream().collect(Collectors.joining(", ")) + " " + joins.stream().collect(Collectors.joining(" "));
+  }
+
+  public static boolean isJoined(EntityTypeSource source) {
+    if (source.getJoinedViaEntityType() != null) {
+      return true;
+    }
     return (
-      baseTables.stream().collect(Collectors.joining(", ")) + " " + joins.stream().collect(Collectors.joining(" "))
+      (source instanceof EntityTypeSourceDatabase sourceDb && sourceDb.getJoin() != null) ||
+      (source instanceof EntityTypeSourceEntityType sourceEt && sourceEt.getSourceField() != null)
     );
   }
 
-  /**
-   * Find all {@link NecessaryJoin NecessaryJoin}s for the given flattened entity type. This will return a list
-   * of records, one for each join that must be resolved between entity types.
-   */
-  public static List<NecessaryJoin> findNecessaryJoins(EntityType flattenedEntityType) {
+  public static List<EntityTypeSource> resolveJoins(EntityType flattenedEntityType) {
     Map<String, EntityTypeSourceEntityType> entityTypeSourceMap = flattenedEntityType
       .getSources()
       .stream()
@@ -109,202 +118,81 @@ public class FromClauseUtils {
     return flattenedEntityType
       .getSources()
       .stream()
-      .filter(EntityTypeSourceDatabase.class::isInstance)
-      .map(EntityTypeSourceDatabase.class::cast)
-      .filter(s -> s.getJoin() == null)
-      .filter(s -> s.getJoinedViaEntityType() != null)
-      .map(source -> findNecessaryJoin(source, entityTypeSourceMap, flattenedEntityType))
-      .filter(Optional::isPresent)
-      .map(Optional::get)
-      .collect(Collectors.toCollection(ArrayList::new));
+      .map((EntityTypeSource source) -> {
+        if (source instanceof EntityTypeSourceDatabase sourceDb) {
+          return resolveJoin(sourceDb, entityTypeSourceMap, flattenedEntityType);
+        } else {
+          return source;
+        }
+      })
+      .toList();
   }
 
   /**
-   * Find the {@link NecessaryJoin NecessaryJoin} required to join the provided database source.
-   * This finds the source's parent where the `sourceField` and `targetField` are provided, finds
-   * the referenced fields, their sources, and wraps it all up into a {@link NecessaryJoin} for later use.
-   *
-   * @param source The source to find the necessary join for
-   * @param sourceMap A map of source aliases to their entity type sources
-   * @param flattenedEntityType The flattened entity type being processed
+   * Resolves the JOIN for a database source based on it's join (if applicable), or it's parent entity type's join.
    */
-  private static Optional<NecessaryJoin> findNecessaryJoin(
+  private static EntityTypeSource resolveJoin(
     EntityTypeSourceDatabase source,
     Map<String, EntityTypeSourceEntityType> sourceMap,
     EntityType flattenedEntityType
   ) {
-    EntityTypeSourceEntityType parentSource = SourceUtils.findJoiningEntityType(source, sourceMap);
+    // joined via plain SQL, not an entity type
+    if (source.getJoin() != null) {
+      String joinClause = Optional
+        .ofNullable(source.getJoin().getCondition())
+        .map(s -> s.replace(":this", "\"" + source.getAlias() + "\""))
+        .map(s -> s.replace(":that", "\"" + source.getJoin().getJoinTo() + "\""))
+        .orElse(null);
+
+      return source.join(source.getJoin().condition(joinClause));
+    }
+
+    if (source.getJoinedViaEntityType() == null) {
+      // we have no parent (simple containing only DBs)
+      return source;
+    }
+
+    EntityTypeSourceEntityType parentSource = sourceMap.get(source.getJoinedViaEntityType());
+    while (parentSource.getJoinedViaEntityType() != null && parentSource.getSourceField() == null) {
+      parentSource = sourceMap.get(parentSource.getJoinedViaEntityType());
+    }
 
     if (parentSource.getSourceField() == null) {
       // parent source is not joined, so we do not need to join either
-      return Optional.empty();
+      return source;
     }
 
-    EntityTypeColumn columnA = EntityTypeUtils.findColumnByName(flattenedEntityType, parentSource.getSourceField());
-    EntityTypeColumn columnB = EntityTypeUtils.findColumnByName(
-      flattenedEntityType,
-      parentSource.getAlias() + "." + parentSource.getTargetField()
-    );
-    EntityTypeSourceDatabase sourceA = (EntityTypeSourceDatabase) EntityTypeUtils.findSourceByAlias(
-      flattenedEntityType,
-      columnA.getSourceAlias(),
-      columnA.getName()
-    );
-    EntityTypeSourceDatabase sourceB = (EntityTypeSourceDatabase) EntityTypeUtils.findSourceByAlias(
-      flattenedEntityType,
-      columnB.getSourceAlias(),
-      columnB.getName()
-    );
-
-    return Optional.of(new NecessaryJoin(columnA, sourceA, columnB, sourceB, parentSource.getOverrideJoinDirection()));
+    return source.join(computeJoin(flattenedEntityType, parentSource));
   }
 
-  /** Represents a join between two columns (and their sources) that must be resolved and end up in the resulting query */
-  protected record NecessaryJoin(
-    EntityTypeColumn columnA,
-    EntityTypeSourceDatabase sourceA,
-    EntityTypeColumn columnB,
-    EntityTypeSourceDatabase sourceB,
-    JoinDirection overrideJoinDirection
-  ) {
-    public NecessaryJoin flip() {
-      return new NecessaryJoin(columnB, sourceB, columnA, sourceA, SourceUtils.flipDirection(overrideJoinDirection));
-    }
-
-    public String toString() {
-      return "%s[%s] <-> %s[%s]".formatted(
-          columnA().getName(),
-          sourceA().getAlias(),
-          columnB().getName(),
-          sourceB().getAlias()
-        );
-    }
-  }
-
-  /**
-   * Resolves the entity type joins for the given flattened entity type. This is done via the following process:
-   *
-   * <ol>
-   * <li>Find database sources that already have SQL joins declared; use these as the basis for our join
-   *     dependency graph (see {@link #resolveDatabaseJoins})</li>
-   * <li>Algorithmically resolve the graph of desired joins to solve the network into dependency lists</li>
-   * <li>Add SQL conditions to the database sources</li>
-   * <li>Order the sources based on the created graph (see {@link #orderSources})</li>
-   * <li>Return the ordered sources ready to be concatenated into SQL</li>
-   * </ol>
-   *
-   * @param flattenedEntityType the entity type to process
-   * @param necessaryJoins      the list of joins to include
-   * @return a list of ordered database sources with joins resolved
-   */
-  public static List<EntityTypeSourceDatabase> resolveJoins(
-    EntityType flattenedEntityType,
-    List<NecessaryJoin> necessaryJoins
-  ) {
-    // stores the dependencies for joining in the format `KEY must come _after_ VALUES`
-    Map<String, Set<String>> dependencies = new HashMap<>();
-
-    resolveDatabaseJoins(flattenedEntityType, dependencies);
-
-    Set<String> sourcesAvailableForEntityJoins = flattenedEntityType
-      .getSources()
-      .stream()
-      .filter(EntityTypeSourceDatabase.class::isInstance)
-      .map(EntityTypeSourceDatabase.class::cast)
-      .filter(sourceDb -> sourceDb.getJoin() == null)
-      .map(s -> s.getAlias())
-      .collect(Collectors.toSet());
-
-    while (!necessaryJoins.isEmpty()) {
-      // if one side of a join is already used, we must resolve the other side before potentially deadlocking ourselves.
-      // for example, A joins to B and source A is already joined to something else, so we can't use it.
-      // Therefore, we must join B ON (some condition with A)
-      Optional<NecessaryJoin> joinToAlreadyJoined = necessaryJoins
-        .stream()
-        .filter(join ->
-          !sourcesAvailableForEntityJoins.contains(join.sourceA().getAlias()) ||
-          !sourcesAvailableForEntityJoins.contains(join.sourceB().getAlias())
-        )
-        .findFirst()
-        .map(join -> {
-          if (sourcesAvailableForEntityJoins.contains(join.sourceA().getAlias())) {
-            return join.flip();
-          } else {
-            return join;
-          }
-        });
-
-      // if above isn't a thing, just grab the next one
-      NecessaryJoin join = joinToAlreadyJoined.orElse(necessaryJoins.getFirst());
-
-      EntityTypeSourceDatabaseJoin computedJoin = computeJoin(
-        flattenedEntityType,
-        join.columnB(),
-        join.columnA(),
-        join.overrideJoinDirection()
-      );
-      join.sourceB().setJoin(computedJoin);
-
-      // A needs to get added to the query before B
-      dependencies.computeIfAbsent(join.sourceB().getAlias(), k -> new HashSet<>()).add(join.sourceA().getAlias());
-
-      sourcesAvailableForEntityJoins.remove(join.sourceB().getAlias());
-      necessaryJoins.remove(join);
-      necessaryJoins.remove(join.flip()); // in case we flipped earlier, re-flip for removal
-    }
-
-    // Order DB sources so that JOIN clause makes sense
-    // we don't care about ET sources for the actual from clause, so we filter for just DB ones here
-    return orderSources(
-      flattenedEntityType
-        .getSources()
-        .stream()
-        .filter(EntityTypeSourceDatabase.class::isInstance)
-        .map(EntityTypeSourceDatabase.class::cast)
-        .toList(),
-      dependencies
-    );
-  }
-
-  /** Handle SQL join conditions for database sources */
-  public static void resolveDatabaseJoins(EntityType flattenedEntityType, Map<String, Set<String>> dependencies) {
-    flattenedEntityType
-      .getSources()
-      .stream()
-      .filter(EntityTypeSourceDatabase.class::isInstance)
-      .map(EntityTypeSourceDatabase.class::cast)
-      .filter(source -> source.getJoin() != null)
-      .forEach(source -> {
-        source.setJoin(
-          source
-            .getJoin()
-            .condition(
-              Optional
-                .ofNullable(source.getJoin().getCondition())
-                .map(s -> s.replace(":this", "\"" + source.getAlias() + "\""))
-                .map(s -> s.replace(":that", "\"" + source.getJoin().getJoinTo() + "\""))
-                .orElse(null)
-            )
-        );
-
-        dependencies.computeIfAbsent(source.getAlias(), k -> new HashSet<>()).add(source.getJoin().getJoinTo());
-      });
-  }
-
-  /** Compute the SQL for a join between two columns */
   public static EntityTypeSourceDatabaseJoin computeJoin(
     EntityType flattenedEntityType,
-    EntityTypeColumn sourceColumn,
-    EntityTypeColumn targetColumn,
-    JoinDirection overrideJoinDirection
+    EntityTypeSourceEntityType source
   ) {
+    EntityTypeColumn sourceColumn = EntityTypeUtils
+      .findColumnByName(flattenedEntityType, source.getSourceField())
+      .orElseThrow(() ->
+        new InvalidEntityTypeDefinitionException(
+          "Column " + source.getSourceField() + " could not be found",
+          flattenedEntityType
+        )
+      );
+    EntityTypeColumn targetColumn = EntityTypeUtils
+      .findColumnByName(flattenedEntityType, source.getAlias() + "." + source.getTargetField())
+      .orElseThrow(() ->
+        new InvalidEntityTypeDefinitionException(
+          "Column " + source.getAlias() + "." + source.getTargetField() + " could not be found",
+          flattenedEntityType
+        )
+      );
+
     Optional<Join> sourceToTargetJoin = EntityTypeUtils.findJoinBetween(sourceColumn, targetColumn);
     Optional<Join> targetToSourceJoin = EntityTypeUtils.findJoinBetween(targetColumn, sourceColumn);
 
     if (sourceToTargetJoin.isEmpty() && targetToSourceJoin.isEmpty()) {
       throw log.throwing(
         new InvalidEntityTypeDefinitionException(
-          "No join found between %s and %s".formatted(sourceColumn.getName(), targetColumn.getName()),
+          "No join found between %s and %s".formatted(source.getSourceField(), source.getTargetField()),
           flattenedEntityType
         )
       );
@@ -312,17 +200,19 @@ public class FromClauseUtils {
       throw log.throwing(
         new InvalidEntityTypeDefinitionException(
           "Ambiguous join found between %s and %s; joins should only be on one side!".formatted(
-              sourceColumn.getName(),
-              targetColumn.getName()
+              source.getSourceField(),
+              source.getTargetField()
             ),
           flattenedEntityType
         )
       );
     } else {
       return sourceToTargetJoin
-        .map(join -> computeJoin(sourceColumn, targetColumn, join, overrideJoinDirection, false))
+        .map(join -> computeJoin(sourceColumn, targetColumn, join, source.getOverrideJoinDirection(), false))
         .or(() ->
-          targetToSourceJoin.map(join -> computeJoin(targetColumn, sourceColumn, join, overrideJoinDirection, true))
+          targetToSourceJoin.map(join ->
+            computeJoin(targetColumn, sourceColumn, join, source.getOverrideJoinDirection(), true)
+          )
         )
         .orElseThrow();
     }
@@ -367,46 +257,76 @@ public class FromClauseUtils {
   }
 
   /**
-   * Orders sources based on a graph traversal given a dependency list of format KEY after VALUE(S).
+   * Orders sources to ensure we get sensible JOIN clauses.
+   * We do not care about the order of entity type sources vs database sources themselves, only the relationships
+   * they define.
+   *
+   * This method will return a list with the following properties:
+   * <ul>
+   *  <li>If an entity type source has a sourceField, it's source will appear BEFORE it in the list</li>
+   *  <li>If an source has a joinedViaEntityType, it's parent will appear BEFORE it in the list</li>
+   *  <li>If a database source has a join, it's joinTo source will appear BEFORE it in the list</li>
+   * </ul>
    */
-  public static List<EntityTypeSourceDatabase> orderSources(
-    List<EntityTypeSourceDatabase> sources,
-    Map<String, Set<String>> sourceDependencies
-  ) {
-    Map<String, EntityTypeSourceDatabase> sourceMap = sources
+  public static List<EntityTypeSource> orderSources(List<EntityTypeSource> sources) {
+    Map<String, EntityTypeSource> sourceMap = sources
       .stream()
-      .collect(Collectors.toMap(EntityTypeSourceDatabase::getAlias, Function.identity()));
+      .collect(Collectors.toMap(EntityTypeSource::getAlias, Function.identity()));
 
-    List<String> result = new ArrayList<>();
-    Set<String> toInsert = sources
-      .stream()
-      .map(EntityTypeSourceDatabase::getAlias)
-      .collect(Collectors.toCollection(HashSet::new));
+    List<EntityTypeSource> orderedList = new ArrayList<>();
+    Set<String> visited = new HashSet<>();
+    sources.stream().forEach(source -> orderSourcesRecursively(source, sourceMap, visited, orderedList, sources));
 
-    while (!toInsert.isEmpty()) {
-      String next = toInsert.iterator().next();
-      orderSourceVisit(result, toInsert, sourceDependencies, next);
-    }
-
-    return result.stream().map(sourceMap::get).toList();
+    return orderedList;
   }
 
-  private static void orderSourceVisit(
-    List<String> result,
-    Set<String> toInsert,
-    Map<String, Set<String>> sourceDependencies,
-    String source
+  private static void orderSourcesRecursively(
+    EntityTypeSource source,
+    Map<String, EntityTypeSource> sourceMap,
+    Set<String> visited,
+    List<EntityTypeSource> orderedList,
+    List<EntityTypeSource> allSources
   ) {
-    if (!toInsert.contains(source)) {
+    // Depth-first/post-order traversal
+    if (!visited.add(source.getAlias())) {
       return;
     }
+    // join our join-to source before ourselves
+    if (source instanceof EntityTypeSourceEntityType sourceEt && sourceEt.getSourceField() != null) {
+      orderSourcesRecursively(
+        sourceMap.get(splitFieldIntoAliasAndField(sourceEt.getSourceField()).getLeft()),
+        sourceMap,
+        visited,
+        orderedList,
+        allSources
+      );
+    }
 
-    toInsert.remove(source);
+    // join our parent entity type(s) before ourselves
+    if (source.getJoinedViaEntityType() != null) {
+      EntityTypeSource joinedViaSource = sourceMap.get(source.getJoinedViaEntityType());
+      orderSourcesRecursively(joinedViaSource, sourceMap, visited, orderedList, allSources);
+    }
 
-    sourceDependencies
-      .getOrDefault(source, Set.of())
-      .forEach(dep -> orderSourceVisit(result, toInsert, sourceDependencies, dep));
+    // join our join-to source before ourselves
+    // we only want true DB joins here; entity-type derived joins don't have a joinTo
+    if (
+      source instanceof EntityTypeSourceDatabase sourceDb &&
+      sourceDb.getJoin() != null &&
+      sourceDb.getJoin().getJoinTo() != null
+    ) {
+      EntityTypeSource joinToSource = sourceMap.get(sourceDb.getJoin().getJoinTo());
+      orderSourcesRecursively(joinToSource, sourceMap, visited, orderedList, allSources);
+    }
 
-    result.add(source);
+    orderedList.add(source);
+
+    // join the DB sources that depend on this ET source.
+    // Do it after the current source, so that the parent source appears before the children sources
+    if (source instanceof EntityTypeSourceEntityType sourceEt) {
+      allSources.stream()
+          .filter(s -> sourceEt.getAlias().equals(s.getJoinedViaEntityType()))
+          .forEach(s -> orderSourcesRecursively(s, sourceMap, visited, orderedList, allSources));
+    }
   }
 }

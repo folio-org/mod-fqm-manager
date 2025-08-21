@@ -1,15 +1,11 @@
 package org.folio.fqm.utils;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.log4j.Log4j2;
-
 import org.apache.commons.lang3.tuple.Pair;
-import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.Join;
 import org.jooq.Field;
 import org.jooq.SortField;
@@ -25,7 +21,6 @@ import static org.jooq.impl.DSL.field;
 /**
  * Class responsible for retrieving information related to the ID columns of an entity type.
  */
-@Log4j2
 @UtilityClass
 public class EntityTypeUtils {
 
@@ -100,39 +95,11 @@ public class EntityTypeUtils {
   }
 
   /**
-   * Searches for a column within an entity type by name, returning it if it exists and throwing otherwise.
+   * Searches for a column within an entity type by name, returning it if it exists.
    * This method will not search nested object fields, only top-level columns.
    */
-  public static EntityTypeColumn findColumnByName(EntityType entityType, String columnName) {
-    return entityType
-      .getColumns()
-      .stream()
-      .filter(column -> column.getName().equals(columnName))
-      .findFirst()
-      .orElseThrow(() ->
-        log.throwing(
-          new InvalidEntityTypeDefinitionException("Column " + columnName + " could not be found", entityType)
-        )
-      );
-  }
-
-  /**
-   * Searches for a source within an entity type by alias, returning it if it exists and throwing otherwise.
-   */
-  public static EntityTypeSource findSourceByAlias(EntityType entityType, String alias, String ref) {
-    return entityType
-      .getSources()
-      .stream()
-      .filter(source -> source.getAlias().equals(alias))
-      .findFirst()
-      .orElseThrow(() ->
-        log.throwing(
-          new InvalidEntityTypeDefinitionException(
-            "Source " + alias + " (referenced by field " + ref + ") could not be found",
-            entityType
-          )
-        )
-      );
+  public static Optional<EntityTypeColumn> findColumnByName(EntityType entityType, String columnName) {
+    return entityType.getColumns().stream().filter(column -> column.getName().equals(columnName)).findFirst();
   }
 
   /**

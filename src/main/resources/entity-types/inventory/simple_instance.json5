@@ -142,8 +142,7 @@
       queryable: true,
       essential: false,
       visibleByDefault: false,
-      sourceAlias: 'inst',
-      valueGetter: ':sourceAlias.instancetypeid',
+      valueGetter: ':inst.instancetypeid',
       joinsTo: [
         {
           targetId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c', // simple_instance_type
@@ -775,8 +774,7 @@
       queryable: true,
       hidden: true,
       visibleByDefault: false,
-      sourceAlias: 'inst',
-      valueGetter: ":sourceAlias.jsonb->'dates'->>'dateTypeId'",
+      valueGetter: ":inst.jsonb->'dates'->>'dateTypeId'",
       joinsTo: [
         {
           targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
@@ -1190,8 +1188,7 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
-      sourceAlias: 'inst',
-      valueGetter: ":sourceAlias.jsonb->>'statusId'",
+      valueGetter: ":inst.jsonb->>'statusId'",
       joinsTo: [
         {
           targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',

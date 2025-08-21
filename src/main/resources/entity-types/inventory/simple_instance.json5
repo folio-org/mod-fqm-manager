@@ -713,7 +713,8 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -1492,6 +1493,6 @@
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
                     WHERE pst.precedinginstanceid = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
-    }
+    },
   ],
 }

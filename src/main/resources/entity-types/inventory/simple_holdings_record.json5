@@ -932,5 +932,71 @@
       essential: true,
       valueGetter: ':sourceAlias.jsonb::text',
     },
+    {
+      name: 'additional_call_numbers',
+      sourceAlias: 'hrd',
+      essential: true,
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'call_number',
+              property: 'callNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(elems.value->>'callNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'additionalCallNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'prefix',
+              property: 'prefix',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(elems.value->>'prefix')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'additionalCallNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'suffix',
+              property: 'suffix',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(elems.value->>'suffix')) FROM jsonb_array_elements(:sourceAlias.jsonb->'additionalCallNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'call_number_type_id',
+              property: 'callNumberType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(elems.value->>'typeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'additionalCallNumbers') AS elems)",
+              valueFunction: 'lower(:value)',
+              source: {
+                entityTypeId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+                columnName: 'name',
+              },
+            },
+          ],
+        },
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                              jsonb_build_object('callNumberType', call_number_type.jsonb ->> 'name') \
+                 ORDER BY record.value ->> 'callNumberType') \
+               FROM jsonb_array_elements((:sourceAlias.jsonb -> 'additionalCallNumbers')) record(value) \
+                 LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_call_number_type call_number_type \
+                   ON (record.value ->> 'typeId') = call_number_type.id::text)::text"
+    }
   ],
 }

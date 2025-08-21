@@ -239,8 +239,8 @@ public class FromClauseUtils {
 
       EntityTypeSourceDatabaseJoin computedJoin = computeJoin(
         flattenedEntityType,
-        join.columnB(),
         join.columnA(),
+        join.columnB(),
         join.overrideJoinDirection()
       );
       join.sourceB().setJoin(computedJoin);

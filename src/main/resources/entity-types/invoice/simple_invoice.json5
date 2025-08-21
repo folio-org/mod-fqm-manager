@@ -22,7 +22,8 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ':invoice.id',
+      sourceAlias: 'invoice',
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'accounting_code',
@@ -468,7 +469,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":invoice.jsonb->>'vendorId'",
+      sourceAlias: 'invoice',
+      valueGetter: ":sourceAlias.jsonb->>'vendorId'",
       joinsTo: [
         {
           targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
@@ -518,7 +520,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":invoice.jsonb->>'fiscalYearId'",
+      sourceAlias: 'invoice',
+      valueGetter: ":sourceAlias.jsonb->>'fiscalYearId'",
       joinsTo: [
         {
           targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
@@ -651,7 +654,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":invoice.jsonb->'metadata'->>'createdByUserId'",
+      sourceAlias: 'invoice',
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
@@ -676,7 +680,8 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":invoice.jsonb->'metadata'->>'updatedByUserId'",
+      sourceAlias: 'invoice',
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
+import javax.annotation.CheckForNull;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -16,6 +16,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 
@@ -42,8 +43,6 @@ public class SourceUtils {
    * This method injects the source alias into the column's value getter and filter value getter.
    * It also recursively injects the source alias into nested object types and array types.
    *
-   * Only one of renamedAliases or sourceAlias should be provided. If both are provided, renamedAliases will be ignored.
-   *
    * @param <T>            The type of the column, which must extend the Field interface.
    * @param column         The column to inject the source alias into.
    * @param renamedAliases The map of old aliases to new aliases.
@@ -58,14 +57,16 @@ public class SourceUtils {
     String sourceAlias,
     boolean finalPass
   ) {
-    if (sourceAlias != null) {
-      return injectSourceAlias(column, Map.of("sourceAlias", renamedAliases.get(sourceAlias)), finalPass);
-    } else {
-      return injectSourceAlias(column, renamedAliases, finalPass);
+    if (sourceAlias != null && renamedAliases.containsKey(sourceAlias)) {
+      injectSourceAlias(column, Map.of("sourceAlias", renamedAliases.get(sourceAlias)), finalPass);
     }
+
+    injectSourceAlias(column, renamedAliases, finalPass);
+
+    return column;
   }
 
-  public static ObjectType injectSourceAliasForObjectType(
+  private static ObjectType injectSourceAliasForObjectType(
     ObjectType objectType,
     Map<String, String> renamedAliases,
     boolean finalPass
@@ -78,7 +79,7 @@ public class SourceUtils {
     return objectType.toBuilder().properties(convertedProperties).build();
   }
 
-  public static ArrayType injectSourceAliasForArrayType(
+  private static ArrayType injectSourceAliasForArrayType(
     ArrayType arrayType,
     Map<String, String> renamedAliases,
     boolean finalPass
@@ -102,7 +103,9 @@ public class SourceUtils {
       .forEach(alias -> {
         column.valueGetter(applyAliasReplacement(column.getValueGetter(), alias, renamedAliases, finalPass));
         if (column.getFilterValueGetter() != null) {
-          column.filterValueGetter(applyAliasReplacement(column.getFilterValueGetter(), alias, renamedAliases, finalPass));
+          column.filterValueGetter(
+            applyAliasReplacement(column.getFilterValueGetter(), alias, renamedAliases, finalPass)
+          );
         }
         if (column.getValueFunction() != null) {
           column.valueFunction(applyAliasReplacement(column.getValueFunction(), alias, renamedAliases, finalPass));
@@ -152,9 +155,7 @@ public class SourceUtils {
     // we only want to remove the :alias format once we're on the final pass (no more parent sources above this one)
     String newAliasReference = (finalPass ? "\"%s\"" : ":[%s]").formatted(renamedAliases.get(alias));
 
-    return input
-      .replace(oldAliasReference, newAliasReference)
-      .replace(intermediateAliasReference, newAliasReference);
+    return input.replace(oldAliasReference, newAliasReference).replace(intermediateAliasReference, newAliasReference);
   }
 
   private static Stream<String> getAliasReplacementOrder(Map<String, String> renamedAliases) {
@@ -170,23 +171,21 @@ public class SourceUtils {
     Stream<EntityTypeColumn> columns,
     Map<String, String> renamedAliases
   ) {
-    return columns
-      .map(column -> {
-        EntityTypeColumn newColumn = copyColumn(column);
-        // Only treat newColumn as idColumn if outer source specifies to do so
-        newColumn.isIdColumn(
-          Optional
-            .ofNullable(newColumn.getIsIdColumn())
-            .map(isIdColumn ->
-              Boolean.TRUE.equals(isIdColumn) &&
-                (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
-            )
-            .orElse(null)
-        );
-        injectSourceAlias(newColumn, renamedAliases, newColumn.getSourceAlias(), sourceFromParent == null);
-        newColumn.setSourceAlias(null);
-        return newColumn;
-      });
+    return columns.map(column -> {
+      EntityTypeColumn newColumn = copyColumn(column);
+      // Only treat newColumn as idColumn if outer source specifies to do so
+      newColumn.isIdColumn(
+        Optional
+          .ofNullable(newColumn.getIsIdColumn())
+          .map(isIdColumn ->
+            Boolean.TRUE.equals(isIdColumn) &&
+            (sourceFromParent == null || Boolean.TRUE.equals(sourceFromParent.getUseIdColumns()))
+          )
+          .orElse(null)
+      );
+      injectSourceAlias(newColumn, renamedAliases, newColumn.getSourceAlias(), sourceFromParent == null);
+      return newColumn;
+    });
   }
 
   public static EntityTypeColumn copyColumn(EntityTypeColumn column) {
@@ -269,5 +268,45 @@ public class SourceUtils {
       // or, if no current joinedVia, use the parent's
       .or(() -> Optional.ofNullable(sourceFromParent).map(EntityTypeSource::getAlias))
       .orElse(null);
+  }
+
+  public static JoinDirection flipDirection(@CheckForNull JoinDirection direction) {
+    if (direction == null) {
+      return null;
+    }
+
+    return switch (direction) {
+      case LEFT -> JoinDirection.RIGHT;
+      case RIGHT -> JoinDirection.LEFT;
+      default -> direction;
+    };
+  }
+
+  /** If a source is joined via a parent entity type, explicit DB join, or to another ET */
+  public static boolean isJoined(EntityTypeSource source) {
+    if (source.getJoinedViaEntityType() != null) {
+      return true;
+    }
+    return (
+      (source instanceof EntityTypeSourceDatabase sourceDb && sourceDb.getJoin() != null) ||
+      (source instanceof EntityTypeSourceEntityType sourceEt && sourceEt.getSourceField() != null)
+    );
+  }
+
+  /**
+   * Finds the joinedViaEntityType at the top of the tree for a given source. This may not always be the direct
+   * parent, e.g. if entity type foo [X -> Y -> Z] is joined to bar [A -> B] then the joining source for Z is X.
+   */
+  public static EntityTypeSourceEntityType findJoiningEntityType(
+    EntityTypeSourceDatabase source,
+    Map<String, EntityTypeSourceEntityType> sourceMap
+  ) {
+    EntityTypeSourceEntityType parentSource = sourceMap.get(source.getJoinedViaEntityType());
+
+    while (parentSource.getJoinedViaEntityType() != null && parentSource.getSourceField() == null) {
+      parentSource = sourceMap.get(parentSource.getJoinedViaEntityType());
+    }
+
+    return parentSource;
   }
 }

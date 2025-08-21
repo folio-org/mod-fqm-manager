@@ -153,7 +153,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':hrd.effectivelocationid',
+      sourceAlias: 'hrd',
+      valueGetter: ':sourceAlias.effectivelocationid',
       joinsTo: [
         {
           targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
@@ -216,7 +217,8 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':hrd.permanentlocationid',
+      sourceAlias: 'hrd',
+      valueGetter: ':sourceAlias.permanentlocationid',
       essential: true,
       joinsTo: [
         {
@@ -236,7 +238,8 @@
       queryable: true,
       visibleByDefault: false,
       hidden: true,
-      valueGetter: ':hrd.temporarylocationid',
+      sourceAlias: 'hrd',
+      valueGetter: ':sourceAlias.temporarylocationid',
       essential: true,
       joinsTo: [
         {

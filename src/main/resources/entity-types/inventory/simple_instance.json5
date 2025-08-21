@@ -657,7 +657,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'publisher') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publisher')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -668,7 +668,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'place') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'place')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -679,7 +679,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'dateOfPublication') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'dateOfPublication')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -690,7 +690,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',

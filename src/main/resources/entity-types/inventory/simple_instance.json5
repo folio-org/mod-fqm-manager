@@ -257,6 +257,19 @@
       },
     },
     {
+      name: 'source_uri',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":inst.jsonb->>'sourceUri'",
+      filterValueGetter: '"left"(lower(:inst.jsonb ->> \'sourceUri\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
+    },
+    {
       name: 'title',
       sourceAlias: 'inst',
       dataType: {

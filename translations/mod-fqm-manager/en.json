@@ -771,6 +771,7 @@
   "entityType.simple_instance.series": "Series",
   "entityType.simple_instance.shared": "Shared",
   "entityType.simple_instance.source": "Source",
+  "entityType.simple_instance.source_uri": "Instance source URI",
   "entityType.simple_instance.staff_suppress": "Staff suppress",
   "entityType.simple_instance.statistical_code_ids": "Statistical code UUIDs",
   "entityType.simple_instance.statistical_code_names": "Statistical code names",

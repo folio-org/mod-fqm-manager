@@ -71,9 +71,8 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      sourceAlias: 'fund_distribution',
-      valueGetter: "(:sourceAlias.jsonb->>'fundId')",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'fundId')",
+      valueGetter: "(:fund_distribution.jsonb->>'fundId')",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'fundId')",
       valueFunction: 'lower(:value)',
       joinsTo: [
         {
@@ -89,9 +88,8 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'fund_distribution',
-      valueGetter: "(:sourceAlias.jsonb->>'expenseClassId')",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'expenseClassId')",
+      valueGetter: "(:fund_distribution.jsonb->>'expenseClassId')",
+      filterValueGetter: "lower(:fund_distribution.jsonb->>'expenseClassId')",
       valueFunction: 'lower(:value)',
       joinsTo: [
         {

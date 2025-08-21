@@ -15,8 +15,7 @@
       visibleByDefault: false,
       essential: true,
       isIdColumn: true,
-      sourceAlias: 'transaction',
-      valueGetter: ':sourceAlias.id',
+      valueGetter: ':transaction.id',
     },
     {
       name: 'version',
@@ -25,8 +24,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb ->> '_version')::integer",
+      valueGetter: "(:transaction.jsonb ->> '_version')::integer",
       valueFunction: '(:value)::integer'
     },
     {
@@ -37,8 +35,7 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb ->> 'amount')::float",
+      valueGetter: "(:transaction.jsonb ->> 'amount')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -48,8 +45,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'encumbranceId'",
+      valueGetter: ":transaction.jsonb -> 'awaitingPayment' ->> 'encumbranceId'",
     },
     {
       name: 'release_encumbrance',
@@ -58,8 +54,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
+      valueGetter: ":transaction.jsonb -> 'awaitingPayment' ->> 'releaseEncumbrance'",
       values: [
         {
           label: 'True',
@@ -79,8 +74,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'currency'",
+      valueGetter: ":transaction.jsonb ->> 'currency'",
     },
     {
       name: 'description',
@@ -90,8 +84,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'description'",
+      valueGetter: ":transaction.jsonb ->> 'description'",
     },
     {
       name: 'expense_class_id',
@@ -102,8 +95,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.expenseclassid",
+      valueGetter: ":transaction.expenseclassid",
       joinsTo: [
         {
           targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
@@ -122,8 +114,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ':sourceAlias.fiscalyearid',
+      valueGetter: ':transaction.fiscalyearid',
       joinsTo: [
         {
           targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
@@ -142,8 +133,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ':sourceAlias.fromfundid',
+      valueGetter: ':transaction.fromfundid',
       joinsTo: [
         {
           targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
@@ -161,8 +151,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'invoiceCancelled'",
+      valueGetter: ":transaction.jsonb ->> 'invoiceCancelled'",
       values: [
         {
           label: 'True',
@@ -181,8 +170,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'paymentEncumbranceId'",
+      valueGetter: ":transaction.jsonb ->> 'paymentEncumbranceId'",
     },
     {
       name: 'source',
@@ -192,8 +180,7 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'source'",
+      valueGetter: ":transaction.jsonb ->> 'source'",
       values: [
         {
           label: 'Fiscal year',
@@ -222,8 +209,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ':sourceAlias.sourcefiscalyearid',
+      valueGetter: ':transaction.sourcefiscalyearid',
       joinsTo: [
         {
           targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
@@ -242,8 +228,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceId'",
+      valueGetter: ":transaction.jsonb ->> 'sourceInvoiceId'",
       joinsTo: [
         {
           targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
@@ -262,8 +247,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'sourceInvoiceLineId'",
+      valueGetter: ":transaction.jsonb ->> 'sourceInvoiceLineId'",
       joinsTo: [
         {
           targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
@@ -285,7 +269,6 @@
       queryable: false,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text) FILTER (\
@@ -293,7 +276,7 @@
               (elems.value::text) IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          jsonb_array_elements_text(:transaction.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       filterValueGetter: "(\
         SELECT\
@@ -302,7 +285,7 @@
               (elems.value::text) IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          jsonb_array_elements_text(:transaction.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       valueFunction: 'lower(:value)',
     },
@@ -315,8 +298,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ':sourceAlias.tofundid',
+      valueGetter: ':transaction.tofundid',
       joinsTo: [
         {
           targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
@@ -334,8 +316,7 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb ->> 'transactionType'::text",
+      valueGetter: ":transaction.jsonb ->> 'transactionType'::text",
       values: [
         {
           label: 'Allocation',
@@ -374,8 +355,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb ->> 'voidedAmount')::float",
+      valueGetter: "(:transaction.jsonb ->> 'voidedAmount')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -386,8 +366,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdDate'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'createdDate'",
     },
     {
       name: 'created_by_user_id',
@@ -398,8 +377,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'createdByUserId'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'createdByUserId'",
       joinsTo: [
         {
           targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
@@ -417,8 +395,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedDate'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'updatedDate'",
     },
     {
       name: 'updated_by_user_id',
@@ -429,8 +406,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'metadata' ->> 'updatedByUserId'",
+      valueGetter: ":transaction.jsonb -> 'metadata' ->> 'updatedByUserId'",
       joinsTo: [
         {
           targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
@@ -448,8 +424,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountAwaitingPayment')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountAwaitingPayment')::float",
       valueFunction: '(:value)::float',
     },
     {
@@ -460,8 +435,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountCredited')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountCredited')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -472,8 +446,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'amountExpended')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'amountExpended')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -484,8 +457,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance' ->> 'initialAmountEncumbered')::float",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance' ->> 'initialAmountEncumbered')::float",
       valueFunction: '(:value)::float'
     },
     {
@@ -496,8 +468,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'status'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'status'",
       valueFunction: 'lower(:value)',
       values: [
         {
@@ -518,8 +489,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderType'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'orderType'",
       valueFunction: 'lower(:value)',
       values: [
         {
@@ -540,8 +510,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'orderStatus'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'orderStatus'",
       valueFunction: 'lower(:value)',
       values: [
         {
@@ -566,8 +535,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'subscription'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'subscription'",
       values: [
         {
           label: 'True',
@@ -587,8 +555,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
-      valueGetter: ":sourceAlias.jsonb -> 'encumbrance' ->> 'reEncumber'",
+      valueGetter: ":transaction.jsonb -> 'encumbrance' ->> 'reEncumber'",
       values: [
         {
           label: 'True',
@@ -609,8 +576,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePurchaseOrderId'::text"
+      valueGetter: "(:transaction.jsonb -> 'encumbrance'::text) ->> 'sourcePurchaseOrderId'::text"
     },
     {
       name: 'source_po_line_id',
@@ -621,8 +587,7 @@
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      sourceAlias: 'transaction',
-      valueGetter: "(:sourceAlias.jsonb -> 'encumbrance'::text) ->> 'sourcePoLineId'::text",
+      valueGetter: "(:transaction.jsonb -> 'encumbrance'::text) ->> 'sourcePoLineId'::text",
     }
   ],
   sources: [

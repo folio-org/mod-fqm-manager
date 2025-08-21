@@ -60,18 +60,18 @@ class FromClauseUtilsResolveAndOrderTest {
 
   static List<Arguments> resolutionOrderTestCases() {
     return List.of(
-      Arguments.of(List.of(join("a", "b")), List.of("a[base]", "b[b+a]")),
-      Arguments.of(List.of(join("a", "b"), join("a", "c")), List.of("a[base]", "b[b+a]", "c[c+a]")),
-      Arguments.of(List.of(join("a", "b"), join("c", "a")), List.of("c[base]", "a[a+c]", "b[b+a]")),
-      Arguments.of(List.of(join("b", "a"), join("a", "c")), List.of("b[base]", "a[a+b]", "c[c+a]")),
-      Arguments.of(List.of(join("b", "a"), join("c", "a")), List.of("b[base]", "a[a+b]", "c[c+a]")),
+      Arguments.of(List.of(join("a", "b")), List.of("a[base]", "b[a+b]")),
+      Arguments.of(List.of(join("a", "b"), join("a", "c")), List.of("a[base]", "b[a+b]", "c[a+c]")),
+      Arguments.of(List.of(join("a", "b"), join("c", "a")), List.of("c[base]", "a[c+a]", "b[a+b]")),
+      Arguments.of(List.of(join("b", "a"), join("a", "c")), List.of("b[base]", "a[b+a]", "c[a+c]")),
+      Arguments.of(List.of(join("b", "a"), join("c", "a")), List.of("b[base]", "a[b+a]", "c[a+c]")),
       // star denotes DB source that cannot be joined as it is already used in an explicit SQL join
       // a cannot be used, so we have to join b after
-      Arguments.of(List.of(join("a*", "b")), List.of("a[base]", "b[b+a*]")),
-      Arguments.of(List.of(join("b", "a*")), List.of("a[base]", "b[b+a*]")),
-      Arguments.of(List.of(join("a*", "b"), join("a*", "c")), List.of("a[base]", "b[b+a*]", "c[c+a*]")),
-      Arguments.of(List.of(join("a", "b*"), join("a", "c")), List.of("b[base]", "a[a+b*]", "c[c+a]")),
-      Arguments.of(List.of(join("a", "b"), join("a", "c*")), List.of("c[base]", "a[a+c*]", "b[b+a]"))
+      Arguments.of(List.of(join("a*", "b")), List.of("a[base]", "b[a*+b]")),
+      Arguments.of(List.of(join("b", "a*")), List.of("a[base]", "b[a*+b]")),
+      Arguments.of(List.of(join("a*", "b"), join("a*", "c")), List.of("a[base]", "b[a*+b]", "c[a*+c]")),
+      Arguments.of(List.of(join("a", "b*"), join("a", "c")), List.of("b[base]", "a[b*+a]", "c[a+c]")),
+      Arguments.of(List.of(join("a", "b"), join("a", "c*")), List.of("c[base]", "a[c*+a]", "b[a+b]"))
     );
   }
 

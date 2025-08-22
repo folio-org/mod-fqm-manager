@@ -989,7 +989,7 @@
         }
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
                               jsonb_build_object('callNumberType', call_number_type.jsonb ->> 'name') \
@@ -1012,7 +1012,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'publicDisplay') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicDisplay')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1033,7 +1033,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'enumeration') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'enumeration')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1044,7 +1044,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'chronology') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'chronology')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1054,9 +1054,10 @@
       },
       essential: true,
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'entries'",
+//      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'entries'",
+      valueGetter: "( SELECT COALESCE(jsonb_agg(elem), '[]'::jsonb) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') elem WHERE elem != 'null'::jsonb)::text"
     },
   ],
 }

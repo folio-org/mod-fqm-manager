@@ -584,12 +584,27 @@
           dataType: 'objectType',
           properties: [
             {
+              name: 'relationship',
+              property: 'relationship',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'relationshipId') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'relationshipId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              source: {
+                entityTypeId: '80dac615-4de8-416f-85d1-27e73457f72c',
+                columnName: 'name',
+              },
+              valueFunction: 'lower(:value)'
+            },
+            {
               name: 'uri',
               property: 'uri',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'uri') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'uri')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
@@ -600,7 +615,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'linkText') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'linkText')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
@@ -611,7 +626,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'materialsSpecification') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'materialsSpecification')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
@@ -622,7 +637,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'publicNote') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicNote')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
@@ -634,7 +649,12 @@
       queryable: false,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'electronicAccess'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                      jsonb_build_object('relationship', class_type.jsonb ->> 'name') \
+                       ORDER BY record.value ->> 'relationshipId') \
+                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'electronicAccess')) record(value) \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_electronic_access_relationship class_type \
+                         ON (record.value ->> 'relationshipId') = class_type.id::text)::text"
     },
     {
       name: 'shelving_title',

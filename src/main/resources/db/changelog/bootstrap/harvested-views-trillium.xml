@@ -85,4 +85,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_src_holdings_url_relationship" author="Oleksandr_Bozhko@epam.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="electronic_access_relationship" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+            replaceIfExists="true"
+            viewName="src_inventory_electronic_access_relationship">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.electronic_access_relationship
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

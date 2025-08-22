@@ -58,7 +58,7 @@ public class V20ContainsAllToEqOperatorMigrationTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(TEST_ENTITY_TYPE_ID)
-          .fqlQuery("{ \"$and\": [ { \"$and\": [ { \"arrayField\": { \"$eq\": \"value1\" } }, { \"arrayField\": { \"$eq\": \"value2\" } } ] }, { \"arrayField\": { \"$ne\": \"exclude\" } } ] }")
+          .fqlQuery("{ \"$and\": [ { \"arrayField\": { \"$eq\": \"value1\" } }, { \"arrayField\": { \"$eq\": \"value2\" } }, { \"arrayField\": { \"$ne\": \"exclude\" } } ] }")
           .fields(List.of())
           .build()
       ),
@@ -73,7 +73,7 @@ public class V20ContainsAllToEqOperatorMigrationTest extends TestTemplate {
         MigratableQueryInformation
           .builder()
           .entityTypeId(TEST_ENTITY_TYPE_ID)
-          .fqlQuery("{\"$and\": [ {\"arrayField\": {\"$eq\": \"singleValue\"}} ]}")
+          .fqlQuery("{\"arrayField\": {\"$eq\": \"singleValue\"}}")
           .fields(List.of())
           .build()
       ),

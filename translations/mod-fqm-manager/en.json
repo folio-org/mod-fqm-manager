@@ -877,7 +877,7 @@
   "entityType.simple_item.electronic_access.uri": "URI",
   "entityType.simple_item.electronic_access.uri._qualified": "Electronic access URI",
   "entityType.simple_item.enumeration": "Enumeration",
-  "entityType.simple_item.former_ids": "Former IDs",
+  "entityType.simple_item.former_ids": "Former identifiers",
   "entityType.simple_item.holdings_record_id": "Holdings record UUID",
   "entityType.simple_item.hrid": "Item HRID",
   "entityType.simple_item.id": "Item UUID",

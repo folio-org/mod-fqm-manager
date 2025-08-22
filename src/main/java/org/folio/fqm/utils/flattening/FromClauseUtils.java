@@ -55,6 +55,17 @@ public class FromClauseUtils {
       );
     }
 
+    flattenedEntityType.setSources(
+      flattenedEntityType
+        .getSources()
+        .stream()
+        .map(EntityTypeSource::toBuilder)
+        .map(EntityTypeSource.EntityTypeSourceBuilder::build)
+        // it complains if this cast is not here due to superclass builder implementation
+        .map(EntityTypeSource.class::cast)
+        .toList()
+    );
+
     List<EntityTypeSourceDatabase> joinedSources = resolveJoins(
       flattenedEntityType,
       findNecessaryJoins(flattenedEntityType)

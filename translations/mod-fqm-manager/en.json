@@ -881,7 +881,7 @@
   "entityType.simple_item.electronic_access.public_note": "URL public note",
   "entityType.simple_item.electronic_access.public_note._qualified": "Items — Electronic access — URL public note",
   "entityType.simple_item.enumeration": "Enumeration",
-  "entityType.simple_item.former_ids": "Former IDs",
+  "entityType.simple_item.former_ids": "Former identifiers",
   "entityType.simple_item.holdings_record_id": "Holdings record UUID",
   "entityType.simple_item.hrid": "Item HRID",
   "entityType.simple_item.id": "Item UUID",

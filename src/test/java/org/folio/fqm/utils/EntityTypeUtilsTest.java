@@ -1,9 +1,11 @@
 package org.folio.fqm.utils;
 
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Field;
 import org.jooq.SortField;
@@ -14,6 +16,7 @@ import java.util.List;
 
 import static org.jooq.impl.DSL.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
 
 class EntityTypeUtilsTest {
@@ -110,5 +113,39 @@ class EntityTypeUtilsTest {
     List<String> expectedIdColumnNames = List.of("field2", "tenant_id");
     List<String> actualIdColumnNames = EntityTypeUtils.getIdColumnNames(entityType);
     assertEquals(expectedIdColumnNames, actualIdColumnNames);
+  }
+
+  @Test
+  void testFindColumnByName() {
+    EntityType entityType = new EntityType().columns(List.of(new EntityTypeColumn().name("field1")));
+
+    assertEquals(entityType.getColumns().get(0), EntityTypeUtils.findColumnByName(entityType, "field1"));
+  }
+
+  @Test
+  void testFindColumnByNameMissing() {
+    EntityType entityType = new EntityType().columns(List.of(new EntityTypeColumn().name("field1")));
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeUtils.findColumnByName(entityType, "missing")
+    );
+  }
+
+  @Test
+  void testFindSourceByAlias() {
+    EntityType entityType = new EntityType().sources(List.of(new EntityTypeSourceEntityType().alias("source1")));
+
+    assertEquals(entityType.getSources().get(0), EntityTypeUtils.findSourceByAlias(entityType, "source1", "ref"));
+  }
+
+  @Test
+  void testFindSourceByAliasMissing() {
+    EntityType entityType = new EntityType().sources(List.of(new EntityTypeSourceEntityType().alias("source1")));
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeUtils.findSourceByAlias(entityType, "missing", "ref")
+    );
   }
 }

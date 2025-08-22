@@ -47,7 +47,8 @@
       },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'userId')::uuid",
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+      valueGetter: "(:sourceAlias.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
       joinsTo: [
         {

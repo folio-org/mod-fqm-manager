@@ -634,7 +634,7 @@
   "entityType.simple_holdings_record.electronic_access.relationship._qualified": "Holdings — Electronic access — URL relationship",
   "entityType.simple_holdings_record.electronic_access.uri": "URI",
   "entityType.simple_holdings_record.electronic_access.uri._qualified": "Holdings — Electronic access — URI",
-  "entityType.simple_holdings_record.former_ids": "Former IDs",
+  "entityType.simple_holdings_record.former_ids": "Former Identifiers",
   "entityType.simple_holdings_record.holdings_statements": "Statements",
   "entityType.simple_holdings_record.holdings_statements.note": "Public note",
   "entityType.simple_holdings_record.holdings_statements.note._qualified": "Statements — Public note",

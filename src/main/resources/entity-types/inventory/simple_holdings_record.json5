@@ -985,11 +985,11 @@
                 columnName: 'name',
               },
             },
-          ],
-        },
+          ]
+        }
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(SELECT jsonb_agg(record.value || \
                               jsonb_build_object('callNumberType', call_number_type.jsonb ->> 'name') \
@@ -997,6 +997,66 @@
                FROM jsonb_array_elements((:sourceAlias.jsonb -> 'additionalCallNumbers')) record(value) \
                  LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_call_number_type call_number_type \
                    ON (record.value ->> 'typeId') = call_number_type.id::text)::text"
-    }
+    },
+    {
+      name: 'receiving_history',
+      sourceAlias: 'hrd',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'public_display',
+              property: 'publicDisplay',
+              dataType: {
+                dataType: 'booleanType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'publicDisplay') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicDisplay')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+            },
+            {
+              name: 'enumeration',
+              property: 'enumeration',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'enumeration') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'enumeration')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'chronology',
+              property: 'chronology',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(elems.value->>'chronology') FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'chronology')) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+          ],
+        },
+      },
+      essential: true,
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'entries'",
+    },
   ],
 }

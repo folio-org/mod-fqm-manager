@@ -14,6 +14,7 @@ import org.folio.fqm.migration.MigrationUtils;
  * Version 19 -> 20 migration to map legacy regex operator to the new 'contains' / 'starts_with' operators.
  */
 @Log4j2
+@RequiredArgsConstructor
 public class V19RegexOperatorMigration implements MigrationStrategy {
 
   private final ObjectMapper objectMapper = new ObjectMapper();

@@ -257,6 +257,19 @@
       },
     },
     {
+      name: 'source_uri',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":inst.jsonb->>'sourceUri'",
+      filterValueGetter: '"left"(lower(:inst.jsonb ->> \'sourceUri\'::text), 600)',
+      valueFunction: '"left"(lower(:value), 600)',
+    },
+    {
       name: 'title',
       sourceAlias: 'inst',
       dataType: {
@@ -644,7 +657,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'publisher') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publisher')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -655,7 +668,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'place') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'place')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -666,7 +679,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'dateOfPublication') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'dateOfPublication')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -677,7 +690,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
@@ -700,19 +713,20 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'publicationFrequency') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'publicationFrequency') AS elems\
       )",
       filterValueGetter: "(\
         SELECT\
           array_agg(lower(elems.value::text))\
         FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'publicationFrequency') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'publicationFrequency') AS elems\
       )",
     },
     {
@@ -1479,6 +1493,6 @@
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
                     WHERE pst.precedinginstanceid = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
-    }
+    },
   ],
 }

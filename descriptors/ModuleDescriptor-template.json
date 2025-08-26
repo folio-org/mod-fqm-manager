@@ -531,6 +531,10 @@
     {
       "id": "instance-preceding-succeeding-titles",
       "version": "0.2"
+    },
+    {
+      "id": "electronic-access-relationships",
+      "version": "1.1"
     }
   ],
   "optional": [

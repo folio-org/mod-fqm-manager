@@ -63,7 +63,6 @@ public class EntityTypeInitializationService {
         .enable(JsonReadFeature.ALLOW_TRAILING_COMMA)
         // allows "escaping" newlines, giving proper linebreaks
         .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
-              .enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
         .build();
   }
 

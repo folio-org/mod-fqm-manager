@@ -8,17 +8,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.function.TriConsumer;
 import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.exception.InvalidFqlException;
 
 @Log4j2
 @UtilityClass
@@ -27,18 +31,105 @@ public class MigrationUtils {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
-   * Helper function to transform an FQL query. This changes a version to a new one, and runs a given
-   * function on each field in the query. See {@link #migrateFqlTree(ObjectNode, TriConsumer)} for more
-   * details on the field transformation function.
+   * Helper function to transform an FQL query where each field gets turned into a new quantity of fields.
+   * This runs a given function on each field's condition in the query, potentially adding or removing $and as needed.
+   *
+   * @param fqlQuery The root query to migrate
+   * @param handler  something that takes an {@link FqlFieldAndCondition} and returns a list of
+   *                 {@link FqlFieldAndCondition FqlFieldAndCondition(s)} to replace it with
+   */
+  public static String migrateAndReshapeFql(
+    String fqlQuery,
+    Function<FqlFieldAndCondition, Collection<FqlFieldAndCondition>> handler
+  ) {
+    try {
+      ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
+
+      ObjectNode result = objectMapper.createObjectNode();
+
+      // iterate through fields in source
+      List<FqlFieldAndCondition> startingFields = new ArrayList<>();
+      extractFieldsAndConditions(fql, startingFields, v -> result.set(MigrationConfiguration.VERSION_KEY, v));
+
+      List<FqlFieldAndCondition> resultingFields = startingFields
+        .stream()
+        .map(handler)
+        .flatMap(Collection::stream)
+        .toList();
+
+      if (resultingFields.isEmpty()) {
+        log.warn("Migrating {} yielded zero fields", fqlQuery);
+      } else if (resultingFields.size() == 1) {
+        result.set(resultingFields.get(0).field(), resultingFields.get(0).getConditionObject());
+      } else {
+        ArrayNode arrayNode = objectMapper.createArrayNode();
+        resultingFields.forEach(field -> arrayNode.add(field.getFieldAndConditionObject()));
+        result.set("$and", arrayNode);
+      }
+
+      return objectMapper.writeValueAsString(result);
+    } catch (JsonProcessingException e) {
+      log.error("Unable to process JSON", e);
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  private static void extractFieldsAndConditions(
+    ObjectNode fql,
+    List<FqlFieldAndCondition> result,
+    Consumer<JsonNode> handleVersion
+  ) {
+    fql
+      .properties()
+      .forEach(entry -> {
+        if ("$and".equals(entry.getKey())) {
+          // recurse onto nested conditions
+          ((ArrayNode) entry.getValue()).elements()
+            .forEachRemaining(node -> {
+              extractFieldsAndConditions(
+                (ObjectNode) node,
+                result,
+                // _version only applies to outer
+                v -> {
+                  throw log.throwing(new InvalidFqlException("_version found nested inside query", Map.of()));
+                }
+              );
+            });
+        } else if (!MigrationConfiguration.VERSION_KEY.equals(entry.getKey())) {
+          // add each condition from this field
+          entry
+            .getValue()
+            .properties()
+            .forEach(condition ->
+              result.add(new FqlFieldAndCondition(entry.getKey(), condition.getKey(), condition.getValue()))
+            );
+        } else {
+          handleVersion.accept(entry.getValue());
+        }
+      });
+  }
+
+  public record FqlFieldAndCondition(String field, String operator, JsonNode value) {
+    public JsonNode getConditionObject() {
+      return objectMapper.createObjectNode().set(operator, value);
+    }
+    public JsonNode getFieldAndConditionObject() {
+      return objectMapper.createObjectNode().set(field, objectMapper.createObjectNode().set(operator, value));
+    }
+  }
+
+  /**
+   * New code should probably use {@link #migrateAndReshapeFql(String, Function)} instead.
+   *
+   * Helper function to transform an FQL query where each field gets turned into one or zero fields.
+   * This changes a version to a new one, and runs a given function on each field in the query. See
+   * {@link #migrateFqlTree(ObjectNode, TriConsumer)} for more details on the field transformation function.
    *
    * @param fqlQuery The root query to migrate
    * @param handler  something that takes the result node, the field name, and the field's query object,
    *                 applies some transformation, and stores the results back in result
    */
-  public static String migrateFql(
-    String fqlQuery,
-    TriConsumer<ObjectNode, String, JsonNode> handler
-  ) {
+  public static String migrateFql(String fqlQuery, TriConsumer<ObjectNode, String, JsonNode> handler) {
     try {
       ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
       fql = migrateFqlTree(fql, handler);
@@ -65,13 +156,13 @@ public class MigrationUtils {
    * @return
    */
   private static ObjectNode migrateFqlTree(ObjectNode fql, TriConsumer<ObjectNode, String, JsonNode> handler) {
-    ObjectNode result = new ObjectMapper().createObjectNode();
+    ObjectNode result = objectMapper.createObjectNode();
     // iterate through fields in source
     fql
-      .fields()
-      .forEachRemaining(entry -> {
+      .properties()
+      .forEach(entry -> {
         if ("$and".equals(entry.getKey())) {
-          ArrayNode resultContents = new ObjectMapper().createArrayNode();
+          ArrayNode resultContents = objectMapper.createArrayNode();
           ((ArrayNode) entry.getValue()).elements()
             .forEachRemaining(node -> {
               ObjectNode innerResult = migrateFqlTree((ObjectNode) node, handler);
@@ -108,11 +199,7 @@ public class MigrationUtils {
    *                         transformed value, or `null` if it should be removed (the transformer
    *                         is responsible for handling warnings)
    */
-  public static String migrateFqlValues(
-    String fqlQuery,
-    Predicate<String> applies,
-    ValueTransformer valueTransformer
-  ) {
+  public static String migrateFqlValues(String fqlQuery, Predicate<String> applies, ValueTransformer valueTransformer) {
     return migrateFql(
       fqlQuery,
       (result, key, value) -> {
@@ -236,13 +323,17 @@ public class MigrationUtils {
     }
     String[] version1Parts = version1.split("\\.", 2);
     String[] version2Parts = version2.split("\\.", 2);
-    int result = NUMBER_PATTERN.matcher(version1Parts[0]).matches() && NUMBER_PATTERN.matcher(version2Parts[0]).matches() // Are both of these ints?
+    int result = NUMBER_PATTERN.matcher(version1Parts[0]).matches() &&
+      NUMBER_PATTERN.matcher(version2Parts[0]).matches() // Are both of these ints?
       ? Integer.compare(Integer.parseInt(version1Parts[0]), Integer.parseInt(version2Parts[0])) // Yep - compare as ints
       : version1Parts[0].compareTo(version2Parts[0]); // Nope - compare as strings
     if (result != 0) {
       return result;
     }
     // If we got to here, then the current version parts are equal, so move on to the next set of parts
-    return compareVersions(version1Parts.length == 1 ? null : version1Parts[1], version2Parts.length == 1 ? null : version2Parts[1]);
+    return compareVersions(
+      version1Parts.length == 1 ? null : version1Parts[1],
+      version2Parts.length == 1 ? null : version2Parts[1]
+    );
   }
 }

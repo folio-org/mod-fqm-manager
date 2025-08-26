@@ -22,7 +22,8 @@
       queryable: true,
       hidden: true,
       essential: true,
-      valueGetter: ':date_type.id',
+      sourceAlias: 'date_type',
+      valueGetter: ':sourceAlias.id',
     },
     {
       name: 'name',

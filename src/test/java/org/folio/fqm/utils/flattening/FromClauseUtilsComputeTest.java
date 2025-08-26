@@ -10,7 +10,6 @@ import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
-import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinCustom;
 import org.folio.querytool.domain.dto.JoinDirection;
@@ -162,10 +161,7 @@ class FromClauseUtilsComputeTest {
 
   @Test
   void testComputeJoinCorrectDirection() {
-    EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(
-      EntityType.builder().columns(List.of(COLUMN_A_WITH_JOINS_TO_B, COLUMN_B)).build(),
-      EntityTypeSourceEntityType.builder().alias("ETB").sourceField("ETA.a").targetField("b").build()
-    );
+    EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(null, COLUMN_A_WITH_JOINS_TO_B, COLUMN_B, null);
 
     assertThat(join.getCondition(), is("A -> B"));
     assertThat(join.getType(), is("LEFT JOIN"));
@@ -173,10 +169,7 @@ class FromClauseUtilsComputeTest {
 
   @Test
   void testComputeJoinReversedDirection() {
-    EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(
-      EntityType.builder().columns(List.of(COLUMN_A_WITH_JOINS_TO_B, COLUMN_B)).build(),
-      EntityTypeSourceEntityType.builder().alias("ETA").sourceField("ETB.b").targetField("a").build()
-    );
+    EntityTypeSourceDatabaseJoin join = FromClauseUtils.computeJoin(null, COLUMN_B, COLUMN_A_WITH_JOINS_TO_B, null);
 
     assertThat(join.getCondition(), is("A -> B"));
     assertThat(join.getType(), is("RIGHT JOIN"));
@@ -195,9 +188,7 @@ class FromClauseUtilsComputeTest {
   @ParameterizedTest
   @MethodSource("invalidColumnPairs")
   void testComputeJoinInvalid(EntityTypeColumn a, EntityTypeColumn b) {
-    EntityType entityType = EntityType.builder().columns(List.of(a, b)).build();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().sourceField("a").targetField("b").build();
-
-    assertThrows(InvalidEntityTypeDefinitionException.class, () -> FromClauseUtils.computeJoin(entityType, source));
+    EntityType et = EntityType.builder().build();
+    assertThrows(InvalidEntityTypeDefinitionException.class, () -> FromClauseUtils.computeJoin(et, a, b, null));
   }
 }

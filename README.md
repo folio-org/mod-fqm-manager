@@ -294,7 +294,7 @@ FQL is the language for querying FQM. It is similar to the MongoDB query syntax 
 ## FQL operators
 ### $eq
 Match values that are equal to a specified value. String comparison is done in a case-insensitive manner. Supports
-string, number, boolean, date and uuid types.
+string, number, boolean, date, uuid, array, and jsonbArray types.
 
 Examples:
 ```json
@@ -313,7 +313,7 @@ If a date and time are both provided, the query will match all the records with 
 ```
 
 ### $ne
-Match values that are not equal to a specified value. String comparison is done in a case-insensitive manner. Supports uuid (by API only, with potentially [strange behavior](https://folio-org.atlassian.net/browse/UIPQB-144)), string, number, boolean, and date types.
+Match values that are not equal to a specified value. String comparison is done in a case-insensitive manner. Supports uuid (by API only, with potentially [strange behavior](https://folio-org.atlassian.net/browse/UIPQB-144)), string, number, boolean, date, array, and jsonbArray types.
 
 Examples:
 ```json
@@ -376,7 +376,7 @@ Examples:
 ```
 
 ### $in
-Matches any of the values specified in an array. Supports array of string, date, number, uuid and boolean types.
+Matches any of the values specified in an array. Supports array of string, date, number, uuid, boolean, array, and jsonbArray types.
 
 Example:
 ```json
@@ -384,68 +384,38 @@ Example:
 ```
 
 ### $nin
-Matches none of the values specified in an array. Supports array of string, date, number, uuid and boolean types.
+Matches none of the values specified in an array. Supports array of string, date, number, uuid, boolean, array, and jsonbArray types.
 
 Example:
 ```json
 {"field1": {"$nin": ["value1", "value2"]}}
 ```
 
-### $contains_all
-Matches all records where an array field contains all of the specified values. Supports an array of string, number, uuid, or boolean types.
 
-Example:
-```json
-{"field1": {"$contains_all": [1, 2, 3]}}
-```
-
-### $not_contains_all
-Matches all records where an array field does not contain all of the specified values. Supports an array of string, number, uuid, or boolean types.
-
-Example:
-```json
-{"field1": {"$not_contains_all": [1, 2, 3]}}
-```
-
-### $contains_any
-Matches all records where an array field contains any of the specified values. Supports an array of string, number, uuid, or boolean types.
-
-Example:
-```json
-{"field1": {"$contains_any": [1, 2, 3]}}
-```
-
-### $not_contains_any
-Matches all records where an array field does not contain any of the specified values. Supports an array of string, number, uuid, or boolean types.
-
-Example:
-```json
-{"field1": {"$not_contains_any": [1, 2, 3]}}
-```
 
 ### $empty
-Can be true or false. If true, returns all records for which the specified column is null or empty. If false, returns all records for which the specified column is not null or empty.
+Can be true or false. If true, returns all records for which the specified column is null or empty. If false, returns all records for which the specified column is not null or empty. Supports all data types including array and jsonbArray types.
 
 Example:
 ```json
 {"field1": {"$empty": true}}
 ```
 
-### $regex
-Provides regular expression capabilities for pattern matching strings in queries. At present, only the following two
+### $contains and $starts_with
+Provides regular expression capabilities for pattern matching strings in queries. Supports string, array, and jsonbArray types. At present, only the following two
 patterns are supported.
-- Starts with a given string. Example: ```/^comp```  will search for string starts with ```comp```
-- Containing a given string. Example: ```comp```  will search for string containing ```comp```.
+- Starts with a given string. Example: ```$starts_with```  will search for string starts with ```comp```
+- Containing a given string. Example: ```$contains```  will search for string containing ```comp```.
 
 Examples:
 
 Matches all records where ```field1``` contains the string ```test```:
 ```json
-{"field1": {"$regex": "test"}}
+{"field1": {"$contains": "test"}}
 ```
 Matches all records where ```field1``` starts with the string ```test```:
 ```json
-{"field1": {"$regex": "/^test"}}
+{"field1": {"$starts_with": "test"}}
 ```
 
 ### $and
@@ -454,11 +424,90 @@ Example:
 ```json
 {
     "$and": [
-        {"field1": {"$regex": "test"}},
+        {"field1": {"$contains": "test"}},
         {"field2": {"$in": ["value1", "value2"]}},
         {"field3": {"$eq": "value3"}}
     ]
 }
+```
+
+## Supported operators for arrayType and jsonbArrayType
+
+Array and jsonbArray types support the following operators:
+
+### $eq - Match values that are equal to a specified value
+```json
+{"field1": {"$eq": "value1"}}
+```
+
+To match arrays containing ALL specified values, use multiple `$eq`:
+```json
+{
+  "$and": [
+    {"field1": {"$eq": "value1"}},
+    {"field1": {"$eq": "value2"}}
+  ]
+}
+```
+
+### $ne - Match values that are not equal to a specified value
+```json
+{"field1": {"$ne": "value1"}}
+```
+
+To exclude arrays containing ALL specified values, use multiple `$ne`:
+```json
+{
+  "$and": [
+    {"field1": {"$ne": "value1"}},
+    {"field1": {"$ne": "value2"}}
+  ]
+}
+```
+
+### $in - Match any of the values specified in an array
+```json
+{"field1": {"$in": ["value1", "value2", "value3"]}}
+```
+```json
+{"field2": {"$in": [100, 200, 300, 400]}}
+```
+
+### $nin - Match none of the values specified in an array
+```json
+{"field1": {"$nin": ["value1", "value2", "value3"]}}
+```
+```json
+{"field2": {"$nin": [404, 500, 503]}}
+```
+
+### Pattern matching with support for contains and starts with
+**Contains** - matches arrays where any element contains the specified substring:
+```json
+{"field1": {"$contains": "value1"}}
+```
+Example: If field1 contains `["prefix_value1_suffix", "other_value"]`, it will match because "value1" is contained in the first element.
+
+**Starts with** - matches arrays where any element starts with the specified pattern:
+```json
+{"field1": {"$starts_with": "value1"}}
+```
+Example: If field1 contains `["value1_something", "another_value"]`, it will match because the first element starts with "value1".
+
+Additional examples:
+```json
+{"field1": {"$contains": "test"}}
+```
+```json
+{"field1": {"$starts_with": "prefix"}}
+```
+
+### $empty - Check if the field is null or empty
+```json
+{"field1": {"$empty": true}}
+```
+```json
+{"field2": {"$empty": false}}
 ```
 
 ## FQL reserved field names

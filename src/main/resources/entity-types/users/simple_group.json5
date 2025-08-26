@@ -83,7 +83,7 @@
       name: 'created_date',
       sourceAlias: 'groups',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: false,
       visibleByDefault: false,
@@ -93,7 +93,7 @@
       name: 'updated_date',
       sourceAlias: 'groups',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: false,
       visibleByDefault: false,

@@ -55,7 +55,7 @@
       name: 'user_created_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -68,7 +68,7 @@
       name: 'user_updated_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

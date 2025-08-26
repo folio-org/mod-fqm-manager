@@ -18,7 +18,7 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
-import org.folio.querytool.domain.dto.DateType;
+import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
@@ -138,8 +138,8 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEquals(EqualsCondition equalsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (isDateCondition(equalsCondition, entityType)) {
-      return handleDate(equalsCondition, field, entityType);
+    if (isDateTimeCondition(equalsCondition, entityType)) {
+      return handleDateTime(equalsCondition, field, entityType);
     }
     String dataType = getFieldDataType(entityType, equalsCondition);
     if (ARRAY_TYPE.equals(dataType)) {
@@ -161,7 +161,7 @@ public class FqlToSqlConverterService {
       String value = (String) equalsCondition.value();
       return cast(field, UUID.class).eq(cast(value, UUID.class));
     }
-    if (STRING_TYPE.equals(dataType) || DATE_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
+    if (STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
       return caseInsensitiveComparison(equalsCondition, entityType, field, (String) equalsCondition.value(), org.jooq.Field::equalIgnoreCase, org.jooq.Field::eq);
     }
     return field.eq(valueField(equalsCondition.value(), equalsCondition, entityType));
@@ -171,8 +171,8 @@ public class FqlToSqlConverterService {
     String dataType = getFieldDataType(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     Condition baseCondition;
-    if (DATE_TYPE.equals(filterFieldDataType)) {
-      baseCondition = handleDate(notEqualsCondition, field, entityType);
+    if (isDateTimeCondition(notEqualsCondition, entityType)) {
+      baseCondition = handleDateTime(notEqualsCondition, field, entityType);
     } else if (ARRAY_TYPE.equals(dataType)) {
       var valueArray = cast(array(valueField(notEqualsCondition.value(), notEqualsCondition, entityType)), String[].class);
       baseCondition = not(arrayOverlap(cast(field, String[].class), valueArray));
@@ -207,7 +207,7 @@ public class FqlToSqlConverterService {
     return baseCondition.or(field.isNull());
   }
 
-  private static Condition handleDate(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
+  private static Condition handleDateTime(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
     String dateString = (String) fieldCondition.value();
     Condition condition = falseCondition();
     LocalDateTime dateTime;
@@ -255,9 +255,9 @@ public class FqlToSqlConverterService {
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
-  private static boolean isDateCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
+  private static boolean isDateTimeCondition(FieldCondition<?> fieldCondition, EntityType entityType) {
     EntityDataType dataType = getFieldForFiltering(fieldCondition, entityType).getDataType();
-    return dataType instanceof DateType;
+    return dataType instanceof DateTimeType;
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
@@ -363,8 +363,8 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (isDateCondition(greaterThanCondition, entityType)) {
-      return handleDate(greaterThanCondition, field, entityType);
+    if (isDateTimeCondition(greaterThanCondition, entityType)) {
+      return handleDateTime(greaterThanCondition, field, entityType);
     }
     if (greaterThanCondition.orEqualTo()) {
       return field.greaterOrEqual(valueField(greaterThanCondition.value(), greaterThanCondition, entityType));
@@ -373,8 +373,8 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleLessThan(LessThanCondition lessThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    if (isDateCondition(lessThanCondition, entityType)) {
-      return handleDate(lessThanCondition, field, entityType);
+    if (isDateTimeCondition(lessThanCondition, entityType)) {
+      return handleDateTime(lessThanCondition, field, entityType);
     }
     if (lessThanCondition.orEqualTo()) {
       return field.lessOrEqual(valueField(lessThanCondition.value(), lessThanCondition, entityType));

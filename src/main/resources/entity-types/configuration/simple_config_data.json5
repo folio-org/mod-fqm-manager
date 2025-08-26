@@ -120,7 +120,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'config',
       queryable: true,
@@ -130,7 +130,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'config',
       queryable: true,

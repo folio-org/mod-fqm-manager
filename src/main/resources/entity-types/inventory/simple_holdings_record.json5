@@ -58,7 +58,7 @@
       name: 'created_at',
       sourceAlias: 'hrd',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -98,7 +98,7 @@
       name: 'updated_at',
       sourceAlias: 'hrd',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

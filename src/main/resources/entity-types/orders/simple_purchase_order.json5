@@ -57,7 +57,7 @@
       name: 'created_at',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -95,7 +95,7 @@
       name: 'approval_date',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -147,7 +147,7 @@
       name: 'date_ordered',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -447,7 +447,7 @@
       name: 'updated_at',
       sourceAlias: 'po',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

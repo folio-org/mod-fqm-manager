@@ -1,0 +1,178 @@
+{
+  id: 'da991f67-df20-49d8-bf2b-281eb072240e',
+  name: 'simple_item_note_type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'note_type',
+      target: 'src_item_note_type',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.item-note-types.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+      source: {
+        columnName: 'id',
+        entityTypeId: 'da991f67-df20-49d8-bf2b-281eb072240e',
+      },
+      valueSourceApi: {
+        path: 'item-note-types',
+        labelJsonPath: '$.itemNoteTypes.*.id',
+        valueJsonPath: '$.itemNoteTypes.*.id',
+      }
+    },
+    {
+      name: 'name',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      idColumnName: 'id',
+      source: {
+        columnName: 'name',
+        entityTypeId: 'da991f67-df20-49d8-bf2b-281eb072240e',
+      },
+      valueSourceApi: {
+        path: 'item-note-types',
+        labelJsonPath: '$.itemNoteTypes.*.name',
+        valueJsonPath: '$.itemNoteTypes.*.id',
+      }
+    },
+    {
+      name: 'source',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'created_date',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'updated_date',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'created_by_user_id',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'updated_by_user_id',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'created_by_username',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUsername'",
+    },
+    {
+      name: 'updated_by_username',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUsername'",
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'note_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb::text",
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

@@ -677,93 +677,107 @@ class FqlToSqlConverterServiceTest {
         )
       ),
       Arguments.of(
-        "contains all for jsonb array",
+        "contains all for jsonb array (using $and with $eq)",
         """
-          {"jsonbArrayField": {"$contains_all": ["value1", "value2"]}}""",
+          {"$and": [
+            {"jsonbArrayField": {"$eq": "value1"}},
+            {"jsonbArrayField": {"$eq": "value2"}}
+          ]}""",
         DSL.and(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value1\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
         )
       ),
       Arguments.of(
-        "not contains all for jsonb array",
+        "not contains all for jsonb array (using $and with $ne)",
         """
-          {"jsonbArrayField": {"$not_contains_all": ["value1", "value2"]}}""",
-        DSL.not(
-          DSL.and(
-            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value1\"]")),
-            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField", JSONB.class).cast(JSONB.class), DSL.inline("[\"value2\"]"))
-          )
+          {"$and": [
+            {"jsonbArrayField": {"$ne": "value1"}},
+            {"jsonbArrayField": {"$ne": "value2"}}
+          ]}""",
+        DSL.and(
+          DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")).or(field("jsonbArrayField").isNull()),
+          DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]")).or(field("jsonbArrayField").isNull())
         )
       ),
       Arguments.of(
-        "contains all string",
+        "eq string for array field",
         """
-          {"arrayField": {"$contains_all": ["Some vALUE"]}}""",
-        cast(field("arrayField"), String[].class).contains(cast(array("Some vALUE"), String[].class))
-      ),
-      Arguments.of(
-        "contains all numeric",
-        """
-          {"arrayField": {"$contains_all": [10]}}""",
-        cast(field("arrayField"), String[].class).contains(cast(array(10), String[].class))
-      ),
-
-      Arguments.of(
-        "not contains all string",
-        """
-          {"arrayField": {"$not_contains_all": ["Some vALUE"]}}""",
-        cast(field("arrayField"), String[].class).notContains(cast(array("Some vALUE"), String[].class))
-      ),
-      Arguments.of(
-        "not contains all numeric",
-        """
-          {"arrayField": {"$not_contains_all": [10]}}""",
-        cast(field("arrayField"), String[].class).notContains(cast(array(10), String[].class))
-      ),
-
-      Arguments.of(
-        "contains any string",
-        """
-          {"arrayField": {"$contains_any": ["Some vALUE"]}}""",
+          {"arrayField": {"$eq": "Some vALUE"}}""",
         arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class))
       ),
       Arguments.of(
-        "contains any numeric",
+        "contains all numeric (using $and with $eq)",
         """
-          {"arrayField": {"$contains_any": [10]}}""",
+          {"$and": [
+            {"arrayField": {"$eq": 10}}
+          ]}""",
         arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class))
       ),
 
       Arguments.of(
-        "not contains any string",
+        "not contains all string (using $and with $ne)",
         """
-          {"arrayField": {"$not_contains_any": ["Some vALUE"]}}""",
-        not(arrayOverlap(cast(field("arrayField"), String[].class), (cast(array("Some vALUE"), String[].class))))
+          {"$and": [
+            {"arrayField": {"$ne": "Some vALUE"}}
+          ]}""",
+        not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class))).or(field("arrayField").isNull())
       ),
       Arguments.of(
-        "not contains any numeric",
+        "not contains all numeric (using $and with $ne)",
         """
-          {"arrayField": {"$not_contains_any": [10]}}""",
-        not(arrayOverlap(cast(field("arrayField"), String[].class), (cast(array(10), String[].class))))
+          {"$and": [
+            {"arrayField": {"$ne": 10}}
+          ]}""",
+        not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class))).or(field("arrayField").isNull())
+      ),
+
+      Arguments.of(
+        "array field in string",
+        """
+          {"arrayField": {"$in": ["Some vALUE"]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class))
       ),
       Arguments.of(
-        "contains any for jsonb array",
+        "array field in numeric",
         """
-          {"jsonbArrayField": {"$contains_any": ["value1", "value2"]}}""",
+          {"arrayField": {"$in": [10]}}""",
+        arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class))
+      ),
+
+      Arguments.of(
+        "array field nin string",
+        """
+          {"arrayField": {"$nin": ["Some vALUE"]}}""",
+        field("arrayField").isNull().or(
+          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class)))
+        )
+      ),
+      Arguments.of(
+        "array field nin numeric",
+        """
+          {"arrayField": {"$nin": [10]}}""",
+        field("arrayField").isNull().or(
+          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class)))
+        )
+      ),
+      Arguments.of(
+        "in for jsonb array",
+        """
+          {"jsonbArrayField": {"$in": ["value1", "value2"]}}""",
         DSL.or(
           DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
           DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
         )
       ),
       Arguments.of(
-        "not contains any for jsonb array",
+        "nin for jsonb array",
         """
-          {"jsonbArrayField": {"$not_contains_any": ["value1", "value2"]}}""",
-        DSL.not(
-          DSL.or(
-            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-            DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
+        field("jsonbArrayField").isNull().or(
+          and(
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
+            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
           )
         )
       ),
@@ -847,45 +861,36 @@ class FqlToSqlConverterServiceTest {
       ),
 
       Arguments.of(
-        "contains_all condition on a field with a filter value getter and a value function",
+        "eq conditions combined with booleanAnd on a field with a filter value getter and a value function",
         """
-          {    "arrayFieldWithValueFunction": {"$contains_all": ["value1", "value2"]}}
-          }""",
-        DSL
-          .cast(
-            field("foo(valueGetter)"),
-            String[].class
-          )
-          .contains(
-            cast(
-              array(
-                field("foo(:value1)", String.class, param("value", "value1")),
-                field("foo(:value)", String.class, param("value", "value2"))
-              ),
-              String[].class
-            )
-          )
+          {
+            "$and": [
+              { "arrayFieldWithValueFunction": { "$eq": "value1" } },
+              { "arrayFieldWithValueFunction": { "$eq": "value2" } }
+            ]
+          }
+        """,
+        DSL.and(
+          arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value1"))), String[].class)),
+          arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value2"))), String[].class))
+        )
       ),
 
+
       Arguments.of(
-        "not_contains_all condition on a field with a filter value getter and a value function",
+        "not contains all condition on a field with a filter value getter and a value function",
         """
-          {    "arrayFieldWithValueFunction": {"$not_contains_all": [10, 20]}}
-          }""",
-        DSL
-          .cast(
-            field("foo(valueGetter)"),
-            String[].class
-          )
-          .notContains(
-            cast(
-              array(
-                field("foo(:value)", Integer.class, param("value", 10)),
-                field("foo(:value)", Integer.class, param("value", 20))
-              ),
-              String[].class
-            )
-          )
+          {
+            "$and": [
+              { "arrayFieldWithValueFunction": { "$ne": 10 } },
+              { "arrayFieldWithValueFunction": { "$ne": 20 } }
+            ]
+          }
+          """,
+        DSL.and(
+          not(arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", Integer.class, param("value", 10))), String[].class))).or(field("foo(valueGetter)").isNull()),
+          not(arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", Integer.class, param("value", 20))), String[].class))).or(field("foo(valueGetter)").isNull())
+        )
       ),
 
       Arguments.of(

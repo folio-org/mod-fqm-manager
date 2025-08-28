@@ -1,5 +1,10 @@
 # 4.0.x - Sunflower
 
+# 4.0.13
+- [MODFQMMGR-924] Join SRS records on id instead of matched_id
+
+[MODFQMMGR-924]: https://folio-org.atlassian.net/browse/MODFQMMGR-924
+
 # 4.0.12
 - [MODFQMMGR-884] Migrate effective library fields for Items ET (Sunflower backport)
 

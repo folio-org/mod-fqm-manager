@@ -28,7 +28,6 @@ import org.folio.fqm.migration.strategies.V8LocationValueChange;
 import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
 import org.folio.fqm.migration.strategies.V15AlertsAndReportingCodesRemoval;
 import org.folio.fqm.migration.strategies.V16OrganizationSimpleToCompositeMigration;
-import org.folio.fqm.migration.strategies.V21NotContainsAllToNeqOperatorMigration;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -70,8 +69,7 @@ public class MigrationStrategyRepository {
         new V17ContainsAnyToInOperatorMigration(),
         new V18NotContainsAnyToNinOperatorMigration(),
         new V19RegexOperatorMigration(),
-        new V20ContainsAllToEqOperatorMigration(),
-        new V21NotContainsAllToNeqOperatorMigration()
+        new V20ContainsAllToEqOperatorMigration()
       // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

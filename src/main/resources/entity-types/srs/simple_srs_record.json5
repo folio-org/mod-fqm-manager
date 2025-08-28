@@ -15,7 +15,7 @@
       join: {
         type: 'left join',
         joinTo: 'record_lb',
-        condition: ':this.id = :that.matched_id',
+        condition: ':this.id = :that.id',
       },
     },
   ],

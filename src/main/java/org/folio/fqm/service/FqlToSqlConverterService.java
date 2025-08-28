@@ -1,8 +1,6 @@
 package org.folio.fqm.service;
 
 import org.folio.fql.model.AndCondition;
-import org.folio.fql.model.ContainsAllCondition;
-import org.folio.fql.model.ContainsAnyCondition;
 import org.folio.fql.model.EmptyCondition;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.FieldCondition;
@@ -10,8 +8,6 @@ import org.folio.fql.model.FqlCondition;
 import org.folio.fql.model.GreaterThanCondition;
 import org.folio.fql.model.InCondition;
 import org.folio.fql.model.LessThanCondition;
-import org.folio.fql.model.NotContainsAllCondition;
-import org.folio.fql.model.NotContainsAnyCondition;
 import org.folio.fql.model.NotEqualsCondition;
 import org.folio.fql.model.NotInCondition;
 import org.folio.fql.model.RegexCondition;
@@ -128,12 +124,6 @@ public class FqlToSqlConverterService {
         case "GreaterThanCondition" -> handleGreaterThan((GreaterThanCondition) fqlCondition, entityType, field);
         case "LessThanCondition" -> handleLessThan((LessThanCondition) fqlCondition, entityType, field);
         case "RegexCondition" -> handleRegEx((RegexCondition) fqlCondition, entityType, field);
-        case "ContainsAllCondition" -> handleContainsAll((ContainsAllCondition) fqlCondition, entityType, field);
-        case "NotContainsAllCondition" ->
-          handleNotContainsAll((NotContainsAllCondition) fqlCondition, entityType, field);
-        case "ContainsAnyCondition" -> handleContainsAny((ContainsAnyCondition) fqlCondition, entityType, field);
-        case "NotContainsAnyCondition" ->
-          handleNotContainsAny((NotContainsAnyCondition) fqlCondition, entityType, field);
         case "StartsWithCondition" -> handleStartsWith((StartsWithCondition) fqlCondition, entityType, field);
         case "ContainsCondition" -> handleContains((ContainsCondition) fqlCondition, entityType, field);
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
@@ -272,7 +262,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, inCondition);
-    
+
     if (ARRAY_TYPE.equals(dataType)) {
       var valueList = inCondition
         .value().stream()
@@ -281,7 +271,7 @@ public class FqlToSqlConverterService {
       var valueArray = cast(array(valueList), String[].class);
       return arrayOverlap(cast(field, String[].class), valueArray);
     }
-    
+
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
       Field entityField = getField(inCondition, entityType);
       List<Condition> conditionList = inCondition
@@ -298,7 +288,7 @@ public class FqlToSqlConverterService {
         .toList();
       return or(conditionList);
     }
-    
+
     List<Condition> conditionList = inCondition.value().stream()
       .map(val -> {
         String filterFieldDataType = getFieldForFiltering(inCondition, entityType).getDataType().getDataType();
@@ -319,7 +309,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, notInCondition);
-    
+
     if (ARRAY_TYPE.equals(dataType)) {
       List<Condition> conditionList = notInCondition
         .value().stream()
@@ -330,7 +320,7 @@ public class FqlToSqlConverterService {
         .toList();
       return field.isNull().or(and(conditionList));
     }
-    
+
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
       Field entityField = getField(notInCondition, entityType);
       List<Condition> conditionList = notInCondition
@@ -347,7 +337,7 @@ public class FqlToSqlConverterService {
         .toList();
       return field.isNull().or(and(conditionList));
     }
-    
+
     List<Condition> conditionList = notInCondition
       .value().stream()
       .map(val -> {
@@ -406,98 +396,6 @@ public class FqlToSqlConverterService {
       return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ~* {1})", field.cast(JSONB.class), valueField(regexCondition.value(), regexCondition, entityType));
     }
     return condition("{0} ~* {1}", field, valueField(regexCondition.value(), regexCondition, entityType));
-  }
-
-  private static Condition handleContainsAll(ContainsAllCondition containsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, containsAllCondition);
-    if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
-      var jsonbConditions = containsAllCondition
-        .value()
-        .stream()
-        .map(val -> {
-          var jsonbValue = DSL.inline("[\"" + val + "\"]");
-          return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-        })
-        .toArray(Condition[]::new);
-      return DSL.and(jsonbConditions);
-    } else {
-      var valueList = containsAllCondition
-        .value()
-        .stream()
-        .map(val -> valueField(val, containsAllCondition, entityType))
-        .toArray(org.jooq.Field[]::new);
-      var valueArray = cast(array(valueList), String[].class);
-      return cast(field, String[].class).contains(valueArray);
-    }
-  }
-
-  private static Condition handleNotContainsAll(NotContainsAllCondition notContainsAllCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notContainsAllCondition);
-    if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
-      var jsonbConditions = notContainsAllCondition
-        .value()
-        .stream()
-        .map(val -> {
-          var jsonbValue = DSL.inline("[\"" + val + "\"]");
-          return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-        })
-        .toArray(Condition[]::new);
-      return DSL.not(DSL.and(jsonbConditions));
-    } else {
-      var valueList = notContainsAllCondition
-        .value()
-        .stream()
-        .map(val -> valueField(val, notContainsAllCondition, entityType))
-        .toArray(org.jooq.Field[]::new);
-      var valueArray = cast(array(valueList), String[].class);
-      return cast(field, String[].class).notContains(valueArray);
-    }
-  }
-
-  private static Condition handleContainsAny(ContainsAnyCondition containsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, containsAnyCondition);
-    if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
-      var jsonbConditions = containsAnyCondition
-        .value()
-        .stream()
-        .map(val -> {
-          var jsonbValue = DSL.inline("[\"" + val + "\"]");
-          return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-        })
-        .toArray(Condition[]::new);
-      return DSL.or(jsonbConditions);
-    } else {
-      var valueList = containsAnyCondition
-        .value()
-        .stream()
-        .map(val -> valueField(val, containsAnyCondition, entityType))
-        .toArray(org.jooq.Field[]::new);
-      var valueArray = cast(array(valueList), String[].class);
-      return arrayOverlap(cast(field, String[].class), valueArray);
-    }
-  }
-
-  private static Condition handleNotContainsAny(NotContainsAnyCondition notContainsAnyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notContainsAnyCondition);
-    if (dataType.equalsIgnoreCase(JSONB_ARRAY_TYPE)) {
-      var jsonbConditions = notContainsAnyCondition
-        .value()
-        .stream()
-        .map(val -> {
-          var jsonbValue = DSL.inline("[\"" + val + "\"]");
-          return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-        })
-        .toArray(Condition[]::new);
-      return DSL.not(DSL.or(jsonbConditions));
-    } else {
-      var valueList = notContainsAnyCondition
-        .value()
-        .stream()
-        .map(val -> valueField(val, notContainsAnyCondition, entityType))
-        .toArray(org.jooq.Field[]::new);
-      var valueArray = cast(array(valueList), String[].class);
-      return not(arrayOverlap(cast(field, String[].class), valueArray));
-    }
   }
 
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {

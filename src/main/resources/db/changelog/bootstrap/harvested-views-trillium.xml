@@ -96,4 +96,15 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_src_item_note_type" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="item_note_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_item_note_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.item_note_type
+    </createView>
+  </changeSet>
+
 </databaseChangeLog>

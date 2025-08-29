@@ -63,7 +63,7 @@
       name: 'created_date',
       sourceAlias: 'contributor_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -73,7 +73,7 @@
       name: 'updated_date',
       sourceAlias: 'contributor_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

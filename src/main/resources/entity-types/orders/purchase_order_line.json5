@@ -46,7 +46,7 @@
       name: 'created_at',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -224,7 +224,7 @@
               name: 'sent',
               property: 'sent',
               dataType: {
-                dataType: 'dateType',
+                dataType: 'dateTimeType',
               },
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'sent') FROM jsonb_array_elements(:sourceAlias.jsonb->'claims') AS elems)",
@@ -570,7 +570,7 @@
       name: 'details_subscription_from',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -593,7 +593,7 @@
       name: 'details_subscription_to',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -782,7 +782,7 @@
       name: 'eresource_expected_activation',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -1131,7 +1131,7 @@
       name: 'last_edi_export_date',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -1280,7 +1280,7 @@
       name: 'physical_expected_receipt_date',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -1294,7 +1294,7 @@
       name: 'physical_receipt_due',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -1381,7 +1381,7 @@
       name: 'receipt_date',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       essential: true,
@@ -1608,7 +1608,7 @@
       name: 'updated_at',
       sourceAlias: 'pol',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       essential: true,

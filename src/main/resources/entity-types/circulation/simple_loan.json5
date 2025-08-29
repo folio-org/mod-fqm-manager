@@ -29,7 +29,7 @@
       name: 'created_at',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -206,7 +206,7 @@
       name: 'checkout_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -220,7 +220,7 @@
       name: 'due_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -234,7 +234,7 @@
       name: 'return_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -246,7 +246,7 @@
       name: 'system_return_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -410,7 +410,7 @@
       name: 'declared_lost_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -422,7 +422,7 @@
       name: 'claimed_returned_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -479,7 +479,7 @@
       name: 'aged_to_lost_delayed_billing_date_item_should_be_billed',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -491,7 +491,7 @@
       name: 'aged_to_lost_delayed_billing_aged_to_lost_date',
       sourceAlias: 'loan',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

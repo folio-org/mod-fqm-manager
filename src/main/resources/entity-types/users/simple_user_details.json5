@@ -52,7 +52,7 @@
       name: 'user_created_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -63,7 +63,7 @@
       name: 'user_updated_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -359,7 +359,7 @@
       name: 'date_of_birth',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -407,7 +407,7 @@
       name: 'created_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -418,7 +418,7 @@
       name: 'updated_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -429,7 +429,7 @@
       name: 'expiration_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -595,7 +595,7 @@
       name: 'enrollment_date',
       sourceAlias: 'user',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

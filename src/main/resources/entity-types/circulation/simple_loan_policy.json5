@@ -38,7 +38,7 @@
       name: 'created_at',
       sourceAlias: 'lp',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

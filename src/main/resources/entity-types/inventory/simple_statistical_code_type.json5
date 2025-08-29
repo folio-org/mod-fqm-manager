@@ -50,7 +50,7 @@
       name: 'created_date',
       sourceAlias: 'statistical_code_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -60,7 +60,7 @@
       name: 'updated_date',
       sourceAlias: 'statistical_code_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

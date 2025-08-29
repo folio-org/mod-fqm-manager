@@ -89,7 +89,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher',
       queryable: true,
@@ -100,7 +100,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher',
       queryable: true,
@@ -243,7 +243,7 @@
     {
       name: 'voucher_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher',
       queryable: true,
@@ -413,7 +413,7 @@
     {
       name: 'disbursement_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher',
       queryable: true,

@@ -885,7 +885,11 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              source: {
+                entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+                columnName: 'code',
+              },
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',
@@ -896,7 +900,7 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'encumbrance') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'encumbrance')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',
@@ -907,9 +911,38 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_name',
+              property: 'fund_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(fund.jsonb ->> 'name') \
+                                FILTER (WHERE (fund.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'fundDistribution')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                                ON (record.value ->> 'fundId')::uuid = fund.id \
+                            )",
+              filterValueGetter: "( \
+                                    SELECT \
+                                      array_agg(lower(fund.jsonb ->> 'name')) \
+                                      FILTER (WHERE (fund.jsonb ->> 'name') IS NOT NULL) \
+                                      AS array_agg \
+                                    FROM \
+                                      jsonb_array_elements((:sourceAlias.jsonb -> 'fundDistribution')) record(value) \
+                                      LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                                      ON (record.value ->> 'fundId')::uuid = fund.id \
+                                  )",
               valueFunction: 'lower(:value)',
             },
             {
@@ -918,9 +951,38 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'expenseClassId') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'expenseClassId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_name',
+              property: 'expense_class_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(expense_class.jsonb ->> 'name') \
+                                FILTER (WHERE (expense_class.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'fundDistribution')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                                ON (record.value ->> 'expenseClassId')::uuid = expense_class.id \
+                            )",
+              filterValueGetter: "( \
+                                    SELECT \
+                                      array_agg(lower(expense_class.jsonb ->> 'name')) \
+                                      FILTER (WHERE (expense_class.jsonb ->> 'name') IS NOT NULL) \
+                                      AS array_agg \
+                                    FROM \
+                                      jsonb_array_elements((:sourceAlias.jsonb -> 'fundDistribution')) record(value) \
+                                      LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                                      ON (record.value ->> 'expenseClassId')::uuid = expense_class.id \
+                                  )",
               valueFunction: 'lower(:value)',
             },
             {
@@ -929,7 +991,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: 'lower(:value)',
@@ -961,7 +1023,19 @@
       queryable: false,
       visibleByDefault: false,
       essential: true,
-      valueGetter: ":sourceAlias.jsonb->>'fundDistribution'",
+      valueGetter: "( \
+                  SELECT \
+                    jsonb_agg(\
+                      record.value || jsonb_build_object('fund_name', fund.jsonb ->> 'name', 'expense_class_name', expense_class.jsonb ->> 'name') \
+                      ORDER BY record.value ->> 'fundId', record.value ->> 'expenseClassId' \
+                    ) \
+                  FROM \
+                    jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistribution') AS record(value) \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                      ON (record.value ->> 'fundId')::uuid = fund.id \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                      ON (record.value ->> 'expenseClassId')::uuid = expense_class.id\
+                )::text",
     },
     {
       name: 'instance_id',

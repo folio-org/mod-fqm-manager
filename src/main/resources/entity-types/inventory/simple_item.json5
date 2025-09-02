@@ -692,7 +692,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\

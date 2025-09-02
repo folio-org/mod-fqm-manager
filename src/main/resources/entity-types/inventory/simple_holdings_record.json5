@@ -1056,7 +1056,6 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-//      valueGetter: ":sourceAlias.jsonb->'receivingHistory'->>'entries'",
       valueGetter: "( SELECT COALESCE(jsonb_agg(elem), '[]'::jsonb) FROM jsonb_array_elements(:sourceAlias.jsonb->'receivingHistory'->'entries') elem WHERE elem != 'null'::jsonb)::text"
     },
   ],

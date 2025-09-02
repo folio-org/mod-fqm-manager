@@ -728,6 +728,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'publicationFrequency') AS elems\
       )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'publication_range',

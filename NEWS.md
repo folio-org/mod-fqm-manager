@@ -1,5 +1,11 @@
 # 3.0.x - Ramsons
 
+# 3.0.16
+- [MODFQMMGR-924] Join SRS records on id instead of matched_id
+
+[MODFQMMGR-924]: https://folio-org.atlassian.net/browse/MODFQMMGR-924
+
+
 # 3.0.15
 - [MODFQMMGR-885] Migrate effective library fields for Items ET
 

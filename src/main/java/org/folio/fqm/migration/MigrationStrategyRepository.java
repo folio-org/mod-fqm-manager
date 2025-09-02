@@ -18,6 +18,7 @@ import org.folio.fqm.migration.strategies.V18NotContainsAnyToNinOperatorMigratio
 import org.folio.fqm.migration.strategies.V19RegexOperatorMigration;
 import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
 import org.folio.fqm.migration.strategies.V20ContainsAllToEqOperatorMigration;
+import org.folio.fqm.migration.strategies.V22UserCustomFieldMigration;
 import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
 import org.folio.fqm.migration.strategies.V4DateFieldTimezoneAddition;
@@ -71,7 +72,8 @@ public class MigrationStrategyRepository {
         new V18NotContainsAnyToNinOperatorMigration(),
         new V19RegexOperatorMigration(),
         new V20ContainsAllToEqOperatorMigration(),
-        new V21NotContainsAllToNeqOperatorMigration()
+        new V21NotContainsAllToNeqOperatorMigration(),
+        new V22UserCustomFieldMigration()
       // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

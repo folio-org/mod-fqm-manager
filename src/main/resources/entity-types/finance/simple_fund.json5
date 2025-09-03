@@ -152,6 +152,15 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
+      source: {
+        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+        columnName: 'code',
+      },
+      valueSourceApi: {
+        path: 'finance-storage/funds',
+        valueJsonPath: '$.funds.*.code',
+        labelJsonPath: '$.funds.*.code',
+      },
       valueGetter: ":sourceAlias.jsonb ->> 'code'",
       filterValueGetter: "lower(${tenant_id}_mod_finance_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_finance_storage.f_unaccent(:value))',

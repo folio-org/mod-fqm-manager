@@ -56,13 +56,13 @@ public class V22UserCustomFieldMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(COMPOSITE_USERS_ID)
           .fqlQuery("{\"$and\": [ {\"_custom_field_1\": {\"$ne\": \"value1\"}}, {\"regular_field\": {\"$ne\": \"value2\"}} ]}")
-          .fields(List.of("_custom_field_1", "regular_field"))
+          .fields(List.of("_custom_field_1", "regular_field", "_custom_field_2"))
           .build(),
         MigratableQueryInformation
           .builder()
           .entityTypeId(COMPOSITE_USERS_ID)
           .fqlQuery("{\"$and\": [ {\"users._custom_field_1\": {\"$ne\": \"value1\"}}, {\"regular_field\": {\"$ne\": \"value2\"}} ]}")
-          .fields(List.of("users._custom_field_1", "regular_field"))
+          .fields(List.of("users._custom_field_1", "regular_field", "users._custom_field_2"))
           .build()
       )
     );

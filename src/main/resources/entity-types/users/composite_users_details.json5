@@ -38,21 +38,6 @@
       order: 40
     }
   ],
-  columns: [
-    {
-      name: 'user_custom_fields',
-      essential: true,
-      queryable: true,
-      visibleByDefault: false,
-      dataType: {
-        dataType: 'customFieldType',
-        customFieldMetadata: {
-          configurationView: 'src_user_custom_fields',
-          dataExtractionPath: ":users.user.jsonb -> 'customFields'",
-        },
-      },
-    }
-  ],
   defaultSort: [
     {
       columnName: '"users.user".id',

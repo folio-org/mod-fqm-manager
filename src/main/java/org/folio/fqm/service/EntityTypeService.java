@@ -398,7 +398,7 @@ public class EntityTypeService {
     // UUID.fromString() will pad 0's onto invalid UUID strings to make valid UUIDs, which can lead to unexpected behavior.
     // This block ensures that the service accepts only valid UUID strings
     try {
-      if (customEntityTypeIdString == null) {
+      if (customEntityTypeIdString == null || customEntityTypeIdString.isEmpty()) {
         customEntityTypeId = UUID.randomUUID();
       } else {
         customEntityTypeId = UUID.fromString(customEntityTypeIdString);

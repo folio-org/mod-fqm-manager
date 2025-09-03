@@ -821,6 +821,28 @@ class EntityTypeServiceTest {
   }
 
   @Test
+  void createCustomEntityType_shouldGenerateId_whenIdIsEmptyString() {
+    UUID ownerId = UUID.randomUUID();
+    CustomEntityType customEntityType = new CustomEntityType()
+      .id("")
+      .shared(false)
+      .owner(ownerId)
+      .name("test")
+      ._private(false)
+      .isCustom(true);
+
+    when(clockService.now()).thenReturn(new Date());
+    when(executionContext.getUserId()).thenReturn(ownerId);
+
+    CustomEntityType result = entityTypeService.createCustomEntityType(customEntityType);
+
+    assertNotNull(result.getId(), "ID should be generated when input ID is empty string");
+    assertFalse(result.getId().isEmpty(), "Generated ID should not be empty");
+    assertDoesNotThrow(() -> UUID.fromString(result.getId()), "Generated ID should be a valid UUID");
+    verify(repo).createCustomEntityType(result);
+  }
+
+  @Test
   void createCustomEntityType_shouldThrowInvalidEntityTypeDefinitionException_whenIdIsInvalidUUID() {
     CustomEntityType customEntityType = new CustomEntityType()
       .id("not-a-uuid")

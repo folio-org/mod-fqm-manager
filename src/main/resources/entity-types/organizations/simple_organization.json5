@@ -46,7 +46,7 @@
       name: 'created_at',
       sourceAlias: 'org',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -84,7 +84,7 @@
       name: 'updated_at',
       sourceAlias: 'org',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -1559,7 +1559,7 @@
               name: 'timestamp',
               property: 'timestamp',
               dataType: {
-                dataType: 'dateType',
+                dataType: 'dateTimeType',
               },
               queryable: false,
               valueGetter: "( SELECT array_agg(elems.value->>'timestamp') FROM jsonb_array_elements(:sourceAlias.jsonb->'changelogs') AS elems)",
@@ -1993,7 +1993,7 @@
       name: 'edi_job_scheduling_date',
       sourceAlias: 'org',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

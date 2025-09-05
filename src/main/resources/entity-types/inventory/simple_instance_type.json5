@@ -85,7 +85,7 @@
       name: 'metadata_created_date',
       sourceAlias: 'instance_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -96,7 +96,7 @@
       name: 'metadata_updated_date',
       sourceAlias: 'instance_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

@@ -109,7 +109,7 @@
       name: 'voucher_date',
       sourceAlias: 'voucher',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       valueGetter: ":sourceAlias.jsonb->>'voucherDate'",
       queryOnly: true,

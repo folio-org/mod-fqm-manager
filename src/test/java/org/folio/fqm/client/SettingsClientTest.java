@@ -16,16 +16,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConfigurationClientTest {
+class SettingsClientTest {
 
   private static final String UTC_MINUS_THREE_LOCALE =
     """
     {
-      "configs": [
+      "items": [
         {
            "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
-           "module":"ORG",
-           "configName":"localeSettings",
+           "scope": "stripes-core.prefs.manage",
+           "key":"tenantLocaleSettings",
            "enabled":true,
            "value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"America/Montevideo\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
         }
@@ -38,33 +38,33 @@ class ConfigurationClientTest {
   private static final String EMPTY_LOCALE_JSON =
     """
     {
-      "configs": [],
+      "items": [],
       "totalRecords": 0,
       "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
     }
     """;
 
   @InjectMocks
-  private ConfigurationClient configurationClient;
+  private SettingsClient settingsClient;
 
   @Mock
-  private ConfigurationClientRaw underlyingClient;
+  private SettingsClientRaw underlyingClient;
 
-  @Spy // lazy way to make it inject into ConfigurationClient
+  @Spy // lazy way to make it inject into SettingsClient
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   void testTenantTimezoneWhenPresent() {
     when(underlyingClient.getLocaleSettings()).thenReturn(UTC_MINUS_THREE_LOCALE);
 
-    assertThat(configurationClient.getTenantTimezone(), is(ZoneId.of("America/Montevideo")));
+    assertThat(settingsClient.getTenantTimezone(), is(ZoneId.of("America/Montevideo")));
   }
 
   @Test
   void testTenantTimezoneWhenNonePresent() {
     when(underlyingClient.getLocaleSettings()).thenReturn(EMPTY_LOCALE_JSON);
 
-    assertThat(configurationClient.getTenantTimezone(), is(ZoneId.of("UTC")));
+    assertThat(settingsClient.getTenantTimezone(), is(ZoneId.of("UTC")));
   }
 
   @Test
@@ -72,6 +72,6 @@ class ConfigurationClientTest {
     when(underlyingClient.getLocaleSettings())
       .thenThrow(new FeignException.Unauthorized("", mock(feign.Request.class), null, null));
 
-    assertThat(configurationClient.getTenantTimezone(), is(ZoneId.of("UTC")));
+    assertThat(settingsClient.getTenantTimezone(), is(ZoneId.of("UTC")));
   }
 }

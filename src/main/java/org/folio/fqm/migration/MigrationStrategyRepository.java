@@ -1,7 +1,7 @@
 package org.folio.fqm.migration;
 
 import java.util.List;
-import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.client.LocationUnitsClient;
 import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.ModesOfIssuanceClient;
@@ -40,7 +40,7 @@ public class MigrationStrategyRepository {
   private final List<MigrationStrategy> migrationStrategies;
 
   public MigrationStrategyRepository(
-    ConfigurationClient configurationClient,
+    SettingsClient settingsClient,
     LocationsClient locationsClient,
     LocationUnitsClient locationUnitsClient,
     ModesOfIssuanceClient modesOfIssuanceClient,
@@ -55,7 +55,7 @@ public class MigrationStrategyRepository {
         new V1ModeOfIssuanceConsolidation(),
         new V2ResourceTypeConsolidation(),
         new V3RamsonsFieldCleanup(),
-        new V4DateFieldTimezoneAddition(configurationClient),
+        new V4DateFieldTimezoneAddition(settingsClient),
         new V5UUIDNotEqualOperatorRemoval(),
         new V6ModeOfIssuanceValueChange(modesOfIssuanceClient),
         new V7PatronGroupsValueChange(patronGroupsClient),

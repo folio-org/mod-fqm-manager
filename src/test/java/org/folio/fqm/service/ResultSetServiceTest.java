@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 
-import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.DateType;
@@ -50,7 +50,7 @@ class ResultSetServiceTest {
 
   private ResultSetRepository resultSetRepository;
   private EntityTypeFlatteningService entityTypeFlatteningService;
-  private ConfigurationClient configurationClient;
+  private SettingsClient settingsClient;
   private ResultSetService service;
   private FolioExecutionContext executionContext;
 
@@ -58,9 +58,9 @@ class ResultSetServiceTest {
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.configurationClient = mock(ConfigurationClient.class);
+    this.settingsClient = mock(SettingsClient.class);
     this.executionContext = mock(FolioExecutionContext.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, configurationClient, executionContext);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext);
   }
 
   @Test
@@ -164,7 +164,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(DATE_ENTITY_TYPE);
-    when(configurationClient.getTenantTimezone()).thenReturn(timezone);
+    when(settingsClient.getTenantTimezone()).thenReturn(timezone);
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(
@@ -206,7 +206,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(DATE_ENTITY_TYPE);
-    when(configurationClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(

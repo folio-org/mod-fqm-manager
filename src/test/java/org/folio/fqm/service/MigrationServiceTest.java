@@ -7,12 +7,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -20,15 +18,11 @@ import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.fql.service.FqlService;
-import org.folio.fqm.client.ConfigurationClient;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
-import org.folio.fqm.migration.strategies.V4DateFieldTimezoneAddition;
-import org.folio.fqm.migration.warnings.Warning;
-import org.folio.spring.i18n.service.TranslationService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

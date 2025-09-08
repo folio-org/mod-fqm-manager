@@ -1014,7 +1014,7 @@
               dataType: {
                 dataType: 'numberType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "( SELECT array_agg((elems.value->>'value')::float) FROM jsonb_array_elements(:sourceAlias.jsonb->'fundDistribution') AS elems)",
               valueFunction: '(:value)::float',
             },

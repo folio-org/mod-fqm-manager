@@ -12,27 +12,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Convenience methods wrapping {@link ConfigurationClientRaw}.
+ * Convenience methods wrapping {@link SettingsClientRaw}.
  */
 // this must be a separate class as feign clients must be interfaces,
 // disallowing any injection (ObjectMapper) or fields (our logger)
 @Log4j2
 @Component
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ConfigurationClient {
+public class SettingsClient {
 
   private final ObjectMapper objectMapper;
-  private final ConfigurationClientRaw underlyingClient;
+  private final SettingsClientRaw underlyingClient;
 
   public ZoneId getTenantTimezone() {
     try {
       String localeSettingsResponse = underlyingClient.getLocaleSettings();
       JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode.path("configs").get(0).path("value").asText();
+      String valueString = localeSettingsNode.path("items").get(0).path("value").asText();
       JsonNode valueNode = objectMapper.readTree(valueString);
       return ZoneId.of(valueNode.path("timezone").asText());
     } catch (JsonProcessingException | FeignException.Unauthorized | NullPointerException | DateTimeException e) {
-      log.error("Failed to retrieve timezone information from mod-configuration. Defaulting to UTC.", e);
+      log.error("Failed to retrieve timezone information from mod-settings. Defaulting to UTC.", e);
       return ZoneId.of("UTC");
     }
   }

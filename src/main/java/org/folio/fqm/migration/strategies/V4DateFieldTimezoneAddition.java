@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fql.service.FqlService;
-import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationUtils;
@@ -85,7 +85,7 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
     "users.user_updated_date"
   );
 
-  private final ConfigurationClient configurationClient;
+  private final SettingsClient settingsClient;
 
   @Override
   public String getLabel() {
@@ -108,7 +108,7 @@ public class V4DateFieldTimezoneAddition implements MigrationStrategy {
           }
 
           if (timezone.get() == null) {
-            timezone.set(configurationClient.getTenantTimezone());
+            timezone.set(settingsClient.getTenantTimezone());
           }
 
           try {

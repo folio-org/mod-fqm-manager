@@ -9,7 +9,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +22,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class V4DateFieldTimezoneAdditionTest extends TestTemplate {
 
   @Mock
-  ConfigurationClient configurationClient;
+  SettingsClient settingsClient;
 
   @BeforeEach
   public void setup() {
-    lenient().when(configurationClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
+    lenient().when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
   }
 
   @Override
   public MigrationStrategy getStrategy() {
-    return new V4DateFieldTimezoneAddition(configurationClient);
+    return new V4DateFieldTimezoneAddition(settingsClient);
   }
 
   @Override
@@ -51,7 +51,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
           .fqlQuery("{\"name\": {\"$eq\":\"foo\"}}")
           .fields(List.of())
           .build(),
-        (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(configurationClient)
+        (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(settingsClient)
       ),
       Arguments.of(
         "Query with dates",
@@ -108,7 +108,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
           .fields(List.of())
           .build(),
         (Consumer<MigratableQueryInformation>) (
-          transformed -> verify(configurationClient, times(1)).getTenantTimezone()
+          transformed -> verify(settingsClient, times(1)).getTenantTimezone()
         )
       )
     );

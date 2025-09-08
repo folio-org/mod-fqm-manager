@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.client.ConfigurationClient;
+import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
@@ -38,7 +38,7 @@ public class ResultSetService {
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
-  private final ConfigurationClient configurationClient;
+  private final SettingsClient settingsClient;
   private final FolioExecutionContext executionContext;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
@@ -63,7 +63,7 @@ public class ResultSetService {
       );
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateFields(entityType) : List.of();
-    ZoneId tenantTimezone = localize ? configurationClient.getTenantTimezone() : null;
+    ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
 
     return contentIds
       .stream()

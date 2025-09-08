@@ -396,6 +396,7 @@
   "entityType.simple_invoice.folio_invoice_no": "Folio invoice number",
   "entityType.simple_invoice.id": "UUID",
   "entityType.simple_invoice.invoice_date": "Invoice date",
+  "entityType.simple_invoice.jsonb": "JSONB",
   "entityType.simple_invoice.lock_total": "Lock total",
   "entityType.simple_invoice.manual_payment": "Manual payment",
   "entityType.simple_invoice.next_invoice_line_number": "Next invoice line number",

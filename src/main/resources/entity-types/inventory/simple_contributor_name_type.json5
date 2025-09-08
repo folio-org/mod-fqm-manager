@@ -9,6 +9,9 @@
       target: 'src_inventory_contributor_name_type',
     },
   ],
+  requiredPermissions: [
+    'inventory-storage.contributor-name-types.collection.get'
+  ],
   columns: [
     {
       name: 'id',
@@ -34,6 +37,15 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'contributor-name-types',
+        valueJsonPath: '$.contributorNameTypes.*.id',
+        labelJsonPath: '$.contributorNameTypes.*.name',
+      }
     },
     {
       name: 'ordering',

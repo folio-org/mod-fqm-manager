@@ -461,71 +461,80 @@
               name: 'name',
               property: 'name',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'stringType'
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueFunction: 'lower(:value)'
             },
-            //            {
-            //              name: 'contributor_type_id',
-            //              property: 'contributorTypeId',
-            //              dataType: {
-            //                dataType: 'rangedUUIDType',
-            //              },
-            //              queryable: false,
-            //              valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeId' ORDER BY elems.value->>'contributorTypeId') \
-            //                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
-            //            },
-            {
-              name: 'contributor_type',
-              property: 'contributorType',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: false,
-              valueGetter: "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
-                         FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_type contributor_type \
-                             ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
-                        )",
-            },
-            //            {
-            //              name: 'contributor_name_type_id',
-            //              property: 'contributorNameTypeId',
-            //              dataType: {
-            //                dataType: 'rangedUUIDType',
-            //              },
-            //              queryable: false,
-            //              valueGetter: "(SELECT array_agg(elems.value->>'contributorNameTypeId' ORDER BY elems.value->>'contributorNameTypeId') \
-            //                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
-            //            },
             {
               name: 'contributor_name_type',
               property: 'contributorNameType',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'stringType'
               },
-              queryable: false,
-              valueGetter: "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
-                         FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
-                             ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text \
-                        )",
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'contributorNameTypeId' ORDER BY elems.value->>'contributorNameTypeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              source: {
+                entityTypeId: '6cd60e0e-f862-413a-9857-1d1ef1ca34ea',
+                columnName: 'name',
+              }
             },
+            {
+              name: 'contributor_type',
+              property: 'contributorType',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeId' ORDER BY elems.value->>'contributorTypeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              source: {
+                entityTypeId: 'a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2',
+                columnName: 'name',
+              }
+            },
+            {
+              name: 'contributor_type_text',
+              property: 'contributorTypeText',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
+                                     FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+                                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
+                                       join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_type contributor_type \
+                                         ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
+                                    )",
+              valueFunction: 'lower(:value)'
+            },
+            //            {
+//              name: 'contributor_name_type',
+//              property: 'contributorNameType',
+//              dataType: {
+//                dataType: 'stringType',
+//              },
+//              queryable: false,
+//              valueGetter: "(SELECT array_agg(contributor_name_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorNameTypeId') \
+//                         FILTER (WHERE (contributor_name_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
+//                         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
+//                           join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
+//                             ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text \
+//                        )",
+//            },
             {
               name: 'primary',
               property: 'primary',
               dataType: {
-                dataType: 'booleanType',
+                dataType: 'booleanType'
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'primary') \
-                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
-            },
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
+            }
           ],
         },
       },

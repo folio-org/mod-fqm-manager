@@ -728,6 +728,18 @@
           (invoice_line.jsonb ->> 'invoiceId')::uuid = :invoice.id \
       )",
       valueFunction: '(:value)::integer'
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':invoice.jsonb::text',
     }
   ],
   sources: [

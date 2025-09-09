@@ -611,13 +611,13 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
-              valueGetter: "(SELECT array_agg(class_type.jsonb ->> 'name' ORDER BY record.value ->> 'classificationTypeId') \
-                             FILTER (WHERE (class_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-                               join ${tenant_id}_mod_fqm_manager.src_inventory_classification_type class_type \
-                                 ON (record.value ->> 'classificationTypeId') = class_type.id::text \
-                            )",
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'classificationTypeId' ORDER BY elems.value->>'classificationTypeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              source: {
+                entityTypeId: '60013bee-6752-4125-aedb-5689143477ae',
+                columnName: 'name',
+              }
             },
             {
               name: 'number',
@@ -625,7 +625,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(record.value ->> 'classificationNumber' ORDER BY record.value ->> 'classificationTypeId') \
                              FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
                              FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \

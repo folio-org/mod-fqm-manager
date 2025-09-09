@@ -107,4 +107,14 @@
     </createView>
   </changeSet>
 
+  <changeSet id="create_view_src_instance_classification_type" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="classification_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_classification_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.classification_type
+    </createView>
+  </changeSet>
 </databaseChangeLog>

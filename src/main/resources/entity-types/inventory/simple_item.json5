@@ -861,6 +861,18 @@
       valueGetter: ":sourceAlias.jsonb->>'effectiveShelvingOrder'",
     },
     {
+      name: 'order',
+      dataType: {
+        dataType: 'numberType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "(:item.jsonb->'order')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
       name: 'item_level_call_number',
       sourceAlias: 'item',
       dataType: {

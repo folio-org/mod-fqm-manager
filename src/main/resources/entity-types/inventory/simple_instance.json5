@@ -392,46 +392,50 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'identifier_type',
+              name: 'identifier_type_name',
               property: 'identifierType',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'stringType'
               },
-              queryable: false,
-              valueGetter: "( \
-                              SELECT \
-                                array_agg(identifier_type.jsonb ->> 'name' ORDER BY record.value ->> 'identifierTypeId') \
-                                FILTER (WHERE (identifier_type.jsonb ->> 'name') IS NOT NULL) \
-                                AS array_agg \
-                              FROM \
-                                jsonb_array_elements((:sourceAlias.jsonb -> 'identifiers')) record(value) \
-                                join ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type \
-                                ON (record.value ->> 'identifierTypeId') = identifier_type.id::text \
-                            )",
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'identifierTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              source: {
+                entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
+                columnName: 'name',
+              },
+              valueFunction: 'lower(:value)'
             },
+//            {
+//              name: 'identifier_type',
+//              property: 'identifierType',
+//              dataType: {
+//                dataType: 'stringType',
+//              },
+//              queryable: false,
+//              valueGetter: "( \
+//                              SELECT \
+//                                array_agg(identifier_type.jsonb ->> 'name' ORDER BY record.value ->> 'identifierTypeId') \
+//                                FILTER (WHERE (identifier_type.jsonb ->> 'name') IS NOT NULL) \
+//                                AS array_agg \
+//                              FROM \
+//                                jsonb_array_elements((:sourceAlias.jsonb -> 'identifiers')) record(value) \
+//                                join ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type \
+//                                ON (record.value ->> 'identifierTypeId') = identifier_type.id::text \
+//                            )",
+//            },
             {
-              name: 'value',
+              name: 'identifier_value',
               property: 'value',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
               valueFunction: 'lower(:value)',
-            },
-            //            {
-            //              name: 'identifier_type_id',
-            //              property: 'identifierTypeId',
-            //              dataType: {
-            //                dataType: 'stringType',
-            //              },
-            //              queryable: false,
-            //              valueGetter: "( SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-            //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'identifierTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-            //              valueFunction: 'lower(:value)',
-            //            },
-          ],
+            }
+          ]
         },
       },
       isIdColumn: false,

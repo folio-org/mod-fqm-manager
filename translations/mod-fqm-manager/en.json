@@ -942,6 +942,7 @@
   "entityType.simple_item_note_type.id": "Id",
   "entityType.simple_item.number_of_missing_pieces": "Number of missing pieces",
   "entityType.simple_item.number_of_pieces": "Number of pieces",
+  "entityType.simple_item.order": "Sort order",
   "entityType.simple_item.permanent_loan_type_id": "Permanent loan type UUID",
   "entityType.simple_item.permanent_location_id": "Permanent location UUID",
   "entityType.simple_item.purchase_order_line_identifier": "Purchase order line identifier",

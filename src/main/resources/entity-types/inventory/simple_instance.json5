@@ -676,6 +676,17 @@
               valueFunction: 'lower(:value)',
             },
             {
+              name: 'role',
+              property: 'role',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
               name: 'place',
               property: 'place',
               dataType: {
@@ -695,17 +706,6 @@
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'dateOfPublication') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'dateOfPublication')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'role',
-              property: 'role',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
               valueFunction: 'lower(:value)',
             },
           ],

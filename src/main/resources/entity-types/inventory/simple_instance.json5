@@ -1371,6 +1371,7 @@
       valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
       filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
       valueFunction: 'lower(:value)',
+      idColumnName: 'tenant_id',
       source: {
         columnName: 'tenant_name',
         entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',

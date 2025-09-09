@@ -553,6 +553,18 @@
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'referenceNumbers'",
     },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      essential: true,
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':invoice_lines.jsonb::text',
+    }
   ],
   sources: [
     {

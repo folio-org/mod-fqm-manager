@@ -539,6 +539,10 @@
     {
       "id": "item-note-types",
       "version": "1.0"
+    },
+    {
+      "id": "configuration",
+      "version": "2.0"
     }
   ],
   "optional": [

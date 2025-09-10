@@ -27,7 +27,11 @@ class SettingsClientTest {
            "scope": "stripes-core.prefs.manage",
            "key":"tenantLocaleSettings",
            "enabled":true,
-           "value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"America/Montevideo\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
+           "value": {
+             "locale": "en-US",
+             "currency": "USD",
+             "timezone": "America/Montevideo"
+           }
         }
       ],
       "totalRecords": 1,

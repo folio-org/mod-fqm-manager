@@ -28,9 +28,13 @@ public class SettingsClient {
     try {
       String localeSettingsResponse = underlyingClient.getLocaleSettings();
       JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode.path("items").get(0).path("value").asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      return ZoneId.of(valueNode.path("timezone").asText());
+      String timezone = localeSettingsNode
+        .path("items")
+        .get(0)
+        .path("value")
+        .get("timezone")
+        .asText();
+      return ZoneId.of(timezone);
     } catch (JsonProcessingException | FeignException.Unauthorized | NullPointerException | DateTimeException e) {
       log.error("Failed to retrieve timezone information from mod-settings. Defaulting to UTC.", e);
       return ZoneId.of("UTC");

@@ -117,4 +117,26 @@
       SELECT * FROM ${tenant_id}_mod_inventory_storage.classification_type
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_inventory_subject_source" author="Oleksandr_Bozhko@epam.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="subject_source" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+            replaceIfExists="true"
+            viewName="src_inventory_subject_source">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.subject_source
+    </createView>
+  </changeSet>
+
+  <changeSet id="create_view_src_inventory_subject_type" author="Oleksandr_Bozhko@epam.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="subject_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+            replaceIfExists="true"
+            viewName="src_inventory_subject_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.subject_type
+    </createView>
+  </changeSet>
 </databaseChangeLog>

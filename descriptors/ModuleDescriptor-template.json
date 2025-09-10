@@ -551,6 +551,14 @@
     {
       "id": "classification-types",
       "version": "1.2"
+    },
+    {
+      "id": "subject-sources",
+      "version": "1.0"
+    },
+    {
+      "id": "subject-types",
+      "version": "1.0"
     }
   ],
   "optional": [

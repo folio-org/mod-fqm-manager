@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'name'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -38,6 +39,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'description'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'description'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -94,6 +96,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'countClosed'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'countClosed'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -116,6 +119,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'maxOverdueFine')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'forgive_overdue_fine',
@@ -125,6 +129,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'forgiveOverdueFine'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'forgiveOverdueFine'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -191,6 +196,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->>'gracePeriodRecall'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'gracePeriodRecall'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -213,6 +219,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'maxOverdueRecallFine')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_count_closed',
@@ -461,6 +468,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'jsonb',

@@ -17,6 +17,7 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
+import org.folio.fqm.client.ListsClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
@@ -80,6 +81,7 @@ public class EntityTypeService {
   private final FolioExecutionContext executionContext;
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
+  private final ListsClient listsClient;
 
   /**
    * Returns the list of all entity types.
@@ -648,6 +650,11 @@ public class EntityTypeService {
   }
 
   private void verifyEntityTypeHasNoDependencies(EntityType entityType) {
+    verifyNoEntityTypesUseThisEntityType(entityType);
+    verifyNoListsUseThisEntityType(entityType);
+  }
+
+  private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
     List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
       .filter(et -> !et.getId().equals(entityType.getId()))
@@ -663,12 +670,13 @@ public class EntityTypeService {
     }
   }
 
-  private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
-
-  }
-
   private void verifyNoListsUseThisEntityType(EntityType entityType) {
-
+    ListsClient.ListsResponse listsResponse = listsClient.getLists(entityType.getId());
+    List<ListsClient.ListEntity> lists = listsResponse.lists();
+    if (!lists.isEmpty()) {
+      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
+        lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));
+    }
   }
 
   /**

@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__owners.jsonb->>'owner'",
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'desc',
@@ -36,6 +37,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__owners.jsonb->>'desc'",
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'service_point_owner',
@@ -71,6 +73,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__owners.jsonb->>'servicePointOwner'",
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'default_charge_notice_id',
@@ -81,6 +84,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'defaultChargeNoticeId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'default_action_notice_id',
@@ -91,6 +95,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'defaultActionNoticeId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'metadata_created_date',
@@ -140,6 +145,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__owners.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__owners',
     },
     {
       name: 'jsonb',

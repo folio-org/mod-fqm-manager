@@ -507,12 +507,7 @@
                 dataType: 'stringType'
               },
               queryable: true,
-              valueGetter: "(SELECT array_agg(contributor_type.jsonb ->> 'name' ORDER BY record.value ->> 'contributorTypeId') \
-                                     FILTER (WHERE (contributor_type.jsonb ->> 'name') IS NOT NULL) AS array_agg \
-                                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'contributors')) record(value) \
-                                       join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_type contributor_type \
-                                         ON (record.value ->> 'contributorTypeId') = contributor_type.id::text \
-                                    )",
+              valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)'
             },
             //            {
@@ -537,7 +532,20 @@
               },
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'primary') \
-                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'primary') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ]
             }
           ],
         },

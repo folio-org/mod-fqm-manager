@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'name'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -38,6 +39,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'description'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'description'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -249,6 +251,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemProcessingFee')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
     },
     {
       name: 'charge_amount_item_patron',
@@ -258,6 +261,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemPatron'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemPatron'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -279,6 +283,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemSystem'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'chargeAmountItemSystem'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -345,6 +350,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'returnedLostItemProcessingFee'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'returnedLostItemProcessingFee'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -366,6 +372,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacedLostItemProcessingFee'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacedLostItemProcessingFee'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -388,6 +395,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementProcessingFee')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
     },
     {
       name: 'replacement_allowed',
@@ -397,6 +405,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementAllowed'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'replacementAllowed'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -418,6 +427,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemReturned'",
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'lostItemReturned'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -514,6 +524,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
     },
     {
       name: 'jsonb',

@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->>'automatic'",
+      sourceAlias: 'src__circulation__feesfines__feefines',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefines.jsonb->>'automatic'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -48,6 +49,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->>'feeFineType'",
+      sourceAlias: 'src__circulation__feesfines__feefines',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefines.jsonb->>'feeFineType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -60,6 +62,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'defaultAmount')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__feefines',
     },
     {
       name: 'charge_notice_id',
@@ -70,6 +73,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'chargeNoticeId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefines',
     },
     {
       name: 'action_notice_id',
@@ -80,6 +84,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'actionNoticeId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefines',
     },
     {
       name: 'owner_id',
@@ -90,6 +95,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'ownerId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefines',
     },
     {
       name: 'metadata_created_date',
@@ -139,6 +145,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefines',
     },
     {
       name: 'jsonb',

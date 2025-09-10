@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__payments.jsonb->>'nameMethod'",
+      sourceAlias: 'src__circulation__feesfines__payments',
     },
     {
       name: 'allowed_refund_method',
@@ -36,6 +37,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__payments.jsonb->>'allowedRefundMethod'",
+      sourceAlias: 'src__circulation__feesfines__payments',
       values: [
         {
           value: 'true',
@@ -94,6 +96,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__payments.jsonb->>'ownerId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__payments',
     },
     {
       name: 'id',
@@ -105,6 +108,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__payments.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__payments',
     },
     {
       name: 'jsonb',

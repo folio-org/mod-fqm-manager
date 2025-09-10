@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__comments.jsonb->>'paid'",
+      sourceAlias: 'src__circulation__feesfines__comments',
       values: [
         {
           value: 'true',
@@ -46,6 +47,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__comments.jsonb->>'waived'",
+      sourceAlias: 'src__circulation__feesfines__comments',
       values: [
         {
           value: 'true',
@@ -65,6 +67,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__comments.jsonb->>'refunded'",
+      sourceAlias: 'src__circulation__feesfines__comments',
       values: [
         {
           value: 'true',
@@ -84,6 +87,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__comments.jsonb->>'transferredManually'",
+      sourceAlias: 'src__circulation__feesfines__comments',
       values: [
         {
           value: 'true',
@@ -143,6 +147,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__comments.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__comments',
     },
     {
       name: 'jsonb',

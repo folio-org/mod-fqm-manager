@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__waives.jsonb->>'nameReason'",
+      sourceAlias: 'src__circulation__feesfines__waives',
     },
     {
       name: 'description',
@@ -36,6 +37,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__waives.jsonb->>'description'",
+      sourceAlias: 'src__circulation__feesfines__waives',
     },
     {
       name: 'metadata_created_date',
@@ -84,6 +86,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__waives.jsonb->>'accountId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__waives',
     },
     {
       name: 'id',
@@ -95,6 +98,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__waives.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__waives',
     },
     {
       name: 'jsonb',

@@ -29,6 +29,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
     {
       name: 'version',
@@ -39,6 +40,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'_version')::integer",
       valueFunction: '(:value)::integer',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
     {
       name: 'user_id',
@@ -47,9 +49,9 @@
       },
       queryable: true,
       visibleByDefault: false,
-      sourceAlias: 'src__circulation__patron_blocks__user_summary',
-      valueGetter: "(:sourceAlias.jsonb->>'userId')::uuid",
+      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
@@ -216,6 +218,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'",
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
       filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
     },
@@ -272,6 +275,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'",
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
       filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
     },

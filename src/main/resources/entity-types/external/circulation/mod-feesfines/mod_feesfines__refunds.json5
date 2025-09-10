@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__refunds.jsonb->>'nameReason'",
+      sourceAlias: 'src__circulation__feesfines__refunds',
     },
     {
       name: 'description',
@@ -36,6 +37,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__refunds.jsonb->>'description'",
+      sourceAlias: 'src__circulation__feesfines__refunds',
     },
     {
       name: 'metadata_created_date',
@@ -84,6 +86,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__refunds.jsonb->>'accountId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__refunds',
     },
     {
       name: 'id',
@@ -95,6 +98,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__refunds.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__refunds',
     },
     {
       name: 'jsonb',

@@ -27,6 +27,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'dateAction'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'dateAction'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -38,6 +39,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'typeAction'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'typeAction'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -95,6 +97,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'comments'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'comments'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -106,6 +109,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'notify'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'notify'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
       values: [
@@ -128,6 +132,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'amountAction')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'balance',
@@ -138,6 +143,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'balance')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'transaction_information',
@@ -147,6 +153,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'transactionInformation'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'transactionInformation'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -159,6 +166,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'createdAt')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'original_created_at',
@@ -168,6 +176,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'originalCreatedAt'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'originalCreatedAt'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -179,6 +188,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'source'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'source'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -190,6 +200,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__feefineactions.jsonb->>'paymentMethod'",
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefineactions.jsonb->>'paymentMethod'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -202,6 +213,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'accountId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'user_id',
@@ -212,6 +224,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'id',
@@ -223,6 +236,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__feefineactions.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__feefineactions',
     },
     {
       name: 'jsonb',

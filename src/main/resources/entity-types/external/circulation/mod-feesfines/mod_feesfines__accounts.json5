@@ -28,6 +28,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'amount')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'remaining',
@@ -38,6 +39,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'remaining')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'status_name',
@@ -141,6 +143,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'feeFineType'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'feeFineType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -152,6 +155,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'feeFineOwner'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'feeFineOwner'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -163,6 +167,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'title'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'title'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -174,6 +179,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'callNumber'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'callNumber'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -185,6 +191,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'barcode'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'barcode'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -196,6 +203,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'materialType'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'materialType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -216,6 +224,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'location'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'location'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -265,6 +274,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'dueDate'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'dueDate'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -276,6 +286,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'returnedDate'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'returnedDate'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -288,6 +299,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'loanId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'user_id',
@@ -298,6 +310,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'item_id',
@@ -308,6 +321,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'itemId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'material_type_id',
@@ -318,6 +332,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'materialTypeId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'fee_fine_id',
@@ -328,6 +343,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'feeFineId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'owner_id',
@@ -338,6 +354,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'ownerId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'id',
@@ -349,6 +366,7 @@
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'holdings_record_id',
@@ -359,6 +377,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'holdingsRecordId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'instance_id',
@@ -369,6 +388,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'instanceId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'contributors',
@@ -394,6 +414,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->>'contributors'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'contributors'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
     },
@@ -406,6 +427,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'loanPolicyId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'overdue_fine_policy_id',
@@ -416,6 +438,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'overdueFinePolicyId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'lost_item_fee_policy_id',
@@ -426,6 +449,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'lostItemFeePolicyId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'process_id',
@@ -436,6 +460,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'processId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'jsonb',

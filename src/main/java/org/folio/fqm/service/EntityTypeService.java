@@ -591,6 +591,7 @@ public class EntityTypeService {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
     }
     permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
+    verifyEntityTypeHasNoDependencies(customEntityType);
     CustomEntityType deletedCustomEntityType = customEntityType.toBuilder()
       .deleted(true)
       .updatedAt(clockService.now())
@@ -643,6 +644,18 @@ public class EntityTypeService {
     }
 
     return builder.build();
+  }
+
+  private void verifyEntityTypeHasNoDependencies(EntityType entityType) {
+
+  }
+
+  private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
+
+  }
+
+  private void verifyNoListsUseThisEntityType(EntityType entityType) {
+
   }
 
   /**

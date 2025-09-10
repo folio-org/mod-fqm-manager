@@ -19,6 +19,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -647,7 +648,19 @@ public class EntityTypeService {
   }
 
   private void verifyEntityTypeHasNoDependencies(EntityType entityType) {
-
+    List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+      .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
+      .filter(et -> !et.getId().equals(entityType.getId()))
+      .filter(et -> et.getSources() != null && et.getSources().stream()
+        .filter(source -> source instanceof EntityTypeSourceEntityType)
+        .map(source -> (EntityTypeSourceEntityType) source)
+        .anyMatch(source -> source.getTargetId() != null && source.getTargetId().toString().equals(entityType.getId()))
+      )
+      .toList();
+    if (!dependentEntityTypes.isEmpty()) {
+      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used as a source by other entity types: " +
+        dependentEntityTypes.stream().map(et -> et.getName() + (" (id " + et.getId() + ")")).collect(Collectors.joining(", ")));
+    }
   }
 
   private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {

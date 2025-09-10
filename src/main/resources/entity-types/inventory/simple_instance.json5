@@ -583,25 +583,72 @@
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'stringType',
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'subject_value',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'subject_source',
+              property: 'subjectSource',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'sourceId' ORDER BY elems.value->>'sourceId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              source: {
+                entityTypeId: '4433fa88-8afd-4d39-9387-ef3c4945b4f8',
+                columnName: 'name',
+              }
+            },
+            {
+              name: 'subject_type',
+              property: 'subjectType',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'typeId' ORDER BY elems.value->>'typeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              source: {
+                entityTypeId: '47838a6a-41ad-4f53-a04c-9dfb923ef818',
+                columnName: 'name',
+              }
+            }
+          ]
         },
       },
       isIdColumn: false,
       queryable: false,
       essential: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value->>'value')\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value->>'value'))\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems\
-      )",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                  jsonb_build_object('subjectSource', subject_source.jsonb ->> 'name', \
+                                                     'subjectType', subject_type.jsonb ->> 'name') \
+                   ORDER BY record.value ->> 'sourceId', record.value ->> 'typeId') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'subjects')) record(value) \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_subject_source subject_source \
+                     ON (record.value ->> 'sourceId') = subject_source.id::text \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_subject_type subject_type \
+                     ON (record.value ->> 'typeId') = subject_type.id::text)::text",
+      filterValueGetter: "(SELECT jsonb_agg(record.value || \
+                                  jsonb_build_object('subjectSource', subject_source.jsonb ->> 'name', \
+                                                     'subjectType', subject_type.jsonb ->> 'name') \
+                   ORDER BY record.value ->> 'sourceId', record.value ->> 'typeId') \
+                 FROM jsonb_array_elements((:sourceAlias.jsonb -> 'subjects')) record(value) \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_subject_source subject_source \
+                     ON (record.value ->> 'sourceId') = subject_source.id::text \
+                   LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_subject_type subject_type \
+                     ON (record.value ->> 'typeId') = subject_type.id::text)::text",
       valueFunction: 'lower(:value)',
     },
     {

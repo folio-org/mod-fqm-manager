@@ -697,7 +697,7 @@
     "entityType.simple_instance_date_type.code": "Code",
     "entityType.simple_instance.classifications": "Classifications",
     "entityType.simple_instance.classifications.number": "Classification",
-    "entityType.simple_instance.classifications.number._qualified": "Instance - Classifications  - Classification",
+    "entityType.simple_instance.classifications.number._qualified": "Instance - Classifications - Classification",
     "entityType.simple_instance.classifications.type_id": "Identifier type UUID",
     "entityType.simple_instance.classifications.type_id._qualified": "Classification identifier type UUID",
     "entityType.simple_instance.classifications.type_name": "Classification identifier type",

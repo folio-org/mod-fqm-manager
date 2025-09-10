@@ -703,7 +703,7 @@
   "entityType.simple_instance.cataloged_date": "Cataloged date",
   "entityType.simple_instance.classifications": "Classifications",
   "entityType.simple_instance.classifications.number": "Classification",
-  "entityType.simple_instance.classifications.number._qualified": "Instance - Classifications  - Classification",
+  "entityType.simple_instance.classifications.number._qualified": "Instance - Classifications - Classification",
   "entityType.simple_instance.classifications.type_id": "Identifier type UUID",
   "entityType.simple_instance.classifications.type_id._qualified": "Classification identifier type UUID",
   "entityType.simple_instance.classifications.type_name": "Classification identifier type",

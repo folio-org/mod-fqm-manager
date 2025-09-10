@@ -366,7 +366,7 @@
       },
       isIdColumn: false,
       essential: true,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\

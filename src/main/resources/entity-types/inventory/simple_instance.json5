@@ -537,7 +537,20 @@
               },
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'primary') \
-                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)"
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'primary') \
+                         FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ]
             }
           ],
         },

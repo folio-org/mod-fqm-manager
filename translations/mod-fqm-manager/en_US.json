@@ -1771,5 +1771,13 @@
     "entityType.simple_instance.notes.instance_note_type": "Note type",
     "entityType.simple_instance.notes.instance_note_type._qualified": "Instance — Notes — Note type",
     "entityType.simple_instance_note_type": "Note type",
-    "entityType.simple_instance_note_type.id": "Id"
+    "entityType.simple_instance_note_type.id": "Id",
+    "entityType.simple_tags": "Tags",
+    "entityType.simple_tags.id": "UUID",
+    "entityType.simple_tags.description": "description",
+    "entityType.simple_tags.label": "Label",
+    "entityType.simple_tags.updated_by_user_id": "Updated by user UUID",
+    "entityType.simple_tags.updated_by_username": "Updated by username",
+    "entityType.simple_tags.created_by_user_id": "Created by user UUID",
+    "entityType.simple_tags.created_by_username": "Created by username"
 }

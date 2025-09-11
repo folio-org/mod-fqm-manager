@@ -1038,15 +1038,21 @@
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
-          array_agg(elems.value::text)\
+          array_agg(elems.value::text) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       filterValueGetter: "(\
         SELECT\
-          array_agg(lower(elems.value::text))\
+          array_agg(lower(elems.value::text)) FILTER (\
+            WHERE\
+              (elems.value::text) IS NOT NULL\
+          ) AS ARRAY_AGG\
         FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       valueFunction: 'lower(:value)',
       source: {

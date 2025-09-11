@@ -322,7 +322,7 @@
         },
       },
       sourceAlias: 'inst',
-      queryable: false,
+      queryable: true,
       essential: true,
       visibleByDefault: false,
       valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitle') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",

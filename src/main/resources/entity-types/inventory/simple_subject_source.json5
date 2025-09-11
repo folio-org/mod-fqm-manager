@@ -42,7 +42,7 @@
       },
       valueSourceApi: {
         path: 'subject-sources',
-        valueJsonPath: '$.subjectSources.*.name',
+        valueJsonPath: '$.subjectSources.*.id',
         labelJsonPath: '$.subjectSources.*.name',
       },
     },

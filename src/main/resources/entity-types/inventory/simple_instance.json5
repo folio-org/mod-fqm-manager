@@ -392,17 +392,30 @@
           dataType: 'objectType',
           properties: [
             {
+              name: 'identifier_value',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
               name: 'identifier_type_name',
               property: 'identifierType',
               dataType: {
                 dataType: 'stringType'
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'identifierTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId' ORDER BY elems.value->>'identifierTypeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId' ORDER BY elems.value->>'identifierTypeId') \
+                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
               source: {
                 entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
-                columnName: 'name',
+                columnName: 'name'
               },
               valueFunction: 'lower(:value)'
             },
@@ -424,17 +437,6 @@
 //                                ON (record.value ->> 'identifierTypeId') = identifier_type.id::text \
 //                            )",
 //            },
-            {
-              name: 'identifier_value',
-              property: 'value',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              valueFunction: 'lower(:value)',
-            }
           ]
         },
       },

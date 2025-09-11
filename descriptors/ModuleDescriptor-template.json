@@ -559,6 +559,10 @@
     {
       "id": "subject-types",
       "version": "1.0"
+    },
+    {
+      "id": "tags",
+      "version": "1.0"
     }
   ],
   "optional": [

@@ -1,0 +1,156 @@
+{
+  id: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
+  name: 'simple_tags',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'tgs',
+      target: 'src_tags',
+    },
+  ],
+  requiredPermissions: ['tags.collection.get'],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'label',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'label'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_tags.f_unaccent (:sourceAlias.jsonb->>'label'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_tags.f_unaccent (:value))',
+      source: {
+        entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
+        columnName: 'label',
+      },
+      valueSourceApi: {
+        path: 'tags',
+        valueJsonPath: '$.tags.*.label',
+        labelJsonPath: '$.tags.*.label',
+      },
+    },
+    {
+      name: 'description',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'description'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_tags.f_unaccent (:sourceAlias.jsonb->>'description'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_tags.f_unaccent (:value))',
+    },
+    {
+      name: 'metadata_created_date',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_updated_date',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'tgs',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

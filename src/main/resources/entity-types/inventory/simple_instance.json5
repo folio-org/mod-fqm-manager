@@ -1316,7 +1316,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       essential: true,
       valueGetter: "(\
@@ -1338,6 +1338,10 @@
           jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
       )",
       valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
+        columnName: 'label',
+      }
     },
     {
       name: 'nature_of_content_term_ids',

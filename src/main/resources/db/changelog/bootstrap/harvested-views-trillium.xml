@@ -139,4 +139,15 @@
       SELECT * FROM ${tenant_id}_mod_inventory_storage.subject_type
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_tags" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="tags" schemaName="${tenant_id}_mod_tags"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_tags">
+      SELECT * FROM ${tenant_id}_mod_tags.tags
+    </createView>
+  </changeSet>
 </databaseChangeLog>

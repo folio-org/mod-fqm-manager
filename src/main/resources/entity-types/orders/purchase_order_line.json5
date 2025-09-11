@@ -1642,7 +1642,7 @@
       isIdColumn: false,
       essential: true,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'titleOrPackage'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb ->> \'titleOrPackage\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_orders_storage.f_unaccent(:value)), 600)',
@@ -1689,7 +1689,7 @@
       isIdColumn: false,
       essential: true,
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
     },
     {

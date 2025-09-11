@@ -564,19 +564,19 @@
                    LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_contributor_name_type contributor_name_type \
                      ON (record.value ->> 'contributorNameTypeId') = contributor_name_type.id::text)::text",
     },
-    {
-      name: 'instance_primary_contributor',
-      dataType: {
-        dataType: 'stringType',
-      },
-      valueGetter: 'jsonb_path_query_first(:sourceAlias.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
-      filterValueGetter: 'jsonb_path_query_first(:sourceAlias.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
-      valueFunction: 'lower(:value)',
-      visibleByDefault: false,
-      queryable: false,
-      sourceAlias: 'inst',
-      essential: true,
-    },
+//    {
+//      name: 'instance_primary_contributor',
+//      dataType: {
+//        dataType: 'stringType',
+//      },
+//      valueGetter: 'jsonb_path_query_first(:sourceAlias.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
+//      filterValueGetter: 'jsonb_path_query_first(:sourceAlias.jsonb, \'$."contributors"[*]?(@."primary" == true)."name"\'::jsonpath) #>> \'{}\'::text[]',
+//      valueFunction: 'lower(:value)',
+//      visibleByDefault: false,
+//      queryable: false,
+//      sourceAlias: 'inst',
+//      essential: true,
+//    },
     {
       name: 'subjects',
       sourceAlias: 'inst',

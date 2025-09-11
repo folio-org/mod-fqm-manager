@@ -161,4 +161,15 @@
       SELECT * FROM ${tenant_id}_mod_inventory_storage.nature_of_content_term
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_alternative_title_type" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="alternative_title_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_alternative_title_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.alternative_title_type
+    </createView>
+  </changeSet>
 </databaseChangeLog>

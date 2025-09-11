@@ -28,7 +28,6 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
       essential: true,
@@ -49,6 +48,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
       essential: true,

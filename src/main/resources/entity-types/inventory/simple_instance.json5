@@ -663,18 +663,6 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'number',
-              property: 'classificationNumber',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "(SELECT array_agg(record.value ->> 'classificationNumber' ORDER BY record.value ->> 'classificationTypeId') \
-                             FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
-                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
-                            )",
-            },
-            {
               name: 'type_name',
               property: 'classificationType',
               dataType: {
@@ -687,6 +675,18 @@
                 entityTypeId: '60013bee-6752-4125-aedb-5689143477ae',
                 columnName: 'name',
               }
+            },
+            {
+              name: 'number',
+              property: 'classificationNumber',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(record.value ->> 'classificationNumber' ORDER BY record.value ->> 'classificationTypeId') \
+                             FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
+                             FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+                            )",
             },
             //            {
             //              name: 'type_id',
@@ -881,6 +881,32 @@
           dataType: 'objectType',
           properties: [
             {
+              name: 'relationship',
+              property: 'relationship',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'relationshipId') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'relationshipId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              source: {
+                entityTypeId: '80dac615-4de8-416f-85d1-27e73457f72c',
+                columnName: 'name',
+              },
+              valueFunction: 'lower(:value)'
+            },
+            {
+              name: 'uri',
+              property: 'uri',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'uri') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'uri')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
               name: 'link_text',
               property: 'linkText',
               dataType: {
@@ -903,17 +929,6 @@
               valueFunction: 'lower(:value)',
             },
             {
-              name: 'uri',
-              property: 'uri',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'uri') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'uri')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
               name: 'public_note',
               property: 'publicNote',
               dataType: {
@@ -923,21 +938,6 @@
               valueGetter: "( SELECT array_agg(elems.value->>'publicNote') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publicNote')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
               valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'relationship',
-              property: 'relationship',
-              dataType: {
-                dataType: 'stringType'
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'relationshipId') FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'relationshipId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'electronicAccess') AS elems)",
-              source: {
-                entityTypeId: '80dac615-4de8-416f-85d1-27e73457f72c',
-                columnName: 'name',
-              },
-              valueFunction: 'lower(:value)'
             },
           ],
         },

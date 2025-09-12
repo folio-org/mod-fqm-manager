@@ -296,24 +296,6 @@
       essential: true,
     },
     {
-      name: 'alternative_titles_ids',
-      sourceAlias: 'inst',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'rangedUUIDType',
-        },
-      },
-      isIdColumn: false,
-      queryable: true,
-      essential: true,
-      hidden: true,
-      visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitleTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitleTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
-      valueFunction: 'lower(:value)',
-    },
-    {
       name: 'alternative_titles',
       sourceAlias: 'inst',
       dataType: {
@@ -342,13 +324,8 @@
               valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitleTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitleTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
               source: {
-                columnName: 'alternative_titles',
-                entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-              },
-              valueSourceApi: {
-                path: 'alternative-title-types',
-                valueJsonPath: '$.alternativeTitleTypes.*.id',
-                labelJsonPath: '$.alternativeTitleTypes.*.name',
+                columnName: 'name',
+                entityTypeId: '5da93f6e-2ecb-4cf8-ad53-904b32b0b857',
               },
               valueFunction: 'lower(:value)'
             },

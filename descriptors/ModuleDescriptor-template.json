@@ -563,6 +563,10 @@
     {
       "id": "tags",
       "version": "1.0"
+    },
+    {
+      "id": "alternative-title-types",
+      "version": "1.0"
     }
   ],
   "optional": [

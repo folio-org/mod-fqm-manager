@@ -392,17 +392,6 @@
           dataType: 'objectType',
           properties: [
             {
-              name: 'identifier_value',
-              property: 'value',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              valueFunction: 'lower(:value)',
-            },
-            {
               name: 'identifier_type_name',
               property: 'identifierType',
               dataType: {
@@ -418,6 +407,17 @@
                 columnName: 'name'
               },
               valueFunction: 'lower(:value)'
+            },
+            {
+              name: 'identifier_value',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              valueFunction: 'lower(:value)',
             },
 //            {
 //              name: 'identifier_type',

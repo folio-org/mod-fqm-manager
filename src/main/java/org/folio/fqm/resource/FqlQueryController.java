@@ -55,13 +55,6 @@ public class FqlQueryController implements FqlQueryApi {
       contentsRequest.getFields(), contentsRequest.getIds(), contentsRequest.getUserId(), Boolean.TRUE.equals(contentsRequest.getLocalize()), true));
   }
 
-  /**
-   * This endpoint is deprecated and will be removed in a future version.
-   * @deprecated Since version 3.0.0.
-   * This endpoint is planned for removal.
-   */
-  @Deprecated(since = "3.0.0", forRemoval = true)
-  @ApiOperation(value = "Deprecated endpoint", notes = "This endpoint is deprecated and will be removed in future versions.")
   @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
   public ResponseEntity<List<List<String>>> getSortedIds(UUID queryId, Integer offset, Integer limit){

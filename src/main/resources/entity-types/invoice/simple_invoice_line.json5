@@ -362,7 +362,7 @@
     {
       name: 'subscription_start',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
@@ -373,7 +373,7 @@
     {
       name: 'subscription_end',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
@@ -408,7 +408,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'invoice_lines',
       queryable: true,
@@ -418,7 +418,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'invoice_lines',
       queryable: true,

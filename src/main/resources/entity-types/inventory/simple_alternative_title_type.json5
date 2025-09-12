@@ -43,7 +43,7 @@
       valueSourceApi: {
         path: 'alternative-title-types',
         valueJsonPath: '$.alternativeTitleTypes.*.id',
-        labelJsonPath: '$.identifierTypes.*.name',
+        labelJsonPath: '$.alternativeTitleTypes.*.name',
       },
     },
     {

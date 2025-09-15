@@ -657,7 +657,6 @@ public class EntityTypeService {
   private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
     List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
-      .filter(et -> !et.getId().equals(entityType.getId()))
       .filter(et -> et.getSources() != null && et.getSources().stream()
         .filter(source -> source instanceof EntityTypeSourceEntityType)
         .map(source -> (EntityTypeSourceEntityType) source)

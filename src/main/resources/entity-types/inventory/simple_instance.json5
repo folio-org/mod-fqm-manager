@@ -37,6 +37,7 @@
     'inventory-storage.statistical-codes.collection.get',
     'inventory-storage.statistical-code-types.collection.get',
     'inventory-storage.instance-formats.collection.get',
+    'inventory-storage.nature-of-content-terms.collection.get'
   ],
   columns: [
     {
@@ -1348,7 +1349,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'rangedUUIDType',
         },
@@ -1357,18 +1358,34 @@
       queryable: false,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'natureOfContentTermIds') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'natureOfContentTermIds') AS elems\
-      )",
+      valueGetter: "(:sourceAlias.jsonb -> 'natureOfContentTermIds'::text)",
+      filterValueGetter: "(:sourceAlias.jsonb -> 'natureOfContentTermIds'::text)"
+    },
+    {
+      name: 'nature_of_content_term',
+      sourceAlias: 'inst',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      essential: true,
+      idColumnName: 'nature_of_content_term_ids',
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(nct.jsonb ->> 'name') FILTER (WHERE (nct.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'natureOfContentTermIds') record(value) JOIN src_nature_of_content_term nct ON record.value::text = nct.id::text )",
+      filterValueGetter: "( SELECT jsonb_agg(lower(nct.jsonb ->> 'name')) FILTER (WHERE nct.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'natureOfContentTermIds') record(value) JOIN src_nature_of_content_term nct record.value::text = nct.id::text )",
+      valueFunction: 'lower(:value)',
+      source: {
+        entityTypeId: '7d92f1b8-8826-4e66-8c79-9dc25341fe54',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'nature-of-content-terms',
+        valueJsonPath: '$.natureOfContentTerms.*.id',
+        labelJsonPath: '$.natureOfContentTerms.*.name',
+      }
     },
     {
       name: 'shared',

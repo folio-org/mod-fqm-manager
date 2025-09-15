@@ -752,6 +752,7 @@
   "entityType.simple_instance.mode_of_issuance_id": "Mode of issuance UUID",
   "entityType.simple_instance.mode_of_issuance_name": "Mode of issuance",
   "entityType.simple_instance.nature_of_content_term_ids": "Nature of content term UUIDs",
+  "entityType.simple_instance.nature_of_content_term": "Nature of content",
   "entityType.simple_instance.notes": "Notes",
   "entityType.simple_instance.notes.instance_note_type_id": "Type UUID",
   "entityType.simple_instance.notes.instance_note_type_id._qualified": "Notes type UUID",
@@ -1803,5 +1804,13 @@
   "entityType.simple_tags.updated_by_user_id": "Updated by user UUID",
   "entityType.simple_tags.updated_by_username": "Updated by username",
   "entityType.simple_tags.created_by_user_id": "Created by user UUID",
-  "entityType.simple_tags.created_by_username": "Created by username"
+  "entityType.simple_tags.created_by_username": "Created by username",
+  "entityType.simple_nature_of_content_term": "Nature of content term",
+  "entityType.simple_nature_of_content_term.id": "UUID",
+  "entityType.simple_nature_of_content_term.name": "Name",
+  "entityType.simple_nature_of_content_term.source": "Source",
+  "entityType.simple_nature_of_content_term.updated_by_user_id": "Updated by user UUID",
+  "entityType.simple_nature_of_content_term.updated_by_username": "Updated by username",
+  "entityType.simple_nature_of_content_term.created_by_user_id": "Created by user UUID",
+  "entityType.simple_nature_of_content_term.created_by_username": "Created by username"
 }

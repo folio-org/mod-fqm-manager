@@ -563,6 +563,10 @@
     {
       "id": "tags",
       "version": "1.0"
+    },
+    {
+      "id": "nature-of-content-terms",
+      "version": "1.0"
     }
   ],
   "optional": [

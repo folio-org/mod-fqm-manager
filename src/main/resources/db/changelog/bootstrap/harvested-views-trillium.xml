@@ -150,4 +150,15 @@
       SELECT * FROM ${tenant_id}_mod_tags.tags
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_nature_of_content_term" author="kjain@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="nature_of_content_term" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_nature_of_content_term">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.nature_of_content_term
+    </createView>
+  </changeSet>
 </databaseChangeLog>

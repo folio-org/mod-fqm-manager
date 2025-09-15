@@ -40,9 +40,10 @@
         entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
         columnName: 'label',
       },
+      idColumnName: 'id',
       valueSourceApi: {
         path: 'tags',
-        valueJsonPath: '$.tags.*.label',
+        valueJsonPath: '$.tags.*.id',
         labelJsonPath: '$.tags.*.label',
       },
     },

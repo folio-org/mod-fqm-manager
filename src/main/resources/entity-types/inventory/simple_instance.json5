@@ -297,37 +297,52 @@
       essential: true,
     },
     {
-      name: 'alternative_titles_ids',
+      name: 'alternative_titles',
       sourceAlias: 'inst',
       dataType: {
         dataType: 'arrayType',
         itemDataType: {
-          dataType: 'rangedUUIDType',
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'title',
+              property: 'alternativeTitle',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitle') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitle')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'title_type',
+              property: 'titleType',
+              dataType: {
+                dataType: 'stringType'
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitleTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitleTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+              source: {
+                columnName: 'name',
+                entityTypeId: '5da93f6e-2ecb-4cf8-ad53-904b32b0b857',
+              },
+              valueFunction: 'lower(:value)'
+            },
+          ],
         },
       },
       isIdColumn: false,
-      queryable: true,
-      essential: true,
-      hidden: true,
-      visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitleTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitleTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
-      valueFunction: 'lower(:value)',
-    },
-    {
-      name: 'alternative_titles',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      sourceAlias: 'inst',
       queryable: false,
-      essential: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(elems.value->>'alternativeTitle') FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
-      filterValueGetter: "( SELECT array_agg(lower(elems.value->>'alternativeTitle')) FROM jsonb_array_elements(:sourceAlias.jsonb->'alternativeTitles') AS elems)",
+      essential: true,
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                                      jsonb_build_object('titleType', title_type.jsonb ->> 'name') \
+                       ORDER BY record.value ->> 'alternativeTitleTypeId') \
+                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'alternativeTitles')) record(value) \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_alternative_title_type title_type \
+                         ON (record.value ->> 'alternativeTitleTypeId') = title_type.id::text)::text",
       valueFunction: 'lower(:value)',
     },
     {

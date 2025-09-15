@@ -1,0 +1,141 @@
+{
+  id: '5da93f6e-2ecb-4cf8-ad53-904b32b0b857',
+  name: 'simple_alternative_title_type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'alternative_title_type',
+      target: 'src_inventory_alternative_title_type',
+    },
+  ],
+  requiredPermissions: ['inventory-storage.alternative-title-types.collection.get'],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: '5da93f6e-2ecb-4cf8-ad53-904b32b0b857',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'alternative-title-types',
+        valueJsonPath: '$.alternativeTitleTypes.*.id',
+        labelJsonPath: '$.alternativeTitleTypes.*.name',
+      },
+    },
+    {
+      name: 'metadata_created_date',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_updated_date',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'dateType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'alternative_title_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

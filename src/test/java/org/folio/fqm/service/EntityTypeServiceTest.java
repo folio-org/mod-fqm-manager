@@ -5,8 +5,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.ListsClient;
+import org.folio.fqm.client.ListsClient.ListEntity;
+import org.folio.fqm.client.ListsClient.ListsResponse;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -1083,6 +1086,77 @@ class EntityTypeServiceTest {
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsClient.ListsResponse(List.of()));
+
+    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfUserLacksListPermissions() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    doThrow(FeignException.Unauthorized.class).when(listsClient).getLists(List.of(entityTypeId.toString()), true);
+
+    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfListsDependOnEntityType() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    ListEntity dependentList = new ListEntity(UUID.randomUUID().toString(), "Dependent List");
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(listsClient.getLists(List.of(entityTypeId.toString()), true))
+      .thenReturn(new ListsResponse(List.of(dependentList)));
+
+    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfOtherEntityTypesDependOnEntityType() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(repo.getEntityTypeDefinitions(Set.of(), tenantId)).thenReturn(
+      Stream.of(
+        new EntityType().id(UUID.randomUUID().toString()).name("Dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType().targetId(entityTypeId)
+        ))
+      )
+    );
+    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldAllowDeletionIfModListsIsNotEnabled() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    doThrow(FeignException.NotFound.class).when(listsClient).getLists(List.of(entityTypeId.toString()), true);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));

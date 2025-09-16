@@ -11,9 +11,9 @@ import java.util.List;
 @FeignClient(name = "lists")
 public interface ListsClient {
   @GetMapping(value = "")
-  public ListsResponse getLists(@RequestParam String entityTypeId);
+  public ListsResponse getLists(@RequestParam("entityTypeIds") List<String> entityTypeIds, @RequestParam("includePrivateEntityTypes") boolean includePrivateEntityTypes);
 
-  public record ListsResponse(List<ListEntity> lists) {}
+  public record ListsResponse(List<ListEntity> content, int totalRecords, int totalPages) {}
 
   public record ListEntity(String id, String name) {}
 }

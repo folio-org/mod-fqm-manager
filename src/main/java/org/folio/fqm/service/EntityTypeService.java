@@ -672,8 +672,8 @@ public class EntityTypeService {
   // TODO: how to handle permissions when we can't have a dependency on mod-lists?
   // might need to handle unauthorized exception differently than other exceptions
   private void verifyNoListsUseThisEntityType(EntityType entityType) {
-    ListsClient.ListsResponse listsResponse = listsClient.getLists(entityType.getId());
-    List<ListsClient.ListEntity> lists = listsResponse.lists();
+    ListsClient.ListsResponse listsResponse = listsClient.getLists(List.of(entityType.getId()), true);
+    List<ListsClient.ListEntity> lists = listsResponse.content();
     if (lists != null && !lists.isEmpty()) {
       throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
         lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));

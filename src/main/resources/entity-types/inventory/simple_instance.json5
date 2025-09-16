@@ -1063,7 +1063,7 @@
 //              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
 //              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
 //              valueFunction: 'lower(:value)'
-//            },
+            },
             {
               name: 'instance_note_type',
               property: 'instanceNoteType',
@@ -1322,21 +1322,23 @@
       essential: true,
       valueGetter: "(\
         SELECT\
-          array_agg(elems.value::text) FILTER (\
+          array_agg(tags.jsonb->>'label') FILTER (\
             WHERE\
-              (elems.value::text) IS NOT NULL\
+              (tags.jsonb->>'label') IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          LEFT JOIN ${tenant_id}_mod_fqm_manager.src_tags tags ON elems.value::text = tags.jsonb->>'label'\
       )",
       filterValueGetter: "(\
         SELECT\
-          array_agg(lower(elems.value::text)) FILTER (\
+          array_agg(lower(tags.jsonb->>'label')) FILTER (\
             WHERE\
-              (elems.value::text) IS NOT NULL\
+              (tags.jsonb->>'label') IS NOT NULL\
           ) AS ARRAY_AGG\
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) elems (value)\
+          LEFT JOIN ${tenant_id}_mod_fqm_manager.src_tags tags ON elems.value::text = tags.jsonb->>'label'\
       )",
       valueFunction: 'lower(:value)',
       source: {

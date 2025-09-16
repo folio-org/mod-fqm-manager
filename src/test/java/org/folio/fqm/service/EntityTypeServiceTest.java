@@ -4,6 +4,7 @@ import feign.FeignException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
+import org.folio.fqm.client.ListsClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -71,6 +72,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private FolioExecutionContext executionContext;
+
+  @Mock
+  private ListsClient listsClient;
 
   @Spy
   private ClockService clockService;
@@ -1078,6 +1082,7 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsClient.ListsResponse(List.of()));
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));

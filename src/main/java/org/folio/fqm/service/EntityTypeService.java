@@ -500,7 +500,8 @@ public class EntityTypeService {
    *                       if null, will check existence in the repository
    * @throws InvalidEntityTypeDefinitionException if any validation check fails
    */
-  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
+  @SuppressWarnings({"java:S2589", "java:S2583"})
+  // Suppress incorrect warnings about null check always returning false
   void validateEntityType(UUID entityTypeId, EntityType entityType, List<String> validTargetIds) {
     if (entityType.getId() == null || entityTypeId == null) {
       throw new InvalidEntityTypeDefinitionException("Entity type ID cannot be null", entityTypeId);
@@ -655,17 +656,28 @@ public class EntityTypeService {
   }
 
   private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
-    List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
-      .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
-      .filter(et -> et.getSources() != null && et.getSources().stream()
-        .filter(source -> source instanceof EntityTypeSourceEntityType)
-        .map(source -> (EntityTypeSourceEntityType) source)
-        .anyMatch(source -> source.getTargetId() != null && source.getTargetId().toString().equals(entityType.getId()))
-      )
-      .toList();
-    if (!dependentEntityTypes.isEmpty()) {
-      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used as a source by other entity types: " +
-        dependentEntityTypes.stream().map(et -> et.getName() + (" (id " + et.getId() + ")")).collect(Collectors.joining(", ")));
+    try {
+      List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+        .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
+        .filter(et -> et.getSources() != null && et.getSources().stream()
+          .filter(source -> source instanceof EntityTypeSourceEntityType)
+          .map(source -> (EntityTypeSourceEntityType) source)
+          .anyMatch(source -> source.getTargetId() != null && source.getTargetId().toString().equals(entityType.getId()))
+        )
+        .toList();
+      if (!dependentEntityTypes.isEmpty()) {
+        throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used as a source by other entity types: " +
+          dependentEntityTypes.stream().map(et -> et.getName() + (" (id " + et.getId() + ")")).collect(Collectors.joining(", ")));
+      }
+    } catch (FeignException.NotFound e) {
+      // If we get a 404 from mod-lists, that means there are no lists, so we can safely ignore it
+      log.debug("Received 404 from mod-lists when checking for dependent lists. Assuming no dependent lists exist.");
+    } catch (FeignException.Unauthorized e) {
+      // If we can't access mod-lists, we can't be sure there are no dependencies, so don't allow the delete
+      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type " + entityType.getName() + " (id " + entityType.getId() + ") because we cannot verify that no other lists depend on it. This user may lack sufficient permissions to access mod-lists APIs.");
+    } catch (Exception e) {
+      // If we get any other exception, we can't be sure there are no dependencies, so don't allow the delete
+      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type " + entityType.getName() + " (id " + entityType.getId() + ") because we cannot verify that no other lists depend on it. Error: " + e.getMessage());
     }
   }
 

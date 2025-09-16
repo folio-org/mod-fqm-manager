@@ -13,7 +13,7 @@ public interface ListsClient {
   @GetMapping(value = "")
   public ListsResponse getLists(@RequestParam("entityTypeIds") List<String> entityTypeIds, @RequestParam("includePrivateEntityTypes") boolean includePrivateEntityTypes);
 
-  public record ListsResponse(List<ListEntity> content, int totalRecords, int totalPages) {}
+  public record ListsResponse(List<ListEntity> content) {}
 
   public record ListEntity(String id, String name) {}
 }

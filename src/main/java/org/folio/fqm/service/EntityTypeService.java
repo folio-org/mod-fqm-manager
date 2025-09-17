@@ -500,8 +500,7 @@ public class EntityTypeService {
    *                       if null, will check existence in the repository
    * @throws InvalidEntityTypeDefinitionException if any validation check fails
    */
-  @SuppressWarnings({"java:S2589", "java:S2583"})
-  // Suppress incorrect warnings about null check always returning false
+  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
   void validateEntityType(UUID entityTypeId, EntityType entityType, List<String> validTargetIds) {
     if (entityType.getId() == null || entityTypeId == null) {
       throw new InvalidEntityTypeDefinitionException("Entity type ID cannot be null", entityTypeId);
@@ -595,7 +594,7 @@ public class EntityTypeService {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
     }
     permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
-    verifyEntityTypeHasNoDependencies(customEntityType);
+    ensureEntityTypeIsNotInUse(customEntityType);
     CustomEntityType deletedCustomEntityType = customEntityType.toBuilder()
       .deleted(true)
       .updatedAt(clockService.now())
@@ -650,12 +649,12 @@ public class EntityTypeService {
     return builder.build();
   }
 
-  private void verifyEntityTypeHasNoDependencies(EntityType entityType) {
-    verifyNoEntityTypesUseThisEntityType(entityType);
-    verifyNoListsUseThisEntityType(entityType);
+  private void ensureEntityTypeIsNotInUse(EntityType entityType) {
+    ensureNoEntityTypesUseThisEntityType(entityType);
+    ensureNoListsUseThisEntityType(entityType);
   }
 
-  private void verifyNoEntityTypesUseThisEntityType(EntityType entityType) {
+  private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
     List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
       .filter(et -> et.getSources() != null && et.getSources().stream()
@@ -671,7 +670,7 @@ public class EntityTypeService {
   }
 
 
-  private void verifyNoListsUseThisEntityType(EntityType entityType) {
+  private void ensureNoListsUseThisEntityType(EntityType entityType) {
     List<ListsClient.ListEntity> lists = null;
     try {
       ListsClient.ListsResponse listsResponse = listsClient.getLists(List.of(entityType.getId()), true);

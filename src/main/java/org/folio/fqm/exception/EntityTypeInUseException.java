@@ -6,19 +6,17 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.http.HttpStatus;
 
 public class EntityTypeInUseException extends FqmException {
-  private EntityType entityType;
-  private String exceptionMessage;
+  private final EntityType entityType;
 
   public EntityTypeInUseException(EntityType entityType, String message) {
     super(message);
     this.entityType = entityType;
-    this.exceptionMessage = message;
   }
+
 
   @Override
   public Error getError() {
     return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityType.getId()));
-
   }
 
   @Override

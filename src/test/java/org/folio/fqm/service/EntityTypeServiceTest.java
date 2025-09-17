@@ -1111,6 +1111,9 @@ class EntityTypeServiceTest {
         new EntityType().id(UUID.randomUUID().toString()).name("Non-dependent Type"),
         new EntityType().id(UUID.randomUUID().toString()).name("Another non-dependent Type").sources(List.of(
           new EntityTypeSourceEntityType()
+        )),
+        new EntityType().id(UUID.randomUUID().toString()).name("A third non-dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType().targetId(UUID.randomUUID())
         ))
       )
     );
@@ -1150,7 +1153,8 @@ class EntityTypeServiceTest {
     when(listsClient.getLists(List.of(entityTypeId.toString()), true))
       .thenReturn(new ListsResponse(List.of(dependentList)));
 
-    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    assertTrue(ex.getMessage().contains("Cannot delete custom entity type because it is used by the following lists"));
   }
 
   @Test

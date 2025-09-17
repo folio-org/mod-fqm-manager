@@ -657,15 +657,17 @@ public class EntityTypeService {
   private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
     List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
-      .filter(et -> et.getSources() != null && et.getSources().stream()
-        .filter(EntityTypeSourceEntityType.class::isInstance)
-        .map(EntityTypeSourceEntityType.class::cast)
-        .anyMatch(source -> source.getTargetId() != null && source.getTargetId().toString().equals(entityType.getId()))
-      )
+      .filter(et -> dependsOnTargetEntityType(et, entityType))
       .toList();
     if (!dependentEntityTypes.isEmpty()) {
-      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used as a source by other entity types: " +
-        dependentEntityTypes.stream().map(et -> et.getName() + (" (id " + et.getId() + ")")).collect(Collectors.joining(", ")));
+      String usedBy = dependentEntityTypes
+        .stream()
+        .map(et -> et.getName() + " (id " + et.getId() + ")")
+        .collect(Collectors.joining(", "));
+      throw new EntityTypeInUseException(
+        entityType,
+        "Cannot delete custom entity type because it is used as a source by other entity types: " + usedBy
+      );
     }
   }
 
@@ -689,6 +691,18 @@ public class EntityTypeService {
       throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
         lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));
     }
+  }
+
+  private boolean dependsOnTargetEntityType(EntityType entityType, EntityType target) {
+    return entityType.getSources() != null &&
+      entityType.getSources()
+        .stream()
+        .filter(EntityTypeSourceEntityType.class::isInstance)
+        .map(EntityTypeSourceEntityType.class::cast)
+        .anyMatch(source ->
+          source.getTargetId() != null &&
+            source.getTargetId().toString().equals(target.getId())
+        );
   }
 
   /**

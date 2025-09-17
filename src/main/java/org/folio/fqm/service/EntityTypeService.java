@@ -673,7 +673,7 @@ public class EntityTypeService {
 
 
   private void ensureNoListsUseThisEntityType(EntityType entityType) {
-    List<ListsClient.ListEntity> lists = null;
+    List<ListsClient.ListSummary> lists = null;
     try {
       ListsClient.ListsResponse listsResponse = listsClient.getLists(List.of(entityType.getId()), true);
       lists = listsResponse.content();

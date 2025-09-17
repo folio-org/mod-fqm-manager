@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.ListsClient;
-import org.folio.fqm.client.ListsClient.ListEntity;
+import org.folio.fqm.client.ListsClient.ListSummary;
 import org.folio.fqm.client.ListsClient.ListsResponse;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
@@ -1148,7 +1148,7 @@ class EntityTypeServiceTest {
       .id(entityTypeId.toString())
       .owner(ownerId);
 
-    ListEntity dependentList = new ListEntity(UUID.randomUUID().toString(), "Dependent List");
+    ListSummary dependentList = new ListSummary(UUID.randomUUID().toString(), "Dependent List");
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(listsClient.getLists(List.of(entityTypeId.toString()), true))

@@ -672,13 +672,10 @@ public class EntityTypeService {
 
 
   private void verifyNoListsUseThisEntityType(EntityType entityType) {
+    List<ListsClient.ListEntity> lists = null;
     try {
       ListsClient.ListsResponse listsResponse = listsClient.getLists(List.of(entityType.getId()), true);
-      List<ListsClient.ListEntity> lists = listsResponse.content();
-      if (lists != null && !lists.isEmpty()) {
-        throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
-          lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));
-      }
+      lists = listsResponse.content();
     } catch (FeignException.NotFound e) {
       // If we get a 404 from /lists, then mod-lists is likely not enabled, so we can assume there are no dependent lists
       log.debug("Received 404 from mod-lists when checking for dependent lists. Assuming no dependent lists exist.");
@@ -688,6 +685,10 @@ public class EntityTypeService {
     } catch (Exception e) {
       // If we get any other exception, we can't be sure there are no dependencies, so don't allow the delete
       throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type " + entityType.getName() + " (id " + entityType.getId() + ") because we cannot verify that no other lists depend on it. Error: " + e.getMessage());
+    }
+    if (lists != null && !lists.isEmpty()) {
+      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
+        lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));
     }
   }
 

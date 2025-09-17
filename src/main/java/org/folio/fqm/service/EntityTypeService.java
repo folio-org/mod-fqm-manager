@@ -659,8 +659,8 @@ public class EntityTypeService {
     List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
       .filter(et -> et.getSources() != null && et.getSources().stream()
-        .filter(source -> source instanceof EntityTypeSourceEntityType)
-        .map(source -> (EntityTypeSourceEntityType) source)
+        .filter(EntityTypeSourceEntityType.class::isInstance)
+        .map(EntityTypeSourceEntityType.class::cast)
         .anyMatch(source -> source.getTargetId() != null && source.getTargetId().toString().equals(entityType.getId()))
       )
       .toList();

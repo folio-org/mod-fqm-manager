@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -1155,6 +1156,12 @@ class EntityTypeServiceTest {
 
     EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
     assertTrue(ex.getMessage().contains("Cannot delete custom entity type because it is used by the following lists"));
+    var error = ex.getError();
+    assertEquals("id", error.getParameters().get(0).getKey());
+    assertEquals(entityTypeId.toString(), error.getParameters().get(0).getValue());
+
+    // check getHttpStatus()
+    assertEquals(HttpStatus.CONFLICT, ex.getHttpStatus());
   }
 
   @Test

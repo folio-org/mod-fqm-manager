@@ -1085,7 +1085,36 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsClient.ListsResponse(List.of()));
+    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsResponse(List.of()));
+
+    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldAllowDeletionIfOnlyDependentEntityTypesAreDeleted() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(repo.getEntityTypeDefinitions(Set.of(), tenantId)).thenReturn(
+      Stream.of(
+        new EntityType().id(UUID.randomUUID().toString()).name("Dependent Type").deleted(true).sources(List.of(
+          new EntityTypeSourceEntityType().targetId(entityTypeId)
+        )),
+        new EntityType().id(UUID.randomUUID().toString()).name("Non-dependent Type"),
+        new EntityType().id(UUID.randomUUID().toString()).name("Another non-dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType()
+        ))
+      )
+    );
+    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsResponse(List.of()));
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));

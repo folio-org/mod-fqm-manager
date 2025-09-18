@@ -4,9 +4,6 @@ import feign.FeignException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
-import org.folio.fqm.client.ListsClient;
-import org.folio.fqm.client.ListsClient.ListSummary;
-import org.folio.fqm.client.ListsClient.ListsResponse;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
@@ -76,9 +73,6 @@ class EntityTypeServiceTest {
 
   @Mock
   private FolioExecutionContext executionContext;
-
-  @Mock
-  private ListsClient listsClient;
 
   @Spy
   private ClockService clockService;
@@ -1086,7 +1080,6 @@ class EntityTypeServiceTest {
       .owner(ownerId);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsResponse(List.of()));
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
@@ -1118,50 +1111,9 @@ class EntityTypeServiceTest {
         ))
       )
     );
-    when(listsClient.getLists(List.of(entityTypeId.toString()), true)).thenReturn(new ListsResponse(List.of()));
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
-  }
-
-  @Test
-  void deleteCustomEntityType_shouldThrowExceptionIfUserLacksListPermissions() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-
-    CustomEntityType existingEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId);
-
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    doThrow(FeignException.Unauthorized.class).when(listsClient).getLists(List.of(entityTypeId.toString()), true);
-
-    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-  }
-
-  @Test
-  void deleteCustomEntityType_shouldThrowExceptionIfListsDependOnEntityType() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-
-    CustomEntityType existingEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId);
-
-    ListSummary dependentList = new ListSummary(UUID.randomUUID().toString(), "Dependent List");
-
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    when(listsClient.getLists(List.of(entityTypeId.toString()), true))
-      .thenReturn(new ListsResponse(List.of(dependentList)));
-
-    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    assertTrue(ex.getMessage().contains("Cannot delete custom entity type because it is used by the following lists"));
-    var error = ex.getError();
-    assertEquals("id", error.getParameters().get(0).getKey());
-    assertEquals(entityTypeId.toString(), error.getParameters().get(0).getValue());
-
-    // check getHttpStatus()
-    assertEquals(HttpStatus.CONFLICT, ex.getHttpStatus());
   }
 
   @Test
@@ -1184,22 +1136,6 @@ class EntityTypeServiceTest {
       )
     );
     assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-  }
-
-  @Test
-  void deleteCustomEntityType_shouldAllowDeletionIfModListsIsNotEnabled() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID ownerId = UUID.randomUUID();
-
-    CustomEntityType existingEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(ownerId);
-
-    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
-    doThrow(FeignException.NotFound.class).when(listsClient).getLists(List.of(entityTypeId.toString()), true);
-
-    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
   }
 
   @Test

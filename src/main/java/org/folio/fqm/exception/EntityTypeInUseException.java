@@ -5,20 +5,18 @@ import org.folio.fqm.domain.dto.Parameter;
 import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.http.HttpStatus;
 
-import java.util.UUID;
-
 public class EntityTypeInUseException extends FqmException {
-  private final UUID entityTypeId;
+  private final String entityTypeId;
 
   public EntityTypeInUseException(EntityType entityType, String message) {
     super(message);
-    this.entityTypeId = UUID.fromString(entityType.getId());
+    this.entityTypeId = entityType.getId();
   }
 
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityTypeId.toString()));
+    return new Error().message(getMessage()).addParametersItem(new Parameter().key("entityTypeId").value(entityTypeId));
   }
 
   @Override

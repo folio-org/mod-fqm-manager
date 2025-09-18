@@ -17,7 +17,6 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
-import org.folio.fqm.client.ListsClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
@@ -81,7 +80,6 @@ public class EntityTypeService {
   private final FolioExecutionContext executionContext;
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
-  private final ListsClient listsClient;
 
   /**
    * Returns the list of all entity types.
@@ -651,7 +649,6 @@ public class EntityTypeService {
 
   private void ensureEntityTypeIsNotInUse(EntityType entityType) {
     ensureNoEntityTypesUseThisEntityType(entityType);
-    ensureNoListsUseThisEntityType(entityType);
   }
 
   private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
@@ -662,34 +659,12 @@ public class EntityTypeService {
     if (!dependentEntityTypes.isEmpty()) {
       String usedBy = dependentEntityTypes
         .stream()
-        .map(et -> et.getName() + " (id " + et.getId() + ")")
+        .map(et -> String.format("%s (id %s)", et.getName(), et.getId()))
         .collect(Collectors.joining(", "));
       throw new EntityTypeInUseException(
         entityType,
         "Cannot delete custom entity type because it is used as a source by other entity types: " + usedBy
       );
-    }
-  }
-
-
-  private void ensureNoListsUseThisEntityType(EntityType entityType) {
-    List<ListsClient.ListSummary> lists = null;
-    try {
-      ListsClient.ListsResponse listsResponse = listsClient.getLists(List.of(entityType.getId()), true);
-      lists = listsResponse.content();
-    } catch (FeignException.NotFound e) {
-      // If we get a 404 from /lists, then mod-lists is likely not enabled, so we can assume there are no dependent lists
-      log.debug("Received 404 from mod-lists when checking for dependent lists. Assuming no dependent lists exist.");
-    } catch (FeignException.Unauthorized e) {
-      // If we can't access mod-lists, we can't be sure there are no dependencies, so don't allow the delete
-      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type " + entityType.getName() + " (id " + entityType.getId() + ") because we cannot verify that no other lists depend on it. This user may lack sufficient permissions to access mod-lists APIs.");
-    } catch (Exception e) {
-      // If we get any other exception, we can't be sure there are no dependencies, so don't allow the delete
-      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type " + entityType.getName() + " (id " + entityType.getId() + ") because we cannot verify that no other lists depend on it. Error: " + e.getMessage());
-    }
-    if (lists != null && !lists.isEmpty()) {
-      throw new EntityTypeInUseException(entityType, "Cannot delete custom entity type because it is used by the following lists: " +
-        lists.stream().map(list -> list.name() + (" (id " + list.id() + ")")).collect(Collectors.joining(", ")));
     }
   }
 

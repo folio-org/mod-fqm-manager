@@ -1135,7 +1135,15 @@ class EntityTypeServiceTest {
         ))
       )
     );
-    assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+
+    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    assertTrue(ex.getMessage().contains("Cannot delete custom entity type because it is used as a source by other entity types"));
+    var error = ex.getError();
+    assertEquals("entityTypeId", error.getParameters().get(0).getKey());
+    assertEquals(entityTypeId.toString(), error.getParameters().get(0).getValue());
+
+    assertEquals(HttpStatus.CONFLICT, ex.getHttpStatus());
+
   }
 
   @Test

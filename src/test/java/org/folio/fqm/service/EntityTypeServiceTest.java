@@ -6,6 +6,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -27,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -1081,6 +1083,67 @@ class EntityTypeServiceTest {
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
     verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldAllowDeletionIfOnlyDependentEntityTypesAreDeleted() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(repo.getEntityTypeDefinitions(Set.of(), tenantId)).thenReturn(
+      Stream.of(
+        new EntityType().id(UUID.randomUUID().toString()).name("Dependent Type").deleted(true).sources(List.of(
+          new EntityTypeSourceEntityType().targetId(entityTypeId)
+        )),
+        new EntityType().id(UUID.randomUUID().toString()).name("Non-dependent Type"),
+        new EntityType().id(UUID.randomUUID().toString()).name("Another non-dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType()
+        )),
+        new EntityType().id(UUID.randomUUID().toString()).name("A third non-dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType().targetId(UUID.randomUUID())
+        ))
+      )
+    );
+
+    assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfOtherEntityTypesDependOnEntityType() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+
+    CustomEntityType existingEntityType = new CustomEntityType()
+      .id(entityTypeId.toString())
+      .owner(ownerId);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
+    when(repo.getEntityTypeDefinitions(Set.of(), tenantId)).thenReturn(
+      Stream.of(
+        new EntityType().id(UUID.randomUUID().toString()).name("Dependent Type").sources(List.of(
+          new EntityTypeSourceEntityType().targetId(entityTypeId)
+        ))
+      )
+    );
+
+    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+    assertTrue(ex.getMessage().contains("Cannot delete custom entity type because it is used as a source by other entity types"));
+    var error = ex.getError();
+    assertEquals("entityTypeId", error.getParameters().get(0).getKey());
+    assertEquals(entityTypeId.toString(), error.getParameters().get(0).getValue());
+
+    assertEquals(HttpStatus.CONFLICT, ex.getHttpStatus());
+
   }
 
   @Test

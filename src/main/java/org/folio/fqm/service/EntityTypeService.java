@@ -19,6 +19,7 @@ import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
+import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -591,6 +592,7 @@ public class EntityTypeService {
       throw new EntityTypeNotFoundException(entityTypeId, "Entity type " + entityTypeId + " is not a custom entity type, so it cannot be deleted");
     }
     permissionsService.verifyUserCanAccessCustomEntityType(customEntityType);
+    ensureEntityTypeIsNotInUse(customEntityType);
     CustomEntityType deletedCustomEntityType = customEntityType.toBuilder()
       .deleted(true)
       .updatedAt(clockService.now())
@@ -643,6 +645,39 @@ public class EntityTypeService {
     }
 
     return builder.build();
+  }
+
+  private void ensureEntityTypeIsNotInUse(EntityType entityType) {
+    ensureNoEntityTypesUseThisEntityType(entityType);
+  }
+
+  private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
+    List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+      .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
+      .filter(et -> dependsOnTargetEntityType(et, entityType))
+      .toList();
+    if (!dependentEntityTypes.isEmpty()) {
+      String usedBy = dependentEntityTypes
+        .stream()
+        .map(et -> String.format("%s (id %s)", et.getName(), et.getId()))
+        .collect(Collectors.joining(", "));
+      throw new EntityTypeInUseException(
+        entityType,
+        "Cannot delete custom entity type because it is used as a source by other entity types: " + usedBy
+      );
+    }
+  }
+
+  private boolean dependsOnTargetEntityType(EntityType entityType, EntityType target) {
+    return entityType.getSources() != null &&
+      entityType.getSources()
+        .stream()
+        .filter(EntityTypeSourceEntityType.class::isInstance)
+        .map(EntityTypeSourceEntityType.class::cast)
+        .anyMatch(source ->
+          source.getTargetId() != null &&
+            source.getTargetId().toString().equals(target.getId())
+        );
   }
 
   /**

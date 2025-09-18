@@ -431,17 +431,6 @@
           dataType: "objectType",
           properties: [
             {
-              name: "note",
-              property: "note",
-              dataType: {
-                dataType: "stringType"
-              },
-              queryable: true,
-              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
-              valueFunction: "lower(:value)"
-            },
-            {
               name: "note_type",
               property: "noteType",
               dataType: {
@@ -450,6 +439,17 @@
               queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'noteType') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'noteType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
+              valueFunction: "lower(:value)"
+            },
+            {
+              name: "note",
+              property: "note",
+              dataType: {
+                dataType: "stringType"
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check in')",
               valueFunction: "lower(:value)"
             },
             {
@@ -491,17 +491,6 @@
           dataType: "objectType",
           properties: [
             {
-              name: "note",
-              property: "note",
-              dataType: {
-                dataType: "stringType"
-              },
-              queryable: true,
-              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
-              valueFunction: "lower(:value)"
-            },
-            {
               name: "note_type",
               property: "noteType",
               dataType: {
@@ -510,6 +499,17 @@
               queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'noteType') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'noteType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
+              valueFunction: "lower(:value)"
+            },
+            {
+              name: "note",
+              property: "note",
+              dataType: {
+                dataType: "stringType"
+              },
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'circulationNotes') AS elems WHERE elems.value->>'noteType' = 'Check out')",
               valueFunction: "lower(:value)"
             },
             {

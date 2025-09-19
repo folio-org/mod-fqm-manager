@@ -863,7 +863,7 @@
     {
       name: 'order',
       dataType: {
-        dataType: 'numberType',
+        dataType: 'integerType',
       },
       isIdColumn: false,
       queryable: true,

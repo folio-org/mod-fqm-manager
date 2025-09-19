@@ -1,5 +1,10 @@
 # 4.0.x - Sunflower
 
+# 4.0.14
+- [MODFQMMGR-954] Change how unique record is identified for SRS records (Sunflower backport)
+
+[MODFQMMGR-954]: https://folio-org.atlassian.net/browse/MODFQMMGR-954
+
 # 4.0.13
 - [MODFQMMGR-924] Join SRS records on id instead of matched_id
 

@@ -75,7 +75,7 @@
       name: 'created_date',
       sourceAlias: 'service_point',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -86,7 +86,7 @@
       name: 'updated_date',
       sourceAlias: 'service_point',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

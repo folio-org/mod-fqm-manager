@@ -83,7 +83,7 @@
       name: 'created_at',
       sourceAlias: 'inst',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -124,7 +124,7 @@
       name: 'updated_at',
       sourceAlias: 'inst',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -880,8 +880,7 @@
       valueGetter: ":sourceAlias.jsonb->'dates'->>'dateTypeId'",
       joinsTo: [
         {
-          targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
-          // simple_instance_date_type
+          targetId: '2d4bd468-720e-42b2-af41-8f4a9d7cb335', // simple_instance_date_type
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -1176,8 +1175,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb->>'catalogedDate')::timestamp",
-      valueFunction: '(:value)::timestamp'
+      valueGetter: ":sourceAlias.jsonb->>'catalogedDate'",
     },
     {
       name: 'previously_held',
@@ -1315,7 +1313,7 @@
     //      name: 'status_updated_date',
     //      sourceAlias: 'inst',
     //      dataType: {
-    //        dataType: 'dateType',
+    //        dataType: 'dateTimeType',
     //      },
     //      isIdColumn: false,
     //      queryable: true,

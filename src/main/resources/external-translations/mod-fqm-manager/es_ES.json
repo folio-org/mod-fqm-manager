@@ -254,7 +254,7 @@
   "entityType.mod_patron_blocks__user_summary.open_fees_fines.loan_id._qualified": "Open fees/fines loan UUID",
   "entityType.mod_patron_blocks__user_summary.open_fees_fines.fee_fine_type_id": "Fee fine type UUID",
   "entityType.mod_patron_blocks__user_summary.open_fees_fines.fee_fine_type_id._qualified": "Open fees/fines fee fine type UUID",
-  "entityType.mod_patron_blocks__user_summary.open_fees_fines.fee_fine_id": "Fee fine UUID",
+  "entityType.mod_patron_blocks__user_summary.open_fees_fines.fee_fine_id": "Tarifa/multa",
   "entityType.mod_patron_blocks__user_summary.open_fees_fines.fee_fine_id._qualified": "Open fees/fines fee fine UUID",
   "entityType.mod_patron_blocks__user_summary.jsonb": "JSONB"
 }

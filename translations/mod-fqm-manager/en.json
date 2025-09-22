@@ -42,7 +42,7 @@
   "entityType.composite_item_details": "Items",
   "entityType.composite_item_details.effective_call_number": "Effective call number",
   "entityType.composite_item_details.effective_location": "Item effective location",
-  "entityType.composite_item_details.holdings": "Holding",
+  "entityType.composite_item_details.holdings": "Holdings",
   "entityType.composite_item_details.instances": "Instance",
   "entityType.composite_item_details.instance_status": "Instance status",
   "entityType.composite_item_details.item_level_call_number": "Item call number",

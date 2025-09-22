@@ -632,7 +632,7 @@
     "entityType.composite_item_details.permanent_location": "Item permanent location",
     "entityType.composite_item_details.mtypes": "Material type",
     "entityType.composite_item_details.temporary_location": "Item temporary location",
-    "entityType.composite_item_details.holdings": "Holding",
+    "entityType.composite_item_details.holdings": "Holdings",
     "entityType.composite_item_details.instances": "Instance",
     "entityType.simple_instance.statistical_code_names": "Statistical code names",
     "entityType.simple_organization.acq_unit_names": "Acquisition unit names",

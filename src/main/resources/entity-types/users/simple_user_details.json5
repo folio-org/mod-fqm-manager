@@ -475,6 +475,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'type'",
       values: [
         {

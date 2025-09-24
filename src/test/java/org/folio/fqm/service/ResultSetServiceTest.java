@@ -16,7 +16,6 @@ import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.DateTimeType;
-import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
@@ -36,9 +35,9 @@ class ResultSetServiceTest {
     .columns(
       List.of(
         new EntityTypeColumn().name("id").isIdColumn(true),
-        new EntityTypeColumn().name("dateField").dataType(new DateTimeType()),
+        new EntityTypeColumn().name("dateTimeField").dataType(new DateTimeType()),
         new EntityTypeColumn().name("timestampField").dataType(new DateTimeType()),
-        new EntityTypeColumn().name("offsetDateField").dataType(new DateTimeType())
+        new EntityTypeColumn().name("offsetdateTimeField").dataType(new DateTimeType())
       )
     )
     .sources(List.of(
@@ -139,27 +138,27 @@ class ResultSetServiceTest {
 
   @ParameterizedTest(name = "should localize dates {1} to {4} for timezone {0}")
   @MethodSource("dateLocalizationTestCases")
-  void testDateLocalization(ZoneId timezone, String dateField, Timestamp timestampField, String offsetDateField, String expected) {
+  void testDateLocalization(ZoneId timezone, String dateTimeField, Timestamp timestampField, String offsetdateTimeField, String expected) {
     UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
     UUID contentId = UUID.fromString("900111ca-f498-5e8e-b12d-a90d275b5080");
 
     List<Map<String, Object>> repositoryResponse = List.of(
       Map.of(
         "id", contentId,
-        "dateField", dateField,
+        "dateTimeField", dateTimeField,
         "timestampField", timestampField,
-        "offsetDateField", offsetDateField
+        "offsetdateTimeField", offsetdateTimeField
       )
     );
     List<Map<String, Object>> expectedResult = List.of(
       Map.of(
         "id", contentId,
-        "dateField", expected,
+        "dateTimeField", expected,
         "timestampField", expected,
-        "offsetDateField", expected
+        "offsetdateTimeField", expected
       )
     );
-    List<String> fields = List.of("id", "dateField", "timestampField", "offsetDateField");
+    List<String> fields = List.of("id", "dateTimeField", "timestampField", "offsetdateTimeField");
     List<String> tenantIds = List.of("tenant_01");
     List<List<String>> listIds = List.of(List.of(contentId.toString()));
 
@@ -190,18 +189,18 @@ class ResultSetServiceTest {
     List<Map<String, Object>> repositoryResponse = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "invalid date", // verify strings are attempted to be parsed and handled gracefully
-        "offsetDateField", extraordinarilyInvalidDate // verify non-strings are handled gracefully
+        "dateTimeField", "invalid date", // verify strings are attempted to be parsed and handled gracefully
+        "offsetdateTimeField", extraordinarilyInvalidDate // verify non-strings are handled gracefully
       )
     );
     List<Map<String, Object>> expectedResult = List.of(
       Map.of(
         "id", contentId,
-        "dateField", "invalid date",
-        "offsetDateField", extraordinarilyInvalidDate
+        "dateTimeField", "invalid date",
+        "offsetdateTimeField", extraordinarilyInvalidDate
       )
     );
-    List<String> fields = List.of("id", "dateField");
+    List<String> fields = List.of("id", "dateTimeField");
     List<String> tenantIds = List.of("tenant_01");
     List<List<String>> listIds = List.of(List.of(contentId.toString()));
 

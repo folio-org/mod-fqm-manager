@@ -15,6 +15,7 @@ import java.util.*;
 import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
+import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -35,9 +36,9 @@ class ResultSetServiceTest {
     .columns(
       List.of(
         new EntityTypeColumn().name("id").isIdColumn(true),
-        new EntityTypeColumn().name("dateField").dataType(new DateType()),
-        new EntityTypeColumn().name("timestampField").dataType(new DateType()),
-        new EntityTypeColumn().name("offsetDateField").dataType(new DateType())
+        new EntityTypeColumn().name("dateField").dataType(new DateTimeType()),
+        new EntityTypeColumn().name("timestampField").dataType(new DateTimeType()),
+        new EntityTypeColumn().name("offsetDateField").dataType(new DateTimeType())
       )
     )
     .sources(List.of(

@@ -134,6 +134,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->'personal'->>'email'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent((:sourceAlias.jsonb -> 'personal'::text) ->> 'email'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',

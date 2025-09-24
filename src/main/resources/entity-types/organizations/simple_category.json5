@@ -35,7 +35,7 @@
       name: 'created_date',
       sourceAlias: 'categories',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -45,7 +45,7 @@
       name: 'updated_date',
       sourceAlias: 'categories',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

@@ -71,7 +71,7 @@
       name: 'created_date',
       sourceAlias: 'note_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -81,7 +81,7 @@
       name: 'updated_date',
       sourceAlias: 'note_type',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

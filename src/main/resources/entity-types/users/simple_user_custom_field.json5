@@ -102,7 +102,7 @@
       name: 'created_date',
       sourceAlias: 'custom_fields',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,
@@ -113,7 +113,7 @@
       name: 'updated_date',
       sourceAlias: 'custom_fields',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       isIdColumn: false,
       queryable: true,

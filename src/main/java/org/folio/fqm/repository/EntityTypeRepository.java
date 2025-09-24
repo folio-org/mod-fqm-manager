@@ -50,7 +50,6 @@ public class EntityTypeRepository {
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
   public static final String STRING_EXTRACTOR = "%s ->> '%s'";
-  public static final String DATE_EXTRACTOR = "(%s ->> '%s')::date";
   public static final String JSONB_ARRAY_EXTRACTOR = "%s -> '%s'";
   public static final String CUSTOM_FIELD_PREPENDER = "_custom_field_";
   public static final String CUSTOM_FIELD_NAME = "jsonb ->> 'name'";
@@ -389,8 +388,7 @@ public class EntityTypeRepository {
       .name(CUSTOM_FIELD_PREPENDER + id)
       .dataType(new DateType().dataType("dateType"))
       .visibleByDefault(Boolean.TRUE.equals(customFieldColumn.getVisibleByDefault()))
-      .valueGetter(String.format(DATE_EXTRACTOR, sourceViewExtractor, refId))
-      .valueFunction("(:value)::date")
+      .valueGetter(String.format(STRING_EXTRACTOR, sourceViewExtractor, refId))
       .labelAlias(name)
       .queryable(Boolean.TRUE.equals(customFieldColumn.getQueryable()))
       .essential(Boolean.TRUE.equals(customFieldColumn.getEssential()))

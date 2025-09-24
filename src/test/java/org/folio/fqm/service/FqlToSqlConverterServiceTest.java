@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -52,8 +53,9 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),
           new EntityTypeColumn().name("field2").dataType(new EntityDataType().dataType("booleanType")),
           new EntityTypeColumn().name("field3").dataType(new EntityDataType().dataType("stringType")),
-          new EntityTypeColumn().name("field4").dataType(new DateType().dataType("dateType")),
+          new EntityTypeColumn().name("field4").dataType(new DateTimeType().dataType("dateTimeType")),
           new EntityTypeColumn().name("field5").dataType(new EntityDataType().dataType("integerType")),
+          new EntityTypeColumn().name("field6").dataType(new DateType().dataType("dateType")),
           new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
@@ -113,18 +115,24 @@ class FqlToSqlConverterServiceTest {
         field("field2").equal(true)
       ),
       Arguments.of(
-        "equals date",
+        "equals date-time (no time component)",
         """
           {"field4": {"$eq": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-02T00:00:00.000")
           .and(field("field4").lessThan("2023-06-03T00:00:00.000"))
       ),
       Arguments.of(
-        "equals date and time",
+        "equals date-time (with time component)",
         """
           {"field4": {"$eq": "2024-09-13T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2024-09-13T04:00:00.000")
           .and(field("field4").lessThan("2024-09-14T04:00:00.000"))
+      ),
+      Arguments.of(
+        "equals date",
+        """
+          {"field6": {"$eq": "2023-06-02"}}""",
+        field("field6").eq("2023-06-02")
       ),
       Arguments.of(
         "equals ranged UUID",
@@ -255,7 +263,7 @@ class FqlToSqlConverterServiceTest {
         field("field2").notEqual(true).or(field("field2").isNull())
       ),
       Arguments.of(
-        "not equals date",
+        "not equals date-time (no time component)",
         """
           {"field4": {"$ne": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
@@ -263,14 +271,19 @@ class FqlToSqlConverterServiceTest {
           .or(field("field4").isNull())
       ),
       Arguments.of(
-        "not equals date and time",
+        "not equals date-time (with time component)",
         """
           {"field4": {"$ne": "2023-06-02T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
           .or(field("field4").lessThan("2023-06-02T04:00:00.000"))
           .or(field("field4").isNull())
       ),
-
+      Arguments.of(
+        "not equals date",
+        """
+          {"field6": {"$ne": "2023-06-02"}}""",
+        field("field6").ne("2023-06-02").or(field("field6").isNull())
+      ),
       Arguments.of(
         "not equals ranged UUID",
         """
@@ -362,18 +375,23 @@ class FqlToSqlConverterServiceTest {
         field("field1").greaterThan(10)
       ),
       Arguments.of(
-        "greater than date",
+        "greater than date-time (no time component)",
         """
           {"field4": {"$gt": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-03T00:00:00.000")
       ),
       Arguments.of(
-        "greater than date and time",
+        "greater than date-time (with time component)",
         """
           {"field4": {"$gt": "2023-06-02T04:00:00.000"}}""",
         field("field4").greaterOrEqual("2023-06-03T04:00:00.000")
       ),
-
+      Arguments.of(
+        "greater than date",
+        """
+          {"field6": {"$gt": "2023-06-02"}}""",
+        field("field6").greaterThan("2023-06-02")
+      ),
       Arguments.of(
         "greater than or equal to string",
         """
@@ -387,18 +405,23 @@ class FqlToSqlConverterServiceTest {
         field("field1").greaterOrEqual(10)
       ),
       Arguments.of(
-        "greater than or equal to date",
+        "greater than or equal to date-time (no time component)",
         """
           {"field4": {"$gte": "2023-06-02"}}""",
         field("field4").greaterOrEqual("2023-06-02T00:00:00.000")
       ),
       Arguments.of(
-        "greater than or equal to date and time",
+        "greater than or equal to date-time (with time component)",
         """
           {"field4": {"$gte": "2023-06-02T05:30:00.000"}}""",
         field("field4").greaterOrEqual("2023-06-02T05:30:00.000")
       ),
-
+      Arguments.of(
+        "greater than or equal to date",
+        """
+          {"field6": {"$gte": "2023-06-02"}}""",
+        field("field6").greaterOrEqual("2023-06-02")
+      ),
       Arguments.of(
         "less than string",
         """
@@ -412,18 +435,23 @@ class FqlToSqlConverterServiceTest {
         field("field1").lessThan(10)
       ),
       Arguments.of(
-        "less than date",
+        "less than date-time (no time component)",
         """
           {"field4": {"$lt": "2023-06-02"}}""",
         field("field4").lessThan("2023-06-02T00:00:00.000")
       ),
       Arguments.of(
-        "less than date and time",
+        "less than date-time (with time component)",
         """
           {"field4": {"$lt": "2023-06-02T06:00:00.000"}}""",
         field("field4").lessThan("2023-06-02T06:00:00.000")
       ),
-
+      Arguments.of(
+        "less than date",
+        """
+          {"field6": {"$lt": "2023-06-02"}}""",
+        field("field6").lessThan("2023-06-02")
+      ),
       Arguments.of(
         "less than or equal to string",
         """
@@ -437,18 +465,23 @@ class FqlToSqlConverterServiceTest {
         field("field1").lessOrEqual(10)
       ),
       Arguments.of(
-        "less than or equal to date",
+        "less than or equal to date-time (no time component)",
         """
           {"field4": {"$lte": "2023-06-02"}}""",
         field("field4").lessThan("2023-06-03T00:00:00.000")
       ),
       Arguments.of(
-        "less than or equal to date and time",
+        "less than or equal to date-time (with time component)",
         """
           {"field4": {"$lte": "2023-06-02T07:00:00.000"}}""",
         field("field4").lessThan("2023-06-03T07:00:00.000")
       ),
-
+      Arguments.of(
+        "less than or equal to date",
+        """
+          {"field6": {"$lte": "2023-06-02"}}""",
+        field("field6").lessOrEqual("2023-06-02")
+      ),
       Arguments.of(
         "regex",
         """
@@ -1065,7 +1098,7 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
-  void shouldThrowExceptionForInvalidDateValue() {
+  void shouldThrowExceptionForInvalidDateTimeValue() {
     String invalidDateFql = """
       {"field4": {"$eq": "03-09-2024"}}""";
     assertThrows(

@@ -46,7 +46,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'budget',
       queryable: true,
@@ -57,7 +57,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'budget',
       queryable: true,

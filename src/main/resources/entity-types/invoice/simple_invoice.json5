@@ -86,7 +86,7 @@
     {
       name: 'approval_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -279,7 +279,7 @@
     {
       name: 'invoice_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,
@@ -309,7 +309,7 @@
     {
       name: 'payment_due',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,
@@ -319,7 +319,7 @@
     {
       name: 'payment_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,
@@ -628,7 +628,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -638,7 +638,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

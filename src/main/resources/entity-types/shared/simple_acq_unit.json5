@@ -155,7 +155,7 @@
       name: 'created_date',
       sourceAlias: 'acquisitions_unit',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -165,7 +165,7 @@
       name: 'updated_date',
       sourceAlias: 'acquisitions_unit',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

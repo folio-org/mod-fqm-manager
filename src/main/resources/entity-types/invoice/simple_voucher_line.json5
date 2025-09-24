@@ -31,7 +31,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher_lines',
       queryable: true,
@@ -42,7 +42,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'voucher_lines',
       queryable: true,

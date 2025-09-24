@@ -91,7 +91,7 @@
     {
       name: 'created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'expense_class',
       queryable: true,
@@ -102,7 +102,7 @@
     {
       name: 'updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       sourceAlias: 'expense_class',
       queryable: true,

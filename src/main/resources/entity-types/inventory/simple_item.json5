@@ -360,6 +360,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'formerIds') AS elems\
       )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'copy_number',

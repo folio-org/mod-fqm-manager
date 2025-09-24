@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
-import org.folio.querytool.domain.dto.DateType;
+import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
@@ -90,11 +90,11 @@ public class EntityTypeUtils {
     return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
   }
 
-  public static List<String> getDateFields(EntityType entityType) {
+  public static List<String> getDateTimeFields(EntityType entityType) {
     return entityType
       .getColumns()
       .stream()
-      .filter(col -> col.getDataType() instanceof DateType)
+      .filter(col -> col.getDataType() instanceof DateTimeType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .toList();
   }

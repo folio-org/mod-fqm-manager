@@ -1,7 +1,7 @@
 package org.folio.fqm.utils;
 
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
-import org.folio.querytool.domain.dto.DateType;
+import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
@@ -92,14 +92,14 @@ class EntityTypeUtilsTest {
   }
 
   @Test
-  void shouldGetDateFields() {
+  void shouldGetDateTimeFields() {
     EntityType entityType = new EntityType()
       .columns(List.of(
-        new EntityTypeColumn().name("dateField").dataType(new DateType()),
+        new EntityTypeColumn().name("dateTimeField").dataType(new DateTimeType()),
         new EntityTypeColumn().name("notDateField").dataType(new StringType())
       ));
-    List<String> expectedDateFields = List.of("dateField");
-    List<String> actualDateFields = EntityTypeUtils.getDateFields(entityType);
+    List<String> expectedDateFields = List.of("dateTimeField");
+    List<String> actualDateFields = EntityTypeUtils.getDateTimeFields(entityType);
     assertEquals(expectedDateFields, actualDateFields);
   }
 

@@ -62,7 +62,7 @@ public class ResultSetService {
           Function.identity())
       );
 
-    List<String> dateFields = localize ? EntityTypeUtils.getDateFields(entityType) : List.of();
+    List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
 
     return contentIds

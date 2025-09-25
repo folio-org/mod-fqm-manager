@@ -525,7 +525,8 @@
                 dataType: 'stringType'
               },
               queryable: true,
-              valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeText') FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems WHERE elems.value->>'contributorTypeText' IS NOT NULL)",
+
+              valueGetter: "(SELECT array_agg(elems.value->>'contributorTypeText') FILTER (WHERE elems.value->>'contributorTypeText' IS NOT NULL) FROM jsonb_array_elements(:sourceAlias.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)'
             },
             //            {

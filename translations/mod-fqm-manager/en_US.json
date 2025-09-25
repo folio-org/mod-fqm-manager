@@ -1184,7 +1184,7 @@
     "entityType.simple_item.check_in_notes.last_name": "Last name",
     "entityType.simple_item.check_in_notes.last_name._qualified": "Source last name",
     "entityType.simple_item.check_in_notes.note": "Note",
-    "entityType.simple_item.check_in_notes.note._qualified": "Item - Check in notes - Note",
+    "entityType.simple_item.check_in_notes.note._qualified": "Item — Check in notes — Note",
     "entityType.simple_item.check_in_notes.note_type": "Note type",
     "entityType.simple_item.check_in_notes.note_type._qualified": "Item — Check in notes — Note type",
     "entityType.simple_item.check_in_notes.personal": "Personal",

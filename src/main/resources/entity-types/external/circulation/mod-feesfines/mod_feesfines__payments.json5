@@ -52,7 +52,7 @@
     {
       name: 'metadata_created_date',
       dataType: {
-        dataType: 'dateTimeType',
+        dataType: 'dateType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -71,7 +71,7 @@
     {
       name: 'metadata_updated_date',
       dataType: {
-        dataType: 'dateTimeType',
+        dataType: 'dateType',
       },
       queryable: true,
       visibleByDefault: false,

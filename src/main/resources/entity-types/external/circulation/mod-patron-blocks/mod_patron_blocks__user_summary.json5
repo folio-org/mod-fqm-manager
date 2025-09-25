@@ -92,7 +92,7 @@
               valueFunction: 'lower(:value)',
               property: 'dueDate',
               dataType: {
-                dataType: 'dateTimeType',
+                dataType: 'dateType',
               },
             },
             {

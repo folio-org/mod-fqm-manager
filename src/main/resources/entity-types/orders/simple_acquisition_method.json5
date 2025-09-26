@@ -1,0 +1,53 @@
+{
+  id: '37288235-e59c-4db7-a3cc-eb31effd7828',
+  name: 'simple_acquisition_method',
+  private: true,
+  requiredPermissions: [
+    'orders-storage.acquisition-methods.collection.get'
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'acquisition_method',
+      target: 'src_orders_acquisition_method',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'acquisition_method',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'acquisition_method',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'value'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb->>'value'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
+      source: {
+        entityTypeId: '37288235-e59c-4db7-a3cc-eb31effd7828',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'orders-storage/acquisition-methods',
+        valueJsonPath: '$.acquisitionMethods.*.value',
+        labelJsonPath: '$.acquisitionMethods.*.value'
+      }
+    },
+  ],
+}

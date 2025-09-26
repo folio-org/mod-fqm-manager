@@ -172,4 +172,15 @@
       SELECT * FROM ${tenant_id}_mod_inventory_storage.alternative_title_type
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_orders_acquisition_method" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="acquisition_method" schemaName="${tenant_id}_mod_orders_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_orders_acquisition_method">
+      SELECT * FROM ${tenant_id}_mod_orders_storage.acquisition_method
+    </createView>
+  </changeSet>
 </databaseChangeLog>

@@ -7,9 +7,24 @@
       alias: 'pol',
       type: 'db',
       target: 'src_purchase_order_line',
+      order: 10
     },
+    {
+      alias: 'acquisition_method',
+      type: 'db',
+      target: 'src_orders_acquisition_method',
+      order: 20,
+      join: {
+        type: 'left join',
+        joinTo: 'pol',
+        condition: ":this.id::text = :that.jsonb->>'acquisitionMethod'",
+      }
+    }
   ],
-  requiredPermissions: ['orders.po-lines.item.get'],
+  requiredPermissions: [
+    'orders.po-lines.item.get',
+    'orders-storage.acquisition-methods.collection.get',
+  ],
   columns: [
     {
       name: 'id',
@@ -136,7 +151,29 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
+      hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'acquisitionMethod'",
+      source: {
+        entityTypeId: '37288235-e59c-4db7-a3cc-eb31effd7828',
+        columnName: 'id',
+      },
+    },
+    {
+      name: 'acquisition_method_name',
+      sourceAlias: 'acquisition_method',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      source: {
+        entityTypeId: '37288235-e59c-4db7-a3cc-eb31effd7828',
+        columnName: 'name',
+      },
+      valueGetter: ":sourceAlias.jsonb->>'value'",
     },
     {
       name: 'automatic_export',

@@ -1,0 +1,44 @@
+{
+  id: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb',
+  name: 'simple_consortia_tenant',
+  description: 'A simple view of tenant data within a consortium',
+  private: true,
+  sources: [
+    {
+      alias: 'tenant',
+      type: 'db',
+      target: 'src_consortia_tenant',
+    },
+  ],
+  requiredPermissions: [],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':tenant.id',
+      ecsOnly: true,
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':tenant.name',
+      ecsOnly: true,
+      source: {
+        columnName: 'name',
+        entityTypeId: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb',
+        type: 'fqm',
+        name: 'tenant_name',
+      }
+    },
+  ],
+}

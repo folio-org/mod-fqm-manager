@@ -183,4 +183,15 @@
       SELECT * FROM ${tenant_id}_mod_orders_storage.acquisition_method
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_linked_data_resources" author="rlee1@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="export_resources" schemaName="${tenant_id}_mod_linked_data"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_linked_data_resources">
+      SELECT * FROM ${tenant_id}_mod_linked_data.export_resources
+    </createView>
+  </changeSet>
 </databaseChangeLog>

@@ -12,5 +12,7 @@
   "src__circulation__feesfines__overdue_fine_policy",
   "src__circulation__feesfines__owners",
   "src__circulation__feesfines__refunds",
-  "src__circulation__feesfines__payments"
+  "src__circulation__feesfines__payments",
+  "src__acquisition__orders_storage__titles",
+  "src__acquisition__orders_storage__pieces"
 ]

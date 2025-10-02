@@ -48,7 +48,7 @@
           properties: [
             {
               name: 'value',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'value')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'value',
@@ -58,7 +58,7 @@
             },
             {
               name: 'label',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'label') FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'label')) FROM jsonb_array_elements(:src__circulation__feesfines__owners.jsonb->'servicePointOwner') AS elems)",
               valueFunction: 'lower(:value)',

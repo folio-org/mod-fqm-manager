@@ -1,7 +1,7 @@
 {
   id: '77c84371-28cc-52b5-b287-630f8070fcb4',
   name: 'mod_orders_storage__pieces',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -517,6 +517,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdDate'",
     },
     {
@@ -526,6 +527,8 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
     },
@@ -536,6 +539,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUsername'",
     },
     {
@@ -545,6 +549,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedDate'",
     },
     {
@@ -554,6 +559,8 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
     },
@@ -564,6 +571,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUsername'",
     },
     {

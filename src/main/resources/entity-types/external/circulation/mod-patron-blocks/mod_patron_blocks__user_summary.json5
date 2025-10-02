@@ -76,7 +76,7 @@
           properties: [
             {
               name: 'loan_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'loanId',
@@ -86,7 +86,7 @@
             },
             {
               name: 'due_date',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
@@ -97,7 +97,7 @@
             },
             {
               name: 'recall',
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'true',
@@ -118,7 +118,7 @@
             },
             {
               name: 'item_lost',
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'true',
@@ -139,7 +139,7 @@
             },
             {
               name: 'item_claimed_returned',
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'true',
@@ -180,7 +180,7 @@
                   },
                   {
                     name: 'interval_id',
-                    queryable: false,
+                    queryable: true,
                     values: [
                       {
                         value: 'Minutes',
@@ -231,7 +231,7 @@
           properties: [
             {
               name: 'fee_fine_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'feeFineId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'feeFineId',
@@ -241,7 +241,7 @@
             },
             {
               name: 'fee_fine_type_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'feeFineTypeId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'feeFineTypeId',
@@ -251,7 +251,7 @@
             },
             {
               name: 'loan_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'loanId',

@@ -335,7 +335,7 @@
             },
             {
               name: 'time_unit_id',
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'day',
@@ -370,7 +370,7 @@
             },
             {
               name: 'notice_format',
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'Email',
@@ -395,7 +395,7 @@
             },
             {
               name: 'notice_template_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'noticeTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noticeTemplateId',
@@ -405,7 +405,7 @@
             },
             {
               name: 'block_template_id',
-              queryable: false,
+              queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'blockTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'blockTemplateId',

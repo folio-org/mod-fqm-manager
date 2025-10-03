@@ -402,6 +402,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":src__acquisition__orders_storage__titles.jsonb->'metadata'->>'createdDate'",
     },
     {
@@ -411,6 +412,8 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: "(:src__acquisition__orders_storage__titles.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
     },
@@ -421,6 +424,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__acquisition__orders_storage__titles.jsonb->'metadata'->>'createdByUsername'",
     },
     {
@@ -430,6 +434,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: ":src__acquisition__orders_storage__titles.jsonb->'metadata'->>'updatedDate'",
     },
     {
@@ -439,6 +444,8 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
       valueGetter: "(:src__acquisition__orders_storage__titles.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
     },
@@ -449,6 +456,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__acquisition__orders_storage__titles.jsonb->'metadata'->>'updatedByUsername'",
     },
     {

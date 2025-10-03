@@ -1,0 +1,57 @@
+{
+  id: '84451307-215c-4021-a46d-b9dcfada7439',
+  name: 'simple_linked_data_resource',
+  description: 'Simple entity type for querying Linked Data resources',
+  private: true,
+  requiredPermissions: [
+    'linked-data.resources.rdf.get'
+  ],
+  sources: [
+    {
+      type: 'db',
+      alias: 'resource',
+      target: 'src_linked_data_resources'
+    }
+  ],
+  columns: [
+    {
+      name: 'inventory_id',
+      dataType: {
+        dataType: 'stringUUIDType'
+      },
+      sourceAlias: 'resource',
+      queryable: true,
+      isIdColumn: true,
+      essential: true,
+      valueGetter: ":sourceAlias.inventory_id"
+    },
+    {
+      name: 'resource_hash',
+      dataType: {
+        dataType: 'stringType'
+      },
+      sourceAlias: 'resource',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.resource_hash"
+    },
+    {
+      name: 'resource_subgraph',
+      dataType: {
+        dataType: 'stringType'
+      },
+      sourceAlias: 'resource',
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.resource_subgraph"
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: 'inventory_id',
+      direction: 'ASC'
+    }
+  ]
+}

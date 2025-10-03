@@ -108,12 +108,12 @@ class EntityTypeServiceTest {
 
   @Test
   void shouldGetEntityTypeSummaryForValidIds() {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    UUID id1 = new UUID(1, 1);
+    UUID id2 = new UUID(2, 2);
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(id1).label("label_01"),
-      new EntityTypeSummary().id(id2).label("label_02"));
+      new EntityTypeSummary().id(id1).label("label_01").isCustom(false),
+      new EntityTypeSummary().id(id2).label("label_02").isCustom(false));
 
     var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
     var et2 = new EntityType(id2.toString(), "translation_label_02", false);
@@ -136,12 +136,12 @@ class EntityTypeServiceTest {
 
   @Test
   void shouldIncludeCrossTenantEntityTypesWhenInCentralTenant() {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    UUID id1 = new UUID(1, 1);
+    UUID id2 = new UUID(2, 2);
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(id1).label("label_01").crossTenantQueriesEnabled(true),
-      new EntityTypeSummary().id(id2).label("label_02"));
+      new EntityTypeSummary().id(id1).label("label_01").isCustom(false).crossTenantQueriesEnabled(true),
+      new EntityTypeSummary().id(id2).label("label_02").isCustom(false));
     var et1 = new EntityType(id1.toString(), "translation_label_01", false).crossTenantQueriesEnabled(true);
     var et2 = new EntityType(id2.toString(), "translation_label_02", false);
 
@@ -156,10 +156,10 @@ class EntityTypeServiceTest {
 
   @Test
   void testEntityTypeSummaryDoesNotIncludeInaccessibleWhenNotRequested() {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    UUID id1 = new UUID(1, 1);
+    UUID id2 = new UUID(2, 2);
     Set<UUID> ids = Set.of(id1, id2);
-    List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02"));
+    List<EntityTypeSummary> expectedSummary = List.of(new EntityTypeSummary().id(id2).label("label_02").isCustom(false));
     var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
     var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 
@@ -182,13 +182,13 @@ class EntityTypeServiceTest {
 
   @Test
   void testEntityTypeSummaryIncludesAllWhenRequested() {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    UUID id1 = new UUID(1, 1);
+    UUID id2 = new UUID(2, 2);
     Set<UUID> ids = Set.of(id1, id2);
 
     List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(id1).label("label_01"),
-      new EntityTypeSummary().id(id2).label("label_02")
+      new EntityTypeSummary().id(id1).label("label_01").isCustom(false),
+      new EntityTypeSummary().id(id2).label("label_02").isCustom(false)
     );
     var et1 = new EntityType(id1.toString(), "translation_label_01", true).requiredPermissions(List.of("perm1")); // Private entity
     var et2 = new EntityType(id2.toString(), "translation_label_02", true).requiredPermissions(List.of("perm2")); // Non-private entity
@@ -214,12 +214,12 @@ class EntityTypeServiceTest {
 
   @Test
   void testEntityTypeSummaryIncludesInaccessible() {
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    UUID id1 = new UUID(1, 1);
+    UUID id2 = new UUID(2, 2);
     Set<UUID> ids = Set.of(id1, id2);
     List<EntityTypeSummary> expectedSummary = List.of(
-      new EntityTypeSummary().id(id1).label("label_01").missingPermissions(List.of("perm1")),
-      new EntityTypeSummary().id(id2).label("label_02").missingPermissions(List.of()));
+      new EntityTypeSummary().id(id1).label("label_01").isCustom(false).missingPermissions(List.of("perm1")),
+      new EntityTypeSummary().id(id2).label("label_02").isCustom(false).missingPermissions(List.of()));
     var et1 = new EntityType(id1.toString(), "translation_label_01", false).requiredPermissions(List.of("perm1"));
     var et2 = new EntityType(id2.toString(), "translation_label_02", false).requiredPermissions(List.of("perm2"));
 

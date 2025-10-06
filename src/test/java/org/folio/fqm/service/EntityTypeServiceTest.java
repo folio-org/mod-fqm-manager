@@ -1473,7 +1473,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void validateEntityType_shouldThrowException_whenSourceAliasIsNullOrBlank() {
+  void validateEntityType_shouldThrowException_whenSourceAliasIsInvalid() {
     UUID entityTypeId = UUID.randomUUID();
     EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias(null).type("entity-type").targetId(entityTypeId).build();
     EntityType entityType = new EntityType()
@@ -1490,6 +1490,11 @@ class EntityTypeServiceTest {
     InvalidEntityTypeDefinitionException ex2 = assertThrows(InvalidEntityTypeDefinitionException.class,
       () -> entityTypeService.validateEntityType(entityTypeId, entityType, null));
     assertTrue(ex2.getMessage().contains("Source alias cannot be null or blank"));
+
+    source.alias("dot.alias");
+    InvalidEntityTypeDefinitionException ex3 = assertThrows(InvalidEntityTypeDefinitionException.class,
+      () -> entityTypeService.validateEntityType(entityTypeId, entityType, null));
+    assertTrue(ex3.getMessage().contains("must not contain '.'"));
   }
 
   @Test

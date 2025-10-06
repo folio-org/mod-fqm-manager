@@ -532,6 +532,12 @@ public class EntityTypeService {
       if (source.getAlias() == null || source.getAlias().isBlank()) {
         throw new InvalidEntityTypeDefinitionException("Source alias cannot be null or blank", entityType);
       }
+      if (source.getAlias().contains(".")) {
+        throw new InvalidEntityTypeDefinitionException(
+          String.format("Invalid source alias: '%s'. Source aliases must not contain '.'", source.getAlias()),
+          entityType
+        );
+      }
       if (source.getType() == null) {
         throw new InvalidEntityTypeDefinitionException("Source type cannot be null", entityType);
       }

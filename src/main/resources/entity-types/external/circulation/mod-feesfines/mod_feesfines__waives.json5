@@ -1,7 +1,7 @@
 {
   id: '202fcf7f-ac7f-5ead-b73f-6513a47430e9',
   name: 'mod_feesfines__waives',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

@@ -97,6 +97,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        }
+      ]
     },
     {
       name: 'bind_item_id',

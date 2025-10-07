@@ -842,6 +842,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'publicationRange') AS elems\
       )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'instance_date_1',

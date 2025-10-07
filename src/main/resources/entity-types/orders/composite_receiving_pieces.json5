@@ -75,11 +75,5 @@
       order: 80,
     },
   ],
-  defaultSort: [
-    {
-      columnName: '"pieces.pieces".id',
-      direction: 'ASC',
-    },
-  ],
 }
 

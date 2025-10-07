@@ -1,7 +1,7 @@
 {
   id: 'f5443525-d2a9-5e59-8f4a-4ac526ec8528',
   name: 'mod_patron_blocks__user_summary',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

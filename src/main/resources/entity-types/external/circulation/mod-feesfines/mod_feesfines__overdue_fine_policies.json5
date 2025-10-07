@@ -1,7 +1,7 @@
 {
   id: '1b84ae2f-75f3-5533-9300-c740fb4a86f6',
   name: 'mod_feesfines__overdue_fine_policies',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

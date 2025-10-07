@@ -1,7 +1,7 @@
 {
   id: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6',
   name: 'mod_orders_storage__titles',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

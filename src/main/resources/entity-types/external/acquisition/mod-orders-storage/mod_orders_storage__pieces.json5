@@ -103,8 +103,8 @@
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
-        }
-      ]
+        },
+      ],
     },
     {
       name: 'bind_item_id',
@@ -144,6 +144,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'po_line_id',
@@ -170,6 +178,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6', // mod_orders_storage__titles
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'holding_id',
@@ -183,6 +199,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple_holdings_record
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'receiving_tenant_id',
@@ -539,6 +563,20 @@
       essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'metadata_created_by_username',
@@ -571,6 +609,20 @@
       essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'metadata_updated_by_username',

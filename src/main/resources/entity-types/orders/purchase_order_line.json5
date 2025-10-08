@@ -1130,10 +1130,77 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
-              queryable: false,
+              queryable: true,
+              hidden: true,
               valueGetter: "( SELECT array_agg(elems.value->>'locationId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'locationId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'location_name',
+              property: 'name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(loc.jsonb ->> 'name') \
+                                FILTER (WHERE (loc.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
+                                ON (record.value ->> 'locationId')::uuid = loc.id \
+                            )",
+              filterValueGetter: "( \
+                              SELECT \
+                                array_agg(lower(loc.jsonb ->> 'name')) \
+                                FILTER (WHERE (loc.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
+                                ON (record.value ->> 'locationId')::uuid = loc.id \
+                            )",
+              valueFunction: 'lower(:value)',
+              source: {
+                columnName: 'name',
+                entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+              },
+            },
+            {
+              name: 'location_code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(loc.jsonb ->> 'code') \
+                                FILTER (WHERE (loc.jsonb ->> 'code') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
+                                ON (record.value ->> 'locationId')::uuid = loc.id \
+                            )",
+              filterValueGetter: "( \
+                              SELECT \
+                                array_agg(lower(loc.jsonb ->> 'code')) \
+                                FILTER (WHERE (loc.jsonb ->> 'code') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
+                                ON (record.value ->> 'locationId')::uuid = loc.id \
+                            )",
+              valueFunction: 'lower(:value)',
+              source: {
+                columnName: 'code',
+                entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+              },
             },
             {
               name: 'holding_id',
@@ -1142,6 +1209,7 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: false,
+              hidden: true,
               valueGetter: "( SELECT array_agg(elems.value->>'holdingId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'holdingId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1153,6 +1221,7 @@
                 dataType: 'integerType',
               },
               queryable: false,
+              hidden: true,
               valueGetter: "( SELECT array_agg((elems.value->>'quantity')::integer) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               valueFunction: '(:value)::integer',
             },
@@ -1183,17 +1252,67 @@
                 dataType: 'stringType',
               },
               queryable: false,
+              hidden: true,
               valueGetter: "( SELECT array_agg(elems.value->>'tenantId') FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'tenantId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'locations') AS elems)",
               valueFunction: 'lower(:value)',
             },
+            {
+              name: 'tenant_name',
+              property: 'tenant_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(tenant.name) \
+                                FILTER (WHERE (tenant.name) IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                                ON (record.value ->> 'tenantId') = tenant.id \
+                            )",
+              // Note: The filterValueGetter uses the tenant ID, not the name! This is because the special tenant name value source only deals with id/name pairs
+              // and idColumnName doesn't work in nested properties, so we can't do the normal config to redirect this to the ID column
+              filterValueGetter: "( \
+                              SELECT \
+                                array_agg(lower(tenant.id)) \
+                                FILTER (WHERE (tenant.id) IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
+                                LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                                ON (record.value ->> 'tenantId') = tenant.id \
+                            )",
+              valueFunction: 'lower(:value)',
+              source: {
+                columnName: 'name',
+                entityTypeId: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb', // simple_consortia_tenant
+              },
+              ecsOnly: true,
+            }
           ],
         },
       },
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'locations'",
+      essential: true,
+      valueGetter: "(SELECT \
+                       jsonb_agg(\
+                         record.value || \
+                         jsonb_build_object('name', loc.jsonb ->> 'name', 'code', loc.jsonb ->> 'code', 'tenant_name', tenant.name) \
+                         ORDER BY record.value ->> 'locationId' \
+                       ) \
+                     FROM \
+                       jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS record(value) \
+                       LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
+                         ON (record.value ->> 'locationId')::uuid = loc.id \
+                       LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                         ON (record.value ->> 'tenantId') = tenant.id \
+                    )::text",
     },
     {
       // joins are not supported from nested properties yet

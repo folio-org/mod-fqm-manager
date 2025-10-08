@@ -4,40 +4,32 @@
   private: false,
   sources: [
     {
-      alias: 'pieces',
+      alias: 'title',
       type: 'entity-type',
-      targetId: '77c84371-28cc-52b5-b287-630f8070fcb4', // mod_orders_storage__pieces
+      targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6', // mod_orders_storage__titles
       useIdColumns: true,
       essentialOnly: true,
       order: 10,
     },
     {
-      alias: 'item',
+      alias: 'pol',
       type: 'entity-type',
-      targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple item
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
       targetField: 'id',
-      sourceField: 'pieces.item_id',
+      sourceField: 'title.po_line_id',
       essentialOnly: true,
       order: 20,
     },
     {
-      alias: 'location',
+      alias: 'instance',
       type: 'entity-type',
-      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
       targetField: 'id',
-      sourceField: 'pieces.location_id',
+      sourceField: 'pieces.instance_id',
       essentialOnly: true,
       order: 30,
     },
-    {
-      alias: 'pol',
-      type: 'entity-type',
-      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // POL
-      targetField: 'id',
-      sourceField: 'pieces.po_line_id',
-      essentialOnly: true,
-      order: 40,
-    },
+    //
     {
       alias: 'title',
       type: 'entity-type',
@@ -56,6 +48,7 @@
       essentialOnly: true,
       order: 60,
     },
+    //
     {
       alias: 'created_by',
       type: 'entity-type',

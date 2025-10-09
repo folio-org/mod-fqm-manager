@@ -10,6 +10,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.LabeledValue;
+import org.folio.querytool.domain.dto.StringType;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,7 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeColumn()
           .name("col1")
           .labelAlias("Column 1")
+          .dataType(new StringType("stringType"))
           .valueGetter("")
           .joinsTo(List.of(new Join().targetId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
             .targetField("colA")
@@ -78,6 +80,7 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeColumn()
           .name("col2")
           .labelAlias("Column 2")
+          .dataType(new StringType("stringType"))
           .valueGetter("")
       )),
     new EntityType()
@@ -88,6 +91,7 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeColumn()
           .name("colA")
           .labelAlias("Column A")
+          .dataType(new StringType("stringType"))
           .valueGetter("")
           .joinsTo(List.of(new Join().targetId(UUID.fromString("00000000-0000-0000-0000-000000000003"))
             .targetField("colX")
@@ -96,6 +100,7 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeColumn()
           .name("colB")
           .labelAlias("Column B")
+          .dataType(new StringType("stringType"))
           .valueGetter("")
       )),
     new EntityType()
@@ -106,10 +111,12 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeColumn()
           .name("colX")
           .valueGetter("")
+          .dataType(new StringType("stringType"))
           .labelAlias("Column X"),
         new EntityTypeColumn()
           .name("colY")
           .labelAlias("Column Y")
+          .dataType(new StringType("stringType"))
           .valueGetter("")
           .joinsTo(List.of(new Join().targetId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
             .targetField("col1")

@@ -355,7 +355,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       essential: true,
       visibleByDefault: false,
       valueGetter: "(\
@@ -370,6 +370,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'editions') AS elems\
       )",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'series',
@@ -827,7 +828,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -841,6 +842,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'publicationRange') AS elems\
       )",
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'instance_date_1',
@@ -1020,7 +1022,7 @@
         },
       },
       isIdColumn: false,
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -1034,6 +1036,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'physicalDescriptions') AS elems\
       )",
+      valueFunction: 'lower(:value)'
     },
     {
       name: 'languages',

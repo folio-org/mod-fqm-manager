@@ -28,6 +28,9 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.ObjectType;
+import org.folio.querytool.domain.dto.ArrayType;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -261,8 +264,28 @@ public class EntityTypeFlatteningService {
     return unfilteredColumns
       .filter(column -> ecsEnabled || !Boolean.TRUE.equals(column.getEcsOnly()))
       .map(column ->
+        switch (column.getDataType()) {
+          case ArrayType arrayType when arrayType.getItemDataType() instanceof ObjectType objectType ->
+            column.dataType(arrayType.itemDataType(filterEcsProperties(objectType, ecsEnabled)));
+          case JsonbArrayType arrayType when arrayType.getItemDataType() instanceof ObjectType objectType ->
+            column.dataType(arrayType.itemDataType(filterEcsProperties(objectType, ecsEnabled)));
+          default -> column;
+        }
+      )
+      .map(column ->
         column.getValues() == null ? column : column.values(column.getValues().stream().distinct().toList())
       );
+  }
+
+  private static ObjectType filterEcsProperties(ObjectType objectType, boolean ecsEnabled) {
+    if (ecsEnabled) {
+      return objectType;
+    }
+    return objectType.toBuilder().properties(
+      objectType.getProperties().stream()
+        .filter(prop -> !Boolean.TRUE.equals(prop.getEcsOnly()))
+        .toList()
+    ).build();
   }
 
   private boolean ecsEnabled() {

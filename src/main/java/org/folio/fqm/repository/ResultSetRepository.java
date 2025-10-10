@@ -75,6 +75,7 @@ public class ResultSetRepository {
 
       var currentFieldsToSelect = getSqlFields(entityTypeDefinition, fields);
       var currentWhereClause = buildWhereClause(entityTypeDefinition, ids, idColumnNames, idColumnValueGetters);
+      currentWhereClause = currentWhereClause.and(validInternalIdsCondition());
       if (i == 0) {
         query = jooqContext.select(currentFieldsToSelect)
           .from(currentFromClause)
@@ -102,6 +103,26 @@ public class ResultSetRepository {
     }
 
     return recordToMap(baseEntityType, result);
+  }
+
+
+  private static Condition isUuid(Field<String> f) {
+    // строгая проверка формата UUID
+    return f.likeRegex("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}");
+  }
+
+  private static Condition validInternalIdsCondition() {
+    Field<String> statusId      = field("(\"instance.inst\".jsonb->>'statusId')", String.class);
+    Field<String> dateTypeId    = field("(\"instance.inst\".jsonb->'dates'->>'dateTypeId')", String.class);
+    Field<String> updatedByUser = field("(\"instance.inst\".jsonb->'metadata'->>'updatedByUserId')", String.class);
+    Field<String> createdBy     = field("\"instance.inst\".\"created_by\"", String.class);
+
+    Condition okStatus      = statusId.isNull().or(isUuid(statusId));
+    Condition okDateType    = dateTypeId.isNull().or(isUuid(dateTypeId));
+    Condition okUpdatedBy   = updatedByUser.isNull().or(isUuid(updatedByUser));
+    Condition okCreatedBy   = createdBy.isNull().or(isUuid(createdBy));
+
+    return okStatus.and(okDateType).and(okUpdatedBy).and(okCreatedBy);
   }
 
   // TODO: update for GROUP BY functionality

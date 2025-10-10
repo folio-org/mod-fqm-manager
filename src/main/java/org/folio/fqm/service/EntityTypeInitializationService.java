@@ -72,12 +72,15 @@ public class EntityTypeInitializationService {
     if (centralTenantId == null) {
       centralTenantId = crossTenantQueryService.getCentralTenantId();
     }
+    final String safeCentralTenantId; // Central tenant ID, or current tenant ID if ECS is not enabled - Use this in cases where we want things to still work, even in non-ECS environments
     if (centralTenantId != null) {
       log.info("ECS central tenant ID: {}", centralTenantId);
+      safeCentralTenantId = centralTenantId;
     }
     else {
       log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
       centralTenantId = "${central_tenant_id}";
+      safeCentralTenantId = folioExecutionContext.getTenantId();
     }
     String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
     List<EntityType> desiredEntityTypes = Stream
@@ -92,7 +95,8 @@ public class EntityTypeInitializationService {
             resource
               .getContentAsString(StandardCharsets.UTF_8)
               .replace("${tenant_id}", folioExecutionContext.getTenantId())
-              .replace("${central_tenant_id}", finalCentralTenantId),
+              .replace("${central_tenant_id}", finalCentralTenantId)
+              .replace("${safe_central_tenant_id}", safeCentralTenantId),
             EntityType.class
           );
         } catch (IOException e) {

@@ -1271,7 +1271,7 @@
                                 AS array_agg \
                               FROM \
                                 jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
-                                LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                                LEFT JOIN ${safe_central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
                                 ON (record.value ->> 'tenantId') = tenant.id \
                             )",
               // Note: The filterValueGetter uses the tenant ID, not the name! This is because the special tenant name value source only deals with id/name pairs
@@ -1283,7 +1283,7 @@
                                 AS array_agg \
                               FROM \
                                 jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
-                                LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                                LEFT JOIN ${safe_central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
                                 ON (record.value ->> 'tenantId') = tenant.id \
                             )",
               valueFunction: 'lower(:value)',
@@ -1310,7 +1310,7 @@
                        jsonb_array_elements(:sourceAlias.jsonb -> 'locations') AS record(value) \
                        LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_location AS loc \
                          ON (record.value ->> 'locationId')::uuid = loc.id \
-                       LEFT JOIN ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
+                       LEFT JOIN ${safe_central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
                          ON (record.value ->> 'tenantId') = tenant.id \
                     )::text",
     },

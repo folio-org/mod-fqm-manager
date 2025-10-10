@@ -1830,5 +1830,9 @@
   "entityType.simple_nature_of_content_term.updated_by_user_id": "Updated by user UUID",
   "entityType.simple_nature_of_content_term.updated_by_username": "Updated by username",
   "entityType.simple_nature_of_content_term.created_by_user_id": "Created by user UUID",
-  "entityType.simple_nature_of_content_term.created_by_username": "Created by username"
+  "entityType.simple_nature_of_content_term.created_by_username": "Created by username",
+  "entityType.simple_linked_data_resource": "Linked Data resource",
+  "entityType.simple_linked_data_resource.inventory_id": "Instance UUID",
+  "entityType.simple_linked_data_resource.resource_hash": "Graph ID",
+  "entityType.simple_linked_data_resource.resource_subgraph": "Graph"
 }

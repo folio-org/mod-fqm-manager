@@ -597,6 +597,10 @@
     {
       "id": "permissions-users",
       "version": "1.0"
+    },
+    {
+      "id": "linked-data",
+      "version": "2.0"
     }
   ],
   "launchDescriptor": {

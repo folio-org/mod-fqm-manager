@@ -1,0 +1,79 @@
+{
+  id: 'a344dd36-cd35-4723-8905-3fc3f1baef26',
+  name: 'composite_receiving_pieces',
+  private: false,
+  sources: [
+    {
+      alias: 'pieces',
+      type: 'entity-type',
+      targetId: '77c84371-28cc-52b5-b287-630f8070fcb4', // mod_orders_storage__pieces
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'item',
+      type: 'entity-type',
+      targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple item
+      targetField: 'id',
+      sourceField: 'pieces.item_id',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'location',
+      type: 'entity-type',
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_location
+      targetField: 'id',
+      sourceField: 'pieces.location_id',
+      essentialOnly: true,
+      order: 30,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // POL
+      targetField: 'id',
+      sourceField: 'pieces.po_line_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'title',
+      type: 'entity-type',
+      targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6', // mod_orders_storage__titles
+      targetField: 'id',
+      sourceField: 'pieces.title_id',
+      essentialOnly: true,
+      order: 50,
+    },
+    {
+      alias: 'holding',
+      type: 'entity-type',
+      targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf', // simple holdings record
+      targetField: 'id',
+      sourceField: 'pieces.holding_id',
+      essentialOnly: true,
+      order: 60,
+    },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pieces.metadata_created_by_user_id',
+      essentialOnly: true,
+      order: 70,
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'pieces.metadata_updated_by_user_id',
+      essentialOnly: true,
+      order: 80,
+    },
+  ],
+}
+

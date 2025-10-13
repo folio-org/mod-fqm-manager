@@ -171,7 +171,7 @@
                   {
                     name: 'duration',
                     queryable: false,
-                    valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'duration')::integer",
+                    valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans'->'gracePeriod'->>'duration')::integer",
                     valueFunction: '(:value)::integer',
                     property: 'duration',
                     dataType: {
@@ -203,7 +203,7 @@
                         label: 'Months',
                       },
                     ],
-                    valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->'->'openLoans'->'gracePeriod''->>'intervalId'",
+                    valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->'openLoans'->'gracePeriod'->>'intervalId'",
                     property: 'intervalId',
                     dataType: {
                       dataType: 'stringType',

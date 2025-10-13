@@ -326,7 +326,7 @@
             {
               name: 'interval',
               queryable: false,
-              valueGetter: "(SELECT array_agg((elems.value->>'interval')::integer) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg((elems.value->>'interval')::integer) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: '(:value)::integer',
               property: 'interval',
               dataType: {
@@ -350,8 +350,8 @@
                   label: 'Minute',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'timeUnitId') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'timeUnitId')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'timeUnitId') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'timeUnitId')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'timeUnitId',
               dataType: {
@@ -361,7 +361,7 @@
             {
               name: 'reminder_fee',
               queryable: false,
-              valueGetter: "(SELECT array_agg((elems.value->>'reminderFee')::float) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg((elems.value->>'reminderFee')::float) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: '(:value)::float',
               property: 'reminderFee',
               dataType: {
@@ -385,8 +385,8 @@
                   label: 'None',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'noticeFormat') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'noticeFormat')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg(elems.value->>'noticeFormat') FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'noticeFormat')) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'noticeFormat',
               dataType: {
@@ -396,7 +396,7 @@
             {
               name: 'notice_template_id',
               queryable: true,
-              valueGetter: "(SELECT array_agg((elems.value->>'noticeTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg((elems.value->>'noticeTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noticeTemplateId',
               dataType: {
@@ -406,7 +406,7 @@
             {
               name: 'block_template_id',
               queryable: true,
-              valueGetter: "(SELECT array_agg((elems.value->>'blockTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'->'reminderFeesPolicy'->'reminderSchedule'') AS elems)",
+              valueGetter: "(SELECT array_agg((elems.value->>'blockTemplateId')::uuid) FROM jsonb_array_elements(:src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->'reminderSchedule') AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'blockTemplateId',
               dataType: {

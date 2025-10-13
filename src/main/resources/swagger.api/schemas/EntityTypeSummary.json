@@ -27,6 +27,16 @@
       "items": {
         "type": "string"
       }
+    },
+    "createdAt": {
+      "description": "[custom only] The creation timestamp of the entity type",
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "description": "[custom only] The last update timestamp of the entity type",
+      "type": "string",
+      "format": "date-time"
     }
   },
   "additionalProperties": false,

@@ -47,6 +47,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -100,6 +101,7 @@ public class EntityTypeService {
           .label(localizationService.getEntityTypeLabel(entityType))
           .isCustom(Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")))
           .crossTenantQueriesEnabled(Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled()) && crossTenantQueryService.isCentralTenant());
+
         if (includeInaccessible) {
           return result.missingPermissions(
             permissionsService.getRequiredPermissions(entityType)
@@ -108,6 +110,12 @@ public class EntityTypeService {
               .toList()
           );
         }
+
+        if (Boolean.TRUE.equals(result.getIsCustom())) {
+          result.setCreatedAt(Date.from(Instant.parse((String) entityType.getAdditionalProperty("createdAt"))));
+          result.setUpdatedAt(Date.from(Instant.parse((String) entityType.getAdditionalProperty("updatedAt"))));
+        }
+
         return result;
       })
       .sorted(comparing(EntityTypeSummary::getLabel, String.CASE_INSENSITIVE_ORDER))

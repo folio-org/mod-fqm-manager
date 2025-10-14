@@ -3,11 +3,14 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -80,7 +83,14 @@ class FqlToSqlConverterServiceTest {
             .valueFunction("lower(:value)"),
           new EntityTypeColumn().name("fieldWithAValueFunction")
             .dataType(new EntityDataType().dataType("stringType"))
-            .valueFunction("upper(:value)")
+            .valueFunction("upper(:value)"),
+          new EntityTypeColumn().name("nested")
+            .dataType(new ArrayType().dataType("arrayType")
+              .itemDataType(new ObjectType().dataType("objectType")
+                .properties(List.of(
+                  new NestedObjectProperty().name("string").dataType(new EntityDataType().dataType("stringType")).valueGetter("nestStr"),
+                  new NestedObjectProperty().name("uuid").dataType(new EntityDataType().dataType("rangedUUIDType")).valueGetter("nestUuid")
+            ))))
         )
       );
   }
@@ -141,23 +151,23 @@ class FqlToSqlConverterServiceTest {
         cast(field("rangedUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
       ),
       Arguments.of(
-        "equals ranged UUID",
-        "{\"rangedUUIDField\": {\"$eq\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        "equals invalid ranged UUID",
+        "{\"rangedUUIDField\": {\"$eq\": \"invalid-uuid\"}}",
         cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class))
       ),
       Arguments.of(
-        "not equals ranged UUID",
-        "{\"rangedUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        "not equals invalid ranged UUID",
+        "{\"rangedUUIDField\": {\"$ne\": \"invalid-uuid\"}}",
         trueCondition.or(field("rangedUUIDField").isNull())
       ),
       Arguments.of(
-        "equals open UUID",
-        "{\"openUUIDField\": {\"$eq\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        "equals invalid open UUID",
+        "{\"openUUIDField\": {\"$eq\": \"invalid-uuid\"}}",
         cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class))
       ),
       Arguments.of(
-        "not equals open UUID",
-        "{\"openUUIDField\": {\"$ne\": \"69939c9a-a440a-a873-3b48f308\"}}",
+        "not equals invalid open UUID",
+        "{\"openUUIDField\": {\"$ne\": \"invalid-uuid\"}}",
         trueCondition.or(field("openUUIDField").isNull())
       ),
       Arguments.of(
@@ -529,44 +539,44 @@ class FqlToSqlConverterServiceTest {
         )
       ),
       Arguments.of(
-        "in list open UUID",
+        "in list of invalid open UUID",
         """
-          {"openUUIDField": {"$in": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+          {"openUUIDField": {"$in": ["invalid-uuid", "invalid-uuid-2"]}}""",
         cast(field("openUUIDField"), UUID.class)
           .eq(cast(null, UUID.class))
           .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
       Arguments.of(
-        "in list ranged UUID",
+        "in list of invalid ranged UUID",
         """
-          {"rangedUUIDField": {"$in": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+          {"rangedUUIDField": {"$in": ["invalid-uuid", "invalid-uuid-2"]}}""",
         cast(field("rangedUUIDField"), UUID.class)
           .eq(cast(null, UUID.class))
           .or(cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
       Arguments.of(
-        "not in list open UUID",
+        "not in list of invalid open UUID",
         """
-          {"openUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+          {"openUUIDField": {"$nin": ["invalid-uuid", "invalid-uuid-2"]}}""",
         field("openUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
       ),
       Arguments.of(
-        "not in list ranged UUID",
+        "not in list of invalid ranged UUID",
         """
-          {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a", "69939c9a-aa96-440a-a87"]}}""",
+          {"rangedUUIDField": {"$nin": ["invalid-uuid", "invalid-uuid-2"]}}""",
         field("rangedUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
       ),
       Arguments.of(
-        "in list ranged UUID",
+        "in list of partially invalid ranged UUID",
         """
-          {"rangedUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+          {"rangedUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "invalid-uuid-2"]}}""",
         cast(field("rangedUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .or(cast(field("rangedUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
       Arguments.of(
-        "in list open UUID",
+        "in list of partially invalid open UUID",
         """
-          {"openUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+          {"openUUIDField": {"$in": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "invalid-uuid-2"]}}""",
         cast(field("openUUIDField"), UUID.class).eq(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .or(cast(field("openUUIDField"), UUID.class).eq(cast(null, UUID.class)))
       ),
@@ -625,7 +635,7 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not in list open UUID",
         """
-          {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a87"]}}""",
+          {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "invalid-uuid-2"]}}""",
         field("openUUIDField").isNull().or(cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .and(trueCondition))
       ),
@@ -634,7 +644,7 @@ class FqlToSqlConverterServiceTest {
         """
           {
             "$and": [
-              {"rangedUUIDField": {"$eq": "69939c9a-aa96-440a-a87"}},
+              {"rangedUUIDField": {"$eq": "invalid-uuid-2"}},
               {"field2": {"$eq": true}},
               {"field5": {"$lte": 3}},
               {"field2": {"$in": [false, true]}},
@@ -668,7 +678,7 @@ class FqlToSqlConverterServiceTest {
         """
           {
             "$and": [
-              {"openUUIDField": {"$eq": "69939c9a-aa96-440a-a87"}},
+              {"openUUIDField": {"$eq": "invalid-uuid-2"}},
               {"field2": {"$eq": true}},
               {"field5": {"$lte": 3}},
               {"field2": {"$in": [false, true]}},
@@ -1075,6 +1085,39 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$starts_with": "test & special! chars"}}""",
         condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(val("test & special! chars"), "%"))
+      ),
+      Arguments.of(
+        "eq nested array-object field string",
+        """
+          {"nested[*]->string": {"$eq": "foo bar"}}""",
+        arrayOverlap(cast(field("nestStr"), String[].class), cast(array("foo bar"), String[].class))
+      ),
+      Arguments.of(
+        "eq nested array-object field uuid",
+        """
+          {"nested[*]->uuid": {"$eq": "caf7d3db-bc1a-5551-b54d-360944585605"}}""",
+        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(cast(UUID.fromString("caf7d3db-bc1a-5551-b54d-360944585605"), UUID.class)), String[].class))
+      ),
+      Arguments.of(
+        "eq nested array-object field invalid uuid",
+        """
+          {"nested[*]->uuid": {"$eq": "invalid"}}""",
+        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(cast(null, UUID.class)), String[].class))
+      ),
+      Arguments.of(
+        "in nested array-object field string",
+        """
+          {"nested[*]->string": {"$in": ["foo", "bar"]}}""",
+        arrayOverlap(cast(field("nestStr"), String[].class), cast(array("foo", "bar"), String[].class))
+      ),
+      Arguments.of(
+        "in nested array-object field partially valid uuid",
+        """
+          {"nested[*]->uuid": {"$in": ["df3f3e8a-8694-59ad-ad52-3671613d02dc", "invalid"]}}""",
+        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(
+          cast(UUID.fromString("df3f3e8a-8694-59ad-ad52-3671613d02dc"), UUID.class),
+          cast(null, UUID.class)
+        ), String[].class))
       )
     );
   }

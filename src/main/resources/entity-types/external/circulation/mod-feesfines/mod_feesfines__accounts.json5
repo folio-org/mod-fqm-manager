@@ -59,6 +59,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'status'->>'name'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'payment_status_name',
@@ -134,6 +135,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'paymentStatus'->>'name'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'fee_fine_type',
@@ -215,6 +217,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'itemStatus'->>'name'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'location',
@@ -236,6 +239,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'metadata'->>'createdDate'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'metadata_created_by_user_id',
@@ -246,6 +250,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'metadata_updated_date',
@@ -255,6 +260,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__accounts.jsonb->'metadata'->>'updatedDate'",
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'metadata_updated_by_user_id',
@@ -265,6 +271,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__accounts',
     },
     {
       name: 'due_date',

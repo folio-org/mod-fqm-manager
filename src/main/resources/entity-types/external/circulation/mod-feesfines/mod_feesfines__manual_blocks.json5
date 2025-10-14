@@ -176,6 +176,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'createdDate'",
+      sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
     {
       name: 'metadata_created_by_user_id',
@@ -186,6 +187,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
     {
       name: 'metadata_updated_date',
@@ -195,6 +197,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'updatedDate'",
+      sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
     {
       name: 'metadata_updated_by_user_id',
@@ -205,6 +208,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
     {
       name: 'id',

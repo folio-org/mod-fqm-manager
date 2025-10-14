@@ -52,6 +52,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueFine'->>'quantity')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'overdue_fine_interval_id',
@@ -87,6 +88,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueFine'->>'intervalId'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'count_closed',
@@ -152,6 +154,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueRecallFine'->>'quantity')::float",
       valueFunction: '(:value)::float',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'overdue_recall_fine_interval_id',
@@ -187,6 +190,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'overdueRecallFine'->>'intervalId'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'grace_period_recall',
@@ -239,6 +243,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'countClosed'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_ignore_grace_period_recall',
@@ -258,6 +263,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'ignoreGracePeriodRecall'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_ignore_grace_period_holds',
@@ -277,6 +283,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'ignoreGracePeriodHolds'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_allow_renewal_of_items_with_reminder_fees',
@@ -296,6 +303,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'allowRenewalOfItemsWithReminderFees'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_clear_patron_block_when_paid',
@@ -315,6 +323,7 @@
         },
       ],
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'clearPatronBlockWhenPaid'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'reminder_fees_policy_reminder_schedule',
@@ -419,6 +428,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'reminderFeesPolicy'->>'reminderSchedule'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'metadata_created_date',
@@ -428,6 +438,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'createdDate'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'metadata_created_by_user_id',
@@ -438,6 +449,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'metadata_updated_date',
@@ -447,6 +459,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'updatedDate'",
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'metadata_updated_by_user_id',
@@ -457,6 +470,7 @@
       visibleByDefault: false,
       valueGetter: "(:src__circulation__feesfines__overdue_fine_policy.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__feesfines__overdue_fine_policy',
     },
     {
       name: 'id',

@@ -519,6 +519,7 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdDate'",
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'metadata_created_by_user_id',
@@ -531,6 +532,7 @@
       essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'metadata_created_by_username',
@@ -541,6 +543,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUsername'",
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'metadata_updated_date',
@@ -551,6 +554,7 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedDate'",
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'metadata_updated_by_user_id',
@@ -563,6 +567,7 @@
       essential: true,
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'metadata_updated_by_username',
@@ -573,6 +578,7 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ":src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUsername'",
+      sourceAlias: 'src__acquisition__orders_storage__pieces',
     },
     {
       name: 'jsonb',

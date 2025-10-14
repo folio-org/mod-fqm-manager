@@ -89,7 +89,8 @@ class FqlToSqlConverterServiceTest {
               .itemDataType(new ObjectType().dataType("objectType")
                 .properties(List.of(
                   new NestedObjectProperty().name("string").dataType(new EntityDataType().dataType("stringType")).valueGetter("nestStr"),
-                  new NestedObjectProperty().name("uuid").dataType(new EntityDataType().dataType("rangedUUIDType")).valueGetter("nestUuid")
+                  new NestedObjectProperty().name("ruuid").dataType(new EntityDataType().dataType("rangedUUIDType")).valueGetter("nestRUuid"),
+                  new NestedObjectProperty().name("ouuid").dataType(new EntityDataType().dataType("openUUIDType")).valueGetter("nestOUuid")
             ))))
         )
       );
@@ -1093,16 +1094,28 @@ class FqlToSqlConverterServiceTest {
         arrayOverlap(cast(field("nestStr"), String[].class), cast(array("foo bar"), String[].class))
       ),
       Arguments.of(
-        "eq nested array-object field uuid",
+        "eq nested array-object field ruuid",
         """
-          {"nested[*]->uuid": {"$eq": "caf7d3db-bc1a-5551-b54d-360944585605"}}""",
-        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(cast(UUID.fromString("caf7d3db-bc1a-5551-b54d-360944585605"), UUID.class)), String[].class))
+          {"nested[*]->ruuid": {"$eq": "caf7d3db-bc1a-5551-b54d-360944585605"}}""",
+        arrayOverlap(cast(field("nestRUuid"), String[].class), cast(array(cast(UUID.fromString("caf7d3db-bc1a-5551-b54d-360944585605"), UUID.class)), String[].class))
       ),
       Arguments.of(
-        "eq nested array-object field invalid uuid",
+        "eq nested array-object field invalid ranged uuid",
         """
-          {"nested[*]->uuid": {"$eq": "invalid"}}""",
-        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(cast(null, UUID.class)), String[].class))
+          {"nested[*]->ruuid": {"$eq": "invalid"}}""",
+        arrayOverlap(cast(field("nestRUuid"), String[].class), cast(array(cast(null, UUID.class)), String[].class))
+      ),
+      Arguments.of(
+        "eq nested array-object field open uuid",
+        """
+          {"nested[*]->ouuid": {"$eq": "caf7d3db-bc1a-5551-b54d-360944585605"}}""",
+        arrayOverlap(cast(field("nestOUuid"), String[].class), cast(array(cast(UUID.fromString("caf7d3db-bc1a-5551-b54d-360944585605"), UUID.class)), String[].class))
+      ),
+      Arguments.of(
+        "eq nested array-object field invalid open uuid",
+        """
+          {"nested[*]->ouuid": {"$eq": "invalid"}}""",
+        arrayOverlap(cast(field("nestOUuid"), String[].class), cast(array(cast(null, UUID.class)), String[].class))
       ),
       Arguments.of(
         "in nested array-object field string",
@@ -1111,10 +1124,19 @@ class FqlToSqlConverterServiceTest {
         arrayOverlap(cast(field("nestStr"), String[].class), cast(array("foo", "bar"), String[].class))
       ),
       Arguments.of(
-        "in nested array-object field partially valid uuid",
+        "in nested array-object field partially valid ranged uuid",
         """
-          {"nested[*]->uuid": {"$in": ["df3f3e8a-8694-59ad-ad52-3671613d02dc", "invalid"]}}""",
-        arrayOverlap(cast(field("nestUuid"), String[].class), cast(array(
+          {"nested[*]->ruuid": {"$in": ["df3f3e8a-8694-59ad-ad52-3671613d02dc", "invalid"]}}""",
+        arrayOverlap(cast(field("nestRUuid"), String[].class), cast(array(
+          cast(UUID.fromString("df3f3e8a-8694-59ad-ad52-3671613d02dc"), UUID.class),
+          cast(null, UUID.class)
+        ), String[].class))
+      ),
+      Arguments.of(
+        "in nested array-object field partially valid open uuid",
+        """
+          {"nested[*]->ouuid": {"$in": ["df3f3e8a-8694-59ad-ad52-3671613d02dc", "invalid"]}}""",
+        arrayOverlap(cast(field("nestOUuid"), String[].class), cast(array(
           cast(UUID.fromString("df3f3e8a-8694-59ad-ad52-3671613d02dc"), UUID.class),
           cast(null, UUID.class)
         ), String[].class))

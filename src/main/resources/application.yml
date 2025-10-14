@@ -101,4 +101,12 @@ management:
       enabled: false
     readinessstate:
       enabled: true
+
+logging:
+  level:
+    org:
+      folio:
+        spring:
+          i18n: ERROR
+
 debug: false

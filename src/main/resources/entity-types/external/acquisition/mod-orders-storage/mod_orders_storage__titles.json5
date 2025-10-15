@@ -415,6 +415,20 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__acquisition__orders_storage__titles.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__acquisition__orders_storage__titles',
@@ -450,6 +464,20 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__acquisition__orders_storage__titles.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__acquisition__orders_storage__titles',

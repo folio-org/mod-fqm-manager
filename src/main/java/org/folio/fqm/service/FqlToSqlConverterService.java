@@ -482,6 +482,13 @@ public class FqlToSqlConverterService {
     Field field = getField(condition, entityType);
     boolean inline = shouldInlineValue(entityType, condition, value);
 
+    // ensure that UUIDs are cast properly; this also ensures that invalid UUIDs will be gracefully null'd
+    // inside array fields (matching behavior for non-array fields)
+    String filterFieldDataType = getFieldForFiltering(condition, entityType).getDataType().getDataType();
+    if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
+      return (org.jooq.Field<T>) cast(value, UUID.class);
+    }
+
     if (field.getValueFunction() != null) {
       if (inline) {
         return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.inline(value));

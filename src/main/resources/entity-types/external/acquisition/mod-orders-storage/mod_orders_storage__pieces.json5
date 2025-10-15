@@ -97,6 +97,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '372e025a-9444-473a-9ffd-fa0f63db1674',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'bind_item_id',
@@ -136,6 +144,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'po_line_id',
@@ -149,6 +165,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'title_id',
@@ -162,6 +186,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'holding_id',
@@ -175,6 +207,14 @@
       sourceAlias: 'src__acquisition__orders_storage__pieces',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'receiving_tenant_id',
@@ -530,6 +570,20 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__acquisition__orders_storage__pieces',
@@ -565,6 +619,20 @@
       visibleByDefault: false,
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__acquisition__orders_storage__pieces.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__acquisition__orders_storage__pieces',

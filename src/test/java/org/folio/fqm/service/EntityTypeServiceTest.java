@@ -586,7 +586,7 @@ class EntityTypeServiceTest {
   void testReturnsNoValuesForQBSourceTypes(String source) {
     UUID entityTypeId = UUID.fromString("f91cbc3a-29f1-5280-aee4-eb821285cba8");
     List<String> tenantList = List.of(TENANT_ID);
-    String valueColumnName = "languages";
+    String valueColumnName = "test_column";
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .name("the entity type")

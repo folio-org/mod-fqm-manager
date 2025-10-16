@@ -28,7 +28,7 @@
       essential: true,
       valueGetter: ':sourceAlias.id',
     },
-    // used as id columns for name/code
+    // used as id columns for name/code, so the backend can properly use the IDs without the UI auto-hiding the regular ID
     {
       name: '_id',
       sourceAlias: 'org',

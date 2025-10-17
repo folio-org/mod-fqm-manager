@@ -295,7 +295,8 @@
       idColumnName: "donor_organization_ids",
       source: {
         entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
-        columnName: 'name'
+        name: 'donor_organization', // shows donor org finder in query builder
+        columnName: 'name',
       },
       valueGetter: "( SELECT jsonb_agg(org.jsonb ->> 'name') FILTER (WHERE (org.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'donorOrganizationIds') record(value) JOIN src_organizations org ON record.value::text = org.id::text )",
       filterValueGetter: "( SELECT jsonb_agg(lower(org.jsonb ->> 'name')) FILTER (WHERE (org.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'donorOrganizationIds') record(value) JOIN src_organizations org ON record.value::text = org.id::text )",

@@ -724,6 +724,11 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'donorOrganizationIds') AS elems\
       )",
+      source: {
+        entityTypeId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503',
+        name: 'donor_organization', // shows donor org finder in query builder
+        columnName: 'id',
+      },
     },
     {
       name: 'eresource_activated',

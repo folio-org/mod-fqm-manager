@@ -192,7 +192,7 @@ public class EntityTypeService {
             return getLanguages(searchText, tenantsToQuery);
           }
           // instructs query builder to provide organization finder plugin
-          case "organization" -> {
+          case "organization", "donor_organization" -> {
             return ColumnValues.builder().content(List.of()).build();
           }
           default -> {

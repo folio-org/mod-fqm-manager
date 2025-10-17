@@ -24,6 +24,8 @@ import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -577,6 +579,31 @@ class EntityTypeServiceTest {
     when(languageClient.get(TENANT_ID)).thenThrow(FeignException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"organization", "donor_organization"})
+  void testReturnsNoValuesForQBSourceTypes(String source) {
+    UUID entityTypeId = UUID.fromString("f91cbc3a-29f1-5280-aee4-eb821285cba8");
+    List<String> tenantList = List.of(TENANT_ID);
+    String valueColumnName = "test_column";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name(source)
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+
+    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of());
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
 
   @Test

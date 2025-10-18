@@ -1,7 +1,7 @@
 {
   id: '77c84371-28cc-52b5-b287-630f8070fcb4',
   name: 'mod_orders_storage__pieces',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

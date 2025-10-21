@@ -35,7 +35,7 @@
     {
       name: 'expected_receipt_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -268,7 +268,7 @@
     {
       name: 'subscription_from',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -281,7 +281,7 @@
     {
       name: 'subscription_to',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -398,7 +398,7 @@
     {
       name: 'metadata_created_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,
@@ -447,7 +447,7 @@
     {
       name: 'metadata_updated_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

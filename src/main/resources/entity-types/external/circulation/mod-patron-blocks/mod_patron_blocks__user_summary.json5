@@ -86,13 +86,13 @@
             },
             {
               name: 'due_date',
-              queryable: true,
+              queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
               property: 'dueDate',
               dataType: {
-                dataType: 'dateType',
+                dataType: 'dateTimeType',
               },
             },
             {

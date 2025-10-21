@@ -22,7 +22,7 @@
     {
       name: 'date_action',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: false,

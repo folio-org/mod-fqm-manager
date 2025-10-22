@@ -79,6 +79,7 @@
               queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: '(:value)::uuid',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'loanId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -90,6 +91,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'dueDate') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'dueDate')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'dueDate',
               dataType: {
                 dataType: 'dateTimeType',
@@ -111,6 +113,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'recall') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'recall')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'recall',
               dataType: {
                 dataType: 'booleanType',
@@ -132,6 +135,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'itemLost') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemLost')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'itemLost',
               dataType: {
                 dataType: 'booleanType',
@@ -153,6 +157,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'itemClaimedReturned') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'itemClaimedReturned')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'itemClaimedReturned',
               dataType: {
                 dataType: 'booleanType',
@@ -164,6 +169,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'gracePeriod') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'gracePeriod')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'gracePeriod',
               dataType: {
                 dataType: 'objectType',
@@ -173,6 +179,7 @@
                     queryable: false,
                     valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans'->'gracePeriod'->>'duration')::integer",
                     valueFunction: '(:value)::integer',
+                    sourceAlias: 'src__circulation__patron_blocks__user_summary',
                     property: 'duration',
                     dataType: {
                       dataType: 'integerType',
@@ -204,6 +211,7 @@
                       },
                     ],
                     valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->'openLoans'->'gracePeriod'->>'intervalId'",
+                    sourceAlias: 'src__circulation__patron_blocks__user_summary',
                     property: 'intervalId',
                     dataType: {
                       dataType: 'stringType',
@@ -234,6 +242,7 @@
               queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'feeFineId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'feeFineId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -244,6 +253,7 @@
               queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'feeFineTypeId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'feeFineTypeId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -254,6 +264,7 @@
               queryable: true,
               valueGetter: "(SELECT array_agg((elems.value->>'loanId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::uuid',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'loanId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -264,6 +275,7 @@
               queryable: false,
               valueGetter: "(SELECT array_agg((elems.value->>'balance')::float) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
               valueFunction: '(:value)::float',
+              sourceAlias: 'src__circulation__patron_blocks__user_summary',
               property: 'balance',
               dataType: {
                 dataType: 'numberType',

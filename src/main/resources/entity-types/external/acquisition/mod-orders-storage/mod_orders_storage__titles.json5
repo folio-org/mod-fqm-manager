@@ -70,6 +70,14 @@
       sourceAlias: 'src__acquisition__orders_storage__titles',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'instance_id',
@@ -83,6 +91,14 @@
       sourceAlias: 'src__acquisition__orders_storage__titles',
       hidden: true,
       essential: true,
+      joinsTo: [
+        {
+          targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'next_sequence_number',
@@ -109,6 +125,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'productId') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'productId')) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__acquisition__orders_storage__titles',
               property: 'productId',
               dataType: {
                 dataType: 'stringType',
@@ -117,12 +134,17 @@
             {
               name: 'product_id_type',
               queryable: true,
-              hidden: true,
-              valueGetter: "(SELECT array_agg((elems.value->>'productIdType')::uuid) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems)",
-              valueFunction: '(:value)::uuid',
+              source: {
+                columnName: 'name',
+                entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
+              },
+              valueGetter: "(SELECT array_agg(identifier_type.jsonb ->> 'name') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type ON (elems.value->>'productIdType')::uuid = identifier_type.id)",
+              filterValueGetter: "(SELECT array_agg(lower(identifier_type.jsonb ->> 'name')) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type ON (elems.value->>'productIdType')::uuid = identifier_type.id)",
+              valueFunction: 'lower(:value)',
+              sourceAlias: 'src__acquisition__orders_storage__titles',
               property: 'productIdType',
               dataType: {
-                dataType: 'rangedUUIDType',
+                dataType: 'stringType',
               },
             },
             {
@@ -131,6 +153,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'qualifier') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'qualifier')) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__acquisition__orders_storage__titles',
               property: 'qualifier',
               dataType: {
                 dataType: 'stringType',
@@ -141,10 +164,8 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":src__acquisition__orders_storage__titles.jsonb->>'productIds'",
+      valueGetter: "( SELECT jsonb_agg(record.value || jsonb_build_object('productIdType', identifier_type.jsonb ->> 'name') ORDER BY record.value ->> 'productIdType') FROM jsonb_array_elements((:sourceAlias.jsonb -> 'productIds')) record(value) LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type ON (record.value ->> 'productIdType') = identifier_type.id::text)::text",
       sourceAlias: 'src__acquisition__orders_storage__titles',
-      filterValueGetter: "lower(${tenant_id}_mod_orders_storage.f_unaccent(:src__acquisition__orders_storage__titles.jsonb->>'productIds'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
       essential: true,
     },
     {
@@ -160,6 +181,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'contributor') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'contributors') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'contributor')) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__acquisition__orders_storage__titles',
               property: 'contributor',
               dataType: {
                 dataType: 'stringType',
@@ -171,6 +193,7 @@
               hidden: true,
               valueGetter: "(SELECT array_agg((elems.value->>'contributorNameTypeId')::uuid) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'contributors') AS elems)",
               valueFunction: '(:value)::uuid',
+              sourceAlias: 'src__acquisition__orders_storage__titles',
               property: 'contributorNameTypeId',
               dataType: {
                 dataType: 'rangedUUIDType',
@@ -504,6 +527,26 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':src__acquisition__orders_storage__titles.jsonb::text',
+    },
+    {
+      name: 'acq_unit_names',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      sourceAlias: 'src__acquisition__orders_storage__titles',
+      idColumnName: 'acq_unit_ids',
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: "( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )",
+      valueFunction: 'lower(:value)',
+      source: {
+        columnName: 'name',
+        entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
+      },
     },
   ],
 }

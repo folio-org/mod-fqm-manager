@@ -410,6 +410,7 @@
               valueGetter: "(SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:src__circulation__feesfines__accounts.jsonb->'contributors') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:src__circulation__feesfines__accounts.jsonb->'contributors') AS elems)",
               valueFunction: 'lower(:value)',
+              sourceAlias: 'src__circulation__feesfines__accounts',
               property: 'name',
               dataType: {
                 dataType: 'stringType',

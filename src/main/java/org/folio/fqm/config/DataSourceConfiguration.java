@@ -12,9 +12,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -22,6 +25,7 @@ import javax.sql.DataSource;
 @Configuration
 @Log4j2
 public class DataSourceConfiguration {
+
   @Value("${DB_HOST_READER:}")
   private String dbHostReader;
 
@@ -39,33 +43,53 @@ public class DataSourceConfiguration {
 
   @Primary
   @Bean("dataSource")
-  @ConfigurationProperties("spring.datasource.hikari")
-  public DataSource writerDataSource() {
-    var writerDataSource = writerDataSourceProperties()
+  public DataSource writerDataSource(
+    @Qualifier("writerDataSourceProperties") DataSourceProperties writerProps,
+    Environment env
+  ) {
+    HikariDataSource dataSource = writerProps
       .initializeDataSourceBuilder()
+      .type(HikariDataSource.class)
       .build();
-    var hikari = (HikariDataSource) writerDataSource;
-    System.out.println("ZZY Writer datasource max pool size: " + hikari.getMaximumPoolSize());
-    return writerDataSource;
+
+    Binder.get(env).bind("spring.datasource.hikari", HikariDataSource.class)
+      .ifBound(props -> copyHikariProps(props, dataSource));
+
+    log.info("ZZY Writer datasource max pool size: {}", dataSource.getMaximumPoolSize());
+    return dataSource;
   }
 
   @Bean("readerDataSource")
-  @ConfigurationProperties("spring.datasource.hikari")
-  public DataSource readerDataSource(FolioExecutionContext context) {
-    DataSourceProperties dataSourceProperties = readerDataSourceProperties();
+  public DataSource readerDataSource(
+    @Qualifier("readerDataSourceProperties") DataSourceProperties readerProps,
+    @Qualifier("writerDataSourceProperties") DataSourceProperties writerProps,
+    Environment env,
+    FolioExecutionContext context
+  ) {
+    DataSourceProperties selectedProps = readerProps;
+
     if (ObjectUtils.isEmpty(dbHostReader)) {
       log.warn("Writer DB is used since reader DB is not available");
-      dataSourceProperties = writerDataSourceProperties();
+      selectedProps = writerProps;
     } else {
       log.info("Connecting to reader DB");
     }
-    DataSource readerDataSource = dataSourceProperties
-      .initializeDataSourceBuilder()
-      .build();
-    var hikari = (HikariDataSource) readerDataSource;
-    System.out.println("ZZY Reader datasource max pool size: " + hikari.getMaximumPoolSize());
 
-    return new DataSourceFolioWrapper(readerDataSource, context);
+    HikariDataSource dataSource = selectedProps
+      .initializeDataSourceBuilder()
+      .type(HikariDataSource.class)
+      .build();
+
+    Binder.get(env).bind("spring.datasource.hikari", HikariDataSource.class)
+      .ifBound(props -> copyHikariProps(props, dataSource));
+
+    log.info("ZZY Reader datasource max pool size: {}", dataSource.getMaximumPoolSize());
+    return new DataSourceFolioWrapper(dataSource, context);
+  }
+
+  // Any properties specified in the hikari config of application.yml should be set here
+  private static void copyHikariProps(HikariDataSource src, HikariDataSource dest) {
+    dest.setMaximumPoolSize(src.getMaximumPoolSize());
   }
 
   @Primary

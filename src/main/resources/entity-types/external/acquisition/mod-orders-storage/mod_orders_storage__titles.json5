@@ -11,6 +11,8 @@
   ],
   requiredPermissions: [
     'orders-storage.titles.collection.get',
+    'acquisitions-units.units.collection.get',
+    'inventory-storage.identifier-types.collection.get',
   ],
   defaultSort: [
     {

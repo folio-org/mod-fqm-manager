@@ -1,5 +1,6 @@
 package org.folio.fqm.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.spring.FolioExecutionContext;
@@ -40,9 +41,12 @@ public class DataSourceConfiguration {
   @Bean("dataSource")
   @ConfigurationProperties("spring.datasource.hikari")
   public DataSource writerDataSource() {
-    return writerDataSourceProperties()
+    var writerDataSource = writerDataSourceProperties()
       .initializeDataSourceBuilder()
       .build();
+    var hikari = (HikariDataSource) writerDataSource;
+    System.out.println("ZZY Writer datasource max pool size: " + hikari.getMaximumPoolSize());
+    return writerDataSource;
   }
 
   @Bean("readerDataSource")
@@ -58,6 +62,9 @@ public class DataSourceConfiguration {
     DataSource readerDataSource = dataSourceProperties
       .initializeDataSourceBuilder()
       .build();
+    var hikari = (HikariDataSource) readerDataSource;
+    System.out.println("ZZY Reader datasource max pool size: " + hikari.getMaximumPoolSize());
+
     return new DataSourceFolioWrapper(readerDataSource, context);
   }
 

@@ -42,7 +42,7 @@
       },
       valueSourceApi: {
         path: 'identifier-types',
-        valueJsonPath: '$.identifierTypes.*.id',
+        valueJsonPath: '$.identifierTypes.*.name',
         labelJsonPath: '$.identifierTypes.*.name',
       },
     },

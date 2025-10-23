@@ -1,0 +1,51 @@
+{
+  id: '0427eefc-6e4e-4607-bcb7-ba9d3223f0e1',
+  name: 'composite_receiving_titles',
+  private: false,
+  sources: [
+    {
+      alias: 'title',
+      type: 'entity-type',
+      targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6', // mod_orders_storage__titles
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'pol',
+      type: 'entity-type',
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
+      targetField: 'id',
+      sourceField: 'title.po_line_id',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'instance',
+      type: 'entity-type',
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      targetField: 'id',
+      sourceField: 'title.instance_id',
+      essentialOnly: true,
+      order: 30,
+    },
+    {
+      alias: 'created_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'title.metadata_created_by_user_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'updated_by',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'title.metadata_updated_by_user_id',
+      essentialOnly: true,
+      order: 50,
+    },
+  ],
+}

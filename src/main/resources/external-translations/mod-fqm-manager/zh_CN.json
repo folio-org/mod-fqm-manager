@@ -105,6 +105,7 @@
   "entityType.mod_orders_storage__titles.metadata_updated_by_user_id": "由用户UUID更新",
   "entityType.mod_orders_storage__titles.metadata_updated_by_username": "由用户名更新",
   "entityType.mod_orders_storage__titles.jsonb": "JSONB",
+  "entityType.mod_orders_storage__titles.acq_unit_names": "Acquisition unit",
   "entityType.mod_feesfines__waives": "免除费用/罚款",
   "entityType.mod_feesfines__waives.name_reason": "原因名称",
   "entityType.mod_feesfines__waives.description": "描述",

@@ -658,7 +658,7 @@
         "value": "UTF-8"
       },
       { "name": "DB_MAXPOOLSIZE",
-        "value": "5"
+        "value": "12"
       },
       { "name": "MODFQMMANAGER_QUERYRETENTIONDURATION",
         "value": "3h"

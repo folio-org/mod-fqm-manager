@@ -24,7 +24,7 @@ spring:
       initialization-fail-timeout: 1800000
       data-source-properties:
         reWriteBatchedInserts: true
-      maximum-pool-size: 12
+      maximum-pool-size: ${DB_MAXPOOLSIZE:12}
   sql:
     init:
       # to boot up application despite of any DB connection issues

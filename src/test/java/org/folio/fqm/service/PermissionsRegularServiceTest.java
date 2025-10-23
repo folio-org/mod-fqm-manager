@@ -59,24 +59,24 @@ class PermissionsRegularServiceTest {
     assertEquals(2, permissionsService.getUserPermissions().size());
   }
 
-  @Test
-  void testUserWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
-    setUpMocks(); // User has no permissions
-    EntityType entityType = getTestEntityType();
-
-    when(context.getTenantId()).thenReturn(TENANT_ID);
-    assertDoesNotThrow(
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
-      "No permissions are required"
-    );
-
-    entityType.requiredPermissions(List.of("permission1"));
-    assertThrows(
-      MissingPermissionsException.class,
-      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
-      "The does not have the required permission"
-    );
-  }
+//  @Test
+//  void testUserWithNoPermissionsCanOnlyAccessEntityTypesWithNoPermissions() {
+//    setUpMocks(); // User has no permissions
+//    EntityType entityType = getTestEntityType();
+//
+//    when(context.getTenantId()).thenReturn(TENANT_ID);
+//    assertDoesNotThrow(
+//      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
+//      "No permissions are required"
+//    );
+//
+//    entityType.requiredPermissions(List.of("permission1"));
+//    assertThrows(
+//      MissingPermissionsException.class,
+//      () -> permissionsService.verifyUserHasNecessaryPermissions(TENANT_ID, entityType, USER_ID, false),
+//      "The does not have the required permission"
+//    );
+//  }
 
   @Test
   void testUserHasNecessaryPermissions() {

@@ -19,6 +19,8 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.UpdateUsedByRequest;
+import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -948,7 +951,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(repo.getEntityTypeDefinition(targetId, TENANT_ID)).thenReturn(Optional.of(new EntityType()));
     when(clockService.now()).thenReturn(updatedDate);
-    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+    doNothing().when(repo).updateEntityType(any(CustomEntityType.class));
 
     // Act
     CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
@@ -956,7 +959,7 @@ class EntityTypeServiceTest {
     // Assert
     assertEquals(updatedDate, result.getUpdatedAt());
     assertEquals("Updated name", result.getName());
-    verify(repo).updateCustomEntityType(result);
+    verify(repo).updateEntityType(result);
   }
 
   @Test
@@ -981,7 +984,7 @@ class EntityTypeServiceTest {
     assertThrows(EntityTypeNotFoundException.class, () ->
       entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
 
-    verify(repo, never()).updateCustomEntityType(any());
+    verify(repo, never()).updateEntityType(any());
   }
 
   @Test
@@ -1016,14 +1019,14 @@ class EntityTypeServiceTest {
     when(repo.getEntityTypeDefinition(targetId, TENANT_ID)).thenReturn(Optional.of(new EntityType()));
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
     when(clockService.now()).thenReturn(updatedDate);
-    doNothing().when(repo).updateCustomEntityType(any(CustomEntityType.class));
+    doNothing().when(repo).updateEntityType(any(CustomEntityType.class));
 
     // Act
     CustomEntityType result = entityTypeService.updateCustomEntityType(entityTypeId, customEntityType);
 
     // Assert
     assertEquals(updatedDate, result.getUpdatedAt());
-    verify(repo).updateCustomEntityType(result);
+    verify(repo).updateEntityType(result);
   }
 
   @Test
@@ -1049,7 +1052,7 @@ class EntityTypeServiceTest {
     assertThrows(InvalidEntityTypeDefinitionException.class, () ->
       entityTypeService.updateCustomEntityType(entityTypeId, customEntityType));
 
-    verify(repo, never()).updateCustomEntityType(any());
+    verify(repo, never()).updateEntityType(any());
   }
 
   @Test
@@ -1093,8 +1096,8 @@ class EntityTypeServiceTest {
 
     // Assert
     assertEquals(updatedDate, result.getUpdatedAt());
-    verify(repo).updateCustomEntityType(argThat(entity ->
-      entity.getUpdatedAt().equals(updatedDate) && !entity.getUpdatedAt().equals(originalDate)));
+    verify(repo).updateEntityType(argThat(entity ->
+      ((CustomEntityType) entity).getUpdatedAt().equals(updatedDate) && !((CustomEntityType) entity).getUpdatedAt().equals(originalDate)));
   }
 
   @Test
@@ -1109,7 +1112,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+    verify(repo, times(1)).updateEntityType(any(CustomEntityType.class));
   }
 
   @Test
@@ -1140,7 +1143,7 @@ class EntityTypeServiceTest {
     );
 
     assertDoesNotThrow(() -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, times(1)).updateCustomEntityType(any(CustomEntityType.class));
+    verify(repo, times(1)).updateEntityType(any(CustomEntityType.class));
   }
 
   @Test
@@ -1180,7 +1183,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(null);
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, never()).updateCustomEntityType(any());
+    verify(repo, never()).updateEntityType(any());
   }
 
   @Test
@@ -1195,7 +1198,7 @@ class EntityTypeServiceTest {
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
 
     assertThrows(EntityTypeNotFoundException.class, () -> entityTypeService.deleteCustomEntityType(entityTypeId));
-    verify(repo, never()).updateCustomEntityType(any());
+    verify(repo, never()).updateEntityType(any());
   }
 
   @Test
@@ -1769,5 +1772,81 @@ class EntityTypeServiceTest {
       () -> entityTypeService.validateEntityType(entityTypeId, entityType, null)
     );
     assertEquals("Entity type must have at least one source defined", ex.getMessage());
+  }
+
+
+  @Test
+  void shouldAddUsedByWhenOperationIsAdd() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entity = new EntityType()
+      .id(entityTypeId.toString())
+      .usedBy(new ArrayList<>(List.of("existing-module")));
+
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
+      .thenReturn(Optional.of(entity));
+
+    Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
+      entityTypeId, "new-module", OperationEnum.ADD);
+
+    assertTrue(result.isPresent());
+    assertTrue(result.get().getUsedBy().containsAll(List.of("existing-module", "new-module")));
+
+    ArgumentCaptor<EntityType> captor = ArgumentCaptor.forClass(EntityType.class);
+    verify(repo).updateEntityType(captor.capture());
+    assertTrue(captor.getValue().getUsedBy().contains("new-module"));
+  }
+
+  @Test
+  void shouldRemoveUsedByWhenOperationIsRemove() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entity = new EntityType()
+      .id(entityTypeId.toString())
+      .usedBy(new ArrayList<>(List.of("module-to-keep", "module-to-remove")));
+
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
+      .thenReturn(Optional.of(entity));
+
+    Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
+      entityTypeId, "module-to-remove", OperationEnum.REMOVE);
+
+    assertTrue(result.isPresent());
+    assertEquals(List.of("module-to-keep"), result.get().getUsedBy());
+    verify(repo).updateEntityType(any(EntityType.class));
+  }
+
+  @Test
+  void shouldReturnEmptyWhenEntityTypeNotFound() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
+      .thenReturn(Optional.empty());
+
+    Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
+      entityTypeId, "my-module", OperationEnum.ADD);
+
+    assertTrue(result.isEmpty());
+    verify(repo, never()).updateEntityType(any());
+  }
+
+  @Test
+  void shouldHandleNullUsedByListGracefully() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entity = new EntityType()
+      .id(entityTypeId.toString())
+      .usedBy(null);
+
+    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
+      .thenReturn(Optional.of(entity));
+
+    Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
+      entityTypeId, "my-module", UpdateUsedByRequest.OperationEnum.ADD);
+
+    assertTrue(result.isPresent());
+    assertEquals(List.of("my-module"), result.get().getUsedBy());
+    verify(repo).updateEntityType(any(EntityType.class));
   }
 }

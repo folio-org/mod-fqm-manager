@@ -306,7 +306,7 @@ class EntityTypeRepositoryTest {
       .sources(Collections.emptyList())
       .columns(Collections.emptyList());
 
-    repo.updateCustomEntityType(updatedEntityType);
+    repo.updateEntityType(updatedEntityType);
 
     // 4. Retrieve and verify the update
     CustomEntityType retrievedUpdatedType = repo.getCustomEntityType(entityTypeId);
@@ -339,7 +339,7 @@ class EntityTypeRepositoryTest {
 
   @Test
   @SneakyThrows
-  void updateCustomEntityType_shouldHandleInvalidJson() {
+  void updateEntityType_shouldHandleInvalidJson() {
     // Similar approach as above but for updating
     UUID entityTypeId = UUID.randomUUID();
     UUID owner = UUID.randomUUID();
@@ -359,7 +359,7 @@ class EntityTypeRepositoryTest {
 
     // This should throw an InvalidEntityTypeDefinitionException
     assertThrows(InvalidEntityTypeDefinitionException.class, () ->
-      repo.updateCustomEntityType(customEntityType));
+      repo.updateEntityType(customEntityType));
   }
 
   @Test

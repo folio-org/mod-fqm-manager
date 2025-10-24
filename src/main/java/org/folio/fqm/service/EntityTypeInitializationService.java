@@ -8,7 +8,9 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.extern.log4j.Log4j2;
@@ -110,6 +112,24 @@ public class EntityTypeInitializationService {
       .stream()
       .map(EntityType::getId)
       .toList();
+
+    List<UUID> entityTypeUUIDs = entityTypeIds.stream()
+      .map(UUID::fromString)
+      .toList();
+
+    List<EntityType> existingEntityTypes = entityTypeRepository.getEntityTypeDefinitions(
+      entityTypeUUIDs,
+      folioExecutionContext.getTenantId()
+    ).toList();
+    Map<String, List<String>> usedByMap = existingEntityTypes.stream()
+      .collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
+
+    for (EntityType desired : desiredEntityTypes) {
+      List<String> existingUsedBy = usedByMap.get(desired.getId());
+      if (existingUsedBy != null) {
+        desired.setUsedBy(existingUsedBy);
+      }
+    }
 
     for (EntityType entityType : desiredEntityTypes) {
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());

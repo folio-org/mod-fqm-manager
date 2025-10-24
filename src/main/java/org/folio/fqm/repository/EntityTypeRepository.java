@@ -439,16 +439,16 @@ public class EntityTypeRepository {
     }
   }
 
-  public void updateCustomEntityType(CustomEntityType customEntityType) {
+  public void updateEntityType(EntityType entityType) {
     try {
       jooqContext
         .update(table(TABLE_NAME))
-        .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
-        .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(customEntityType.getId())))
+        .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(entityType)))
+        .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(entityType.getId())))
         .execute();
       entityTypeCache.invalidate(executionContext.getTenantId());
     } catch (JsonProcessingException e) {
-      throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
+      throw new InvalidEntityTypeDefinitionException(e.getMessage(), entityType);
     }
   }
 

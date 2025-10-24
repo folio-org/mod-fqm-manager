@@ -35,4 +35,5 @@
       direction: 'ASC',
     },
   ],
+  usedBy: ['some-module'],
 }

@@ -10,8 +10,8 @@ import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.rest.resource.EntityTypesApi;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -28,7 +28,6 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   private final EntityTypeService entityTypeService;
   private final MigrationService migrationService;
-  private final FolioExecutionContext folioExecutionContext;
 
   @EntityTypePermissionsRequired
   @Override
@@ -74,6 +73,17 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   public ResponseEntity<Void> deleteCustomEntityType(UUID entityTypeId) {
     entityTypeService.deleteCustomEntityType(entityTypeId);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<EntityType> updateEntityTypeUsedBy(UUID entityTypeId, UpdateUsedByRequest updateUsedByRequest) {
+    return entityTypeService.updateEntityTypeUsedBy(
+        entityTypeId,
+        updateUsedByRequest.getName(),
+        updateUsedByRequest.getOperation()
+      )
+      .map(ResponseEntity::ok)
+      .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
 

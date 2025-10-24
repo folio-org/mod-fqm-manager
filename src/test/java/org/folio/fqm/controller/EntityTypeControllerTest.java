@@ -27,9 +27,9 @@ import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.StringType;
+import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
-import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +45,12 @@ class EntityTypeControllerTest {
 
   private static final String GET_DEFINITION_URL = "/entity-types/{entity-type-id}";
   private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final String USED_BY_REQUEST = """
+    {
+      "name": "my-module",
+      "operation": "add"
+    }
+    """;
 
   @Autowired
   private MockMvc mockMvc;
@@ -55,8 +61,6 @@ class EntityTypeControllerTest {
   @MockitoBean
   private MigrationService migrationService;
 
-  @MockitoBean
-  private FolioExecutionContext folioExecutionContext;
 
   @Test
   void shouldReturnEntityTypeDefinition() throws Exception {
@@ -64,8 +68,7 @@ class EntityTypeControllerTest {
     String derivedTableName = "derived_table_01";
     EntityTypeColumn col = getEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
-    when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id,false)).thenReturn(mockDefinition);
+    when(entityTypeService.getEntityTypeDefinition(id, false)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -80,14 +83,14 @@ class EntityTypeControllerTest {
       .andExpect(jsonPath("$.columns[0].labelAlias", is(col.getLabelAlias())))
       .andExpect(jsonPath("$.columns[0].visibleByDefault", is(col.getVisibleByDefault())));
   }
+
   @Test
   void shouldReturnEntityTypeDefinitionWithHiddenColumn() throws Exception {
     UUID id = UUID.randomUUID();
     String derivedTableName = "derived_table_01";
     EntityTypeColumn col = getHiddenEntityTypeColumn();
     EntityType mockDefinition = getEntityType(col);
-    when(folioExecutionContext.getTenantId()).thenReturn("tenant_01");
-    when(entityTypeService.getEntityTypeDefinition(id,true)).thenReturn(mockDefinition);
+    when(entityTypeService.getEntityTypeDefinition(id, true)).thenReturn(mockDefinition);
     RequestBuilder builder = MockMvcRequestBuilders
       .get(GET_DEFINITION_URL, id)
       .accept(MediaType.APPLICATION_JSON)
@@ -401,6 +404,40 @@ class EntityTypeControllerTest {
       .contentType(MediaType.APPLICATION_JSON);
     mockMvc.perform(requestBuilder)
       .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  void shouldUpdateUsedByWithValidRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+
+    EntityType expectedEntityType = new EntityType().id(entityTypeId.toString()).usedBy(List.of("my-module"));
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .patch("/entity-types/" + entityTypeId + "/used-by")
+      .accept(MediaType.APPLICATION_JSON)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(USED_BY_REQUEST);
+
+    when(entityTypeService.updateEntityTypeUsedBy(entityTypeId, "my-module", UpdateUsedByRequest.OperationEnum.ADD)).thenReturn(Optional.of(expectedEntityType));
+
+    mockMvc.perform(requestBuilder)
+      .andExpect(status().isOk());
+  }
+
+  @Test
+  void shouldReturn404ForInvalidUsedByRequest() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .patch("/entity-types/" + entityTypeId + "/used-by")
+      .accept(MediaType.APPLICATION_JSON)
+      .contentType(MediaType.APPLICATION_JSON)
+      .content(USED_BY_REQUEST);
+
+    when(entityTypeService.updateEntityTypeUsedBy(entityTypeId, "my-module", UpdateUsedByRequest.OperationEnum.ADD)).thenReturn(Optional.empty());
+
+    mockMvc.perform(requestBuilder)
+      .andExpect(status().isNotFound());
   }
 
   private static EntityType getEntityType(EntityTypeColumn col) {

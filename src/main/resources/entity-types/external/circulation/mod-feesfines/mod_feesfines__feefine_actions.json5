@@ -1,7 +1,7 @@
 {
   id: '26726f53-af12-5d7d-88a8-62f13e88834d',
   name: 'mod_feesfines__feefine_actions',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

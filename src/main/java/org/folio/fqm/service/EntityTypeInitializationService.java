@@ -126,9 +126,7 @@ public class EntityTypeInitializationService {
 
     for (EntityType entityType : desiredEntityTypes) {
       List<String> existingUsedBy = usedByMap.get(entityType.getId());
-      if (existingUsedBy != null) {
-        entityType.setUsedBy(existingUsedBy);
-      }
+      entityType.setUsedBy(existingUsedBy);
 
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
       entityTypeService.validateEntityType(

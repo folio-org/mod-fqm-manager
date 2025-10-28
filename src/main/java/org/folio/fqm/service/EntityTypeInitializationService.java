@@ -116,14 +116,10 @@ public class EntityTypeInitializationService {
     List<UUID> entityTypeUUIDs = entityTypeIds.stream()
       .map(UUID::fromString)
       .toList();
-    List<EntityType> existingEntityTypes = entityTypeRepository.getEntityTypeDefinitions(
+    Map<String, List<String>> usedByMap = entityTypeRepository.getEntityTypeDefinitions(
       entityTypeUUIDs,
       folioExecutionContext.getTenantId()
-    ).toList();
-
-    Map<String, List<String>> usedByMap = existingEntityTypes
-      .stream()
-      .collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
+    ).collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
 
     for (EntityType entityType : desiredEntityTypes) {
       List<String> existingUsedBy = usedByMap.getOrDefault(entityType.getId(), Collections.emptyList());

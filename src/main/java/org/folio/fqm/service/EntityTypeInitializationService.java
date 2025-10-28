@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -125,7 +126,7 @@ public class EntityTypeInitializationService {
       .collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
 
     for (EntityType entityType : desiredEntityTypes) {
-      List<String> existingUsedBy = usedByMap.get(entityType.getId());
+      List<String> existingUsedBy = usedByMap.getOrDefault(entityType.getId(), Collections.emptyList());
       entityType.setUsedBy(existingUsedBy);
 
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());

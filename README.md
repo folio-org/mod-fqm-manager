@@ -241,6 +241,13 @@ curl \
 To paginate through the results, you can utilize the optional `offset` and `limit` query parameters. It's important to
 note that the offset parameter follows a zero-based index.
 
+> **Note:** You can retrieve results with concurrent API requests. However, it is recommended to avoid making too many
+> concurrent requests, as this may lead to increased load on the system. In our tests, we've found that retrieving 10000
+> results with 3 concurrent requests provides optimal performance without overwhelming the system. The gains from
+> additional concurrency beyond this point are minimal and may not justify the increased load. Smaller page sizes leads to
+> more API requests at a higher rate, which may also increase the load on the system, while larger page sizes lead to
+> higher memory consumption with little difference in performance.
+
 ## Cancelling a query
 To cancel a query after submission, you can utilize the following API:
 ```bash

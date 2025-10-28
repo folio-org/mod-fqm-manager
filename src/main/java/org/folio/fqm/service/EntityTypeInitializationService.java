@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -78,8 +79,7 @@ public class EntityTypeInitializationService {
     if (centralTenantId != null) {
       log.info("ECS central tenant ID: {}", centralTenantId);
       safeCentralTenantId = centralTenantId;
-    }
-    else {
+    } else {
       log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
       centralTenantId = "${central_tenant_id}";
       safeCentralTenantId = folioExecutionContext.getTenantId();
@@ -112,26 +112,24 @@ public class EntityTypeInitializationService {
       .stream()
       .map(EntityType::getId)
       .toList();
-
     List<UUID> entityTypeUUIDs = entityTypeIds.stream()
       .map(UUID::fromString)
       .toList();
-
     List<EntityType> existingEntityTypes = entityTypeRepository.getEntityTypeDefinitions(
       entityTypeUUIDs,
       folioExecutionContext.getTenantId()
     ).toList();
-    Map<String, List<String>> usedByMap = existingEntityTypes.stream()
+
+    Map<String, List<String>> usedByMap = existingEntityTypes
+      .stream()
       .collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
 
-    for (EntityType desired : desiredEntityTypes) {
-      List<String> existingUsedBy = usedByMap.get(desired.getId());
-      if (existingUsedBy != null) {
-        desired.setUsedBy(existingUsedBy);
-      }
-    }
-
     for (EntityType entityType : desiredEntityTypes) {
+      List<String> existingUsedBy = usedByMap.get(entityType.getId());
+      if (existingUsedBy != null) {
+        entityType.setUsedBy(existingUsedBy);
+      }
+
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
       entityTypeService.validateEntityType(
         UUID.fromString(entityType.getId()),

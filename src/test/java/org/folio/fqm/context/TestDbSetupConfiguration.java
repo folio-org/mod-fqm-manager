@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import liquibase.integration.spring.SpringLiquibase;
-import org.folio.fqm.IntegrationTestBase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;

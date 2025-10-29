@@ -76,7 +76,7 @@
         {
           "methods": ["PATCH"],
           "pathPattern": "/entity-types/{entity-type-id}/used-by",
-          "permissionsRequired": [ "fqm.entityTypes.item.get", "fqm.entityTypes.used-by.item.patch"]
+          "permissionsRequired": ["fqm.entityTypes.used-by.item.patch"]
         }
       ]
     },

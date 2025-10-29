@@ -3,12 +3,16 @@ package org.folio.fqm.service;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.extern.log4j.Log4j2;
@@ -76,8 +80,7 @@ public class EntityTypeInitializationService {
     if (centralTenantId != null) {
       log.info("ECS central tenant ID: {}", centralTenantId);
       safeCentralTenantId = centralTenantId;
-    }
-    else {
+    } else {
       log.info("ECS is not enabled for tenant {}", folioExecutionContext.getTenantId());
       centralTenantId = "${central_tenant_id}";
       safeCentralTenantId = folioExecutionContext.getTenantId();
@@ -110,8 +113,18 @@ public class EntityTypeInitializationService {
       .stream()
       .map(EntityType::getId)
       .toList();
+    List<UUID> entityTypeUUIDs = entityTypeIds.stream()
+      .map(UUID::fromString)
+      .toList();
+    Map<String, List<String>> usedByMap = entityTypeRepository.getEntityTypeDefinitions(
+      entityTypeUUIDs,
+      folioExecutionContext.getTenantId()
+    ).collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
 
     for (EntityType entityType : desiredEntityTypes) {
+      List<String> existingUsedBy = usedByMap.getOrDefault(entityType.getId(), Collections.emptyList());
+      entityType.setUsedBy(existingUsedBy);
+
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
       entityTypeService.validateEntityType(
         UUID.fromString(entityType.getId()),

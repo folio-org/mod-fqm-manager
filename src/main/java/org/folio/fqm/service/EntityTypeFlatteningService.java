@@ -138,7 +138,8 @@ public class EntityTypeFlatteningService {
       .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
       .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
       .filterConditions(originalEntityType.getFilterConditions())
-      .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions());
+      .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions())
+      .usedBy(originalEntityType.getUsedBy());
 
     // If we have a parent, this will be `parent.`, otherwise empty
     String aliasPrefix = Optional.ofNullable(sourceFromParent).map(s -> s.getAlias() + ".").orElse("");

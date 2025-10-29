@@ -36,6 +36,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
@@ -451,7 +452,7 @@ public class EntityTypeService {
       .build();
 
     validateCustomEntityType(entityTypeId, updatedCustomEntityType);
-    entityTypeRepository.updateCustomEntityType(updatedCustomEntityType);
+    entityTypeRepository.updateEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
   }
 
@@ -612,7 +613,7 @@ public class EntityTypeService {
       .deleted(true)
       .updatedAt(clockService.now())
       .build();
-    entityTypeRepository.updateCustomEntityType(deletedCustomEntityType);
+    entityTypeRepository.updateEntityType(deletedCustomEntityType);
   }
 
   /**
@@ -660,6 +661,25 @@ public class EntityTypeService {
     }
 
     return builder.build();
+  }
+
+  public Optional<EntityType> updateEntityTypeUsedBy(UUID entityTypeId, String usedBy, OperationEnum operation) {
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
+      .map(entityType -> {
+        Set<String> usedBySet = new HashSet<>(
+          Optional.ofNullable(entityType.getUsedBy()).orElse(Collections.emptyList())
+        );
+
+        if (operation == OperationEnum.ADD) {
+          usedBySet.add(usedBy);
+        } else if (operation == OperationEnum.REMOVE) {
+          usedBySet.remove(usedBy);
+        }
+
+        entityType.setUsedBy(new ArrayList<>(usedBySet));
+        entityTypeRepository.updateEntityType(entityType);
+        return entityType;
+      });
   }
 
   private void ensureEntityTypeIsNotInUse(EntityType entityType) {

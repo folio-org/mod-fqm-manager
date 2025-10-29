@@ -72,6 +72,11 @@
           "methods": ["POST"],
           "pathPattern": "/entity-types/custom/available-joins",
           "permissionsRequired": ["fqm.entityTypes.custom.available-joins.collection.post"]
+        },
+        {
+          "methods": ["PATCH"],
+          "pathPattern": "/entity-types/{entity-type-id}/used-by",
+          "permissionsRequired": ["fqm.entityTypes.item.get", "fqm.entity-types.used-by.item.patch"]
         }
       ]
     },

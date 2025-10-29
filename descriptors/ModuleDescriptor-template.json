@@ -76,7 +76,7 @@
         {
           "methods": ["PATCH"],
           "pathPattern": "/entity-types/{entity-type-id}/used-by",
-          "permissionsRequired": ["fqm.entityTypes.item.get", "fqm.entityTypes.used-by.item.patch"]
+          "permissionsRequired": ["fqm.entityTypes.item.get", "fqm.entityTypes.used-by.item.put"]
         }
       ]
     },
@@ -228,7 +228,7 @@
       "visible":  true
     },
     {
-      "permissionName": "fqm.entityTypes.used-by.item.patch",
+      "permissionName": "fqm.entityTypes.used-by.item.put",
       "displayName": "FQM - Update usedBy field for an entity type",
       "description": "Update usedBy field for an entity type",
       "visible":  true

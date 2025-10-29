@@ -228,7 +228,7 @@
       "visible":  true
     },
     {
-      "permissionName": "fqm.entity-types.used-by.item.put",
+      "permissionName": "fqm.entityTypes.used-by.item.put",
       "displayName": "FQM - Update usedBy field for an entity type",
       "description": "Update usedBy field for an entity type",
       "visible":  true

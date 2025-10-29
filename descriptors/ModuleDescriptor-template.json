@@ -76,7 +76,7 @@
         {
           "methods": ["PATCH"],
           "pathPattern": "/entity-types/{entity-type-id}/used-by",
-          "permissionsRequired": ["fqm.entityTypes.item.get", "fqm.entity-types.used-by.item.patch"]
+          "permissionsRequired": ["fqm.entityTypes.item.get", "fqm.entityTypes.used-by.item.patch"]
         }
       ]
     },
@@ -225,6 +225,12 @@
       "permissionName": "fqm.entityTypes.custom.item.delete",
       "displayName": "FQM - Delete custom entity type",
       "description": "Delete a custom entity type definition",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entity-types.used-by.item.patch",
+      "displayName": "FQM - Update usedBy field for an entity type",
+      "description": "Update usedBy field for an entity type",
       "visible":  true
     },
     {

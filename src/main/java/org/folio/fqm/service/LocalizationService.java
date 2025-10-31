@@ -34,6 +34,7 @@ public class LocalizationService {
   // refers to a possessive version of the entity type, for custom fields, e.g. "User's {customField}"
   private static final String ENTITY_TYPE_CUSTOM_FIELD_POSSESSIVE_TRANSLATION_TEMPLATE =
     "mod-fqm-manager.entityType.%s._custom_field_possessive";
+  private static final String ENTITY_TYPE_DESCRIPTION_TRANSLATION_TEMPLATE = "mod-fqm-manager.entityType.%s._description";
 
   // provides locale-specific way of joining `Source name — Field name`, to account for different separators or RTL
   // see MODFQMMGR-409 for more details
@@ -53,6 +54,7 @@ public class LocalizationService {
 
   public EntityType localizeEntityType(EntityType entityType, List<EntityTypeSource> sources) {
     entityType.setLabelAlias(getEntityTypeLabel(entityType));
+    entityType.setDescription(getEntityTypeDescription(entityType));
 
     var localizedColumns = entityType.getColumns().stream()
       .map(column -> localizeEntityTypeColumn(entityType, sources, column))
@@ -148,6 +150,10 @@ public class LocalizationService {
     } else {
       return entityType.getName();
     }
+  }
+
+  private String getEntityTypeDescription(EntityType entityType) {
+    return translationService.format(ENTITY_TYPE_DESCRIPTION_TRANSLATION_TEMPLATE.formatted(entityType.getName()));
   }
 
   private String getEntityTypeColumnLabel(String tableName, String columnName) {

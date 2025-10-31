@@ -128,6 +128,7 @@ public class EntityTypeFlatteningService {
     EntityType flattenedEntityType = new EntityType()
       .id(originalEntityType.getId())
       .name(originalEntityType.getName())
+      .description(originalEntityType.getDescription())
       ._private(originalEntityType.getPrivate())
       .defaultSort(originalEntityType.getDefaultSort())
       .idView(originalEntityType.getIdView())

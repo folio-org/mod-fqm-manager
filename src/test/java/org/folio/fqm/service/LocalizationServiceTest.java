@@ -40,6 +40,7 @@ class LocalizationServiceTest {
   private void testBasicEntityTypeFormatting(Map<String, String> translations,
                                              String expectedTableTranslation,
                                              String expectedColumnTranslation,
+                                             String expectedDescriptionTranslation,
                                              int numInvocations) {
     translations.forEach((translationKey, translationValue) -> when(translationService.format(translationKey)).thenReturn(translationValue));
 
@@ -50,6 +51,7 @@ class LocalizationServiceTest {
     EntityType actual = localizationService.localizeEntityType(entityType, null);
     assertEquals(expectedTableTranslation, actual.getLabelAlias());
     assertEquals(expectedColumnTranslation, actual.getColumns().get(0).getLabelAlias());
+    assertEquals(expectedDescriptionTranslation, actual.getDescription());
     verify(translationService, times(numInvocations)).format(anyString());
     verifyNoMoreInteractions(translationService);
   }
@@ -75,16 +77,20 @@ class LocalizationServiceTest {
   void testSimpleEntityTypeTranslations() {
     String expectedTableTranslation = "Table Name";
     String expectedColumnTranslation = "Column Name";
+    String expectedDescriptionTranslation = "Description";
     testBasicEntityTypeFormatting(
       Map.of(
         "mod-fqm-manager.entityType.table_name",
         expectedTableTranslation,
         "mod-fqm-manager.entityType.table_name.column_name",
-        expectedColumnTranslation
+        expectedColumnTranslation,
+        "mod-fqm-manager.entityType.table_name._description",
+        expectedDescriptionTranslation
       ),
       expectedTableTranslation,
       expectedColumnTranslation,
-      2
+      expectedDescriptionTranslation,
+      3
     );
   }
 
@@ -92,6 +98,8 @@ class LocalizationServiceTest {
   void testEntityTypeRootTranslations() {
     String expectedTableTranslationKey = "mod-fqm-manager.entityType.table_name";
     String expectedTableTranslation = "Table Name";
+    String expectedDescriptionTranslationKey = "mod-fqm-manager.entityType.table_name._description";
+    String expectedDescriptionTranslation = "Description";
 
     String expectedInnerSourceTranslationKey = "mod-fqm-manager.entityType.table_name.nested_source";
     String expectedInnerSourceTranslation = "Inner Source Name";
@@ -103,13 +111,14 @@ class LocalizationServiceTest {
       .addColumnsItem(new EntityTypeColumn().name("nested_source.foo").labelAlias(expectedColumnTranslation));
 
     when(translationService.format(expectedTableTranslationKey)).thenReturn(expectedTableTranslation);
+    when(translationService.format(expectedDescriptionTranslationKey)).thenReturn(expectedDescriptionTranslation);
     when(translationService.format(expectedInnerSourceTranslationKey)).thenReturn(expectedInnerSourceTranslation);
     mockSourceLabelJoiner();
 
     EntityType result = localizationService.localizeEntityType(entityType, List.of(new EntityTypeSource().alias("nested_source")));
     assertEquals("Inner Source Name | Field from a simple entity!", result.getColumns().get(0).getLabelAlias());
 
-    verify(translationService, times(2)).format(anyString());
+    verify(translationService, times(3)).format(anyString());
     verify(translationService, times(1)).format(anyString(), any(), any(), any(), any());
     verifyNoMoreInteractions(translationService);
   }

@@ -5,6 +5,7 @@ import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Field;
@@ -16,8 +17,10 @@ import java.util.List;
 
 import static org.jooq.impl.DSL.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EntityTypeUtilsTest {
 
@@ -147,5 +150,22 @@ class EntityTypeUtilsTest {
       InvalidEntityTypeDefinitionException.class,
       () -> EntityTypeUtils.findSourceByAlias(entityType, "missing", "ref")
     );
+  }
+
+  @Test
+  void testIsEntityTypeSimple() {
+    EntityType simpleEntityType = new EntityType()
+      .sources(List.of(
+        new EntityTypeSourceDatabase().alias("db-source").type("db")
+      ));
+
+    EntityType compositeEntityType = new EntityType()
+      .sources(List.of(
+        new EntityTypeSourceDatabase().alias("db-source").type("db"),
+        new EntityTypeSourceEntityType().alias("et-source").type("entityType")
+      ));
+
+    assertTrue(EntityTypeUtils.isSimple(simpleEntityType));
+    assertFalse(EntityTypeUtils.isSimple(compositeEntityType));
   }
 }

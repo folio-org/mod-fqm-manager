@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "severity": "warning",
+    "metadata": {
+      "team": "thunderjet",
+      "domain": "acquisition",
+      "module": "mod-orders-storage"
+    },
+    "type": "translations-extra",
+    "extraTranslations": [
+      "fqm.entityType.pieces._description",
+      "fqm.entityType.titles._description"
+    ]
+  }
+]

@@ -165,6 +165,12 @@ public class EntityTypeUtils {
     return Pair.of(field.substring(0, dotIndex), field.substring(dotIndex + 1));
   }
 
+  public static boolean isSimple(EntityType entityType) {
+    return entityType.getSources()
+      .stream()
+      .allMatch(source -> source.getType().equals("db"));
+  }
+
   private static List<EntityTypeColumn> getIdColumns(EntityType entityType) {
     return entityType
       .getColumns()

@@ -1176,6 +1176,31 @@ class EntityTypeServiceTest {
 
   }
 
+  // Java
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfConsumersUseEntityType() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+
+    // EntityType definition representing the same custom entity with consumer modules
+    CustomEntityType customEntityType = new CustomEntityType()
+      .name("custom_entity")
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .isCustom(true)
+      .usedBy(new ArrayList<>(List.of("mod-consumer", "mod-other-consumer")));
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class,
+      () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+
+    assertEquals("Cannot delete custom entity type because it is used by the following consumers: mod-consumer, mod-other-consumer", ex.getMessage());
+    verify(repo, never()).updateEntityType(any());
+  }
+
   @Test
   void deleteCustomEntityType_shouldThrowNotFoundException_whenEntityTypeDoesNotExist() {
     UUID entityTypeId = UUID.randomUUID();

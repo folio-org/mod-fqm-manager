@@ -625,9 +625,9 @@ public class EntityTypeService {
     return entityTypeRepository
       .getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
+      .filter(EntityTypeUtils::isSimple)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
       .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), executionContext.getTenantId(), true))
-      .filter(EntityTypeUtils::isSimple)
       .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a));
   }

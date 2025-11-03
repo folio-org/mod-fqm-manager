@@ -840,7 +840,9 @@ public class EntityTypeService {
    */
   private static List<LabeledValue> entityTypesToSortedLabeledValues(Stream<EntityType> entityTypes) {
     return entityTypes
-      .map(entityType -> new LabeledValue(entityType.getLabelAlias()).value(entityType.getId()))
+      .map(entityType ->
+        new LabeledValue(entityType.getLabelAlias()).value(entityType.getId()).description(entityType.getDescription())
+      )
       .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
   }

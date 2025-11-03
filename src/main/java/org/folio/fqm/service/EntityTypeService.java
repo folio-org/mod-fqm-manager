@@ -24,6 +24,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
@@ -624,6 +625,7 @@ public class EntityTypeService {
     return entityTypeRepository
       .getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
+      .filter(EntityTypeUtils::isSimple)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
       .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), executionContext.getTenantId(), true))
       .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))

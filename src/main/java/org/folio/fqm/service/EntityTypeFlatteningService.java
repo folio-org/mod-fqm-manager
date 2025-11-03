@@ -140,7 +140,13 @@ public class EntityTypeFlatteningService {
       .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
       .filterConditions(originalEntityType.getFilterConditions())
       .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions())
-      .usedBy(originalEntityType.getUsedBy());
+      .usedBy(originalEntityType.getUsedBy())
+      .putAdditionalProperty(
+        "isCustom",
+        Optional.ofNullable(originalEntityType.getAdditionalProperties())
+          .map(props -> props.get("isCustom"))
+          .orElse(false)
+      );
 
     // If we have a parent, this will be `parent.`, otherwise empty
     String aliasPrefix = Optional.ofNullable(sourceFromParent).map(s -> s.getAlias() + ".").orElse("");

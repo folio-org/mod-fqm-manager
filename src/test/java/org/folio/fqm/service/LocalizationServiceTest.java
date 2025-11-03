@@ -95,6 +95,43 @@ class LocalizationServiceTest {
   }
 
   @Test
+  void testCustomEntityTypeTranslations() {
+    String expectedTableTranslation = "Custom Table Name";
+    String expectedDescriptionTranslation = "Custom Description";
+    EntityType inputEntityType = new EntityType()
+      .name(expectedTableTranslation)
+      .description(expectedDescriptionTranslation)
+      .putAdditionalProperty("isCustom", true);
+
+    EntityType expectedCustomEntityType = new EntityType()
+      .name(expectedTableTranslation)
+      .description(expectedDescriptionTranslation)
+      .labelAlias(expectedTableTranslation)
+      .putAdditionalProperty("isCustom", true);
+
+    EntityType actualCustomEntityType = localizationService.localizeEntityType(inputEntityType, List.of());
+    assertEquals(expectedCustomEntityType, actualCustomEntityType);
+  }
+
+  @Test
+  void customEntityTypeDescriptionShouldDefaultToEmpty() {
+    String expectedTableTranslation = "Custom Table Name";
+    EntityType inputEntityType = new EntityType()
+      .name(expectedTableTranslation)
+      .description(null)
+      .putAdditionalProperty("isCustom", true);
+
+    EntityType expectedCustomEntityType = new EntityType()
+      .name(expectedTableTranslation)
+      .labelAlias(expectedTableTranslation)
+      .description("")
+      .putAdditionalProperty("isCustom", true);
+
+    EntityType actualCustomEntityType = localizationService.localizeEntityType(inputEntityType, List.of());
+    assertEquals(expectedCustomEntityType, actualCustomEntityType);
+  }
+
+  @Test
   void testEntityTypeRootTranslations() {
     String expectedTableTranslationKey = "mod-fqm-manager.entityType.table_name";
     String expectedTableTranslation = "Table Name";

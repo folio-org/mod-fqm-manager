@@ -153,7 +153,10 @@ public class LocalizationService {
   }
 
   private String getEntityTypeDescription(EntityType entityType) {
-    return translationService.format(ENTITY_TYPE_DESCRIPTION_TRANSLATION_TEMPLATE.formatted(entityType.getName()));
+    if (!Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom"))) {
+      return translationService.format(ENTITY_TYPE_DESCRIPTION_TRANSLATION_TEMPLATE.formatted(entityType.getName()));
+    }
+    return entityType.getDescription() != null ? entityType.getDescription() : "";
   }
 
   private String getEntityTypeColumnLabel(String tableName, String columnName) {

@@ -204,7 +204,7 @@
   "entityType.composite_user_details.groups": "Patron group",
   "entityType.composite_user_details.updated_by_user": "User updated by",
   "entityType.composite_user_details.users": "User",
-  "entityType.composite_users_details._description": "Composite entity type where each record is a user. Records include user data along with related group, created_by and updated_by user data when present.",
+  "entityType.composite_user_details._description": "Composite entity type where each record is a user. Records include user data along with related group, created_by and updated_by user data when present.",
   "entityType.composite_voucher": "Vouchers",
   "entityType.composite_voucher_line__fund_distribution": "Composite voucher line fund distribution",
   "entityType.composite_voucher_line__fund_distribution._description": "Composite entity type where each record is a combination of a voucher line and one of its fund distributions. Every distinct pairing of voucher line and fund distribution constitutes a separate record.",

@@ -1177,14 +1177,11 @@ class EntityTypeServiceTest {
 
   }
 
-  // Java
   @Test
   void deleteCustomEntityType_shouldThrowExceptionIfConsumersUseEntityType() {
     UUID entityTypeId = UUID.randomUUID();
     UUID ownerId = UUID.randomUUID();
     String tenantId = "tenant_01";
-
-    // EntityType definition representing the same custom entity with consumer modules
     CustomEntityType customEntityType = new CustomEntityType()
       .name("custom_entity")
       .id(entityTypeId.toString())

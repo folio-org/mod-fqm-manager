@@ -1107,7 +1107,8 @@ class EntityTypeServiceTest {
 
     CustomEntityType existingEntityType = new CustomEntityType()
       .id(entityTypeId.toString())
-      .owner(ownerId);
+      .owner(ownerId)
+      .usedBy(null);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
 
@@ -1859,13 +1860,13 @@ class EntityTypeServiceTest {
   @Test
   void shouldHandleNullUsedByListGracefully() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entity = new EntityType()
+    EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .usedBy(null);
 
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
-      .thenReturn(Optional.of(entity));
+      .thenReturn(Optional.of(entityType));
 
     Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
       entityTypeId, "my-module", UpdateUsedByRequest.OperationEnum.ADD);

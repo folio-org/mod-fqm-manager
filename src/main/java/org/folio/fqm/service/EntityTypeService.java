@@ -632,25 +632,35 @@ public class EntityTypeService {
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a));
   }
 
-  public AvailableJoinsResponse getAvailableJoins(CustomEntityType customEntityType, String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField) {
+  public AvailableJoinsResponse getAvailableJoins(List<EntityTypeSourceEntityType> sources, String customEntityTypeField, UUID targetEntityTypeId, String targetEntityTypeField) {
     // See https://folio-org.atlassian.net/browse/MODFQMMGR-608 for details on what this should return
     // TL;DR - It returns the possible options for the properties that aren't provided in the request (the method parameters)
     var builder = AvailableJoinsResponse.builder();
+    // Treat null or empty list as null, to simplify things
+    sources = sources == null || sources.isEmpty() ? null : sources;
 
     // Special case where all parameters are provided. The user already has everything they need to build a join, so return an empty AvailableJoins object
-    if (customEntityType != null && customEntityTypeField != null && targetEntityTypeId != null && targetEntityTypeField != null) {
+    if (sources != null && customEntityTypeField != null && targetEntityTypeId != null && targetEntityTypeField != null) {
       return builder.build();
     }
 
-    EntityType flattenedCustomEntityType = customEntityType == null ? null : entityTypeFlatteningService.getFlattenedEntityType(customEntityType, executionContext.getTenantId(), true);
     Map<UUID, EntityType> accessibleEntityTypesById = getAccessibleEntityTypesById();
 
-    if (targetEntityTypeId == null || flattenedCustomEntityType == null) {
+    // Special case where the custom ET isn't provided: provide all accessible entity types as possible targets
+    if (sources == null) {
+      return builder.availableTargetIds(entityTypesToSortedLabeledValues(accessibleEntityTypesById.values().stream()))
+        .build();
+    }
+
+    CustomEntityType tempCustomEntityType = CustomEntityType.builder()
+      .id(UUID.randomUUID().toString())
+      .name("temp custom entity type for join discovery")
+      .sources(new ArrayList<>(sources)) // Rebuild sources, to get the proper type
+      .build();
+    EntityType flattenedCustomEntityType = entityTypeFlatteningService.getFlattenedEntityType(tempCustomEntityType, executionContext.getTenantId(), true);
+
+    if (targetEntityTypeId == null) {
       builder.availableTargetIds(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById));
-      // Special case where the custom ET isn't provided: Only provide the target entity types
-      if (flattenedCustomEntityType == null) {
-        return builder.build();
-      }
     }
 
     if (customEntityTypeField == null) {
@@ -722,11 +732,6 @@ public class EntityTypeService {
    * and reverse joins from other entity types that can join to this customEntityType.
    */
   private static List<LabeledValue> discoverTargetEntityTypes(EntityType customEntityType, String customEntityTypeFieldName, Map<UUID, EntityType> accessibleEntityTypesById) {
-    // Special case where the custom ET isn't provided: All accessible entity types are returned
-    if (customEntityType == null) {
-      return entityTypesToSortedLabeledValues(accessibleEntityTypesById.values().stream());
-    }
-
     List<EntityTypeColumn> customEntityTypeColumns = customEntityType.getColumns().stream()
       .filter(col -> customEntityTypeFieldName == null || col.getName().equals(customEntityTypeFieldName))
       .toList();

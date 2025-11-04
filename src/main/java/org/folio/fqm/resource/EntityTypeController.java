@@ -93,7 +93,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
       return ResponseEntity.ok(entityTypeService.getAvailableJoins(null, null, null, null));
     }
     return ResponseEntity.ok(entityTypeService.getAvailableJoins(
-      availableJoinsRequest.getCustomEntityType(),
+      availableJoinsRequest.getSources(),
       availableJoinsRequest.getSourceField(),
       availableJoinsRequest.getTargetId(),
       availableJoinsRequest.getTargetField()

@@ -652,11 +652,10 @@ public class EntityTypeService {
         .build();
     }
 
-    CustomEntityType tempCustomEntityType = CustomEntityType.builder()
+    CustomEntityType tempCustomEntityType = new CustomEntityType()
       .id(UUID.randomUUID().toString())
       .name("temp custom entity type for join discovery")
-      .sources(new ArrayList<>(sources)) // Rebuild sources, to get the proper type
-      .build();
+      .sources(new ArrayList<>(sources)); // Rebuild sources, to get the proper type
     EntityType flattenedCustomEntityType = entityTypeFlatteningService.getFlattenedEntityType(tempCustomEntityType, executionContext.getTenantId(), true);
 
     if (targetEntityTypeId == null) {

@@ -61,7 +61,7 @@ public class PermissionsRegularService implements PermissionsService {
 
   public Set<String> getRequiredPermissions(EntityType entityType) {
     EntityType flattenedEntityType = entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), context.getTenantId(), false);
-    return new HashSet<>(flattenedEntityType.getRequiredPermissions());
+    return new HashSet<>(flattenedEntityType.getRequiredPermissions() != null ? flattenedEntityType.getRequiredPermissions() : List.of());
   }
 
   @Override

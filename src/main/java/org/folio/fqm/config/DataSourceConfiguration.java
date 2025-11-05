@@ -50,9 +50,8 @@ public class DataSourceConfiguration {
       .build();
 
     datasource.setMaximumPoolSize(maxPoolSize);
-
-    log.info("Writer DB URL: {}", writerDataSourceProperties().getUrl());
     log.info("Max pool size for writer datasource: {}", datasource.getMaximumPoolSize());
+
     return datasource;
   }
 
@@ -63,8 +62,7 @@ public class DataSourceConfiguration {
       return writerDataSource;
     }
 
-    log.info("Connecting to separate reader DB at {}:{}", dbHostReader, System.getProperty("DB_PORT_READER"));
-
+    log.info("Connecting to separate reader DB");
     HikariDataSource readerDataSource = readerDataSourceProperties()
       .initializeDataSourceBuilder()
       .type(HikariDataSource.class)

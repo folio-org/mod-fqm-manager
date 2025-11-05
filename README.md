@@ -37,25 +37,26 @@ By utilizing the combination of source views, computed views, and other relevant
 mvn clean install
 ```
 ## Environment Variables
-| Name                                              | Default Value | Description                                                                                    |
-|---------------------------------------------------|---------------|------------------------------------------------------------------------------------------------|
-| DB\_HOST                                          | localhost     | Postgres hostname                                                                              |
-| DB\_PORT                                          | 5432          | Postgres port                                                                                  |
-| DB\_HOST\_READER                                  | localhost     | Postgres hostname                                                                              |
-| DB\_PORT\_READER                                  | 5432          | Postgres port                                                                                  |
-| DB\_USERNAME                                      | postgres      | Postgres username                                                                              |
-| DB\_PASSWORD                                      | postgres      | Postgres password                                                                              |
-| DB\_DATABASE                                      | postgres      | Postgres database name                                                                         |
-| IS\_EUREKA                                        | false         | Specifies if environment is configured for EUREKA                                              |
-| MAX\_QUERY\_SIZE                                  | 1250000       | max result count per query                                                                     |
-| MODFQMMANAGER\_PERMISSIONSCACHETIMEOUTSECONDS     | 60            | Cache duration for user permissions                                                            |
-| MODFQMMANAGER\_ENTITYTYPECACHETIMEOUTSECONDS      | 300           | Cache duration for entity type definitions                                                     |
-| MODFQMMANAGER\_ZOMBIEQUERYMAXWAITSECONDS          | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie |
-| SERVER\_PORT                                      | 8081          | Server port                                                                                    |
-| MODFQMMANAGER\_QUERYRETENTIONDURATION             | 3h            | Older queries get deleted                                                                      |
-| TASK\_EXECUTION\_POOL\_CORESIZE                   | 9             | Core number of concurrent async tasks                                                          |
-| TASK\_EXECUTION\_POOL\_MAXSIZE                    | 10            | Max number of concurrent async tasks                                                           |
-| TASK\_EXECUTION\_POOL\_QUEUECAPACITY              | 1000          | Size of the task queue                                                                         |
+| Name                                          | Default Value | Description                                                                                     |
+|-----------------------------------------------|---------------|-------------------------------------------------------------------------------------------------|
+| DB\_HOST                                      | localhost     | Postgres hostname                                                                               |
+| DB\_PORT                                      | 5432          | Postgres port                                                                                   |
+| DB\_HOST\_READER                              | localhost     | Postgres hostname                                                                               |
+| DB\_PORT\_READER                              | 5432          | Postgres port                                                                                   |
+| DB\_USERNAME                                  | postgres      | Postgres username                                                                               |
+| DB\_PASSWORD                                  | postgres      | Postgres password                                                                               |
+| DB\_DATABASE                                  | postgres      | Postgres database name                                                                          |
+| DB\_MAXPOOLSIZE                               | 12            | Maximum number of connections in the database connection pool                                   |
+| IS\_EUREKA                                    | false         | Specifies if environment is configured for EUREKA                                               |
+| MAX\_QUERY\_SIZE                              | 1250000       | max result count per query                                                                      |
+| MODFQMMANAGER\_PERMISSIONSCACHETIMEOUTSECONDS | 60            | Cache duration for user permissions                                                             |
+| MODFQMMANAGER\_ENTITYTYPECACHETIMEOUTSECONDS  | 300           | Cache duration for entity type definitions                                                      |
+| MODFQMMANAGER\_ZOMBIEQUERYMAXWAITSECONDS      | 300           | Maximum wait time before assuming an in-progress query without a backing SQL query is a zombie  |
+| SERVER\_PORT                                  | 8081          | Server port                                                                                     |
+| MODFQMMANAGER\_QUERYRETENTIONDURATION         | 3h            | Older queries get deleted                                                                       |
+| TASK\_EXECUTION\_POOL\_CORESIZE               | 9             | Core number of concurrent async tasks                                                           |
+| TASK\_EXECUTION\_POOL\_MAXSIZE                | 10            | Max number of concurrent async tasks                                                            |
+| TASK\_EXECUTION\_POOL\_QUEUECAPACITY          | 1000          | Size of the task queue                                                                          |
 
 > **Note regarding `MODFQMMANAGER\_ENTITYTYPECACHETIMEOUTSECONDS`:** The default value defined in the project's
 > module descriptor is `300`, as this value is more appropriate for development environments while still being reasonable

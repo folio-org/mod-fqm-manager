@@ -1,5 +1,6 @@
 package org.folio.fqm.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.folio.spring.FolioExecutionContext;
@@ -24,6 +25,9 @@ public class DataSourceConfiguration {
   @Value("${DB_HOST_READER:}")
   private String dbHostReader;
 
+  @Value("${spring.datasource.hikari.maximum-pool-size}")
+  private int maxPoolSize;
+
   @Bean
   @ConfigurationProperties("spring.datasource.writer")
   public DataSourceProperties writerDataSourceProperties() {
@@ -40,24 +44,33 @@ public class DataSourceConfiguration {
   @Bean("dataSource")
   @ConfigurationProperties("spring.datasource.hikari")
   public DataSource writerDataSource() {
-    return writerDataSourceProperties()
+    HikariDataSource datasource = writerDataSourceProperties()
       .initializeDataSourceBuilder()
+      .type(HikariDataSource.class)
       .build();
+
+    datasource.setMaximumPoolSize(maxPoolSize);
+    log.info("Max pool size for writer datasource: {}", datasource.getMaximumPoolSize());
+
+    return datasource;
   }
 
   @Bean("readerDataSource")
-  @ConfigurationProperties("spring.datasource.hikari")
-  public DataSource readerDataSource(FolioExecutionContext context) {
-    DataSourceProperties dataSourceProperties = readerDataSourceProperties();
+  public DataSource readerDataSource(FolioExecutionContext context, DataSource writerDataSource) {
     if (ObjectUtils.isEmpty(dbHostReader)) {
-      log.warn("Writer DB is used since reader DB is not available");
-      dataSourceProperties = writerDataSourceProperties();
-    } else {
-      log.info("Connecting to reader DB");
+      log.warn("Reader DB not defined; using writer datasource");
+      return writerDataSource;
     }
-    DataSource readerDataSource = dataSourceProperties
+
+    log.info("Connecting to separate reader DB");
+    HikariDataSource readerDataSource = readerDataSourceProperties()
       .initializeDataSourceBuilder()
+      .type(HikariDataSource.class)
       .build();
+
+    readerDataSource.setMaximumPoolSize(maxPoolSize);
+    log.info("Max pool size for reader datasource: {}", readerDataSource.getMaximumPoolSize());
+
     return new DataSourceFolioWrapper(readerDataSource, context);
   }
 

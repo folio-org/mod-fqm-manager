@@ -696,6 +696,7 @@ public class EntityTypeService {
 
   private void ensureEntityTypeIsNotInUse(EntityType entityType) {
     ensureNoEntityTypesUseThisEntityType(entityType);
+    ensureNoConsumersUseThisEntityType(entityType);
   }
 
   private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
@@ -725,6 +726,16 @@ public class EntityTypeService {
           source.getTargetId() != null &&
             source.getTargetId().toString().equals(target.getId())
         );
+  }
+
+  private void ensureNoConsumersUseThisEntityType(EntityType entityType) {
+    if (entityType.getUsedBy() != null && !entityType.getUsedBy().isEmpty()) {
+      String usedBy = String.join(", ", entityType.getUsedBy());
+      throw new EntityTypeInUseException(
+        entityType,
+        "Cannot delete custom entity type because it is used by the following consumers: " + usedBy
+      );
+    }
   }
 
   /**

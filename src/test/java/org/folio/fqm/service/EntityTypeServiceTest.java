@@ -1107,7 +1107,8 @@ class EntityTypeServiceTest {
 
     CustomEntityType existingEntityType = new CustomEntityType()
       .id(entityTypeId.toString())
-      .owner(ownerId);
+      .owner(ownerId)
+      .usedBy(null);
 
     when(repo.getCustomEntityType(entityTypeId)).thenReturn(existingEntityType);
 
@@ -1174,6 +1175,28 @@ class EntityTypeServiceTest {
 
     assertEquals(HttpStatus.CONFLICT, ex.getHttpStatus());
 
+  }
+
+  @Test
+  void deleteCustomEntityType_shouldThrowExceptionIfConsumersUseEntityType() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID ownerId = UUID.randomUUID();
+    String tenantId = "tenant_01";
+    CustomEntityType customEntityType = new CustomEntityType()
+      .name("custom_entity")
+      .id(entityTypeId.toString())
+      .owner(ownerId)
+      .isCustom(true)
+      .usedBy(new ArrayList<>(List.of("mod-consumer", "mod-other-consumer")));
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(repo.getCustomEntityType(entityTypeId)).thenReturn(customEntityType);
+
+    EntityTypeInUseException ex = assertThrows(EntityTypeInUseException.class,
+      () -> entityTypeService.deleteCustomEntityType(entityTypeId));
+
+    assertEquals("Cannot delete custom entity type because it is used by the following consumers: mod-consumer, mod-other-consumer", ex.getMessage());
+    verify(repo, never()).updateEntityType(any());
   }
 
   @Test
@@ -1834,13 +1857,13 @@ class EntityTypeServiceTest {
   @Test
   void shouldHandleNullUsedByListGracefully() {
     UUID entityTypeId = UUID.randomUUID();
-    EntityType entity = new EntityType()
+    EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .usedBy(null);
 
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID))
-      .thenReturn(Optional.of(entity));
+      .thenReturn(Optional.of(entityType));
 
     Optional<EntityType> result = entityTypeService.updateEntityTypeUsedBy(
       entityTypeId, "my-module", UpdateUsedByRequest.OperationEnum.ADD);

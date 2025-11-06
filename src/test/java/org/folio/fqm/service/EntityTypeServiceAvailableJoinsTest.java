@@ -439,10 +439,10 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and no specific field
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, null, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId1, null);
 
-    // Then it should include both target entity types in the available target entity types
-    assertNotNull(result.getAvailableTargetIds());
+    // Then it should not include any target IDs
+    assertNull(result.getAvailableTargetIds());
 
     // And it should include the custom entity type field that can be used for joins
     assertNotNull(result.getAvailableSourceFields());
@@ -453,6 +453,42 @@ class EntityTypeServiceAvailableJoinsTest {
       .map(LabeledValue::getValue)
       .collect(Collectors.toSet());
     assertTrue(customFieldNames.contains("col1"));
+  }
+
+  @Test
+  void getAvailableJoins_shouldOnlyReturnTargetIdsWhenItIsNotProvided() {
+    // Use static entityTypes from the repo for custom and target entity types
+    UUID customEtId = UUID.fromString("00000000-0000-0000-0000-000000000001"); // et1
+    UUID targetEtId1 = UUID.fromString("00000000-0000-0000-0000-000000000002"); // et2
+    UUID targetEtId2 = UUID.fromString("00000000-0000-0000-0000-000000000003"); // et3
+
+    List<EntityTypeSourceEntityType> sources = List.of(
+      new EntityTypeSourceEntityType()
+        .type("entity-type")
+        .alias("superCoolAlias")
+        .targetId(targetEtId1)
+    );
+    EntityType customEt = entityTypes.get(customEtId);
+    EntityType targetEt1 = entityTypes.get(targetEtId1);
+    EntityType targetEt2 = entityTypes.get(targetEtId2);
+
+    Map<UUID, EntityType> accessible = Map.of(
+      targetEtId1, targetEt1,
+      targetEtId2, targetEt2
+    );
+
+    doReturn(accessible).when(entityTypeService).getAccessibleEntityTypesById();
+    doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
+
+    // When there's a request for available joins with the custom entity type and no specific field
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, null, null);
+
+    // Then it should include both target entity types in the available target entity types
+    assertNotNull(result.getAvailableTargetIds());
+
+    // And it should not include the custom entity type fields or target fields
+    assertNull(result.getAvailableSourceFields());
+    assertNull(result.getAvailableTargetFields());
   }
 
   @Test

@@ -658,16 +658,17 @@ public class EntityTypeService {
       .sources(new ArrayList<>(sources)); // Rebuild sources, to get the proper type
     EntityType flattenedCustomEntityType = entityTypeFlatteningService.getFlattenedEntityType(tempCustomEntityType, executionContext.getTenantId(), true);
 
+    // Only provide target ET ids when the target ET has not been provided
     if (targetEntityTypeId == null) {
-      builder.availableTargetIds(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById));
+      return builder.availableTargetIds(discoverTargetEntityTypes(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById))
+        .build();
     }
 
     if (customEntityTypeField == null) {
       builder.availableSourceFields(discoverCustomEntityTypeFields(flattenedCustomEntityType, targetEntityTypeId, targetEntityTypeField, accessibleEntityTypesById));
     }
 
-    // Only provide target ET fields when the target ET has been provided
-    if (targetEntityTypeField == null && targetEntityTypeId != null) {
+    if (targetEntityTypeField == null) {
       builder.availableTargetFields(discoverTargetEntityTypeFields(flattenedCustomEntityType, customEntityTypeField, accessibleEntityTypesById.get(targetEntityTypeId)));
     }
 

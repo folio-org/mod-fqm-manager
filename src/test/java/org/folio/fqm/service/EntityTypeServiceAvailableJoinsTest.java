@@ -10,6 +10,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.querytool.domain.dto.LabeledValue;
+import org.folio.querytool.domain.dto.LabeledValueWithDescription;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -185,8 +186,8 @@ class EntityTypeServiceAvailableJoinsTest {
     // Then it should return all available target entity types
     AvailableJoinsResponse expected = new AvailableJoinsResponse()
       .availableTargetIds(entityTypeService.getAccessibleEntityTypesById().values().stream()
-        .map(et -> new LabeledValue(et.getLabelAlias()).value(et.getId()))
-        .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
+        .map(et -> new LabeledValueWithDescription(et.getLabelAlias()).value(et.getId()))
+        .sorted(comparing(LabeledValueWithDescription::getLabel, String.CASE_INSENSITIVE_ORDER))
         .toList())
       .availableTargetFields(null)
       .availableSourceFields(null);

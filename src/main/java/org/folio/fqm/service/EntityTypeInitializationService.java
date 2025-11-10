@@ -86,7 +86,8 @@ public class EntityTypeInitializationService {
       safeCentralTenantId = folioExecutionContext.getTenantId();
     }
     String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
-    List<EntityType> desiredEntityTypes = Stream
+
+    List<EntityType> availableEntityTypes = Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json5"))
@@ -109,19 +110,30 @@ public class EntityTypeInitializationService {
       })
       .toList();
 
-    List<String> entityTypeIds = desiredEntityTypes
+    validateEntityTypesAndFillUsedBy(availableEntityTypes);
+
+    // lambdas ensure we don't do the stream/map/etc. unless logging is enabled
+    log.info(
+      "Found {} available entity types in package: {}",
+      () -> availableEntityTypes.size(),
+      () -> availableEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
+    );
+
+    entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+  }
+
+  private void validateEntityTypesAndFillUsedBy(List<EntityType> entityTypes) {
+    List<UUID> entityTypeIds = entityTypes
       .stream()
       .map(EntityType::getId)
-      .toList();
-    List<UUID> entityTypeUUIDs = entityTypeIds.stream()
       .map(UUID::fromString)
       .toList();
     Map<String, List<String>> usedByMap = entityTypeRepository.getEntityTypeDefinitions(
-      entityTypeUUIDs,
+      entityTypeIds,
       folioExecutionContext.getTenantId()
     ).collect(Collectors.toMap(EntityType::getId, EntityType::getUsedBy));
 
-    for (EntityType entityType : desiredEntityTypes) {
+    for (EntityType entityType : entityTypes) {
       List<String> existingUsedBy = usedByMap.getOrDefault(entityType.getId(), Collections.emptyList());
       entityType.setUsedBy(existingUsedBy);
 
@@ -132,14 +144,5 @@ public class EntityTypeInitializationService {
         entityTypeIds
       );
     }
-
-    // lambdas ensure we don't do the stream/map/etc. unless logging is enabled
-    log.info(
-      "Found {} entity types in package: {}",
-      () -> desiredEntityTypes.size(),
-      () -> desiredEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
-    );
-
-    entityTypeRepository.replaceEntityTypeDefinitions(desiredEntityTypes);
   }
 }

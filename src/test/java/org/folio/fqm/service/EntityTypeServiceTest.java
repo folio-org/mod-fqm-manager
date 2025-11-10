@@ -1738,7 +1738,7 @@ class EntityTypeServiceTest {
   void validateEntityType_shouldThrowException_whenSourceIdNotInValidSources() {
     UUID entityTypeId = UUID.randomUUID();
     UUID sourceId = UUID.randomUUID();
-    List<String> validSources = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    List<UUID> validSources = List.of(new UUID(1, 0), new UUID(1, 1));
 
     EntityTypeSourceEntityType source = new EntityTypeSourceEntityType();
     source.setAlias("sourceAlias");
@@ -1763,7 +1763,7 @@ class EntityTypeServiceTest {
   void validateEntityType_shouldNotThrow_whenSourceIdIsInValidEntityTypeIds() {
     UUID entityTypeId = UUID.randomUUID();
     UUID sourceId = UUID.randomUUID();
-    List<String> validEntityTypeIds = List.of(sourceId.toString(), UUID.randomUUID().toString());
+    List<UUID> validEntityTypeIds = List.of(sourceId, new UUID(0, 1));
 
     EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder()
       .alias("sourceAlias")

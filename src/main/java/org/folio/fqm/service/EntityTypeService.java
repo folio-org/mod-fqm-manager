@@ -511,7 +511,7 @@ public class EntityTypeService {
    * @throws InvalidEntityTypeDefinitionException if any validation check fails
    */
   @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
-  void validateEntityType(UUID entityTypeId, EntityType entityType, List<String> validTargetIds) {
+  void validateEntityType(UUID entityTypeId, EntityType entityType, List<UUID> validTargetIds) {
     if (entityType.getId() == null || entityTypeId == null) {
       throw new InvalidEntityTypeDefinitionException("Entity type ID cannot be null", entityTypeId);
     }
@@ -535,7 +535,7 @@ public class EntityTypeService {
   }
 
   @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
-  private void validateSources(EntityType entityType, List<String> validTargetIds) {
+  private void validateSources(EntityType entityType, List<UUID> validTargetIds) {
     if (entityType.getSources() == null) {
       throw new InvalidEntityTypeDefinitionException("Entity type must have at least one source defined", entityType);
     }
@@ -561,7 +561,7 @@ public class EntityTypeService {
     }
   }
 
-  private void validateEntityTypeSource(EntityType entityType, UUID targetId, List<String> validTargetIds) {
+  private void validateEntityTypeSource(EntityType entityType, UUID targetId, List<UUID> validTargetIds) {
     if (targetId == null) {
       throw new InvalidEntityTypeDefinitionException("Source entity type ID cannot be null for entity-type sources", entityType);
     }
@@ -569,7 +569,7 @@ public class EntityTypeService {
       if (entityTypeRepository.getEntityTypeDefinition(targetId, executionContext.getTenantId()).isEmpty()) {
         throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
       }
-    } else if (!validTargetIds.contains(targetId.toString())) {
+    } else if (!validTargetIds.contains(UUID.fromString(targetId.toString()))) {
       throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
     }
   }

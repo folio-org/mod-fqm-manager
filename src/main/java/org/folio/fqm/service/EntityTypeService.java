@@ -36,6 +36,7 @@ import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.LabeledValue;
+import org.folio.querytool.domain.dto.LabeledValueWithDescription;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -742,7 +743,7 @@ public class EntityTypeService {
    * Identifies joinable entity types by analyzing both direct joins from fields within the customEntityType
    * and reverse joins from other entity types that can join to this customEntityType.
    */
-  private static List<LabeledValue> discoverTargetEntityTypes(EntityType customEntityType, String customEntityTypeFieldName, Map<UUID, EntityType> accessibleEntityTypesById) {
+  private static List<LabeledValueWithDescription> discoverTargetEntityTypes(EntityType customEntityType, String customEntityTypeFieldName, Map<UUID, EntityType> accessibleEntityTypesById) {
     List<EntityTypeColumn> customEntityTypeColumns = customEntityType.getColumns().stream()
       .filter(col -> customEntityTypeFieldName == null || col.getName().equals(customEntityTypeFieldName))
       .toList();
@@ -854,12 +855,14 @@ public class EntityTypeService {
   /**
    * Converts a collection of entity types to sorted labeled values.
    */
-  private static List<LabeledValue> entityTypesToSortedLabeledValues(Stream<EntityType> entityTypes) {
+  private static List<LabeledValueWithDescription> entityTypesToSortedLabeledValues(Stream<EntityType> entityTypes) {
     return entityTypes
       .map(entityType ->
-        new LabeledValue(entityType.getLabelAlias()).value(entityType.getId()).description(entityType.getDescription())
+        new LabeledValueWithDescription(entityType.getLabelAlias())
+          .value(entityType.getId())
+          .description(entityType.getDescription())
       )
-      .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .sorted(comparing(LabeledValueWithDescription::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
   }
 }

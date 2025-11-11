@@ -260,8 +260,8 @@ class IdStreamerTest {
     );
 
     assertDoesNotThrow(() -> newIdStreamer.cancelQuery(CANCELLED_QUERY_ID));
-    verify(mockJooqContext, times(1)).execute("SELECT pg_cancel_backend(?)", 123);
-    verify(mockJooqContext, times(1)).execute("SELECT pg_cancel_backend(?)", 456);
+    verify(mockJooqContext, times(1)).execute("SELECT pg_terminate_backend(?)", 123);
+    verify(mockJooqContext, times(1)).execute("SELECT pg_terminate_backend(?)", 456);
   }
 
   @Test

@@ -193,7 +193,7 @@ public class IdStreamer {
             .orElseThrow(() -> new QueryNotFoundException(queryId))
             .status();
           if (queryStatus == QueryStatus.CANCELLED) {
-            cancelQuery(queryId);
+            queryRepository.cancelQuery(queryId);
           } else if (queryStatus == QueryStatus.IN_PROGRESS) {
             // Reschedule the cancellation monitor if query is still in progress
             executorService.schedule(this, QUERY_CANCELLATION_CHECK_SECONDS, TimeUnit.SECONDS);
@@ -204,15 +204,6 @@ public class IdStreamer {
       }
     };
     executorService.schedule(cancellationMonitor, QUERY_CANCELLATION_CHECK_SECONDS, TimeUnit.SECONDS);
-  }
-
-  void cancelQuery(UUID queryId) {
-    log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
-    List<Integer> pids = queryRepository.getSelectQueryPids(queryId);
-    for (int pid : pids) {
-      log.debug("PID for the executing query: {}", pid);
-      jooqContext.execute("SELECT pg_terminate_backend(?)", pid);
-    }
   }
 
   private ResultQuery<Record1<String[]>> buildQuery(EntityType entityType, Field<String[]> idValueGetter, String finalJoinClause, Condition sqlWhereClause, boolean sortResults, int batchSize, UUID queryId) {

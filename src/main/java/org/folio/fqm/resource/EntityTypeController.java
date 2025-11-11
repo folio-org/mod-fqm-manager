@@ -90,13 +90,11 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @Override
   public ResponseEntity<AvailableJoinsResponse> getAvailableJoins(AvailableJoinsRequest availableJoinsRequest) {
     if (availableJoinsRequest == null) {
-      return ResponseEntity.ok(entityTypeService.getAvailableJoins(null, null, null, null));
+      return ResponseEntity.ok(entityTypeService.getAvailableJoins(null, null));
     }
     return ResponseEntity.ok(entityTypeService.getAvailableJoins(
       availableJoinsRequest.getSources(),
-      availableJoinsRequest.getSourceField(),
-      availableJoinsRequest.getTargetId(),
-      availableJoinsRequest.getTargetField()
+      availableJoinsRequest.getTargetId()
     ));
   }
 

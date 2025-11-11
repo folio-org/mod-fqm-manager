@@ -9,6 +9,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.JoinDirection;
+import org.folio.querytool.domain.dto.JoinFieldPair;
 import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.LabeledValueWithDescription;
 import org.folio.querytool.domain.dto.StringType;
@@ -158,30 +159,9 @@ class EntityTypeServiceAvailableJoinsTest {
   }
 
   @Test
-  void getAvailableJoins_shouldReturnEmptyWhenAllParamsProvided() {
-    String customEntityTypeField = "col1";
-    UUID targetEntityTypeId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    String targetEntityTypeField = "colA";
-    List<EntityTypeSourceEntityType> sources = List.of(
-      new EntityTypeSourceEntityType()
-        .type("entity-type")
-        .alias("superCoolAlias")
-        .targetId(targetEntityTypeId)
-    );
-    // When there's a request for available joins with those components
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, customEntityTypeField, targetEntityTypeId, targetEntityTypeField);
-
-    // Then the available options are all empty or null, since there are no unknowns
-    assertNotNull(result);
-    assertTrue(CollectionUtils.isEmpty(result.getAvailableTargetIds()));
-    assertTrue(CollectionUtils.isEmpty(result.getAvailableSourceFields()));
-    assertTrue(CollectionUtils.isEmpty(result.getAvailableTargetFields()));
-  }
-
-  @Test
   void getAvailableJoins_shouldReturnTargetEntityTypesWhenCustomEntityTypeIsNull() {
     // When there's a request for available joins without a custom entity type
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null, null, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null);
 
     // Then it should return all available target entity types
     AvailableJoinsResponse expected = new AvailableJoinsResponse()
@@ -189,13 +169,12 @@ class EntityTypeServiceAvailableJoinsTest {
         .map(et -> new LabeledValueWithDescription(et.getLabelAlias()).value(et.getId()))
         .sorted(comparing(LabeledValueWithDescription::getLabel, String.CASE_INSENSITIVE_ORDER))
         .toList())
-      .availableTargetFields(null)
-      .availableSourceFields(null);
+      .availableJoinConditions(null);
     assertEquals(expected, result);
   }
 
   @Test
-  void getAvailableJoins_shouldReturnCustomEntityTypeFieldsWhenCustomEntityTypeFieldIsNull() {
+  void getAvailableJoins_shouldReturnFieldPairsWhenSourcesAndTargetAreProvided() {
     // Given a custom entity type with a join field and an arbitrary other ET
     UUID customEtId = UUID.randomUUID();
     UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -208,7 +187,7 @@ class EntityTypeServiceAvailableJoinsTest {
     EntityType customEt = new EntityType().id(customEtId.toString())
       .columns(List.of(
         new EntityTypeColumn()
-          .name("joinField")
+          .name("superCoolAlias.joinField")
           .labelAlias("Join Field")
           .joinsTo(List.of(new Join().targetId(targetEtId).targetField("colA")))
       ));
@@ -218,125 +197,27 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and no specific fields
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
 
     // Then it should return the fields from both entity types that can be used in a join between the two
-    assertNotNull(result.getAvailableSourceFields());
-    assertEquals(1, result.getAvailableSourceFields().size());
-    assertEquals("Join Field", result.getAvailableSourceFields().getFirst().getLabel());
-    assertEquals(List.of(new LabeledValue("Column A").value("colA")), result.getAvailableTargetFields());
-  }
-
-  @Test
-  void getAvailableJoins_shouldReturnTargetEntityTypeFieldsWhenTargetEntityTypeFieldIsNull() {
-    // Given a custom entity type with a join field and an arbitrary other ET with a joinable field
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    List<EntityTypeSourceEntityType> sources = List.of(
-      new EntityTypeSourceEntityType()
-        .type("entity-type")
-        .alias("superCoolAlias")
-        .targetId(targetEtId)
-    );
-    EntityType customEt = new EntityType().id(customEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("customField")
-          .labelAlias("Custom Field")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join().targetId(targetEtId).targetField("colX"))))
-      );
-    EntityType targetEt = entityTypeService.getAccessibleEntityTypesById().get(targetEtId);
-
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
-
-    doReturn(accessible).when(entityTypeService).getAccessibleEntityTypesById();
-    doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
-
-    // When there's a request for available joins with the custom entity type and no specified target field
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, "customField", targetEtId, null);
-
-    // Then it should return the fields from the target entity type that can be used in a join with the custom entity type
-    assertNotNull(result.getAvailableTargetFields());
-    assertEquals(1, result.getAvailableTargetFields().size());
-    assertEquals("Column X", result.getAvailableTargetFields().getFirst().getLabel());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertEquals(1, result.getAvailableJoinConditions().size());
+    assertEquals(new JoinFieldPair(new LabeledValue("Join Field").value("superCoolAlias.joinField"), new LabeledValue("Column A").value("colA")),
+      result.getAvailableJoinConditions().getFirst());
   }
 
   @Test
   void getAvailableJoins_shouldReturnAllAccessibleEntityTypesWhenCustomEntityTypeIsNull() {
     // When there's a request for target entity types without a custom entity type set
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null, null, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null);
 
     // Then it should return all accessible entity types
+    assertNotNull(result.getAvailableTargetIds());
     assertEquals(entityTypeService.getAccessibleEntityTypesById().size(), result.getAvailableTargetIds().size());
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 1".equals(lv.getLabel())));
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 2".equals(lv.getLabel())));
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 3".equals(lv.getLabel())));
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Composite Entity 1-2".equals(lv.getLabel())));
-  }
-
-  @Test
-  void getAvailableJoins_shouldReturnCustomEntityTypeFieldsForJoinableFields() {
-    // Given a custom entity type with a join field pointed at a target entity type
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    List<EntityTypeSourceEntityType> sources = List.of(
-      new EntityTypeSourceEntityType()
-        .type("entity-type")
-        .alias("superCoolAlias")
-        .targetId(targetEtId)
-    );
-    EntityType customEt = new EntityType().id(customEtId.toString()).columns(List.of(
-      new EntityTypeColumn()
-        .name("joinField")
-        .labelAlias("Join Field")
-        .joinsTo(List.of(new Join().targetId(targetEtId).targetField("colA")))
-    ));
-    EntityType targetEt = entityTypeService.getAccessibleEntityTypesById().get(targetEtId);
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
-
-    doReturn(accessible).when(entityTypeService).getAccessibleEntityTypesById();
-    doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
-
-    // When there's a request for custom entity type fields with the custom entity type and target entity type ID
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId, null);
-
-    // Then it should return the field from the custom entity type
-    assertNotNull(result.getAvailableSourceFields());
-    assertEquals(1, result.getAvailableSourceFields().size());
-    assertEquals("Join Field", result.getAvailableSourceFields().getFirst().getLabel());
-  }
-
-  @Test
-  void getAvailableJoins_shouldReturnTargetEntityTypeFieldsForJoinableFields() {
-    // Given a custom entity type with a join field and an arbitrary target entity type with a join field
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    List<EntityTypeSourceEntityType> sources = List.of(
-      new EntityTypeSourceEntityType()
-        .type("entity-type")
-        .alias("superCoolAlias")
-        .targetId(targetEtId)
-    );
-    EntityType customEt = new EntityType().id(customEtId.toString()).columns(List.of(
-      new EntityTypeColumn()
-        .name("customField")
-        .labelAlias("Custom Field")
-        .originalEntityTypeId(customEtId)
-        .joinsTo(List.of(new Join().targetId(targetEtId).targetField("colX")))
-    ));
-    EntityType targetEt = entityTypeService.getAccessibleEntityTypesById().get(targetEtId);
-
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
-    doReturn(accessible).when(entityTypeService).getAccessibleEntityTypesById();
-    doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
-
-    // When there's a request for target entity type fields with the custom entity type and no specified target field
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, "customField", targetEtId, null);
-
-    // Then it should return the fields from the target entity type that can be used in a join with the custom entity type
-    assertEquals(1, result.getAvailableTargetFields().size());
-    assertEquals("Column X", result.getAvailableTargetFields().get(0).getLabel());
   }
 
   @Test
@@ -358,10 +239,11 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for target entity type fields with the custom entity type and target entity type
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
 
     // Then it should return an empty list since there are no joinable fields
-    assertTrue(result.getAvailableTargetFields().isEmpty());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertTrue(result.getAvailableJoinConditions().isEmpty());
   }
 
   @Test
@@ -406,7 +288,7 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, null, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null);
 
     // Then it should include the target entity type in the available target entity types
     assertNotNull(result.getAvailableTargetIds());
@@ -440,17 +322,18 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and no specific field
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId1, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId1);
 
     // Then it should not include any target IDs
     assertNull(result.getAvailableTargetIds());
 
     // And it should include the custom entity type field that can be used for joins
-    assertNotNull(result.getAvailableSourceFields());
-    assertEquals(1, result.getAvailableSourceFields().size());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertEquals(1, result.getAvailableJoinConditions().size());
 
     // Verify field names are present
-    Set<String> customFieldNames = result.getAvailableSourceFields().stream()
+    Set<String> customFieldNames = result.getAvailableJoinConditions().stream()
+      .map(JoinFieldPair::getSourceField)
       .map(LabeledValue::getValue)
       .collect(Collectors.toSet());
     assertTrue(customFieldNames.contains("col1"));
@@ -482,14 +365,13 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and no specific field
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, null, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null);
 
     // Then it should include both target entity types in the available target entity types
     assertNotNull(result.getAvailableTargetIds());
 
     // And it should not include the custom entity type fields or target fields
-    assertNull(result.getAvailableSourceFields());
-    assertNull(result.getAvailableTargetFields());
+    assertNull(result.getAvailableJoinConditions());
   }
 
   @Test
@@ -549,14 +431,15 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and target entity type
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId, null);
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
 
     // Then it should include both custom entity type fields that can be used for joins
-    assertNotNull(result.getAvailableSourceFields());
-    assertEquals(2, result.getAvailableSourceFields().size());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertEquals(2, result.getAvailableJoinConditions().size());
 
     // Verify field names are present
-    Set<String> customFieldNames = result.getAvailableSourceFields().stream()
+    Set<String> customFieldNames = result.getAvailableJoinConditions().stream()
+      .map(JoinFieldPair::getSourceField)
       .map(LabeledValue::getValue)
       .collect(Collectors.toSet());
     assertTrue(customFieldNames.contains("customField1"));
@@ -586,16 +469,14 @@ class EntityTypeServiceAvailableJoinsTest {
     // When there's a request for available joins with the custom entity type and specific field
     AvailableJoinsResponse result = entityTypeService.getAvailableJoins(
       sources,
-      "colA",
-      targetEtId,
-      null
+      targetEtId
     );
 
     // Then it should include the target field in the available target entity type fields
-    assertNotNull(result.getAvailableTargetFields());
-    assertEquals(1, result.getAvailableTargetFields().size());
-    assertEquals("colX", result.getAvailableTargetFields().get(0).getValue());
-    assertEquals("Column X", result.getAvailableTargetFields().get(0).getLabel());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertEquals(1, result.getAvailableJoinConditions().size());
+    assertEquals("colA", result.getAvailableJoinConditions().get(0).getSourceField().getValue());
+    assertEquals("colX", result.getAvailableJoinConditions().get(0).getTargetField().getValue());
   }
 
   @Test
@@ -619,19 +500,15 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
     // When there's a request for available joins with the custom entity type and target entity type
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(
-      sources,
-      null,
-      targetEtId,
-      null
-    );
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
 
     // Then it should include both custom fields in the custom entity type fields
-    assertNotNull(result.getAvailableSourceFields());
-    assertEquals(1, result.getAvailableSourceFields().size());
+    assertNotNull(result.getAvailableJoinConditions());
+    assertEquals(1, result.getAvailableJoinConditions().size());
 
     // Verify field names are present
-    Set<String> customFieldNames = result.getAvailableSourceFields().stream()
+    Set<String> customFieldNames = result.getAvailableJoinConditions().stream()
+      .map(JoinFieldPair::getSourceField)
       .map(LabeledValue::getValue)
       .collect(Collectors.toSet());
     assertTrue(customFieldNames.contains("colY"));
@@ -692,180 +569,7 @@ class EntityTypeServiceAvailableJoinsTest {
     doReturn(accessible).when(entityTypeService).getAccessibleEntityTypesById();
     doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
 
-    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null, targetEtId, null);
-    assertTrue(result.getAvailableSourceFields().isEmpty());
-    assertTrue(result.getAvailableTargetFields().isEmpty());
-  }
-
-  @Test
-  void discoverTargetEntityTypeFields_shouldReturnEmptyIfTargetHasNoColumns() {
-    EntityType customEt = new EntityType().id(UUID.randomUUID().toString()).columns(List.of(
-      new EntityTypeColumn().name("f1").labelAlias("F1")
-    ));
-    EntityType targetEt = new EntityType().id(UUID.randomUUID().toString()).columns(List.of());
-    List<LabeledValue> result = EntityTypeService.discoverTargetEntityTypeFields(customEt, null, targetEt);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
-  void discoverCustomEntityTypeFields_shouldReturnEmptyIfCustomHasNoColumns() {
-    EntityType customEt = new EntityType().id(UUID.randomUUID().toString()).columns(List.of());
-    Map<UUID, EntityType> accessible = Map.of(UUID.randomUUID(), new EntityType());
-    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, null, null, accessible);
-    assertTrue(result.isEmpty());
-  }
-
-  @Test
-  void discoverCustomEntityTypeFields_shouldReturnOnlyFieldsThatCanJoinWithTarget() {
-    // Setup: custom entity type with two fields, only one can join with the target entity type
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.randomUUID();
-
-    EntityType customEt = new EntityType()
-      .id(customEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("joinableField")
-          .labelAlias("Joinable Field")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(targetEtId)
-            .targetField("targetField"))),
-        new EntityTypeColumn()
-          .name("selfJoinableField")
-          .labelAlias("Self-Joinable Field")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(customEtId)
-            .targetField("joinableField"))),
-        new EntityTypeColumn()
-          .name("nonJoinableField")
-          .labelAlias("Non-Joinable Field")
-          .originalEntityTypeId(customEtId)
-      ));
-
-    EntityType targetEt = new EntityType()
-      .id(targetEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("targetField")
-          .labelAlias("Target Field")
-          .originalEntityTypeId(targetEtId)
-      ));
-
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt, customEtId, customEt);
-
-    // When discoverCustomEntityTypeFields is called with the target entity type selected
-    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, null, accessible);
-
-    // Expect only the joinable field to be returned
-    assertEquals(
-      List.of(new LabeledValue("Joinable Field").value("joinableField")),
-      result,
-      "Should only return fields from the custom entity type that can join with the selected target entity type");
-  }
-
-  @Test
-  void discoverCustomEntityTypeFields_shouldReturnOnlyFieldsThatCanJoinWithTargetField() {
-    // Setup: custom entity type with two fields, both join to the same target entity type, but only one joins to the specific target field
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.randomUUID();
-
-    EntityType customEt = new EntityType()
-      .id(customEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("joinableField")
-          .labelAlias("Joinable Field")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(targetEtId)
-            .targetField("targetField"))),
-        new EntityTypeColumn()
-          .name("notJoinableField")
-          .labelAlias("Not Joinable Field")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(targetEtId)
-            .targetField("otherField")))
-      ));
-
-    EntityType targetEt = new EntityType()
-      .id(targetEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("targetField")
-          .labelAlias("Target Field")
-          .originalEntityTypeId(targetEtId),
-        new EntityTypeColumn()
-          .name("otherField")
-          .labelAlias("Other Field")
-          .originalEntityTypeId(targetEtId)
-      ));
-
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
-
-    // When discoverCustomEntityTypeFields is called with the target entity type and target field selected
-    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, "targetField", accessible);
-
-    // Expect only the joinable field to be returned
-    assertEquals(
-      List.of(new LabeledValue("Joinable Field").value("joinableField")),
-      result,
-      "Should only return fields from the custom entity type that can join with the selected target entity type field"
-    );
-  }
-
-  @Test
-  void discoverCustomEntityTypeFields_shouldReturnAllJoinableFieldsIfTargetFieldIsNull() {
-    // Setup: custom entity type with two fields, both join to the same target entity type, but to different fields
-    UUID customEtId = UUID.randomUUID();
-    UUID targetEtId = UUID.randomUUID();
-
-    EntityType customEt = new EntityType()
-      .id(customEtId.toString())
-      .columns(List.of(new EntityTypeColumn()
-          .name("joinableField1")
-          .labelAlias("Joinable Field 1")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(targetEtId)
-            .targetField("targetField1"))),
-        new EntityTypeColumn()
-          .name("joinableField2")
-          .labelAlias("Joinable Field 2")
-          .originalEntityTypeId(customEtId)
-          .joinsTo(List.of(new Join()
-            .targetId(targetEtId)
-            .targetField("targetField2")))
-      ));
-
-    EntityType targetEt = new EntityType()
-      .id(targetEtId.toString())
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("targetField1")
-          .labelAlias("Target Field 1")
-          .originalEntityTypeId(targetEtId),
-        new EntityTypeColumn()
-          .name("targetField2")
-          .labelAlias("Target Field 2")
-          .originalEntityTypeId(targetEtId)
-      ));
-
-    Map<UUID, EntityType> accessible = Map.of(targetEtId, targetEt);
-
-    // When discoverCustomEntityTypeFields is called with the target entity type and no target field
-    List<LabeledValue> result = EntityTypeService.discoverCustomEntityTypeFields(customEt, targetEtId, null, accessible);
-
-    // Expect both joinable fields to be returned
-    assertEquals(
-      List.of(
-        new LabeledValue("Joinable Field 1").value("joinableField1"),
-        new LabeledValue("Joinable Field 2").value("joinableField2")
-      ),
-      result,
-      "Should return all fields from the custom entity type that can join with the selected target entity type"
-    );
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
+    assertTrue(result.getAvailableJoinConditions().isEmpty());
   }
 }

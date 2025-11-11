@@ -211,7 +211,7 @@ public class IdStreamer {
     List<Integer> pids = queryRepository.getSelectQueryPids(queryId);
     for (int pid : pids) {
       log.debug("PID for the executing query: {}", pid);
-      jooqContext.execute("SELECT pg_cancel_backend(?)", pid);
+      jooqContext.execute("SELECT pg_terminate_backend(?)", pid);
     }
   }
 

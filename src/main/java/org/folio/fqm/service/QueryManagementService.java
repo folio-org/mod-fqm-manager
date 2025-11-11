@@ -289,9 +289,10 @@ public class QueryManagementService {
     return List.of();
   }
 
-  private void deleteQueryAndResults(List<UUID> queryId) {
-    queryResultsRepository.deleteQueryResults(queryId);
-    queryRepository.deleteQueries(queryId);
+  private void deleteQueryAndResults(List<UUID> queryIds) {
+    queryResultsRepository.deleteQueryResults(queryIds);
+    queryRepository.deleteQueries(queryIds);
+    queryRepository.cancelQueries(queryIds);
   }
 
   private static Date offsetDateTimeAsDate(OffsetDateTime offsetDateTime) {

@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.table;
 
 @Repository
@@ -49,6 +50,7 @@ public class EntityTypeRepository {
 
   public static final String ID_FIELD_NAME = "id";
   public static final String DEFINITION_FIELD_NAME = "definition";
+  public static final String CUSTOM_ENTITY_FIELD_NAME = "coalesce((definition->>'isCustom')::boolean, false)";
   public static final String STRING_EXTRACTOR = "%s ->> '%s'";
   public static final String JSONB_ARRAY_EXTRACTOR = "%s -> '%s'";
   public static final String CUSTOM_FIELD_PREPENDER = "_custom_field_";
@@ -184,27 +186,57 @@ public class EntityTypeRepository {
     }
   }
 
-  public void replaceEntityTypeDefinitions(List<EntityType> entityTypes) {
-    log.info("Replacing entity type definitions with new set of {} entities", entityTypes.size());
+  public void replaceEntityTypeDefinitions(List<EntityType> incomingEntities) {
+    log.info("Replacing FQM-managed entity type definitions with a new set of {} entities", incomingEntities.size());
 
     jooqContext.transaction(transaction -> {
-      transaction.dsl()
-        .deleteFrom(table(TABLE_NAME))
-        .where(
-          field(ID_FIELD_NAME, UUID.class)
-            .in(entityTypes.stream().map(et -> UUID.fromString(et.getId())).toList())
-        )
-        .execute();
+      Set<UUID> fqmManagedEntities = transaction.dsl()
+        .select(field(ID_FIELD_NAME, UUID.class))
+        .from(table(TABLE_NAME))
+        .where(not(field(CUSTOM_ENTITY_FIELD_NAME, Boolean.class).isTrue()))
+        .fetch(field(ID_FIELD_NAME, UUID.class)).stream().collect(Collectors.toSet());
 
+      List<EntityType> newEntities = incomingEntities.stream()
+        .filter(et -> !fqmManagedEntities.contains(UUID.fromString(et.getId())))
+        .toList();
+      List<EntityType> updatedEntities = incomingEntities.stream()
+        .filter(et -> fqmManagedEntities.contains(UUID.fromString(et.getId())))
+        .toList();
+      List<UUID> removedEntities = fqmManagedEntities.stream()
+        .filter(id -> incomingEntities.stream().noneMatch(et -> et.getId().equals(id.toString())))
+        .toList();
+
+      log.info(
+        "Found {} existing FQM-managed entities. {} new entities will be inserted, {} updated, and {} removed.",
+        fqmManagedEntities.size(),
+        newEntities.size(),
+        updatedEntities.size(),
+        removedEntities.size()
+      );
+      
+      log.info("Inserting new entity types");
       InsertValuesStep2<Record, UUID, JSONB> insert = transaction.dsl()
         .insertInto(table(TABLE_NAME))
         .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class));
-
-      for (EntityType entityType : entityTypes) {
+      for (EntityType entityType : newEntities) {
         insert.values(UUID.fromString(entityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(entityType)));
       }
-
       insert.execute();
+
+      log.info("Updating existing entity types");
+      for (EntityType entityType : updatedEntities) {
+        transaction.dsl()
+          .update(table(TABLE_NAME))
+          .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(entityType)))
+          .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(entityType.getId())))
+          .execute();
+      }
+
+      log.info("Removing old entities {}", removedEntities);
+      transaction.dsl()
+        .deleteFrom(table(TABLE_NAME))
+        .where(field(ID_FIELD_NAME, UUID.class).in(removedEntities))
+        .execute();
     });
   }
 

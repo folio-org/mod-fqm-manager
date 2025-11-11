@@ -101,14 +101,29 @@ public class QueryRepository {
         .lessThan(field("CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '" + retentionSeconds + " second'"))
       ).or(
         field("start_date").lessThan(
-            field("CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '" + stuckQuerySeconds + " second'"))
-          )
+          field("CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - INTERVAL '" + stuckQuerySeconds + " second'"))
+      )
       .fetchInto(UUID.class);
-}
+  }
 
   public void deleteQueries(List<UUID> queryId) {
     jooqContext.deleteFrom(table(QUERY_DETAILS_TABLE))
       .where(field(QUERY_ID).in(queryId))
       .execute();
+  }
+
+  public void cancelQueries(List<UUID> queryIds) {
+    for (UUID queryId : queryIds) {
+      cancelQuery(queryId);
+    }
+  }
+
+  public void cancelQuery(UUID queryId) {
+    log.info("Query {} has been marked as cancelled. Cancelling query in database.", queryId);
+    List<Integer> pids = getSelectQueryPids(queryId);
+    for (int pid : pids) {
+      log.debug("PID for the executing query: {}", pid);
+      jooqContext.execute("SELECT pg_terminate_backend(?)", pid);
+    }
   }
 }

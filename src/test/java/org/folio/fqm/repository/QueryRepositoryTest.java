@@ -9,12 +9,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.util.StringUtils.hasText;
@@ -25,6 +31,10 @@ class QueryRepositoryTest {
 
   @Autowired
   private QueryRepository repo;
+
+  @Autowired
+  private DataSource dataSource;
+
   private UUID queryId;
 
 
@@ -83,8 +93,8 @@ class QueryRepositoryTest {
   @Test
   void shouldGetQueriesForDeletion() {
     String fqlQuery = """
-    {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5"] }}
-    """;
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5"] }}
+      """;
     List<String> fields = List.of("id", "field1");
 
     UUID queryIdToDelete = UUID.randomUUID();
@@ -131,5 +141,29 @@ class QueryRepositoryTest {
   void shouldGetQueryPids() {
     assertNotNull(repo.getSelectQueryPids(queryId));
     assertNotNull(repo.getInsertQueryPids(queryId));
+  }
+
+  @Test
+  void shouldCancelRunningQuery() throws Exception {
+    AtomicReference<SQLException> exception = new AtomicReference<>();
+    Thread queryThread = new Thread(() -> {
+      try (
+        Connection conn = dataSource.getConnection();
+        PreparedStatement statement = conn.prepareStatement("/* Query ID: " + queryId + " */ SELECT pg_sleep(30)")
+      ) {
+        statement.executeQuery();
+      } catch (SQLException e) {
+        exception.set(e);
+      }
+    });
+
+    queryThread.start();
+    Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> !repo.getSelectQueryPids(queryId).isEmpty());
+
+    repo.cancelQueries(List.of(queryId));
+    queryThread.join(5000);
+
+    assertFalse(queryThread.isAlive());
+    assertNotNull(exception.get(), "Expected SQLException due to query cancellation");
   }
 }

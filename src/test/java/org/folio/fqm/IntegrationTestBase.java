@@ -117,7 +117,7 @@ public class IntegrationTestBase {
     RestAssured.requestSpecification = null;
   }
 
-  protected static DataSource getDataSource() {
+  public static DataSource getDataSource() {
     final HikariConfig config = new HikariConfig();
     config.setJdbcUrl(postgres.getJdbcUrl());
     config.setUsername(postgres.getUsername());

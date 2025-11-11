@@ -243,28 +243,6 @@ class IdStreamerTest {
   }
 
   @Test
-  void shouldCancelQuery() {
-    // This test uses a mocked DSLContext because our test DSLContext doesn't behave nicely in separate threads
-    DSLContext mockJooqContext = mock(DSLContext.class);
-    QueryRepository mockQueryRepository = mock(QueryRepository.class);
-    when(mockQueryRepository.getSelectQueryPids(any())).thenReturn(List.of(123, 456));
-
-    IdStreamer newIdStreamer = new IdStreamer(
-      mockJooqContext,
-      entityTypeFlatteningService,
-      crossTenantQueryService,
-      mock(FolioExecutionContext.class),
-      mockQueryRepository,
-      queryResultsRepository,
-      executorService
-    );
-
-    assertDoesNotThrow(() -> newIdStreamer.cancelQuery(CANCELLED_QUERY_ID));
-    verify(mockJooqContext, times(1)).execute("SELECT pg_terminate_backend(?)", 123);
-    verify(mockJooqContext, times(1)).execute("SELECT pg_terminate_backend(?)", 456);
-  }
-
-  @Test
   void shouldMonitorQueryCancellation() {
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
     Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);

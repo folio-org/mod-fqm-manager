@@ -1,5 +1,10 @@
 # 4.0.x - Sunflower
 
+# 4.0.15
+- [MODFQMMGR-1000] Use pg_terminate_backend to cancel queries + kill associated db queries when deleting FQM queries
+
+[MODFQMMGR-1000]: https://folio-org.atlassian.net/browse/MODFQMMGR-1000
+
 # 4.0.14
 - [MODFQMMGR-954] Change how unique record is identified for SRS records (Sunflower backport)
 

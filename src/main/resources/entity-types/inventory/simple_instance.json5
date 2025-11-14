@@ -1576,12 +1576,12 @@
                         'title', i.jsonb->>'title',\
                         'hrid', i.jsonb->>'hrid',\
                         'precedingInstanceId', pst.precedinginstanceid,\
-                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                        'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedinginstanceid = i.id\
-                    WHERE pst.precedinginstanceid = :sourceAlias.id)::text",
+                    WHERE ( (i.jsonb->>'source' = 'MARC' AND pst.precedinginstanceid = :sourceAlias.id) OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.succeedinginstanceid = :sourceAlias.id) )::text",
       valueFunction: 'lower(:value)'
     },
     {
@@ -1604,12 +1604,12 @@
                         'title', i.jsonb->>'title',\
                         'hrid', i.jsonb->>'hrid',\
                         'succeedingInstanceId', pst.succeedinginstanceid,\
-                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                        'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
-                    WHERE pst.succeedinginstanceid = :sourceAlias.id)::text",
+                    WHERE ( (i.jsonb->>'source' = 'FOLIO' AND pst.precedinginstanceid = :sourceAlias.id) OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.succeedinginstanceid = :sourceAlias.id) )::text",
       valueFunction: 'lower(:value)'
     },
   ],

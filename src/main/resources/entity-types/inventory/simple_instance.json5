@@ -1573,7 +1573,7 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', i.jsonb->>'title',\
+                        'title', pst.jsonb->>'title',\
                         'hrid', i.jsonb->>'hrid',\
                         'precedingInstanceId', pst.precedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
@@ -1581,7 +1581,8 @@
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedinginstanceid = i.id\
-                    WHERE ( (i.jsonb->>'source' = 'MARC' AND pst.precedinginstanceid = :sourceAlias.id) OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.succeedinginstanceid = :sourceAlias.id) ) )::text",
+                    WHERE ( (i.jsonb->>'source' = 'MARC' AND pst.succeedinginstanceid = :sourceAlias.id)\
+                    OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.succeedinginstanceid = :sourceAlias.id) ) )::text",
       valueFunction: 'lower(:value)'
     },
     {
@@ -1601,7 +1602,7 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', i.jsonb->>'title',\
+                        'title', pst.jsonb->>'title',\
                         'hrid', i.jsonb->>'hrid',\
                         'succeedingInstanceId', pst.succeedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
@@ -1609,7 +1610,8 @@
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
-                    WHERE ( (i.jsonb->>'source' = 'FOLIO' AND pst.precedinginstanceid = :sourceAlias.id) OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.succeedinginstanceid = :sourceAlias.id) ) )::text",
+                    WHERE ( (i.jsonb->>'source' = 'FOLIO' AND pst.precedinginstanceid = :sourceAlias.id)\
+                    OR (COALESCE(i.jsonb->>'source','') <> 'FOLIO' AND pst.precedinginstanceid = :sourceAlias.id) ) )::text",
       valueFunction: 'lower(:value)'
     },
   ],

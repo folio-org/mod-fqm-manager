@@ -521,13 +521,13 @@ class FqlToSqlConverterServiceTest {
         "starts_with",
         """
           {"field1": {"$starts_with": "prefix"}}""",
-        field("field1").startsWith("prefix")
+        field("field1").startsWithIgnoreCase("prefix")
       ),
       Arguments.of(
         "contains",
         """
           {"field1": {"$contains": "substring"}}""",
-        field("field1").contains("substring")
+        field("field1").containsIgnoreCase("substring")
       ),
       Arguments.of(
         "in list",

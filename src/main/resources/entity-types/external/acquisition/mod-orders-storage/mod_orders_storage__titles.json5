@@ -139,8 +139,8 @@
                 columnName: 'name',
                 entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
               },
-              valueGetter: "(SELECT array_agg(identifier_type.jsonb ->> 'name') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type ON (elems.value->>'productIdType')::uuid = identifier_type.id)",
-              filterValueGetter: "(SELECT array_agg(lower(identifier_type.jsonb ->> 'name')) FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_identifier_type identifier_type ON (elems.value->>'productIdType')::uuid = identifier_type.id)",
+              valueGetter: "(SELECT array_agg(identifier_type.value->>'productIdType' ORDER BY identifier_type.value->>'productIdType') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS identifier_type)",
+              filterValueGetter: "(SELECT array_agg(identifier_type.value->>'productIdType' ORDER BY identifier_type.value->>'productIdType') FROM jsonb_array_elements(:src__acquisition__orders_storage__titles.jsonb->'productIds') AS identifier_type)",
               valueFunction: 'lower(:value)',
               property: 'productIdType',
               dataType: {

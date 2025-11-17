@@ -1573,18 +1573,13 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', pst.jsonb->>'title',\
-                        'hrid', i.jsonb->>'hrid',\
-                        CASE WHEN i.jsonb->>'source' = 'FOLIO' THEN 'precedingInstanceId' ELSE 'succeedingInstanceId' END,\
-                        CASE WHEN i.jsonb->>'source' = 'FOLIO' THEN pst.precedingInstanceId ELSE pst.succeedingInstanceId END,\
-                        'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
+                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON (CASE WHEN i.jsonb->>'source' = 'FOLIO'\
-                                      THEN pst.precedingInstanceId ELSE pst.succeedingInstanceId END) = i.id\
-                    WHERE (CASE WHEN i.jsonb->>'source' = 'FOLIO'\
-                                      THEN pst.precedingInstanceId ELSE pst.succeedingInstanceId END) = :sourceAlias.id)::text",
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedingInstanceId = i.id\
+                    WHERE pst.succeedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
     {
@@ -1604,18 +1599,13 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', pst.jsonb->>'title',\
-                        'hrid', i.jsonb->>'hrid',\
-                        CASE WHEN i.jsonb->>'source' = 'FOLIO' THEN 'succeedingInstanceId' ELSE 'precedingInstanceId' END,\
-                        CASE WHEN i.jsonb->>'source' = 'FOLIO' THEN pst.succeedingInstanceId ELSE pst.precedingInstanceId END,\
-                        'identifiers', COALESCE(pst.jsonb->'identifiers', '[]'::jsonb)\
+                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON (CASE WHEN i.jsonb->>'source' = 'FOLIO'\
-                                      THEN pst.succeedingInstanceId ELSE pst.precedingInstanceId END) = i.id\
-                    WHERE (CASE WHEN i.jsonb->>'source' = 'FOLIO'\
-                                      THEN pst.succeedingInstanceId ELSE pst.precedingInstanceId END) = :sourceAlias.id)::text",
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedingInstanceId = i.id\
+                    WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
   ],

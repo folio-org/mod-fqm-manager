@@ -199,62 +199,64 @@ public class EntityTypeInitializationService {
   }
 
   private boolean checkEntityTypeIsAvailable(
-    UUID id,
+    UUID entityTypeId,
     Map<UUID, EntityType> allEntityTypes,
     ConcurrentMap<UUID, Boolean> entityTypeAvailabilityMap,
     ConcurrentMap<String, Boolean> sourceViewAvailabilityMap,
     AtomicBoolean hasAttemptedLiquibaseUpdate
   ) {
-    return entityTypeAvailabilityMap.computeIfAbsent(
-      id,
-      entityTypeId -> {
-        EntityType entityType = allEntityTypes.get(entityTypeId);
-        if (entityType == null) {
-          log.warn("Source entity type with ID {} not found among available entity types", entityTypeId);
-          return false;
-        }
+    if (entityTypeAvailabilityMap.containsKey(entityTypeId)) {
+      return entityTypeAvailabilityMap.get(entityTypeId);
+    }
 
-        if (
-          CollectionUtils
-            .emptyIfNull(entityType.getSources())
-            .stream()
-            .allMatch(source -> {
-              return switch (source) {
-                case EntityTypeSourceEntityType sourceEt -> checkEntityTypeIsAvailable(
-                  sourceEt.getTargetId(),
-                  allEntityTypes,
-                  entityTypeAvailabilityMap,
-                  sourceViewAvailabilityMap,
-                  hasAttemptedLiquibaseUpdate
-                );
-                case EntityTypeSourceDatabase sourceDb -> checkSourceViewIsAvailableWithCache(
-                  sourceDb.getTarget(),
-                  sourceViewAvailabilityMap,
-                  hasAttemptedLiquibaseUpdate
-                );
-                default -> {
-                  log.warn(
-                    "Unknown source type {} in entity type {} ({})",
-                    source.getClass().getName(),
-                    entityType.getName(),
-                    entityType.getId()
-                  );
-                  yield false;
-                }
-              };
-            })
-        ) {
-          return true;
-        } else {
-          log.warn(
-            "Entity type {} ({}) is not available due to unavailable sources",
-            entityType.getName(),
-            entityType.getId()
-          );
-          return false;
-        }
-      }
-    );
+    EntityType entityType = allEntityTypes.get(entityTypeId);
+    if (entityType == null) {
+      log.warn("Source entity type with ID {} not found among available entity types", entityTypeId);
+      entityTypeAvailabilityMap.put(entityTypeId, false);
+      return false;
+    }
+
+    if (
+      CollectionUtils
+        .emptyIfNull(entityType.getSources())
+        .stream()
+        .allMatch(source -> {
+          return switch (source) {
+            case EntityTypeSourceEntityType sourceEt -> checkEntityTypeIsAvailable(
+              sourceEt.getTargetId(),
+              allEntityTypes,
+              entityTypeAvailabilityMap,
+              sourceViewAvailabilityMap,
+              hasAttemptedLiquibaseUpdate
+            );
+            case EntityTypeSourceDatabase sourceDb -> checkSourceViewIsAvailableWithCache(
+              sourceDb.getTarget(),
+              sourceViewAvailabilityMap,
+              hasAttemptedLiquibaseUpdate
+            );
+            default -> {
+              log.warn(
+                "Unknown source type {} in entity type {} ({})",
+                source.getClass().getName(),
+                entityType.getName(),
+                entityType.getId()
+              );
+              yield false;
+            }
+          };
+        })
+    ) {
+      entityTypeAvailabilityMap.put(entityTypeId, true);
+      return true;
+    } else {
+      log.warn(
+        "Entity type {} ({}) is not available due to unavailable sources",
+        entityType.getName(),
+        entityType.getId()
+      );
+      entityTypeAvailabilityMap.put(entityTypeId, true);
+      return false;
+    }
   }
 
   private boolean checkSourceViewIsAvailableWithCache(

@@ -527,7 +527,7 @@ class FqlToSqlConverterServiceTest {
         "contains",
         """
           {"field1": {"$contains": "substring"}}""",
-        field("field1").contains("substring")
+        field("field1").containsIgnoreCase("substring")
       ),
       Arguments.of(
         "in list",

@@ -399,7 +399,8 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    return field.contains(valueField(containsCondition.value(), containsCondition, entityType));
+    return caseInsensitiveComparison(containsCondition, entityType, field, containsCondition.value(),
+      org.jooq.Field::containsIgnoreCase, org.jooq.Field::contains);
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {

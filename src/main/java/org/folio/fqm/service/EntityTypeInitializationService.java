@@ -112,8 +112,7 @@ public class EntityTypeInitializationService {
     }
     String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
 
-    List<EntityType> availableEntityTypes =
-      this.getAvailableEntityTypes(folioExecutionContext.getTenantId(), finalCentralTenantId, safeCentralTenantId);
+    List<EntityType> availableEntityTypes = this.getAvailableEntityTypes(finalCentralTenantId, safeCentralTenantId);
 
     validateEntityTypesAndFillUsedBy(availableEntityTypes);
 
@@ -127,11 +126,8 @@ public class EntityTypeInitializationService {
     entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
   }
 
-  private List<EntityType> getAvailableEntityTypes(
-    String tenantId,
-    String finalCentralTenantId,
-    String safeCentralTenantId
-  ) throws IOException {
+  protected List<EntityType> getAvailableEntityTypes(String finalCentralTenantId, String safeCentralTenantId)
+    throws IOException {
     Map<UUID, EntityType> allEntityTypes = Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),
@@ -181,7 +177,7 @@ public class EntityTypeInitializationService {
       .toList();
   }
 
-  private ConcurrentMap<String, Boolean> prefillSourceViewAvailabilityMap() {
+  protected ConcurrentMap<String, Boolean> prefillSourceViewAvailabilityMap() {
     // prefill with existing views, to avoid repeated DB queries
     List<String> existingViews = readerJooqContext
       .select(field("table_name", String.class))
@@ -198,7 +194,7 @@ public class EntityTypeInitializationService {
     return sourceViewAvailabilityMap;
   }
 
-  private boolean checkEntityTypeIsAvailable(
+  protected boolean checkEntityTypeIsAvailable(
     UUID entityTypeId,
     Map<UUID, EntityType> allEntityTypes,
     ConcurrentMap<UUID, Boolean> entityTypeAvailabilityMap,
@@ -220,8 +216,8 @@ public class EntityTypeInitializationService {
       CollectionUtils
         .emptyIfNull(entityType.getSources())
         .stream()
-        .allMatch(source -> {
-          return switch (source) {
+        .allMatch(source ->
+          switch (source) {
             case EntityTypeSourceEntityType sourceEt -> checkEntityTypeIsAvailable(
               sourceEt.getTargetId(),
               allEntityTypes,
@@ -243,8 +239,8 @@ public class EntityTypeInitializationService {
               );
               yield false;
             }
-          };
-        })
+          }
+        )
     ) {
       entityTypeAvailabilityMap.put(entityTypeId, true);
       return true;
@@ -259,7 +255,7 @@ public class EntityTypeInitializationService {
     }
   }
 
-  private boolean checkSourceViewIsAvailableWithCache(
+  protected boolean checkSourceViewIsAvailableWithCache(
     String view,
     ConcurrentMap<String, Boolean> sourceViewAvailabilityMap,
     AtomicBoolean hasAttemptedLiquibaseUpdate
@@ -270,7 +266,7 @@ public class EntityTypeInitializationService {
     );
   }
 
-  private boolean checkSourceViewIsAvailable(String view, AtomicBoolean hasAttemptedLiquibaseUpdate) {
+  protected boolean checkSourceViewIsAvailable(String view, AtomicBoolean hasAttemptedLiquibaseUpdate) {
     try {
       if (view.contains("(")) {
         log.info("Source `{}` is a complex expression and cannot be checked", view);
@@ -313,7 +309,7 @@ public class EntityTypeInitializationService {
             folioExecutionContext.getTenantId(),
             le
           );
-          throw new RuntimeException(le);
+          throw new IllegalStateException(le);
         }
       }
 
@@ -321,7 +317,7 @@ public class EntityTypeInitializationService {
     }
   }
 
-  private void validateEntityTypesAndFillUsedBy(List<EntityType> entityTypes) {
+  protected void validateEntityTypesAndFillUsedBy(List<EntityType> entityTypes) {
     List<UUID> entityTypeIds = entityTypes.stream().map(EntityType::getId).map(UUID::fromString).toList();
     Map<String, List<String>> usedByMap = entityTypeRepository
       .getEntityTypeDefinitions(entityTypeIds, folioExecutionContext.getTenantId())

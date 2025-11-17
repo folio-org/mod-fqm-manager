@@ -1230,7 +1230,6 @@
   "entityType.simple_item.version": "Version",
   "entityType.simple_item.volume": "Volume",
   "entityType.simple_item.year_caption": "Year, caption",
-  "entityType.simple_language._description": "Simple entity type for language data.",
   "entityType.simple_ledger": "Ledger",
   "entityType.simple_ledger._description": "Simple entity type for finance ledger data.",
   "entityType.simple_ledger.acq_unit_ids": "Acquisition unit UUIDs",

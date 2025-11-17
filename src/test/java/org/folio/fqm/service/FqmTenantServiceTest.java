@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import lombok.SneakyThrows;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.config.FolioSpringConfiguration;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.tenant.domain.dto.Parameter;
@@ -42,10 +41,7 @@ class FqmTenantServiceTest {
 
     fqmTenantService.createOrUpdateTenant(new TenantAttributes().parameters(List.of()));
     verify(folioSpringLiquibase, times(1)).setChangeLogParameters(anyMap());
-    verify(folioSpringLiquibase, times(1)).setContexts("!slow");
-    verify(folioSpringLiquibase, times(1)).setContexts("slow");
-    Thread.sleep(100); // Let the slow migration thread finish
-    verify(entityTypeInitializationService, times(2)).initializeEntityTypes(null);
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
   }
 
   @Test
@@ -53,9 +49,6 @@ class FqmTenantServiceTest {
   void createOrUpdateTenantForEcs() {
     fqmTenantService.createOrUpdateTenant(new TenantAttributes().addParametersItem(new Parameter("centralTenantId").value("central-test-tenant")));
     verify(folioSpringLiquibase, times(1)).setChangeLogParameters(anyMap());
-    verify(folioSpringLiquibase, times(1)).setContexts("!slow");
-    verify(folioSpringLiquibase, times(1)).setContexts("slow");
-    Thread.sleep(100); // Let the slow migration thread finish
-    verify(entityTypeInitializationService, times(2)).initializeEntityTypes("central-test-tenant");
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes("central-test-tenant");
   }
 }

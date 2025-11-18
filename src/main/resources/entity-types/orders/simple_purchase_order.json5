@@ -129,6 +129,7 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->'closeReason'->>'reason'",
     },
@@ -152,6 +153,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'dateOrdered'",
     },
     {

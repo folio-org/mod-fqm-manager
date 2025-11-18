@@ -25,11 +25,13 @@ import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -38,6 +40,8 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinFieldPair;
 import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.LabeledValueWithDescription;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -144,8 +148,28 @@ public class EntityTypeService {
       .stream()
       .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
       .toList();
+    List<EntityTypeColumn> filteredColumns = new ArrayList<>();
+    for (EntityTypeColumn column : columns) {
+      if (column.getDataType() instanceof ArrayType arrayType) {
+        EntityDataType itemDataType = arrayType.getItemDataType();
+        if (itemDataType instanceof ObjectType objectType) {
+          List<NestedObjectProperty> filteredProperties = objectType
+            .getProperties()
+            .stream()
+            .filter(property -> includeHidden || !Boolean.TRUE.equals(property.getHidden()))
+            .toList();
+          ObjectType filteredObjectType = objectType.toBuilder().properties(filteredProperties).build();
+          ArrayType filteredArrayType = arrayType.toBuilder().itemDataType(filteredObjectType).build();
+          filteredColumns.add(column.toBuilder().dataType(filteredArrayType).build());
+        } else {
+          filteredColumns.add(column);
+        }
+      } else {
+        filteredColumns.add(column);
+      }
+    }
     return entityType
-      .columns(columns)
+      .columns(filteredColumns)
       .crossTenantQueriesEnabled(crossTenantEnabled);
   }
 

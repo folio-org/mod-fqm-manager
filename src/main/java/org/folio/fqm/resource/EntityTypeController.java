@@ -1,7 +1,10 @@
 package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
 import org.folio.fqm.domain.dto.EntityTypeSummaries;
@@ -16,16 +19,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Log4j2
 @RestController
 @RequiredArgsConstructor
 public class EntityTypeController implements org.folio.fqm.resource.EntityTypesApi, org.folio.querytool.rest.resource.EntityTypesApi {
 
+  private final EntityTypeInitializationService entityTypeInitializationService;
   private final EntityTypeService entityTypeService;
   private final MigrationService migrationService;
 
@@ -96,6 +103,16 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
       availableJoinsRequest.getSources(),
       availableJoinsRequest.getTargetId()
     ));
+  }
+
+  @Override
+  public ResponseEntity<Void> installEntityTypes() {
+    try {
+      entityTypeInitializationService.initializeEntityTypes(null);
+    } catch (IOException e) {
+      throw log.throwing(new UncheckedIOException(e));
+    }
+    return ResponseEntity.ok().build();
   }
 
   @Override

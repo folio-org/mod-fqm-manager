@@ -143,7 +143,6 @@ class SourceUtilsCopyTest {
 
   @Test
   void testCopySourceUnknownType() {
-    // java 21 switch statements would make this obsolete :(
     EntityTypeSource s = new EntityTypeSource() {};
     Map<String, String> map = Map.of();
     assertThrows(IllegalStateException.class, () -> SourceUtils.copySource(null, s, map));

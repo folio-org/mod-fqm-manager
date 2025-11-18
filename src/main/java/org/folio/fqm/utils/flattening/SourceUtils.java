@@ -201,13 +201,11 @@ public class SourceUtils {
     EntityTypeSource source,
     Map<String, String> renamedAliases
   ) {
-    if (source instanceof EntityTypeSourceDatabase sourceDb) {
-      return copySource(sourceFromParent, sourceDb, renamedAliases);
-    } else if (source instanceof EntityTypeSourceEntityType sourceEt) {
-      return copySource(sourceFromParent, sourceEt, renamedAliases);
-    } else {
-      throw log.throwing(new IllegalStateException("Unknown source type: " + source.getClass()));
-    }
+    return switch (source) {
+      case EntityTypeSourceDatabase sourceDb -> copySource(sourceFromParent, sourceDb, renamedAliases);
+      case EntityTypeSourceEntityType sourceEt -> copySource(sourceFromParent, sourceEt, renamedAliases);
+      default -> throw log.throwing(new IllegalStateException("Unknown source type: " + source.getClass()));
+    };
   }
 
   private static EntityTypeSourceDatabase copySource(

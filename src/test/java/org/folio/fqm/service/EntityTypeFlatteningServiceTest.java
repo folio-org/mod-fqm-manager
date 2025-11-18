@@ -767,7 +767,6 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testUnknownSourceType() {
-    // java 21 switch statements would make this obsolete :(
     EntityType childEntityType = new EntityType()
       .id("f5ecbd82-ca25-5cfd-9a91-4d48dbe357e9")
       .sources(List.of(new EntityTypeSource() {}));

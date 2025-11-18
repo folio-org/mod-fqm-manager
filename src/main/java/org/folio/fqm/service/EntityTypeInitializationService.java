@@ -150,7 +150,7 @@ public class EntityTypeInitializationService {
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), Function.identity()));
 
     // stores if an entity type/view is available or not, for caching purposes
-    Map<UUID, Boolean> entityTypeAvailabilityCache = new HashMap<>(allEntityTypes.size());
+    Map<UUID, Boolean> entityTypeAvailabilityCache = HashMap.newHashMap(allEntityTypes.size());
     Map<String, Boolean> sourceViewAvailabilityCache = prefillSourceViewAvailabilityCache();
     // TODO [MODFQMMGR-997]: replace AtomicBoolean and global liquibase run with a precise solution that only attempts with one view
     AtomicBoolean hasAttemptedLiquibaseUpdate = new AtomicBoolean(false);
@@ -183,7 +183,7 @@ public class EntityTypeInitializationService {
       .where(field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())))
       .fetch(field("table_name", String.class));
 
-    Map<String, Boolean> sourceViewAvailabilityCache = new HashMap<>(existingViews.size());
+    Map<String, Boolean> sourceViewAvailabilityCache = HashMap.newHashMap(existingViews.size());
 
     for (String view : existingViews) {
       sourceViewAvailabilityCache.put(view, true);

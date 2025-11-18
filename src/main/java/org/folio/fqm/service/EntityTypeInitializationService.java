@@ -12,12 +12,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -116,7 +115,6 @@ public class EntityTypeInitializationService {
 
     validateEntityTypesAndFillUsedBy(availableEntityTypes);
 
-    // lambdas ensure we don't do the stream/map/etc. unless logging is enabled
     log.info(
       "Found {} available entity types in package: {}",
       () -> availableEntityTypes.size(),
@@ -152,20 +150,20 @@ public class EntityTypeInitializationService {
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), Function.identity()));
 
     // stores if an entity type/view is available or not, for caching purposes
-    ConcurrentMap<UUID, Boolean> entityTypeAvailabilityMap = new ConcurrentHashMap<>(allEntityTypes.size());
-    ConcurrentMap<String, Boolean> sourceViewAvailabilityMap = prefillSourceViewAvailabilityMap();
+    Map<UUID, Boolean> entityTypeAvailabilityCache = new HashMap<>(allEntityTypes.size());
+    Map<String, Boolean> sourceViewAvailabilityCache = prefillSourceViewAvailabilityCache();
     // TODO [MODFQMMGR-997]: replace AtomicBoolean and global liquibase run with a precise solution that only attempts with one view
     AtomicBoolean hasAttemptedLiquibaseUpdate = new AtomicBoolean(false);
 
-    // populates entityTypeAvailabilityMap
+    // populates entityTypeAvailabilityCache
     allEntityTypes
       .keySet()
       .forEach(entityTypeId ->
-        checkEntityTypeIsAvailable(
+        checkEntityTypeIsAvailableWithCache(
           entityTypeId,
           allEntityTypes,
-          entityTypeAvailabilityMap,
-          sourceViewAvailabilityMap,
+          entityTypeAvailabilityCache,
+          sourceViewAvailabilityCache,
           hasAttemptedLiquibaseUpdate
         )
       );
@@ -173,11 +171,11 @@ public class EntityTypeInitializationService {
     return allEntityTypes
       .values()
       .stream()
-      .filter(et -> Boolean.TRUE.equals(entityTypeAvailabilityMap.get(UUID.fromString(et.getId()))))
+      .filter(et -> Boolean.TRUE.equals(entityTypeAvailabilityCache.get(UUID.fromString(et.getId()))))
       .toList();
   }
 
-  protected ConcurrentMap<String, Boolean> prefillSourceViewAvailabilityMap() {
+  protected Map<String, Boolean> prefillSourceViewAvailabilityCache() {
     // prefill with existing views, to avoid repeated DB queries
     List<String> existingViews = readerJooqContext
       .select(field("table_name", String.class))
@@ -185,30 +183,30 @@ public class EntityTypeInitializationService {
       .where(field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())))
       .fetch(field("table_name", String.class));
 
-    ConcurrentMap<String, Boolean> sourceViewAvailabilityMap = new ConcurrentHashMap<>(existingViews.size());
+    Map<String, Boolean> sourceViewAvailabilityCache = new HashMap<>(existingViews.size());
 
     for (String view : existingViews) {
-      sourceViewAvailabilityMap.put(view, true);
+      sourceViewAvailabilityCache.put(view, true);
     }
 
-    return sourceViewAvailabilityMap;
+    return sourceViewAvailabilityCache;
   }
 
-  protected boolean checkEntityTypeIsAvailable(
+  protected boolean checkEntityTypeIsAvailableWithCache(
     UUID entityTypeId,
     Map<UUID, EntityType> allEntityTypes,
-    ConcurrentMap<UUID, Boolean> entityTypeAvailabilityMap,
-    ConcurrentMap<String, Boolean> sourceViewAvailabilityMap,
+    Map<UUID, Boolean> entityTypeAvailabilityCache,
+    Map<String, Boolean> sourceViewAvailabilityCache,
     AtomicBoolean hasAttemptedLiquibaseUpdate
   ) {
-    if (entityTypeAvailabilityMap.containsKey(entityTypeId)) {
-      return entityTypeAvailabilityMap.get(entityTypeId);
+    if (entityTypeAvailabilityCache.containsKey(entityTypeId)) {
+      return entityTypeAvailabilityCache.get(entityTypeId);
     }
 
     EntityType entityType = allEntityTypes.get(entityTypeId);
     if (entityType == null) {
       log.warn("Source entity type with ID {} not found among available entity types", entityTypeId);
-      entityTypeAvailabilityMap.put(entityTypeId, false);
+      entityTypeAvailabilityCache.put(entityTypeId, false);
       return false;
     }
 
@@ -218,16 +216,16 @@ public class EntityTypeInitializationService {
         .stream()
         .allMatch(source ->
           switch (source) {
-            case EntityTypeSourceEntityType sourceEt -> checkEntityTypeIsAvailable(
+            case EntityTypeSourceEntityType sourceEt -> checkEntityTypeIsAvailableWithCache(
               sourceEt.getTargetId(),
               allEntityTypes,
-              entityTypeAvailabilityMap,
-              sourceViewAvailabilityMap,
+              entityTypeAvailabilityCache,
+              sourceViewAvailabilityCache,
               hasAttemptedLiquibaseUpdate
             );
             case EntityTypeSourceDatabase sourceDb -> checkSourceViewIsAvailableWithCache(
               sourceDb.getTarget(),
-              sourceViewAvailabilityMap,
+              sourceViewAvailabilityCache,
               hasAttemptedLiquibaseUpdate
             );
             default -> {
@@ -242,7 +240,7 @@ public class EntityTypeInitializationService {
           }
         )
     ) {
-      entityTypeAvailabilityMap.put(entityTypeId, true);
+      entityTypeAvailabilityCache.put(entityTypeId, true);
       return true;
     } else {
       log.warn(
@@ -250,17 +248,17 @@ public class EntityTypeInitializationService {
         entityType.getName(),
         entityType.getId()
       );
-      entityTypeAvailabilityMap.put(entityTypeId, true);
+      entityTypeAvailabilityCache.put(entityTypeId, true);
       return false;
     }
   }
 
   protected boolean checkSourceViewIsAvailableWithCache(
     String view,
-    ConcurrentMap<String, Boolean> sourceViewAvailabilityMap,
+    Map<String, Boolean> sourceViewAvailabilityCache,
     AtomicBoolean hasAttemptedLiquibaseUpdate
   ) {
-    return sourceViewAvailabilityMap.computeIfAbsent(
+    return sourceViewAvailabilityCache.computeIfAbsent(
       view,
       v -> checkSourceViewIsAvailable(v, hasAttemptedLiquibaseUpdate)
     );

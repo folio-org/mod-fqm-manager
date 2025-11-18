@@ -12,11 +12,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import liquibase.exception.LiquibaseException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -47,8 +46,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @ExtendWith(MockitoExtension.class)
 class EntityTypeInitializationServiceTest {
 
-  static ConcurrentMap<UUID, Boolean> validEntityMap;
-  static ConcurrentMap<String, Boolean> validViewMap;
+  private Map<UUID, Boolean> validEntityMap;
+  private Map<String, Boolean> validViewMap;
 
   @Mock
   private EntityTypeRepository entityTypeRepository;
@@ -81,11 +80,11 @@ class EntityTypeInitializationServiceTest {
   void setup() {
     lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenantId");
 
-    validEntityMap = new ConcurrentHashMap<>();
+    validEntityMap = new HashMap<>();
     validEntityMap.put(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), true);
     validEntityMap.put(UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff"), false);
 
-    validViewMap = new ConcurrentHashMap<>();
+    validViewMap = new HashMap<>();
     validViewMap.put("valid_view", true);
     validViewMap.put("invalid_view", false);
   }
@@ -93,13 +92,13 @@ class EntityTypeInitializationServiceTest {
   @ParameterizedTest
   @ValueSource(booleans = { true, false })
   void testEntityTypeAvailabilityCacheIsUsed(boolean testValue) {
-    ConcurrentMap<UUID, Boolean> map = spy(new ConcurrentHashMap<>());
+    Map<UUID, Boolean> map = spy(new HashMap<>());
     map.put(UUID.fromString("11111111-1111-1111-1111-111111111111"), testValue);
 
     lenient().doThrow(new RuntimeException("Cache should not be modified")).when(map).put(any(), any());
 
     assertThat(
-      entityTypeInitializationService.checkEntityTypeIsAvailable(
+      entityTypeInitializationService.checkEntityTypeIsAvailableWithCache(
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         null,
         map,
@@ -113,10 +112,10 @@ class EntityTypeInitializationServiceTest {
   @Test
   void testEntityTypeAvailabilityFailsIfUnknownId() {
     assertThat(
-      entityTypeInitializationService.checkEntityTypeIsAvailable(
+      entityTypeInitializationService.checkEntityTypeIsAvailableWithCache(
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         Map.of(),
-        new ConcurrentHashMap<>(),
+        new HashMap<>(),
         null,
         null
       ),
@@ -159,7 +158,7 @@ class EntityTypeInitializationServiceTest {
   @MethodSource("entityTypeAvailabilityCases")
   void testEntityTypeAvailability(EntityType entityType, boolean expectedAvailability) {
     assertThat(
-      entityTypeInitializationService.checkEntityTypeIsAvailable(
+      entityTypeInitializationService.checkEntityTypeIsAvailableWithCache(
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         Map.of(UUID.fromString("11111111-1111-1111-1111-111111111111"), entityType),
         validEntityMap,
@@ -173,7 +172,7 @@ class EntityTypeInitializationServiceTest {
   @ParameterizedTest
   @ValueSource(booleans = { true, false })
   void testSourceViewAvailabilityCacheIsUsed(boolean testValue) {
-    ConcurrentMap<String, Boolean> map = spy(new ConcurrentHashMap<>());
+    Map<String, Boolean> map = spy(new HashMap<>());
     map.put("view", testValue);
 
     lenient().doThrow(new RuntimeException("Cache should not be modified")).when(map).put(any(), any());

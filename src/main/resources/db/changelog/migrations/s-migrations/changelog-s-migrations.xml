@@ -20,4 +20,22 @@
       $$ LANGUAGE 'plpgsql';
     </createProcedure>
   </changeSet>
+
+  <changeSet id="MODFQMMGR-895-safe-uuid" author="bsharp@ebsco.com" runOnChange="true">
+    <createProcedure>
+      CREATE OR REPLACE FUNCTION ${tenant_id}_mod_fqm_manager.safe_uuid(val text)
+      RETURNS uuid
+      LANGUAGE plpgsql
+      IMMUTABLE
+      STRICT
+      AS $$
+      BEGIN
+        RETURN val::uuid;
+      EXCEPTION WHEN invalid_text_representation THEN
+        RETURN NULL;
+      END;
+      $$;
+    </createProcedure>
+  </changeSet>
+
 </databaseChangeLog>

@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.folio.fqm.service.FqlToSqlConverterService.ALL_NULLS;
 import static org.folio.fqm.service.FqlToSqlConverterService.NOT_ALL_NULLS;
+import static org.folio.fqm.service.FqlToSqlConverterService.UUID_REGEX;
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
 import static org.jooq.impl.DSL.arrayOverlap;
@@ -62,6 +63,7 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("rangedUUIDField").dataType(new EntityDataType().dataType("rangedUUIDType")),
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
+          new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
@@ -639,6 +641,12 @@ class FqlToSqlConverterServiceTest {
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "invalid-uuid-2"]}}""",
         field("openUUIDField").isNull().or(cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
           .and(trueCondition))
+      ),
+      Arguments.of(
+        "validated field",
+        """
+          {"validatedField": {"$eq": "69939c9a-aa96-440a-a873-3b48f3f4f608"}}""",
+        (field("validatedField").isNull().or(field("validatedField").likeRegex(UUID_REGEX))).and(cast(field("validatedField"), UUID.class).eq(cast("69939c9a-aa96-440a-a873-3b48f3f4f608", UUID.class)))
       ),
       Arguments.of(
         "complex condition 1",

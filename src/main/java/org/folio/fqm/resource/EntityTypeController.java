@@ -112,7 +112,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     } catch (IOException e) {
       throw log.throwing(new UncheckedIOException(e));
     }
-    return ResponseEntity.ok().build();
+    return ResponseEntity.noContent().build();
   }
 
   @Override

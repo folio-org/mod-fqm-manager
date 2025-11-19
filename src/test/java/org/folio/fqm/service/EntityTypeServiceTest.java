@@ -11,13 +11,17 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
@@ -106,6 +110,57 @@ class EntityTypeServiceTest {
       .toList();
 
     assertEquals(expectedColumns, result.getColumns(), "Columns should include hidden ones and be sorted");
+
+    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
+    verifyNoMoreInteractions(entityTypeFlatteningService);
+  }
+
+  @Test
+  void shouldExcludeHiddenFieldsAndSubfields() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
+      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
+      new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
+        .dataType(
+          new ArrayType()
+            .itemDataType(
+              new ObjectType().properties(
+                List.of(
+                  new NestedObjectProperty().name("hiddenSubfield").hidden(true),
+                  new NestedObjectProperty().name("notHiddenSubfield").hidden(false)
+                )
+              )
+            )
+        )
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(columns);
+
+
+    var subfieldFilteredColumn = new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
+      .dataType(
+        new ArrayType()
+          .itemDataType(
+            new ObjectType().properties(
+              List.of(
+                new NestedObjectProperty().name("notHiddenSubfield").hidden(false)
+              )
+            )
+          )
+      );
+
+    List<EntityTypeColumn> expectedColumns = List.of(
+      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
+      subfieldFilteredColumn
+    );
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, false);
+
+    assertEquals(expectedColumns, result.getColumns(), "Hidden fields and subfields should be excluded");
 
     verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
     verifyNoMoreInteractions(entityTypeFlatteningService);

@@ -23,6 +23,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -122,6 +123,7 @@ class EntityTypeServiceTest {
     List<EntityTypeColumn> columns = List.of(
       new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
       new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
+      new EntityTypeColumn().name("C").labelAlias("C").hidden(false).dataType(new ArrayType().itemDataType(new StringType())),
       new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
         .dataType(
           new ArrayType()
@@ -154,6 +156,7 @@ class EntityTypeServiceTest {
 
     List<EntityTypeColumn> expectedColumns = List.of(
       new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
+      new EntityTypeColumn().name("C").labelAlias("C").hidden(false).dataType(new ArrayType().itemDataType(new StringType())),
       subfieldFilteredColumn
     );
 

@@ -92,7 +92,7 @@ public class EntityTypeInitializationService {
         .build();
   }
 
-  // called as part of tenant install/upgrade (see FqmTenantService)
+  // called as part of tenant install/upgrade (see FqmTenantService) or on POST /entity-types/install
   public void initializeEntityTypes(String centralTenantId) throws IOException {
     log.info("Initializing entity types");
     if (centralTenantId == null) {

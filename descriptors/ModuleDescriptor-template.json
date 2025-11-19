@@ -77,6 +77,12 @@
           "methods": ["PATCH"],
           "pathPattern": "/entity-types/{entity-type-id}/used-by",
           "permissionsRequired": ["fqm.entityTypes.used-by.item.patch"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/entity-types/install",
+          "permissionsRequired": ["fqm.entityTypes.install.post"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         }
       ]
     },
@@ -167,6 +173,13 @@
           "modulePermissions": [
             "fqm.materializedViews.post"
           ]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/entity-types/install",
+          "unit": "hour",
+          "delay": "1",
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get","permissions.users.item.get"]
         }
       ]
     }
@@ -231,6 +244,12 @@
       "permissionName": "fqm.entityTypes.used-by.item.patch",
       "displayName": "FQM - Update usedBy field for an entity type",
       "description": "Update usedBy field for an entity type",
+      "visible":  true
+    },
+    {
+      "permissionName": "fqm.entityTypes.install.post",
+      "displayName": "FQM - Install entity types",
+      "description": "Install all available entity types",
       "visible":  true
     },
     {

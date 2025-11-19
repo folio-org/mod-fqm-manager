@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -20,6 +22,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
@@ -54,6 +57,9 @@ class EntityTypeControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
+
+  @MockitoBean
+  private EntityTypeInitializationService entityTypeInitializationService;
 
   @MockitoBean
   private EntityTypeService entityTypeService;
@@ -438,6 +444,28 @@ class EntityTypeControllerTest {
 
     mockMvc.perform(requestBuilder)
       .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void testInstallEntityTypes() throws Exception {
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install");
+
+    mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
+    verifyNoMoreInteractions(entityTypeInitializationService);
+  }
+
+  @Test
+  void testInstallEntityTypesFailure() throws Exception {
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install");
+
+    doThrow(new IOException()).when(entityTypeInitializationService).initializeEntityTypes(null);
+
+    mockMvc.perform(requestBuilder).andExpect(status().isInternalServerError());
+
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
+    verifyNoMoreInteractions(entityTypeInitializationService);
   }
 
   private static EntityType getEntityType(EntityTypeColumn col) {

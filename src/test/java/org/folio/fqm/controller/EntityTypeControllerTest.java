@@ -20,6 +20,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
 import org.folio.querytool.domain.dto.ColumnValues;
@@ -54,6 +55,9 @@ class EntityTypeControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
+
+  @MockitoBean
+  private EntityTypeInitializationService entityTypeInitializationService;
 
   @MockitoBean
   private EntityTypeService entityTypeService;

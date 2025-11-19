@@ -123,7 +123,8 @@ class EntityTypeServiceTest {
     List<EntityTypeColumn> columns = List.of(
       new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
       new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
-      new EntityTypeColumn().name("C").labelAlias("C").hidden(false).dataType(new ArrayType().itemDataType(new StringType())),
+      new EntityTypeColumn().name("C").labelAlias("C").hidden(false)
+        .dataType(new ArrayType().itemDataType(new StringType())),
       new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
         .dataType(
           new ArrayType()

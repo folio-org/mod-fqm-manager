@@ -68,6 +68,8 @@ public class FqlToSqlConverterService {
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
   private static final String STRING_TYPE = "stringType";
+  private static final String INTEGER_TYPE = "integerType";
+  private static final String NUMBER_TYPE = "numberType";
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String STRING_UUID_TYPE = "stringUUIDType";
   private static final String OPEN_UUID_TYPE = "openUUIDType";
@@ -453,9 +455,27 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition validateCondition(org.jooq.Field field, String dataType) {
-    switch(dataType) {
+    switch (dataType) {
+
+      // UUID types
       case RANGED_UUID_TYPE, OPEN_UUID_TYPE, STRING_UUID_TYPE:
-        return field.likeRegex("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}");
+        return field.likeRegex(
+          "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
+        );
+
+      // Integer types (Postgres integer cast-safe)
+      case INTEGER_TYPE:
+        return field.likeRegex("^-?[0-9]+$");
+
+      // Number types (Postgres numeric cast-safe)
+      // Allows: 10, -5, 3.14, -2.7, 1e10, -1.2e-3
+      case NUMBER_TYPE:
+        return field.likeRegex("^-?[0-9]+(\\.[0-9]+)?([eE]-?[0-9]+)?$");
+
+      // No validation needed (always safe)
+      case STRING_TYPE, DATE_TYPE:
+        return trueCondition();
+
       default:
         return trueCondition();
     }

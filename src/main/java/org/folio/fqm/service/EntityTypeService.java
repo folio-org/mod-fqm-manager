@@ -145,7 +145,11 @@ public class EntityTypeService {
       && crossTenantQueryService.isCentralTenant();
     List<EntityTypeColumn> filteredColumns = entityType.getColumns().stream()
       .filter(col -> includeHidden || !Boolean.TRUE.equals(col.getHidden()))
-      .map(col -> filterNestedHiddenFields(col, includeHidden))
+//      .map(col -> filterNestedHiddenFields(col, includeHidden))
+      .map(col -> {
+        EntityDataType filteredDataType = filterHiddenFields(col.getDataType(), includeHidden);
+        return (EntityTypeColumn) col.toBuilder().dataType(filteredDataType).build();
+      })
       .toList();
     return entityType
       .columns(filteredColumns)
@@ -212,22 +216,51 @@ public class EntityTypeService {
     throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);
   }
 
-  private EntityTypeColumn filterNestedHiddenFields(EntityTypeColumn column, boolean includeHidden) {
-    if (column.getDataType() instanceof ArrayType arrayType
-      && arrayType.getItemDataType() instanceof ObjectType objectType) {
-      List<NestedObjectProperty> props = objectType.getProperties()
-        .stream()
-        .filter(property -> includeHidden || !Boolean.TRUE.equals(property.getHidden()))
-        .toList();
-      ObjectType newObjectType = objectType.toBuilder()
-        .properties(props)
-        .build();
-      ArrayType newArrayType = arrayType.toBuilder()
-        .itemDataType(newObjectType)
-        .build();
-      return column.toBuilder().dataType(newArrayType).build();
+//  private EntityTypeColumn filterNestedHiddenFields(EntityTypeColumn column, boolean includeHidden) {
+//    if (column.getDataType() instanceof ArrayType arrayType
+//      && arrayType.getItemDataType() instanceof ObjectType objectType) {
+//      List<NestedObjectProperty> props = objectType.getProperties()
+//        .stream()
+//        .filter(property -> includeHidden || !Boolean.TRUE.equals(property.getHidden()))
+//        .toList();
+//      ObjectType newObjectType = objectType.toBuilder()
+//        .properties(props)
+//        .build();
+//      ArrayType newArrayType = arrayType.toBuilder()
+//        .itemDataType(newObjectType)
+//        .build();
+//      return column.toBuilder().dataType(newArrayType).build();
+//    }
+//    return column;
+//  }
+
+  private EntityDataType filterHiddenFields(EntityDataType dataType, boolean includeHidden) {
+    switch (dataType) {
+      case ObjectType objectType -> {
+        List<NestedObjectProperty> filteredProps = objectType.getProperties().stream()
+          .map(prop -> {
+            EntityDataType propDataType = prop.getDataType();
+            if (propDataType != null) {
+              EntityDataType filteredType = filterHiddenFields(propDataType, includeHidden);
+              return prop.toBuilder().dataType(filteredType).build();
+            }
+            return prop;
+          })
+          .filter(prop -> includeHidden || !Boolean.TRUE.equals(prop.getHidden()))
+          .toList();
+
+        return objectType.toBuilder().properties(filteredProps).build();
+
+      }
+      case ArrayType arrayType -> {
+        EntityDataType filteredItemType = filterHiddenFields(arrayType.getItemDataType(), includeHidden);
+        return arrayType.toBuilder().itemDataType(filteredItemType).build();
+
+      }
+      default -> {
+        return dataType;
+      }
     }
-    return column;
   }
 
   private ColumnValues getTenantIds(EntityType entityType) {

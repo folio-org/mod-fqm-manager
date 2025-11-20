@@ -95,9 +95,9 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
 
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
-      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
-      new EntityTypeColumn().name("C").labelAlias("C").hidden(true)
+      new EntityTypeColumn().name("A").labelAlias("A").dataType(new StringType()).hidden(true),
+      new EntityTypeColumn().name("B").labelAlias("B").dataType(new StringType()).hidden(false),
+      new EntityTypeColumn().name("C").labelAlias("C").dataType(new StringType()).hidden(true)
     );
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())

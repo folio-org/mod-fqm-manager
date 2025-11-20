@@ -131,35 +131,19 @@ class EntityTypeServiceTest {
     EntityTypeColumn filteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
       .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(visibleSubfield))));
 
+    // Second-level nested fields
+    NestedObjectProperty hiddenNestedSubfield = new NestedObjectProperty().name("hiddenNestedSubfield").dataType(new StringType()).hidden(true);
+    NestedObjectProperty visibleNestedSubfield = new NestedObjectProperty().name("visibleNestedSubfield").dataType(new StringType()).hidden(false);
 
-    NestedObjectProperty hiddenNestedSubfield = new NestedObjectProperty()
-      .name("hiddenNestedSubfield")
-      .dataType(new StringType())
-      .hidden(true);
-
-    NestedObjectProperty visibleNestedSubfield = new NestedObjectProperty()
-      .name("visibleNestedSubfield")
-      .dataType(new StringType())
-      .hidden(false);
-
+    // First-level nested fields
     NestedObjectProperty innerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(hiddenNestedSubfield, visibleNestedSubfield)));
     NestedObjectProperty filteredInnerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(visibleNestedSubfield)));
+    ObjectType firstLevelObject = new ObjectType().properties(List.of(innerObject));
+    ObjectType filteredFirstLevelObject = new ObjectType().properties(List.of(filteredInnerObject));
 
-    ObjectType firstLevelObject = new ObjectType()
-      .properties(List.of(innerObject));
-
-    ObjectType filteredFirstLevelObject = new ObjectType()
-      .properties(List.of(filteredInnerObject));
-
-    EntityTypeColumn nestedObjectColumn = new EntityTypeColumn()
-      .name("nestedObject")
-      .hidden(false)
-      .dataType(firstLevelObject);
-
-    EntityTypeColumn filteredNestedObjectColumn = new EntityTypeColumn()
-      .name("nestedObject")
-      .hidden(false)
-      .dataType(filteredFirstLevelObject);
+    // Doubly-nested ObjectType column
+    EntityTypeColumn nestedObjectColumn = new EntityTypeColumn().name("nestedObject").hidden(false).dataType(firstLevelObject);
+    EntityTypeColumn filteredNestedObjectColumn = new EntityTypeColumn().name("nestedObject").hidden(false).dataType(filteredFirstLevelObject);
 
     List<EntityTypeColumn> columns = List.of(
       hiddenColumn,
@@ -171,7 +155,6 @@ class EntityTypeServiceTest {
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .columns(columns);
-
 
     List<EntityTypeColumn> expectedColumns = List.of(
       visibleColumn,

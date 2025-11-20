@@ -160,7 +160,7 @@ public class FqlToSqlConverterService {
     if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
       String value = (String) equalsCondition.value();
       if (validate) {
-        Condition validateCondition = field.likeRegex("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}");
+        Condition validateCondition = validateCondition(field, dataType);
         return validateCondition.and(cast(field, UUID.class).eq(cast(value, UUID.class)));
       }
       return cast(field, UUID.class).eq(cast(value, UUID.class));
@@ -450,6 +450,15 @@ public class FqlToSqlConverterService {
       }
       default -> nullCondition;
     };
+  }
+
+  private static Condition validateCondition(org.jooq.Field field, String dataType) {
+    switch(dataType) {
+      case RANGED_UUID_TYPE, OPEN_UUID_TYPE, STRING_UUID_TYPE:
+        return field.likeRegex("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}");
+      default:
+        return trueCondition();
+    }
   }
 
   /**

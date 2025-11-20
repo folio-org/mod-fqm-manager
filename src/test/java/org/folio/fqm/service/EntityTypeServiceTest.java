@@ -122,8 +122,8 @@ class EntityTypeServiceTest {
     NestedObjectProperty hiddenSubfield = new NestedObjectProperty().name("hiddenSubfield").hidden(true);
     NestedObjectProperty visibleSubfield = new NestedObjectProperty().name("visibleSubfield").hidden(false);
 
-    EntityTypeColumn hiddenColumn = new EntityTypeColumn().name("hidden").hidden(true);
-    EntityTypeColumn visibleColumn = new EntityTypeColumn().name("visible").hidden(false);
+    EntityTypeColumn hiddenColumn = new EntityTypeColumn().name("hidden").dataType(new StringType()).hidden(true);
+    EntityTypeColumn visibleColumn = new EntityTypeColumn().name("visible").dataType(new StringType()).hidden(false);
     EntityTypeColumn arrayColumn = new EntityTypeColumn().name("array").hidden(false)
       .dataType(new ArrayType().itemDataType(new StringType()));
     EntityTypeColumn unfilteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
@@ -131,11 +131,42 @@ class EntityTypeServiceTest {
     EntityTypeColumn filteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
       .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(visibleSubfield))));
 
+
+    NestedObjectProperty hiddenNestedSubfield = new NestedObjectProperty()
+      .name("hiddenNestedSubfield")
+      .dataType(new StringType())
+      .hidden(true);
+
+    NestedObjectProperty visibleNestedSubfield = new NestedObjectProperty()
+      .name("visibleNestedSubfield")
+      .dataType(new StringType())
+      .hidden(false);
+
+    NestedObjectProperty innerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(hiddenNestedSubfield, visibleNestedSubfield)));
+    NestedObjectProperty filteredInnerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(visibleNestedSubfield)));
+
+    ObjectType firstLevelObject = new ObjectType()
+      .properties(List.of(innerObject));
+
+    ObjectType filteredFirstLevelObject = new ObjectType()
+      .properties(List.of(filteredInnerObject));
+
+    EntityTypeColumn nestedObjectColumn = new EntityTypeColumn()
+      .name("nestedObject")
+      .hidden(false)
+      .dataType(firstLevelObject);
+
+    EntityTypeColumn filteredNestedObjectColumn = new EntityTypeColumn()
+      .name("nestedObject")
+      .hidden(false)
+      .dataType(filteredFirstLevelObject);
+
     List<EntityTypeColumn> columns = List.of(
       hiddenColumn,
       visibleColumn,
       arrayColumn,
-      unfilteredObjectArrayColumn
+      unfilteredObjectArrayColumn,
+      nestedObjectColumn
     );
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -145,7 +176,8 @@ class EntityTypeServiceTest {
     List<EntityTypeColumn> expectedColumns = List.of(
       visibleColumn,
       arrayColumn,
-      filteredObjectArrayColumn
+      filteredObjectArrayColumn,
+      filteredNestedObjectColumn
     );
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);

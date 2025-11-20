@@ -459,22 +459,12 @@ public class FqlToSqlConverterService {
 
   private static Condition validateCondition(org.jooq.Field field, String dataType) {
     switch (dataType) {
-
-      // UUID types
       case RANGED_UUID_TYPE, OPEN_UUID_TYPE, STRING_UUID_TYPE:
-        return field.likeRegex(
-          "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"
-        );
-
-      // Integer types (Postgres integer cast-safe)
+        return field.likeRegex(UUID_REGEX);
       case INTEGER_TYPE:
         return field.likeRegex(INTEGER_REGEX);
-
-      // Number types (Postgres numeric cast-safe)
-      // Allows: 10, -5, 3.14, -2.7, 1e10, -1.2e-3
       case NUMBER_TYPE:
         return field.likeRegex(NUMBER_REGEX);
-
       default:
         return trueCondition();
     }

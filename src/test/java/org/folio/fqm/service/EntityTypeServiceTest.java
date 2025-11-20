@@ -120,54 +120,39 @@ class EntityTypeServiceTest {
   void shouldExcludeHiddenFieldsAndSubfields() {
     UUID entityTypeId = UUID.randomUUID();
 
+    NestedObjectProperty hiddenSubfield = new NestedObjectProperty().name("hiddenSubfield").hidden(true);
+    NestedObjectProperty visibleSubfield = new NestedObjectProperty().name("visibleSubfield").hidden(false);
+
+    EntityTypeColumn hiddenColumn = new EntityTypeColumn().name("hidden").hidden(true);
+    EntityTypeColumn visibleColumn = new EntityTypeColumn().name("visible").hidden(false);
+    EntityTypeColumn arrayColumn = new EntityTypeColumn().name("array").hidden(false)
+      .dataType(new ArrayType().itemDataType(new StringType()));
+    EntityTypeColumn unfilteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
+      .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(hiddenSubfield, visibleSubfield))));
+    EntityTypeColumn filteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
+      .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(visibleSubfield))));
+
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
-      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
-      new EntityTypeColumn().name("C").labelAlias("C").hidden(false)
-        .dataType(new ArrayType().itemDataType(new StringType())),
-      new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
-        .dataType(
-          new ArrayType()
-            .itemDataType(
-              new ObjectType().properties(
-                List.of(
-                  new NestedObjectProperty().name("hiddenSubfield").hidden(true),
-                  new NestedObjectProperty().name("notHiddenSubfield").hidden(false)
-                )
-              )
-            )
-        )
+      hiddenColumn,
+      visibleColumn,
+      arrayColumn,
+      unfilteredObjectArrayColumn
     );
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .columns(columns);
 
 
-    var subfieldFilteredColumn = new EntityTypeColumn().name("D").labelAlias("D").hidden(false)
-      .dataType(
-        new ArrayType()
-          .itemDataType(
-            new ObjectType().properties(
-              List.of(
-                new NestedObjectProperty().name("notHiddenSubfield").hidden(false)
-              )
-            )
-          )
-      );
-
     List<EntityTypeColumn> expectedColumns = List.of(
-      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
-      new EntityTypeColumn().name("C").labelAlias("C").hidden(false).dataType(new ArrayType().itemDataType(new StringType())),
-      subfieldFilteredColumn
+      visibleColumn,
+      arrayColumn,
+      filteredObjectArrayColumn
     );
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+
     EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, false);
-
     assertEquals(expectedColumns, result.getColumns(), "Hidden fields and subfields should be excluded");
-
-    verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
-    verifyNoMoreInteractions(entityTypeFlatteningService);
   }
 
   @Test

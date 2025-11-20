@@ -67,6 +67,9 @@ public class FqlToSqlConverterService {
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
+  private static final String UUID_REGEX = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}";
+  private static final String INTEGER_REGEX = "^-?[0-9]+$";
+  private static final String NUMBER_REGEX = "^-?[0-9]+(\\.[0-9]+)?([eE]-?[0-9]+)?$";
   private static final String STRING_TYPE = "stringType";
   private static final String INTEGER_TYPE = "integerType";
   private static final String NUMBER_TYPE = "numberType";
@@ -354,7 +357,7 @@ public class FqlToSqlConverterService {
               UUID uuidValue = UUID.fromString(value);
               boolean validate = true;
               if (validate) {
-                Condition validateCondition = field.likeRegex("[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}");
+                Condition validateCondition = field.likeRegex(UUID_REGEX);
                 return validateCondition.and(cast(field, UUID.class).eq(cast(value, UUID.class)));
               }
               return cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
@@ -465,16 +468,12 @@ public class FqlToSqlConverterService {
 
       // Integer types (Postgres integer cast-safe)
       case INTEGER_TYPE:
-        return field.likeRegex("^-?[0-9]+$");
+        return field.likeRegex(INTEGER_REGEX);
 
       // Number types (Postgres numeric cast-safe)
       // Allows: 10, -5, 3.14, -2.7, 1e10, -1.2e-3
       case NUMBER_TYPE:
-        return field.likeRegex("^-?[0-9]+(\\.[0-9]+)?([eE]-?[0-9]+)?$");
-
-      // No validation needed (always safe)
-      case STRING_TYPE, DATE_TYPE:
-        return trueCondition();
+        return field.likeRegex(NUMBER_REGEX);
 
       default:
         return trueCondition();

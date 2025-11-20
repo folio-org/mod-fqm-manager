@@ -11,6 +11,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.testutil.TestDataFixture;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
@@ -18,7 +19,10 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
+import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -91,9 +95,9 @@ class EntityTypeServiceTest {
     UUID entityTypeId = UUID.randomUUID();
 
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("A").labelAlias("A").hidden(true),
-      new EntityTypeColumn().name("B").labelAlias("B").hidden(false),
-      new EntityTypeColumn().name("C").labelAlias("C").hidden(true)
+      new EntityTypeColumn().name("A").labelAlias("A").dataType(new StringType()).hidden(true),
+      new EntityTypeColumn().name("B").labelAlias("B").dataType(new StringType()).hidden(false),
+      new EntityTypeColumn().name("C").labelAlias("C").dataType(new StringType()).hidden(true)
     );
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
@@ -109,6 +113,60 @@ class EntityTypeServiceTest {
 
     verify(entityTypeFlatteningService, times(1)).getFlattenedEntityType(entityTypeId, null, false);
     verifyNoMoreInteractions(entityTypeFlatteningService);
+  }
+
+  @Test
+  void shouldExcludeHiddenFieldsAndSubfields() {
+    UUID entityTypeId = UUID.randomUUID();
+
+    NestedObjectProperty hiddenSubfield = new NestedObjectProperty().name("hiddenSubfield").hidden(true);
+    NestedObjectProperty visibleSubfield = new NestedObjectProperty().name("visibleSubfield").hidden(false);
+
+    EntityTypeColumn hiddenColumn = new EntityTypeColumn().name("hidden").dataType(new StringType()).hidden(true);
+    EntityTypeColumn visibleColumn = new EntityTypeColumn().name("visible").dataType(new StringType()).hidden(false);
+    EntityTypeColumn arrayColumn = new EntityTypeColumn().name("array").hidden(false)
+      .dataType(new ArrayType().itemDataType(new StringType()));
+    EntityTypeColumn unfilteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
+      .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(hiddenSubfield, visibleSubfield))));
+    EntityTypeColumn filteredObjectArrayColumn = new EntityTypeColumn().name("D").hidden(false)
+      .dataType(new ArrayType().itemDataType(new ObjectType().properties(List.of(visibleSubfield))));
+
+    // Second-level nested fields
+    NestedObjectProperty hiddenNestedSubfield = new NestedObjectProperty().name("hiddenNestedSubfield").dataType(new StringType()).hidden(true);
+    NestedObjectProperty visibleNestedSubfield = new NestedObjectProperty().name("visibleNestedSubfield").dataType(new StringType()).hidden(false);
+
+    // First-level nested fields
+    NestedObjectProperty innerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(hiddenNestedSubfield, visibleNestedSubfield)));
+    NestedObjectProperty filteredInnerObject = new NestedObjectProperty().dataType(new ObjectType().properties(List.of(visibleNestedSubfield)));
+    ObjectType firstLevelObject = new ObjectType().properties(List.of(innerObject));
+    ObjectType filteredFirstLevelObject = new ObjectType().properties(List.of(filteredInnerObject));
+
+    // Doubly-nested ObjectType column
+    EntityTypeColumn nestedObjectColumn = new EntityTypeColumn().name("nestedObject").hidden(false).dataType(firstLevelObject);
+    EntityTypeColumn filteredNestedObjectColumn = new EntityTypeColumn().name("nestedObject").hidden(false).dataType(filteredFirstLevelObject);
+
+    List<EntityTypeColumn> columns = List.of(
+      hiddenColumn,
+      visibleColumn,
+      arrayColumn,
+      unfilteredObjectArrayColumn,
+      nestedObjectColumn
+    );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(columns);
+
+    List<EntityTypeColumn> expectedColumns = List.of(
+      visibleColumn,
+      arrayColumn,
+      filteredObjectArrayColumn,
+      filteredNestedObjectColumn
+    );
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+
+    EntityType result = entityTypeService.getEntityTypeDefinition(entityTypeId, false);
+    assertEquals(expectedColumns, result.getColumns(), "Hidden fields and subfields should be excluded");
   }
 
   @Test

@@ -25,11 +25,13 @@ import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -38,6 +40,8 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinFieldPair;
 import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.LabeledValueWithDescription;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -139,13 +143,15 @@ public class EntityTypeService {
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
-    List<EntityTypeColumn> columns = entityType
-      .getColumns()
-      .stream()
-      .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
+    List<EntityTypeColumn> filteredColumns = entityType.getColumns().stream()
+      .filter(col -> includeHidden || !Boolean.TRUE.equals(col.getHidden()))
+      .map(col -> {
+        EntityDataType filteredDataType = filterHiddenFields(col.getDataType(), includeHidden);
+        return (EntityTypeColumn) col.toBuilder().dataType(filteredDataType).build();
+      })
       .toList();
     return entityType
-      .columns(columns)
+      .columns(filteredColumns)
       .crossTenantQueriesEnabled(crossTenantEnabled);
   }
 
@@ -207,6 +213,32 @@ public class EntityTypeService {
     }
 
     throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);
+  }
+
+  private EntityDataType filterHiddenFields(EntityDataType dataType, boolean includeHidden) {
+    switch (dataType) {
+      case ObjectType objectType -> {
+        List<NestedObjectProperty> filteredProps = objectType.getProperties().stream()
+          .map(prop -> {
+            EntityDataType propDataType = prop.getDataType();
+            if (propDataType != null) {
+              EntityDataType filteredType = filterHiddenFields(propDataType, includeHidden);
+              return prop.toBuilder().dataType(filteredType).build();
+            }
+            return prop;
+          })
+          .filter(prop -> includeHidden || !Boolean.TRUE.equals(prop.getHidden()))
+          .toList();
+        return objectType.toBuilder().properties(filteredProps).build();
+      }
+      case ArrayType arrayType -> {
+        EntityDataType filteredItemType = filterHiddenFields(arrayType.getItemDataType(), includeHidden);
+        return arrayType.toBuilder().itemDataType(filteredItemType).build();
+      }
+      default -> {
+        return dataType;
+      }
+    }
   }
 
   private ColumnValues getTenantIds(EntityType entityType) {

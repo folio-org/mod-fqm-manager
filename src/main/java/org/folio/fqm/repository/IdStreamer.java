@@ -113,10 +113,6 @@ public class IdStreamer {
       String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
 
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
-      boolean validate = true;
-      if (validate) {
-        getWhereClauseWithValidation(fql.fqlCondition(), entityTypeDefinition, whereClause);
-      }
 
       if (!CollectionUtils.isEmpty(entityType.getFilterConditions())) {
         for (String condition : entityType.getFilterConditions()) {
@@ -165,11 +161,6 @@ public class IdStreamer {
       idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
         .forEach(idsWithCancelCallback -> handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
     }
-  }
-
-  public Condition getWhereClauseWithValidation(FqlCondition fqlCondition, EntityType entityType, Condition whereClause) {
-    // Currently a placeholder for future validation logic
-    return whereClause;
   }
 
   void handleBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback, Integer maxQuerySize, AtomicInteger total) {

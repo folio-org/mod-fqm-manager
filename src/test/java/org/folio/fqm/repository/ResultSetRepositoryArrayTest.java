@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -24,6 +26,7 @@ import org.mockito.MockedStatic;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link ResultSetRepositoryArrayTestDataProvider} class
@@ -33,14 +36,30 @@ class ResultSetRepositoryArrayTest {
   private ResultSetRepository repo;
 
   EntityTypeFlatteningService entityTypeFlatteningService;
-
+  EntityTypeInitializationService entityTypeInitializationService;
 
   @BeforeEach
   void setup() {
     DSLContext context = DSL.using(new MockConnection(
       new ResultSetRepositoryArrayTestDataProvider()), SQLDialect.POSTGRES);
+
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class), new ObjectMapper());
+    entityTypeInitializationService = mock(EntityTypeInitializationService.class);
+
+    lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
+      .thenAnswer(invocation -> {
+        var callable = invocation.getArgument(0, Callable.class);
+        return callable.call();
+      });
+
+    this.repo =
+      new ResultSetRepository(
+        context,
+        entityTypeFlatteningService,
+        entityTypeInitializationService,
+        mock(FolioExecutionContext.class),
+        new ObjectMapper()
+      );
   }
 
   @Test

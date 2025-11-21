@@ -263,7 +263,7 @@ public class EntityTypeInitializationService {
         entityType.getName(),
         entityType.getId()
       );
-      entityTypeAvailabilityCache.put(entityTypeId, true);
+      entityTypeAvailabilityCache.put(entityTypeId, false);
       return false;
     }
   }
@@ -282,11 +282,11 @@ public class EntityTypeInitializationService {
   protected boolean checkSourceViewIsAvailable(String view, AtomicBoolean hasAttemptedLiquibaseUpdate) {
     try {
       if (view.contains("(")) {
-        log.info("Source `{}` is a complex expression and cannot be checked", view);
+        log.info("√ Source `{}` is a complex expression and cannot be checked", view);
         return true;
       }
 
-      log.info("Checking if source view {} is available", view);
+      log.info("? Checking if source view {} is available", view);
 
       Optional
         .ofNullable(

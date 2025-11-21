@@ -3,7 +3,6 @@ package org.folio.fqm.repository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.fql.model.FqlCondition;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.exception.MaxQuerySizeExceededException;

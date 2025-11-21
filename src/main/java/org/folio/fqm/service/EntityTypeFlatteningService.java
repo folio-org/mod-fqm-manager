@@ -1,7 +1,5 @@
 package org.folio.fqm.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -10,18 +8,18 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.repository.EntityTypeCacheRepository;
+import org.folio.fqm.repository.EntityTypeCacheRepository.FlattenedEntityTypeCacheKey;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.EntityType;
@@ -33,7 +31,6 @@ import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -46,11 +43,10 @@ import static java.util.Objects.requireNonNullElse;
 public class EntityTypeFlatteningService {
 
   private final EntityTypeRepository entityTypeRepository;
+  private final EntityTypeCacheRepository entityTypeCacheRepository;
   private final LocalizationService localizationService;
   private final FolioExecutionContext executionContext;
   private final UserTenantService userTenantService;
-
-  private final Cache<EntityTypeCacheKey, EntityType> entityTypeCache;
 
   // Sort columns within a source, based on their label alias (nulls last)
   private static final Comparator<EntityTypeColumn> columnComparator =
@@ -62,18 +58,16 @@ public class EntityTypeFlatteningService {
   @Autowired
   public EntityTypeFlatteningService(
     EntityTypeRepository entityTypeRepository,
+    EntityTypeCacheRepository entityTypeCacheRepository,
     LocalizationService localizationService,
     FolioExecutionContext executionContext,
-    UserTenantService userTenantService,
-    @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:300}") long cacheDurationSeconds
+    UserTenantService userTenantService
   ) {
     this.entityTypeRepository = entityTypeRepository;
+    this.entityTypeCacheRepository = entityTypeCacheRepository;
     this.localizationService = localizationService;
     this.executionContext = executionContext;
     this.userTenantService = userTenantService;
-
-    this.entityTypeCache =
-      Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
   }
 
   /**
@@ -86,9 +80,9 @@ public class EntityTypeFlatteningService {
    * @return The flattened entity type definition, fully localized
    */
   public EntityType getFlattenedEntityType(UUID entityTypeId, String tenantId, boolean preserveAllColumns) {
-    return entityTypeCache
-      .get(
-        new EntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
+    return entityTypeCacheRepository
+      .getFlattened(
+        new FlattenedEntityTypeCacheKey(tenantId, entityTypeId, localizationService.getCurrentLocales(), preserveAllColumns),
         k -> getFlattenedEntityType(k.entityTypeId(), null, k.tenantId(), k.preserveAllColumns())
       )
       // ensures we get a fresh copy each time, preventing any changes to the cached entity type from affecting future requests
@@ -310,19 +304,5 @@ public class EntityTypeFlatteningService {
         ? etSource.getOrder()
         : Integer.MAX_VALUE) // Right now this only affects things inherited from ET sources, so just put DB sources last. This doesn't really affect anything, but it reduces the noise when debugging
       .thenComparing(source -> Objects.toString(localizationService.localizeSourceLabel(entityType, source.getAlias(), source))); // Use Objects.toString(), to handle nulls gracefully
-  }
-
-  // translations are included as part of flattening, so we must cache based on locales, too
-  private record EntityTypeCacheKey(
-    String tenantId,
-    UUID entityTypeId,
-    List<Locale> locales,
-    boolean preserveAllColumns
-  ) {
-    EntityTypeCacheKey {
-      if (tenantId == null) {
-        throw new IllegalArgumentException("tenantId cannot be null");
-      }
-    }
   }
 }

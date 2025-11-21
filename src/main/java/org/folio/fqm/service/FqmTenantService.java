@@ -33,10 +33,8 @@ public class FqmTenantService extends TenantService {
   }
 
   @Override
-  public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
-    this.folioSpringLiquibase.setChangeLogParameters(Map.of("tenant_id", this.context.getTenantId()));
-
-    super.createOrUpdateTenant(tenantAttributes);
+  protected void beforeLiquibaseUpdate(TenantAttributes tenantAttributes) {
+    this.folioSpringLiquibase.setChangeLogParameters(Map.of("tenant_id", this.context.getTenantId()));  
   }
 
   @Override

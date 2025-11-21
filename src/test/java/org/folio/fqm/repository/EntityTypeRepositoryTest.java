@@ -52,13 +52,16 @@ class EntityTypeRepositoryTest {
   @Autowired
   private EntityTypeRepository repo;
 
+  @Autowired
+  private EntityTypeCacheRepository cache;
+
   @MockitoSpyBean
   private FolioExecutionContext folioExecutionContext;
 
   @BeforeEach
   void setUp() {
     // Clear cache before each test to ensure fresh data
-    repo.clearCache();
+    cache.invalidateAll();
     // Reset the mock object mapper to avoid side effects from previous tests
     reset(objectMapper);
   }

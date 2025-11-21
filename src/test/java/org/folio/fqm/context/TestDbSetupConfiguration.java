@@ -8,7 +8,7 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
-import org.folio.fqm.service.EntityTypeService;
+import org.folio.fqm.service.EntityTypeValidationService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.jooq.DSLContext;
@@ -70,7 +70,7 @@ public class TestDbSetupConfiguration {
     private EntityTypeRepository entityTypeRepository;
 
     @Autowired
-    private EntityTypeService entityTypeService;
+    private EntityTypeValidationService entityTypeValidationService;
 
     @Autowired
     private ResourcePatternResolver resourceResolver;
@@ -105,7 +105,9 @@ public class TestDbSetupConfiguration {
       when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
       when(executionContext.getTenantId()).thenReturn(TENANT_ID);
       new EntityTypeInitializationService(
+        null,
         entityTypeRepository,
+        entityTypeValidationService,
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {
@@ -113,8 +115,6 @@ public class TestDbSetupConfiguration {
           }
         },
         resourceResolver,
-        null,
-        entityTypeService,
         readerJooqContext,
         folioSpringLiquibase
       )

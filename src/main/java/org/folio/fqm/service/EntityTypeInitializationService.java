@@ -41,33 +41,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class EntityTypeInitializationService {
 
+  private final CrossTenantQueryService crossTenantQueryService;
   private final EntityTypeRepository entityTypeRepository;
-  private final EntityTypeService entityTypeService;
+  private final EntityTypeValidationService entityTypeValidationService;
 
   private final FolioExecutionContext folioExecutionContext;
 
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
-  private final CrossTenantQueryService crossTenantQueryService;
 
   private final DSLContext readerJooqContext;
   private final FolioSpringLiquibase folioSpringLiquibase;
 
   @Autowired
   public EntityTypeInitializationService(
+    CrossTenantQueryService crossTenantQueryService,
     EntityTypeRepository entityTypeRepository,
+    EntityTypeValidationService entityTypeValidationService,
     FolioExecutionContext folioExecutionContext,
     ResourcePatternResolver resourceResolver,
-    CrossTenantQueryService crossTenantQueryService,
-    EntityTypeService entityTypeService,
     @Qualifier("readerJooqContext") DSLContext readerJooqContext,
     FolioSpringLiquibase folioSpringLiquibase
   ) {
+    this.crossTenantQueryService = crossTenantQueryService;
     this.entityTypeRepository = entityTypeRepository;
+    this.entityTypeValidationService = entityTypeValidationService;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
-    this.crossTenantQueryService = crossTenantQueryService;
-    this.entityTypeService = entityTypeService;
     this.readerJooqContext = readerJooqContext;
     this.folioSpringLiquibase = folioSpringLiquibase;
 
@@ -90,6 +90,20 @@ public class EntityTypeInitializationService {
         // allows "escaping" newlines, giving proper linebreaks
         .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
         .build();
+  }
+
+  public void runLiquibaseUpdate() {
+    try {
+      folioSpringLiquibase.setChangeLogParameters(Map.of("tenant_id", folioExecutionContext.getTenantId()));
+      folioSpringLiquibase.performLiquibaseUpdate();
+    } catch (LiquibaseException le) {
+      log.error(
+        "Error during liquibase update attempt for tenant {}. Something is very wrong.",
+        folioExecutionContext.getTenantId(),
+        le
+      );
+      throw new IllegalStateException(le);
+    }
   }
 
   // called as part of tenant install/upgrade (see FqmTenantService) or on POST /entity-types/install
@@ -152,7 +166,8 @@ public class EntityTypeInitializationService {
     // stores if an entity type/view is available or not, for caching purposes
     Map<UUID, Boolean> entityTypeAvailabilityCache = HashMap.newHashMap(allEntityTypes.size());
     Map<String, Boolean> sourceViewAvailabilityCache = prefillSourceViewAvailabilityCache();
-    // TODO [MODFQMMGR-997]: replace AtomicBoolean and global liquibase run with a precise solution that only attempts with one view
+    // TODO [MODFQMMGR-997]: replace AtomicBoolean and global liquibase run with a precise solution that
+    // only attempts with one view
     AtomicBoolean hasAttemptedLiquibaseUpdate = new AtomicBoolean(false);
 
     // populates entityTypeAvailabilityCache
@@ -205,7 +220,7 @@ public class EntityTypeInitializationService {
 
     EntityType entityType = allEntityTypes.get(entityTypeId);
     if (entityType == null) {
-      log.warn("Source entity type with ID {} not found among available entity types", entityTypeId);
+      log.warn("X Source entity type with ID {} not found among available entity types", entityTypeId);
       entityTypeAvailabilityCache.put(entityTypeId, false);
       return false;
     }
@@ -230,7 +245,7 @@ public class EntityTypeInitializationService {
             );
             default -> {
               log.warn(
-                "Unknown source type {} in entity type {} ({})",
+                "X Unknown source type {} in entity type {} ({})",
                 source.getClass().getName(),
                 entityType.getName(),
                 entityType.getId()
@@ -244,11 +259,11 @@ public class EntityTypeInitializationService {
       return true;
     } else {
       log.warn(
-        "Entity type {} ({}) is not available due to unavailable sources",
+        "X Entity type {} ({}) is not available due to unavailable sources",
         entityType.getName(),
         entityType.getId()
       );
-      entityTypeAvailabilityCache.put(entityTypeId, true);
+      entityTypeAvailabilityCache.put(entityTypeId, false);
       return false;
     }
   }
@@ -297,18 +312,9 @@ public class EntityTypeInitializationService {
       if (hasAttemptedLiquibaseUpdate.compareAndSet(false, true)) {
         log.info("Attempting to run liquibase update for tenant {}", folioExecutionContext.getTenantId());
 
-        try {
-          folioSpringLiquibase.performLiquibaseUpdate();
+        this.runLiquibaseUpdate();
 
-          return checkSourceViewIsAvailable(view, hasAttemptedLiquibaseUpdate);
-        } catch (LiquibaseException le) {
-          log.error(
-            "Error during liquibase update attempt for tenant {}. Something is very wrong.",
-            folioExecutionContext.getTenantId(),
-            le
-          );
-          throw new IllegalStateException(le);
-        }
+        return checkSourceViewIsAvailable(view, hasAttemptedLiquibaseUpdate);
       }
 
       return false;
@@ -326,7 +332,7 @@ public class EntityTypeInitializationService {
       entityType.setUsedBy(existingUsedBy);
 
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
-      entityTypeService.validateEntityType(UUID.fromString(entityType.getId()), entityType, entityTypeIds);
+      entityTypeValidationService.validateEntityType(UUID.fromString(entityType.getId()), entityType, entityTypeIds);
     }
   }
 }

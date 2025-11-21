@@ -1,6 +1,6 @@
 package org.folio.fqm.service;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.CustomEntityType;
@@ -43,6 +43,9 @@ class EntityTypeServiceAvailableJoinsTest {
   private EntityTypeRepository repo;
 
   @Mock
+  private EntityTypeCacheRepository cacheRepository;
+
+  @Mock
   private LocalizationService localizationService;
 
   @Mock
@@ -54,7 +57,8 @@ class EntityTypeServiceAvailableJoinsTest {
   @Mock
   private FolioExecutionContext executionContext;
 
-  @Mock PermissionsService permissionsService;
+  @Mock
+  private PermissionsService permissionsService;
 
   @Spy
   @InjectMocks
@@ -151,7 +155,7 @@ class EntityTypeServiceAvailableJoinsTest {
     lenient().when(userTenantService.getUserTenantsResponse(any())).thenReturn("{\"totalRecords\": 0}");
     lenient().when(repo.getEntityTypeDefinition(any(), any())).thenAnswer(invocationOnMock -> Optional.of(entityTypes.get(invocationOnMock.getArgument(0, UUID.class))));
 
-    EntityTypeFlatteningService flatteningService = new EntityTypeFlatteningService(repo, localizationService, executionContext, userTenantService, 0L);
+    EntityTypeFlatteningService flatteningService = new EntityTypeFlatteningService(repo, cacheRepository, localizationService, executionContext, userTenantService);
     lenient().doAnswer(invocationOnMock -> entityTypes.values().stream()
       .map(et -> flatteningService.getFlattenedEntityType(et, "", true))
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a))
@@ -529,7 +533,7 @@ class EntityTypeServiceAvailableJoinsTest {
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(etId1), any(), eq(true))).thenReturn(et1);
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(etId2), any(), eq(true))).thenReturn(et2);
 
-    Map<UUID, EntityType> result = new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, permissionsService, null, null, executionContext, executionContext, null)
+    Map<UUID, EntityType> result = new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, null, permissionsService, null, null, executionContext, null)
       .getAccessibleEntityTypesById();
 
     assertEquals(1, result.size());
@@ -545,7 +549,7 @@ class EntityTypeServiceAvailableJoinsTest {
     when(repo.getEntityTypeDefinitions(Set.of(), null)).thenReturn(Stream.of(et));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of());
 
-    EntityTypeService svc = spy(new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, permissionsService, null, null, executionContext, executionContext, null));
+    EntityTypeService svc = spy(new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, null, permissionsService, null, null, executionContext, null));
     doReturn(false).when(svc).currentUserCanAccessCustomEntityType(etId.toString());
 
     Map<UUID, EntityType> result = svc.getAccessibleEntityTypesById();

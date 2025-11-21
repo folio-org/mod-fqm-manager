@@ -167,6 +167,7 @@ class EntityTypeInitializationServiceTest {
       ),
       is(expectedAvailability)
     );
+    assertThat(validEntityMap.get(UUID.fromString("11111111-1111-1111-1111-111111111111")), is(expectedAvailability));
   }
 
   @ParameterizedTest

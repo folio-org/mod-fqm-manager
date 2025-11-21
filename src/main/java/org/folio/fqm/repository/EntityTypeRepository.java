@@ -134,7 +134,7 @@ public class EntityTypeRepository {
   }
 
   public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
-    log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
+    log.info("Getting definitions name for tenant {} and entity type IDs {}", tenantId, entityTypeIds);
     Map<UUID, EntityType> entityTypes = entityTypeCacheRepository.getRaw(tenantId, tenantIdKey -> {
         String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
         Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);

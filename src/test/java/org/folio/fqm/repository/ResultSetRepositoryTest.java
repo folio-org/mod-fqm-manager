@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
@@ -57,7 +57,7 @@ class ResultSetRepositoryTest {
 
     lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
       .thenAnswer(invocation -> {
-        var callable = invocation.getArgument(0, Callable.class);
+        var callable = invocation.getArgument(1, Supplier.class);
         return callable.call();
       });
 

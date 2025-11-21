@@ -26,7 +26,7 @@ import org.mockito.MockedStatic;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 /**
  * NOTE - Tests in this class depends on the mock results returned from {@link ResultSetRepositoryArrayTestDataProvider} class
@@ -48,8 +48,8 @@ class ResultSetRepositoryArrayTest {
 
     lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
       .thenAnswer(invocation -> {
-        var callable = invocation.getArgument(0, Callable.class);
-        return callable.call();
+        var callable = invocation.getArgument(1, Supplier.class);
+        return callable.get();
       });
 
     this.repo =

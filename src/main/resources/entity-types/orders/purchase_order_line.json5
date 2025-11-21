@@ -1330,6 +1330,7 @@
         dataType: 'arrayType',
         itemDataType: {
           dataType: 'objectType',
+          properties: [],
         },
       },
       sourceAlias: 'pol',

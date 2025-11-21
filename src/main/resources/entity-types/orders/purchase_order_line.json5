@@ -1326,7 +1326,12 @@
       queryable: false,
       isIdColumn: false,
       visibleByDefault: false,
-      dataType: { dataType: 'arrayType' },
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+        },
+      },
       sourceAlias: 'pol',
       valueGetter: "jsonb_array_elements(:sourceAlias.jsonb -> 'locations')",
       joinsTo: [

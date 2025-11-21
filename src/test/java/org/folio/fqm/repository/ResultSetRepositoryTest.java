@@ -58,7 +58,7 @@ class ResultSetRepositoryTest {
     lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
       .thenAnswer(invocation -> {
         var callable = invocation.getArgument(1, Supplier.class);
-        return callable.call();
+        return callable.get();
       });
 
     this.repo =

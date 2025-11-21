@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
@@ -122,6 +123,13 @@ class IdStreamerTest {
     entityTypeInitializationService = mock(EntityTypeInitializationService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
+
+    lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
+      .thenAnswer(invocation -> {
+        var callable = invocation.getArgument(1, Supplier.class);
+        return callable.get();
+      });
+
     this.idStreamer =
       new IdStreamer(
         context,

@@ -126,7 +126,7 @@ public class ResultSetRepository {
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType, false);
+      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
 
       if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
         for (String condition : baseEntityType.getFilterConditions()) {

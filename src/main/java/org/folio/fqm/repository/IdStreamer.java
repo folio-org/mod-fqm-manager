@@ -112,7 +112,7 @@ public class IdStreamer {
       EntityType entityTypeDefinitionWithAllFields = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, true);
       String innerFromClause = FromClauseUtils.getFromClause(entityTypeDefinitionWithAllFields, tenantId);
 
-      Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition, false);
+      Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
       boolean validate = true;
       if (validate) {
         getWhereClauseWithValidation(fql.fqlCondition(), entityTypeDefinition, whereClause);

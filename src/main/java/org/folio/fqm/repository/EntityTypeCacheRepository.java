@@ -44,11 +44,17 @@ public class EntityTypeCacheRepository {
   }
 
   public void invalidateTenant(String tenantId) {
+    if (tenantId == null) {
+      return;
+    }
     rawEntityTypeCache.invalidate(tenantId);
     flattenedEntityTypeCache.asMap().keySet().removeIf(key -> key.tenantId().equals(tenantId));
   }
 
   public void invalidateEntityType(String tenantId, String entityTypeId) {
+    if (tenantId == null) {
+      return;
+    }
     rawEntityTypeCache.invalidate(tenantId);
     flattenedEntityTypeCache.asMap().keySet().removeIf(key ->
       key.tenantId().equals(tenantId) && key.entityTypeId().toString().equals(entityTypeId)

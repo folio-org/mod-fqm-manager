@@ -4,13 +4,20 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
@@ -42,9 +49,9 @@ public class ResultSetRepository {
   @Qualifier("readerJooqContext")
   private final DSLContext jooqContext;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final EntityTypeInitializationService entityTypeInitializationService;
   private final FolioExecutionContext executionContext;
   private final ObjectMapper objectMapper;
-
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -80,26 +87,28 @@ public class ResultSetRepository {
           .from(currentFromClause)
           .where(currentWhereClause);
       } else {
-        var partialQuery = jooqContext.select(currentFieldsToSelect)
+        SelectConditionStep<Record> partialQuery = jooqContext.select(currentFieldsToSelect)
           .from(currentFromClause)
           .where(currentWhereClause);
         query = (SelectConditionStep<Record>) query.unionAll(partialQuery);
       }
     }
 
-    Result<Record> result;
-    if (isEmpty(baseEntityType.getGroupByFields())) {
-      result = query.fetch();
-    } else {
-      Field<?>[] groupByFields = baseEntityType
-        .getColumns()
-        .stream()
-        .filter(col -> baseEntityType.getGroupByFields().contains(col.getName()))
-        .map(org.folio.querytool.domain.dto.Field::getValueGetter)
-        .map(DSL::field)
-        .toArray(Field[]::new);
-      result = query.groupBy(groupByFields).fetch();
-    }
+    SelectConditionStep<Record> finalQuery = query;
+    Result<Record> result = entityTypeInitializationService.runWithRecovery(baseEntityType, () -> {
+      if (isEmpty(baseEntityType.getGroupByFields())) {
+        return finalQuery.fetch();
+      } else {
+        Field<?>[] groupByFields = baseEntityType
+          .getColumns()
+          .stream()
+          .filter(col -> baseEntityType.getGroupByFields().contains(col.getName()))
+          .map(org.folio.querytool.domain.dto.Field::getValueGetter)
+          .map(DSL::field)
+          .toArray(Field[]::new);
+        return finalQuery.groupBy(groupByFields).fetch();
+      }
+    });
 
     return recordToMap(baseEntityType, result);
   }
@@ -170,12 +179,13 @@ public class ResultSetRepository {
       .orderBy(sortCriteria)
       .limit(limit);
 
-    Result<Record> result;
-    if (isEmpty(baseEntityType.getGroupByFields())) {
-      result = (Result<Record>) limitedQuery.fetch();
-    } else {
-      throw new IllegalArgumentException("Synchronous queries are not currently supported for entity types with GROUP BY clauses.");
-    }
+    Result<Record> result = entityTypeInitializationService.runWithRecovery(baseEntityType, () -> {
+      if (isEmpty(baseEntityType.getGroupByFields())) {
+        return (Result<Record>) limitedQuery.fetch();
+      } else {
+        throw new IllegalArgumentException("Synchronous queries are not currently supported for entity types with GROUP BY clauses.");
+      }
+    });
 
     return recordToMap(baseEntityType, result);
   }

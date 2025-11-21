@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import liquibase.exception.LiquibaseException;
@@ -31,6 +32,9 @@ import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.jooq.DSLContext;
+import org.jooq.exception.DataAccessException;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
@@ -333,6 +337,36 @@ public class EntityTypeInitializationService {
 
       log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
       entityTypeValidationService.validateEntityType(UUID.fromString(entityType.getId()), entityType, entityTypeIds);
+    }
+  }
+
+  /**
+   * Attempt to recreate the source views for an entity type. If this is not possible, the entity type
+   * should no longer exist in the DB after this method has finished executing.
+   */
+  // TODO: MAKE THIS MORE TARGETED (MODFQMMGR-997)
+  public void attemptToHealEntityType(EntityType entityType) {
+    log.info("Attempting to heal entity type {} ({})", entityType.getName(), entityType.getId());
+
+    try {
+      this.initializeEntityTypes(null);
+    } catch (IOException e) {
+      log.info("Could not heal entity type:", e);
+    }
+  }
+
+  public <T> T runWithRecovery(EntityType entityType, Supplier<T> runnable) {
+    try {
+      return runnable.get();
+    } catch (DataAccessException dae) {
+      PSQLException pgException = dae.getCause(PSQLException.class);
+      if (pgException != null && PSQLState.UNDEFINED_TABLE.getState().equals(pgException.getSQLState())) {
+        log.error("Unable to run query due to an UNDEFINED_TABLE error. Attempting to heal and re-run...");
+        this.attemptToHealEntityType(entityType);
+        return runnable.get();
+      } else {
+        throw log.throwing(dae);
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
@@ -22,6 +23,7 @@ import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -104,6 +106,7 @@ class IdStreamerTest {
 
   private IdStreamer idStreamer;
   private EntityTypeFlatteningService entityTypeFlatteningService;
+  private EntityTypeInitializationService entityTypeInitializationService;
   private CrossTenantQueryService crossTenantQueryService;
   private QueryResultsRepository queryResultsRepository;
 
@@ -117,12 +120,21 @@ class IdStreamerTest {
   void setup() {
     QueryRepository queryRepository = new QueryRepository(context, context);
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    entityTypeInitializationService = mock(EntityTypeInitializationService.class);
     crossTenantQueryService = mock(CrossTenantQueryService.class);
     queryResultsRepository = mock(QueryResultsRepository.class);
+
+    lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
+      .thenAnswer(invocation -> {
+        var callable = invocation.getArgument(1, Supplier.class);
+        return callable.get();
+      });
+
     this.idStreamer =
       new IdStreamer(
         context,
         entityTypeFlatteningService,
+        entityTypeInitializationService,
         crossTenantQueryService,
         mock(FolioExecutionContext.class),
         queryRepository,
@@ -250,6 +262,7 @@ class IdStreamerTest {
     IdStreamer newIdStreamer = new IdStreamer(
       context,
       entityTypeFlatteningService,
+      entityTypeInitializationService,
       crossTenantQueryService,
       mock(FolioExecutionContext.class),
       mockQueryRepository,
@@ -267,6 +280,7 @@ class IdStreamerTest {
     IdStreamer newIdStreamer = new IdStreamer(
       context,
       entityTypeFlatteningService,
+      entityTypeInitializationService,
       crossTenantQueryService,
       mock(FolioExecutionContext.class),
       mockQueryRepository,
@@ -286,6 +300,7 @@ class IdStreamerTest {
     IdStreamer newIdStreamer = new IdStreamer(
       context,
       entityTypeFlatteningService,
+      entityTypeInitializationService,
       crossTenantQueryService,
       mock(FolioExecutionContext.class),
       mockQueryRepository,

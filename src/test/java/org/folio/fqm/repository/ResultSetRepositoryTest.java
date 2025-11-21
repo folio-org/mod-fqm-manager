@@ -5,6 +5,7 @@ import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,6 +43,7 @@ import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.ENTIT
 class ResultSetRepositoryTest {
 
   EntityTypeFlatteningService entityTypeFlatteningService;
+  EntityTypeInitializationService entityTypeInitializationService;
 
   private ResultSetRepository repo;
 
@@ -49,7 +53,22 @@ class ResultSetRepositoryTest {
       new ResultSetRepositoryTestDataProvider()), SQLDialect.POSTGRES);
 
     entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.repo = new ResultSetRepository(context, entityTypeFlatteningService, mock(FolioExecutionContext.class), new ObjectMapper());
+    entityTypeInitializationService = mock(EntityTypeInitializationService.class);
+
+    lenient().when(entityTypeInitializationService.runWithRecovery(any(), any()))
+      .thenAnswer(invocation -> {
+        var callable = invocation.getArgument(1, Supplier.class);
+        return callable.get();
+      });
+
+    this.repo =
+      new ResultSetRepository(
+        context,
+        entityTypeFlatteningService,
+        entityTypeInitializationService,
+        mock(FolioExecutionContext.class),
+        new ObjectMapper()
+      );
   }
 
   @Test

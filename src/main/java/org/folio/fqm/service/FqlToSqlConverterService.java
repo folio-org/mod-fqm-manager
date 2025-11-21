@@ -67,7 +67,12 @@ public class FqlToSqlConverterService {
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
+  private static final String UUID_REGEX = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}";
+  private static final String INTEGER_REGEX = "^-?[0-9]+$";
+  private static final String NUMBER_REGEX = "^-?[0-9]+(\\.[0-9]+)?([eE]-?[0-9]+)?$";
   private static final String STRING_TYPE = "stringType";
+  private static final String INTEGER_TYPE = "integerType";
+  private static final String NUMBER_TYPE = "numberType";
   private static final String RANGED_UUID_TYPE = "rangedUUIDType";
   private static final String STRING_UUID_TYPE = "stringUUIDType";
   private static final String OPEN_UUID_TYPE = "openUUIDType";
@@ -116,7 +121,13 @@ public class FqlToSqlConverterService {
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
       final org.jooq.Field<Object> field = field(fieldCondition, entityType);
-      return switch (fqlCondition.getClass().getSimpleName()) {
+      Field fqmField = getField(fieldCondition, entityType);
+      Condition validation = trueCondition();
+      if (fqmField.getValidated()) {
+        String dataType = getFieldDataType(entityType, fieldCondition);
+        validation = validateCondition(field, dataType);
+      }
+      Condition baseCondition = switch (fqlCondition.getClass().getSimpleName()) {
         case "EqualsCondition" -> handleEquals((EqualsCondition) fqlCondition, entityType, field);
         case "NotEqualsCondition" -> handleNotEquals((NotEqualsCondition) fqlCondition, entityType, field);
         case "InCondition" -> handleIn((InCondition) fqlCondition, entityType, field);
@@ -129,6 +140,8 @@ public class FqlToSqlConverterService {
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
         default -> falseCondition();
       };
+      // TODO: make sure true condition doesn't show up in final query
+      return validation.and(baseCondition);
     } else {
       return switch (fqlCondition.getClass().getSimpleName()) {
         case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
@@ -346,6 +359,11 @@ public class FqlToSqlConverterService {
           if (val instanceof String value) {
             try {
               UUID uuidValue = UUID.fromString(value);
+              boolean validate = true;
+              if (validate) {
+                Condition validateCondition = field.likeRegex(UUID_REGEX);
+                return validateCondition.and(cast(field, UUID.class).eq(cast(value, UUID.class)));
+              }
               return cast(field, UUID.class).ne(cast(uuidValue, UUID.class));
             } catch (IllegalArgumentException e) {
               return trueCondition();
@@ -441,6 +459,16 @@ public class FqlToSqlConverterService {
       }
       default -> nullCondition;
     };
+  }
+
+  private static Condition validateCondition(org.jooq.Field field, String dataType) {
+    Condition validationCheck = switch (dataType) {
+      case RANGED_UUID_TYPE, OPEN_UUID_TYPE, STRING_UUID_TYPE -> field.likeRegex(UUID_REGEX);
+      case INTEGER_TYPE -> field.likeRegex(INTEGER_REGEX);
+      case NUMBER_TYPE -> field.likeRegex(NUMBER_REGEX);
+      default -> trueCondition();
+    };
+    return field.isNull().or(validationCheck);
   }
 
   /**

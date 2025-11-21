@@ -263,7 +263,7 @@ public class EntityTypeInitializationService {
         entityType.getName(),
         entityType.getId()
       );
-      entityTypeAvailabilityCache.put(entityTypeId, false);
+      entityTypeAvailabilityCache.put(entityTypeId, true);
       return false;
     }
   }

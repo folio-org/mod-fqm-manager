@@ -613,10 +613,11 @@ class EntityTypeServiceTest {
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
+    // Expects ISO 639 names from languages.json5 for consistency with results display
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("mus").label("Creek"),
-      new ValueWithLabel().value("ger").label("Deutsch"),
-      new ValueWithLabel().value("eng").label("Englisch")
+      new ValueWithLabel().value("eng").label("English"),
+      new ValueWithLabel().value("ger").label("German")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

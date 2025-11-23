@@ -404,12 +404,8 @@ public class EntityTypeService {
 
     for (String code : langSet) {
       String label;
-      String a2Code = a3ToA2Map.get(code);
       String name = a3ToNameMap.get(code);
-      if (StringUtils.isNotEmpty(a2Code)) {
-        Locale languageLocale = new Locale(a2Code);
-        label = languageLocale.getDisplayLanguage(folioLocale);
-      } else if (StringUtils.isNotEmpty(name)) {
+      if (StringUtils.isNotEmpty(name)) {
         label = name;
       } else if (StringUtils.isNotEmpty(code)) {
         label = code;

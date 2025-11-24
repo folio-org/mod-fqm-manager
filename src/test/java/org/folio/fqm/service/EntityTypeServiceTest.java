@@ -595,21 +595,6 @@ class EntityTypeServiceTest {
              }
            }
       """);
-    when(simpleHttpClient.get(eq("configurations/entries"), anyMap())).thenReturn("""
-           {
-             "configs": [
-               {
-                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
-                 "module":"ORG",
-                 "configName":"localeSettings",
-                 "enabled":true,
-                 "value":"{\\"locale\\":\\"de\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
-               }
-             ],
-             "totalRecords": 1,
-             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
-           }
-      """);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 

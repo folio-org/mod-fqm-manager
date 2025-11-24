@@ -2,7 +2,6 @@ package org.folio.fqm.service;
 
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
@@ -29,12 +28,9 @@ import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
-import org.folio.querytool.domain.dto.CustomFieldMetadata;
-import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinFieldPair;
@@ -80,10 +76,6 @@ public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILEPATH = "languages.json5";
-  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
-  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
-    "query", "(module==ORG and configName==localeSettings)"
-  );
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -680,16 +672,6 @@ public class EntityTypeService {
           && join.getTargetField() != null
           && (targetEntityTypeColumn.getName().equals(join.getTargetField()) || targetEntityTypeColumn.getName().endsWith('.' + join.getTargetField())));
     return targetCanJoinToCustom || customCanJoinToTarget;
-  }
-
-  /**
-   * Converts a stream of entity type columns to sorted labeled values.
-   */
-  private static List<LabeledValue> columnsToSortedLabeledValues(Stream<EntityTypeColumn> columns) {
-    return columns
-      .map(col -> new LabeledValue(col.getLabelAlias()).value(col.getName()))
-      .sorted(comparing(LabeledValue::getLabel, String.CASE_INSENSITIVE_ORDER))
-      .toList();
   }
 
   /**

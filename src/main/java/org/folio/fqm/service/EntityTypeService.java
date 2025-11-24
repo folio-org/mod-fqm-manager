@@ -377,7 +377,7 @@ public class EntityTypeService {
       log.error("Failed to read language file. Language display names may not be properly translated.");
     }
 
-    Locale folioLocale;
+    Locale folioLocale  = Locale.ENGLISH;
     try {
       String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
       ObjectMapper objectMapper = new ObjectMapper();
@@ -392,7 +392,6 @@ public class EntityTypeService {
       folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");
-      folioLocale = Locale.ENGLISH;
     }
 
     Map<String, String> a3ToNameMap = new HashMap<>();

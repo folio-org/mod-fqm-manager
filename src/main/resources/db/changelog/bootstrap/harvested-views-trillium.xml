@@ -201,12 +201,12 @@
   <!-- Iff mod-search is installed, this table will exist, so we can use this view to guarantee mod-search is available -->
   <changeSet id="create_dummy_mod_search_view" author="novercash@ebsco.com" runAlways="true">
     <preConditions onFail="CONTINUE">
-      <tableExists tableName="databasechangelog" schemaName="${tenant_id}_mod_search"/>
+      <tableExists tableName="language_config" schemaName="${tenant_id}_mod_search"/>
     </preConditions>
     <createView
       replaceIfExists="true"
       viewName="_mod_search_languages_availability_indicator">
-      SELECT 1 FROM ${tenant_id}_mod_search.databasechangelog
+      SELECT 1 FROM ${tenant_id}_mod_search.language_config
     </createView>
   </changeSet>
 

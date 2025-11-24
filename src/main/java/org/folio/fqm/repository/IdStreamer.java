@@ -10,6 +10,7 @@ import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.model.IdsWithCancelCallback;
 import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeFlatteningService;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.fqm.utils.StreamHelper;
@@ -52,6 +53,7 @@ public class IdStreamer {
   @Qualifier("readerJooqContext")
   private final DSLContext jooqContext;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final EntityTypeInitializationService entityTypeInitializationService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final FolioExecutionContext executionContext;
   private final QueryRepository queryRepository;
@@ -95,7 +97,8 @@ public class IdStreamer {
   private void streamIdsInBatch(EntityType entityType,
                                 boolean sortResults,
                                 Fql fql, int batchSize,
-                                int maxQuerySize, UUID queryId, List<String> tenantsToQuery, boolean ecsEnabled) {
+                                int maxQuerySize, UUID queryId,
+                                List<String> tenantsToQuery, boolean ecsEnabled) {
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
@@ -146,21 +149,27 @@ public class IdStreamer {
       fullQuery.fetchSize(batchSize);
     }
 
+    Select<Record1<String[]>> finalQuery = fullQuery;
+
     monitorQueryCancellation(queryId);
 
-    try (
-      Cursor<Record1<String[]>> idsCursor = fullQuery.fetchLazy();
-      Stream<String[]> idStream = idsCursor
-        .stream()
-        // This is something we may want to revisit. This implementation is a bit hackish for cross-tenant queries,
-        // though it does work
-        .map(row -> row.getValue(idValueGetter));
-      Stream<List<String[]>> idsStream = StreamHelper.chunk(idStream, batchSize)
-    ) {
-      var total = new AtomicInteger();
-      idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
-        .forEach(idsWithCancelCallback -> handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
-    }
+    entityTypeInitializationService.runWithRecovery(entityType, () -> {
+      try (
+        Cursor<Record1<String[]>> idsCursor = finalQuery.fetchLazy();
+        Stream<String[]> idStream = idsCursor
+          .stream()
+          // This is something we may want to revisit. This implementation is a bit hackish for cross-tenant queries,
+          // though it does work
+          .map(row -> row.getValue(idValueGetter));
+        Stream<List<String[]>> idsStream = StreamHelper.chunk(idStream, batchSize)
+      ) {
+        var total = new AtomicInteger();
+        idsStream.map(ids -> new IdsWithCancelCallback(ids, idsStream::close))
+          .forEach(idsWithCancelCallback -> handleBatch(queryId, idsWithCancelCallback, maxQuerySize, total));
+      }
+
+      return null;
+    });
   }
 
   void handleBatch(UUID queryId, IdsWithCancelCallback idsWithCancelCallback, Integer maxQuerySize, AtomicInteger total) {

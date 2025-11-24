@@ -1573,15 +1573,13 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', i.jsonb->>'title',\
-                        'hrid', i.jsonb->>'hrid',\
-                        'precedingInstanceId', pst.precedinginstanceid,\
-                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedinginstanceid = i.id\
-                    WHERE pst.succeedinginstanceid = :sourceAlias.id)::text",
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedingInstanceId = i.id\
+                    WHERE pst.succeedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
     {
@@ -1601,15 +1599,13 @@
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
                       jsonb_build_object(\
                         'id', pst.id,\
-                        'title', i.jsonb->>'title',\
-                        'hrid', i.jsonb->>'hrid',\
-                        'succeedingInstanceId', pst.succeedinginstanceid,\
-                        'identifiers', COALESCE(i.jsonb->'identifiers', '[]'::jsonb)\
+                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedinginstanceid = i.id\
-                    WHERE pst.precedinginstanceid = :sourceAlias.id)::text",
+                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedingInstanceId = i.id\
+                    WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
   ],

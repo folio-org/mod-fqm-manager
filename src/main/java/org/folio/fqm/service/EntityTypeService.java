@@ -201,27 +201,19 @@ public class EntityTypeService {
 
         return getFieldValuesFromEntityType(sourceEntityType, field.getSource().getColumnName(), searchText);
       } else if (field.getSource().getType() == SourceColumn.TypeEnum.FQM) {
-        switch (Objects.requireNonNull(field.getSource().getName(), "Value sources with the FQM type require the source name to be configured")) {
-          case "currency" -> {
-            return getCurrencyValues();
-          }
-          case "tenant_id" -> {
-            return getTenantIds(entityType);
-          }
-          case "tenant_name" -> {
-            return getTenantNames(entityType);
-          }
-          case "languages" -> {
-            return getLanguages(searchText, tenantsToQuery);
-          }
-          // instructs query builder to provide organization finder plugin
-          case "organization", "donor_organization" -> {
-            return ColumnValues.builder().content(List.of()).build();
-          }
-          default -> {
-            throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
-          }
-        }
+        return switch (Objects.requireNonNull(field.getSource().getName(), "Value sources with the FQM type require the source name to be configured")) {
+          // entity types using this MUST declare a dependency on view `_mod_finance_storage_exchange_rate_availability_indicator`
+          // to ensure that this source is available
+          case "currency" -> getCurrencyValues();
+          // entity types using this MUST declare a dependency on view `_mod_search_languages_availability_indicator`
+          // to ensure that this source is available
+          case "languages" -> getLanguages(searchText, tenantsToQuery);
+          case "tenant_id" -> getTenantIds(entityType);
+          case "tenant_name" -> getTenantNames(entityType);
+          // instructs query builder to provide organization finder plugin, so no values need be returned here
+          case "organization", "donor_organization" -> ColumnValues.builder().content(List.of()).build();
+          default -> throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
+        };
       }
     }
 

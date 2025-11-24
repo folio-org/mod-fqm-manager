@@ -194,4 +194,35 @@
       SELECT * FROM ${tenant_id}_mod_linked_data.export_resources
     </createView>
   </changeSet>
+
+  <!-- Indicates if mod-search is installed in the tenant, for use when querying languages -->
+  <!-- We do this via API, however, it needs to be used as a condition for if the instances ET can exist -->
+  <!-- Therefore, we have to have a DB object to confirm whether or not instances is available. -->
+  <!-- Iff mod-search is installed, this table will exist, so we can use this view to guarantee mod-search is available -->
+  <changeSet id="create_dummy_mod_search_view" author="novercash@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="databasechangelog" schemaName="${tenant_id}_mod_search"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="_mod_search_languages_availability_indicator">
+      SELECT 1 FROM ${tenant_id}_mod_search.databasechangelog
+    </createView>
+  </changeSet>
+
+  <!-- Indicates if mod-finance-storage is installed in the tenant, for use when querying exchange rates -->
+  <!-- We do this via API, however, it needs to be used as a condition for if the exchange rates ET can exist -->
+  <!-- Unfortunately, mod-finance does not itself have a database schema at all, but mod-finance-storage _should_ -->
+  <!-- be a sufficient indicator. `app-acquisitions` specifies both together, so there should be no reason that -->
+  <!-- only the storage module would exist alone. -->
+  <changeSet id="create_dummy_mod_finance_storage_view" author="novercash@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="rmb_internal" schemaName="${tenant_id}_mod_finance_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="_mod_finance_storage_exchange_rate_availability_indicator">
+      SELECT 1 FROM ${tenant_id}_mod_finance_storage.rmb_internal
+    </createView>
+  </changeSet>
 </databaseChangeLog>

@@ -235,6 +235,16 @@ class EntityTypeInitializationServiceTest {
     verify(readerJooqContext, times(2)).selectOne();
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = { true, false })
+  void testIsModFinanceInstalled(boolean expected) {
+    mockFetchOne(expected);
+
+    assertThat(entityTypeInitializationService.isModFinanceInstalled(), is(expected));
+
+    verify(readerJooqContext, times(1)).selectOne();
+  }
+
   @SuppressWarnings("unchecked")
   private void mockFetchOne(boolean shouldHaveResult) {
     SelectSelectStep<Record1<Integer>> selection = mock(SelectSelectStep.class);

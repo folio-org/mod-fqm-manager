@@ -342,296 +342,82 @@
     }
   ],
   "requires": [
-    {
-      "id": "item-storage",
-      "version": "10.0 11.0"
-    },
-    {
-      "id": "holdings-storage",
-      "version": "6.0 7.0 8.0"
-    },
-    {
-      "id": "instance-storage",
-      "version": "10.0 11.0"
-    },
-    {
-      "id": "instance-date-types",
-      "version": "1.0"
-    },
-    {
-      "id": "instance-formats",
-      "version": "2.0"
-    },
-    {
-      "id": "instance-types",
-      "version": "2.0"
-    },
-    {
-      "id": "loan-types",
-      "version": "2.2"
-    },
-    {
-      "id": "material-types",
-      "version": "2.2"
-    },
-    {
-      "id": "location-units",
-      "version": "2.0"
-    },
-    {
-      "id": "locations",
-      "version": "3.0"
-    },
-    {
-      "id": "call-number-types",
-      "version": "1.0"
-    },
-    {
-      "id": "holdings-types",
-      "version": "1.0"
-    },
-    {
-      "id": "service-points",
-      "version": "3.3"
-    },
-    {
-      "id": "users",
-      "version": "16.0"
-    },
-    {
-      "id": "user-tenants",
-      "version": "1.0"
-    },
-    {
-      "id": "loan-policy-storage",
-      "version": "2.3"
-    },
-    {
-      "id": "loan-storage",
-      "version": "7.1"
-    },
-    {
-      "id": "organizations-storage.organizations",
-      "version": "3.3"
-    },
-    {
-      "id": "organizations-storage.organization-types",
-      "version": "1.0"
-    },
-    {
-      "id": "orders-storage.po-lines",
-      "version": "13.0"
-    },
-    {
-      "id": "orders-storage.purchase-orders",
-      "version": "8.0"
-    },
-    {
-      "id": "acquisitions-units-storage.units",
-      "version": "1.1"
-    },
-    {
-      "id": "acquisitions-units",
-      "version": "1.1"
-    },
-    {
-      "id": "contributor-types",
-      "version": "2.0"
-    },
-    {
-      "id": "contributor-name-types",
-      "version": "1.2"
-    },
-    {
-      "id": "modes-of-issuance",
-      "version": "1.1"
-    },
-    {
-      "id": "instance-statuses",
-      "version": "1.0"
-    },
-    {
-      "id": "statistical-code-types",
-      "version": "1.0"
-    },
-    {
-      "id": "statistical-codes",
-      "version": "1.0"
-    },
-    {
-      "id": "settings",
-      "version": "1.2"
-    },
-    {
-      "id": "finance.exchange-rate",
-      "version": "1.0"
-    },
-    {
-      "id": "circulation",
-      "version": "14.2"
-    },
-    {
-      "id": "orders",
-      "version": "13.0"
-    },
-    {
-      "id": "organizations.organizations",
-      "version": "1.2"
-    },
-    {
-      "id": "voucher-storage.vouchers",
-      "version": "1.2"
-    },
-    {
-      "id": "voucher-storage.voucher-lines",
-      "version": "2.1"
-    },
-    {
-      "id": "voucher-storage.voucher-number",
-      "version": "1.1"
-    },
-    {
-      "id": "search-facets",
-      "version": "1.0"
-    },
-    {
-      "id": "voucher",
-      "version": "2.3"
-    },
-    {
-      "id": "invoice",
-      "version": "7.2"
-    },
-    {
-      "id": "finance.ledgers",
-      "version": "2.0"
-    },
-    {
-      "id": "finance.fund-types",
-      "version": "2.0"
-    },
-    {
-      "id": "finance.funds",
-      "version": "3.0"
-    },
-    {
-      "id": "finance.fiscal-years",
-      "version": "2.0"
-    },
-    {
-      "id": "finance.expense-classes",
-      "version": "3.0"
-    },
-    {
-      "id": "batch-group",
-      "version": "1.1"
-    },
-    {
-      "id": "finance.groups",
-      "version": "2.0"
-    },
-    {
-      "id": "finance.budgets",
-      "version": "2.0"
-    },
-    {
-      "id": "finance.transactions",
-      "version": "6.0"
-    },
-    {
-      "id": "source-storage-records",
-      "version": "3.3"
-    },
-    {
-      "id": "user-summary",
-      "version": "0.1"
-    },
-    {
-      "id": "feesfines",
-      "version": "19.1"
-    },
-    {
-      "id": "instance-note-types",
-      "version": "1.0"
-    },
-    {
-      "id": "holdings-note-types",
-      "version": "1.0"
-    },
-    {
-      "id": "instance-preceding-succeeding-titles",
-      "version": "0.2"
-    },
-    {
-      "id": "electronic-access-relationships",
-      "version": "1.1"
-    },
-    {
-      "id": "item-note-types",
-      "version": "1.0"
-    },
-    {
-      "id": "identifier-types",
-      "version": "1.2"
-    },
-    {
-      "id": "configuration",
-      "version": "2.0"
-    },
-    {
-      "id": "classification-types",
-      "version": "1.2"
-    },
-    {
-      "id": "subject-sources",
-      "version": "1.0"
-    },
-    {
-      "id": "subject-types",
-      "version": "1.0"
-    },
-    {
-      "id": "tags",
-      "version": "1.0"
-    },
-    {
-      "id": "nature-of-content-terms",
-      "version": "1.0"
-    },
-    {
-      "id": "alternative-title-types",
-      "version": "1.0"
-    },
-    {
-      "id": "orders-storage.acquisition-methods",
-      "version": "1.0"
-    },
-    {
-      "id": "orders-storage.titles",
-      "version": "1.1"
-    },
-    {
-      "id": "orders-storage.pieces",
-      "version": "5.0"
-    }
+    { "id": "settings", "version": "1.2" },
+    { "id": "users", "version": "16.0" },
+    { "id": "user-tenants", "version": "1.0" }
   ],
   "optional": [
-    {
-      "id": "consortia",
-      "version": "1.0"
-    },
-    {
-      "id": "permissions",
-      "version": "5.7"
-    },
-    {
-      "id": "permissions-users",
-      "version": "1.0"
-    },
-    {
-      "id": "linked-data",
-      "version": "2.0"
-    }
+    { "id": "consortia", "version": "1.0" },
+    { "id": "permissions", "version": "5.7" },
+    { "id": "permissions-users", "version": "1.0" },
+
+    { "id": "finance.exchange-rate", "version": "1.0" },
+    { "id": "search-facets", "version": "1.0" },
+
+    { "id": "acquisitions-units-storage.units", "version": "1.1" },
+    { "id": "acquisitions-units", "version": "1.1" },
+    { "id": "alternative-title-types", "version": "1.0" },
+    { "id": "batch-group", "version": "1.1" },
+    { "id": "call-number-types", "version": "1.0" },
+    { "id": "circulation", "version": "14.2" },
+    { "id": "classification-types", "version": "1.2" },
+    { "id": "configuration", "version": "2.0" },
+    { "id": "contributor-name-types", "version": "1.2" },
+    { "id": "contributor-types", "version": "2.0" },
+    { "id": "electronic-access-relationships", "version": "1.1" },
+    { "id": "feesfines", "version": "19.1" },
+    { "id": "finance.budgets", "version": "2.0" },
+    { "id": "finance.expense-classes", "version": "3.0" },
+    { "id": "finance.fiscal-years", "version": "2.0" },
+    { "id": "finance.fund-types", "version": "2.0" },
+    { "id": "finance.funds", "version": "3.0" },
+    { "id": "finance.groups", "version": "2.0" },
+    { "id": "finance.ledgers", "version": "2.0" },
+    { "id": "finance.transactions", "version": "6.0" },
+    { "id": "holdings-note-types", "version": "1.0" },
+    { "id": "holdings-storage", "version": "6.0 7.0 8.0" },
+    { "id": "holdings-types", "version": "1.0" },
+    { "id": "identifier-types", "version": "1.2" },
+    { "id": "instance-date-types", "version": "1.0" },
+    { "id": "instance-formats", "version": "2.0" },
+    { "id": "instance-note-types", "version": "1.0" },
+    { "id": "instance-preceding-succeeding-titles", "version": "0.2" },
+    { "id": "instance-statuses", "version": "1.0" },
+    { "id": "instance-storage", "version": "10.0 11.0" },
+    { "id": "instance-types", "version": "2.0" },
+    { "id": "invoice", "version": "7.2" },
+    { "id": "item-note-types", "version": "1.0" },
+    { "id": "item-storage", "version": "10.0 11.0" },
+    { "id": "linked-data", "version": "2.0" },
+    { "id": "loan-policy-storage", "version": "2.3" },
+    { "id": "loan-storage", "version": "7.1" },
+    { "id": "loan-types", "version": "2.2" },
+    { "id": "location-units", "version": "2.0" },
+    { "id": "locations", "version": "3.0" },
+    { "id": "material-types", "version": "2.2" },
+    { "id": "modes-of-issuance", "version": "1.1" },
+    { "id": "nature-of-content-terms", "version": "1.0" },
+    { "id": "orders-storage.acquisition-methods", "version": "1.0" },
+    { "id": "orders-storage.pieces", "version": "5.0" },
+    { "id": "orders-storage.po-lines", "version": "13.0" },
+    { "id": "orders-storage.purchase-orders", "version": "8.0" },
+    { "id": "orders-storage.titles", "version": "1.1" },
+    { "id": "orders", "version": "13.0" },
+    { "id": "organizations-storage.organization-types", "version": "1.0" },
+    { "id": "organizations-storage.organizations", "version": "3.3" },
+    { "id": "organizations.organizations", "version": "1.2" },
+    { "id": "service-points", "version": "3.3" },
+    { "id": "source-storage-records", "version": "3.3" },
+    { "id": "statistical-code-types", "version": "1.0" },
+    { "id": "statistical-codes", "version": "1.0" },
+    { "id": "subject-sources", "version": "1.0" },
+    { "id": "subject-types", "version": "1.0" },
+    { "id": "tags", "version": "1.0" },
+    { "id": "user-summary", "version": "0.1" },
+    { "id": "voucher-storage.voucher-lines", "version": "2.1" },
+    { "id": "voucher-storage.voucher-number", "version": "1.1" },
+    { "id": "voucher-storage.vouchers", "version": "1.2" },
+    { "id": "voucher", "version": "2.3" }
   ],
   "launchDescriptor": {
     "dockerImage": "@artifactId@:@version@",

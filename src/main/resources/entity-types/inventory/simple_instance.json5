@@ -28,6 +28,17 @@
         condition: ':this.id = :that.instanceTypeId',
       },
     },
+    // required to guarantee that the special FQM languages source for `languages` is present
+    {
+      type: 'db',
+      alias: '_language_availability_via_mod_search',
+      target: '_mod_search_languages_availability_indicator',
+      join: {
+        type: 'left join',
+        joinTo: 'inst',
+        condition: '1 = 1'
+      }
+    }
   ],
   requiredPermissions: [
     'inventory-storage.classification-types.collection.get',

@@ -39,6 +39,15 @@
       order: 40,
     },
     {
+      alias: 'po',
+      type: 'entity-type',
+      targetId: '48de4796-11a2-44e9-abb7-01e84af87234', // simple_purchase_order
+      targetField: 'id',
+      sourceField: 'pol.purchase_order_id',
+      essentialOnly: true,
+      order: 45
+    },
+    {
       alias: 'title',
       type: 'entity-type',
       targetId: 'cd9e34da-a81e-57e5-8111-6bab5d4ceba6', // mod_orders_storage__titles

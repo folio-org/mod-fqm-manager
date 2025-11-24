@@ -3,8 +3,6 @@ package org.folio.fqm.repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.flattening.SourceUtils;
@@ -28,11 +26,18 @@ import org.jooq.Record5;
 import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,8 +47,8 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.table;
 
-@Repository
 @Log4j2
+@Repository
 public class EntityTypeRepository {
 
   public static final String TABLE_NAME = "entity_type_definition";
@@ -109,19 +114,19 @@ public class EntityTypeRepository {
   private final DSLContext jooqContext;
   private final ObjectMapper objectMapper;
   private final FolioExecutionContext executionContext;
-  private final Cache<String, Map<UUID, EntityType>> entityTypeCache;
+  private final EntityTypeCacheRepository entityTypeCacheRepository;
 
   @Autowired
   public EntityTypeRepository(@Qualifier("readerJooqContext") DSLContext readerJooqContext,
                               DSLContext jooqContext,
                               ObjectMapper objectMapper,
                               FolioExecutionContext executionContext,
-                              @Value("${mod-fqm-manager.entity-type-cache-timeout-seconds:300}") long cacheDurationSeconds) {
+                              EntityTypeCacheRepository entityTypeCacheRepository) {
     this.readerJooqContext = readerJooqContext;
     this.jooqContext = jooqContext;
     this.objectMapper = objectMapper;
     this.executionContext = executionContext;
-    this.entityTypeCache = Caffeine.newBuilder().expireAfterWrite(cacheDurationSeconds, TimeUnit.SECONDS).build();
+    this.entityTypeCacheRepository = entityTypeCacheRepository;
   }
 
   public Optional<EntityType> getEntityTypeDefinition(UUID entityTypeId, String tenantId) {
@@ -129,8 +134,8 @@ public class EntityTypeRepository {
   }
 
   public Stream<EntityType> getEntityTypeDefinitions(Collection<UUID> entityTypeIds, String tenantId) {
-    log.info("Getting definitions name for entity type ID: {}", entityTypeIds);
-    Map<UUID, EntityType> entityTypes = entityTypeCache.get(tenantId, tenantIdKey -> {
+    log.info("Getting definitions name for tenant {} and entity type IDs {}", tenantId, entityTypeIds);
+    Map<UUID, EntityType> entityTypes = entityTypeCacheRepository.getRaw(tenantId, tenantIdKey -> {
         String tableName = "".equals(tenantIdKey) ? TABLE_NAME : tenantIdKey + "_mod_fqm_manager." + TABLE_NAME;
         Field<String> definitionField = field(DEFINITION_FIELD_NAME, String.class);
         Map<String, EntityType> rawEntityTypes = readerJooqContext
@@ -238,6 +243,8 @@ public class EntityTypeRepository {
         .where(field(ID_FIELD_NAME, UUID.class).in(removedEntities))
         .execute();
     });
+
+    entityTypeCacheRepository.invalidateTenant(executionContext.getTenantId());
   }
 
   private List<EntityTypeColumn> processCustomFieldColumn(EntityType entityType, EntityTypeColumn column) {
@@ -465,7 +472,7 @@ public class EntityTypeRepository {
         .columns(field(ID_FIELD_NAME, UUID.class), field(DEFINITION_FIELD_NAME, JSONB.class))
         .values(UUID.fromString(customEntityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
         .execute();
-      entityTypeCache.invalidate(executionContext.getTenantId());
+      entityTypeCacheRepository.invalidateEntityType(executionContext.getTenantId(), customEntityType.getId());
     } catch (JsonProcessingException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
     }
@@ -478,14 +485,9 @@ public class EntityTypeRepository {
         .set(field(DEFINITION_FIELD_NAME, JSONB.class), JSONB.jsonb(objectMapper.writeValueAsString(entityType)))
         .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(entityType.getId())))
         .execute();
-      entityTypeCache.invalidate(executionContext.getTenantId());
+      entityTypeCacheRepository.invalidateEntityType(executionContext.getTenantId(), entityType.getId());
     } catch (JsonProcessingException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), entityType);
     }
-  }
-
-  // Clear the ET cache for testing
-  void clearCache() {
-    entityTypeCache.invalidateAll();
   }
 }

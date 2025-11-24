@@ -63,6 +63,17 @@ paths:
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
+  /entity-types/install:
+    post:
+      operationId: installEntityTypes
+      tags:
+        - entityTypes
+      description: Create database views and install entity types for a tenant.
+      responses:
+        '204':
+          description: 'Entity types installed'
+        '500':
+          $ref: '#/components/responses/internalServerErrorResponse'
   /fqm/version:
     get:
       operationId: getFqmVersion

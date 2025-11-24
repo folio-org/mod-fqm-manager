@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.greaterThan;
@@ -88,6 +89,8 @@ public class IntegrationTestBase {
       module.followOutput(new Slf4jLogConsumer(LOG).withSeparateOutputStreams());
     }
 
+    createDummyViews();
+
     // Bootstrap the module's DB
     String body = """
                   {"module_to": "999999.0.0",
@@ -105,8 +108,6 @@ public class IntegrationTestBase {
            {"module_from": "0.0.0",
            """ + body.substring(1);
     postTenant(body);
-
-    createDummyViews();
 
     // Test: smoke test the /entity-types endpoint to verify DB interactions are working
     smokeTest();
@@ -127,7 +128,6 @@ public class IntegrationTestBase {
 
   private static void postTenant(String body) {
     given()
-//      .header(XOkapiHeaders.TENANT, TENANT_ID)
       .headers(getOkapiHeaders())
       .contentType("application/json")
       .body(body)
@@ -139,10 +139,11 @@ public class IntegrationTestBase {
 
   private static void createDummyViews() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
-    // Create a src_user_custom_fields view, since the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
-    jdbcTemplate.execute("CREATE VIEW src_user_custom_fields AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
-    jdbcTemplate.execute("CREATE VIEW src_purchase_order_custom_fields AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
-    jdbcTemplate.execute("CREATE VIEW src_purchase_order_line_custom_fields AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
+    jdbcTemplate.execute("CREATE SCHEMA " + TENANT_ID + "_mod_fqm_manager");
+    // Create views for the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
+    Stream.of("src_user_custom_fields", "src_users_users", "src_users_groups").forEach(v -> {
+      jdbcTemplate.execute("CREATE VIEW " + TENANT_ID + "_mod_fqm_manager." + v + " AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
+    });
   }
 
   private static void smokeTest() {

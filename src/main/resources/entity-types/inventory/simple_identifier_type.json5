@@ -40,9 +40,10 @@
         entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
         columnName: 'name',
       },
+      idColumnName: 'id',
       valueSourceApi: {
         path: 'identifier-types',
-        valueJsonPath: '$.identifierTypes.*.name',
+        valueJsonPath: '$.identifierTypes.*.id',
         labelJsonPath: '$.identifierTypes.*.name',
       },
     },

@@ -1,19 +1,19 @@
 package org.folio.fqm.context;
 
 import jakarta.annotation.PostConstruct;
-
 import java.io.IOException;
 import java.util.UUID;
 import javax.sql.DataSource;
-
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
-import org.folio.fqm.service.EntityTypeService;
-import org.folio.fqm.service.PermissionsService;
+import org.folio.fqm.service.EntityTypeValidationService;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.liquibase.FolioSpringLiquibase;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -45,12 +45,14 @@ public class TestDbSetupConfiguration {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     jdbcTemplate.execute(String.format("CREATE SCHEMA IF NOT EXISTS %s_mod_fqm_manager", TENANT_ID));
     jdbcTemplate.execute(
-      String.format("""
+      String.format(
+        """
         CREATE TABLE IF NOT EXISTS %s_mod_fqm_manager.entity_type_definition (
           id UUID PRIMARY KEY,
           definition JSONB
         )
-      """, TENANT_ID
+      """,
+        TENANT_ID
       )
     );
     return liquibase;
@@ -68,18 +70,24 @@ public class TestDbSetupConfiguration {
     private EntityTypeRepository entityTypeRepository;
 
     @Autowired
-    private EntityTypeService entityTypeService;
+    private EntityTypeValidationService entityTypeValidationService;
 
     @Autowired
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    private PermissionsService permissionsService;
+    @Qualifier("readerJooqContext")
+    private DSLContext readerJooqContext;
+
+    @Autowired
+    private FolioSpringLiquibase folioSpringLiquibase;
 
     @PostConstruct
     public void populateEntityTypes() throws IOException {
       SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
-      when(ecsClient.get(eq("user-tenants"), anyMap())).thenReturn("""
+      when(ecsClient.get(eq("user-tenants"), anyMap()))
+        .thenReturn(
+          """
         {
             "userTenants": [
                 {
@@ -91,12 +99,15 @@ public class TestDbSetupConfiguration {
             ],
             "totalRecords": 1
         }
-        """);
+        """
+        );
       FolioExecutionContext executionContext = mock(FolioExecutionContext.class);
       when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
       when(executionContext.getTenantId()).thenReturn(TENANT_ID);
       new EntityTypeInitializationService(
+        null,
         entityTypeRepository,
+        entityTypeValidationService,
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {
@@ -104,8 +115,8 @@ public class TestDbSetupConfiguration {
           }
         },
         resourceResolver,
-        null,
-        entityTypeService
+        readerJooqContext,
+        folioSpringLiquibase
       )
         .initializeEntityTypes("tenant_01");
     }

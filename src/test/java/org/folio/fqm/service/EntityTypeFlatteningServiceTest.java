@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -18,6 +17,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import lombok.SneakyThrows;
+
+import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -371,10 +372,10 @@ class EntityTypeFlatteningServiceTest {
     entityTypeFlatteningService =
       new EntityTypeFlatteningService(
         entityTypeRepository,
+        new EntityTypeCacheRepository(0),
         localizationService,
         executionContext,
-        userTenantService,
-        0
+        userTenantService
       );
 
     for (EntityType et : List.of(
@@ -767,7 +768,6 @@ class EntityTypeFlatteningServiceTest {
 
   @Test
   void testUnknownSourceType() {
-    // java 21 switch statements would make this obsolete :(
     EntityType childEntityType = new EntityType()
       .id("f5ecbd82-ca25-5cfd-9a91-4d48dbe357e9")
       .sources(List.of(new EntityTypeSource() {}));

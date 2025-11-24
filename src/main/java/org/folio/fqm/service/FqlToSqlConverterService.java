@@ -399,7 +399,8 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleContains(ContainsCondition containsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    return field.contains(valueField(containsCondition.value(), containsCondition, entityType));
+    return caseInsensitiveComparison(containsCondition, entityType, field, containsCondition.value(),
+      org.jooq.Field::containsIgnoreCase, org.jooq.Field::contains);
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
@@ -410,7 +411,8 @@ public class FqlToSqlConverterService {
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
       return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
     }
-    return field.startsWith(valueField(startsWithCondition.value(), startsWithCondition, entityType));
+    return caseInsensitiveComparison(startsWithCondition, entityType, field, startsWithCondition.value(),
+      org.jooq.Field::startsWithIgnoreCase, org.jooq.Field::startsWith);
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {

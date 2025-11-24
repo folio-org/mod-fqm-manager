@@ -25,11 +25,13 @@ import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -38,6 +40,8 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinFieldPair;
 import org.folio.querytool.domain.dto.LabeledValue;
 import org.folio.querytool.domain.dto.LabeledValueWithDescription;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
@@ -52,13 +56,26 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Locale;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
@@ -75,6 +92,7 @@ public class EntityTypeService {
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
   private final SimpleHttpClient simpleHttpClient;
@@ -82,7 +100,6 @@ public class EntityTypeService {
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final LanguageClient languageClient;
-  private final FolioExecutionContext executionContext;
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
 
@@ -94,7 +111,7 @@ public class EntityTypeService {
   public List<EntityTypeSummary> getEntityTypeSummary(Set<UUID> entityTypeIds, boolean includeInaccessible, boolean includeAll) {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeDefinitions(entityTypeIds, executionContext.getTenantId())
+      .getEntityTypeDefinitions(entityTypeIds, folioExecutionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
       .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
@@ -136,16 +153,18 @@ public class EntityTypeService {
    */
   public EntityType getEntityTypeDefinition(UUID entityTypeId, boolean includeHidden) {
     verifyAccessForPossibleCustomEntityType(entityTypeId);
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, folioExecutionContext.getTenantId(), false);
     boolean crossTenantEnabled = Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
       && crossTenantQueryService.isCentralTenant();
-    List<EntityTypeColumn> columns = entityType
-      .getColumns()
-      .stream()
-      .filter(column -> includeHidden || !Boolean.TRUE.equals(column.getHidden())) // Filter based on includeHidden flag
+    List<EntityTypeColumn> filteredColumns = entityType.getColumns().stream()
+      .filter(col -> includeHidden || !Boolean.TRUE.equals(col.getHidden()))
+      .map(col -> {
+        EntityDataType filteredDataType = filterHiddenFields(col.getDataType(), includeHidden);
+        return (EntityTypeColumn) col.toBuilder().dataType(filteredDataType).build();
+      })
       .toList();
     return entityType
-      .columns(columns)
+      .columns(filteredColumns)
       .crossTenantQueriesEnabled(crossTenantEnabled);
   }
 
@@ -159,7 +178,7 @@ public class EntityTypeService {
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
     verifyAccessForPossibleCustomEntityType(entityTypeId);
-    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, executionContext.getTenantId(), false);
+    EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, folioExecutionContext.getTenantId(), false);
 
     Field field = FqlValidationService
       .findFieldDefinition(new FqlField(fieldName), entityType)
@@ -176,7 +195,7 @@ public class EntityTypeService {
 
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
-        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), executionContext.getTenantId(), false);
+        EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), folioExecutionContext.getTenantId(), false);
 
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 
@@ -209,6 +228,32 @@ public class EntityTypeService {
     throw new InvalidEntityTypeDefinitionException("Unable to retrieve column values for " + fieldName, entityType);
   }
 
+  private EntityDataType filterHiddenFields(EntityDataType dataType, boolean includeHidden) {
+    switch (dataType) {
+      case ObjectType objectType -> {
+        List<NestedObjectProperty> filteredProps = objectType.getProperties().stream()
+          .map(prop -> {
+            EntityDataType propDataType = prop.getDataType();
+            if (propDataType != null) {
+              EntityDataType filteredType = filterHiddenFields(propDataType, includeHidden);
+              return prop.toBuilder().dataType(filteredType).build();
+            }
+            return prop;
+          })
+          .filter(prop -> includeHidden || !Boolean.TRUE.equals(prop.getHidden()))
+          .toList();
+        return objectType.toBuilder().properties(filteredProps).build();
+      }
+      case ArrayType arrayType -> {
+        EntityDataType filteredItemType = filterHiddenFields(arrayType.getItemDataType(), includeHidden);
+        return arrayType.toBuilder().itemDataType(filteredItemType).build();
+      }
+      default -> {
+        return dataType;
+      }
+    }
+  }
+
   private ColumnValues getTenantIds(EntityType entityType) {
     List<String> tenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
     List<ValueWithLabel> tenantValues = tenants
@@ -221,7 +266,7 @@ public class EntityTypeService {
   private ColumnValues getTenantNames(EntityType entityType) {
     List<Pair<String, String>> tenantMaps = crossTenantQueryService.getTenantIdNamePairs(
       entityType,
-      executionContext.getUserId()
+      folioExecutionContext.getUserId()
     );
     List<ValueWithLabel> tenantValues = tenantMaps
       .stream()
@@ -424,7 +469,7 @@ public class EntityTypeService {
       throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", customEntityType);
     }
 
-    if (customEntityType.getOwner() != null && !customEntityType.getOwner().equals(executionContext.getUserId())) {
+    if (customEntityType.getOwner() != null && !customEntityType.getOwner().equals(folioExecutionContext.getUserId())) {
       throw new InvalidEntityTypeDefinitionException(
         "owner ID mismatch: the provided owner ID does not match the current user's ID. This field should be omitted " +
           "or match the authenticated user.",
@@ -439,7 +484,7 @@ public class EntityTypeService {
       .owner(folioExecutionContext.getUserId())
       .build();
 
-    validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
+    entityTypeValidationService.validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
   }
@@ -454,142 +499,9 @@ public class EntityTypeService {
       .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))
       .build();
 
-    validateCustomEntityType(entityTypeId, updatedCustomEntityType);
+    entityTypeValidationService.validateCustomEntityType(entityTypeId, updatedCustomEntityType);
     entityTypeRepository.updateEntityType(updatedCustomEntityType);
     return updatedCustomEntityType;
-  }
-
-  // Package-private to make Visible for testing
-  void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
-    validateEntityType(entityTypeId, customEntityType, null);
-    if (customEntityType.getOwner() == null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity type must have an owner", customEntityType);
-    }
-    if (customEntityType.getShared() == null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity type must have a shared property", customEntityType);
-    }
-    if (!Boolean.TRUE.equals(customEntityType.getIsCustom())) {
-      throw new EntityTypeNotFoundException(entityTypeId, String.format("Entity type %s is not a custom entity type", entityTypeId));
-    }
-    if (customEntityType.getSources() != null && !customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", customEntityType);
-    }
-    if (customEntityType.getColumns() != null && !customEntityType.getColumns().isEmpty()) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", customEntityType);
-    }
-    if (customEntityType.getCustomFieldEntityTypeId() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom field entity type id must not be defined for custom entity types", customEntityType);
-    }
-    if (customEntityType.getSourceView() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceView property", customEntityType);
-    }
-    if (customEntityType.getSourceViewExtractor() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceViewExtractor property", customEntityType);
-    }
-    if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
-    }
-    if (customEntityType.getPrivate() == null) {
-      throw new InvalidEntityTypeDefinitionException("The \"private\" property must be set", customEntityType);
-    }
-  }
-
-  /**
-   * Validates the structure and integrity of an {@link EntityType} definition.
-   * <p>
-   * This method checks that the entity type has a valid UUID, a non-null and non-blank name,
-   * the private property is set, and all sources and columns are valid. For sources of type
-   * {@link EntityTypeSourceEntityType}, it ensures the referenced entity type exists (unless
-   * a list of valid entity type IDs is provided, in which case it checks against that list).
-   * For columns of type {@link CustomFieldType}, it ensures that required custom field metadata
-   * properties are present and non-blank.
-   * </p>
-   *
-   * @param entityTypeId   the expected UUID of the entity type (should match entityType.getId())
-   * @param entityType     the {@link EntityType} to validate
-   * @param validTargetIds optional list of valid entity type IDs (as strings) to check source references against;
-   *                       if null, will check existence in the repository
-   * @throws InvalidEntityTypeDefinitionException if any validation check fails
-   */
-  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
-  void validateEntityType(UUID entityTypeId, EntityType entityType, List<UUID> validTargetIds) {
-    if (entityType.getId() == null || entityTypeId == null) {
-      throw new InvalidEntityTypeDefinitionException("Entity type ID cannot be null", entityTypeId);
-    }
-    try {
-      UUID.fromString(entityType.getId());
-    } catch (IllegalArgumentException e) {
-      throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", entityTypeId);
-    }
-    if (!entityTypeId.toString().equals(entityType.getId())) {
-      throw new InvalidEntityTypeDefinitionException("Entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
-    }
-    if (entityType.getName() == null || entityType.getName().isBlank()) {
-      throw new InvalidEntityTypeDefinitionException("Entity type name cannot be null or blank", entityTypeId);
-    }
-    if (entityType.getPrivate() == null) {
-      throw new InvalidEntityTypeDefinitionException("Entity type must have private property set", entityTypeId);
-    }
-
-    validateSources(entityType, validTargetIds);
-    validateColumns(entityType);
-  }
-
-  @SuppressWarnings({"java:S2589", "java:S2583"}) // Suppress incorrect warnings about null check always returning false
-  private void validateSources(EntityType entityType, List<UUID> validTargetIds) {
-    if (entityType.getSources() == null) {
-      throw new InvalidEntityTypeDefinitionException("Entity type must have at least one source defined", entityType);
-    }
-    for (EntityTypeSource source : entityType.getSources()) {
-      if (source.getAlias() == null || source.getAlias().isBlank()) {
-        throw new InvalidEntityTypeDefinitionException("Source alias cannot be null or blank", entityType);
-      }
-      if (source.getAlias().contains(".")) {
-        throw new InvalidEntityTypeDefinitionException(
-          String.format("Invalid source alias: '%s'. Source aliases must not contain '.'", source.getAlias()),
-          entityType
-        );
-      }
-      if (source.getType() == null) {
-        throw new InvalidEntityTypeDefinitionException("Source type cannot be null", entityType);
-      }
-      if (!source.getType().equals("db") && !source.getType().equals("entity-type")) {
-        throw new InvalidEntityTypeDefinitionException("Source type must be either 'db' or 'entity-type'", entityType);
-      }
-      if (source instanceof EntityTypeSourceEntityType entityTypeSource) {
-        validateEntityTypeSource(entityType, entityTypeSource.getTargetId(), validTargetIds);
-      }
-    }
-  }
-
-  private void validateEntityTypeSource(EntityType entityType, UUID targetId, List<UUID> validTargetIds) {
-    if (targetId == null) {
-      throw new InvalidEntityTypeDefinitionException("Source entity type ID cannot be null for entity-type sources", entityType);
-    }
-    if (validTargetIds == null) {
-      if (entityTypeRepository.getEntityTypeDefinition(targetId, executionContext.getTenantId()).isEmpty()) {
-        throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
-      }
-    } else if (!validTargetIds.contains(UUID.fromString(targetId.toString()))) {
-      throw new InvalidEntityTypeDefinitionException("Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
-    }
-  }
-
-  @SuppressWarnings({"java:S2589"}) // Suppress incorrect warnings about null check always returning false
-  private void validateColumns(EntityType entityType) {
-    if (entityType.getColumns() != null) {
-      for (EntityTypeColumn column : entityType.getColumns()) {
-        if (column.getDataType() instanceof CustomFieldType customFieldType) {
-          CustomFieldMetadata customFieldMetadata = customFieldType.getCustomFieldMetadata();
-          if (customFieldMetadata.getConfigurationView() == null || customFieldMetadata.getConfigurationView().isBlank()) {
-            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a configuration view defined", UUID.fromString(entityType.getId()));
-          }
-          if (customFieldMetadata.getDataExtractionPath() == null || customFieldMetadata.getDataExtractionPath().isBlank()) {
-            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a data extraction path defined", UUID.fromString(entityType.getId()));
-          }
-        }
-      }
-    }
   }
 
   boolean currentUserCanAccessCustomEntityType(String entityTypeId) {
@@ -598,7 +510,7 @@ public class EntityTypeService {
   }
 
   void verifyAccessForPossibleCustomEntityType(UUID entityTypeId) {
-    entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
+    entityTypeRepository.getEntityTypeDefinition(entityTypeId, folioExecutionContext.getTenantId())
       .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
       .map(et -> getCustomEntityType(entityTypeId))
       .ifPresent(permissionsService::verifyUserCanAccessCustomEntityType);
@@ -625,11 +537,11 @@ public class EntityTypeService {
   Map<UUID, EntityType> getAccessibleEntityTypesById() {
     Set<String> userPermissions = permissionsService.getUserPermissions();
     return entityTypeRepository
-      .getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+      .getEntityTypeDefinitions(Set.of(), folioExecutionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .filter(EntityTypeUtils::isSimple)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
-      .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), executionContext.getTenantId(), true))
+      .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), folioExecutionContext.getTenantId(), true))
       .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), et -> et, (a, b) -> a));
   }
@@ -650,7 +562,7 @@ public class EntityTypeService {
       .id(UUID.randomUUID().toString())
       .name("temp custom entity type for join discovery")
       .sources(new ArrayList<>(sources)); // Rebuild sources, to get the proper type
-    EntityType flattenedCustomEntityType = entityTypeFlatteningService.getFlattenedEntityType(tempCustomEntityType, executionContext.getTenantId(), true);
+    EntityType flattenedCustomEntityType = entityTypeFlatteningService.getFlattenedEntityType(tempCustomEntityType, folioExecutionContext.getTenantId(), true);
 
     // If no target ET is provided, return the possible options
     if (targetEntityTypeId == null) {
@@ -664,7 +576,7 @@ public class EntityTypeService {
   }
 
   public Optional<EntityType> updateEntityTypeUsedBy(UUID entityTypeId, String usedBy, OperationEnum operation) {
-    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, executionContext.getTenantId())
+    return entityTypeRepository.getEntityTypeDefinition(entityTypeId, folioExecutionContext.getTenantId())
       .map(entityType -> {
         Set<String> usedBySet = new HashSet<>(
           Optional.ofNullable(entityType.getUsedBy()).orElse(Collections.emptyList())
@@ -688,7 +600,7 @@ public class EntityTypeService {
   }
 
   private void ensureNoEntityTypesUseThisEntityType(EntityType entityType) {
-    List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), executionContext.getTenantId())
+    List<EntityType> dependentEntityTypes = entityTypeRepository.getEntityTypeDefinitions(Set.of(), folioExecutionContext.getTenantId())
       .filter(et -> !Boolean.TRUE.equals(et.getDeleted()))
       .filter(et -> dependsOnTargetEntityType(et, entityType))
       .toList();

@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
 
   <changeSet id="create-derived-table-definition" author="kjain@ebsco.com">
     <sqlFile path="sql/create-table-entity_type_definition.sql" relativeToChangelogFile="true"/>

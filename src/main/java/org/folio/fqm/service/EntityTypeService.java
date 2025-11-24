@@ -377,24 +377,6 @@ public class EntityTypeService {
       log.error("Failed to read language file. Language display names may not be properly translated.");
     }
 
-    Locale folioLocale;
-    try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode
-        .path("configs")
-        .get(0)
-        .path("value")
-        .asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      String localeString = valueNode.path("locale").asText();
-      folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
-    } catch (Exception e) {
-      log.debug("No default locale defined. Defaulting to English for language translations.");
-      folioLocale = Locale.ENGLISH;
-    }
-
     Map<String, String> a3ToNameMap = new HashMap<>();
     Map<String, String> a3ToA2Map = new HashMap<>();
     for (Map<String, String> language : languages) {
@@ -404,12 +386,8 @@ public class EntityTypeService {
 
     for (String code : langSet) {
       String label;
-      String a2Code = a3ToA2Map.get(code);
       String name = a3ToNameMap.get(code);
-      if (StringUtils.isNotEmpty(a2Code)) {
-        Locale languageLocale = new Locale(a2Code);
-        label = languageLocale.getDisplayLanguage(folioLocale);
-      } else if (StringUtils.isNotEmpty(name)) {
+      if (StringUtils.isNotEmpty(name)) {
         label = name;
       } else if (StringUtils.isNotEmpty(code)) {
         label = code;

@@ -377,23 +377,6 @@ public class EntityTypeService {
       log.error("Failed to read language file. Language display names may not be properly translated.");
     }
 
-    Locale folioLocale  = Locale.ENGLISH;
-    try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode
-        .path("configs")
-        .get(0)
-        .path("value")
-        .asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      String localeString = valueNode.path("locale").asText();
-      folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
-    } catch (Exception e) {
-      log.debug("No default locale defined. Defaulting to English for language translations.");
-    }
-
     Map<String, String> a3ToNameMap = new HashMap<>();
     Map<String, String> a3ToA2Map = new HashMap<>();
     for (Map<String, String> language : languages) {

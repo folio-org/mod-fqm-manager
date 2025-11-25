@@ -1585,6 +1585,8 @@
                       jsonb_build_object(\
                         'id', pst.id,\
                         'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'hrid', i.jsonb->>'hrid',\
+                        'precedingInstanceId', pst.precedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\
@@ -1611,6 +1613,8 @@
                       jsonb_build_object(\
                         'id', pst.id,\
                         'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
+                        'hrid', i.jsonb->>'hrid',\
+                        'succeedingInstanceId', pst.succeedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
                     ), '[]'::jsonb)\

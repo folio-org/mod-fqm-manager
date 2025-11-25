@@ -45,6 +45,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EntityTypeInitializationService {
 
+  private static final String MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW = "_mod_finance_storage_exchange_rate_availability_indicator";
+
   private final CrossTenantQueryService crossTenantQueryService;
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeValidationService entityTypeValidationService;
@@ -368,5 +370,15 @@ public class EntityTypeInitializationService {
         throw log.throwing(dae);
       }
     }
+  }
+
+  /**
+   * Check if mod-finance was available (at the time of last entity type installation)
+   *
+   * <strong>Note:</strong> this does not check mod-finance itself, but mod-finance-storage.
+   * See the liquibase changelog for more details on what this does and why it exists.
+   */
+  public boolean isModFinanceInstalled() {
+    return checkSourceViewIsAvailable(MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW, new AtomicBoolean(true));
   }
 }

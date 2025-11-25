@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record2;
@@ -72,6 +73,7 @@ public class DataRefreshRepository {
   );
 
   private final DSLContext jooqContext;
+  private final EntityTypeInitializationService entityTypeInitializationService;
   private final SimpleHttpClient simpleHttpClient;
 
   /**
@@ -81,6 +83,11 @@ public class DataRefreshRepository {
    * @return            True if refresh successful, false otherwise
    */
   public boolean refreshExchangeRates(String tenantId) {
+    if (!entityTypeInitializationService.isModFinanceInstalled()) {
+      log.info("mod-finance is not installed and entities using exchange rates are unavailable; skipping exchange rate refresh");
+      return true;
+    }
+
     log.info("Refreshing exchange rates");
     String fullTableName = tenantId + "_mod_fqm_manager." + EXCHANGE_RATE_TABLE;
     String systemCurrency = getSystemCurrencyCode();

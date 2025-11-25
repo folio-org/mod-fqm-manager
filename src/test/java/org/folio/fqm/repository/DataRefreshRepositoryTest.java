@@ -1,6 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.service.EntityTypeInitializationService;
 import org.jooq.DSLContext;
 import org.jooq.InsertOnConflictWhereIndexPredicateStep;
 import org.jooq.InsertOnDuplicateSetMoreStep;
@@ -22,6 +23,7 @@ import java.util.Map;
 import static org.folio.fqm.repository.DataRefreshRepository.CURRENCY_FIELD;
 import static org.folio.fqm.repository.DataRefreshRepository.EXCHANGE_RATE_FIELD;
 import static org.jooq.impl.DSL.table;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -29,12 +31,16 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class DataRefreshRepositoryTest {
   @InjectMocks
   private DataRefreshRepository dataRefreshRepository;
+  @Mock
+  private EntityTypeInitializationService entityTypeInitializationService;
   @Mock
   private DSLContext jooqContext;
   @Mock
@@ -49,6 +55,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
+    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [
@@ -100,6 +107,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
+    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [
@@ -132,6 +140,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
+    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [],
@@ -165,5 +174,14 @@ class DataRefreshRepositoryTest {
     when(insertOnDuplicateSetMoreStepMock.execute()).thenReturn(1);
     assertDoesNotThrow(() -> dataRefreshRepository.refreshExchangeRates(tenantId));
     verify(insertOnDuplicateSetMoreStepMock, times(1)).execute();
+  }
+
+  @Test
+  void testDoesNotLoadExchangeRatesIfFinanceNotInstalled() {
+    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(false);
+
+    assertTrue(dataRefreshRepository.refreshExchangeRates(null));
+
+    verifyNoInteractions(simpleHttpClient, jooqContext);
   }
 }

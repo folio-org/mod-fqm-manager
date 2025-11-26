@@ -65,6 +65,7 @@ public class FqlToSqlConverterService {
    */
   public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS").withZone(ZoneId.of("UTC"));
+  protected static final String UUID_REGEX = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}";
   private static final String DATE_REGEX = "^\\d{4}-\\d{2}-\\d{2}$";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}$";
   private static final String STRING_TYPE = "stringType";
@@ -116,7 +117,15 @@ public class FqlToSqlConverterService {
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
       final org.jooq.Field<Object> field = field(fieldCondition, entityType);
-      return switch (fqlCondition.getClass().getSimpleName()) {
+      Field fqmField = getField(fieldCondition, entityType);
+
+      Condition validation = null;
+      if (Boolean.TRUE.equals(fqmField.getValidated())) {
+        String dataType = getFieldDataType(entityType, fieldCondition);
+        validation = validateCondition(field, dataType);
+      }
+
+      Condition baseCondition = switch (fqlCondition.getClass().getSimpleName()) {
         case "EqualsCondition" -> handleEquals((EqualsCondition) fqlCondition, entityType, field);
         case "NotEqualsCondition" -> handleNotEquals((NotEqualsCondition) fqlCondition, entityType, field);
         case "InCondition" -> handleIn((InCondition) fqlCondition, entityType, field);
@@ -129,6 +138,7 @@ public class FqlToSqlConverterService {
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
         default -> falseCondition();
       };
+      return (validation != null) ? validation.and(baseCondition) : baseCondition;
     } else {
       return switch (fqlCondition.getClass().getSimpleName()) {
         case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
@@ -441,6 +451,14 @@ public class FqlToSqlConverterService {
       }
       default -> nullCondition;
     };
+  }
+
+  private static Condition validateCondition(org.jooq.Field<?> field, String dataType) {
+    Condition validationCheck = switch (dataType) {
+      case RANGED_UUID_TYPE, OPEN_UUID_TYPE, STRING_UUID_TYPE -> field.likeRegex(UUID_REGEX);
+      default -> trueCondition();
+    };
+    return field.isNull().or(validationCheck);
   }
 
   /**

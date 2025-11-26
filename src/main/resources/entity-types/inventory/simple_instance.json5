@@ -1312,14 +1312,16 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
+      validated: true,
       sourceAlias: 'inst',
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
       joinsTo: [
         {
           targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
           targetField: 'id',
-          type: 'equality-cast-uuid',
+          type: 'custom',
           direction: 'left',
+          sql: '${tenant_id}_mod_fqm_manager.safe_uuid(:this) = :that',
         },
       ],
     },

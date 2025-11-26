@@ -1,5 +1,11 @@
 package org.folio.fqm.context;
 
+import static org.folio.fqm.IntegrationTestBase.TENANT_ID;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.UUID;
@@ -20,12 +26,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import static org.folio.fqm.IntegrationTestBase.TENANT_ID;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * This class is responsible for inserting test data into a PostgreSQL test container database.
@@ -51,7 +51,20 @@ public class TestDbSetupConfiguration {
           id UUID PRIMARY KEY,
           definition JSONB
         )
-      """,
+        """,
+        TENANT_ID
+      )
+    );
+    jdbcTemplate.execute(
+      String.format(
+        """
+        CREATE OR REPLACE FUNCTION %s_mod_fqm_manager.get_tenant_data()
+          RETURNS TABLE(id TEXT, name TEXT) AS $$
+        BEGIN
+          RETURN;
+        END;
+        $$ language plpgsql;
+        """,
         TENANT_ID
       )
     );
@@ -107,12 +120,7 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
-        new SourceViewService(
-          sourceViewRepository,
-          executionContext,
-          resourceResolver,
-          jooqContext
-        ),
+        new SourceViewService(sourceViewRepository, executionContext, resourceResolver, jooqContext),
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {

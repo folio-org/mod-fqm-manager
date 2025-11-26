@@ -1,0 +1,5 @@
+{
+  name: 'src_finance_fiscal_year',
+  dependsOn: [['${tenant_id}_mod_finance_storage', 'fiscal_year']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_finance_storage.fiscal_year',
+}

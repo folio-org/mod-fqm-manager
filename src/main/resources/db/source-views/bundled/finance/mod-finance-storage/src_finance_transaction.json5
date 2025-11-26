@@ -1,0 +1,5 @@
+{
+  name: 'src_finance_transaction',
+  dependsOn: [['${tenant_id}_mod_finance_storage', 'transaction']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_finance_storage.transaction',
+}

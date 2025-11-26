@@ -1,0 +1,5 @@
+{
+  name: 'src_instance_note_type',
+  dependsOn: [['${tenant_id}_mod_inventory_storage', 'instance_note_type']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_inventory_storage.instance_note_type',
+}

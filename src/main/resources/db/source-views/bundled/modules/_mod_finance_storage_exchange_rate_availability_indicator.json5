@@ -1,0 +1,10 @@
+// Indicates if mod-finance-storage is installed in the tenant, for use when querying exchange rates
+// We do this via API, however, it needs to be used as a condition for if the exchange rates ET can exist
+// Unfortunately, mod-finance does not itself have a database schema at all, but mod-finance-storage _should_
+// be a sufficient indicator. `app-acquisitions` specifies both together, so there should be no reason that
+// only the storage module would exist alone.
+{
+  name: '_mod_finance_storage_exchange_rate_availability_indicator',
+  dependsOn: [['${tenant_id}_mod_finance_storage', 'rmb_internal']],
+  sql: 'SELECT 1 FROM ${tenant_id}_mod_finance_storage.rmb_internal',
+}

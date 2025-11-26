@@ -1,0 +1,5 @@
+{
+  name: 'src_linked_data_resources',
+  dependsOn: [['${tenant_id}_mod_linked_data', 'export_resources']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_linked_data.export_resources',
+}

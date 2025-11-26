@@ -1,31 +1,34 @@
 package org.folio.fqm.context;
 
+import static org.folio.fqm.IntegrationTestBase.TENANT_ID;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.repository.SourceViewRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
+import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import static org.folio.fqm.IntegrationTestBase.TENANT_ID;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * This class is responsible for inserting test data into a PostgreSQL test container database.
@@ -51,7 +54,20 @@ public class TestDbSetupConfiguration {
           id UUID PRIMARY KEY,
           definition JSONB
         )
-      """,
+        """,
+        TENANT_ID
+      )
+    );
+    jdbcTemplate.execute(
+      String.format(
+        """
+        CREATE OR REPLACE FUNCTION %s_mod_fqm_manager.get_tenant_data()
+          RETURNS TABLE(id TEXT, name TEXT) AS $$
+        BEGIN
+          RETURN;
+        END;
+        $$ language plpgsql;
+        """,
         TENANT_ID
       )
     );
@@ -76,15 +92,18 @@ public class TestDbSetupConfiguration {
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    @Qualifier("readerJooqContext")
-    private DSLContext readerJooqContext;
+    private DSLContext jooqContext;
 
     @Autowired
-    private FolioSpringLiquibase folioSpringLiquibase;
+    private FolioSpringLiquibase liquibase;
+
+    @Autowired
+    private SourceViewRepository sourceViewRepository;
 
     @PostConstruct
-    public void populateEntityTypes() throws IOException {
+    public void populateEntityTypes() throws IOException, LiquibaseException {
       SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
+
       when(ecsClient.get(eq("user-tenants"), anyMap()))
         .thenReturn(
           """
@@ -104,19 +123,22 @@ public class TestDbSetupConfiguration {
       FolioExecutionContext executionContext = mock(FolioExecutionContext.class);
       when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
       when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+
+      liquibase.setChangeLogParameters(Map.of("tenant_id", TENANT_ID));
+      liquibase.performLiquibaseUpdate();
+
       new EntityTypeInitializationService(
         null,
         entityTypeRepository,
         entityTypeValidationService,
+        new SourceViewService(sourceViewRepository, executionContext, resourceResolver, jooqContext),
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {
             return TENANT_ID;
           }
         },
-        resourceResolver,
-        readerJooqContext,
-        folioSpringLiquibase
+        resourceResolver
       )
         .initializeEntityTypes("tenant_01");
     }

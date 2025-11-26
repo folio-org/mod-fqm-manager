@@ -1,0 +1,5 @@
+{
+  name: 'src_consortia_tenant',
+  dependsOn: [],
+  sql: 'SELECT * FROM ${tenant_id}_mod_fqm_manager.get_tenant_data();',
+}

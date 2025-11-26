@@ -1,0 +1,5 @@
+{
+  name: 'src_inventory_location',
+  dependsOn: [['${tenant_id}_mod_inventory_storage', 'location']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_inventory_storage.location',
+}

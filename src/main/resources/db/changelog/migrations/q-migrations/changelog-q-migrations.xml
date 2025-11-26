@@ -20,20 +20,4 @@
     </sql>
   </changeSet>
 
-  <changeSet id="MODFQMMGR-184" author="bsharp@ebsco.com" runOnChange="true">
-    <comment>Remove unneeded materialized view for POL currencies</comment>
-    <sql> DROP MATERIALIZED VIEW IF EXISTS drv_pol_currency;</sql>
-  </changeSet>
-
-  <changeSet id="MODFQMMGR-171" author="kjain@ebsco.com" runOnChange="true">
-    <comment>Remove unneeded materialized view for languages</comment>
-    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_languages;</sql>
-  </changeSet>
-  <changeSet id="MODFQMMGR-210-refresh-payment-status" author="mweaver@ebsco.com" runOnChange="true">
-    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_pol_payment_status;</sql>
-  </changeSet>
-  <changeSet id="MODFQMMGR-210-refresh-receipt-status" author="mweaver@ebsco.com" runOnChange="true">
-    <sql>DROP MATERIALIZED VIEW IF EXISTS drv_pol_receipt_status;</sql>
-  </changeSet>
-
 </databaseChangeLog>

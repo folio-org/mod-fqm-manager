@@ -1,0 +1,5 @@
+{
+  name: 'src_circulation_loan_policy',
+  dependsOn: [['${tenant_id}_mod_circulation_storage', 'loan_policy']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_circulation_storage.loan_policy',
+}

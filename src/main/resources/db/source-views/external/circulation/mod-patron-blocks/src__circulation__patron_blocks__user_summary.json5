@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__patron_blocks__user_summary',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_patron_blocks',
+      'user_summary',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_patron_blocks.user_summary',
+}

@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__feesfines__waives',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_feesfines',
+      'waives',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_feesfines.waives',
+}

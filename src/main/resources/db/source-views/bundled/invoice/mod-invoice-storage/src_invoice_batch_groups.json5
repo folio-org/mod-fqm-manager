@@ -1,0 +1,5 @@
+{
+  name: 'src_invoice_batch_groups',
+  dependsOn: [['${tenant_id}_mod_invoice_storage', 'batch_groups']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_invoice_storage.batch_groups',
+}

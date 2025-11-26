@@ -16,7 +16,7 @@
       join: {
         type: 'left join',
         joinTo: 'rates',
-        condition: '1 = 1'
+        condition: '0 = 1'
       }
     }
   ],

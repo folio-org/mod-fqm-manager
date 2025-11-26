@@ -1,0 +1,5 @@
+{
+  name: 'src_tags',
+  dependsOn: [['${tenant_id}_mod_tags', 'tags']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_tags.tags',
+}

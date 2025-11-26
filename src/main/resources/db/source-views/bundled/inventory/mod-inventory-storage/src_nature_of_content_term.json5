@@ -1,0 +1,5 @@
+{
+  name: 'src_nature_of_content_term',
+  dependsOn: [['${tenant_id}_mod_inventory_storage', 'nature_of_content_term']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_inventory_storage.nature_of_content_term',
+}

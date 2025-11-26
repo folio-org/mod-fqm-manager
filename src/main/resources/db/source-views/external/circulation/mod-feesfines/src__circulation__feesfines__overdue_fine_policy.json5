@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__feesfines__overdue_fine_policy',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_feesfines',
+      'overdue_fine_policy',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_feesfines.overdue_fine_policy',
+}

@@ -1,0 +1,5 @@
+{
+  name: 'src_user_custom_fields',
+  dependsOn: [['${tenant_id}_mod_users', 'custom_fields']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_users.custom_fields',
+}

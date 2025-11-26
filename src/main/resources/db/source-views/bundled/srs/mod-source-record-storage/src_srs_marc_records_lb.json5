@@ -1,0 +1,5 @@
+{
+  name: 'src_srs_marc_records_lb',
+  dependsOn: [['${tenant_id}_mod_source_record_storage', 'marc_records_lb']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_source_record_storage.marc_records_lb',
+}

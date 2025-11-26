@@ -7,13 +7,13 @@ import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.repository.SourceViewRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
 import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -76,11 +76,10 @@ public class TestDbSetupConfiguration {
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    @Qualifier("readerJooqContext")
-    private DSLContext readerJooqContext;
+    private DSLContext jooqContext;
 
     @Autowired
-    private SourceViewService sourceViewService;
+    private SourceViewRepository sourceViewRepository;
 
     @PostConstruct
     public void populateEntityTypes() throws IOException {
@@ -108,7 +107,12 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
-        sourceViewService,
+        new SourceViewService(
+          sourceViewRepository,
+          executionContext,
+          resourceResolver,
+          jooqContext
+        ),
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {

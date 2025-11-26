@@ -1,7 +1,7 @@
 package org.folio.fqm.repository;
 
 import org.folio.fqm.client.SimpleHttpClient;
-import org.folio.fqm.service.EntityTypeInitializationService;
+import org.folio.fqm.service.SourceViewService;
 import org.jooq.DSLContext;
 import org.jooq.InsertOnConflictWhereIndexPredicateStep;
 import org.jooq.InsertOnDuplicateSetMoreStep;
@@ -40,7 +40,7 @@ class DataRefreshRepositoryTest {
   @InjectMocks
   private DataRefreshRepository dataRefreshRepository;
   @Mock
-  private EntityTypeInitializationService entityTypeInitializationService;
+  private SourceViewService sourceViewService;
   @Mock
   private DSLContext jooqContext;
   @Mock
@@ -55,7 +55,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
+    when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [
@@ -107,7 +107,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
+    when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [
@@ -140,7 +140,7 @@ class DataRefreshRepositoryTest {
     Map<String, String> localeSettingsParams = Map.of(
       "query", "(module==ORG and configName==localeSettings)"
     );
-    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(true);
+    when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
     when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
            {
              "configs": [],
@@ -178,7 +178,7 @@ class DataRefreshRepositoryTest {
 
   @Test
   void testDoesNotLoadExchangeRatesIfFinanceNotInstalled() {
-    when(entityTypeInitializationService.isModFinanceInstalled()).thenReturn(false);
+    when(sourceViewService.isModFinanceInstalled()).thenReturn(false);
 
     assertTrue(dataRefreshRepository.refreshExchangeRates(null));
 

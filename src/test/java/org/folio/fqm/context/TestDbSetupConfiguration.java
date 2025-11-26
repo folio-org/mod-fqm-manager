@@ -9,8 +9,8 @@ import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
+import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -80,7 +80,7 @@ public class TestDbSetupConfiguration {
     private DSLContext readerJooqContext;
 
     @Autowired
-    private FolioSpringLiquibase folioSpringLiquibase;
+    private SourceViewService sourceViewService;
 
     @PostConstruct
     public void populateEntityTypes() throws IOException {
@@ -108,15 +108,14 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
+        sourceViewService,
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {
             return TENANT_ID;
           }
         },
-        resourceResolver,
-        readerJooqContext,
-        folioSpringLiquibase
+        resourceResolver
       )
         .initializeEntityTypes("tenant_01");
     }

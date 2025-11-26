@@ -30,7 +30,10 @@
     <coffee-boots.version>4.0.0</coffee-boots.version>
     <snakeyaml.version>2.0</snakeyaml.version>
     <org.postgresql.version>42.5.4</org.postgresql.version>
-    <org.jooq.version>3.20.9</org.jooq.version>
+    <!-- [2025-11-26] 3.19.21 onwards causes issues with Record1::value1 in IdStreamer -->
+    <!-- It appears these return a String[][] when they should (and declare) String[] -->
+    <!-- Attempting to use it in our logic (to make List<String>) results in casting exceptions -->
+    <org.jooq.version>3.19.20</org.jooq.version>
     <org.apache.commons.version>4.4</org.apache.commons.version>
     <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
     <spring-retry.version>2.0.10</spring-retry.version>

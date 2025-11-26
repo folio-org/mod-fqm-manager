@@ -8,8 +8,10 @@ import static org.mockito.Mockito.when;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -18,6 +20,7 @@ import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
 import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -92,11 +95,15 @@ public class TestDbSetupConfiguration {
     private DSLContext jooqContext;
 
     @Autowired
+    private FolioSpringLiquibase liquibase;
+
+    @Autowired
     private SourceViewRepository sourceViewRepository;
 
     @PostConstruct
-    public void populateEntityTypes() throws IOException {
+    public void populateEntityTypes() throws IOException, LiquibaseException {
       SimpleHttpClient ecsClient = mock(SimpleHttpClient.class);
+
       when(ecsClient.get(eq("user-tenants"), anyMap()))
         .thenReturn(
           """
@@ -116,6 +123,10 @@ public class TestDbSetupConfiguration {
       FolioExecutionContext executionContext = mock(FolioExecutionContext.class);
       when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
       when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+
+      liquibase.setChangeLogParameters(Map.of("tenant_id", TENANT_ID));
+      liquibase.performLiquibaseUpdate();
+
       new EntityTypeInitializationService(
         null,
         entityTypeRepository,

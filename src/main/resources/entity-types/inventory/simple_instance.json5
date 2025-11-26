@@ -1312,6 +1312,7 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
+      validated: true,
       sourceAlias: 'inst',
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
       joinsTo: [

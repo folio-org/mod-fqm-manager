@@ -218,8 +218,9 @@ public class SourceViewService {
 
     jooqContext.transaction(transaction -> {
       definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
-      definitionsToUpdate.forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
-      definitionsToInstall.forEach(k -> transaction.dsl().createView(k).as(toInstall.get(k).sql()).execute());
+      Stream
+        .concat(definitionsToInstall.stream(), definitionsToUpdate.stream())
+        .forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
     });
 
     log.info("All done, updating source_views table...");

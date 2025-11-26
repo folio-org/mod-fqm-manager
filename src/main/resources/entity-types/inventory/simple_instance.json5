@@ -36,7 +36,7 @@
       join: {
         type: 'left join',
         joinTo: 'inst',
-        condition: '1 = 1'
+        condition: '0 = 1'
       }
     }
   ],

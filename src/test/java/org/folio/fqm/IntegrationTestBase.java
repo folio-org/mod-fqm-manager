@@ -140,9 +140,10 @@ public class IntegrationTestBase {
   private static void createDummyViews() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
     jdbcTemplate.execute("CREATE SCHEMA " + TENANT_ID + "_mod_fqm_manager");
+    jdbcTemplate.execute("CREATE SCHEMA " + TENANT_ID + "_mod_users");
     // Create views for the Users entity type depends on it for custom fields. Without this, the smoke test will fail.
-    Stream.of("src_user_custom_fields", "src_users_users", "src_users_groups").forEach(v -> {
-      jdbcTemplate.execute("CREATE VIEW " + TENANT_ID + "_mod_fqm_manager." + v + " AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
+    Stream.of("custom_fields", "users", "groups").forEach(t -> {
+      jdbcTemplate.execute("CREATE VIEW " + TENANT_ID + "_mod_users." + t + " AS SELECT NULL::uuid AS id, '{}'::jsonb AS jsonb LIMIT 1");
     });
   }
 

@@ -1312,14 +1312,16 @@
       hidden: true,
       queryable: true,
       visibleByDefault: false,
+      validated: true,
       sourceAlias: 'inst',
       valueGetter: ":sourceAlias.jsonb->>'statusId'",
       joinsTo: [
         {
           targetId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
           targetField: 'id',
-          type: 'equality-cast-uuid',
+          type: 'custom',
           direction: 'left',
+          sql: '${tenant_id}_mod_fqm_manager.safe_uuid(:this) = :that',
         },
       ],
     },
@@ -1585,7 +1587,7 @@
                       jsonb_build_object(\
                         'id', pst.id,\
                         'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
-                        'hrid', i.jsonb->>'hrid',\
+                        'hrid', pst.jsonb ->> 'hrid',\
                         'precedingInstanceId', pst.precedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\
@@ -1613,7 +1615,7 @@
                       jsonb_build_object(\
                         'id', pst.id,\
                         'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
-                        'hrid', i.jsonb->>'hrid',\
+                        'hrid', pst.jsonb ->> 'hrid',\
                         'succeedingInstanceId', pst.succeedinginstanceid,\
                         'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
                       )\

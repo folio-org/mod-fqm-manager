@@ -116,7 +116,6 @@ public class IdStreamer {
 
       Condition whereClause = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
-
       if (!CollectionUtils.isEmpty(entityType.getFilterConditions())) {
         for (String condition : entityType.getFilterConditions()) {
           whereClause = whereClause.and(condition);

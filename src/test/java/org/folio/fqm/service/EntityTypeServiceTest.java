@@ -542,11 +542,12 @@ class EntityTypeServiceTest {
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
 
+    // Language codes are returned as both value and label (no formatted names)
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("eng").label("English"),
-      new ValueWithLabel().value("fre").label("French"),
-      new ValueWithLabel().value("ger").label("German"),
-      new ValueWithLabel().value("xyze").label("xyze") // non-existent language code should use code as display name
+      new ValueWithLabel().value("eng").label("eng"),
+      new ValueWithLabel().value("fre").label("fre"),
+      new ValueWithLabel().value("ger").label("ger"),
+      new ValueWithLabel().value("xyze").label("xyze")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
@@ -598,11 +599,11 @@ class EntityTypeServiceTest {
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
-    // Expects ISO 639 names from languages.json5 for consistency with results display
+    // Language codes are returned as both value and label (no formatted names)
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("mus").label("Creek"),
-      new ValueWithLabel().value("eng").label("English"),
-      new ValueWithLabel().value("ger").label("German")
+      new ValueWithLabel().value("eng").label("eng"),
+      new ValueWithLabel().value("ger").label("ger"),
+      new ValueWithLabel().value("mus").label("mus")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

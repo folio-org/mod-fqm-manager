@@ -1,9 +1,5 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import feign.FeignException;
@@ -49,16 +45,12 @@ import org.springframework.stereotype.Service;
 import static java.util.Comparator.comparing;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
-import java.util.Locale;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +67,6 @@ import java.util.stream.Stream;
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -346,40 +337,12 @@ public class EntityTypeService {
     }
 
     List<ValueWithLabel> results = new ArrayList<>();
-    ObjectMapper mapper =
-      JsonMapper
-        .builder()
-        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-        .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
-        .build();
-
-    List<Map<String, String>> languages = List.of();
-    try (InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
-      languages = mapper.readValue(input, new TypeReference<>() {
-      });
-    } catch (IOException e) {
-      log.error("Failed to read language file. Language display names may not be properly translated.");
-    }
-
-    Map<String, String> a3ToNameMap = new HashMap<>();
-    Map<String, String> a3ToA2Map = new HashMap<>();
-    for (Map<String, String> language : languages) {
-      a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
-      a3ToNameMap.put(language.get("alpha3"), language.get("name"));
-    }
-
     for (String code : langSet) {
-      String label;
-      String name = a3ToNameMap.get(code);
-      if (StringUtils.isNotEmpty(name)) {
-        label = name;
-      } else if (StringUtils.isNotEmpty(code)) {
-        label = code;
-      } else {
+      if (StringUtils.isEmpty(code)) {
         continue;
       }
-      if (label.toLowerCase().contains(searchText.toLowerCase())) {
-        results.add(new ValueWithLabel().value(code).label(label));
+      if (code.toLowerCase().contains(searchText.toLowerCase())) {
+        results.add(new ValueWithLabel().value(code).label(code));
       }
     }
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));

@@ -7,7 +7,7 @@ import java.util.List;
 import org.folio.fqm.domain.SourceViewDefinition.SourceViewDependency;
 import org.junit.jupiter.api.Test;
 
-public class SourceViewDefinitionTest {
+class SourceViewDefinitionTest {
 
   private static final SourceViewDependency DEP_A = new SourceViewDependency("", "a");
   private static final SourceViewDependency DEP_B = new SourceViewDependency("", "b");

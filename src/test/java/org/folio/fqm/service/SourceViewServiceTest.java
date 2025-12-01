@@ -38,6 +38,8 @@ import org.folio.fqm.repository.SourceViewRepository;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Condition;
 import org.jooq.Configuration;
+import org.jooq.CreateViewAsStep;
+import org.jooq.CreateViewFinalStep;
 import org.jooq.DSLContext;
 import org.jooq.DropViewFinalStep;
 import org.jooq.Field;
@@ -300,7 +302,7 @@ class SourceViewServiceTest {
   }
 
   @Test
-  void testAttemptToHealSourceViewExistsInDatabaseAndRecord() throws IOException {
+  void testAttemptToHealSourceViewExistsInDatabaseAndRecord() {
     when(sourceViewRepository.existsById("view")).thenReturn(true);
     when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(true));
 
@@ -340,7 +342,7 @@ class SourceViewServiceTest {
   }
 
   @Test
-  void testAttemptToHealSourceViewCreatesViewIfPossible() throws IOException {
+  void testAttemptToHealSourceViewCreatesViewIfPossible() throws Throwable {
     when(sourceViewRepository.existsById("view_a")).thenReturn(false);
     when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(false));
     mockDefinitions(List.of(DEFINITION_A));
@@ -349,11 +351,22 @@ class SourceViewServiceTest {
 
     assertTrue(sourceViewService.attemptToHealSourceView("view_a"));
 
+    ArgumentCaptor<TransactionalRunnable> transactionCaptor = ArgumentCaptor.forClass(TransactionalRunnable.class);
+    verify(jooqContext, times(1)).transaction(transactionCaptor.capture());
+
+    Configuration transaction = mock(Configuration.class);
+    DSLContext dsl = mock(DSLContext.class);
+    when(transaction.dsl()).thenReturn(dsl);
+    CreateViewAsStep<Record> createViewAsStep = mock(CreateViewAsStep.class);
+    when(createViewAsStep.as("SELECT 'a'")).thenReturn(mock(CreateViewFinalStep.class));
+    when(dsl.createOrReplaceView("view_a")).thenReturn(createViewAsStep);
+
+    transactionCaptor.getValue().run(transaction);
+
     verify(sourceViewRepository).existsById("view_a");
     verify(sourceViewRepository).save(any());
     verify(jooqContext).selectOne();
     verify(jooqContext).select(any(List.class));
-    verify(jooqContext).transaction(any(TransactionalRunnable.class));
     verifyNoMoreInteractions(sourceViewRepository, jooqContext);
   }
 
@@ -405,8 +418,8 @@ class SourceViewServiceTest {
         values
           .stream()
           .map(v -> {
-            Record record = mock(Record.class);
-            when(record.get(any(Field.class)))
+            Record r = mock(Record.class);
+            when(r.get(any(Field.class)))
               .thenAnswer(invocation -> {
                 Field<?> field = invocation.getArgument(0);
                 if (field.getName().equals("table_schema")) {
@@ -418,7 +431,7 @@ class SourceViewServiceTest {
                   return null;
                 }
               });
-            return record;
+            return r;
           })
       );
 

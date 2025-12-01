@@ -160,13 +160,13 @@ public class SourceViewService {
    */
   public Set<String> installAvailableSourceViews(boolean forceUpdate) throws IOException {
     Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions();
-    int originalAvailableCount = availableDefinitions.size();
+    int originalAvailableCount = -1;
     boolean shouldForceUpdateOnThisIteration = forceUpdate;
 
     // simple traversal to handle inter-view dependencies. This hierarchy should be incredibly shallow
     // (likely no more than one level), so simply checking if more are available after an install
     // is sufficient.
-    do {
+    while (originalAvailableCount != availableDefinitions.size()) {
       this.installSourceViews(availableDefinitions, shouldForceUpdateOnThisIteration);
 
       originalAvailableCount = availableDefinitions.size();
@@ -179,7 +179,7 @@ public class SourceViewService {
           availableDefinitions.size() - originalAvailableCount
         );
       }
-    } while (originalAvailableCount != availableDefinitions.size());
+    }
 
     return availableDefinitions.keySet();
   }

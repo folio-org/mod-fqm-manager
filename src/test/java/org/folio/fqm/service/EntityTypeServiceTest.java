@@ -542,7 +542,6 @@ class EntityTypeServiceTest {
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
 
-    // Language codes are returned as both value and label (no formatted names)
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("eng").label("eng"),
       new ValueWithLabel().value("fre").label("fre"),
@@ -599,7 +598,6 @@ class EntityTypeServiceTest {
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
-    // Language codes are returned as both value and label (no formatted names)
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("eng").label("eng"),
       new ValueWithLabel().value("ger").label("ger"),

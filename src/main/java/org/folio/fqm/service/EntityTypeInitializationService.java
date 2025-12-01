@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.JSON5ObjectMapperFactory;
 import org.folio.querytool.domain.dto.EntityType;
@@ -65,8 +66,27 @@ public class EntityTypeInitializationService {
   }
 
   // called as part of tenant install/upgrade (see FqmTenantService) or on POST /entity-types/install
-  public void initializeEntityTypes(String centralTenantId) throws IOException {
+  public void initializeEntityTypes(String providedCentralTenantId) throws IOException {
     log.info("Initializing entity types");
+
+    Pair<String, String> centralTenantInfo = this.getCentralTenantIdSafely(providedCentralTenantId);
+    String safeCentralTenantId = centralTenantInfo.getLeft();
+    String centralTenantId = centralTenantInfo.getRight();
+
+    List<EntityType> availableEntityTypes = this.getAvailableEntityTypes(centralTenantId, safeCentralTenantId);
+
+    validateEntityTypesAndFillUsedBy(availableEntityTypes);
+
+    log.info(
+      "Found {} available entity types in package: {}",
+      () -> availableEntityTypes.size(),
+      () -> availableEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
+    );
+
+    entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+  }
+
+  protected Pair<String, String> getCentralTenantIdSafely(String centralTenantId) {
     if (centralTenantId == null) {
       centralTenantId = crossTenantQueryService.getCentralTenantId();
     }
@@ -81,22 +101,11 @@ public class EntityTypeInitializationService {
       centralTenantId = "${central_tenant_id}";
       safeCentralTenantId = folioExecutionContext.getTenantId();
     }
-    String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
 
-    List<EntityType> availableEntityTypes = this.getAvailableEntityTypes(finalCentralTenantId, safeCentralTenantId);
-
-    validateEntityTypesAndFillUsedBy(availableEntityTypes);
-
-    log.info(
-      "Found {} available entity types in package: {}",
-      () -> availableEntityTypes.size(),
-      () -> availableEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
-    );
-
-    entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+    return Pair.of(safeCentralTenantId, centralTenantId);
   }
 
-  protected List<EntityType> getAvailableEntityTypes(String finalCentralTenantId, String safeCentralTenantId)
+  protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
     sourceViewService.verifyAll();
 
@@ -112,7 +121,7 @@ public class EntityTypeInitializationService {
             resource
               .getContentAsString(StandardCharsets.UTF_8)
               .replace("${tenant_id}", folioExecutionContext.getTenantId())
-              .replace("${central_tenant_id}", finalCentralTenantId)
+              .replace("${central_tenant_id}", centralTenantId)
               .replace("${safe_central_tenant_id}", safeCentralTenantId),
             EntityType.class
           );
@@ -217,7 +226,7 @@ public class EntityTypeInitializationService {
   }
 
   protected boolean checkSourceViewIsAvailable(String view, Map<String, Boolean> sourceViewAvailabilityCache) {
-    return sourceViewAvailabilityCache.computeIfAbsent(view, v -> sourceViewService.doesSourceViewExist(v));
+    return sourceViewAvailabilityCache.computeIfAbsent(view, sourceViewService::doesSourceViewExist);
   }
 
   protected void validateEntityTypesAndFillUsedBy(List<EntityType> entityTypes) {
@@ -252,7 +261,7 @@ public class EntityTypeInitializationService {
       .filter(EntityTypeSourceDatabase.class::isInstance)
       .map(EntityTypeSourceDatabase.class::cast)
       .map(EntityTypeSourceDatabase::getTarget)
-      .forEach(view -> sourceViewService.attemptToHealSourceView(view));
+      .forEach(sourceViewService::attemptToHealSourceView);
 
     try {
       // will cleanup unavailable ones if the source view was not able to be created.

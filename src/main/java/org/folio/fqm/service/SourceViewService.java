@@ -52,7 +52,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SourceViewService {
 
-  private static final String MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW =
+  protected static final String MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW =
     "_mod_finance_storage_exchange_rate_availability_indicator";
 
   private final SourceViewRepository sourceViewRepository;
@@ -163,7 +163,7 @@ public class SourceViewService {
     int originalAvailableCount = availableDefinitions.size();
     boolean shouldForceUpdateOnThisIteration = forceUpdate;
 
-    // stupid traversal to handle inter-view dependencies. This hierarchy should be incredibly shallow
+    // simple traversal to handle inter-view dependencies. This hierarchy should be incredibly shallow
     // (likely no more than one level), so simply checking if more are available after an install
     // is sufficient.
     do {
@@ -173,6 +173,12 @@ public class SourceViewService {
       availableDefinitions = this.getAvailableDefinitions();
       // we've reinstalled once. all in future cycles will be new, so no need to force update again
       shouldForceUpdateOnThisIteration = false;
+      if (originalAvailableCount != availableDefinitions.size()) {
+        log.info(
+          "{} additional source views are now available after installation cycle; rerunning",
+          availableDefinitions.size() - originalAvailableCount
+        );
+      }
     } while (originalAvailableCount != availableDefinitions.size());
 
     return availableDefinitions.keySet();
@@ -216,12 +222,14 @@ public class SourceViewService {
     log.info("To update: {}", definitionsToUpdate);
     log.info("To remove: {}", definitionsToRemove);
 
-    jooqContext.transaction(transaction -> {
-      definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
-      Stream
-        .concat(definitionsToInstall.stream(), definitionsToUpdate.stream())
-        .forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
-    });
+    if (!definitionsToInstall.isEmpty()) {
+      jooqContext.transaction(transaction -> {
+        definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
+        Stream
+          .concat(definitionsToInstall.stream(), definitionsToUpdate.stream())
+          .forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
+      });
+    }
 
     log.info("All done, updating source_views table...");
 
@@ -291,11 +299,8 @@ public class SourceViewService {
 
     return result
       .stream()
-      .map(record ->
-        new SourceViewDependency(
-          record.get(field("table_schema", String.class)),
-          record.get(field("table_name", String.class))
-        )
+      .map(r ->
+        new SourceViewDependency(r.get(field("table_schema", String.class)), r.get(field("table_name", String.class)))
       )
       .collect(Collectors.toSet());
   }
@@ -320,7 +325,10 @@ public class SourceViewService {
 
     Collection<String> missingViews = CollectionUtils.subtract(expectedViews, realViews);
     if (!missingViews.isEmpty()) {
-      log.error("The following source views are missing from the database: {}", missingViews);
+      log.error(
+        "The following source views were previously created but are now missing from the database: {}",
+        missingViews
+      );
       log.error("Removing these from source_views table and triggering recreation...");
       sourceViewRepository.deleteAllById(missingViews);
     }
@@ -330,18 +338,18 @@ public class SourceViewService {
       log.warn("The following unexpected source views exist in the database: {}", unexpectedViews);
       log.warn("These are likely from a previous installation where views were created by Liquibase.");
       log.warn("Removing {} views: {}", unexpectedViews.size(), unexpectedViews);
-      jooqContext.transaction(transaction -> {
-        unexpectedViews.forEach(viewName -> transaction.dsl().dropView(viewName).execute());
-      });
+      jooqContext.transaction(transaction ->
+        unexpectedViews.forEach(viewName -> transaction.dsl().dropView(viewName).execute())
+      );
     }
 
     List<String> materializedViews = getMaterializedViewsFromDatabase();
     if (!materializedViews.isEmpty()) {
       log.warn("The following legacy materialized views exist in the database: {}", materializedViews);
       log.warn("Removing {} materialized views: {}", materializedViews.size(), materializedViews);
-      jooqContext.transaction(transaction -> {
-        materializedViews.forEach(viewName -> transaction.dsl().dropMaterializedView(viewName).execute());
-      });
+      jooqContext.transaction(transaction ->
+        materializedViews.forEach(viewName -> transaction.dsl().dropMaterializedView(viewName).execute())
+      );
     }
 
     this.installAvailableSourceViews(false);
@@ -394,18 +402,18 @@ public class SourceViewService {
       }
 
       log.info("→ Attempting to create source view `{}`", viewName);
-      jooqContext.transaction(transaction -> {
-        transaction.dsl().createOrReplaceView(viewName).as(definition.sql()).execute();
-      });
+      jooqContext.transaction(transaction ->
+        transaction.dsl().createOrReplaceView(viewName).as(definition.sql()).execute()
+      );
 
-      SourceViewRecord record = SourceViewRecord
+      SourceViewRecord newRecord = SourceViewRecord
         .builder()
         .name(definition.name())
         .definition(definition.sql())
         .sourceFile(definition.sourceFilePath())
         .lastUpdated(Instant.now())
         .build();
-      sourceViewRepository.save(record);
+      sourceViewRepository.save(newRecord);
 
       log.info("√ Successfully created source view `{}`", viewName);
       return true;

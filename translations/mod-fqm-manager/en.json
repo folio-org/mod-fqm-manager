@@ -825,7 +825,6 @@
   "entityType.simple_holdings_record.version": "Record version",
   "entityType.simple_holdings_type": "Holdings type",
   "entityType.simple_holdings_type._description": "Simple entity type for holdings type data.",
-  "entityType.simple_holdings_type.code": "Code",
   "entityType.simple_holdings_type.id": "Type UUID",
   "entityType.simple_holdings_type.jsonb": "JSONB",
   "entityType.simple_holdings_type.metadata_created_by_user_id": "Created by user UUID",

@@ -19,32 +19,9 @@
       },
       isIdColumn: true,
       queryable: true,
+      essential: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-    },
-    {
-      name: 'code',
-      sourceAlias: 'holdings_type',
-      dataType: {
-        dataType: 'stringType',
-      },
-      isIdColumn: false,
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ":sourceAlias.jsonb->>'code'",
-      filterValueGetter: "lower(\
-        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
-      )",
-      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-      source: {
-        entityTypeId: 'b9eaaed8-c11b-4d53-a784-a4213c584001',
-        columnName: 'code',
-      },
-      valueSourceApi: {
-        path: 'holdings-types',
-        valueJsonPath: '$.holdingsTypes.*.code',
-        labelJsonPath: '$.holdingsTypes.*.code',
-      },
     },
     {
       name: 'name',
@@ -54,7 +31,9 @@
       },
       isIdColumn: false,
       queryable: true,
+      essential: true,
       visibleByDefault: true,
+      idColumnName: 'id',
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(\
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
@@ -66,7 +45,7 @@
       },
       valueSourceApi: {
         path: 'holdings-types',
-        valueJsonPath: '$.holdingsTypes.*.name',
+        valueJsonPath: '$.holdingsTypes.*.id',
         labelJsonPath: '$.holdingsTypes.*.name',
       },
     },

@@ -42,6 +42,7 @@ public class TestDbSetupConfiguration {
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setDataSource(dataSource);
     liquibase.setChangeLog("classpath:test-db/changelog-test.xml");
+    liquibase.setChangeLogParameters(Map.of("tenant_id", TENANT_ID));
     liquibase.setShouldRun(true);
 
     // Create tenant-prefixed entity type definition table, required to not break initialization during integration tests

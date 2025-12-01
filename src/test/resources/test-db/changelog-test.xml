@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
 
-  <include file="db/changelog/bootstrap/core-tables.xml" relativeToChangelogFile="false"/>
+  <include file="db/changelog/changelog-master.xml" relativeToChangelogFile="false"/>
 
   <changeSet id="custom-fields-source-view.sql" author="bsharp@ebsco.com">
     <sqlFile path="test-db/scripts/custom-fields-source-view.sql" relativeToChangelogFile="false"/>

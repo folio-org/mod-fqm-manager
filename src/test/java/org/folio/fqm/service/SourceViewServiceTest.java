@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -265,6 +267,112 @@ class SourceViewServiceTest {
     ArgumentCaptor<String> dropViewCaptor = ArgumentCaptor.forClass(String.class);
     verify(dsl, atLeastOnce()).dropMaterializedView(dropViewCaptor.capture());
     assertThat(dropViewCaptor.getAllValues(), containsInAnyOrder("view_mat"));
+  }
+
+  @Test
+  void testAttemptToHealSourceViewComplexExpression() {
+    assertTrue(sourceViewService.attemptToHealSourceView("(select 1)"));
+
+    verifyNoInteractions(sourceViewRepository, jooqContext);
+  }
+
+  @Test
+  void testAttemptToHealSourceViewExistsInDatabaseButNoRecord() throws IOException {
+    mockDefinitions(List.of());
+    when(jooqContext.select(any(List.class))).thenAnswer(i -> mockFetchAvailableDependencies(List.of()));
+
+    when(sourceViewRepository.existsById("view")).thenReturn(false);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(true));
+    when(jooqContext.select(any(Field.class)))
+      .thenAnswer(i -> {
+        Field<?> field = i.getArgument(0);
+        if (field.getName().equals("table_name")) {
+          return mockFetchInstalledViews(Set.of());
+        } else {
+          return mockFetchInstalledMaterializedViews(List.of());
+        }
+      });
+
+    sourceViewService.attemptToHealSourceView("view");
+
+    verify(sourceViewRepository, never()).save(any());
+    verify(jooqContext, never()).transaction(any(TransactionalRunnable.class));
+  }
+
+  @Test
+  void testAttemptToHealSourceViewExistsInDatabaseAndRecord() throws IOException {
+    when(sourceViewRepository.existsById("view")).thenReturn(true);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(true));
+
+    assertTrue(sourceViewService.attemptToHealSourceView("view"));
+
+    verify(sourceViewRepository).existsById("view");
+    verify(jooqContext).selectOne();
+    verifyNoMoreInteractions(sourceViewRepository, jooqContext);
+  }
+
+  @Test
+  void testAttemptToHealSourceViewDoesNotExist() throws IOException {
+    when(sourceViewRepository.existsById("view")).thenReturn(false);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(false));
+    mockDefinitions(List.of());
+
+    assertFalse(sourceViewService.attemptToHealSourceView("view"));
+
+    verify(sourceViewRepository).existsById("view");
+    verify(jooqContext).selectOne();
+    verifyNoMoreInteractions(sourceViewRepository, jooqContext);
+  }
+
+  @Test
+  void testAttemptToHealSourceViewHasUnavailableDependencies() throws IOException {
+    when(sourceViewRepository.existsById("view_a")).thenReturn(false);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(false));
+    mockDefinitions(List.of(DEFINITION_A));
+    when(jooqContext.select(any(List.class))).thenAnswer(i -> mockFetchAvailableDependencies(List.of()));
+
+    assertFalse(sourceViewService.attemptToHealSourceView("view_a"));
+
+    verify(sourceViewRepository).existsById("view_a");
+    verify(jooqContext).selectOne();
+    verify(jooqContext).select(any(List.class));
+    verifyNoMoreInteractions(sourceViewRepository, jooqContext);
+  }
+
+  @Test
+  void testAttemptToHealSourceViewCreatesViewIfPossible() throws IOException {
+    when(sourceViewRepository.existsById("view_a")).thenReturn(false);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(false));
+    mockDefinitions(List.of(DEFINITION_A));
+    when(jooqContext.select(any(List.class)))
+      .thenAnswer(i -> mockFetchAvailableDependencies(List.of(Pair.of("a", "a"))));
+
+    assertTrue(sourceViewService.attemptToHealSourceView("view_a"));
+
+    verify(sourceViewRepository).existsById("view_a");
+    verify(sourceViewRepository).save(any());
+    verify(jooqContext).selectOne();
+    verify(jooqContext).select(any(List.class));
+    verify(jooqContext).transaction(any(TransactionalRunnable.class));
+    verifyNoMoreInteractions(sourceViewRepository, jooqContext);
+  }
+
+  @Test
+  void testAttemptToHealSourceViewException() throws IOException {
+    when(sourceViewRepository.existsById("view_a")).thenReturn(false);
+    when(jooqContext.selectOne()).thenAnswer(i -> mockFetchOne(false));
+
+    // easy example that would trigger an IOException
+    Resource resource = mock(Resource.class);
+    when(resource.isReadable()).thenReturn(true);
+    when(resource.getContentAsString(any())).thenThrow(new IOException());
+    when(resourceResolver.getResources(anyString())).thenReturn(new Resource[] { resource });
+
+    assertFalse(sourceViewService.attemptToHealSourceView("view_a"));
+
+    verify(sourceViewRepository).existsById("view_a");
+    verify(jooqContext).selectOne();
+    verifyNoMoreInteractions(sourceViewRepository, jooqContext);
   }
 
   private SelectSelectStep<Record1<Integer>> mockFetchOne(boolean shouldHaveResult) {

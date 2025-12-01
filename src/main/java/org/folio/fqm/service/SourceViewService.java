@@ -417,7 +417,7 @@ public class SourceViewService {
 
       log.info("√ Successfully created source view `{}`", viewName);
       return true;
-    } catch (DataAccessException | IOException e) {
+    } catch (DataAccessException | IOException | UncheckedIOException e) {
       log.error("X Failed to create source view `{}` due to unexpected error", viewName, e);
       return false;
     }

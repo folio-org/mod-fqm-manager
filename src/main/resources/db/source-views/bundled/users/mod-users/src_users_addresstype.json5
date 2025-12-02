@@ -1,0 +1,5 @@
+{
+  name: 'src_users_addresstype',
+  dependsOn: [['${tenant_id}_mod_users', 'addresstype']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_users.addresstype',
+}

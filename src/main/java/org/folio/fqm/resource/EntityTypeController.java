@@ -7,6 +7,7 @@ import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
+import org.folio.fqm.service.SourceViewService;
 import org.folio.fqm.domain.dto.EntityTypeSummaries;
 import org.folio.querytool.domain.dto.AvailableJoinsRequest;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
@@ -34,6 +35,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   private final EntityTypeInitializationService entityTypeInitializationService;
   private final EntityTypeService entityTypeService;
+  private final SourceViewService sourceViewService;
   private final MigrationService migrationService;
 
   @EntityTypePermissionsRequired
@@ -106,8 +108,12 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   @Override
-  public ResponseEntity<Void> installEntityTypes() {
+  public ResponseEntity<Void> installEntityTypes(Boolean forceUpdateViews) {
     try {
+      if (Boolean.TRUE.equals(forceUpdateViews)) {
+        log.info("Forcing recreation of views as requested");
+        sourceViewService.installAvailableSourceViews(true);
+      }
       entityTypeInitializationService.initializeEntityTypes(null);
     } catch (IOException e) {
       throw log.throwing(new UncheckedIOException(e));

@@ -1,0 +1,5 @@
+{
+  name: 'src_purchase_order_line_custom_fields',
+  dependsOn: [['${tenant_id}_mod_orders_storage', 'custom_fields']],
+  sql: "SELECT * FROM ${tenant_id}_mod_orders_storage.custom_fields WHERE jsonb->>'entityType' = 'po_line'",
+}

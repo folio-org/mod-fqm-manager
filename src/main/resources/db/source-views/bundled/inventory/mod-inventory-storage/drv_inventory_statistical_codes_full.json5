@@ -1,0 +1,13 @@
+{
+  name: 'drv_inventory_statistical_codes_full',
+  dependsOn: [
+    ['${tenant_id}_mod_fqm_manager', 'src_inventory_statistical_code'],
+    ['${tenant_id}_mod_fqm_manager', 'src_inventory_statistical_code_type'],
+  ],
+  sql: "SELECT \
+          statcode.id AS id, \
+          CONCAT(stattype.jsonb->>'name', ': ', statcode.jsonb->>'code', ' - ', statcode.jsonb->>'name') AS statistical_code \
+        FROM ${tenant_id}_mod_fqm_manager.src_inventory_statistical_code statcode \
+        JOIN ${tenant_id}_mod_fqm_manager.src_inventory_statistical_code_type stattype \
+          ON stattype.id::text = statcode.jsonb ->> 'statisticalCodeTypeId'",
+}

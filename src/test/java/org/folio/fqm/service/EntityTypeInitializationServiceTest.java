@@ -2,22 +2,22 @@ package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import liquibase.exception.LiquibaseException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -25,12 +25,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
-import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSelectStep;
-import org.jooq.Table;
+import org.jooq.exception.DataAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +36,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.postgresql.util.PSQLException;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,16 +56,13 @@ class EntityTypeInitializationServiceTest {
   private FolioExecutionContext folioExecutionContext;
 
   @Mock
-  private ObjectMapper objectMapper;
-
-  @Mock
   private ResourcePatternResolver resourceResolver;
 
   @Mock
-  private CrossTenantQueryService crossTenantQueryService;
+  private SourceViewService sourceViewService;
 
   @Mock
-  private DSLContext readerJooqContext;
+  private CrossTenantQueryService crossTenantQueryService;
 
   @Mock
   private FolioSpringLiquibase folioSpringLiquibase;
@@ -78,7 +72,7 @@ class EntityTypeInitializationServiceTest {
 
   @BeforeEach
   void setup() {
-    lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenantId");
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenant");
 
     validEntityMap = new HashMap<>();
     validEntityMap.put(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), true);
@@ -87,6 +81,34 @@ class EntityTypeInitializationServiceTest {
     validViewMap = new HashMap<>();
     validViewMap.put("valid_view", true);
     validViewMap.put("invalid_view", false);
+  }
+
+  static List<Arguments> centralTenantResolutionCases() {
+    return List.of(
+      // passed in central tenant ID; response from CTQS; expected safe central tenant ID; expected final central tenant ID
+      // not ECS
+      Arguments.of(null, null, "tenant", "${central_tenant_id}"),
+      // ECS, but not passed in
+      Arguments.of(null, "central", "central", "central"),
+      // ECS, passed in
+      Arguments.of("central", null, "central", "central")
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("centralTenantResolutionCases")
+  void testCentralTenantResolution(
+    String providedId,
+    String ctqsResponse,
+    String expectedSafeId,
+    String expectedFinalId
+  ) {
+    lenient().when(crossTenantQueryService.getCentralTenantId()).thenReturn(ctqsResponse);
+
+    Pair<String, String> result = entityTypeInitializationService.getCentralTenantIdSafely(providedId);
+
+    assertThat(result.getLeft(), is(expectedSafeId));
+    assertThat(result.getRight(), is(expectedFinalId));
   }
 
   @ParameterizedTest
@@ -102,7 +124,6 @@ class EntityTypeInitializationServiceTest {
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         null,
         map,
-        null,
         null
       ),
       is(testValue)
@@ -116,7 +137,6 @@ class EntityTypeInitializationServiceTest {
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         Map.of(),
         new HashMap<>(),
-        null,
         null
       ),
       is(false)
@@ -162,102 +182,130 @@ class EntityTypeInitializationServiceTest {
         UUID.fromString("11111111-1111-1111-1111-111111111111"),
         Map.of(UUID.fromString("11111111-1111-1111-1111-111111111111"), entityType),
         validEntityMap,
-        validViewMap,
-        null
+        validViewMap
       ),
       is(expectedAvailability)
     );
     assertThat(validEntityMap.get(UUID.fromString("11111111-1111-1111-1111-111111111111")), is(expectedAvailability));
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans = { true, false })
-  void testSourceViewAvailabilityCacheIsUsed(boolean testValue) {
-    Map<String, Boolean> map = spy(new HashMap<>());
-    map.put("view", testValue);
+  @Test
+  void testRunWithRecoveryNoFailure() {
+    assertThat(entityTypeInitializationService.runWithRecovery(null, () -> "success"), is("success"));
 
-    lenient().doThrow(new RuntimeException("Cache should not be modified")).when(map).put(any(), any());
-
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailableWithCache("view", map, null), is(testValue));
+    verifyNoInteractions(sourceViewService);
   }
 
   @Test
-  void testSourceViewAvailabilityIgnoresComplexExpressions() {
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailable("(SELECT 1)", null), is(true));
+  void testRunWithRecoveryExternalFailure() {
+    RuntimeException expected = new RuntimeException("simulated failure not from entity types");
+
+    RuntimeException actual = assertThrows(
+      RuntimeException.class,
+      () ->
+        entityTypeInitializationService.runWithRecovery(
+          null,
+          () -> {
+            throw expected;
+          }
+        )
+    );
+    assertThat(actual, is(expected));
+
+    verifyNoInteractions(sourceViewService);
   }
 
   @Test
-  void testSourceViewAvailabilityWithSuccessfulQuery() {
-    mockFetchOne(true);
+  void testRunWithRecoveryMiscDBFailure() {
+    DataAccessException exception = mock(DataAccessException.class);
+    when(exception.getCause(PSQLException.class)).thenReturn(null);
 
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailable("view", null), is(true));
+    RuntimeException actual = assertThrows(
+      RuntimeException.class,
+      () ->
+        entityTypeInitializationService.runWithRecovery(
+          null,
+          () -> {
+            throw exception;
+          }
+        )
+    );
+    assertThat(actual, is(exception));
 
-    verify(readerJooqContext, times(1)).selectOne();
+    verifyNoInteractions(sourceViewService);
   }
 
   @Test
-  void testSourceViewAvailabilityWithFailingQueryNoLiquibase() {
-    mockFetchOne(false);
+  void testRunWithRecoveryMiscPostgresFailure() {
+    DataAccessException exception = mock(DataAccessException.class);
+    PSQLException innerEx = mock(PSQLException.class);
+    when(innerEx.getSQLState()).thenReturn("ZZZZZ"); // undefined_table
+    when(exception.getCause(PSQLException.class)).thenReturn(innerEx);
 
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailable("view", new AtomicBoolean(true)), is(false));
+    RuntimeException actual = assertThrows(
+      RuntimeException.class,
+      () ->
+        entityTypeInitializationService.runWithRecovery(
+          null,
+          () -> {
+            throw exception;
+          }
+        )
+    );
+    assertThat(actual, is(exception));
 
-    verify(readerJooqContext, times(1)).selectOne();
+    verifyNoInteractions(sourceViewService);
   }
 
   @Test
-  void testSourceViewAvailabilityWithFailingAndLiquibaseRunAndSuccess() throws LiquibaseException {
-    mockFetchOne(false);
+  void testRunWithRecoveryEntityFailure() throws IOException {
+    DataAccessException ex = mock(DataAccessException.class);
+    PSQLException innerEx = mock(PSQLException.class);
+    when(innerEx.getSQLState()).thenReturn("42P01"); // undefined_table
+    when(ex.getCause(PSQLException.class)).thenReturn(innerEx);
 
-    doAnswer(i -> {
-        mockFetchOne(true);
-        return null;
-      })
-      .when(folioSpringLiquibase)
-      .performLiquibaseUpdate();
+    when(resourceResolver.getResources(anyString())).thenReturn(new Resource[0]);
 
-    AtomicBoolean bool = new AtomicBoolean(false);
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailable("view", bool), is(true));
-    assertThat(bool.get(), is(true));
+    AtomicBoolean hasThrown = new AtomicBoolean(false);
 
-    verify(folioSpringLiquibase, times(1)).performLiquibaseUpdate();
-    verify(readerJooqContext, times(2)).selectOne();
+    assertThat(
+      entityTypeInitializationService.runWithRecovery(
+        new EntityType().sources(List.of()),
+        () -> {
+          if (hasThrown.compareAndSet(false, true)) {
+            throw ex;
+          } else {
+            return "recovered";
+          }
+        }
+      ),
+      is("recovered")
+    );
   }
 
   @Test
-  void testSourceViewAvailabilityWithFailingAndLiquibaseRunAndStillFailing() throws LiquibaseException {
-    mockFetchOne(false);
+  void testRunWithRecoveryIrrecoverableEntityFailure() throws IOException {
+    DataAccessException ex = mock(DataAccessException.class);
+    PSQLException innerEx = mock(PSQLException.class);
+    when(innerEx.getSQLState()).thenReturn("42P01"); // undefined_table
+    when(ex.getCause(PSQLException.class)).thenReturn(innerEx);
 
-    AtomicBoolean bool = new AtomicBoolean(false);
-    assertThat(entityTypeInitializationService.checkSourceViewIsAvailable("view", bool), is(false));
-    assertThat(bool.get(), is(true));
+    when(resourceResolver.getResources(anyString())).thenThrow(new IOException());
 
-    verify(folioSpringLiquibase, times(1)).performLiquibaseUpdate();
-    verify(readerJooqContext, times(2)).selectOne();
-  }
+    AtomicBoolean hasThrown = new AtomicBoolean(false);
 
-  @ParameterizedTest
-  @ValueSource(booleans = { true, false })
-  void testIsModFinanceInstalled(boolean expected) {
-    mockFetchOne(expected);
-
-    assertThat(entityTypeInitializationService.isModFinanceInstalled(), is(expected));
-
-    verify(readerJooqContext, times(1)).selectOne();
-  }
-
-  @SuppressWarnings("unchecked")
-  private void mockFetchOne(boolean shouldHaveResult) {
-    SelectSelectStep<Record1<Integer>> selection = mock(SelectSelectStep.class);
-    when(readerJooqContext.selectOne()).thenReturn(selection);
-    SelectJoinStep<Record1<Integer>> selection2 = mock(SelectJoinStep.class);
-    when(selection.from(any(Table.class))).thenReturn(selection2);
-    SelectConditionStep<Record1<Integer>> selection3 = mock(SelectConditionStep.class);
-    when(selection2.where(any(List.class))).thenReturn(selection3);
-
-    if (shouldHaveResult) {
-      when(selection3.fetchOne()).thenReturn(mock(Record1.class));
-    } else {
-      when(selection3.fetchOne()).thenReturn(null);
-    }
+    assertThat(
+      entityTypeInitializationService.runWithRecovery(
+        new EntityType().sources(List.of()),
+        () -> {
+          if (hasThrown.compareAndSet(false, true)) {
+            throw ex;
+          } else {
+            return "recovered";
+          }
+        }
+      ),
+      is("recovered")
+    );
   }
 }

@@ -8,5 +8,4 @@
   <include file="migrations/q-migrations/changelog-q-migrations.xml" relativeToChangelogFile="true"/>
   <include file="migrations/r-migrations/changelog-r-migrations.xml" relativeToChangelogFile="true"/>
   <include file="migrations/s-migrations/changelog-s-migrations.xml" relativeToChangelogFile="true"/>
-  <includeAll path="external/changesets" relativeToChangelogFile="true" />
 </databaseChangeLog>

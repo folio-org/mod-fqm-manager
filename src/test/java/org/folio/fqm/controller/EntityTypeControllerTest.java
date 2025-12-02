@@ -25,6 +25,7 @@ import org.folio.fqm.resource.EntityTypeController;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
+import org.folio.fqm.service.SourceViewService;
 import org.folio.querytool.domain.dto.ColumnValues;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -67,6 +68,8 @@ class EntityTypeControllerTest {
   @MockitoBean
   private MigrationService migrationService;
 
+  @MockitoBean
+  private SourceViewService sourceViewService;
 
   @Test
   void shouldReturnEntityTypeDefinition() throws Exception {
@@ -454,6 +457,17 @@ class EntityTypeControllerTest {
 
     verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
     verifyNoMoreInteractions(entityTypeInitializationService);
+  }
+
+  @Test
+  void testInstallEntityTypesWithPurge() throws Exception {
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install?forceRecreateViews=true");
+
+    mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+    verify(sourceViewService, times(1)).installAvailableSourceViews(true);
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
+    verifyNoMoreInteractions(entityTypeInitializationService, sourceViewService);
   }
 
   @Test

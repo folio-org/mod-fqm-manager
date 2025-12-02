@@ -1,0 +1,5 @@
+{
+  name: 'src_invoice_voucher_lines',
+  dependsOn: [['${tenant_id}_mod_invoice_storage', 'voucher_lines']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_invoice_storage.voucher_lines',
+}

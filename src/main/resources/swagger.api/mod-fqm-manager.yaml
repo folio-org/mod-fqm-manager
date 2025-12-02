@@ -69,6 +69,8 @@ paths:
       tags:
         - entityTypes
       description: Create database views and install entity types for a tenant.
+      parameters:
+        - $ref: '#/components/parameters/force-recreate-views'
       responses:
         '204':
           description: 'Entity types installed'
@@ -152,6 +154,13 @@ components:
       in: query
       required: false
       description: Include all the entity types regardless of being private
+      schema:
+        type: boolean
+    force-recreate-views:
+      name: forceRecreateViews
+      in: query
+      required: false
+      description: Force recreation of views even if they already exist
       schema:
         type: boolean
   schemas:

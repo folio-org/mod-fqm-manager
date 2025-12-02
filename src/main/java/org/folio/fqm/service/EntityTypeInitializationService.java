@@ -1,12 +1,6 @@
 package org.folio.fqm.service;
 
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.name;
-import static org.jooq.impl.DSL.table;
-
-import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -15,28 +9,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import liquibase.exception.LiquibaseException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.JSON5ObjectMapperFactory;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.liquibase.FolioSpringLiquibase;
-import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.PSQLState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -45,76 +36,57 @@ import org.springframework.stereotype.Service;
 @Service
 public class EntityTypeInitializationService {
 
-  private static final String MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW = "_mod_finance_storage_exchange_rate_availability_indicator";
-
   private final CrossTenantQueryService crossTenantQueryService;
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeValidationService entityTypeValidationService;
+  private final SourceViewService sourceViewService;
 
   private final FolioExecutionContext folioExecutionContext;
 
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
 
-  private final DSLContext readerJooqContext;
-  private final FolioSpringLiquibase folioSpringLiquibase;
-
   @Autowired
   public EntityTypeInitializationService(
     CrossTenantQueryService crossTenantQueryService,
     EntityTypeRepository entityTypeRepository,
     EntityTypeValidationService entityTypeValidationService,
+    SourceViewService sourceViewService,
     FolioExecutionContext folioExecutionContext,
-    ResourcePatternResolver resourceResolver,
-    @Qualifier("readerJooqContext") DSLContext readerJooqContext,
-    FolioSpringLiquibase folioSpringLiquibase
+    ResourcePatternResolver resourceResolver
   ) {
     this.crossTenantQueryService = crossTenantQueryService;
     this.entityTypeRepository = entityTypeRepository;
     this.entityTypeValidationService = entityTypeValidationService;
+    this.sourceViewService = sourceViewService;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
-    this.readerJooqContext = readerJooqContext;
-    this.folioSpringLiquibase = folioSpringLiquibase;
 
-    // this enables all JSON5 features, except for numeric ones (hex, starting/trailing
-    // decimal points, use of NaN, etc), as those are not relevant for our use
-    // see: https://stackoverflow.com/questions/68312227/can-the-jackson-parser-be-used-to-parse-json5
-    // full list:
-    // https://fasterxml.github.io/jackson-core/javadoc/2.14/com/fasterxml/jackson/core/json/JsonReadFeature.html
-    this.objectMapper =
-      JsonMapper
-        .builder()
-        // allows use of Java/C++ style comments (both '/'+'*' and '//' varieties) within parsed content.
-        .enable(JsonReadFeature.ALLOW_JAVA_COMMENTS)
-        // some SQL statements may be cleaner this way around
-        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-        // left side of { foo: bar }, cleaner/easier to read. JS style
-        .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
-        // nicer diffs/etc
-        .enable(JsonReadFeature.ALLOW_TRAILING_COMMA)
-        // allows "escaping" newlines, giving proper linebreaks
-        .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
-        .build();
-  }
-
-  public void runLiquibaseUpdate() {
-    try {
-      folioSpringLiquibase.setChangeLogParameters(Map.of("tenant_id", folioExecutionContext.getTenantId()));
-      folioSpringLiquibase.performLiquibaseUpdate();
-    } catch (LiquibaseException le) {
-      log.error(
-        "Error during liquibase update attempt for tenant {}. Something is very wrong.",
-        folioExecutionContext.getTenantId(),
-        le
-      );
-      throw new IllegalStateException(le);
-    }
+    this.objectMapper = JSON5ObjectMapperFactory.create();
   }
 
   // called as part of tenant install/upgrade (see FqmTenantService) or on POST /entity-types/install
-  public void initializeEntityTypes(String centralTenantId) throws IOException {
+  public void initializeEntityTypes(String providedCentralTenantId) throws IOException {
     log.info("Initializing entity types");
+
+    Pair<String, String> centralTenantInfo = this.getCentralTenantIdSafely(providedCentralTenantId);
+    String safeCentralTenantId = centralTenantInfo.getLeft();
+    String centralTenantId = centralTenantInfo.getRight();
+
+    List<EntityType> availableEntityTypes = this.getAvailableEntityTypes(centralTenantId, safeCentralTenantId);
+
+    validateEntityTypesAndFillUsedBy(availableEntityTypes);
+
+    log.info(
+      "Found {} available entity types in package: {}",
+      () -> availableEntityTypes.size(),
+      () -> availableEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
+    );
+
+    entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+  }
+
+  protected Pair<String, String> getCentralTenantIdSafely(String centralTenantId) {
     if (centralTenantId == null) {
       centralTenantId = crossTenantQueryService.getCentralTenantId();
     }
@@ -129,23 +101,14 @@ public class EntityTypeInitializationService {
       centralTenantId = "${central_tenant_id}";
       safeCentralTenantId = folioExecutionContext.getTenantId();
     }
-    String finalCentralTenantId = centralTenantId; // Make centralTenantId effectively final, for the lambda below
 
-    List<EntityType> availableEntityTypes = this.getAvailableEntityTypes(finalCentralTenantId, safeCentralTenantId);
-
-    validateEntityTypesAndFillUsedBy(availableEntityTypes);
-
-    log.info(
-      "Found {} available entity types in package: {}",
-      () -> availableEntityTypes.size(),
-      () -> availableEntityTypes.stream().map(et -> "%s(%s)".formatted(et.getName(), et.getId())).toList()
-    );
-
-    entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+    return Pair.of(safeCentralTenantId, centralTenantId);
   }
 
-  protected List<EntityType> getAvailableEntityTypes(String finalCentralTenantId, String safeCentralTenantId)
+  protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
+    sourceViewService.verifyAll();
+
     Map<UUID, EntityType> allEntityTypes = Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/entity-types/**/*.json")),
@@ -158,7 +121,7 @@ public class EntityTypeInitializationService {
             resource
               .getContentAsString(StandardCharsets.UTF_8)
               .replace("${tenant_id}", folioExecutionContext.getTenantId())
-              .replace("${central_tenant_id}", finalCentralTenantId)
+              .replace("${central_tenant_id}", centralTenantId)
               .replace("${safe_central_tenant_id}", safeCentralTenantId),
             EntityType.class
           );
@@ -172,9 +135,6 @@ public class EntityTypeInitializationService {
     // stores if an entity type/view is available or not, for caching purposes
     Map<UUID, Boolean> entityTypeAvailabilityCache = HashMap.newHashMap(allEntityTypes.size());
     Map<String, Boolean> sourceViewAvailabilityCache = prefillSourceViewAvailabilityCache();
-    // TODO [MODFQMMGR-997]: replace AtomicBoolean and global liquibase run with a precise solution that
-    // only attempts with one view
-    AtomicBoolean hasAttemptedLiquibaseUpdate = new AtomicBoolean(false);
 
     // populates entityTypeAvailabilityCache
     allEntityTypes
@@ -184,8 +144,7 @@ public class EntityTypeInitializationService {
           entityTypeId,
           allEntityTypes,
           entityTypeAvailabilityCache,
-          sourceViewAvailabilityCache,
-          hasAttemptedLiquibaseUpdate
+          sourceViewAvailabilityCache
         )
       );
 
@@ -197,12 +156,7 @@ public class EntityTypeInitializationService {
   }
 
   protected Map<String, Boolean> prefillSourceViewAvailabilityCache() {
-    // prefill with existing views, to avoid repeated DB queries
-    List<String> existingViews = readerJooqContext
-      .select(field("table_name", String.class))
-      .from(table(name("information_schema", "tables")))
-      .where(field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())))
-      .fetch(field("table_name", String.class));
+    Set<String> existingViews = sourceViewService.getInstalledSourceViews();
 
     Map<String, Boolean> sourceViewAvailabilityCache = HashMap.newHashMap(existingViews.size());
 
@@ -217,8 +171,7 @@ public class EntityTypeInitializationService {
     UUID entityTypeId,
     Map<UUID, EntityType> allEntityTypes,
     Map<UUID, Boolean> entityTypeAvailabilityCache,
-    Map<String, Boolean> sourceViewAvailabilityCache,
-    AtomicBoolean hasAttemptedLiquibaseUpdate
+    Map<String, Boolean> sourceViewAvailabilityCache
   ) {
     if (entityTypeAvailabilityCache.containsKey(entityTypeId)) {
       return entityTypeAvailabilityCache.get(entityTypeId);
@@ -241,13 +194,11 @@ public class EntityTypeInitializationService {
               sourceEt.getTargetId(),
               allEntityTypes,
               entityTypeAvailabilityCache,
-              sourceViewAvailabilityCache,
-              hasAttemptedLiquibaseUpdate
+              sourceViewAvailabilityCache
             );
-            case EntityTypeSourceDatabase sourceDb -> checkSourceViewIsAvailableWithCache(
+            case EntityTypeSourceDatabase sourceDb -> checkSourceViewIsAvailable(
               sourceDb.getTarget(),
-              sourceViewAvailabilityCache,
-              hasAttemptedLiquibaseUpdate
+              sourceViewAvailabilityCache
             );
             default -> {
               log.warn(
@@ -274,57 +225,8 @@ public class EntityTypeInitializationService {
     }
   }
 
-  protected boolean checkSourceViewIsAvailableWithCache(
-    String view,
-    Map<String, Boolean> sourceViewAvailabilityCache,
-    AtomicBoolean hasAttemptedLiquibaseUpdate
-  ) {
-    return sourceViewAvailabilityCache.computeIfAbsent(
-      view,
-      v -> checkSourceViewIsAvailable(v, hasAttemptedLiquibaseUpdate)
-    );
-  }
-
-  protected boolean checkSourceViewIsAvailable(String view, AtomicBoolean hasAttemptedLiquibaseUpdate) {
-    try {
-      if (view.contains("(")) {
-        log.info("√ Source `{}` is a complex expression and cannot be checked", view);
-        return true;
-      }
-
-      log.info("? Checking if source view {} is available", view);
-
-      Optional
-        .ofNullable(
-          readerJooqContext
-            .selectOne()
-            .from(table(name("information_schema", "tables")))
-            .where(
-              List.of(
-                field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())),
-                field("table_name").eq(view)
-              )
-            )
-            .fetchOne()
-        )
-        .orElseThrow();
-
-      log.info("√ Source view {} is available!", view);
-
-      return true;
-    } catch (Exception e) {
-      log.warn("X Source view {} is not available: {}", view, e.getMessage());
-      // attempt to run liquibase update once, in case the view is just not created yet
-      if (hasAttemptedLiquibaseUpdate.compareAndSet(false, true)) {
-        log.info("Attempting to run liquibase update for tenant {}", folioExecutionContext.getTenantId());
-
-        this.runLiquibaseUpdate();
-
-        return checkSourceViewIsAvailable(view, hasAttemptedLiquibaseUpdate);
-      }
-
-      return false;
-    }
+  protected boolean checkSourceViewIsAvailable(String view, Map<String, Boolean> sourceViewAvailabilityCache) {
+    return sourceViewAvailabilityCache.computeIfAbsent(view, sourceViewService::doesSourceViewExist);
   }
 
   protected void validateEntityTypesAndFillUsedBy(List<EntityType> entityTypes) {
@@ -346,39 +248,46 @@ public class EntityTypeInitializationService {
    * Attempt to recreate the source views for an entity type. If this is not possible, the entity type
    * should no longer exist in the DB after this method has finished executing.
    */
-  // TODO: MAKE THIS MORE TARGETED (MODFQMMGR-997)
-  public void attemptToHealEntityType(EntityType entityType) {
-    log.info("Attempting to heal entity type {} ({})", entityType.getName(), entityType.getId());
+  public void attemptToHealEntityType(EntityType flattenedEntityType) {
+    log.warn(
+      "Attempting to heal entity type {} ({}) by repairing all of its database sources",
+      flattenedEntityType.getName(),
+      flattenedEntityType.getId()
+    );
+
+    flattenedEntityType
+      .getSources()
+      .stream()
+      .filter(EntityTypeSourceDatabase.class::isInstance)
+      .map(EntityTypeSourceDatabase.class::cast)
+      .map(EntityTypeSourceDatabase::getTarget)
+      .forEach(sourceViewService::attemptToHealSourceView);
 
     try {
+      // will cleanup unavailable ones if the source view was not able to be created.
+      // this ensures other affected ones will also be removed (e.g. if simple_user_details no longer works,
+      // all entity types depending on it should also be removed)
       this.initializeEntityTypes(null);
     } catch (IOException e) {
-      log.info("Could not heal entity type:", e);
+      log.info("Could not re-install entity types after healing entity type:", e);
     }
   }
 
-  public <T> T runWithRecovery(EntityType entityType, Supplier<T> runnable) {
+  public <T> T runWithRecovery(EntityType flattenedEntityType, Supplier<T> runnable) {
     try {
       return runnable.get();
     } catch (DataAccessException dae) {
       PSQLException pgException = dae.getCause(PSQLException.class);
       if (pgException != null && PSQLState.UNDEFINED_TABLE.getState().equals(pgException.getSQLState())) {
-        log.error("Unable to run query due to an UNDEFINED_TABLE error. Attempting to heal and re-run...");
-        this.attemptToHealEntityType(entityType);
+        log.error(
+          "Unable to run query on {} due to an UNDEFINED_TABLE error. Attempting to heal and re-run...",
+          flattenedEntityType.getName()
+        );
+        this.attemptToHealEntityType(flattenedEntityType);
         return runnable.get();
       } else {
         throw log.throwing(dae);
       }
     }
-  }
-
-  /**
-   * Check if mod-finance was available (at the time of last entity type installation)
-   *
-   * <strong>Note:</strong> this does not check mod-finance itself, but mod-finance-storage.
-   * See the liquibase changelog for more details on what this does and why it exists.
-   */
-  public boolean isModFinanceInstalled() {
-    return checkSourceViewIsAvailable(MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW, new AtomicBoolean(true));
   }
 }

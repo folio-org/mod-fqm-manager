@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__feesfines__manual_block_templates',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_feesfines',
+      'manual_block_templates',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_feesfines.manual_block_templates',
+}

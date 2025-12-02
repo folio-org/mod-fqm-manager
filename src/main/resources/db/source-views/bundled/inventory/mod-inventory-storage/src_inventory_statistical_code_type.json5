@@ -1,0 +1,5 @@
+{
+  name: 'src_inventory_statistical_code_type',
+  dependsOn: [['${tenant_id}_mod_inventory_storage', 'statistical_code_type']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_inventory_storage.statistical_code_type',
+}

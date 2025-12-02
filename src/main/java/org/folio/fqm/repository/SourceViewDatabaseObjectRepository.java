@@ -38,7 +38,7 @@ public class SourceViewDatabaseObjectRepository {
   /**
    * Install a single source view. This will create a record in `source_views` table, too.
    */
-  public void persistSingleSourceView(SourceViewDefinition view) {
+  public void installSingleSourceView(SourceViewDefinition view) {
     jooqContext.transaction(transaction -> transaction.dsl().createOrReplaceView(view.name()).as(view.sql()).execute());
 
     SourceViewRecord newRecord = SourceViewRecord

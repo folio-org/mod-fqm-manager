@@ -303,7 +303,7 @@ public class SourceViewService {
       }
 
       log.info("→ Attempting to create source view `{}`", viewName);
-      sourceViewDatabaseObjectRepository.persistSingleSourceView(definition);
+      sourceViewDatabaseObjectRepository.installSingleSourceView(definition);
 
       log.info("√ Successfully created source view `{}`", viewName);
       return true;

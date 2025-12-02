@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
@@ -28,6 +29,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.folio.fqm.domain.SourceViewDefinition;
 import org.folio.fqm.domain.SourceViewDefinition.SourceViewDependency;
@@ -46,6 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class SourceViewServiceTest {
 
@@ -61,11 +64,23 @@ class SourceViewServiceTest {
     "SELECT 'a_a'",
     "a_a.json5"
   );
+  private static final SourceViewDefinition DEFINITION_B = new SourceViewDefinition(
+    "view_b",
+    List.of(new SourceViewDependency("b", "b")),
+    "SELECT 'b'",
+    "b.json5"
+  );
 
   private static final SourceViewRecord RECORD_A = new SourceViewRecord(
     "view_a",
     "SELECT 'a'",
     "a.json5",
+    Instant.now()
+  );
+  private static final SourceViewRecord RECORD_B = new SourceViewRecord(
+    "view_b",
+    "SELECT 'b'",
+    "b.json5",
     Instant.now()
   );
 
@@ -123,7 +138,42 @@ class SourceViewServiceTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
+  void testInstallSourceViewsUpdatingWithoutForceUpdate() throws IOException {
+    when(sourceViewRecordRepository.findAll()).thenReturn(List.of(RECORD_A, RECORD_B));
+
+    sourceViewService.installSourceViews(
+      Map.of("view_a", DEFINITION_A, "view_b", DEFINITION_B.withSql("new sql")),
+      false
+    );
+
+    verify(sourceViewDatabaseObjectRepository)
+      .persistSourceViews(
+        any(),
+        argThat(is(emptyCollectionOf(String.class))),
+        (Collection<String>) argThat(contains("view_b")),
+        argThat(is(emptyCollectionOf(String.class)))
+      );
+  }
+
+  @Test
+  void testInstallSourceViewsUpdatingWithForcedUpdate() throws IOException {
+    when(sourceViewRecordRepository.findAll()).thenReturn(List.of(RECORD_A, RECORD_B));
+
+    sourceViewService.installSourceViews(
+      Map.of("view_a", DEFINITION_A, "view_b", DEFINITION_B.withSql("new sql")),
+      true
+    );
+
+    verify(sourceViewDatabaseObjectRepository)
+      .persistSourceViews(
+        any(),
+        argThat(is(emptyCollectionOf(String.class))),
+        (Collection<String>) argThat(containsInAnyOrder("view_a", "view_b")),
+        argThat(is(emptyCollectionOf(String.class)))
+      );
+  }
+
+  @Test
   void testInstallAvailableSourceViewsMultipleIterations() throws IOException {
     mockDefinitions(List.of(DEFINITION_A, DEFINITION_A_A));
 
@@ -181,7 +231,7 @@ class SourceViewServiceTest {
 
     sourceViewService.attemptToHealSourceView("view");
 
-    verify(sourceViewDatabaseObjectRepository, never()).persistSingleSourceView(any());
+    verify(sourceViewDatabaseObjectRepository, never()).installSingleSourceView(any());
     verify(sourceViewDatabaseObjectRepository)
       .persistSourceViews(
         any(),
@@ -244,7 +294,7 @@ class SourceViewServiceTest {
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");
     verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies();
-    verify(sourceViewDatabaseObjectRepository).persistSingleSourceView(DEFINITION_A);
+    verify(sourceViewDatabaseObjectRepository).installSingleSourceView(DEFINITION_A);
     verifyNoMoreInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }
 

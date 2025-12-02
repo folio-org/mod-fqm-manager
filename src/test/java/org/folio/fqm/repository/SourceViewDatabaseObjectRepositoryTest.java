@@ -84,10 +84,10 @@ class SourceViewDatabaseObjectRepositoryTest {
   }
 
   @Test
-  void testPersistSingleSourceView() {
+  void testInstallSingleSourceView() {
     SourceViewDefinition definition = new SourceViewDefinition("view", List.of(), "sql", "source");
 
-    sourceViewDatabaseObjectRepository.persistSingleSourceView(definition);
+    sourceViewDatabaseObjectRepository.installSingleSourceView(definition);
 
     ArgumentCaptor<SourceViewRecord> recordCaptor = ArgumentCaptor.forClass(SourceViewRecord.class);
     verify(sourceViewRecordRepository).save(recordCaptor.capture());

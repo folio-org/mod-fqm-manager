@@ -15,6 +15,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.repository.SourceViewDatabaseObjectRepository;
 import org.folio.fqm.repository.SourceViewRecordRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
@@ -93,10 +94,10 @@ public class TestDbSetupConfiguration {
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    private DSLContext jooqContext;
+    private FolioSpringLiquibase liquibase;
 
     @Autowired
-    private FolioSpringLiquibase liquibase;
+    private SourceViewDatabaseObjectRepository sourceViewDatabaseObjectRepository;
 
     @Autowired
     private SourceViewRecordRepository sourceViewRecordRepository;
@@ -132,7 +133,12 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
-        new SourceViewService(sourceViewRecordRepository, executionContext, resourceResolver, jooqContext),
+        new SourceViewService(
+          sourceViewDatabaseObjectRepository,
+          sourceViewRecordRepository,
+          executionContext,
+          resourceResolver
+        ),
         new FolioExecutionContext() {
           @Override
           public String getTenantId() {

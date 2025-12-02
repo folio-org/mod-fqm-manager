@@ -22,7 +22,6 @@ import org.folio.fqm.service.EntityTypeValidationService;
 import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
-import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

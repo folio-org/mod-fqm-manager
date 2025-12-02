@@ -61,23 +61,11 @@ class SourceViewServiceTest {
     "SELECT 'a_a'",
     "a_a.json5"
   );
-  private static final SourceViewDefinition DEFINITION_B = new SourceViewDefinition(
-    "view_b",
-    List.of(new SourceViewDependency("b", "b")),
-    "SELECT 'b'",
-    "b.json5"
-  );
 
   private static final SourceViewRecord RECORD_A = new SourceViewRecord(
     "view_a",
     "SELECT 'a'",
     "a.json5",
-    Instant.now()
-  );
-  private static final SourceViewRecord RECORD_B = new SourceViewRecord(
-    "view_b",
-    "SELECT 'b'",
-    "b.json5",
     Instant.now()
   );
 

@@ -225,4 +225,15 @@
       SELECT 1 FROM ${tenant_id}_mod_finance_storage.rmb_internal
     </createView>
   </changeSet>
+
+  <changeSet id="create_view_src_inventory_holdings_type" author="bsharp@ebsco.com" runAlways="true">
+    <preConditions onFail="CONTINUE">
+      <tableExists tableName="holdings_type" schemaName="${tenant_id}_mod_inventory_storage"/>
+    </preConditions>
+    <createView
+      replaceIfExists="true"
+      viewName="src_inventory_holdings_type">
+      SELECT * FROM ${tenant_id}_mod_inventory_storage.holdings_type
+    </createView>
+  </changeSet>
 </databaseChangeLog>

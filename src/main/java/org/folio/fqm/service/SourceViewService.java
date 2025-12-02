@@ -1,14 +1,9 @@
 package org.folio.fqm.service;
 
-import static org.jooq.impl.DSL.field;
-import static org.jooq.impl.DSL.name;
-import static org.jooq.impl.DSL.table;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -23,12 +18,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fqm.domain.SourceViewDefinition;
 import org.folio.fqm.domain.SourceViewDefinition.SourceViewDependency;
 import org.folio.fqm.domain.SourceViewRecord;
-import org.folio.fqm.repository.SourceViewRepository;
+import org.folio.fqm.repository.SourceViewDatabaseObjectRepository;
+import org.folio.fqm.repository.SourceViewRecordRepository;
 import org.folio.fqm.utils.JSON5ObjectMapperFactory;
 import org.folio.spring.FolioExecutionContext;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
 import org.jooq.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -55,26 +48,25 @@ public class SourceViewService {
   protected static final String MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW =
     "_mod_finance_storage_exchange_rate_availability_indicator";
 
-  private final SourceViewRepository sourceViewRepository;
+  private final SourceViewDatabaseObjectRepository sourceViewDatabaseObjectRepository;
+  private final SourceViewRecordRepository sourceViewRecordRepository;
 
   private final FolioExecutionContext folioExecutionContext;
 
   private final ObjectMapper objectMapper;
   private final ResourcePatternResolver resourceResolver;
 
-  private final DSLContext jooqContext;
-
   @Autowired
   public SourceViewService(
-    SourceViewRepository sourceViewRepository,
+    SourceViewDatabaseObjectRepository sourceViewDatabaseObjectRepository,
+    SourceViewRecordRepository sourceViewRecordRepository,
     FolioExecutionContext folioExecutionContext,
-    ResourcePatternResolver resourceResolver,
-    DSLContext jooqContext
+    ResourcePatternResolver resourceResolver
   ) {
-    this.sourceViewRepository = sourceViewRepository;
+    this.sourceViewDatabaseObjectRepository = sourceViewDatabaseObjectRepository;
+    this.sourceViewRecordRepository = sourceViewRecordRepository;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
-    this.jooqContext = jooqContext;
 
     this.objectMapper = JSON5ObjectMapperFactory.create();
   }
@@ -95,12 +87,12 @@ public class SourceViewService {
       return true;
     }
 
-    return sourceViewRepository.existsById(viewName);
+    return sourceViewRecordRepository.existsById(viewName);
   }
 
   /** Get all installed source views (per our installation records) */
   public Set<String> getInstalledSourceViews() {
-    return sourceViewRepository.findAll().stream().map(SourceViewRecord::getName).collect(Collectors.toSet());
+    return sourceViewRecordRepository.findAll().stream().map(SourceViewRecord::getName).collect(Collectors.toSet());
   }
 
   /**
@@ -148,7 +140,7 @@ public class SourceViewService {
    */
   protected Map<String, SourceViewDefinition> getAvailableDefinitions() throws IOException {
     List<SourceViewDefinition> allDefinitions = getAllDefinitions();
-    Set<SourceViewDependency> availableDependencies = getAvailableDependencies();
+    Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies();
 
     Map<String, SourceViewDefinition> availableDefinitions = allDefinitions
       .stream()
@@ -217,7 +209,7 @@ public class SourceViewService {
    */
   protected void installSourceViews(Map<String, SourceViewDefinition> toInstall, boolean forceUpdate)
     throws IOException {
-    Map<String, SourceViewRecord> installedDefinitionsByName = sourceViewRepository
+    Map<String, SourceViewRecord> installedDefinitionsByName = sourceViewRecordRepository
       .findAll()
       .stream()
       .collect(Collectors.toMap(SourceViewRecord::getName, Function.identity()));
@@ -246,95 +238,12 @@ public class SourceViewService {
     log.info("To update: {}", definitionsToUpdate);
     log.info("To remove: {}", definitionsToRemove);
 
-    jooqContext.transaction(transaction -> {
-      definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
-      definitionsToInstall.forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
-      definitionsToUpdate.forEach(k -> {
-        transaction.dsl().dropViewIfExists(k).execute();
-        transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute();
-      });
-    });
-
-    log.info("All done persisting views to DB, updating source_views table...");
-
-    sourceViewRepository.deleteAllById(definitionsToRemove);
-    sourceViewRepository.deleteAllById(definitionsToUpdate);
-    sourceViewRepository.saveAll(
-      Stream
-        .concat(definitionsToInstall.stream(), definitionsToUpdate.stream())
-        .map(name -> {
-          SourceViewDefinition def = toInstall.get(name);
-          return SourceViewRecord
-            .builder()
-            .name(def.name())
-            .definition(def.sql())
-            .sourceFile(def.sourceFilePath())
-            .lastUpdated(Instant.now())
-            .build();
-        })
-        .toList()
+    sourceViewDatabaseObjectRepository.persistSourceViews(
+      toInstall,
+      definitionsToInstall,
+      definitionsToUpdate,
+      definitionsToRemove
     );
-
-    log.info("Source views table updated successfully");
-  }
-
-  protected boolean doesSourceViewExistInDatabase(String viewName) {
-    return (
-      jooqContext
-        .selectOne()
-        .from(table(name("information_schema", "tables")))
-        .where(
-          List.of(
-            field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())),
-            field("table_name").eq(viewName)
-          )
-        )
-        .fetchOne() !=
-      null
-    );
-  }
-
-  /** Get the list of views present in our module; used to reconcile and ensure source_views is accurate */
-  protected Set<String> getInstalledSourceViewsFromDatabase() {
-    return jooqContext
-      .select(field("table_name", String.class))
-      .from(table(name("information_schema", "tables")))
-      .where(
-        List.of(
-          field("table_schema").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())),
-          field("table_type").eq("VIEW")
-        )
-      )
-      .fetchSet(field("table_name", String.class));
-  }
-
-  protected Set<SourceViewDependency> getAvailableDependencies() {
-    // in testing, this yields <2500 tables for a full FOLIO install. This is not the most efficient way to do this,
-    // however, it's a lot better than sending hundreds of individual queries to check for existence one at a time,
-    // and a lot more readable than crafting a massive dynamic query with hundreds of OR clauses.
-    Result<Record> result = jooqContext
-      .select(List.of(field("table_schema", String.class), field("table_name", String.class)))
-      .from(table(name("information_schema", "tables")))
-      .where(field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_"))
-      .fetch();
-
-    log.info("Discovered {} available dependency tables in the database", result.size());
-
-    return result
-      .stream()
-      .map(r ->
-        new SourceViewDependency(r.get(field("table_schema", String.class)), r.get(field("table_name", String.class)))
-      )
-      .collect(Collectors.toSet());
-  }
-
-  /** Get all present materialized views. We want to remove these legacy ones if encountered. */
-  protected List<String> getMaterializedViewsFromDatabase() {
-    return jooqContext
-      .select(field("matviewname", String.class))
-      .from(table(name("pg_matviews")))
-      .where(field("schemaname").eq("%s_mod_fqm_manager".formatted(folioExecutionContext.getTenantId())))
-      .fetch(field("matviewname", String.class));
   }
 
   /**
@@ -343,45 +252,16 @@ public class SourceViewService {
    * @throws IOException
    */
   public void verifyAll() throws IOException {
-    Set<String> realViews = getInstalledSourceViewsFromDatabase();
-    List<String> expectedViews = sourceViewRepository.findAll().stream().map(SourceViewRecord::getName).toList();
-
-    Collection<String> missingViews = CollectionUtils.subtract(expectedViews, realViews);
-    if (!missingViews.isEmpty()) {
-      log.error(
-        "The following source views were previously created but are now missing from the database: {}",
-        missingViews
-      );
-      log.error("Removing these from source_views table and triggering recreation...");
-      sourceViewRepository.deleteAllById(missingViews);
-    }
-
-    Collection<String> unexpectedViews = CollectionUtils.subtract(realViews, expectedViews);
-    if (!unexpectedViews.isEmpty()) {
-      log.warn("The following unexpected source views exist in the database: {}", unexpectedViews);
-      log.warn("These are likely from a previous installation where views were created by Liquibase.");
-      log.warn("Removing {} views: {}", unexpectedViews.size(), unexpectedViews);
-      jooqContext.transaction(transaction ->
-        unexpectedViews.forEach(viewName -> transaction.dsl().dropView(viewName).execute())
-      );
-    }
-
-    List<String> materializedViews = getMaterializedViewsFromDatabase();
-    if (!materializedViews.isEmpty()) {
-      log.warn("The following legacy materialized views exist in the database: {}", materializedViews);
-      log.warn("Removing {} materialized views: {}", materializedViews.size(), materializedViews);
-      jooqContext.transaction(transaction ->
-        materializedViews.forEach(viewName -> transaction.dsl().dropMaterializedView(viewName).execute())
-      );
-    }
-
+    sourceViewDatabaseObjectRepository.verifySourceViewRecordsMatchesDatabase();
+    sourceViewDatabaseObjectRepository.purgeMaterializedViewsIfPresent();
     this.installAvailableSourceViews(false);
   }
 
   /**
-   * Attempt to heal a single source view. Will return if the view exists after the method call.
+   * Attempt to heal a single source view. If the view is missing, we will attempt to install it (subject to its
+   * dependencies being available).
    *
-   * If the view is missing, we will attempt to install it (subject to its dependencies being available).
+   * @return if the view was able to be created
    */
   public boolean attemptToHealSourceView(String viewName) {
     if (viewName.contains("(")) {
@@ -391,14 +271,12 @@ public class SourceViewService {
 
     try {
       boolean installationRecordExists = this.doesSourceViewExist(viewName);
-      if (installationRecordExists != this.doesSourceViewExistInDatabase(viewName)) {
+      if (installationRecordExists != sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase(viewName)) {
         log.warn(
-          "X Source view `{}` existence is out of sync between source_views table and actual database",
+          "X Source view `{}` existence is out of sync between source_views table and actual database. Running full verification procedure...",
           viewName
         );
-        log.warn("→ Running full verification procedure...");
         this.verifyAll();
-        this.installAvailableSourceViews(false);
         return this.doesSourceViewExist(viewName);
       }
 
@@ -419,24 +297,13 @@ public class SourceViewService {
 
       SourceViewDefinition definition = definitionOptional.get();
 
-      if (!definition.isAvailable(getAvailableDependencies())) {
+      if (!definition.isAvailable(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies())) {
         log.warn("X Source view `{}` cannot be created due to missing dependencies", viewName);
         return false;
       }
 
       log.info("→ Attempting to create source view `{}`", viewName);
-      jooqContext.transaction(transaction ->
-        transaction.dsl().createOrReplaceView(viewName).as(definition.sql()).execute()
-      );
-
-      SourceViewRecord newRecord = SourceViewRecord
-        .builder()
-        .name(definition.name())
-        .definition(definition.sql())
-        .sourceFile(definition.sourceFilePath())
-        .lastUpdated(Instant.now())
-        .build();
-      sourceViewRepository.save(newRecord);
+      sourceViewDatabaseObjectRepository.persistSingleSourceView(definition);
 
       log.info("√ Successfully created source view `{}`", viewName);
       return true;

@@ -25,7 +25,6 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
-import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,9 +63,6 @@ class EntityTypeInitializationServiceTest {
 
   @Mock
   private CrossTenantQueryService crossTenantQueryService;
-
-  @Mock
-  private DSLContext readerJooqContext;
 
   @Mock
   private FolioSpringLiquibase folioSpringLiquibase;

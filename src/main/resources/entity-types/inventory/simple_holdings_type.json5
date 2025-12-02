@@ -1,0 +1,154 @@
+{
+  id: 'b9eaaed8-c11b-4d53-a784-a4213c584001',
+  name: 'simple_holdings_type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'holdings_type',
+      target: 'src_inventory_holdings_type',
+    },
+  ],
+  requiredPermissions: ['inventory-storage.holdings-types.collection.get'],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      essential: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'name',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      essential: true,
+      visibleByDefault: true,
+      idColumnName: 'id',
+      valueGetter: ":sourceAlias.jsonb->>'name'",
+      filterValueGetter: "lower(\
+        ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
+      )",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
+      source: {
+        entityTypeId: 'b9eaaed8-c11b-4d53-a784-a4213c584001',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'holdings-types',
+        valueJsonPath: '$.holdingsTypes.*.id',
+        labelJsonPath: '$.holdingsTypes.*.name',
+      },
+    },
+    {
+      name: 'source',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'source'",
+    },
+    {
+      name: 'metadata_created_date',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdDate'",
+    },
+    {
+      name: 'metadata_updated_date',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedDate'",
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'jsonb',
+      sourceAlias: 'holdings_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.jsonb::text',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

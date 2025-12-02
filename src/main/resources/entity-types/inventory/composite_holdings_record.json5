@@ -13,6 +13,15 @@
       order: 10
     },
     {
+      alias: 'holdings_type',
+      type: 'entity-type',
+      targetId: 'b9eaaed8-c11b-4d53-a784-a4213c584001', // simple_holdings_type
+      targetField: 'id',
+      sourceField: 'holdings.holdings_type_id',
+      essentialOnly: true,
+      order: 15
+    },
+    {
       alias: 'effective_location',
       type: 'entity-type',
       targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple_locations,

@@ -176,6 +176,14 @@
       hidden: true,
       valueGetter: ':sourceAlias.holdingstypeid',
       essential: true,
+      joinsTo: [
+        {
+          targetId: 'b9eaaed8-c11b-4d53-a784-a4213c584001', // simple_holdings_type
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'ill_policy_id',

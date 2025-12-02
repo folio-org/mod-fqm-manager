@@ -42,8 +42,8 @@ import org.springframework.stereotype.Service;
  * in the source_views table. Installation is handled by {@link #installAvailableSourceViews(boolean)}
  * (with the option to forcibly recreate all existing ones).
  *
- * These records should not get ouf sync with the actual underlying database objects in normal usage,
- * however, some FSE operations (such as data migration or module (re)installation) can cause this to happen.
+ * These records should not get out of sync with the actual underlying database objects in normal usage,
+ * however, some system operations (such as data migration or module (re)installation) can cause this to happen.
  * In cases where our records are suspected to be out of sync, {@link #verifyAll()} should be used
  * to ensure consistency. If the discrepancies are suspected to be limited to a single source view,
  * the {@link #attemptToHealSourceView(String)} method may be used instead.
@@ -79,7 +79,17 @@ public class SourceViewService {
     this.objectMapper = JSON5ObjectMapperFactory.create();
   }
 
-  /** Check if a source view is available per our installation records */
+  /**
+   * Check if a source view is available per our installation records.
+   *
+   * If a complex expression is provided (tested by presence of parentheses), we assume it exists,
+   * rather than attempting to parse the SQL expression. This is necessary for some special ETs like
+   * composite invoice lines/fund distributions, which self-reference other sources like:
+   * `jsonb_array_elements("invoice_line_fund_distribution.invoice_line.invoice_lines"...)`.
+   *
+   * This is safe to do as such expressions must be referencing a view pulled in via another source,
+   * and that other source will be checked, so no risk of missing a dependency here.
+   */
   public boolean doesSourceViewExist(String viewName) {
     if (viewName.contains("(")) {
       return true;
@@ -97,13 +107,15 @@ public class SourceViewService {
    * Check if mod-finance was available (at the time of last entity type installation)
    *
    * <strong>Note:</strong> this does not check mod-finance itself, but mod-finance-storage.
-   * See the liquibase changelog for more details on what this does and why it exists.
+   * See the source view definition for more details on what this does and why it exists.
+   *
+   * @see /src/main/resources/db/source-views/bundled/modules/_mod_finance_storage_exchange_rate_availability_indicator.json5
    */
   public boolean isModFinanceInstalled() {
     return doesSourceViewExist(MOD_FINANCE_AVAILABILITY_INDICATOR_VIEW);
   }
 
-  /** Get all definitions from the filesystem */
+  /** Get all definitions from the packaged resources */
   protected List<SourceViewDefinition> getAllDefinitions() throws IOException {
     return Stream
       .concat(
@@ -129,7 +141,11 @@ public class SourceViewService {
       .toList();
   }
 
-  /** Get all available source view definitions based on if the underlying DB tables exist */
+  /**
+   * Get all available source view definitions based on if the underlying DB tables exists.
+   *
+   * @return Map of {@link SourceViewDefinition}s keyed by view name
+   */
   protected Map<String, SourceViewDefinition> getAvailableDefinitions() throws IOException {
     List<SourceViewDefinition> allDefinitions = getAllDefinitions();
     Set<SourceViewDependency> availableDependencies = getAvailableDependencies();
@@ -149,14 +165,15 @@ public class SourceViewService {
   }
 
   /**
-   * Install all available source views based on the presence of their dependencies. If {@code forceUpdate} is,
-   * true existing views will be recreated to ensure their definitions are up to date. This may be useful if the
-   * underlying view's definition has changed due to an external force (for example, the source table being
+   * Install all available source views based on the presence of their dependencies. If {@code forceUpdate} is
+   * true, existing views will be recreated to ensure their definitions are up to date. This may be useful if the * underlying view's definition has changed due to an external force (for example, the source table being
    * renamed (this is common in data migrations)).
    *
    * This may result in multiple install cycles, depending on dependencies between views themselves.
    *
    * Once complete, the source_views table will be updated to reflect the current state of installed views.
+   *
+   * @return a set of names of source views that have been installed
    */
   public Set<String> installAvailableSourceViews(boolean forceUpdate) throws IOException {
     Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions();
@@ -166,6 +183,9 @@ public class SourceViewService {
     // simple traversal to handle inter-view dependencies. This hierarchy should be incredibly shallow
     // (likely no more than one level), so simply checking if more are available after an install
     // is sufficient.
+    //
+    // This will not infinitely loop as each additional iteration must have more available views
+    // than the last, and we will eventually run out of views to install.
     while (originalAvailableCount != availableDefinitions.size()) {
       this.installSourceViews(availableDefinitions, shouldForceUpdateOnThisIteration);
 
@@ -190,25 +210,29 @@ public class SourceViewService {
    * an external force (for example, the source table being renamed (this is common in data migrations)).
    *
    * Once complete, the source_views table will be updated to reflect the current state of installed views.
+   *
+   * @param toInstall   Map of {@link SourceViewDefinition}s keyed by view name, typically obtained from
+   *                    {@link #getAvailableDefinitions()}
+   * @param forceUpdate whether to forcibly recreate existing views
    */
   protected void installSourceViews(Map<String, SourceViewDefinition> toInstall, boolean forceUpdate)
     throws IOException {
-    Map<String, SourceViewRecord> installedDefinitions = sourceViewRepository
+    Map<String, SourceViewRecord> installedDefinitionsByName = sourceViewRepository
       .findAll()
       .stream()
       .collect(Collectors.toMap(SourceViewRecord::getName, Function.identity()));
 
     Collection<String> definitionsToInstall = CollectionUtils.subtract(
       toInstall.keySet(),
-      installedDefinitions.keySet()
+      installedDefinitionsByName.keySet()
     );
     Collection<String> definitionsToUpdate = CollectionUtils
-      .intersection(toInstall.keySet(), installedDefinitions.keySet())
+      .intersection(toInstall.keySet(), installedDefinitionsByName.keySet())
       .stream()
-      .filter(k -> forceUpdate || !toInstall.get(k).sql().equals(installedDefinitions.get(k).getDefinition()))
+      .filter(k -> forceUpdate || !toInstall.get(k).sql().equals(installedDefinitionsByName.get(k).getDefinition()))
       .toList();
     Collection<String> definitionsToRemove = CollectionUtils.subtract(
-      installedDefinitions.keySet(),
+      installedDefinitionsByName.keySet(),
       toInstall.keySet()
     );
 
@@ -222,16 +246,16 @@ public class SourceViewService {
     log.info("To update: {}", definitionsToUpdate);
     log.info("To remove: {}", definitionsToRemove);
 
-    if (!definitionsToInstall.isEmpty()) {
-      jooqContext.transaction(transaction -> {
-        definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
-        Stream
-          .concat(definitionsToInstall.stream(), definitionsToUpdate.stream())
-          .forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
+    jooqContext.transaction(transaction -> {
+      definitionsToRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
+      definitionsToInstall.forEach(k -> transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute());
+      definitionsToUpdate.forEach(k -> {
+        transaction.dsl().dropViewIfExists(k).execute();
+        transaction.dsl().createOrReplaceView(k).as(toInstall.get(k).sql()).execute();
       });
-    }
+    });
 
-    log.info("All done, updating source_views table...");
+    log.info("All done persisting views to DB, updating source_views table...");
 
     sourceViewRepository.deleteAllById(definitionsToRemove);
     sourceViewRepository.deleteAllById(definitionsToUpdate);
@@ -254,7 +278,6 @@ public class SourceViewService {
     log.info("Source views table updated successfully");
   }
 
-  /** Check if the underlying source view exists in the database */
   protected boolean doesSourceViewExistInDatabase(String viewName) {
     return (
       jooqContext

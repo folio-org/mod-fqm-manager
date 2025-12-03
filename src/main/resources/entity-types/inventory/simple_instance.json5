@@ -1542,7 +1542,6 @@
                     ), '[]'::jsonb)\
                   FROM ${tenant_id}_mod_fqm_manager.src_instance_relationship ir\
                   WHERE ir.superinstanceid = :sourceAlias.id)::text",
-      valueFunction: 'lower(:value)'
     },
     {
       name: 'parentInstances',
@@ -1567,7 +1566,6 @@
                     ), '[]'::jsonb)\
                   FROM ${tenant_id}_mod_fqm_manager.src_instance_relationship ir\
                   WHERE ir.subinstanceid = :sourceAlias.id)::text",
-      valueFunction: 'lower(:value)'
     },
     {
       name: 'precedingTitles',
@@ -1593,9 +1591,8 @@
                       )\
                     ), '[]'::jsonb)\
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedinginstanceid = i.id\
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedingInstanceId = i.id\
                     WHERE pst.succeedingInstanceId = :sourceAlias.id)::text",
-      valueFunction: 'lower(:value)'
     },
     {
       name: 'succeedingTitles',
@@ -1623,7 +1620,6 @@
                     FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
                     JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedingInstanceId = i.id\
                     WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
-      valueFunction: 'lower(:value)'
     },
   ],
 }

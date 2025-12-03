@@ -32,7 +32,6 @@ import org.jooq.Configuration;
 import org.jooq.CreateViewAsStep;
 import org.jooq.CreateViewFinalStep;
 import org.jooq.DSLContext;
-import org.jooq.DropViewFinalStep;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -131,7 +130,6 @@ class SourceViewDatabaseObjectRepositoryTest {
     DSLContext dsl = transactionPair.getLeft();
     Runnable runnable = transactionPair.getRight();
 
-    when(dsl.dropViewIfExists(anyString())).thenReturn(mock(DropViewFinalStep.class));
     CreateViewAsStep<Record> createViewAsStep1 = mock(CreateViewAsStep.class);
     CreateViewAsStep<Record> createViewAsStep2 = mock(CreateViewAsStep.class);
     when(dsl.createOrReplaceView("view1")).thenReturn(createViewAsStep1);
@@ -141,8 +139,8 @@ class SourceViewDatabaseObjectRepositoryTest {
 
     runnable.run();
 
-    verify(dsl).dropViewIfExists("view2");
-    verify(dsl).dropViewIfExists("view3");
+    verify(dsl).execute("DROP VIEW IF EXISTS \"view2\" CASCADE");
+    verify(dsl).execute("DROP VIEW IF EXISTS \"view3\" CASCADE");
     verify(dsl).createOrReplaceView("view1");
     verify(dsl).createOrReplaceView("view2");
     verify(createViewAsStep1).as("sql1");
@@ -199,10 +197,9 @@ class SourceViewDatabaseObjectRepositoryTest {
     DSLContext dsl = transactionPair.getLeft();
     Runnable runnable = transactionPair.getRight();
 
-    when(dsl.dropMaterializedView(anyString())).thenReturn(mock(DropViewFinalStep.class));
     runnable.run();
-    verify(dsl).dropMaterializedView("view1");
-    verify(dsl).dropMaterializedView("view2");
+    verify(dsl).execute("DROP MATERIALIZED VIEW IF EXISTS \"view1\" CASCADE");
+    verify(dsl).execute("DROP MATERIALIZED VIEW IF EXISTS \"view2\" CASCADE");
 
     verify(jooqContext).select(any(Field.class));
     verifyNoMoreInteractions(jooqContext, dsl);
@@ -266,9 +263,8 @@ class SourceViewDatabaseObjectRepositoryTest {
     Pair<DSLContext, Runnable> transactionPair = verifyTransaction();
     DSLContext dsl = transactionPair.getLeft();
     Runnable runnable = transactionPair.getRight();
-    when(dsl.dropView(anyString())).thenReturn(mock(DropViewFinalStep.class));
     runnable.run();
-    verify(dsl).dropView("view3");
+    verify(dsl).execute("DROP VIEW IF EXISTS \"view3\" CASCADE");
 
     verifyNoMoreInteractions(jooqContext, sourceViewRecordRepository);
   }

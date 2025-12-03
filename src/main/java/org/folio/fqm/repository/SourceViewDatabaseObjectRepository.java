@@ -67,10 +67,12 @@ public class SourceViewDatabaseObjectRepository {
     Collection<String> toRemove
   ) {
     jooqContext.transaction(transaction -> {
-      toRemove.forEach(k -> transaction.dsl().dropViewIfExists(k).execute());
+      // TODO: [MODFQMMGR-1014] Replace formatted SQL string with jOOQ's fluent API once 3.21 is released
+      toRemove.forEach(k -> transaction.dsl().execute("DROP VIEW IF EXISTS \"" + k + "\" CASCADE"));
       toInstall.forEach(k -> transaction.dsl().createOrReplaceView(k).as(definitions.get(k).sql()).execute());
       toUpdate.forEach(k -> {
-        transaction.dsl().dropViewIfExists(k).execute();
+        // TODO: [MODFQMMGR-1014] Replace formatted SQL string with jOOQ's fluent API once 3.21 is released
+        transaction.dsl().execute("DROP VIEW IF EXISTS \"" + k + "\" CASCADE");
         transaction.dsl().createOrReplaceView(k).as(definitions.get(k).sql()).execute();
       });
     });
@@ -164,7 +166,10 @@ public class SourceViewDatabaseObjectRepository {
       log.warn("The following legacy materialized views exist in the database: {}", materializedViews);
       log.warn("Removing {} materialized views: {}", materializedViews.size(), materializedViews);
       jooqContext.transaction(transaction ->
-        materializedViews.forEach(viewName -> transaction.dsl().dropMaterializedView(viewName).execute())
+        materializedViews.forEach(viewName ->
+          // TODO: [MODFQMMGR-1014] Replace formatted SQL string with jOOQ's fluent API once 3.21 is released
+          transaction.dsl().execute("DROP MATERIALIZED VIEW IF EXISTS \"" + viewName + "\" CASCADE")
+        )
       );
     }
   }
@@ -190,7 +195,10 @@ public class SourceViewDatabaseObjectRepository {
         unexpectedViews
       );
       jooqContext.transaction(transaction ->
-        unexpectedViews.forEach(viewName -> transaction.dsl().dropView(viewName).execute())
+        unexpectedViews.forEach(viewName ->
+          // TODO: [MODFQMMGR-1014] Replace formatted SQL string with jOOQ's fluent API once 3.21 is released
+          transaction.dsl().execute("DROP VIEW IF EXISTS \"" + viewName + "\" CASCADE")
+        )
       );
     }
   }

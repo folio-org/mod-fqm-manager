@@ -1584,17 +1584,34 @@
         },
       },
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
-                      jsonb_build_object(\
-                        'id', pst.id,\
-                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
-                        'hrid', pst.jsonb ->> 'hrid',\
-                        'precedingInstanceId', pst.precedinginstanceid,\
-                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
-                      )\
-                    ), '[]'::jsonb)\
-                    FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.succeedingInstanceId = i.id\
-                    WHERE pst.succeedingInstanceId = :sourceAlias.id)::text",
+                       jsonb_build_object(\
+                         'id', pst.id,\
+                         'title', COALESCE(pst.jsonb ->> 'title',\
+                                  (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN i.jsonb ->> 'title'\
+                                   ELSE (\
+                                     SELECT pi.jsonb ->> 'title'\
+                                     FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                     WHERE pi.id = pst.precedingInstanceId) END)),\
+                         'hrid', (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN pst.jsonb ->> 'hrid'\
+                                  ELSE (\
+                                    SELECT pi.jsonb ->> 'hrid'\
+                                    FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                    WHERE pi.id = pst.precedingInstanceId) END),\
+                         'precedingInstanceId', pst.precedinginstanceid,\
+                         'identifiers', COALESCE(pst.jsonb -> 'identifiers', \
+                                        (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN i.jsonb -> 'identifiers'\
+                                         ELSE (\
+                                           SELECT pi.jsonb -> 'identifiers' \
+                                           FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                           WHERE pi.id = pst.precedingInstanceId) END))\
+                                          )\
+                                          ), '[]'::jsonb)\
+                         FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
+                         LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i \
+                         ON (\
+                         CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN pst.succeedingInstanceId\
+                         ELSE pst.precedingInstanceId END) = i.id\
+                         WHERE pst.succeedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
     {
@@ -1612,17 +1629,34 @@
         },
       },
       valueGetter: "(SELECT COALESCE(jsonb_agg(\
-                      jsonb_build_object(\
-                        'id', pst.id,\
-                        'title', COALESCE(pst.jsonb ->> 'title', i.jsonb ->> 'title'),\
-                        'hrid', pst.jsonb ->> 'hrid',\
-                        'succeedingInstanceId', pst.succeedinginstanceid,\
-                        'identifiers', COALESCE(pst.jsonb -> 'identifiers', i.jsonb -> 'identifiers')\
-                      )\
-                    ), '[]'::jsonb)\
-                    FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
-                    JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i ON pst.precedingInstanceId = i.id\
-                    WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
+                       jsonb_build_object(\
+                         'id', pst.id,\
+                         'title', COALESCE(pst.jsonb ->> 'title',\
+                                  (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN i.jsonb ->> 'title'\
+                                   ELSE (\
+                                     SELECT pi.jsonb ->> 'title'\
+                                     FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                     WHERE pi.id = pst.succeedingInstanceId) END)),\
+                         'hrid', (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN pst.jsonb ->> 'hrid'\
+                                  ELSE (\
+                                    SELECT pi.jsonb ->> 'hrid'\
+                                    FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                    WHERE pi.id = pst.succeedingInstanceId) END),\
+                         'succeedingInstanceId', pst.succeedinginstanceid,\
+                         'identifiers', COALESCE(pst.jsonb -> 'identifiers',\
+                                        (CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN i.jsonb -> 'identifiers'\
+                                         ELSE (\
+                                           SELECT pi.jsonb -> 'identifiers'\
+                                           FROM ${tenant_id}_mod_fqm_manager.src_inventory_instance pi\
+                                           WHERE pi.id = pst.succeedinginstanceid) END))\
+                                           )\
+                                           ), '[]'::jsonb)\
+                         FROM ${tenant_id}_mod_fqm_manager.src_preceding_succeeding_title pst\
+                         LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_instance i\
+                         ON (\
+                         CASE WHEN i.jsonb ->> 'source' != 'MARC' THEN pst.precedingInstanceId\
+                         ELSE pst.succeedingInstanceId END) = i.id\
+                         WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
   ],

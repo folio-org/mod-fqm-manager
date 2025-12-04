@@ -247,10 +247,6 @@ public class EntityTypeRepository {
     entityTypeCacheRepository.invalidateTenant(executionContext.getTenantId());
   }
 
-  public void replaceCentralTenantIdInSourceViewFiles() {
-
-  }
-
   private List<EntityTypeColumn> processCustomFieldColumn(EntityType entityType, EntityTypeColumn column) {
     log.debug("Extracting custom fields for column: {} of entity type {}", column.getName(), entityType.getName());
     List<EntityTypeColumn> customFieldColumns = fetchColumnNamesForCustomFields(entityType.getId(), column);

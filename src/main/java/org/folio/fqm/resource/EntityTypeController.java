@@ -112,7 +112,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     try {
       if (Boolean.TRUE.equals(forceUpdateViews)) {
         log.info("Forcing recreation of views as requested");
-        sourceViewService.installAvailableSourceViews(true);
+        sourceViewService.installAvailableSourceViews(null, true);
       }
       entityTypeInitializationService.initializeEntityTypes(null);
     } catch (IOException e) {

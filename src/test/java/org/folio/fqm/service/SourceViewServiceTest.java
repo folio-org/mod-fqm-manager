@@ -134,7 +134,10 @@ class SourceViewServiceTest {
     when(resource.getContentAsString(any())).thenThrow(new IOException());
     when(resourceResolver.getResources(anyString())).thenReturn(new Resource[] { resource });
 
-    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions());
+    // TODO: update
+    String centralTenantId = "tenantId";
+    when(folioExecutionContext.getTenantId()).thenReturn(centralTenantId);
+    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions(centralTenantId));
   }
 
   @Test
@@ -183,7 +186,8 @@ class SourceViewServiceTest {
         Set.of(new SourceViewDependency("a", "a"), new SourceViewDependency("mod_fqm_manager", "view_a"))
       );
     when(sourceViewRecordRepository.findAll()).thenReturn(List.of(), List.of(RECORD_A));
-    sourceViewService.installAvailableSourceViews(false);
+    // TODO: update
+    sourceViewService.installAvailableSourceViews(null, false);
 
     verify(sourceViewDatabaseObjectRepository, atLeastOnce()).getAvailableSourceViewDependencies();
     verify(sourceViewDatabaseObjectRepository)
@@ -202,7 +206,9 @@ class SourceViewServiceTest {
   void testVerifyAll() throws IOException {
     mockDefinitions(List.of());
 
-    sourceViewService.verifyAll();
+    // TODO: update
+    String centralTenantId = "PLACEHOLDER";
+    sourceViewService.verifyAll(centralTenantId);
 
     verify(sourceViewDatabaseObjectRepository).purgeMaterializedViewsIfPresent();
     verify(sourceViewDatabaseObjectRepository).verifySourceViewRecordsMatchesDatabase();

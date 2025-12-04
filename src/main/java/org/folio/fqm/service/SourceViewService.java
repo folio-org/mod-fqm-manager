@@ -32,12 +32,12 @@ import org.springframework.stereotype.Service;
  * Service class for interacting with source views at a higher level.
  *
  * The main operating principle here is that each view database object gets a corresponding {@link SourceViewRecord}
- * in the source_views table. Installation is handled by {@link #installAvailableSourceViews(boolean)}
+ * in the source_views table. Installation is handled by {@link #installAvailableSourceViews(String, boolean)}
  * (with the option to forcibly recreate all existing ones).
  *
  * These records should not get out of sync with the actual underlying database objects in normal usage,
  * however, some system operations (such as data migration or module (re)installation) can cause this to happen.
- * In cases where our records are suspected to be out of sync, {@link #verifyAll()} should be used
+ * In cases where our records are suspected to be out of sync, {@link #verifyAll(String)} should be used
  * to ensure consistency. If the discrepancies are suspected to be limited to a single source view,
  * the {@link #attemptToHealSourceView(String)} method may be used instead.
  */
@@ -108,7 +108,8 @@ public class SourceViewService {
   }
 
   /** Get all definitions from the packaged resources */
-  protected List<SourceViewDefinition> getAllDefinitions() throws IOException {
+  protected List<SourceViewDefinition> getAllDefinitions(String centralTenantId) throws IOException {
+    String centraltenantId = "PLACEHOLDER";
     return Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/db/source-views/**/*.json")),
@@ -121,7 +122,8 @@ public class SourceViewService {
             .readValue(
               resource
                 .getContentAsString(StandardCharsets.UTF_8)
-                .replace("${tenant_id}", folioExecutionContext.getTenantId()),
+                .replace("${tenant_id}", folioExecutionContext.getTenantId())
+                .replace("${central_tenant_id}", centraltenantId),
               SourceViewDefinition.class
             )
             .withSourceFilePath(resource.getURI().toString());
@@ -138,8 +140,8 @@ public class SourceViewService {
    *
    * @return Map of {@link SourceViewDefinition}s keyed by view name
    */
-  protected Map<String, SourceViewDefinition> getAvailableDefinitions() throws IOException {
-    List<SourceViewDefinition> allDefinitions = getAllDefinitions();
+  protected Map<String, SourceViewDefinition> getAvailableDefinitions(String centralTenantId) throws IOException {
+    List<SourceViewDefinition> allDefinitions = getAllDefinitions(centralTenantId);
     Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies();
 
     Map<String, SourceViewDefinition> availableDefinitions = allDefinitions
@@ -167,8 +169,8 @@ public class SourceViewService {
    *
    * @return a set of names of source views that have been installed
    */
-  public Set<String> installAvailableSourceViews(boolean forceUpdate) throws IOException {
-    Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions();
+  public Set<String> installAvailableSourceViews(String centralTenantId, boolean forceUpdate) throws IOException {
+    Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions(centralTenantId);
     int originalAvailableCount = -1;
     boolean shouldForceUpdateOnThisIteration = forceUpdate;
 
@@ -182,7 +184,7 @@ public class SourceViewService {
       this.installSourceViews(availableDefinitions, shouldForceUpdateOnThisIteration);
 
       originalAvailableCount = availableDefinitions.size();
-      availableDefinitions = this.getAvailableDefinitions();
+      availableDefinitions = this.getAvailableDefinitions(centralTenantId);
       // we've reinstalled once. all in future cycles will be new, so no need to force update again
       shouldForceUpdateOnThisIteration = false;
       if (originalAvailableCount != availableDefinitions.size()) {
@@ -204,7 +206,7 @@ public class SourceViewService {
    * Once complete, the source_views table will be updated to reflect the current state of installed views.
    *
    * @param toInstall   Map of {@link SourceViewDefinition}s keyed by view name, typically obtained from
-   *                    {@link #getAvailableDefinitions()}
+   *                    {@link #getAvailableDefinitions(String)}
    * @param forceUpdate whether to forcibly recreate existing views
    */
   protected void installSourceViews(Map<String, SourceViewDefinition> toInstall, boolean forceUpdate)
@@ -251,10 +253,10 @@ public class SourceViewService {
    * with the bonus of ensuring that any views missing from the database are re-created.
    * @throws IOException
    */
-  public void verifyAll() throws IOException {
+  public void verifyAll(String centralTenantId) throws IOException {
     sourceViewDatabaseObjectRepository.verifySourceViewRecordsMatchesDatabase();
     sourceViewDatabaseObjectRepository.purgeMaterializedViewsIfPresent();
-    this.installAvailableSourceViews(false);
+    this.installAvailableSourceViews(centralTenantId, false);
   }
 
   /**
@@ -276,7 +278,10 @@ public class SourceViewService {
           "X Source view `{}` existence is out of sync between source_views table and actual database. Running full verification procedure...",
           viewName
         );
-        this.verifyAll();
+
+        // TODO: update
+        String centralTenantId = "PLACEHOLDER";
+        this.verifyAll(centralTenantId);
         return this.doesSourceViewExist(viewName);
       }
 
@@ -285,7 +290,10 @@ public class SourceViewService {
         return true;
       }
 
-      Optional<SourceViewDefinition> definitionOptional = getAllDefinitions()
+
+      // TODO: update
+      String centralTenantId = "PLACEHOLDER";
+      Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(centralTenantId)
         .stream()
         .filter(def -> def.name().equals(viewName))
         .findFirst();

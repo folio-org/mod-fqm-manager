@@ -107,7 +107,7 @@ public class EntityTypeInitializationService {
 
   protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
-    sourceViewService.verifyAll();
+    sourceViewService.verifyAll(centralTenantId);
 
     Map<UUID, EntityType> allEntityTypes = Stream
       .concat(

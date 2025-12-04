@@ -218,7 +218,7 @@ public class EntityTypeRepository {
         updatedEntities.size(),
         removedEntities.size()
       );
-      
+
       log.info("Inserting new entity types");
       InsertValuesStep2<Record, UUID, JSONB> insert = transaction.dsl()
         .insertInto(table(TABLE_NAME))
@@ -245,6 +245,10 @@ public class EntityTypeRepository {
     });
 
     entityTypeCacheRepository.invalidateTenant(executionContext.getTenantId());
+  }
+
+  public void replaceCentralTenantIdInSourceViewFiles() {
+
   }
 
   private List<EntityTypeColumn> processCustomFieldColumn(EntityType entityType, EntityTypeColumn column) {

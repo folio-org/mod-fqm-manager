@@ -34,7 +34,10 @@ class PermissionsBypassServiceTest {
       permissionsService.getUserPermissions("foo", UUID.fromString("f8983a3b-268e-5649-a03f-e7e4a856412e")),
       is(empty())
     );
-    assertThat(permissionsService.getRequiredPermissions(new EntityType()), is(empty()));
+    assertThat(
+      permissionsService.getRequiredPermissions(new EntityType().id("a310e450-4af7-58fd-aad8-2a975328f827")),
+      is(empty())
+    );
     assertThat(
       permissionsService.canUserAccessCustomEntityType(
         new CustomEntityType().id("3b0f1feb-b1bd-5d82-bfdc-78c77f8a952a")

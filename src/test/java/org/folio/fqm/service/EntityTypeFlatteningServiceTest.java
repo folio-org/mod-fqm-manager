@@ -18,6 +18,9 @@ import java.util.UUID;
 
 import lombok.SneakyThrows;
 
+import org.folio.fqm.domain.dto.Parameter;
+import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.EntityTypeSourceNotFoundException;
 import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.ArrayType;
@@ -786,6 +789,34 @@ class EntityTypeFlatteningServiceTest {
       IllegalStateException.class,
       () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, TENANT_ID, false)
     );
+  }
+
+  @Test
+  void testMissingEntityTypeSource() {
+    UUID compositeId = UUID.fromString("334399a1-c7ed-53b6-b7d7-a9b05ccfee99");
+    UUID missingChildId = UUID.fromString("8c2ed4ba-8248-5ef1-a3af-23c3d9d3860d");
+    EntityType compositeEntityType = new EntityType()
+      .id(compositeId.toString())
+      .name("parent")
+      .sources(List.of(new EntityTypeSourceEntityType().targetId(missingChildId).alias("child")));
+
+    when(entityTypeRepository.getEntityTypeDefinition(eq(missingChildId), any()))
+      .thenThrow(new EntityTypeNotFoundException(missingChildId));
+    when(entityTypeRepository.getEntityTypeDefinition(eq(compositeId), any()))
+      .thenReturn(Optional.of(compositeEntityType));
+
+    EntityTypeSourceNotFoundException ex = assertThrows(
+      EntityTypeSourceNotFoundException.class,
+      () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, TENANT_ID, false)
+    );
+
+    assertThat(ex.getError().getCode(), is("entity.type.source.missing"));
+    assertThat(ex.getError().getParameters(), containsInAnyOrder(
+      new Parameter("parentEntityTypeId").value(compositeId.toString()),
+      new Parameter("parentEntityTypeName").value("parent"),
+      new Parameter("sourceEntityTypeId").value(missingChildId.toString()),
+      new Parameter("sourceEntityTypeAlias").value("child")
+    ));
   }
 
   @Test

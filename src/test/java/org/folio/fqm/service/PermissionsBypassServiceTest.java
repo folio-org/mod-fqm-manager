@@ -8,12 +8,24 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.util.UUID;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class PermissionsBypassServiceTest {
 
-  // all methods should work with zero context
-  private final PermissionsBypassService permissionsService = new PermissionsBypassService();
+  @Mock
+  EntityTypeFlatteningService entityTypeFlatteningService;
+
+  @Mock
+  FolioExecutionContext context;
+
+  @InjectMocks
+  PermissionsBypassService permissionsService;
 
   @Test
   void testAllMethodsBypassed() {
@@ -31,10 +43,13 @@ class PermissionsBypassServiceTest {
     );
 
     assertDoesNotThrow(() -> {
-      permissionsService.verifyUserHasNecessaryPermissions(new EntityType(), true);
+      permissionsService.verifyUserHasNecessaryPermissions(
+        new EntityType().id("930b5d71-e927-5d74-beda-9f9da1e07188"),
+        true
+      );
       permissionsService.verifyUserHasNecessaryPermissions(
         "tenant_01",
-        new EntityType(),
+        new EntityType().id("bc7e53b6-8b31-5897-822f-b02fc4db7aa1"),
         UUID.fromString("6374ed0d-275d-53b3-9a34-b2d524ecf7d6"),
         true
       );

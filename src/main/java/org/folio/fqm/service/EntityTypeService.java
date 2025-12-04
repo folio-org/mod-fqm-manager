@@ -12,7 +12,6 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
-import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -78,7 +77,6 @@ public class EntityTypeService {
   private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
   private final QueryProcessorService queryService;
-  private final SimpleHttpClient simpleHttpClient;
   private final CrossTenantHttpClient crossTenantHttpClient;
   private final PermissionsService permissionsService;
   private final CrossTenantQueryService crossTenantQueryService;

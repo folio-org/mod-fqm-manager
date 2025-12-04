@@ -1,2 +1,3 @@
 * @folio-org/corsair
-/translations @folio-org/bots @folio-org/folio-devops
+# allow anyone to approve translations
+/translations

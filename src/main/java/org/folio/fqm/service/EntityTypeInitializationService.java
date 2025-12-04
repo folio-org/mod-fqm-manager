@@ -292,9 +292,4 @@ public class EntityTypeInitializationService {
       }
     }
   }
-
-  public String getCentralTenantId() {
-    String centralTenantId = "PLACEHOLDER";
-    return centralTenantId;
-  }
 }

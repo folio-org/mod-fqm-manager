@@ -249,7 +249,7 @@ public class EntityTypeInitializationService {
    * Attempt to recreate the source views for an entity type. If this is not possible, the entity type
    * should no longer exist in the DB after this method has finished executing.
    */
-  public void attemptToHealEntityType(EntityType flattenedEntityType) {
+  public void attemptToHealEntityType(EntityType flattenedEntityType, String centralTenantId) {
     log.warn(
       "Attempting to heal entity type {} ({}) by repairing all of its database sources",
       flattenedEntityType.getName(),
@@ -262,7 +262,7 @@ public class EntityTypeInitializationService {
       .filter(EntityTypeSourceDatabase.class::isInstance)
       .map(EntityTypeSourceDatabase.class::cast)
       .map(EntityTypeSourceDatabase::getTarget)
-      .forEach(sourceViewService::attemptToHealSourceView);
+      .forEach(viewName -> sourceViewService.attemptToHealSourceView(viewName, centralTenantId));
 
     try {
       // will cleanup unavailable ones if the source view was not able to be created.
@@ -284,7 +284,8 @@ public class EntityTypeInitializationService {
           "Unable to run query on {} due to an UNDEFINED_TABLE error. Attempting to heal and re-run...",
           flattenedEntityType.getName()
         );
-        this.attemptToHealEntityType(flattenedEntityType);
+        String centralTenantId = crossTenantQueryService.getCentralTenantId();
+        this.attemptToHealEntityType(flattenedEntityType, centralTenantId);
         return runnable.get();
       } else {
         throw log.throwing(dae);

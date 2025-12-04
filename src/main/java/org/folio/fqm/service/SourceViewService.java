@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
  * however, some system operations (such as data migration or module (re)installation) can cause this to happen.
  * In cases where our records are suspected to be out of sync, {@link #verifyAll(String)} should be used
  * to ensure consistency. If the discrepancies are suspected to be limited to a single source view,
- * the {@link #attemptToHealSourceView(String)} method may be used instead.
+ * the {@link #attemptToHealSourceView(String, String)} method may be used instead.
  */
 @Log4j2
 @Service
@@ -264,7 +264,7 @@ public class SourceViewService {
    *
    * @return if the view was able to be created
    */
-  public boolean attemptToHealSourceView(String viewName) {
+  public boolean attemptToHealSourceView(String viewName, String centralTenantId) {
     if (viewName.contains("(")) {
       log.warn("√ Source `{}` is a complex expression and cannot be checked, so we assume it exists", viewName);
       return true;
@@ -280,7 +280,6 @@ public class SourceViewService {
 
         // TODO: update
         // YYZ 3
-        String centralTenantId = "PLACEHOLDER";
         this.verifyAll(centralTenantId);
         return this.doesSourceViewExist(viewName);
       }
@@ -293,7 +292,6 @@ public class SourceViewService {
 
       // TODO: update
       // YYZ 4
-      String centralTenantId = "PLACEHOLDER";
       Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(centralTenantId)
         .stream()
         .filter(def -> def.name().equals(viewName))

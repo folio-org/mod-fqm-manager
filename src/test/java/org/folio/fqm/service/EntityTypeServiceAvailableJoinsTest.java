@@ -533,7 +533,7 @@ class EntityTypeServiceAvailableJoinsTest {
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(etId1), any(), eq(true))).thenReturn(et1);
     when(entityTypeFlatteningService.getFlattenedEntityType(eq(etId2), any(), eq(true))).thenReturn(et2);
 
-    Map<UUID, EntityType> result = new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, null, permissionsService, null, null, executionContext, null)
+    Map<UUID, EntityType> result = new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, permissionsService, null, null, executionContext, null)
       .getAccessibleEntityTypesById();
 
     assertEquals(1, result.size());
@@ -549,7 +549,7 @@ class EntityTypeServiceAvailableJoinsTest {
     when(repo.getEntityTypeDefinitions(Set.of(), null)).thenReturn(Stream.of(et));
     when(permissionsService.getUserPermissions()).thenReturn(Set.of());
 
-    EntityTypeService svc = spy(new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, null, permissionsService, null, null, executionContext, null));
+    EntityTypeService svc = spy(new EntityTypeService(repo, entityTypeFlatteningService, null, null, null, null, permissionsService, null, null, executionContext, null));
     doReturn(false).when(svc).currentUserCanAccessCustomEntityType(etId.toString());
 
     Map<UUID, EntityType> result = svc.getAccessibleEntityTypesById();

@@ -18,6 +18,7 @@ import javax.annotation.CheckForNull;
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
+import org.folio.fqm.exception.EntityTypeSourceNotFoundException;
 import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeCacheRepository.FlattenedEntityTypeCacheKey;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -164,12 +165,22 @@ public class EntityTypeFlatteningService {
       if (source instanceof EntityTypeSourceEntityType sourceEt) {
         // Recursively flatten the source and add it to ourselves
         UUID sourceEntityTypeId = sourceEt.getTargetId();
-        EntityType flattenedSourceDefinition = getFlattenedEntityType(
-          sourceEntityTypeId,
-          sourceEt,
-          tenantId,
-          preserveAllColumns
-        );
+        EntityType flattenedSourceDefinition;
+        try {
+          flattenedSourceDefinition =  getFlattenedEntityType(
+            sourceEntityTypeId,
+            sourceEt,
+            tenantId,
+            preserveAllColumns
+          );
+        } catch (EntityTypeNotFoundException e) {
+          throw log.throwing(new EntityTypeSourceNotFoundException(
+            UUID.fromString(originalEntityType.getId()),
+            originalEntityType.getName(),
+            sourceEntityTypeId,
+            sourceEt.getAlias()
+          ));
+        }
 
         // If the original entity type already supports cross-tenant queries, we can skip this. Otherwise, copy the nested source's setting
         // This effectively means that if any nested source supports cross-tenant queries, the flattened entity type will too

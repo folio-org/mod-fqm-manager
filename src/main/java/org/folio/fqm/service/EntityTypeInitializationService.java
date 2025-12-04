@@ -107,7 +107,7 @@ public class EntityTypeInitializationService {
 
   protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
-    sourceViewService.verifyAll();
+    sourceViewService.verifyAll(safeCentralTenantId);
 
     Map<UUID, EntityType> allEntityTypes = Stream
       .concat(
@@ -255,13 +255,15 @@ public class EntityTypeInitializationService {
       flattenedEntityType.getId()
     );
 
+    String safeCentralTenantId = getCentralTenantIdSafely(null).getLeft();
+
     flattenedEntityType
       .getSources()
       .stream()
       .filter(EntityTypeSourceDatabase.class::isInstance)
       .map(EntityTypeSourceDatabase.class::cast)
       .map(EntityTypeSourceDatabase::getTarget)
-      .forEach(sourceViewService::attemptToHealSourceView);
+      .forEach(viewName -> sourceViewService.attemptToHealSourceView(viewName, safeCentralTenantId));
 
     try {
       // will cleanup unavailable ones if the source view was not able to be created.

@@ -207,8 +207,7 @@ class EntityTypeInitializationServiceTest {
           null,
           () -> {
             throw expected;
-          }
-        )
+          })
     );
     assertThat(actual, is(expected));
 
@@ -227,8 +226,7 @@ class EntityTypeInitializationServiceTest {
           null,
           () -> {
             throw exception;
-          }
-        )
+          })
     );
     assertThat(actual, is(exception));
 
@@ -249,8 +247,7 @@ class EntityTypeInitializationServiceTest {
           null,
           () -> {
             throw exception;
-          }
-        )
+          })
     );
     assertThat(actual, is(exception));
 
@@ -277,8 +274,7 @@ class EntityTypeInitializationServiceTest {
           } else {
             return "recovered";
           }
-        }
-      ),
+        }),
       is("recovered")
     );
   }
@@ -303,8 +299,7 @@ class EntityTypeInitializationServiceTest {
           } else {
             return "recovered";
           }
-        }
-      ),
+        }),
       is("recovered")
     );
   }

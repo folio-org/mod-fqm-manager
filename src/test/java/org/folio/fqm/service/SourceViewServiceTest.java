@@ -52,6 +52,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @ExtendWith(MockitoExtension.class)
 class SourceViewServiceTest {
 
+  private static final String CENTRAL_TENANT_ID = "tenantId";
+
   private static final SourceViewDefinition DEFINITION_A = new SourceViewDefinition(
     "view_a",
     List.of(new SourceViewDependency("a", "a")),
@@ -134,7 +136,10 @@ class SourceViewServiceTest {
     when(resource.getContentAsString(any())).thenThrow(new IOException());
     when(resourceResolver.getResources(anyString())).thenReturn(new Resource[] { resource });
 
-    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions());
+    // TODO: update
+    String centralTenantId = "tenantId";
+    when(folioExecutionContext.getTenantId()).thenReturn(centralTenantId);
+    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions(centralTenantId));
   }
 
   @Test
@@ -177,15 +182,18 @@ class SourceViewServiceTest {
   void testInstallAvailableSourceViewsMultipleIterations() throws IOException {
     mockDefinitions(List.of(DEFINITION_A, DEFINITION_A_A));
 
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies())
+    // TODO: update?
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null))
       .thenReturn(
         Set.of(new SourceViewDependency("a", "a")),
         Set.of(new SourceViewDependency("a", "a"), new SourceViewDependency("mod_fqm_manager", "view_a"))
       );
     when(sourceViewRecordRepository.findAll()).thenReturn(List.of(), List.of(RECORD_A));
-    sourceViewService.installAvailableSourceViews(false);
+    // TODO: update
+    sourceViewService.installAvailableSourceViews(null, false);
 
-    verify(sourceViewDatabaseObjectRepository, atLeastOnce()).getAvailableSourceViewDependencies();
+    // TODO: update?
+    verify(sourceViewDatabaseObjectRepository, atLeastOnce()).getAvailableSourceViewDependencies(null);
     verify(sourceViewDatabaseObjectRepository)
       .persistSourceViews(
         any(),
@@ -202,7 +210,9 @@ class SourceViewServiceTest {
   void testVerifyAll() throws IOException {
     mockDefinitions(List.of());
 
-    sourceViewService.verifyAll();
+    // TODO: update
+    String centralTenantId = "PLACEHOLDER";
+    sourceViewService.verifyAll(centralTenantId);
 
     verify(sourceViewDatabaseObjectRepository).purgeMaterializedViewsIfPresent();
     verify(sourceViewDatabaseObjectRepository).verifySourceViewRecordsMatchesDatabase();
@@ -217,7 +227,7 @@ class SourceViewServiceTest {
 
   @Test
   void testAttemptToHealSourceViewComplexExpression() {
-    assertTrue(sourceViewService.attemptToHealSourceView("(select 1)"));
+    assertTrue(sourceViewService.attemptToHealSourceView("(select 1)", CENTRAL_TENANT_ID));
 
     verifyNoInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }
@@ -229,7 +239,7 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view")).thenReturn(false);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view")).thenReturn(true);
 
-    sourceViewService.attemptToHealSourceView("view");
+    sourceViewService.attemptToHealSourceView("view", CENTRAL_TENANT_ID);
 
     verify(sourceViewDatabaseObjectRepository, never()).installSingleSourceView(any());
     verify(sourceViewDatabaseObjectRepository)
@@ -246,7 +256,7 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view")).thenReturn(true);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view")).thenReturn(true);
 
-    assertTrue(sourceViewService.attemptToHealSourceView("view"));
+    assertTrue(sourceViewService.attemptToHealSourceView("view", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view");
@@ -259,7 +269,7 @@ class SourceViewServiceTest {
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view")).thenReturn(false);
     mockDefinitions(List.of());
 
-    assertFalse(sourceViewService.attemptToHealSourceView("view"));
+    assertFalse(sourceViewService.attemptToHealSourceView("view", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view");
@@ -271,13 +281,15 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view_a")).thenReturn(false);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view_a")).thenReturn(false);
     mockDefinitions(List.of(DEFINITION_A));
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies()).thenReturn(Set.of());
+    // TODO: update?
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null)).thenReturn(Set.of());
 
-    assertFalse(sourceViewService.attemptToHealSourceView("view_a"));
+    assertFalse(sourceViewService.attemptToHealSourceView("view_a", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");
-    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies();
+    // TODO: update?
+    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(null);
     verifyNoMoreInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }
 
@@ -286,14 +298,16 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view_a")).thenReturn(false);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view_a")).thenReturn(false);
     mockDefinitions(List.of(DEFINITION_A));
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies())
+    // TODO: update?
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null))
       .thenReturn(Set.of(new SourceViewDependency("a", "a")));
 
-    assertTrue(sourceViewService.attemptToHealSourceView("view_a"));
+    assertTrue(sourceViewService.attemptToHealSourceView("view_a", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");
-    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies();
+    // TODO: update?
+    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(null);
     verify(sourceViewDatabaseObjectRepository).installSingleSourceView(DEFINITION_A);
     verifyNoMoreInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }
@@ -309,7 +323,7 @@ class SourceViewServiceTest {
     when(resource.getContentAsString(any())).thenThrow(new IOException());
     when(resourceResolver.getResources(anyString())).thenReturn(new Resource[] { resource });
 
-    assertFalse(sourceViewService.attemptToHealSourceView("view_a"));
+    assertFalse(sourceViewService.attemptToHealSourceView("view_a", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");

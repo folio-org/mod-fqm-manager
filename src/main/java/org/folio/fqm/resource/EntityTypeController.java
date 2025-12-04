@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
+import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
@@ -37,6 +38,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   private final EntityTypeService entityTypeService;
   private final SourceViewService sourceViewService;
   private final MigrationService migrationService;
+  private final CrossTenantQueryService crossTenantQueryService;
 
   @EntityTypePermissionsRequired
   @Override
@@ -112,7 +114,9 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     try {
       if (Boolean.TRUE.equals(forceUpdateViews)) {
         log.info("Forcing recreation of views as requested");
-        sourceViewService.installAvailableSourceViews(null, true);
+        // YYZ 1 (should be good)
+        String centralTenantId = crossTenantQueryService.getCentralTenantId();
+        sourceViewService.installAvailableSourceViews(centralTenantId, true);
       }
       entityTypeInitializationService.initializeEntityTypes(null);
     } catch (IOException e) {

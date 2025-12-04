@@ -109,7 +109,6 @@ public class SourceViewService {
 
   /** Get all definitions from the packaged resources */
   protected List<SourceViewDefinition> getAllDefinitions(String centralTenantId) throws IOException {
-    String centraltenantId = "PLACEHOLDER";
     return Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/db/source-views/**/*.json")),
@@ -123,7 +122,7 @@ public class SourceViewService {
               resource
                 .getContentAsString(StandardCharsets.UTF_8)
                 .replace("${tenant_id}", folioExecutionContext.getTenantId())
-                .replace("${central_tenant_id}", centraltenantId),
+                .replace("${central_tenant_id}", centralTenantId),
               SourceViewDefinition.class
             )
             .withSourceFilePath(resource.getURI().toString());
@@ -280,6 +279,7 @@ public class SourceViewService {
         );
 
         // TODO: update
+        // YYZ 3
         String centralTenantId = "PLACEHOLDER";
         this.verifyAll(centralTenantId);
         return this.doesSourceViewExist(viewName);
@@ -292,6 +292,7 @@ public class SourceViewService {
 
 
       // TODO: update
+      // YYZ 4
       String centralTenantId = "PLACEHOLDER";
       Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(centralTenantId)
         .stream()

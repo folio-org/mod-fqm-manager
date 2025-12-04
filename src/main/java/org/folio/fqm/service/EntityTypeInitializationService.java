@@ -107,6 +107,7 @@ public class EntityTypeInitializationService {
 
   protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
+    // YYZ 2 (should be good)
     sourceViewService.verifyAll(centralTenantId);
 
     Map<UUID, EntityType> allEntityTypes = Stream
@@ -289,5 +290,10 @@ public class EntityTypeInitializationService {
         throw log.throwing(dae);
       }
     }
+  }
+
+  public String getCentralTenantId() {
+    String centralTenantId = "PLACEHOLDER";
+    return centralTenantId;
   }
 }

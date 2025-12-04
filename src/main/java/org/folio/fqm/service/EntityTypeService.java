@@ -95,8 +95,8 @@ public class EntityTypeService {
       .getEntityTypeDefinitions(entityTypeIds, folioExecutionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
       .filter(entityType -> includeAll || !Boolean.TRUE.equals(entityType.getPrivate()))
-      .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
+      .filter(entityType -> includeInaccessible || userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
       .map(entityType -> {
         EntityTypeSummary result = new EntityTypeSummary()
           .id(UUID.fromString(entityType.getId()))

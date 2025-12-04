@@ -37,25 +37,6 @@ class LocalizationServiceTest {
   @InjectMocks
   private LocalizationService localizationService;
 
-  private void testBasicEntityTypeFormatting(Map<String, String> translations,
-                                             String expectedTableTranslation,
-                                             String expectedColumnTranslation,
-                                             String expectedDescriptionTranslation,
-                                             int numInvocations) {
-    translations.forEach((translationKey, translationValue) -> when(translationService.format(translationKey)).thenReturn(translationValue));
-
-    EntityType entityType = new EntityType()
-      .name("table_name")
-      .addColumnsItem(new EntityTypeColumn().name("column_name"));
-
-    EntityType actual = localizationService.localizeEntityType(entityType, null);
-    assertEquals(expectedTableTranslation, actual.getLabelAlias());
-    assertEquals(expectedColumnTranslation, actual.getColumns().get(0).getLabelAlias());
-    assertEquals(expectedDescriptionTranslation, actual.getDescription());
-    verify(translationService, times(numInvocations)).format(anyString());
-    verifyNoMoreInteractions(translationService);
-  }
-
   private void mockSourceLabelJoiner() {
     when(
       translationService.format(
@@ -78,20 +59,20 @@ class LocalizationServiceTest {
     String expectedTableTranslation = "Table Name";
     String expectedColumnTranslation = "Column Name";
     String expectedDescriptionTranslation = "Description";
-    testBasicEntityTypeFormatting(
-      Map.of(
-        "mod-fqm-manager.entityType.table_name",
-        expectedTableTranslation,
-        "mod-fqm-manager.entityType.table_name.column_name",
-        expectedColumnTranslation,
-        "mod-fqm-manager.entityType.table_name._description",
-        expectedDescriptionTranslation
-      ),
-      expectedTableTranslation,
-      expectedColumnTranslation,
-      expectedDescriptionTranslation,
-      3
-    );
+    when(translationService.format("mod-fqm-manager.entityType.table_name")).thenReturn(expectedTableTranslation);
+    when(translationService.format("mod-fqm-manager.entityType.table_name.column_name")).thenReturn(expectedColumnTranslation);
+    when(translationService.format("mod-fqm-manager.entityType.table_name._description")).thenReturn(expectedDescriptionTranslation);
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(new EntityTypeColumn().name("column_name"));
+
+    EntityType actual = localizationService.localizeEntityType(entityType, null);
+    assertEquals(expectedTableTranslation, actual.getLabelAlias());
+    assertEquals(expectedColumnTranslation, actual.getColumns().get(0).getLabelAlias());
+    assertEquals(expectedDescriptionTranslation, actual.getDescription());
+    verify(translationService, times(3)).format(anyString());
+    verifyNoMoreInteractions(translationService);
   }
 
   @Test

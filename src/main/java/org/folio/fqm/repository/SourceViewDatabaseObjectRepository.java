@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,11 +113,13 @@ public class SourceViewDatabaseObjectRepository {
           )
         )
         .fetchOne() !=
-      null
+        null
     );
   }
 
-  /** Get the list of views present in our module; used to reconcile and ensure source_views is accurate */
+  /**
+   * Get the list of views present in our module; used to reconcile and ensure source_views is accurate
+   */
   protected Set<String> getInstalledSourceViewsFromDatabase() {
     return jooqContext
       .select(field("table_name", String.class))
@@ -131,7 +134,6 @@ public class SourceViewDatabaseObjectRepository {
   }
 
   public Set<SourceViewDependency> getAvailableSourceViewDependencies(String centralTenantId) {
-    // TODO: might need to include central tenant mod-search here
     // in testing, this yields <2500 tables for a full FOLIO install. This is not the most efficient way to do this,
     // however, it's a lot better than sending hundreds of individual queries to check for existence one at a time,
     // and a lot more readable than crafting a massive dynamic query with hundreds of OR clauses.
@@ -139,7 +141,10 @@ public class SourceViewDatabaseObjectRepository {
       .select(List.of(field("table_schema", String.class), field("table_name", String.class)))
       .from(table(name("information_schema", "tables")))
       // need or condition here
-      .where(field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_").or(field("table_schema").contains(centralTenantId + "_mod_search")))
+      .where(
+        field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_")
+          .or(field("table_schema").contains(centralTenantId + "_mod_search"))
+      )
       .fetch();
 
     log.info("Discovered {} available dependency tables in the database", result.size());
@@ -152,7 +157,9 @@ public class SourceViewDatabaseObjectRepository {
       .collect(Collectors.toSet());
   }
 
-  /** Get all present materialized views. We want to remove these legacy ones if encountered. */
+  /**
+   * Get all present materialized views. We want to remove these legacy ones if encountered.
+   */
   protected List<String> getMaterializedViewsFromDatabase() {
     return jooqContext
       .select(field("matviewname", String.class))
@@ -161,7 +168,9 @@ public class SourceViewDatabaseObjectRepository {
       .fetch(field("matviewname", String.class));
   }
 
-  /** Removes all legacy materialized from the database */
+  /**
+   * Removes all legacy materialized from the database
+   */
   public void purgeMaterializedViewsIfPresent() {
     List<String> materializedViews = getMaterializedViewsFromDatabase();
     if (!materializedViews.isEmpty()) {
@@ -176,7 +185,9 @@ public class SourceViewDatabaseObjectRepository {
     }
   }
 
-  /** Ensures that all {@link SourceViewRecord}s have matching database objects and vice versa */
+  /**
+   * Ensures that all {@link SourceViewRecord}s have matching database objects and vice versa
+   */
   public void verifySourceViewRecordsMatchesDatabase() throws IOException {
     Set<String> realViews = this.getInstalledSourceViewsFromDatabase();
     List<String> expectedViews = sourceViewRecordRepository.findAll().stream().map(SourceViewRecord::getName).toList();

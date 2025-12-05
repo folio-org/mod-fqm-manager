@@ -123,7 +123,7 @@ public class SourceViewService {
               resource
                 .getContentAsString(StandardCharsets.UTF_8)
                 .replace("${tenant_id}", folioExecutionContext.getTenantId())
-                .replace("${central_tenant_id}", centralTenantId),
+                .replace("${safe_central_tenant_id}", centralTenantId),
               SourceViewDefinition.class
             )
             .withSourceFilePath(resource.getURI().toString());

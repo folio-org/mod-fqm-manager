@@ -115,14 +115,12 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   public ResponseEntity<Void> installEntityTypes(Boolean forceUpdateViews) {
     String centralTenantId = crossTenantQueryService.getCentralTenantId();
     if (centralTenantId == null) {
-      log.warn("YYZ INSTALL central tenant ID is null; using current tenant ID in place of central tenant ID");
+      log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
       centralTenantId = executionContext.getTenantId();
     }
     try {
       if (Boolean.TRUE.equals(forceUpdateViews)) {
         log.info("Forcing recreation of views as requested");
-        // YYZ 1 (should be good)
-        log.info("YYZ INSTALL available entity types for central tenant ID: {}", centralTenantId);
         sourceViewService.installAvailableSourceViews(centralTenantId, true);
       }
       entityTypeInitializationService.initializeEntityTypes(centralTenantId);

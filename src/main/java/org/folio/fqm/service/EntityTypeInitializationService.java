@@ -292,14 +292,4 @@ public class EntityTypeInitializationService {
       }
     }
   }
-
-//  private String getSafeCentralTenantId() {
-//    String centralTenantId = crossTenantQueryService.getCentralTenantId();
-//    if (centralTenantId != null) {
-//      return centralTenantId;
-//    } else {
-//      log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
-//      return folioExecutionContext.getTenantId();
-//    }
-//  }
 }

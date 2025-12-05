@@ -17,6 +17,7 @@ import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.rest.resource.EntityTypesApi;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -39,6 +40,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   private final SourceViewService sourceViewService;
   private final MigrationService migrationService;
   private final CrossTenantQueryService crossTenantQueryService;
+  private final FolioExecutionContext executionContext;
 
   @EntityTypePermissionsRequired
   @Override
@@ -111,15 +113,19 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
 
   @Override
   public ResponseEntity<Void> installEntityTypes(Boolean forceUpdateViews) {
+    String centralTenantId = crossTenantQueryService.getCentralTenantId();
+    if (centralTenantId == null) {
+      log.warn("YYZ INSTALL central tenant ID is null; using current tenant ID in place of central tenant ID");
+      centralTenantId = executionContext.getTenantId();
+    }
     try {
       if (Boolean.TRUE.equals(forceUpdateViews)) {
         log.info("Forcing recreation of views as requested");
         // YYZ 1 (should be good)
-        String centralTenantId = crossTenantQueryService.getCentralTenantId();
         log.info("YYZ INSTALL available entity types for central tenant ID: {}", centralTenantId);
         sourceViewService.installAvailableSourceViews(centralTenantId, true);
       }
-      entityTypeInitializationService.initializeEntityTypes(null);
+      entityTypeInitializationService.initializeEntityTypes(centralTenantId);
     } catch (IOException e) {
       throw log.throwing(new UncheckedIOException(e));
     }

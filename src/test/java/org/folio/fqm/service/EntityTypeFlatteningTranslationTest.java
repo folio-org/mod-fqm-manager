@@ -165,22 +165,24 @@ class EntityTypeFlatteningTranslationTest {
         String translation =
           switch (key) {
             case "mod-fqm-manager.entityType._sourceLabelJoiner" -> "{sourceLabel} -> {fieldLabel}";
-            case "mod-fqm-manager.entityType.deeply_composite.s2" -> "Source 2";
-            case "mod-fqm-manager.entityType.deeply_composite.c1" -> "Composite 1";
+            case "mod-fqm-manager.entityType.simple_1" -> "Simple 1";
             case "mod-fqm-manager.entityType.simple_1.field1" -> "Field 1";
             case "mod-fqm-manager.entityType.simple_1.field2" -> "Field 2";
-            case "mod-fqm-manager.entityType.simple_1" -> "Simple 1";
-            case "mod-fqm-manager.entityType.composite_1" -> "Composite 2";
-            case "mod-fqm-manager.entityType.composite_1.s1" -> "Source 1";
-            case "mod-fqm-manager.entityType.simple_2.fieldA" -> "Field A";
-            case "mod-fqm-manager.entityType.simple_2.fieldB" -> "Field B";
-            case "mod-fqm-manager.entityType.simple_2" -> "Simple 2";
-            case "mod-fqm-manager.entityType.deeply_composite" -> "Deep composite";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField" -> "Nested";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop1" -> "Prop 1";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop1._qualified" -> "Nested Prop 1";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop2" -> "Prop 2";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop2._qualified" -> "Nested Prop 2";
+            case "mod-fqm-manager.entityType.simple_2" -> "Simple 2";
+            case "mod-fqm-manager.entityType.simple_2.fieldA" -> "Field A";
+            case "mod-fqm-manager.entityType.simple_2.fieldB" -> "Field B";
+            case "mod-fqm-manager.entityType.composite_1" -> "Composite 2";
+            case "mod-fqm-manager.entityType.composite_1.s1" -> "Source 1";
+            case "mod-fqm-manager.entityType.deeply_composite" -> "Deep composite";
+            case "mod-fqm-manager.entityType.deeply_composite.s2" -> "Source 2";
+            case "mod-fqm-manager.entityType.deeply_composite.c1" -> "Composite 1";
             default -> {
-              if (!key.matches(".+(_description|\\._qualified)$")) { // Don't care about these
+              if (!key.endsWith("_description")) { // Don't care about these
                 System.out.println("Missing translation: " + key); // Tell me if we missed anything
               }
               yield key;
@@ -221,9 +223,9 @@ class EntityTypeFlatteningTranslationTest {
     assertEquals(2, objectType.getProperties().size());
     for (NestedObjectProperty prop : objectType.getProperties()) {
       if (prop.getName().equals("prop1")) {
-        assertEquals("Composite 1 -> Source 1 -> Nested -> Prop 1", prop.getLabelAlias());
+        assertEquals("Composite 1 -> Source 1 -> Nested Prop 1", prop.getLabelAliasFullyQualified());
       } else if (prop.getName().equals("prop2")) {
-        assertEquals("Composite 1 -> Source 1 -> Nested -> Prop 2", prop.getLabelAlias());
+        assertEquals("Composite 1 -> Source 1 -> Nested Prop 2", prop.getLabelAliasFullyQualified());
       }
     }
   }

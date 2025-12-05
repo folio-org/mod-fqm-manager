@@ -5,6 +5,7 @@ import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +83,23 @@ public class LocalizationService {
       // column has been previously translated, so just append source translations to it
       String sourceTranslation = getTranslationWithSourcePrefix(entityType, newColumn.getName(), newColumn.getLabelAlias(), sources);
       newColumn.setLabelAlias(sourceTranslation);
+
+      // Do the same thing with the qualified name of nested properties
+      if (newColumn.getDataType() instanceof ObjectType objectType) {
+        addSourcePrefixToProperties(entityType, newColumn, objectType, sources);
+      } else if (newColumn.getDataType() instanceof ArrayType arrayType) {
+        if (arrayType.getItemDataType() instanceof ObjectType itemObjectType) {
+          addSourcePrefixToProperties(entityType, newColumn, itemObjectType, sources);
+        }
+      }
     }
     return newColumn;
+  }
+
+  private void addSourcePrefixToProperties(EntityType entityType, EntityTypeColumn parentColumn, ObjectType objectType, List<EntityTypeSource> sources) {
+    for (var property : objectType.getProperties()) {
+      property.setLabelAliasFullyQualified(getTranslationWithSourcePrefix(entityType, parentColumn.getName(), property.getLabelAliasFullyQualified(), sources));
+    }
   }
 
   String localizeSourceLabel(EntityType entityType, String sourceAlias, EntityTypeSource source) {

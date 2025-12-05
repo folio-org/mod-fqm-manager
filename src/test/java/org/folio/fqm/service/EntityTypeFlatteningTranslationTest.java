@@ -6,6 +6,9 @@ import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.ArrayType;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.model.TranslationMap;
 import org.folio.spring.i18n.service.TranslationService;
@@ -210,5 +213,18 @@ class EntityTypeFlatteningTranslationTest {
 
     var s2fieldB = EntityTypeUtils.findColumnByName(flattenedEntityType, "s2.fieldB");
     assertEquals("Source 2 -> Field B", s2fieldB.getLabelAlias());
+
+    var c1s1nestedTableField = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.nestedTableField");
+    assertEquals("Composite 1 -> Source 1 -> Nested", c1s1nestedTableField.getLabelAlias());
+    var nestedType = (ArrayType) c1s1nestedTableField.getDataType();
+    var objectType = (ObjectType) nestedType.getItemDataType();
+    assertEquals(2, objectType.getProperties().size());
+    for (NestedObjectProperty prop : objectType.getProperties()) {
+      if (prop.getName().equals("prop1")) {
+        assertEquals("Composite 1 -> Source 1 -> Nested -> Prop 1", prop.getLabelAlias());
+      } else if (prop.getName().equals("prop2")) {
+        assertEquals("Composite 1 -> Source 1 -> Nested -> Prop 2", prop.getLabelAlias());
+      }
+    }
   }
 }

@@ -465,7 +465,8 @@ class EntityTypeControllerTest {
 
     mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
 
-    verify(sourceViewService, times(1)).installAvailableSourceViews(true);
+    // TODO: update
+    verify(sourceViewService, times(1)).installAvailableSourceViews(null, true);
     verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
     verifyNoMoreInteractions(entityTypeInitializationService, sourceViewService);
   }

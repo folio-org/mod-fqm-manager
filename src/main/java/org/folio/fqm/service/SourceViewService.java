@@ -108,8 +108,8 @@ public class SourceViewService {
   }
 
   /** Get all definitions from the packaged resources */
-  protected List<SourceViewDefinition> getAllDefinitions(String centralTenantId) throws IOException {
-    log.info("YYZ GET ALL SOURCE VIEW DEFINITIONS for central tenant ID: {}", centralTenantId);
+  protected List<SourceViewDefinition> getAllDefinitions(String safeCentralTenantId) throws IOException {
+    log.info("YYZ GET ALL SOURCE VIEW DEFINITIONS for central tenant ID: {}", safeCentralTenantId);
     return Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/db/source-views/**/*.json")),
@@ -123,7 +123,7 @@ public class SourceViewService {
               resource
                 .getContentAsString(StandardCharsets.UTF_8)
                 .replace("${tenant_id}", folioExecutionContext.getTenantId())
-                .replace("${safe_central_tenant_id}", centralTenantId),
+                .replace("${safe_central_tenant_id}", safeCentralTenantId),
               SourceViewDefinition.class
             )
             .withSourceFilePath(resource.getURI().toString());
@@ -140,9 +140,9 @@ public class SourceViewService {
    *
    * @return Map of {@link SourceViewDefinition}s keyed by view name
    */
-  protected Map<String, SourceViewDefinition> getAvailableDefinitions(String centralTenantId) throws IOException {
-    List<SourceViewDefinition> allDefinitions = getAllDefinitions(centralTenantId);
-    Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(centralTenantId);
+  protected Map<String, SourceViewDefinition> getAvailableDefinitions(String safeCentralTenantId) throws IOException {
+    List<SourceViewDefinition> allDefinitions = getAllDefinitions(safeCentralTenantId);
+    Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(safeCentralTenantId);
 
     Map<String, SourceViewDefinition> availableDefinitions = allDefinitions
       .stream()
@@ -169,10 +169,10 @@ public class SourceViewService {
    *
    * @return a set of names of source views that have been installed
    */
-  public Set<String> installAvailableSourceViews(String centralTenantId, boolean forceUpdate) throws IOException {
-    Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions(centralTenantId);
+  public Set<String> installAvailableSourceViews(String safeCentralTenantId, boolean forceUpdate) throws IOException {
+    Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions(safeCentralTenantId);
     if (folioExecutionContext.getTenantId().equals("cs00000int_0001")) {
-      log.info("YYZ INSTALL AVAILABLE SOURCE VIEWS for central tenant ID: {}", centralTenantId);
+      log.info("YYZ INSTALL AVAILABLE SOURCE VIEWS for central tenant ID: {}", safeCentralTenantId);
       for (String viewName : availableDefinitions.keySet()) {
         log.info("YYZ → Available source view: {}", viewName);
       }
@@ -190,7 +190,7 @@ public class SourceViewService {
       this.installSourceViews(availableDefinitions, shouldForceUpdateOnThisIteration);
 
       originalAvailableCount = availableDefinitions.size();
-      availableDefinitions = this.getAvailableDefinitions(centralTenantId);
+      availableDefinitions = this.getAvailableDefinitions(safeCentralTenantId);
       // we've reinstalled once. all in future cycles will be new, so no need to force update again
       shouldForceUpdateOnThisIteration = false;
       if (originalAvailableCount != availableDefinitions.size()) {
@@ -266,10 +266,10 @@ public class SourceViewService {
    * with the bonus of ensuring that any views missing from the database are re-created.
    * @throws IOException
    */
-  public void verifyAll(String centralTenantId) throws IOException {
+  public void verifyAll(String safeCentralTenantId) throws IOException {
     sourceViewDatabaseObjectRepository.verifySourceViewRecordsMatchesDatabase();
     sourceViewDatabaseObjectRepository.purgeMaterializedViewsIfPresent();
-    this.installAvailableSourceViews(centralTenantId, false);
+    this.installAvailableSourceViews(safeCentralTenantId, false);
   }
 
   /**
@@ -278,7 +278,7 @@ public class SourceViewService {
    *
    * @return if the view was able to be created
    */
-  public boolean attemptToHealSourceView(String viewName, String centralTenantId) {
+  public boolean attemptToHealSourceView(String viewName, String safeCentralTenantId) {
     if (viewName.contains("(")) {
       log.warn("√ Source `{}` is a complex expression and cannot be checked, so we assume it exists", viewName);
       return true;
@@ -294,8 +294,8 @@ public class SourceViewService {
 
         // TODO: update
         // YYZ 3
-        log.info("YYZ HEAL SOURCE VIEW central tenant ID: {}", centralTenantId);
-        this.verifyAll(centralTenantId);
+        log.info("YYZ HEAL SOURCE VIEW central tenant ID: {}", safeCentralTenantId);
+        this.verifyAll(safeCentralTenantId);
         return this.doesSourceViewExist(viewName);
       }
 
@@ -307,8 +307,8 @@ public class SourceViewService {
 
       // TODO: update
       // YYZ 4
-      log.info("YYZ HEAL SOURCE VIEW 2 central tenant ID: {}", centralTenantId);
-      Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(centralTenantId)
+      log.info("YYZ HEAL SOURCE VIEW 2 central tenant ID: {}", safeCentralTenantId);
+      Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(safeCentralTenantId)
         .stream()
         .filter(def -> def.name().equals(viewName))
         .findFirst();
@@ -320,7 +320,7 @@ public class SourceViewService {
 
       SourceViewDefinition definition = definitionOptional.get();
 
-      if (!definition.isAvailable(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(centralTenantId))) {
+      if (!definition.isAvailable(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(safeCentralTenantId))) {
         log.warn("X Source view `{}` cannot be created due to missing dependencies", viewName);
         return false;
       }

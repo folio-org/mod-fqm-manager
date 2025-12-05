@@ -108,8 +108,8 @@ public class EntityTypeInitializationService {
   protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
     // YYZ 2 (should be good)
-    log.info("YYZ GET available entity types for central tenant ID: {}", centralTenantId);
-    sourceViewService.verifyAll(centralTenantId);
+    log.info("YYZ GET available entity types for safe central tenant ID: {}", safeCentralTenantId);
+    sourceViewService.verifyAll(safeCentralTenantId);
 
     Map<UUID, EntityType> allEntityTypes = Stream
       .concat(
@@ -250,7 +250,7 @@ public class EntityTypeInitializationService {
    * Attempt to recreate the source views for an entity type. If this is not possible, the entity type
    * should no longer exist in the DB after this method has finished executing.
    */
-  public void attemptToHealEntityType(EntityType flattenedEntityType, String centralTenantId) {
+  public void attemptToHealEntityType(EntityType flattenedEntityType, String safeCentralTenantId) {
     log.warn(
       "Attempting to heal entity type {} ({}) by repairing all of its database sources",
       flattenedEntityType.getName(),
@@ -263,7 +263,7 @@ public class EntityTypeInitializationService {
       .filter(EntityTypeSourceDatabase.class::isInstance)
       .map(EntityTypeSourceDatabase.class::cast)
       .map(EntityTypeSourceDatabase::getTarget)
-      .forEach(viewName -> sourceViewService.attemptToHealSourceView(viewName, centralTenantId));
+      .forEach(viewName -> sourceViewService.attemptToHealSourceView(viewName, safeCentralTenantId));
 
     try {
       // will cleanup unavailable ones if the source view was not able to be created.
@@ -285,8 +285,12 @@ public class EntityTypeInitializationService {
           "Unable to run query on {} due to an UNDEFINED_TABLE error. Attempting to heal and re-run...",
           flattenedEntityType.getName()
         );
-        String centralTenantId = crossTenantQueryService.getCentralTenantId();
-        this.attemptToHealEntityType(flattenedEntityType, centralTenantId);
+        String safeCentralTenantId = crossTenantQueryService.getCentralTenantId();
+        if (safeCentralTenantId == null) {
+          log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
+          safeCentralTenantId = folioExecutionContext.getTenantId();
+        }
+        this.attemptToHealEntityType(flattenedEntityType, safeCentralTenantId);
         return runnable.get();
       } else {
         throw log.throwing(dae);

@@ -280,6 +280,7 @@ public class SourceViewService {
 
         // TODO: update
         // YYZ 3
+        log.info("YYZ HEAL SOURCE VIEW central tenant ID: {}", centralTenantId);
         this.verifyAll(centralTenantId);
         return this.doesSourceViewExist(viewName);
       }
@@ -292,6 +293,7 @@ public class SourceViewService {
 
       // TODO: update
       // YYZ 4
+      log.info("YYZ HEAL SOURCE VIEW 2 central tenant ID: {}", centralTenantId);
       Optional<SourceViewDefinition> definitionOptional = getAllDefinitions(centralTenantId)
         .stream()
         .filter(def -> def.name().equals(viewName))

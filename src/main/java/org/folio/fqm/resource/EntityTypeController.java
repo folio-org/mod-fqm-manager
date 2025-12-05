@@ -116,6 +116,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
         log.info("Forcing recreation of views as requested");
         // YYZ 1 (should be good)
         String centralTenantId = crossTenantQueryService.getCentralTenantId();
+        log.info("YYZ INSTALL available entity types for central tenant ID: {}", centralTenantId);
         sourceViewService.installAvailableSourceViews(centralTenantId, true);
       }
       entityTypeInitializationService.initializeEntityTypes(null);

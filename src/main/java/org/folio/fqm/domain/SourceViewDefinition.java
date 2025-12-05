@@ -22,6 +22,10 @@ public record SourceViewDefinition(
   public record SourceViewDependency(String schema, String table) {}
 
   public boolean isAvailable(Collection<SourceViewDependency> availableDependencies) {
+    if (name.equals("_mod_search_languages_availability_indicator")) {
+      System.out.println("YYZ _mod_search_languages_availability_indicator depends on " + dependsOn);
+      System.out.println("YYZ availableDependencies: " + availableDependencies);
+    }
     return this.dependsOn == null || availableDependencies.containsAll(this.dependsOn);
   }
 }

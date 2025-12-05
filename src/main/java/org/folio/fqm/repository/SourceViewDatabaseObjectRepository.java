@@ -130,14 +130,16 @@ public class SourceViewDatabaseObjectRepository {
       .fetchSet(field("table_name", String.class));
   }
 
-  public Set<SourceViewDependency> getAvailableSourceViewDependencies() {
+  public Set<SourceViewDependency> getAvailableSourceViewDependencies(String centralTenantId) {
+    // TODO: might need to include central tenant mod-search here
     // in testing, this yields <2500 tables for a full FOLIO install. This is not the most efficient way to do this,
     // however, it's a lot better than sending hundreds of individual queries to check for existence one at a time,
     // and a lot more readable than crafting a massive dynamic query with hundreds of OR clauses.
     Result<Record> result = jooqContext
       .select(List.of(field("table_schema", String.class), field("table_name", String.class)))
       .from(table(name("information_schema", "tables")))
-      .where(field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_"))
+      // need or condition here
+      .where(field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_").or(field("table_schema").contains(centralTenantId + "_mod_search")))
       .fetch();
 
     log.info("Discovered {} available dependency tables in the database", result.size());

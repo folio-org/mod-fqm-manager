@@ -142,7 +142,7 @@ public class SourceViewService {
    */
   protected Map<String, SourceViewDefinition> getAvailableDefinitions(String centralTenantId) throws IOException {
     List<SourceViewDefinition> allDefinitions = getAllDefinitions(centralTenantId);
-    Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies();
+    Set<SourceViewDependency> availableDependencies = sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(centralTenantId);
 
     Map<String, SourceViewDefinition> availableDefinitions = allDefinitions
       .stream()
@@ -320,7 +320,7 @@ public class SourceViewService {
 
       SourceViewDefinition definition = definitionOptional.get();
 
-      if (!definition.isAvailable(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies())) {
+      if (!definition.isAvailable(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(centralTenantId))) {
         log.warn("X Source view `{}` cannot be created due to missing dependencies", viewName);
         return false;
       }

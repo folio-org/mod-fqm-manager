@@ -109,6 +109,7 @@ public class SourceViewService {
 
   /** Get all definitions from the packaged resources */
   protected List<SourceViewDefinition> getAllDefinitions(String centralTenantId) throws IOException {
+    log.info("YYZ GET ALL SOURCE VIEW DEFINITIONS for central tenant ID: {}", centralTenantId);
     return Stream
       .concat(
         Arrays.stream(resourceResolver.getResources("classpath:/db/source-views/**/*.json")),
@@ -170,6 +171,12 @@ public class SourceViewService {
    */
   public Set<String> installAvailableSourceViews(String centralTenantId, boolean forceUpdate) throws IOException {
     Map<String, SourceViewDefinition> availableDefinitions = this.getAvailableDefinitions(centralTenantId);
+    if (folioExecutionContext.getTenantId().equals("cs00000int_0001")) {
+      log.info("YYZ INSTALL AVAILABLE SOURCE VIEWS for central tenant ID: {}", centralTenantId);
+      for (String viewName : availableDefinitions.keySet()) {
+        log.info("YYZ → Available source view: {}", viewName);
+      }
+    }
     int originalAvailableCount = -1;
     boolean shouldForceUpdateOnThisIteration = forceUpdate;
 
@@ -238,6 +245,13 @@ public class SourceViewService {
     log.info("To create: {}", definitionsToInstall);
     log.info("To update: {}", definitionsToUpdate);
     log.info("To remove: {}", definitionsToRemove);
+
+    for (String viewName : definitionsToInstall) {
+      if (folioExecutionContext.getTenantId().equals("cs00000int_0001") && viewName.equals("_mod_search_languages_availability_indicator")) {
+        log.info("YYZ → Installing source view `{}`", viewName);
+      }
+      sourceViewDatabaseObjectRepository.installSingleSourceView(toInstall.get(viewName));
+    }
 
     sourceViewDatabaseObjectRepository.persistSourceViews(
       toInstall,

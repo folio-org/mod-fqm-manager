@@ -174,7 +174,7 @@ public class SourceViewService {
     if (folioExecutionContext.getTenantId().equals("cs00000int_0001")) {
       log.info("YYZ INSTALL AVAILABLE SOURCE VIEWS for central tenant ID: {}", safeCentralTenantId);
       for (String viewName : availableDefinitions.keySet()) {
-        log.info("YYZ → Available source view: {}", viewName); //
+        log.info("YYZ → Available source view: {}", viewName);
       }
     }
     int originalAvailableCount = -1;

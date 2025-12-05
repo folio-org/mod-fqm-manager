@@ -82,8 +82,23 @@ public class LocalizationService {
       // column has been previously translated, so just append source translations to it
       String sourceTranslation = getTranslationWithSourcePrefix(entityType, newColumn.getName(), newColumn.getLabelAlias(), sources);
       newColumn.setLabelAlias(sourceTranslation);
+
+      // Do the same thing with the qualified name of nested properties. Note: This will only work for shallow hierarchies. If we want to support more complex ones, we'll need to make this recursive.
+      if (newColumn.getDataType() instanceof ObjectType objectType) {
+        addSourcePrefixToProperties(entityType, newColumn, objectType, sources);
+      } else if (newColumn.getDataType() instanceof ArrayType arrayType) {
+        if (arrayType.getItemDataType() instanceof ObjectType itemObjectType) {
+          addSourcePrefixToProperties(entityType, newColumn, itemObjectType, sources);
+        }
+      }
     }
     return newColumn;
+  }
+
+  private void addSourcePrefixToProperties(EntityType entityType, EntityTypeColumn parentColumn, ObjectType objectType, List<EntityTypeSource> sources) {
+    for (var property : objectType.getProperties()) {
+      property.setLabelAliasFullyQualified(getTranslationWithSourcePrefix(entityType, parentColumn.getName(), property.getLabelAliasFullyQualified(), sources));
+    }
   }
 
   String localizeSourceLabel(EntityType entityType, String sourceAlias, EntityTypeSource source) {

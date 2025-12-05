@@ -6,6 +6,9 @@ import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.ArrayType;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.model.TranslationMap;
 import org.folio.spring.i18n.service.TranslationService;
@@ -162,22 +165,24 @@ class EntityTypeFlatteningTranslationTest {
         String translation =
           switch (key) {
             case "mod-fqm-manager.entityType._sourceLabelJoiner" -> "{sourceLabel} -> {fieldLabel}";
-            case "mod-fqm-manager.entityType.deeply_composite.s2" -> "Source 2";
-            case "mod-fqm-manager.entityType.deeply_composite.c1" -> "Composite 1";
+            case "mod-fqm-manager.entityType.simple_1" -> "Simple 1";
             case "mod-fqm-manager.entityType.simple_1.field1" -> "Field 1";
             case "mod-fqm-manager.entityType.simple_1.field2" -> "Field 2";
-            case "mod-fqm-manager.entityType.simple_1" -> "Simple 1";
-            case "mod-fqm-manager.entityType.composite_1" -> "Composite 2";
-            case "mod-fqm-manager.entityType.composite_1.s1" -> "Source 1";
-            case "mod-fqm-manager.entityType.simple_2.fieldA" -> "Field A";
-            case "mod-fqm-manager.entityType.simple_2.fieldB" -> "Field B";
-            case "mod-fqm-manager.entityType.simple_2" -> "Simple 2";
-            case "mod-fqm-manager.entityType.deeply_composite" -> "Deep composite";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField" -> "Nested";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop1" -> "Prop 1";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop1._qualified" -> "Nested Prop 1";
             case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop2" -> "Prop 2";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop2._qualified" -> "Nested Prop 2";
+            case "mod-fqm-manager.entityType.simple_2" -> "Simple 2";
+            case "mod-fqm-manager.entityType.simple_2.fieldA" -> "Field A";
+            case "mod-fqm-manager.entityType.simple_2.fieldB" -> "Field B";
+            case "mod-fqm-manager.entityType.composite_1" -> "Composite 1";
+            case "mod-fqm-manager.entityType.composite_1.s1" -> "Source 1";
+            case "mod-fqm-manager.entityType.deeply_composite" -> "Deep composite";
+            case "mod-fqm-manager.entityType.deeply_composite.s2" -> "Source 2";
+            case "mod-fqm-manager.entityType.deeply_composite.c1" -> "Composite Source 1";
             default -> {
-              if (!key.matches(".+(_description|\\._qualified)$")) { // Don't care about these
+              if (!key.endsWith("_description")) { // Don't care about these
                 System.out.println("Missing translation: " + key); // Tell me if we missed anything
               }
               yield key;
@@ -200,15 +205,28 @@ class EntityTypeFlatteningTranslationTest {
     assertEquals(5, flattenedEntityType.getColumns().size());
 
     var c1s1field1 = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.field1");
-    assertEquals("Composite 1 -> Source 1 -> Field 1", c1s1field1.getLabelAlias());
+    assertEquals("Composite Source 1 -> Source 1 -> Field 1", c1s1field1.getLabelAlias());
 
     var c1s1field2 = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.field2");
-    assertEquals("Composite 1 -> Source 1 -> Field 2", c1s1field2.getLabelAlias());
+    assertEquals("Composite Source 1 -> Source 1 -> Field 2", c1s1field2.getLabelAlias());
 
     var s2fieldA = EntityTypeUtils.findColumnByName(flattenedEntityType, "s2.fieldA");
     assertEquals("Source 2 -> Field A", s2fieldA.getLabelAlias());
 
     var s2fieldB = EntityTypeUtils.findColumnByName(flattenedEntityType, "s2.fieldB");
     assertEquals("Source 2 -> Field B", s2fieldB.getLabelAlias());
+
+    var c1s1nestedTableField = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.nestedTableField");
+    assertEquals("Composite Source 1 -> Source 1 -> Nested", c1s1nestedTableField.getLabelAlias());
+    var nestedType = (ArrayType) c1s1nestedTableField.getDataType();
+    var objectType = (ObjectType) nestedType.getItemDataType();
+    assertEquals(2, objectType.getProperties().size());
+    for (NestedObjectProperty prop : objectType.getProperties()) {
+      if (prop.getName().equals("prop1")) {
+        assertEquals("Composite Source 1 -> Source 1 -> Nested Prop 1", prop.getLabelAliasFullyQualified());
+      } else if (prop.getName().equals("prop2")) {
+        assertEquals("Composite Source 1 -> Source 1 -> Nested Prop 2", prop.getLabelAliasFullyQualified());
+      }
+    }
   }
 }

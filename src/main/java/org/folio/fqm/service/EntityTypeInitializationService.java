@@ -107,8 +107,6 @@ public class EntityTypeInitializationService {
 
   protected List<EntityType> getAvailableEntityTypes(String centralTenantId, String safeCentralTenantId)
     throws IOException {
-    // YYZ 2 (should be good)
-    log.info("YYZ GET available entity types for safe central tenant ID: {}", safeCentralTenantId);
     sourceViewService.verifyAll(safeCentralTenantId);
 
     Map<UUID, EntityType> allEntityTypes = Stream
@@ -250,12 +248,14 @@ public class EntityTypeInitializationService {
    * Attempt to recreate the source views for an entity type. If this is not possible, the entity type
    * should no longer exist in the DB after this method has finished executing.
    */
-  public void attemptToHealEntityType(EntityType flattenedEntityType, String safeCentralTenantId) {
+  public void attemptToHealEntityType(EntityType flattenedEntityType) {
     log.warn(
       "Attempting to heal entity type {} ({}) by repairing all of its database sources",
       flattenedEntityType.getName(),
       flattenedEntityType.getId()
     );
+
+    String safeCentralTenantId = getCentralTenantIdSafely(null).getLeft();
 
     flattenedEntityType
       .getSources()
@@ -285,16 +285,21 @@ public class EntityTypeInitializationService {
           "Unable to run query on {} due to an UNDEFINED_TABLE error. Attempting to heal and re-run...",
           flattenedEntityType.getName()
         );
-        String safeCentralTenantId = crossTenantQueryService.getCentralTenantId();
-        if (safeCentralTenantId == null) {
-          log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
-          safeCentralTenantId = folioExecutionContext.getTenantId();
-        }
-        this.attemptToHealEntityType(flattenedEntityType, safeCentralTenantId);
+        this.attemptToHealEntityType(flattenedEntityType);
         return runnable.get();
       } else {
         throw log.throwing(dae);
       }
     }
   }
+
+//  private String getSafeCentralTenantId() {
+//    String centralTenantId = crossTenantQueryService.getCentralTenantId();
+//    if (centralTenantId != null) {
+//      return centralTenantId;
+//    } else {
+//      log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
+//      return folioExecutionContext.getTenantId();
+//    }
+//  }
 }

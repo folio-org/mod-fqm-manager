@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
-import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.model.TranslationMap;
 import org.folio.spring.i18n.service.TranslationService;
@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,9 +44,27 @@ class EntityTypeFlatteningTranslationTest {
             {
               "id": "00000000-0000-0000-0000-000000000001",
               "name": "simple_1",
+              "sources": [
+                { "type": "db", "alias": "simple_1Source", "target": "simple_1_view" }
+              ],
               "columns": [
                 { "name": "field1", "dataType": { "dataType": "stringType" }, "valueGetter": "field1ValueGetter" },
-                { "name": "field2", "dataType": { "dataType": "stringType" }, "valueGetter": "field2ValueGetter" }
+                { "name": "field2", "dataType": { "dataType": "stringType" }, "valueGetter": "field2ValueGetter" },
+                {
+                  "name": "nestedTableField",
+                  "sourceAlias": "simple_1Source",
+                  "dataType": {
+                    "dataType": "arrayType",
+                    "itemDataType": {
+                      "dataType": "objectType",
+                      "properties": [
+                        { "name": "prop1", "dataType": { "dataType": "stringType" }, "property": "prop1prop", "valueGetter": ":sourceAlias.nestedTableField ->> 'prop1'" },
+                        { "name": "prop2", "dataType": { "dataType": "stringType" }, "property": "prop2prop", "valueGetter": ":sourceAlias.nestedTableField ->> 'prop2'" }
+                      ]
+                    }
+                  },
+                  "valueGetter": "nestedTableFieldValueGetter"
+                }
               ]
             }
             """,
@@ -156,8 +173,11 @@ class EntityTypeFlatteningTranslationTest {
             case "mod-fqm-manager.entityType.simple_2.fieldB" -> "Field B";
             case "mod-fqm-manager.entityType.simple_2" -> "Simple 2";
             case "mod-fqm-manager.entityType.deeply_composite" -> "Deep composite";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField" -> "Nested";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop1" -> "Prop 1";
+            case "mod-fqm-manager.entityType.simple_1.nestedTableField.prop2" -> "Prop 2";
             default -> {
-              if (!key.endsWith("_description")) { // Don't care about this one
+              if (!key.matches(".+(_description|\\._qualified)$")) { // Don't care about these
                 System.out.println("Missing translation: " + key); // Tell me if we missed anything
               }
               yield key;
@@ -176,15 +196,19 @@ class EntityTypeFlatteningTranslationTest {
       TENANT_ID,
       false
     );
-    List<EntityTypeColumn> columns = flattenedEntityType.getColumns();
-    assertEquals(4, columns.size());
-    assertEquals("c1.s1.field1", columns.get(0).getName());
-    assertEquals("Composite 1 -> Source 1 -> Field 1", columns.get(0).getLabelAlias());
-    assertEquals("c1.s1.field2", columns.get(1).getName());
-    assertEquals("Composite 1 -> Source 1 -> Field 2", columns.get(1).getLabelAlias());
-    assertEquals("s2.fieldA", columns.get(2).getName());
-    assertEquals("Source 2 -> Field A", columns.get(2).getLabelAlias());
-    assertEquals("s2.fieldB", columns.get(3).getName());
-    assertEquals("Source 2 -> Field B", columns.get(3).getLabelAlias());
+
+    assertEquals(5, flattenedEntityType.getColumns().size());
+
+    var c1s1field1 = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.field1");
+    assertEquals("Composite 1 -> Source 1 -> Field 1", c1s1field1.getLabelAlias());
+
+    var c1s1field2 = EntityTypeUtils.findColumnByName(flattenedEntityType, "c1.s1.field2");
+    assertEquals("Composite 1 -> Source 1 -> Field 2", c1s1field2.getLabelAlias());
+
+    var s2fieldA = EntityTypeUtils.findColumnByName(flattenedEntityType, "s2.fieldA");
+    assertEquals("Source 2 -> Field A", s2fieldA.getLabelAlias());
+
+    var s2fieldB = EntityTypeUtils.findColumnByName(flattenedEntityType, "s2.fieldB");
+    assertEquals("Source 2 -> Field B", s2fieldB.getLabelAlias());
   }
 }

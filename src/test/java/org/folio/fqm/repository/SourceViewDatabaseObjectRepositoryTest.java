@@ -170,7 +170,6 @@ class SourceViewDatabaseObjectRepositoryTest {
         mockFetchAvailableDependencies(List.of(Pair.of("schema1", "table1"), Pair.of("schema2", "table2")))
       );
 
-    // TODO: update?
     assertThat(
       sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null),
       containsInAnyOrder(new SourceViewDependency("schema1", "table1"), new SourceViewDependency("schema2", "table2"))

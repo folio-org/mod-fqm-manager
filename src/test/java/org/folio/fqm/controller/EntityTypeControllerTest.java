@@ -22,6 +22,7 @@ import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.resource.EntityTypeController;
+import org.folio.fqm.service.CrossTenantQueryService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeService;
 import org.folio.fqm.service.MigrationService;
@@ -34,6 +35,7 @@ import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.UpdateUsedByRequest;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,12 @@ class EntityTypeControllerTest {
 
   @MockitoBean
   private SourceViewService sourceViewService;
+
+  @MockitoBean
+  private CrossTenantQueryService crossTenantQueryService;
+
+  @MockitoBean
+  private FolioExecutionContext executionContext;
 
   @Test
   void shouldReturnEntityTypeDefinition() throws Exception {
@@ -465,7 +473,6 @@ class EntityTypeControllerTest {
 
     mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
 
-    // TODO: update
     verify(sourceViewService, times(1)).installAvailableSourceViews(null, true);
     verify(entityTypeInitializationService, times(1)).initializeEntityTypes(null);
     verifyNoMoreInteractions(entityTypeInitializationService, sourceViewService);

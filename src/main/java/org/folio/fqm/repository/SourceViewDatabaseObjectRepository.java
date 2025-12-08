@@ -144,7 +144,7 @@ public class SourceViewDatabaseObjectRepository {
       // may not have their own mod-search schema in ECS environments).
       .where(
         field("table_schema").startsWith(folioExecutionContext.getTenantId() + "_mod_")
-          .or(field("table_schema").contains(safeCentralTenantId + "_mod_search"))
+          .or(field("table_schema").eq(safeCentralTenantId + "_mod_search"))
       )
       .fetch();
 

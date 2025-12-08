@@ -171,7 +171,7 @@ class SourceViewDatabaseObjectRepositoryTest {
       );
 
     assertThat(
-      sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(),
+      sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null),
       containsInAnyOrder(new SourceViewDependency("schema1", "table1"), new SourceViewDependency("schema2", "table2"))
     );
   }

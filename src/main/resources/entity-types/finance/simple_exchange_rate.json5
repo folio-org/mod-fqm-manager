@@ -6,7 +6,7 @@
     {
       alias: 'rates',
       type: 'db',
-      target: 'drv_currency_exchange_rates',
+      target: 'currency_exchange_rates',
     },
     // required to guarantee that the special FQM currency source for `cost_currency` is present
     {

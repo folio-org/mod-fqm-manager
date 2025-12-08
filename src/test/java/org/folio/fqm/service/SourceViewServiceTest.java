@@ -105,7 +105,7 @@ class SourceViewServiceTest {
 
   @BeforeEach
   void setup() {
-    lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenantId");
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn(CENTRAL_TENANT_ID);
   }
 
   @ParameterizedTest
@@ -136,10 +136,7 @@ class SourceViewServiceTest {
     when(resource.getContentAsString(any())).thenThrow(new IOException());
     when(resourceResolver.getResources(anyString())).thenReturn(new Resource[] { resource });
 
-    // TODO: update
-    String centralTenantId = "tenantId";
-    when(folioExecutionContext.getTenantId()).thenReturn(centralTenantId);
-    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions(centralTenantId));
+    assertThrows(UncheckedIOException.class, () -> sourceViewService.getAvailableDefinitions(CENTRAL_TENANT_ID));
   }
 
   @Test
@@ -182,18 +179,15 @@ class SourceViewServiceTest {
   void testInstallAvailableSourceViewsMultipleIterations() throws IOException {
     mockDefinitions(List.of(DEFINITION_A, DEFINITION_A_A));
 
-    // TODO: update?
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null))
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(CENTRAL_TENANT_ID))
       .thenReturn(
         Set.of(new SourceViewDependency("a", "a")),
         Set.of(new SourceViewDependency("a", "a"), new SourceViewDependency("mod_fqm_manager", "view_a"))
       );
     when(sourceViewRecordRepository.findAll()).thenReturn(List.of(), List.of(RECORD_A));
-    // TODO: update
-    sourceViewService.installAvailableSourceViews(null, false);
+    sourceViewService.installAvailableSourceViews(CENTRAL_TENANT_ID, false);
 
-    // TODO: update?
-    verify(sourceViewDatabaseObjectRepository, atLeastOnce()).getAvailableSourceViewDependencies(null);
+    verify(sourceViewDatabaseObjectRepository, atLeastOnce()).getAvailableSourceViewDependencies(CENTRAL_TENANT_ID);
     verify(sourceViewDatabaseObjectRepository)
       .persistSourceViews(
         any(),
@@ -281,15 +275,13 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view_a")).thenReturn(false);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view_a")).thenReturn(false);
     mockDefinitions(List.of(DEFINITION_A));
-    // TODO: update?
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null)).thenReturn(Set.of());
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(CENTRAL_TENANT_ID)).thenReturn(Set.of());
 
     assertFalse(sourceViewService.attemptToHealSourceView("view_a", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");
-    // TODO: update?
-    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(null);
+    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(CENTRAL_TENANT_ID);
     verifyNoMoreInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }
 
@@ -298,16 +290,14 @@ class SourceViewServiceTest {
     when(sourceViewRecordRepository.existsById("view_a")).thenReturn(false);
     when(sourceViewDatabaseObjectRepository.doesSourceViewExistInDatabase("view_a")).thenReturn(false);
     mockDefinitions(List.of(DEFINITION_A));
-    // TODO: update?
-    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(null))
+    when(sourceViewDatabaseObjectRepository.getAvailableSourceViewDependencies(CENTRAL_TENANT_ID))
       .thenReturn(Set.of(new SourceViewDependency("a", "a")));
 
     assertTrue(sourceViewService.attemptToHealSourceView("view_a", CENTRAL_TENANT_ID));
 
     verify(sourceViewRecordRepository).existsById("view_a");
     verify(sourceViewDatabaseObjectRepository).doesSourceViewExistInDatabase("view_a");
-    // TODO: update?
-    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(null);
+    verify(sourceViewDatabaseObjectRepository).getAvailableSourceViewDependencies(CENTRAL_TENANT_ID);
     verify(sourceViewDatabaseObjectRepository).installSingleSourceView(DEFINITION_A);
     verifyNoMoreInteractions(sourceViewRecordRepository, sourceViewDatabaseObjectRepository);
   }

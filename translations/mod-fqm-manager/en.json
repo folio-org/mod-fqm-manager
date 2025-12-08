@@ -805,7 +805,7 @@
   "entityType.simple_holdings_record.receiving_history": "Receiving history",
   "entityType.simple_holdings_record.receiving_history_display_type": "Receiving history display type",
   "entityType.simple_holdings_record.receiving_history.chronology": "Chronology",
-  "entityType.simple_holdings_record.receiving_history.chronology._qualified": "Holdings — Receiving history — chronology",
+  "entityType.simple_holdings_record.receiving_history.chronology._qualified": "Holdings — Receiving history — Chronology",
   "entityType.simple_holdings_record.receiving_history.enumeration": "Enumeration",
   "entityType.simple_holdings_record.receiving_history.enumeration._qualified": "Holdings — Receiving history — Enumeration",
   "entityType.simple_holdings_record.receiving_history.public_display": "Public display",

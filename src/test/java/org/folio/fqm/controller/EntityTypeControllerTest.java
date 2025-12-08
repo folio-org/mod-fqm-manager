@@ -492,7 +492,7 @@ class EntityTypeControllerTest {
 
   @Test
   void shouldUseCurrentTenantForInstallIfCentralTenantIsNull() throws Exception {
-    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install?");
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install?forceRecreateViews=true");
 
     when(crossTenantQueryService.getCentralTenantId()).thenReturn(null);
     when(executionContext.getTenantId()).thenReturn("tenantId");

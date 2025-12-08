@@ -204,9 +204,7 @@ class SourceViewServiceTest {
   void testVerifyAll() throws IOException {
     mockDefinitions(List.of());
 
-    // TODO: update
-    String centralTenantId = "PLACEHOLDER";
-    sourceViewService.verifyAll(centralTenantId);
+    sourceViewService.verifyAll(CENTRAL_TENANT_ID);
 
     verify(sourceViewDatabaseObjectRepository).purgeMaterializedViewsIfPresent();
     verify(sourceViewDatabaseObjectRepository).verifySourceViewRecordsMatchesDatabase();

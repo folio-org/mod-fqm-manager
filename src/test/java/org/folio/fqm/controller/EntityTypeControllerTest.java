@@ -490,6 +490,20 @@ class EntityTypeControllerTest {
     verifyNoMoreInteractions(entityTypeInitializationService);
   }
 
+  @Test
+  void shouldUseCurrentTenantForInstallIfCentralTenantIsNull() throws Exception {
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install?");
+
+    when(crossTenantQueryService.getCentralTenantId()).thenReturn(null);
+    when(executionContext.getTenantId()).thenReturn("tenantId");
+
+    mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+
+    verify(sourceViewService, times(1)).installAvailableSourceViews("tenantId", true);
+    verify(entityTypeInitializationService, times(1)).initializeEntityTypes("tenantId");
+    verifyNoMoreInteractions(entityTypeInitializationService, sourceViewService);
+  }
+
   private static EntityType getEntityType(EntityTypeColumn col) {
     UUID id = UUID.randomUUID();
     return new EntityType()

@@ -469,7 +469,7 @@ class EntityTypeControllerTest {
 
   @Test
   void testInstallEntityTypesWithPurge() throws Exception {
-    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install?forceRecreateViews=true");
+    RequestBuilder requestBuilder = MockMvcRequestBuilders.post("/entity-types/install").queryParam("forceRecreateViews", "true");
 
     mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
 

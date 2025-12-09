@@ -307,6 +307,14 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'loanId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      joinsTo: [
+        {
+          targetId: '00349126-c923-4045-a29f-3b6db4c6bea9',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'user_id',
@@ -318,6 +326,20 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'item_id',
@@ -329,6 +351,14 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'itemId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      joinsTo: [
+        {
+          targetId: '372e025a-9444-473a-9ffd-fa0f63db1674',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'material_type_id',

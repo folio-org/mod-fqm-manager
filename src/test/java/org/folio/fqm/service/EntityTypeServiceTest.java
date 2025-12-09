@@ -595,14 +595,28 @@ class EntityTypeServiceTest {
              }
            }
       """);
+    when(simpleHttpClient.get(eq("configurations/entries"), anyMap())).thenReturn("""
+           {
+             "configs": [
+               {
+                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
+                 "module":"ORG",
+                 "configName":"localeSettings",
+                 "enabled":true,
+                 "value":"{\\"locale\\":\\"de\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
+               }
+             ],
+             "totalRecords": 1,
+             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
+           }
+      """);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
-    // Expects ISO 639 names from languages.json5 for consistency with results display
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("mus").label("Creek"),
-      new ValueWithLabel().value("eng").label("English"),
-      new ValueWithLabel().value("ger").label("German")
+      new ValueWithLabel().value("ger").label("Deutsch"),
+      new ValueWithLabel().value("eng").label("Englisch")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

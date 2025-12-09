@@ -100,7 +100,7 @@
       visibleByDefault: false,
       valueGetter: "CASE WHEN (:sourceAlias.jsonb -> 'cost' ->> 'exchangeRate') IS NOT NULL \
         THEN (:sourceAlias.jsonb -> 'cost' -> 'exchangeRate')::float \
-        ELSE (select exchange_rate from currency_exchange_rates where currency_exchange_rates.currency = :sourceAlias.jsonb -> 'cost' ->> 'currency') \
+        ELSE (select exchange_rate from drv_currency_exchange_rates where drv_currency_exchange_rates.currency = :sourceAlias.jsonb -> 'cost' ->> 'currency') \
       END",
       valueFunction: '(:value)::float',
     },

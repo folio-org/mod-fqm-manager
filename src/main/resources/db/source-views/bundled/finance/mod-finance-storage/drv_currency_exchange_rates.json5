@@ -1,0 +1,5 @@
+{
+  name: 'drv_currency_exchange_rates',
+  dependsOn: [['${tenant_id}_mod_fqm_manager', 'currency_exchange_rates']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_fqm_manager.currency_exchange_rates',
+}

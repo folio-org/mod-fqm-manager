@@ -1062,6 +1062,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      localizeForExports: true,
       valueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
       filterValueGetter: "(:sourceAlias.jsonb -> 'languages'::text)",
       source: {

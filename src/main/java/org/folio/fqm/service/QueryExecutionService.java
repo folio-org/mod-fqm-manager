@@ -32,17 +32,19 @@ public class QueryExecutionService {
   public void executeQueryAsync(Query query, EntityType entityType, int maxQuerySize) {
     try {
       log.info("Executing query {}", query.queryId());
+      queryRepository.updateQuery(query.queryId(), QueryStatus.IN_PROGRESS, null, null);
+      var inProgressQuery = query.withStatus(QueryStatus.IN_PROGRESS);
       FqlQueryWithContext fqlQueryWithContext = new FqlQueryWithContext(
         folioExecutionContext.getTenantId(),
         entityType,
-        query.fqlQuery(),
+        inProgressQuery.fqlQuery(),
         false
       );
       queryProcessorService.getIdsInBatch(
         fqlQueryWithContext,
         DEFAULT_BATCH_SIZE,
         maxQuerySize,
-        query
+        inProgressQuery
       );
     } catch (MaxQuerySizeExceededException exception) {
       queryRepository.updateQuery(query.queryId(), QueryStatus.MAX_SIZE_EXCEEDED, OffsetDateTime.now(), null);

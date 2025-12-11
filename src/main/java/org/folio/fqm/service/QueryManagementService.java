@@ -26,11 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
 
 import static org.folio.fqm.domain.QueryStatus.FAILED;
+import static org.folio.fqm.domain.QueryStatus.IN_PROGRESS;
+import static org.folio.fqm.domain.QueryStatus.QUEUED;
 
 /**
  * Service class responsible for managing a query
@@ -54,6 +57,10 @@ public class QueryManagementService {
 
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
+  @Value("${mod-fqm-manager.zombie-query-queued-threshold-duration}")
+  private Duration queuedQueryZombieThreshold;
+  @Value("${mod-fqm-manager.convert-queued-status-to-in-progress}")
+  private boolean convertQueuedStatusToInProgress;
   @Setter
   @Value("${mod-fqm-manager.max-query-size}")
   private int maxConfiguredQuerySize;
@@ -175,12 +182,14 @@ public class QueryManagementService {
   public Optional<QueryDetails> getQuery(UUID queryId, boolean includeResults, int offset, int limit) {
     return getPotentialZombieQuery(queryId)
       .map(query -> {
+        // We don't want to return QUEUED status, so turn it to IN_PROGRESS
+        var queryStatus = convertQueuedStatusToInProgress && query.status() == QUEUED ? IN_PROGRESS : query.status();
         QueryDetails details = new QueryDetails()
           .queryId(queryId)
           .entityTypeId(query.entityTypeId())
           .fqlQuery(query.fqlQuery())
           .fields(query.fields())
-          .status(QueryDetails.StatusEnum.valueOf(query.status().toString()))
+          .status(QueryDetails.StatusEnum.valueOf(queryStatus.toString()))
           .startDate(offsetDateTimeAsDate(query.startDate()))
           .endDate(offsetDateTimeAsDate(query.endDate()))
           .failureReason(query.failureReason());
@@ -214,7 +223,7 @@ public class QueryManagementService {
 
   private Optional<Query> getAndValidateQuery(UUID queryId) {
     Optional<Query> query = queryRepository.getQuery(queryId, false);
-    if (query.filter(q -> q.status() == QueryStatus.IN_PROGRESS).isPresent()
+    if (query.filter(this::isZombieCandidate).isPresent()
       && queryRepository.getSelectQueryPids(queryId).isEmpty()
       && queryRepository.getInsertQueryPids(queryId).isEmpty()
     ) {
@@ -222,6 +231,12 @@ public class QueryManagementService {
       throw new ZombieQueryException(); // This exception is the trigger to retry in the RetryTemplate
     }
     return query;
+  }
+
+  private boolean isZombieCandidate(@Nonnull Query query) {
+    // All in-progress queries are potential zombies, as are queued queries that have been queued for longer than the threshold
+    return query.status() == IN_PROGRESS ||
+           (query.status() == QUEUED && OffsetDateTime.now().isAfter(query.startDate().plus(queuedQueryZombieThreshold)));
   }
 
   private Optional<Query> handleZombieQuery(UUID queryId) {

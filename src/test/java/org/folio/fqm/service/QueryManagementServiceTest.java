@@ -26,6 +26,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -711,5 +713,146 @@ class QueryManagementServiceTest {
 
   private static Date offsetDateTimeAsDate(OffsetDateTime offsetDateTime) {
     return offsetDateTime == null ? null : Date.from(offsetDateTime.toInstant());
+  }
+
+  @Test
+  void shouldConvertQueuedStatusToInProgressWhenFeatureFlagEnabled() {
+    // Given a query with QUEUED status and the feature flag is enabled
+    Query queuedQuery = TestDataFixture.getMockQuery(QueryStatus.QUEUED);
+    when(queryRepository.getQuery(queuedQuery.queryId(), false)).thenReturn(Optional.of(queuedQuery));
+    when(queryResultsRepository.getQueryResultsCount(queuedQuery.queryId())).thenReturn(0);
+
+    // When getting the query with the flag enabled (default behavior in setup)
+    queryManagementService.setConvertQueuedStatusToInProgress(true);
+    Optional<QueryDetails> queryDetails = queryManagementService.getQuery(queuedQuery.queryId(), false, 0, 100);
+
+    // Then the returned status should be IN_PROGRESS
+    assertEquals(QueryDetails.StatusEnum.IN_PROGRESS, queryDetails.orElseThrow().getStatus());
+  }
+
+  @Test
+  void shouldNotConvertQueuedStatusWhenFeatureFlagDisabled() {
+    // Given a query with QUEUED status and the feature flag is disabled
+    Query queuedQuery = TestDataFixture.getMockQuery(QueryStatus.QUEUED);
+    when(queryRepository.getQuery(queuedQuery.queryId(), false)).thenReturn(Optional.of(queuedQuery));
+    when(queryResultsRepository.getQueryResultsCount(queuedQuery.queryId())).thenReturn(0);
+
+    // When getting the query with the flag disabled
+    queryManagementService.setConvertQueuedStatusToInProgress(false);
+    Optional<QueryDetails> queryDetails = queryManagementService.getQuery(queuedQuery.queryId(), false, 0, 100);
+
+    // Then the returned status should remain QUEUED
+    assertEquals(QueryDetails.StatusEnum.valueOf("QUEUED"), queryDetails.orElseThrow().getStatus());
+  }
+
+  @Test
+  void shouldFailQueuedQueriesThatExceedThreshold() {
+    // Given a QUEUED query that started more than 1 hour ago (exceeding threshold)
+    UUID queryId = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    // Query started 2 hours ago
+    OffsetDateTime oldStartDate = OffsetDateTime.now().minusHours(2);
+    Query queuedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, oldStartDate, null, QueryStatus.QUEUED, null);
+
+    queryManagementService.setQueuedQueryZombieThreshold(Duration.ofHours(1));
+
+    // When the query doesn't have a backing SQL query
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(queuedQuery));
+    when(queryRepository.getSelectQueryPids(queryId)).thenReturn(Collections.emptyList());
+    when(queryRepository.getInsertQueryPids(queryId)).thenReturn(Collections.emptyList());
+
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+
+    // Then it should be marked as failed
+    verify(queryRepository, times(1)).updateQuery(eq(queryId), eq(QueryStatus.FAILED), any(OffsetDateTime.class), anyString());
+  }
+
+  @Test
+  void shouldNotFailQueuedQueriesWithinThreshold() {
+    // Given a QUEUED query that started less than 1 hour ago (within threshold)
+    UUID queryId = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    UUID createdBy = UUID.randomUUID();
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
+      """;
+    List<String> fields = List.of("id", "field1", "field2");
+
+    // Query started 30 minutes ago
+    OffsetDateTime recentStartDate = OffsetDateTime.now().minusMinutes(30);
+    Query queuedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+      createdBy, recentStartDate, null, QueryStatus.QUEUED, null);
+
+    queryManagementService.setQueuedQueryZombieThreshold(Duration.ofHours(1));
+
+    // When the query doesn't have a backing SQL query
+    when(queryRepository.getQuery(queryId, false)).thenReturn(Optional.of(queuedQuery));
+
+    // When you retrieve it with getPotentialZombieQuery()
+    queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
+
+    // Then it should NOT be marked as failed
+    verify(queryRepository, never()).updateQuery(eq(queryId), any(QueryStatus.class), any(OffsetDateTime.class), anyString());
+  }
+
+  @Test
+  void shouldStartNewQueriesInQueuedStatus() {
+    // Given a valid FQL query
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    List<EntityTypeColumn> columns = List.of(
+      new EntityTypeColumn().name("id").isIdColumn(true),
+      new EntityTypeColumn().name("field1")
+    );
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(columns);
+    String fqlQuery = """
+      {"field1": {"$in": ["value1", "value2"] }}
+      """;
+    List<String> fields = List.of("id", "field1");
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(fields);
+
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of());
+
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+    // When submitting a new query
+    queryManagementService.runFqlQueryAsync(submitQuery);
+
+    // Then the query should be saved with QUEUED status
+    verify(queryRepository).saveQuery(queryCaptor.capture());
+    Query savedQuery = queryCaptor.getValue();
+    assertEquals(QueryStatus.QUEUED, savedQuery.status());
+  }
+
+  @Test
+  void shouldNotConvertNonQueuedStatuses() {
+    // Test that other statuses are not affected by the conversion flag
+    for (QueryStatus status : List.of(QueryStatus.SUCCESS, QueryStatus.FAILED, QueryStatus.CANCELLED, QueryStatus.IN_PROGRESS)) {
+      reset(queryRepository, queryResultsRepository);
+      Query query = TestDataFixture.getMockQuery(status);
+      when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
+      when(queryResultsRepository.getQueryResultsCount(query.queryId())).thenReturn(0);
+
+      queryManagementService.setConvertQueuedStatusToInProgress(true);
+      Optional<QueryDetails> queryDetails = queryManagementService.getQuery(query.queryId(), false, 0, 100);
+
+      // Status should remain unchanged
+      assertEquals(QueryDetails.StatusEnum.valueOf(status.toString()), queryDetails.orElseThrow().getStatus());
+    }
   }
 }

@@ -57,8 +57,10 @@ public class QueryManagementService {
 
   @Value("${mod-fqm-manager.query-retention-duration}")
   private Duration queryRetentionDuration;
+  @Setter
   @Value("${mod-fqm-manager.zombie-query-queued-threshold-duration}")
   private Duration queuedQueryZombieThreshold;
+  @Setter
   @Value("${mod-fqm-manager.convert-queued-status-to-in-progress}")
   private boolean convertQueuedStatusToInProgress;
   @Setter

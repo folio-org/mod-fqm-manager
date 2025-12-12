@@ -88,7 +88,7 @@ class QueryExecutionServiceTest {
       any());
 
     assertDoesNotThrow(() -> queryExecutionService.executeQueryAsync(query, entityType, maxSize));
-    verify(queryRepository, times(0)).updateQuery(any(), any(), any(), any());
+    verify(queryRepository, times(1)).updateQuery(eq(query.queryId()), eq(QueryStatus.IN_PROGRESS), isNull(), isNull());
   }
 
   @Test

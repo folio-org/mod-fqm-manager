@@ -5,6 +5,8 @@ mod-fqm-manager:
   permissions-cache-timeout-seconds: 60
   entity-type-cache-timeout-seconds: 300
   zombie-query-max-wait-seconds: 300
+  zombie-query-queued-threshold-duration: 1h
+  convert-queued-status-to-in-progress: ${CONVERT_QUEUED_STATUS_TO_IN_PROGRESS:true}
 server:
   port: 8081
 spring:

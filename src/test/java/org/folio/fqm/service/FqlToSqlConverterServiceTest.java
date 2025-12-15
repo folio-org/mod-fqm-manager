@@ -1007,10 +1007,10 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "empty nested string",
         """
-          {"stringArrayField": {"$empty": true}}""",
-        field("stringArrayField").isNull().or(cardinality(cast(field("stringArrayField"), String[].class)).eq(0)).or(exists(
+          {"stringArrayField[*]->stringSubField": {"$empty": true}}""",
+        field("stringSubField").isNull().or(cardinality(cast(field("stringSubField"), String[].class)).eq(0)).or(exists(
           selectOne()
-            .from(unnest(cast(field("stringArrayField"), String[].class)).as("values"))
+            .from(unnest(cast(field("stringSubField"), String[].class)).as("values"))
             .where(
               DSL.field(name("values")).isNull()
                 .or(DSL.field(name("values"), String.class).eq(""))
@@ -1020,8 +1020,15 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "not empty nested string",
         """
-          {"stringArrayField": {"$empty": false}}""",
-        field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
+          {"stringArrayField[*]->stringSubField": {"$empty": false}}""",
+        field("stringSubField").isNull().or(cardinality(cast(field("stringSubField"), String[].class)).eq(0)).or(exists(
+          selectOne()
+            .from(unnest(cast(field("stringSubField"), String[].class)).as("values"))
+            .where(
+              DSL.field(name("values")).isNull()
+                .or(DSL.field(name("values"), String.class).eq(""))
+            )
+        )).not()
       ),
       Arguments.of(
         "not in list array string",

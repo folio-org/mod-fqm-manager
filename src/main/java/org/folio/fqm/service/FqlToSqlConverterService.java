@@ -459,12 +459,36 @@ public class FqlToSqlConverterService {
       case STRING_TYPE ->
         isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
       case ARRAY_TYPE -> {
-        var cardinality = cardinality(cast(field, String[].class));
-        if (isEmpty) {
-          yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
+        org.jooq.Field<String[]> stringArray = cast(field, String[].class);
+        var cardinality = cardinality(stringArray);
+
+        Condition arrayIsEmpty =
+          field.isNull()
+            .or(cardinality(stringArray).eq(0));
+
+        if ("stringType".equals(filterFieldDataType)) {
+          Condition arrayHasEmptyElement =
+            exists(
+              selectOne()
+                .from(unnest(stringArray).as("values", "v"))
+                .where(
+                  DSL.field(name("v"), String.class).isNull()
+                    .or(DSL.field(name("v"), String.class).eq(""))
+                )
+            );
+
+          arrayIsEmpty = arrayIsEmpty.or(arrayHasEmptyElement);
         } else {
-          yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
+          // TODO: need ALL_NULLS / NOT_ALL_NULLS here? maybe. maybe remove
         }
+
+        yield isEmpty ? arrayIsEmpty : arrayIsEmpty.not();
+
+//        if (isEmpty) {
+//          yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
+//        } else {
+//          yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
+//        }
       }
       case JSONB_ARRAY_TYPE -> {
         var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);

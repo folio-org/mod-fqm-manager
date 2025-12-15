@@ -35,7 +35,6 @@ import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.exists;
-import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.name;

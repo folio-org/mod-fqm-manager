@@ -444,8 +444,6 @@ public class FqlToSqlConverterService {
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
 
     if ("arrayType".equals(fieldType) && "stringType".equals(filterFieldDataType)) {
-      System.out.println("HERE");
-      var valueArray = cast(array(""), String[].class);
       org.jooq.Field<String[]> stringArray = cast(field, String[].class);
 
       Condition arrayHasEmptyElement =

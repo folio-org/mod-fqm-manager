@@ -430,14 +430,6 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    // Conditions to handle
-    // Single string field: is null or equals ""
-    // Array of strings: check as if a single-value string
-    //
-    // Array field: is null or cardinality = 0 or all elements are null
-    // JSONB array field: is null or jsonb_array_length = 0
-
-
     String fieldType = getFieldDataType(entityType, emptyCondition);
     String filterFieldDataType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
@@ -445,7 +437,6 @@ public class FqlToSqlConverterService {
 
     if ("arrayType".equals(fieldType) && "stringType".equals(filterFieldDataType)) {
       org.jooq.Field<String[]> stringArray = cast(field, String[].class);
-
       Condition arrayHasEmptyElement =
         exists(
           selectOne()

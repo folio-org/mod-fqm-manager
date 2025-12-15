@@ -45,10 +45,14 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.falseCondition;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
+import static org.jooq.impl.DSL.selectOne;
 import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.unnest;
 
 /**
  * Class responsible for converting an FQL query to SQL query
@@ -426,9 +430,47 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    // Conditions to handle
+    // Single string field: is null or equals ""
+    // Array of strings: check as if a single-value string
+    //
+    // Array field: is null or cardinality = 0 or all elements are null
+    // JSONB array field: is null or jsonb_array_length = 0
+
+
     String fieldType = getFieldDataType(entityType, emptyCondition);
+    String filterFieldDataType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
+
+    if ("arrayType".equals(fieldType) && "stringType".equals(filterFieldDataType)) {
+      System.out.println("HERE");
+      var valueArray = cast(array(""), String[].class);
+      var emptyOverlap = arrayOverlap(cast(field, String[].class), valueArray);
+
+
+      org.jooq.Field<String[]> stringArray = cast(field, String[].class);
+
+      Condition arrayHasEmptyElement =
+        exists(
+          selectOne()
+            .from(unnest(stringArray).as("values"))
+            .where(
+              DSL.field(name("values")).isNull()
+                .or(DSL.field(name("values"), String.class).eq(""))
+            )
+        );
+
+      Condition arrayIsEmpty =
+        field.isNull()
+          .or(cardinality(stringArray).eq(0))
+          .or(arrayHasEmptyElement);
+
+      return isEmpty ? arrayIsEmpty : arrayIsEmpty.not();
+
+
+//      return nullCondition.or(emptyOverlap);
+    }
 
     return switch (fieldType) {
       case STRING_TYPE ->

@@ -446,9 +446,6 @@ public class FqlToSqlConverterService {
     if ("arrayType".equals(fieldType) && "stringType".equals(filterFieldDataType)) {
       System.out.println("HERE");
       var valueArray = cast(array(""), String[].class);
-      var emptyOverlap = arrayOverlap(cast(field, String[].class), valueArray);
-
-
       org.jooq.Field<String[]> stringArray = cast(field, String[].class);
 
       Condition arrayHasEmptyElement =
@@ -467,9 +464,6 @@ public class FqlToSqlConverterService {
           .or(arrayHasEmptyElement);
 
       return isEmpty ? arrayIsEmpty : arrayIsEmpty.not();
-
-
-//      return nullCondition.or(emptyOverlap);
     }
 
     return switch (fieldType) {

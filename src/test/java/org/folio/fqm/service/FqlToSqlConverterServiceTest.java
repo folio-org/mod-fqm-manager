@@ -11,6 +11,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
+import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -33,11 +34,16 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.exists;
+import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
+import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.unnest;
 import static org.jooq.impl.DSL.val;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +72,11 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
           new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
+          new EntityTypeColumn().name("stringArrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(
+            new ObjectType().dataType("objectType").properties(List.of(
+              new NestedObjectProperty().name("stringSubField").dataType(new StringType().dataType("stringType"))
+            ))
+          )),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("jsonbArrayType"))
             .valueGetter("valueGetter")
@@ -93,7 +104,7 @@ class FqlToSqlConverterServiceTest {
                   new NestedObjectProperty().name("string").dataType(new EntityDataType().dataType("stringType")).valueGetter("nestStr"),
                   new NestedObjectProperty().name("ruuid").dataType(new EntityDataType().dataType("rangedUUIDType")).valueGetter("nestRUuid"),
                   new NestedObjectProperty().name("ouuid").dataType(new EntityDataType().dataType("openUUIDType")).valueGetter("nestOUuid")
-            ))))
+                ))))
         )
       );
   }
@@ -915,13 +926,13 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "eq conditions combined with booleanAnd on a field with a filter value getter and a value function",
         """
-          {
-            "$and": [
-              { "arrayFieldWithValueFunction": { "$eq": "value1" } },
-              { "arrayFieldWithValueFunction": { "$eq": "value2" } }
-            ]
-          }
-        """,
+            {
+              "$and": [
+                { "arrayFieldWithValueFunction": { "$eq": "value1" } },
+                { "arrayFieldWithValueFunction": { "$eq": "value2" } }
+              ]
+            }
+          """,
         DSL.and(
           arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value1"))), String[].class)),
           arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value2"))), String[].class))
@@ -991,6 +1002,25 @@ class FqlToSqlConverterServiceTest {
         "not empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": false}}""",
+        field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
+      ),
+      Arguments.of(
+        "empty nested string",
+        """
+          {"stringArrayField": {"$empty": true}}""",
+        field("stringArrayField").isNull().or(cardinality(cast(field("stringArrayField"), String[].class)).eq(0)).or(exists(
+          selectOne()
+            .from(unnest(cast(field("stringArrayField"), String[].class)).as("values"))
+            .where(
+              DSL.field(name("values")).isNull()
+                .or(DSL.field(name("values"), String.class).eq(""))
+            )
+        ))
+      ),
+      Arguments.of(
+        "not empty nested string",
+        """
+          {"stringArrayField": {"$empty": false}}""",
         field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
       ),
       Arguments.of(

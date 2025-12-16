@@ -447,12 +447,17 @@ public class FqlToSqlConverterService {
       }
 
       case JSONB_ARRAY_TYPE -> {
-        var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
-        org.jooq.Field<String> v = DSL.field(name("v"), String.class);
+        org.jooq.Field<Integer> jsonbCardinality =
+          DSL.field("jsonb_array_length({0})", Integer.class, field);
 
-        Condition jsonbNull = v.eq("null");
+        org.jooq.Field<String> vText = DSL.field("({0})::text", String.class, DSL.field(name("v")));
 
-        Condition emptyString = STRING_TYPE.equals(elementType) ? v.eq("\"\"") : DSL.falseCondition();
+        Condition jsonbNull = vText.eq("null");
+
+        Condition emptyString =
+          STRING_TYPE.equals(elementType)
+            ? vText.eq("\"\"")
+            : DSL.falseCondition();
 
         Condition hasEmptyElement =
           exists(

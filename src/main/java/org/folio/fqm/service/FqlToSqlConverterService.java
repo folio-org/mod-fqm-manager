@@ -47,10 +47,12 @@ import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.falseCondition;
+import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.unnest;
 
@@ -142,7 +144,7 @@ public class FqlToSqlConverterService {
         var transformedValue = valueField(equalsCondition.value(), equalsCondition, entityType);
         return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
       } else {
-        var jsonbValue = DSL.inline("[\"" + equalsCondition.value() + "\"]");
+        var jsonbValue = inline("[\"" + equalsCondition.value() + "\"]");
         return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
       }
     }
@@ -172,7 +174,7 @@ public class FqlToSqlConverterService {
         var transformedValue = valueField(notEqualsCondition.value(), notEqualsCondition, entityType);
         baseCondition = DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
       } else {
-        var jsonbValue = DSL.inline("[\"" + notEqualsCondition.value() + "\"]");
+        var jsonbValue = inline("[\"" + notEqualsCondition.value() + "\"]");
         baseCondition = DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
       }
     } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
@@ -271,7 +273,7 @@ public class FqlToSqlConverterService {
             var transformedValue = valueField(val, inCondition, entityType);
             return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
           } else {
-            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            var jsonbValue = inline("[\"" + val + "\"]");
             return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
           }
         })
@@ -320,7 +322,7 @@ public class FqlToSqlConverterService {
             var transformedValue = valueField(val, notInCondition, entityType);
             return DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
           } else {
-            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            var jsonbValue = inline("[\"" + val + "\"]");
             return DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
           }
         })
@@ -396,10 +398,10 @@ public class FqlToSqlConverterService {
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataType(entityType, startsWithCondition);
     if (ARRAY_TYPE.equals(dataType)) {
-      return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+      return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
     }
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
     }
     return caseInsensitiveComparison(startsWithCondition, entityType, field, startsWithCondition.value(),
       org.jooq.Field::startsWithIgnoreCase, org.jooq.Field::startsWith);
@@ -416,29 +418,30 @@ public class FqlToSqlConverterService {
       }
 
       case ARRAY_TYPE -> {
-        org.jooq.Field<String[]> stringArray = cast(field, String[].class);
-        var cardinality = cardinality(stringArray);
-
-        Condition arrayIsEmpty =
-          field.isNull()
-            .or(cardinality(stringArray).eq(0));
+//        org.jooq.Field<String[]> array = cast(field, String[].class);
+        org.jooq.Field<Object[]> array = cast(field, Object[].class);
+        Condition arrayIsEmpty = field.isNull().or(cardinality(array).eq(0));
 
 
 
+        Condition hasNullElement =
+          exists(
+            selectOne()
+              .from(unnest(array).as("a", "v"))
+              .where(DSL.field(name("v")).isNull())
+          );
+        Condition hasEmptyElement = hasNullElement;
 
         if ("stringType".equals(elementType)) {
-          Condition hasEmptyElement =
+          // For arrays of strings, we must check for null and empty elements
+          hasEmptyElement = hasEmptyElement.or(
             exists(
               selectOne()
-                .from(unnest(stringArray).as("a", "v"))
-                .where(
-                  DSL.field(name("v"), String.class).isNull()
-                    .or(DSL.field(name("v"), String.class).eq(""))
-                )
-            );
+                .from(unnest(array).as("a", "v"))
+                .where(DSL.field(name("v"), String.class).eq(""))
+            )
+          );
           arrayIsEmpty = arrayIsEmpty.or(hasEmptyElement);
-        } else {
-          // TODO: check for null elements for non-string arrays?
         }
 
         yield arrayIsEmpty;
@@ -446,7 +449,26 @@ public class FqlToSqlConverterService {
 
       case JSONB_ARRAY_TYPE -> {
         var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
-        yield field.isNull().or(jsonbCardinality.eq(0));
+
+        Condition hasNullElement =
+          exists(
+            selectOne()
+              .from(
+                table(
+                  "jsonb_array_elements({0})",
+                  field
+                ).as("e", "v")
+              )
+              .where(
+                DSL.field(name("v")).isNull()
+                  .or(DSL.field(name("v")).eq(inline("null")))
+              )
+          );
+
+
+        yield field.isNull()
+          .or(jsonbCardinality.eq(0))
+          .or(hasNullElement);
       }
       default -> {
         yield field.isNull();
@@ -513,12 +535,12 @@ public class FqlToSqlConverterService {
 
     if (field.getValueFunction() != null) {
       if (inline) {
-        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.inline(value));
+        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), inline(value));
       } else {
         return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.param("value", value));
       }
     }
-    return inline ? DSL.inline(value) : DSL.val(value);
+    return inline ? inline(value) : DSL.val(value);
   }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a

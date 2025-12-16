@@ -80,30 +80,6 @@ public class FqlToSqlConverterService {
   private static final String JSONB_ARRAY_TYPE = "jsonbArrayType";
   private static final String DATE_TYPE = "dateType";
   private static final int INLINE_STRING_CHARACTER_LIMIT = 32;
-  public static final String ALL_NULLS = """
-    true = ALL(
-      SELECT(
-        unnest(
-          cast(
-            %s
-            as varchar[]
-          )
-        )
-      ) IS NULL
-    )
-    """;
-  public static final String NOT_ALL_NULLS = """
-    false = ANY(
-      SELECT(
-        unnest(
-          cast(
-            %s
-            as varchar[]
-          )
-        )
-      ) IS NULL
-    )
-    """;
 
   private final FqlService fqlService;
 
@@ -430,34 +406,15 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String fieldType = getFieldDataType(entityType, emptyCondition);
-    String filterFieldDataType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
-    var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
+    String fieldType = getFieldDataType(entityType, emptyCondition);
+    String elementType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
 
-    if ("arrayType".equals(fieldType) && "stringType".equals(filterFieldDataType)) {
-      org.jooq.Field<String[]> stringArray = cast(field, String[].class);
-      Condition arrayHasEmptyElement =
-        exists(
-          selectOne()
-            .from(unnest(stringArray).as("values"))
-            .where(
-              DSL.field(name("values")).isNull()
-                .or(DSL.field(name("values"), String.class).eq(""))
-            )
-        );
+    Condition empty = switch (fieldType) {
+      case STRING_TYPE -> {
+        yield field.isNull().or(cast(field, String.class).eq(""));
+      }
 
-      Condition arrayIsEmpty =
-        field.isNull()
-          .or(cardinality(stringArray).eq(0))
-          .or(arrayHasEmptyElement);
-
-      return isEmpty ? arrayIsEmpty : arrayIsEmpty.not();
-    }
-
-    return switch (fieldType) {
-      case STRING_TYPE ->
-        isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
       case ARRAY_TYPE -> {
         org.jooq.Field<String[]> stringArray = cast(field, String[].class);
         var cardinality = cardinality(stringArray);
@@ -466,41 +423,36 @@ public class FqlToSqlConverterService {
           field.isNull()
             .or(cardinality(stringArray).eq(0));
 
-        if ("stringType".equals(filterFieldDataType)) {
-          Condition arrayHasEmptyElement =
+
+
+
+        if ("stringType".equals(elementType)) {
+          Condition hasEmptyElement =
             exists(
               selectOne()
-                // TODO: rename string literals
-                .from(unnest(stringArray).as("values", "v"))
+                .from(unnest(stringArray).as("a", "v"))
                 .where(
                   DSL.field(name("v"), String.class).isNull()
                     .or(DSL.field(name("v"), String.class).eq(""))
                 )
             );
-
-          arrayIsEmpty = arrayIsEmpty.or(arrayHasEmptyElement);
+          arrayIsEmpty = arrayIsEmpty.or(hasEmptyElement);
         } else {
-          // TODO: need ALL_NULLS / NOT_ALL_NULLS here? maybe. maybe remove
+          // TODO: check for null elements for non-string arrays?
         }
 
-        yield isEmpty ? arrayIsEmpty : arrayIsEmpty.not();
-
-//        if (isEmpty) {
-//          yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
-//        } else {
-//          yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
-//        }
+        yield arrayIsEmpty;
       }
+
       case JSONB_ARRAY_TYPE -> {
         var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
-        if (isEmpty) {
-          yield nullCondition.or(jsonbCardinality.eq(0));
-        } else {
-          yield nullCondition.and(jsonbCardinality.ne(0));
-        }
+        yield field.isNull().or(jsonbCardinality.eq(0));
       }
-      default -> nullCondition;
+      default -> {
+        yield field.isNull();
+      }
     };
+    return isEmpty ? empty : empty.not();
   }
 
   private static Condition validateCondition(org.jooq.Field<?> field, String dataType) {

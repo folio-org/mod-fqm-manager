@@ -407,6 +407,15 @@ public class FqlToSqlConverterService {
       org.jooq.Field::startsWithIgnoreCase, org.jooq.Field::startsWith);
   }
 
+
+  /**
+   * Handle $empty operator.
+   *
+   * "empty" means:
+   *   - SQL NULL
+   *   - empty array
+   *   - OR any element of array is NULL (and "" for string elements)
+   */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     String fieldType = getFieldDataType(entityType, emptyCondition);
@@ -418,63 +427,42 @@ public class FqlToSqlConverterService {
       }
 
       case ARRAY_TYPE -> {
-//        org.jooq.Field<String[]> array = cast(field, String[].class);
-        org.jooq.Field<Object[]> array = cast(field, Object[].class);
-        Condition arrayIsEmpty = field.isNull().or(cardinality(array).eq(0));
+        org.jooq.Field<String[]> array = cast(field, String[].class);
+        org.jooq.Field<String> v = DSL.field(name("v"), String.class);
 
+        Condition emptyStringCheck = STRING_TYPE.equals(elementType)
+          ? v.eq("")
+          : DSL.falseCondition();
 
-
-        Condition hasNullElement =
+        Condition hasEmptyElement =
           exists(
             selectOne()
               .from(unnest(array).as("a", "v"))
-              .where(DSL.field(name("v")).isNull())
-          );
-        Condition hasEmptyElement = hasNullElement;
-
-        Condition elementIsEmpty =
-          exists(
-            selectOne()
-              .from(unnest(array).as("a", "v"))
-              .where(
-                DSL.field(name("v")).isNull()
-                  .or(
-                    "stringType".equals(elementType)
-                      ? DSL.field(name("v"), String.class).eq("")
-                      : DSL.falseCondition()
-                  )
-              )
+              .where(v.isNull().or(emptyStringCheck))
           );
 
-        arrayIsEmpty = arrayIsEmpty.or(hasEmptyElement);
-
-        yield arrayIsEmpty;
+        yield field.isNull()
+          .or(cardinality(array).eq(0))
+          .or(hasEmptyElement);
       }
 
       case JSONB_ARRAY_TYPE -> {
         var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
+        org.jooq.Field<String> v = DSL.field(name("v"), String.class);
+
+        Condition jsonbNull = v.eq("null");
+
+        Condition emptyString = STRING_TYPE.equals(elementType) ? v.eq("\"\"") : DSL.falseCondition();
 
         Condition hasEmptyElement =
           exists(
             selectOne()
               .from(
-                table(
-                  "jsonb_array_elements({0})",
-                  field
-                ).as("e", "v")
+                table("jsonb_array_elements({0})", field)
+                  .as("e", "v")
               )
-              .where(
-                  // JSON null
-                  DSL.field(name("v")).eq(DSL.inline("null"))
-                  // Empty string (only for string elements)
-                  .or(
-                    "stringType".equals(elementType)
-                      ? DSL.field(name("v")).eq(DSL.inline("\"\""))
-                      : DSL.falseCondition()
-                  )
-              )
+              .where(jsonbNull.or(emptyString))
           );
-
 
         yield field.isNull()
           .or(jsonbCardinality.eq(0))

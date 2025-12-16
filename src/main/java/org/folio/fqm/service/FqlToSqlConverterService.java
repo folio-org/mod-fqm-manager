@@ -432,17 +432,21 @@ public class FqlToSqlConverterService {
           );
         Condition hasEmptyElement = hasNullElement;
 
-        if ("stringType".equals(elementType)) {
-          // For arrays of strings, we must check for null and empty elements
-          hasEmptyElement = hasEmptyElement.or(
-            exists(
-              selectOne()
-                .from(unnest(array).as("a", "v"))
-                .where(DSL.field(name("v"), String.class).eq(""))
-            )
+        Condition elementIsEmpty =
+          exists(
+            selectOne()
+              .from(unnest(array).as("a", "v"))
+              .where(
+                DSL.field(name("v")).isNull()
+                  .or(
+                    "stringType".equals(elementType)
+                      ? DSL.field(name("v"), String.class).eq("")
+                      : DSL.falseCondition()
+                  )
+              )
           );
-          arrayIsEmpty = arrayIsEmpty.or(hasEmptyElement);
-        }
+
+        arrayIsEmpty = arrayIsEmpty.or(hasEmptyElement);
 
         yield arrayIsEmpty;
       }
@@ -450,7 +454,7 @@ public class FqlToSqlConverterService {
       case JSONB_ARRAY_TYPE -> {
         var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
 
-        Condition hasNullElement =
+        Condition hasEmptyElement =
           exists(
             selectOne()
               .from(
@@ -460,15 +464,21 @@ public class FqlToSqlConverterService {
                 ).as("e", "v")
               )
               .where(
-                DSL.field(name("v")).isNull()
-                  .or(DSL.field(name("v")).eq(inline("null")))
+                  // JSON null
+                  DSL.field(name("v")).eq(DSL.inline("null"))
+                  // Empty string (only for string elements)
+                  .or(
+                    "stringType".equals(elementType)
+                      ? DSL.field(name("v")).eq(DSL.inline("\"\""))
+                      : DSL.falseCondition()
+                  )
               )
           );
 
 
         yield field.isNull()
           .or(jsonbCardinality.eq(0))
-          .or(hasNullElement);
+          .or(hasEmptyElement);
       }
       default -> {
         yield field.isNull();

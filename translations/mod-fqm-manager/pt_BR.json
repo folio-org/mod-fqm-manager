@@ -1702,7 +1702,7 @@
     "entityType.simple_holdings_record.additional_call_numbers.call_number_type_id._qualified": "Acervos - Números de chamada adicionais dos acervos - Tipo",
     "entityType.simple_holdings_record.receiving_history": "Histórico de recebimento",
     "entityType.simple_holdings_record.receiving_history.chronology": "Cronologia",
-    "entityType.simple_holdings_record.receiving_history.chronology._qualified": "Acervos - Histórico de recebimento - cronologia",
+    "entityType.simple_holdings_record.receiving_history.chronology._qualified": "Acervos - Histórico de recebimento - Cronologia",
     "entityType.simple_holdings_record.receiving_history.enumeration": "Enumeração",
     "entityType.simple_holdings_record.receiving_history.enumeration._qualified": "Acervos - Histórico de recebimento - Enumeração",
     "entityType.simple_holdings_record.receiving_history.public_display": "Exibição pública",

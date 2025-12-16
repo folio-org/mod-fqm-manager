@@ -1014,7 +1014,7 @@ class FqlToSqlConverterServiceTest {
               DSL.field(name("values")).isNull()
                 .or(DSL.field(name("values"), String.class).eq(""))
             )
-        ))
+        )).not()
       ),
       Arguments.of(
         "not empty nested string",

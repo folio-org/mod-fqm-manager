@@ -470,6 +470,7 @@ public class FqlToSqlConverterService {
           Condition arrayHasEmptyElement =
             exists(
               selectOne()
+                // TODO: rename string literals
                 .from(unnest(stringArray).as("values", "v"))
                 .where(
                   DSL.field(name("v"), String.class).isNull()

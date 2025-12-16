@@ -437,7 +437,7 @@
     "entityType.simple_organization.export_to_accounting": "Eksport do systemu księgowego",
     "entityType.simple_organization.governmental": "Governmental",
     "entityType.simple_organization.id": "UUID",
-    "entityType.simple_organization.interfaces": "Interfaces",
+    "entityType.simple_organization.interfaces": "Interfejsy",
     "entityType.simple_organization.is_donor": "Jest darczyńcą",
     "entityType.simple_organization.is_vendor": "Jest dostawcą",
     "entityType.simple_organization.language": "Język",

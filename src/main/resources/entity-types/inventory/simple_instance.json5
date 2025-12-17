@@ -1660,5 +1660,31 @@
                          WHERE pst.precedingInstanceId = :sourceAlias.id)::text",
       valueFunction: 'lower(:value)'
     },
+    {
+      name: 'with_holdings',
+      sourceAlias: 'inst',
+      essential: true,
+      dataType: {
+        dataType: 'booleanType',
+      },
+      isIdColumn: false,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: "(SELECT EXISTS (SELECT 1 FROM ${tenant_id}_mod_fqm_manager.src_inventory_holdings_record WHERE instanceid = :sourceAlias.id))::text",
+      filterValueGetter: "COALESCE(\
+        lower(SELECT EXISTS (SELECT 1 FROM ${tenant_id}_mod_fqm_manager.src_inventory_holdings_record WHERE instanceid = :sourceAlias.id)),\
+        'false'\
+      )",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    }
   ],
 }

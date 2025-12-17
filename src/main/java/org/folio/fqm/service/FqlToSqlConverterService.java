@@ -105,7 +105,7 @@ public class FqlToSqlConverterService {
 
       Condition validation = null;
       if (Boolean.TRUE.equals(fqmField.getValidated())) {
-        String dataType = getFieldDataType(entityType, fieldCondition);
+        String dataType = getFieldDataTypeName(entityType, fieldCondition);
         validation = validateCondition(field, dataType);
       }
 
@@ -135,7 +135,7 @@ public class FqlToSqlConverterService {
     if (isDateTimeCondition(equalsCondition, entityType)) {
       return handleDateTime(equalsCondition, field, entityType);
     }
-    String dataType = getFieldDataType(entityType, equalsCondition);
+    String dataType = getFieldDataTypeName(entityType, equalsCondition);
     if (ARRAY_TYPE.equals(dataType)) {
       var valueArray = cast(array(valueField(equalsCondition.value(), equalsCondition, entityType)), String[].class);
       return arrayOverlap(cast(field, String[].class), valueArray);
@@ -162,7 +162,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notEqualsCondition);
+    String dataType = getFieldDataTypeName(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     Condition baseCondition;
     if (isDateTimeCondition(notEqualsCondition, entityType)) {
@@ -255,7 +255,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, inCondition);
+    String dataType = getFieldDataTypeName(entityType, inCondition);
 
     if (ARRAY_TYPE.equals(dataType)) {
       var valueList = inCondition
@@ -302,7 +302,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notInCondition);
+    String dataType = getFieldDataTypeName(entityType, notInCondition);
 
     if (ARRAY_TYPE.equals(dataType)) {
       List<Condition> conditionList = notInCondition
@@ -382,7 +382,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, org.jooq.Field<Object> field) {
     // perform case-insensitive regex search
-    String dataType = getFieldDataType(entityType, regexCondition);
+    String dataType = getFieldDataTypeName(entityType, regexCondition);
     if (ARRAY_TYPE.equals(dataType)) {
       return condition("exists (select 1 from unnest({0}) where unnest ~* {1})", field, valueField(regexCondition.value(), regexCondition, entityType));
     }
@@ -398,7 +398,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, startsWithCondition);
+    String dataType = getFieldDataTypeName(entityType, startsWithCondition);
     if (ARRAY_TYPE.equals(dataType)) {
       return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
     }
@@ -420,17 +420,8 @@ public class FqlToSqlConverterService {
    */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
-    String fieldType = getFieldDataType(entityType, emptyCondition);
-    // TODO: ternary here to separate object types from others
-    String elementType = null;
-    EntityDataType fieldTypeAsObject = getFieldDataTypeAsObject(entityType, emptyCondition);
-    if (fieldTypeAsObject instanceof ArrayType arrayType) {
-      if (OBJECT_TYPE.equals(arrayType.getItemDataType().getDataType())) {
-        elementType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
-      } else {
-        elementType = arrayType.getItemDataType().getDataType();
-      }
-    }
+    String fieldType = getFieldDataTypeName(entityType, emptyCondition);
+    String elementType = resolveArrayElementType(entityType, emptyCondition);
 
     Condition empty = switch (fieldType) {
       case STRING_TYPE -> {
@@ -524,7 +515,7 @@ public class FqlToSqlConverterService {
     return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
   }
 
-  private static EntityDataType getFieldDataTypeAsObject(EntityType entityType, FieldCondition<?> fieldCondition) {
+  private static EntityDataType getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
@@ -533,13 +524,31 @@ public class FqlToSqlConverterService {
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
-  private static String getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
-    return entityType.getColumns()
-      .stream()
-      .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
-      .map(col -> col.getDataType().getDataType())
-      .findFirst()
-      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+  private static String getFieldDataTypeName(EntityType entityType, FieldCondition<?> fieldCondition) {
+    return getFieldDataType(entityType, fieldCondition).getDataType();
+  }
+
+  private static String resolveArrayElementType(EntityType entityType, FieldCondition<?> condition) {
+    EntityDataType fieldType = getFieldDataType(entityType, condition);
+
+    if (fieldType instanceof ArrayType arrayType) {
+      EntityDataType itemType = arrayType.getItemDataType();
+      if (OBJECT_TYPE.equals(itemType.getDataType())) {
+        return getFieldForFiltering(condition, entityType)
+          .getDataType()
+          .getDataType();
+      }
+      return itemType.getDataType();
+    }
+
+    if (JSONB_ARRAY_TYPE.equals(fieldType.getDataType())) {
+      return getFieldForFiltering(condition, entityType)
+        .getDataType()
+        .getDataType();
+    }
+
+    // Not a collection
+    return null;
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get
@@ -569,7 +578,7 @@ public class FqlToSqlConverterService {
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a
   // performance benefit without much drawback.
   private static <T> boolean shouldInlineValue(EntityType entityType, FieldCondition<?> condition, T value) {
-    var dataType = getFieldDataType(entityType, condition);
+    var dataType = getFieldDataTypeName(entityType, condition);
     switch (dataType) {
       case STRING_TYPE:
         // inline small strings only, due to potential performance hit for large strings

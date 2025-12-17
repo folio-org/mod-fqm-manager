@@ -452,8 +452,14 @@ public class FqlToSqlConverterService {
         org.jooq.Field<Integer> jsonbCardinality =
           DSL.field("jsonb_array_length({0})", Integer.class, field);
 
-        org.jooq.Field<String> vText = DSL.field("({0})::text", String.class, DSL.field(name("v")));
 
+        /// ////
+        org.jooq.Field<String> jsonbType = DSL.field("jsonb_typeof({0})", String.class, field);
+        Condition jsonbIsNull = jsonbType.eq("null");
+        Condition isArray = jsonbType.eq("array");
+        /// /////
+
+        org.jooq.Field<String> vText = DSL.field("({0})::text", String.class, DSL.field(name("v")));
         Condition jsonbNull = vText.eq("null");
 
         Condition emptyString =
@@ -471,9 +477,18 @@ public class FqlToSqlConverterService {
               .where(jsonbNull.or(emptyString))
           );
 
-        yield field.isNull()
-          .or(jsonbCardinality.eq(0))
-          .or(hasEmptyElement);
+
+        Condition isEmptyArray = jsonbCardinality.eq(0);
+
+        var returnValue = field.isNull()
+          .or(jsonbIsNull)
+          .or(
+            isArray.and(
+              isEmptyArray.or(hasEmptyElement)
+            )
+          );
+
+        yield returnValue;
       }
       default -> {
         yield field.isNull();

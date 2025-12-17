@@ -18,6 +18,7 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -81,6 +82,7 @@ public class FqlToSqlConverterService {
   private static final String ARRAY_TYPE = "arrayType";
   private static final String JSONB_ARRAY_TYPE = "jsonbArrayType";
   private static final String DATE_TYPE = "dateType";
+  private static final String OBJECT_TYPE = "objectType";
   private static final int INLINE_STRING_CHARACTER_LIMIT = 32;
 
   private final FqlService fqlService;
@@ -419,7 +421,16 @@ public class FqlToSqlConverterService {
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     String fieldType = getFieldDataType(entityType, emptyCondition);
-    String elementType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
+    // TODO: ternary here to separate object types from others
+    String elementType = null;
+    EntityDataType fieldTypeAsObject = getFieldDataTypeAsObject(entityType, emptyCondition);
+    if (fieldTypeAsObject instanceof ArrayType arrayType) {
+      if (OBJECT_TYPE.equals(arrayType.getItemDataType().getDataType())) {
+        elementType = getFieldForFiltering(emptyCondition, entityType).getDataType().getDataType();
+      } else {
+        elementType = arrayType.getItemDataType().getDataType();
+      }
+    }
 
     Condition empty = switch (fieldType) {
       case STRING_TYPE -> {
@@ -511,6 +522,15 @@ public class FqlToSqlConverterService {
 
   private static org.jooq.Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
     return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
+  }
+
+  private static EntityDataType getFieldDataTypeAsObject(EntityType entityType, FieldCondition<?> fieldCondition) {
+    return entityType.getColumns()
+      .stream()
+      .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
+      .map(col -> col.getDataType())
+      .findFirst()
+      .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }
 
   private static String getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {

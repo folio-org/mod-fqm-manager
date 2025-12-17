@@ -25,8 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.fqm.service.FqlToSqlConverterService.ALL_NULLS;
-import static org.folio.fqm.service.FqlToSqlConverterService.NOT_ALL_NULLS;
 import static org.folio.fqm.service.FqlToSqlConverterService.UUID_REGEX;
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
@@ -35,6 +33,7 @@ import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.exists;
+import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.name;
@@ -983,13 +982,13 @@ class FqlToSqlConverterServiceTest {
         "empty array",
         """
           {"arrayField": {"$empty": true}}""",
-        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0)).or(ALL_NULLS.formatted("arrayField"))
+        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0)).or(falseCondition())
       ),
       Arguments.of(
         "not empty array",
         """
           {"arrayField": {"$empty": false}}""",
-        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(NOT_ALL_NULLS.formatted("arrayField"))
+        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(falseCondition())
       ),
       Arguments.of(
         "empty JSONB array",

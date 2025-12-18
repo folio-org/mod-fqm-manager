@@ -9,8 +9,11 @@ import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
+import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -24,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.fqm.service.FqlToSqlConverterService.ALL_NULLS;
-import static org.folio.fqm.service.FqlToSqlConverterService.NOT_ALL_NULLS;
 import static org.folio.fqm.service.FqlToSqlConverterService.UUID_REGEX;
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.array;
@@ -33,11 +34,17 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.exists;
+import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.inline;
 import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
+import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.table;
+import static org.jooq.impl.DSL.unnest;
 import static org.jooq.impl.DSL.val;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,8 +71,14 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
-          new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
+          new EntityTypeColumn().name("arrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(new NumberType().dataType("numberType"))),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
+          new EntityTypeColumn().name("stringArrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(
+            new ObjectType().dataType("objectType").properties(List.of(
+              new NestedObjectProperty().name("stringSubField").dataType(new StringType().dataType("stringType"))
+            ))
+          )),
+          new EntityTypeColumn().name("jsonbStringArray").dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType"))),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("jsonbArrayType"))
             .valueGetter("valueGetter")
@@ -93,12 +106,13 @@ class FqlToSqlConverterServiceTest {
                   new NestedObjectProperty().name("string").dataType(new EntityDataType().dataType("stringType")).valueGetter("nestStr"),
                   new NestedObjectProperty().name("ruuid").dataType(new EntityDataType().dataType("rangedUUIDType")).valueGetter("nestRUuid"),
                   new NestedObjectProperty().name("ouuid").dataType(new EntityDataType().dataType("openUUIDType")).valueGetter("nestOUuid")
-            ))))
+                ))))
         )
       );
   }
 
   static Condition trueCondition = trueCondition();
+  private static final Condition exists = null;
 
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
@@ -915,13 +929,13 @@ class FqlToSqlConverterServiceTest {
       Arguments.of(
         "eq conditions combined with booleanAnd on a field with a filter value getter and a value function",
         """
-          {
-            "$and": [
-              { "arrayFieldWithValueFunction": { "$eq": "value1" } },
-              { "arrayFieldWithValueFunction": { "$eq": "value2" } }
-            ]
-          }
-        """,
+            {
+              "$and": [
+                { "arrayFieldWithValueFunction": { "$eq": "value1" } },
+                { "arrayFieldWithValueFunction": { "$eq": "value2" } }
+              ]
+            }
+          """,
         DSL.and(
           arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value1"))), String[].class)),
           arrayOverlap(cast(field("foo(valueGetter)"), String[].class), cast(array(field("foo(:value)", String.class, param("value", "value2"))), String[].class))
@@ -955,7 +969,7 @@ class FqlToSqlConverterServiceTest {
         "not empty",
         """
           {"field5": {"$empty": false}}""",
-        field("field5").isNotNull()
+        field("field5").isNull().not()
       ),
       Arguments.of(
         "empty string",
@@ -967,31 +981,145 @@ class FqlToSqlConverterServiceTest {
         "not empty string",
         """
           {"field1": {"$empty": false}}""",
-        field("field1").isNotNull().and(cast(field("field1"), String.class).ne(""))
+        (field("field1").isNull().or(cast(field("field1"), String.class).eq(""))).not()
       ),
       Arguments.of(
         "empty array",
         """
           {"arrayField": {"$empty": true}}""",
-        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0)).or(ALL_NULLS.formatted("arrayField"))
+        field("arrayField").isNull()
+          .or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+          .or(
+            exists(
+              selectOne()
+                .from(unnest(cast(field("arrayField"), String[].class)).as("elem", "value"))
+                .where(field(name("value")).isNull().or(falseCondition()))
+            )
+          )
       ),
       Arguments.of(
         "not empty array",
         """
           {"arrayField": {"$empty": false}}""",
-        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(NOT_ALL_NULLS.formatted("arrayField"))
+        (field("arrayField").isNull()
+          .or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+          .or(
+            exists(
+              selectOne()
+                .from(unnest(cast(field("arrayField"), String[].class)).as("elem", "value"))
+                .where(field(name("value")).isNull().or(falseCondition()))
+            )
+          )).not()
       ),
       Arguments.of(
         "empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": true}}""",
-        field("jsonbArrayField").isNull().or(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0))
+        field("jsonbArrayField").isNull()
+          .or(field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+          .or(
+            field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+              .and(
+                field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                  .or(
+                    exists(
+                      selectOne()
+                        .from(
+                          table("jsonb_array_elements({0})", field("jsonbArrayField"))
+                            .as("elem", "value")
+                        )
+                        .where(field("({0})::text", String.class, field(name("value"))).eq("null").or(falseCondition()))
+                    )
+                  )
+              )
+          )
       ),
       Arguments.of(
         "not empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": false}}""",
-        field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
+        not(
+          field("jsonbArrayField").isNull()
+            .or(field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+            .or(
+              field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+                .and(
+                  field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                    .or(
+                      exists(
+                        selectOne()
+                          .from(
+                            table("jsonb_array_elements({0})", field("jsonbArrayField"))
+                              .as("elem", "value")
+                          )
+                          .where(field("({0})::text", String.class, field(name("value"))).eq("null").or(falseCondition()))
+                      )
+                    )
+                )
+            )
+        )
+      ),
+      Arguments.of(
+        "empty JSONB string array",
+        """
+          {"jsonbStringArray": {"$empty": true}}""",
+        field("jsonbStringArray").isNull()
+          .or(field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("null"))
+          .or(
+            field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("array")
+              .and(
+                field("jsonb_array_length({0})", Integer.class, field("jsonbStringArray")).eq(0)
+                  .or(
+                    exists(
+                      selectOne()
+                        .from(
+                          table("jsonb_array_elements({0})", field("jsonbStringArray"))
+                            .as("elem", "value")
+                        )
+                        .where(
+                          field("({0})::text", String.class, field(name("value"))).eq("null")
+                          .or(field("({0})::text", String.class, field(name("value"))).eq("\"\""))
+                        )
+                    )
+                  )
+              )
+          )
+      ),
+      Arguments.of(
+        "empty nested string",
+        """
+          {"stringArrayField[*]->stringSubField": {"$empty": true}}""",
+        field("stringSubField").isNull()
+          .or(cardinality(cast(field("stringSubField"), String[].class)).eq(0))
+          .or(
+            exists(
+              selectOne()
+                .from(unnest(cast(field("stringSubField"), String[].class)).as("elem", "value"))
+                .where(
+                  field(name("value")).isNull()
+                    .or(field(name("value"), String.class).eq(""))
+                )
+            )
+          )
+      ),
+      Arguments.of(
+        "not empty nested string",
+        """
+          {"stringArrayField[*]->stringSubField": {"$empty": false}}""",
+        not(
+          field("stringSubField").isNull()
+            .or(cardinality(cast(field("stringSubField"), String[].class)).eq(0))
+            .or(
+              exists(
+                selectOne()
+                  .from(unnest(cast(field("stringSubField"), String[].class)).as("elem", "value"))
+                  .where(
+                    field(name("value")).isNull()
+                      .or(field(name("value"), String.class).eq(""))
+                  )
+              )
+            )
+        )
       ),
       Arguments.of(
         "not in list array string",

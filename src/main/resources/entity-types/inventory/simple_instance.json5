@@ -1685,6 +1685,7 @@
           label: 'False',
         },
       ],
+      valueFunction: 'lower(:value)'
     }
   ],
 }

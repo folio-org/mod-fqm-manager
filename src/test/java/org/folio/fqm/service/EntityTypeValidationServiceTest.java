@@ -153,10 +153,11 @@ class EntityTypeValidationServiceTest {
     EntityType entity = entityTypeWithSourcesFactory(
       new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
     );
+    List<UUID> availableTargetIds = List.of();
 
     InvalidEntityTypeDefinitionException ex = assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entity, List.of())
+      () -> entityTypeValidationService.validateEntityType(entityTypeId, entity, availableTargetIds)
     );
     assertThat(
       ex.getMessage(),

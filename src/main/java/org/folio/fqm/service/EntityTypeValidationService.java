@@ -184,6 +184,7 @@ public class EntityTypeValidationService {
     }
   }
 
+  @SuppressWarnings("java:S2583") // Sonar thinks targetId cannot be null, but we still want to check
   private void validateEntityTypeSource(
     EntityType entityType,
     EntityTypeSourceEntityType source,

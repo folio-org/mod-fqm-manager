@@ -430,17 +430,17 @@ public class FqlToSqlConverterService {
 
       case ARRAY_TYPE -> {
         org.jooq.Field<String[]> array = cast(field, String[].class);
-        org.jooq.Field<String> v = DSL.field(name("v"), String.class);
+        org.jooq.Field<String> value = DSL.field(name("value"), String.class);
 
         Condition containsEmptyString = STRING_TYPE.equals(elementType)
-          ? v.eq("")
+          ? value.eq("")
           : DSL.falseCondition();
 
         Condition containsEmptyElement =
           exists(
             selectOne()
               .from(unnest(array).as("elem", "value"))
-              .where(v.isNull().or(containsEmptyString))
+              .where(value.isNull().or(containsEmptyString))
           );
 
         yield field.isNull()

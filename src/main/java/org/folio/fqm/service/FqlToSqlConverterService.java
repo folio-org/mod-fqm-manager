@@ -431,7 +431,7 @@ public class FqlToSqlConverterService {
       case ARRAY_TYPE -> {
         org.jooq.Field<String[]> array = cast(field, String[].class);
         org.jooq.Field<String> value = DSL.field(name("value"), String.class);
-
+        Condition containsNullValue = value.isNull();
         Condition containsEmptyString = STRING_TYPE.equals(elementType)
           ? value.eq("")
           : DSL.falseCondition();
@@ -439,7 +439,7 @@ public class FqlToSqlConverterService {
         Condition containsEmptyElement = exists(
           selectOne()
             .from(unnest(array).as("elem", "value"))
-            .where(value.isNull().or(containsEmptyString))
+            .where(containsNullValue.or(containsEmptyString))
         );
 
         yield field.isNull()
@@ -460,15 +460,14 @@ public class FqlToSqlConverterService {
 
         Condition containsEmptyString = STRING_TYPE.equals(elementType) ? valueText.eq("\"\"") : DSL.falseCondition();
 
-        Condition containsEmptyElement =
-          exists(
-            selectOne()
-              .from(
-                table("jsonb_array_elements({0})", field)
-                  .as("elem", "value")
-              )
-              .where(containsNullValue.or(containsEmptyString))
-          );
+        Condition containsEmptyElement = exists(
+          selectOne()
+            .from(
+              table("jsonb_array_elements({0})", field)
+                .as("elem", "value")
+            )
+            .where(containsNullValue.or(containsEmptyString))
+        );
 
         yield field.isNull()
           .or(jsonbIsNull)

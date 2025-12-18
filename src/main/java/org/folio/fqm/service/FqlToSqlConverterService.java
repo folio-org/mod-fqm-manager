@@ -436,12 +436,11 @@ public class FqlToSqlConverterService {
           ? value.eq("")
           : DSL.falseCondition();
 
-        Condition containsEmptyElement =
-          exists(
-            selectOne()
-              .from(unnest(array).as("elem", "value"))
-              .where(value.isNull().or(containsEmptyString))
-          );
+        Condition containsEmptyElement = exists(
+          selectOne()
+            .from(unnest(array).as("elem", "value"))
+            .where(value.isNull().or(containsEmptyString))
+        );
 
         yield field.isNull()
           .or(cardinality(array).eq(0))

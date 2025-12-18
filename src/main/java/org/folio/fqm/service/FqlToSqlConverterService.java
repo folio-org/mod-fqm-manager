@@ -439,7 +439,7 @@ public class FqlToSqlConverterService {
         Condition containsEmptyElement =
           exists(
             selectOne()
-              .from(unnest(array).as("a", "v"))
+              .from(unnest(array).as("elem", "value"))
               .where(v.isNull().or(containsEmptyString))
           );
 
@@ -469,7 +469,7 @@ public class FqlToSqlConverterService {
             selectOne()
               .from(
                 table("jsonb_array_elements({0})", field)
-                  .as("e", "v")
+                  .as("elem", "value")
               )
               .where(containsNullValue.or(containsEmptyString))
           );

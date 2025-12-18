@@ -10,6 +10,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Condition;
@@ -68,7 +69,7 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
-          new EntityTypeColumn().name("arrayField").dataType(new EntityDataType().dataType("arrayType")),
+          new EntityTypeColumn().name("arrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(new NumberType().dataType("numberType"))),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
           new EntityTypeColumn().name("stringArrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(
             new ObjectType().dataType("objectType").properties(List.of(
@@ -108,6 +109,7 @@ class FqlToSqlConverterServiceTest {
   }
 
   static Condition trueCondition = trueCondition();
+  private static final Condition exists = null;
 
   static List<Arguments> jooqConditionsSource() {
     // list of fqlCondition, expectedCondition
@@ -964,7 +966,7 @@ class FqlToSqlConverterServiceTest {
         "not empty",
         """
           {"field5": {"$empty": false}}""",
-        field("field5").isNotNull()
+        field("field5").isNull().not()
       ),
       Arguments.of(
         "empty string",
@@ -976,19 +978,36 @@ class FqlToSqlConverterServiceTest {
         "not empty string",
         """
           {"field1": {"$empty": false}}""",
-        field("field1").isNotNull().and(cast(field("field1"), String.class).ne(""))
+        (field("field1").isNull().or(cast(field("field1"), String.class).eq(""))).not()
       ),
+      ////////////////////////////////////////////////////
       Arguments.of(
         "empty array",
         """
           {"arrayField": {"$empty": true}}""",
-        field("arrayField").isNull().or(cardinality(cast(field("arrayField"), String[].class)).eq(0)).or(falseCondition())
+        field("arrayField").isNull()
+          .or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+          .or(
+            exists(
+              selectOne()
+                .from(unnest(cast(field("arrayField"), String[].class)).as("elem", "value"))
+                .where(field(name("v")).isNull().or(falseCondition()))
+            )
+          )
       ),
       Arguments.of(
         "not empty array",
         """
           {"arrayField": {"$empty": false}}""",
-        field("arrayField").isNotNull().and(cardinality(cast(field("arrayField"), String[].class)).ne(0)).and(falseCondition())
+        (field("arrayField").isNull()
+          .or(cardinality(cast(field("arrayField"), String[].class)).eq(0))
+          .or(
+            exists(
+              selectOne()
+                .from(unnest(cast(field("arrayField"), String[].class)).as("elem", "value"))
+                .where(field(name("v")).isNull().or(falseCondition()))
+            )
+          )).not()
       ),
       Arguments.of(
         "empty JSONB array",
@@ -1028,6 +1047,7 @@ class FqlToSqlConverterServiceTest {
             )
         )).not()
       ),
+      ////////////////////////////////////////////////////
       Arguments.of(
         "not in list array string",
         """

@@ -102,6 +102,7 @@
       visibleByDefault: true,
       essential: true,
       valueGetter: ':record_lb.external_id',
+      sourceAlias: 'record_lb',
       joinsTo: [
         {
           targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance

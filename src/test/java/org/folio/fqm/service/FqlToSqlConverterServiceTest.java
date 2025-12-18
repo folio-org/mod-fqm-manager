@@ -9,6 +9,7 @@ import org.folio.querytool.domain.dto.DateType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
@@ -77,6 +78,7 @@ class FqlToSqlConverterServiceTest {
               new NestedObjectProperty().name("stringSubField").dataType(new StringType().dataType("stringType"))
             ))
           )),
+          new EntityTypeColumn().name("jsonbStringArray").dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType"))),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("jsonbArrayType"))
             .valueGetter("valueGetter")
@@ -1056,6 +1058,32 @@ class FqlToSqlConverterServiceTest {
                 )
             )
         )
+      ),
+      Arguments.of(
+        "empty JSONB string array",
+        """
+          {"jsonbStringArray": {"$empty": true}}""",
+        field("jsonbStringArray").isNull()
+          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("null"))
+          .or(
+            DSL.field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("array")
+              .and(
+                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbStringArray")).eq(0)
+                  .or(
+                    exists(
+                      selectOne()
+                        .from(
+                          table("jsonb_array_elements({0})", field("jsonbStringArray"))
+                            .as("elem", "value")
+                        )
+                        .where(
+                          DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null")
+                          .or(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("\"\""))
+                        )
+                    )
+                  )
+              )
+          )
       ),
       Arguments.of(
         "empty nested string",

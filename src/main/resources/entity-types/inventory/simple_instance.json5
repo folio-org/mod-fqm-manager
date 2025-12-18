@@ -1671,10 +1671,6 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: "(SELECT EXISTS (SELECT 1 FROM ${tenant_id}_mod_fqm_manager.src_inventory_holdings_record WHERE instanceid = :sourceAlias.id))::text",
-      filterValueGetter: "COALESCE(\
-        lower(SELECT EXISTS (SELECT 1 FROM ${tenant_id}_mod_fqm_manager.src_inventory_holdings_record WHERE instanceid = :sourceAlias.id)),\
-        'false'\
-      )",
       values: [
         {
           value: 'true',

@@ -42,6 +42,7 @@ import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
 import static org.jooq.impl.DSL.param;
 import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.unnest;
 import static org.jooq.impl.DSL.val;
 import static org.jooq.impl.DSL.trueCondition;
@@ -980,7 +981,6 @@ class FqlToSqlConverterServiceTest {
           {"field1": {"$empty": false}}""",
         (field("field1").isNull().or(cast(field("field1"), String.class).eq(""))).not()
       ),
-      ////////////////////////////////////////////////////
       Arguments.of(
         "empty array",
         """
@@ -1009,17 +1009,52 @@ class FqlToSqlConverterServiceTest {
             )
           )).not()
       ),
+      ////////////////////////////////////////////////////
       Arguments.of(
         "empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": true}}""",
-        field("jsonbArrayField").isNull().or(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0))
+        field("jsonbArrayField").isNull()
+          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+          .or(
+            DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+              .and(
+                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                  .or(
+                    exists(
+                      selectOne()
+                        .from(
+                          table("jsonb_array_elements({0})", field("jsonbArrayField"))
+                            .as("elem", "value")
+                        )
+                        .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+                    )
+                  )
+              )
+          )
       ),
       Arguments.of(
         "not empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": false}}""",
-        field("jsonbArrayField").isNotNull().and(field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).ne(0))
+        (field("jsonbArrayField").isNull()
+          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+          .or(
+            DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+              .and(
+                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                  .or(
+                    exists(
+                      selectOne()
+                        .from(
+                          table("jsonb_array_elements({0})", field("jsonbArrayField"))
+                            .as("elem", "value")
+                        )
+                        .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+                    )
+                  )
+              )
+          )).not()
       ),
       Arguments.of(
         "empty nested string",

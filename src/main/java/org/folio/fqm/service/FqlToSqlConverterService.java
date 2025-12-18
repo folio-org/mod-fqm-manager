@@ -18,10 +18,12 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -45,10 +47,16 @@ import static org.jooq.impl.DSL.arrayOverlap;
 import static org.jooq.impl.DSL.cast;
 import static org.jooq.impl.DSL.cardinality;
 import static org.jooq.impl.DSL.condition;
+import static org.jooq.impl.DSL.exists;
 import static org.jooq.impl.DSL.falseCondition;
+import static org.jooq.impl.DSL.inline;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
 import static org.jooq.impl.DSL.or;
+import static org.jooq.impl.DSL.selectOne;
+import static org.jooq.impl.DSL.table;
 import static org.jooq.impl.DSL.trueCondition;
+import static org.jooq.impl.DSL.unnest;
 
 /**
  * Class responsible for converting an FQL query to SQL query
@@ -75,31 +83,8 @@ public class FqlToSqlConverterService {
   private static final String ARRAY_TYPE = "arrayType";
   private static final String JSONB_ARRAY_TYPE = "jsonbArrayType";
   private static final String DATE_TYPE = "dateType";
+  private static final String OBJECT_TYPE = "objectType";
   private static final int INLINE_STRING_CHARACTER_LIMIT = 32;
-  public static final String ALL_NULLS = """
-    true = ALL(
-      SELECT(
-        unnest(
-          cast(
-            %s
-            as varchar[]
-          )
-        )
-      ) IS NULL
-    )
-    """;
-  public static final String NOT_ALL_NULLS = """
-    false = ANY(
-      SELECT(
-        unnest(
-          cast(
-            %s
-            as varchar[]
-          )
-        )
-      ) IS NULL
-    )
-    """;
 
   private final FqlService fqlService;
 
@@ -121,7 +106,7 @@ public class FqlToSqlConverterService {
 
       Condition validation = null;
       if (Boolean.TRUE.equals(fqmField.getValidated())) {
-        String dataType = getFieldDataType(entityType, fieldCondition);
+        String dataType = getFieldDataTypeName(entityType, fieldCondition);
         validation = validateCondition(field, dataType);
       }
 
@@ -151,7 +136,7 @@ public class FqlToSqlConverterService {
     if (isDateTimeCondition(equalsCondition, entityType)) {
       return handleDateTime(equalsCondition, field, entityType);
     }
-    String dataType = getFieldDataType(entityType, equalsCondition);
+    String dataType = getFieldDataTypeName(entityType, equalsCondition);
     if (ARRAY_TYPE.equals(dataType)) {
       var valueArray = cast(array(valueField(equalsCondition.value(), equalsCondition, entityType)), String[].class);
       return arrayOverlap(cast(field, String[].class), valueArray);
@@ -162,7 +147,7 @@ public class FqlToSqlConverterService {
         var transformedValue = valueField(equalsCondition.value(), equalsCondition, entityType);
         return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
       } else {
-        var jsonbValue = DSL.inline("[\"" + equalsCondition.value() + "\"]");
+        var jsonbValue = inline("[\"" + equalsCondition.value() + "\"]");
         return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
       }
     }
@@ -178,7 +163,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotEquals(NotEqualsCondition notEqualsCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notEqualsCondition);
+    String dataType = getFieldDataTypeName(entityType, notEqualsCondition);
     String filterFieldDataType = getFieldForFiltering(notEqualsCondition, entityType).getDataType().getDataType();
     Condition baseCondition;
     if (isDateTimeCondition(notEqualsCondition, entityType)) {
@@ -192,7 +177,7 @@ public class FqlToSqlConverterService {
         var transformedValue = valueField(notEqualsCondition.value(), notEqualsCondition, entityType);
         baseCondition = DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
       } else {
-        var jsonbValue = DSL.inline("[\"" + notEqualsCondition.value() + "\"]");
+        var jsonbValue = inline("[\"" + notEqualsCondition.value() + "\"]");
         baseCondition = DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
       }
     } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
@@ -271,7 +256,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleIn(InCondition inCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, inCondition);
+    String dataType = getFieldDataTypeName(entityType, inCondition);
 
     if (ARRAY_TYPE.equals(dataType)) {
       var valueList = inCondition
@@ -291,7 +276,7 @@ public class FqlToSqlConverterService {
             var transformedValue = valueField(val, inCondition, entityType);
             return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
           } else {
-            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            var jsonbValue = inline("[\"" + val + "\"]");
             return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
           }
         })
@@ -318,7 +303,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleNotIn(NotInCondition notInCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, notInCondition);
+    String dataType = getFieldDataTypeName(entityType, notInCondition);
 
     if (ARRAY_TYPE.equals(dataType)) {
       List<Condition> conditionList = notInCondition
@@ -340,7 +325,7 @@ public class FqlToSqlConverterService {
             var transformedValue = valueField(val, notInCondition, entityType);
             return DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
           } else {
-            var jsonbValue = DSL.inline("[\"" + val + "\"]");
+            var jsonbValue = inline("[\"" + val + "\"]");
             return DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
           }
         })
@@ -398,7 +383,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleRegEx(RegexCondition regexCondition, EntityType entityType, org.jooq.Field<Object> field) {
     // perform case-insensitive regex search
-    String dataType = getFieldDataType(entityType, regexCondition);
+    String dataType = getFieldDataTypeName(entityType, regexCondition);
     if (ARRAY_TYPE.equals(dataType)) {
       return condition("exists (select 1 from unnest({0}) where unnest ~* {1})", field, valueField(regexCondition.value(), regexCondition, entityType));
     }
@@ -414,43 +399,87 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String dataType = getFieldDataType(entityType, startsWithCondition);
+    String dataType = getFieldDataTypeName(entityType, startsWithCondition);
     if (ARRAY_TYPE.equals(dataType)) {
-      return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+      return condition("exists (select 1 from unnest({0}) where unnest like {1})", field, DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
     }
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), DSL.inline("%")));
+      return condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field.cast(JSONB.class), DSL.concat(valueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
     }
     return caseInsensitiveComparison(startsWithCondition, entityType, field, startsWithCondition.value(),
       org.jooq.Field::startsWithIgnoreCase, org.jooq.Field::startsWith);
   }
 
-  private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
-    String fieldType = getFieldDataType(entityType, emptyCondition);
-    boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
-    var nullCondition = isEmpty ? field.isNull() : field.isNotNull();
 
-    return switch (fieldType) {
-      case STRING_TYPE ->
-        isEmpty ? nullCondition.or(cast(field, String.class).eq("")) : nullCondition.and(cast(field, String.class).ne(""));
+  /**
+   * Handle $empty operator.
+   * <p>
+   * "empty" means:
+   * - field is not present
+   * - field is NULL
+   * - empty array
+   * - OR any element of array is NULL (and "" for string elements)
+   */
+  private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
+    boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    String fieldType = getFieldDataTypeName(entityType, emptyCondition);
+    String elementType = resolveArrayElementType(entityType, emptyCondition);
+
+    Condition empty = switch (fieldType) {
+      case STRING_TYPE -> field.isNull().or(cast(field, String.class).eq(""));
+
       case ARRAY_TYPE -> {
-        var cardinality = cardinality(cast(field, String[].class));
-        if (isEmpty) {
-          yield nullCondition.or(cardinality.eq(0)).or(ALL_NULLS.formatted(field));
-        } else {
-          yield nullCondition.and(cardinality.ne(0)).and(NOT_ALL_NULLS.formatted(field));
-        }
+        org.jooq.Field<String[]> array = cast(field, String[].class);
+        org.jooq.Field<String> value = DSL.field(name("value"), String.class);
+        Condition containsNullValue = value.isNull();
+        Condition containsEmptyString = STRING_TYPE.equals(elementType)
+          ? value.eq("")
+          : DSL.falseCondition();
+
+        Condition containsEmptyElement = exists(
+          selectOne()
+            .from(unnest(array).as("elem", "value"))
+            .where(containsNullValue.or(containsEmptyString))
+        );
+
+        yield field.isNull()
+          .or(cardinality(array).eq(0))
+          .or(containsEmptyElement);
       }
+
       case JSONB_ARRAY_TYPE -> {
-        var jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
-        if (isEmpty) {
-          yield nullCondition.or(jsonbCardinality.eq(0));
-        } else {
-          yield nullCondition.and(jsonbCardinality.ne(0));
-        }
+        org.jooq.Field<String> jsonbType = DSL.field("jsonb_typeof({0})", String.class, field);
+        Condition jsonbIsNull = jsonbType.eq("null");
+        Condition jsonbIsArray = jsonbType.eq("array");
+
+        org.jooq.Field<Integer> jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
+        Condition isEmptyArray = jsonbCardinality.eq(0);
+
+        org.jooq.Field<String> valueText = DSL.field("({0})::text", String.class, DSL.field(name("value")));
+        Condition containsNullValue = valueText.eq("null");
+
+        Condition containsEmptyString = STRING_TYPE.equals(elementType) ? valueText.eq("\"\"") : DSL.falseCondition();
+
+        Condition containsEmptyElement = exists(
+          selectOne()
+            .from(
+              table("jsonb_array_elements({0})", field)
+                .as("elem", "value")
+            )
+            .where(containsNullValue.or(containsEmptyString))
+        );
+
+        yield field.isNull()
+          .or(jsonbIsNull)
+          .or(
+            jsonbIsArray.and(
+              isEmptyArray.or(containsEmptyElement)
+            )
+          );
       }
-      default -> nullCondition;
+      default -> field.isNull();
     };
+    return isEmpty ? empty : empty.not();
   }
 
   private static Condition validateCondition(org.jooq.Field<?> field, String dataType) {
@@ -486,13 +515,38 @@ public class FqlToSqlConverterService {
     return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
   }
 
-  private static String getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
+  private static EntityDataType getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
-      .map(col -> col.getDataType().getDataType())
+      .map(Field::getDataType)
       .findFirst()
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+  }
+
+  private static String getFieldDataTypeName(EntityType entityType, FieldCondition<?> fieldCondition) {
+    return getFieldDataType(entityType, fieldCondition).getDataType();
+  }
+
+  private static String resolveArrayElementType(EntityType entityType, FieldCondition<?> condition) {
+    EntityDataType fieldType = getFieldDataType(entityType, condition);
+
+    if (fieldType instanceof ArrayType arrayType) {
+      EntityDataType itemType = arrayType.getItemDataType();
+      if (OBJECT_TYPE.equals(itemType.getDataType())) {
+        return getFieldForFiltering(condition, entityType)
+          .getDataType()
+          .getDataType();
+      }
+      return itemType.getDataType();
+    }
+
+    if (fieldType instanceof JsonbArrayType jsonbArrayType) {
+      return jsonbArrayType.getItemDataType().getDataType();
+    }
+
+    // Not a collection
+    return null;
   }
 
   // Suppress the unchecked cast warning on the Class<T> cast below. We need the correct type there in order to get
@@ -511,18 +565,18 @@ public class FqlToSqlConverterService {
 
     if (field.getValueFunction() != null) {
       if (inline) {
-        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.inline(value));
+        return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), inline(value));
       } else {
         return DSL.field(field.getValueFunction(), (Class<T>) value.getClass(), DSL.param("value", value));
       }
     }
-    return inline ? DSL.inline(value) : DSL.val(value);
+    return inline ? inline(value) : DSL.val(value);
   }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a
   // performance benefit without much drawback.
   private static <T> boolean shouldInlineValue(EntityType entityType, FieldCondition<?> condition, T value) {
-    var dataType = getFieldDataType(entityType, condition);
+    var dataType = getFieldDataTypeName(entityType, condition);
     switch (dataType) {
       case STRING_TYPE:
         // inline small strings only, due to potential performance hit for large strings

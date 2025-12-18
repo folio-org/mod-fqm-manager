@@ -415,7 +415,8 @@ public class FqlToSqlConverterService {
    * Handle $empty operator.
    * <p>
    * "empty" means:
-   * - SQL NULL
+   * - field is not present
+   * - field is NULL
    * - empty array
    * - OR any element of array is NULL (and "" for string elements)
    */
@@ -455,7 +456,7 @@ public class FqlToSqlConverterService {
         org.jooq.Field<Integer> jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
         Condition isEmptyArray = jsonbCardinality.eq(0);
 
-        org.jooq.Field<String> valueText = DSL.field("({0})::text", String.class, DSL.field(name("v")));
+        org.jooq.Field<String> valueText = DSL.field("({0})::text", String.class, DSL.field(name("value")));
         Condition containsNullValue = valueText.eq("null");
 
         Condition containsEmptyString = STRING_TYPE.equals(elementType) ? valueText.eq("\"\"") : DSL.falseCondition();

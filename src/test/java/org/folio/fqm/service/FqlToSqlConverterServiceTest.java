@@ -1016,11 +1016,11 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$empty": true}}""",
         field("jsonbArrayField").isNull()
-          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+          .or(field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
           .or(
-            DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+            field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
               .and(
-                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
                   .or(
                     exists(
                       selectOne()
@@ -1028,7 +1028,7 @@ class FqlToSqlConverterServiceTest {
                           table("jsonb_array_elements({0})", field("jsonbArrayField"))
                             .as("elem", "value")
                         )
-                        .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+                        .where(field("({0})::text", String.class, field(name("value"))).eq("null").or(falseCondition()))
                     )
                   )
               )
@@ -1040,11 +1040,11 @@ class FqlToSqlConverterServiceTest {
           {"jsonbArrayField": {"$empty": false}}""",
         not(
           field("jsonbArrayField").isNull()
-            .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+            .or(field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
             .or(
-              DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+              field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
                 .and(
-                  DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                  field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
                     .or(
                       exists(
                         selectOne()
@@ -1052,7 +1052,7 @@ class FqlToSqlConverterServiceTest {
                             table("jsonb_array_elements({0})", field("jsonbArrayField"))
                               .as("elem", "value")
                           )
-                          .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+                          .where(field("({0})::text", String.class, field(name("value"))).eq("null").or(falseCondition()))
                       )
                     )
                 )
@@ -1064,11 +1064,11 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbStringArray": {"$empty": true}}""",
         field("jsonbStringArray").isNull()
-          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("null"))
+          .or(field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("null"))
           .or(
-            DSL.field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("array")
+            field("jsonb_typeof({0})", String.class, field("jsonbStringArray")).eq("array")
               .and(
-                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbStringArray")).eq(0)
+                field("jsonb_array_length({0})", Integer.class, field("jsonbStringArray")).eq(0)
                   .or(
                     exists(
                       selectOne()
@@ -1077,8 +1077,8 @@ class FqlToSqlConverterServiceTest {
                             .as("elem", "value")
                         )
                         .where(
-                          DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null")
-                          .or(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("\"\""))
+                          field("({0})::text", String.class, field(name("value"))).eq("null")
+                          .or(field("({0})::text", String.class, field(name("value"))).eq("\"\""))
                         )
                     )
                   )
@@ -1096,8 +1096,8 @@ class FqlToSqlConverterServiceTest {
               selectOne()
                 .from(unnest(cast(field("stringSubField"), String[].class)).as("elem", "value"))
                 .where(
-                  DSL.field(name("value")).isNull()
-                    .or(DSL.field(name("value"), String.class).eq(""))
+                  field(name("value")).isNull()
+                    .or(field(name("value"), String.class).eq(""))
                 )
             )
           )
@@ -1114,8 +1114,8 @@ class FqlToSqlConverterServiceTest {
                 selectOne()
                   .from(unnest(cast(field("stringSubField"), String[].class)).as("elem", "value"))
                   .where(
-                    DSL.field(name("value")).isNull()
-                      .or(DSL.field(name("value"), String.class).eq(""))
+                    field(name("value")).isNull()
+                      .or(field(name("value"), String.class).eq(""))
                   )
               )
             )

@@ -3,6 +3,13 @@
   name: 'entity_type-02',
   labelAlias: 'entity_type-02',
   private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'source',
+      target: 'src_consortia_tenant', // available in the test context
+    },
+  ],
   columns: [
     {
       name: 'id',
@@ -40,7 +47,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: false,
-    }
+    },
   ],
   defaultSort: [
     {

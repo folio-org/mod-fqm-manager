@@ -1037,24 +1037,26 @@ class FqlToSqlConverterServiceTest {
         "not empty JSONB array",
         """
           {"jsonbArrayField": {"$empty": false}}""",
-        (field("jsonbArrayField").isNull()
-          .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
-          .or(
-            DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
-              .and(
-                DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
-                  .or(
-                    exists(
-                      selectOne()
-                        .from(
-                          table("jsonb_array_elements({0})", field("jsonbArrayField"))
-                            .as("elem", "value")
-                        )
-                        .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+        not(
+          field("jsonbArrayField").isNull()
+            .or(DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("null"))
+            .or(
+              DSL.field("jsonb_typeof({0})", String.class, field("jsonbArrayField")).eq("array")
+                .and(
+                  DSL.field("jsonb_array_length({0})", Integer.class, field("jsonbArrayField")).eq(0)
+                    .or(
+                      exists(
+                        selectOne()
+                          .from(
+                            table("jsonb_array_elements({0})", field("jsonbArrayField"))
+                              .as("elem", "value")
+                          )
+                          .where(DSL.field("({0})::text", String.class, DSL.field(name("v"))).eq("null").or(falseCondition()))
+                      )
                     )
-                  )
-              )
-          )).not()
+                )
+            )
+        )
       ),
       Arguments.of(
         "empty nested string",

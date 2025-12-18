@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import org.folio.fqm.exception.FqmException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -99,6 +98,28 @@ class EntityTypeValidationServiceTest {
       .thenReturn(Optional.of(new EntityType()));
   }
 
+  // shorthand to build a variant of the base CustomEntityType
+  private static EntityType customETFactory(UnaryOperator<CustomEntityType.CustomEntityTypeBuilder<?, ?>> op) {
+    return op.apply(BASE_VALID_CUSTOM_ENTITY_TYPE.toBuilder()).build();
+  }
+
+  // shorthand to build a variant of the base EntityType
+  private static EntityType entityTypeFactory(UnaryOperator<EntityType.EntityTypeBuilder<?, ?>> op) {
+    return op.apply(BASE_VALID_ENTITY_TYPE.toBuilder()).build();
+  }
+
+  private static EntityType entityTypeWithSourcesFactory(EntityTypeSource... sources) {
+    return entityTypeFactory(b -> b.sources(List.of(sources)));
+  }
+
+  private static EntityType entityTypeWithCustomFieldColumnFactory(CustomFieldMetadata metadata) {
+    return entityTypeFactory(b ->
+      b.columns(
+        List.of(new EntityTypeColumn().name("col").dataType(new CustomFieldType().customFieldMetadata(metadata)))
+      )
+    );
+  }
+
   @Test
   void testValidCustomEntityTypePasses() {
     UUID id = UUID.fromString(BASE_VALID_CUSTOM_ENTITY_TYPE.getId());
@@ -116,10 +137,9 @@ class EntityTypeValidationServiceTest {
   void testValidEntityTypePassesWithSourceFromInput() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
-    EntityType entity = BASE_VALID_ENTITY_TYPE
-      .toBuilder()
-      .sources(List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)))
-      .build();
+    EntityType entity = entityTypeWithSourcesFactory(
+      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
+    );
 
     assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entity, List.of(targetId)));
     verifyNoInteractions(repo);
@@ -130,10 +150,9 @@ class EntityTypeValidationServiceTest {
   void testEntityTypeWithSourcePointingToUnknownTargetFromParameterFails() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
-    EntityType entity = BASE_VALID_ENTITY_TYPE
-      .toBuilder()
-      .sources(List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)))
-      .build();
+    EntityType entity = entityTypeWithSourcesFactory(
+      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
+    );
 
     InvalidEntityTypeDefinitionException ex = assertThrows(
       InvalidEntityTypeDefinitionException.class,
@@ -150,48 +169,34 @@ class EntityTypeValidationServiceTest {
   @Test
   void testEntityTypeWithValidCustomFieldMetadata() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
-    EntityType entity = BASE_VALID_ENTITY_TYPE
-      .toBuilder()
-      .columns(
-        List.of(
-          new EntityTypeColumn()
-            .name("cf1")
-            .dataType(
-              new CustomFieldType()
-                .customFieldMetadata(new CustomFieldMetadata().configurationView("view").dataExtractionPath("path"))
-            )
-        )
-      )
-      .build();
+    EntityType entity = entityTypeWithCustomFieldColumnFactory(
+      new CustomFieldMetadata().configurationView("view").dataExtractionPath("path")
+    );
 
     assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entity, null));
   }
 
   static List<Arguments> customEntityTypeInvalidCases() {
-    // shorthand to build a variant of the base CustomEntityType
-    Function<UnaryOperator<CustomEntityType.CustomEntityTypeBuilder<?, ?>>, CustomEntityType> g = op ->
-      op.apply(BASE_VALID_CUSTOM_ENTITY_TYPE.toBuilder()).build();
-
     // input, expected exception message (supports regex)
     return List.of(
       Arguments.of(
-        g.apply(b -> b.sourceView("something")),
+        customETFactory(b -> b.sourceView("something")),
         "Custom entity types must not contain a sourceView property"
       ),
       Arguments.of(
-        g.apply(b -> b.sourceViewExtractor("something")),
+        customETFactory(b -> b.sourceViewExtractor("something")),
         "Custom entity types must not contain a sourceViewExtractor property"
       ),
       Arguments.of(
-        g.apply(b -> b.customFieldEntityTypeId(BASE_VALID_CUSTOM_ENTITY_TYPE.getId())),
+        customETFactory(b -> b.customFieldEntityTypeId(BASE_VALID_CUSTOM_ENTITY_TYPE.getId())),
         "Custom field entity type ID must not be defined for custom entity types"
       ),
-      Arguments.of(g.apply(b -> b.owner(null)), "Custom entity type must have an owner"),
-      Arguments.of(g.apply(b -> b.isCustom(null)), "Entity type .+ is not a custom entity type"),
-      Arguments.of(g.apply(b -> b.isCustom(false)), "Entity type .+ is not a custom entity type"),
-      Arguments.of(g.apply(b -> b.shared(null)), "Custom entity type must have a shared property"),
+      Arguments.of(customETFactory(b -> b.owner(null)), "Custom entity type must have an owner"),
+      Arguments.of(customETFactory(b -> b.isCustom(null)), "Entity type .+ is not a custom entity type"),
+      Arguments.of(customETFactory(b -> b.isCustom(false)), "Entity type .+ is not a custom entity type"),
+      Arguments.of(customETFactory(b -> b.shared(null)), "Custom entity type must have a shared property"),
       Arguments.of(
-        g.apply(b ->
+        customETFactory(b ->
           b.sources(
             List.of(
               BASE_VALID_CUSTOM_ENTITY_TYPE.getSources().get(0),
@@ -202,11 +207,11 @@ class EntityTypeValidationServiceTest {
         "Custom entity types must contain only entity-type sources"
       ),
       Arguments.of(
-        g.apply(b -> b.columns(List.of(new EntityTypeColumn().name("col1")))),
+        customETFactory(b -> b.columns(List.of(new EntityTypeColumn().name("col1")))),
         "Custom entity types must not contain columns"
       ),
       Arguments.of(
-        g.apply(b -> b.crossTenantQueriesEnabled(true)),
+        customETFactory(b -> b.crossTenantQueriesEnabled(true)),
         "Custom entity must not have cross-tenant queries enabled"
       )
     );
@@ -226,187 +231,126 @@ class EntityTypeValidationServiceTest {
   }
 
   static List<Arguments> entityTypeInvalidCases() {
-    // shorthand to build a variant of the base EntityType
-    Function<UnaryOperator<EntityType.EntityTypeBuilder<?, ?>>, EntityType> g = op ->
-      op.apply(BASE_VALID_ENTITY_TYPE.toBuilder()).build();
-
     // input, expected exception message (supports regex)
     return List.of(
-      Arguments.of(g.apply(b -> b.name(null)), "Entity type name cannot be null or blank"),
-      Arguments.of(g.apply(b -> b.name("")), "Entity type name cannot be null or blank"),
-      Arguments.of(g.apply(b -> b._private(null)), "Entity type must have private property set"),
-      Arguments.of(g.apply(b -> b.sources(null)), "Entity types must have at least one source defined"),
-      Arguments.of(g.apply(b -> b.sources(List.of())), "Entity types must have at least one source defined"),
+      Arguments.of(entityTypeFactory(b -> b.name(null)), "Entity type name cannot be null or blank"),
+      Arguments.of(entityTypeFactory(b -> b.name("")), "Entity type name cannot be null or blank"),
+      Arguments.of(entityTypeFactory(b -> b._private(null)), "Entity type must have private property set"),
+      Arguments.of(entityTypeFactory(b -> b.sources(null)), "Entity types must have at least one source defined"),
+      Arguments.of(entityTypeWithSourcesFactory(), "Entity types must have at least one source defined"),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSourceEntityType().alias(null)))),
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias(null)),
         "Source alias cannot be null or blank"
       ),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSourceEntityType().alias("")))),
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("")),
         "Source alias cannot be null or blank"
       ),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSourceEntityType().alias("foo.bar")))),
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("foo.bar")),
         "Invalid source alias: .+ must not contain '\\.'"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.sources(List.of(new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type(null)))
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type(null)
         ),
         "Source a's type cannot be null"
       ),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSourceDatabase().alias("a").type("bad")))),
+        entityTypeWithSourcesFactory(new EntityTypeSourceDatabase().alias("a").type("bad")),
         "Source a's type must be 'db'"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.sources(List.of(new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type("bad")))
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type("bad")
         ),
         "Source a's type must be 'entity-type'"
       ),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSource() {}.alias("a").type("foo")))),
+        entityTypeWithSourcesFactory(new EntityTypeSource() {}.alias("a").type("foo")),
         "Source a is not a known type"
       ),
       Arguments.of(
-        g.apply(b -> b.sources(List.of(new EntityTypeSourceEntityType().alias("a").type("entity-type").targetId(null)))
-        ),
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("a").type("entity-type").targetId(null)),
         "Source a's target ID cannot be null"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.sources(
-            List.of(
-              new EntityTypeSourceEntityType()
-                .alias("a")
-                .type("entity-type")
-                .targetId(EXISTING_TARGET_ET_ID)
-                .sourceField("foo")
-            )
-          )
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .sourceField("foo")
         ),
         "Source a must contain both targetField and sourceField or neither"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.sources(
-            List.of(
-              new EntityTypeSourceEntityType()
-                .alias("a")
-                .type("entity-type")
-                .targetId(EXISTING_TARGET_ET_ID)
-                .overrideJoinDirection(JoinDirection.LEFT)
-            )
-          )
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .overrideJoinDirection(JoinDirection.LEFT)
         ),
         "Source a may only contain overrideJoinDirection if targetField and sourceField are also defined"
       ),
       // this checks against EntityTypeRepository via mock; see testEntityTypeWithSourcePointingToUnknownTargetFromParameterFails
       // for the version which checks against the parameter list
       Arguments.of(
-        g.apply(b ->
-          b.sources(
-            List.of(
-              new EntityTypeSourceEntityType()
-                .alias("a")
-                .type("entity-type")
-                .targetId(UUID.fromString("95632cd9-2559-57ad-942c-90b145b6c8ea"))
-            )
-          )
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(UUID.fromString("95632cd9-2559-57ad-942c-90b145b6c8ea"))
         ),
         "Source a's target ID 95632cd9-2559-57ad-942c-90b145b6c8ea refers to an unknown entity type"
       ),
-      Arguments.of(g.apply(b -> b.sources(List.of())), "Entity types must have at least one source defined"),
+      Arguments.of(entityTypeWithSourcesFactory(), "Entity types must have at least one source defined"),
       Arguments.of(
-        g.apply(b ->
+        entityTypeWithSourcesFactory(
           // no base sources present to join against
-          b.sources(
-            List.of(
-              new EntityTypeSourceDatabase()
-                .alias("a1")
-                .type("db")
-                .target("db")
-                .join(EntityTypeSourceDatabaseJoin.builder().joinTo("other").build()),
-              new EntityTypeSourceEntityType()
-                .alias("a2")
-                .type("entity-type")
-                .sourceField("source3")
-                .targetId(EXISTING_TARGET_ET_ID)
-                .targetField("field2")
-            )
-          )
+          new EntityTypeSourceDatabase()
+            .alias("a1")
+            .type("db")
+            .target("db")
+            .join(EntityTypeSourceDatabaseJoin.builder().joinTo("other").build()),
+          new EntityTypeSourceEntityType()
+            .alias("a2")
+            .type("entity-type")
+            .sourceField("source3")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .targetField("field2")
         ),
         "Entity types must have one base source without a join defined"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.sources(
-            List.of(
-              new EntityTypeSourceDatabase().alias("a1").type("db").target("db"),
-              new EntityTypeSourceEntityType().alias("a2").type("entity-type").targetId(EXISTING_TARGET_ET_ID)
-            )
-          )
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceDatabase().alias("a1").type("db").target("db"),
+          new EntityTypeSourceEntityType().alias("a2").type("entity-type").targetId(EXISTING_TARGET_ET_ID)
         ),
         "Entity types can have only one base source; all others must define a join"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.columns(
-            List.of(
-              new EntityTypeColumn()
-                .name("col")
-                .dataType(
-                  new CustomFieldType()
-                    .customFieldMetadata(new CustomFieldMetadata().configurationView(null).dataExtractionPath("path"))
-                )
-            )
-          )
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView(null).dataExtractionPath("path")
         ),
         "Custom field metadata must have a configuration view defined"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.columns(
-            List.of(
-              new EntityTypeColumn()
-                .name("col")
-                .dataType(
-                  new CustomFieldType()
-                    .customFieldMetadata(new CustomFieldMetadata().configurationView("").dataExtractionPath("path"))
-                )
-            )
-          )
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("").dataExtractionPath("path")
         ),
         "Custom field metadata must have a configuration view defined"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.columns(
-            List.of(
-              new EntityTypeColumn()
-                .name("col")
-                .dataType(
-                  new CustomFieldType()
-                    .customFieldMetadata(new CustomFieldMetadata().configurationView("view").dataExtractionPath(null))
-                )
-            )
-          )
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("view").dataExtractionPath(null)
         ),
         "Custom field metadata must have a data extraction path defined"
       ),
       Arguments.of(
-        g.apply(b ->
-          b.columns(
-            List.of(
-              new EntityTypeColumn()
-                .name("col")
-                .dataType(
-                  new CustomFieldType()
-                    .customFieldMetadata(new CustomFieldMetadata().configurationView("view").dataExtractionPath(""))
-                )
-            )
-          )
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("view").dataExtractionPath("")
         ),
         "Custom field metadata must have a data extraction path defined"
       )
@@ -427,21 +371,17 @@ class EntityTypeValidationServiceTest {
   }
 
   static List<Arguments> entityTypeIdCases() {
-    // shorthand to build a variant of the base EntityType
-    Function<UnaryOperator<EntityType.EntityTypeBuilder<?, ?>>, EntityType> g = op ->
-      op.apply(BASE_VALID_ENTITY_TYPE.toBuilder()).build();
-
     UUID validId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
 
     // entity type ID parameter, entity type, expected exception message (supports regex)
     return List.of(
-      Arguments.of(validId, g.apply(b -> b.id(null)), "Entity type ID cannot be null"),
-      Arguments.of(validId, g.apply(b -> b.id("")), "Invalid string provided for entity type ID"),
-      Arguments.of(validId, g.apply(b -> b.id("invalid")), "Invalid string provided for entity type ID"),
+      Arguments.of(validId, entityTypeFactory(b -> b.id(null)), "Entity type ID cannot be null"),
+      Arguments.of(validId, entityTypeFactory(b -> b.id("")), "Invalid string provided for entity type ID"),
+      Arguments.of(validId, entityTypeFactory(b -> b.id("invalid")), "Invalid string provided for entity type ID"),
       Arguments.of(null, BASE_VALID_ENTITY_TYPE, "Entity type ID cannot be null"),
       Arguments.of(
         UUID.fromString("a6dd246c-f8c7-579d-9a07-bee592631a80"),
-        g.apply(b -> b.id("b2ad53c2-d4a3-53e0-b04f-f3446cab4b11")),
+        entityTypeFactory(b -> b.id("b2ad53c2-d4a3-53e0-b04f-f3446cab4b11")),
         "Entity type ID in the request body does not match.+"
       )
     );

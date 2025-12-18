@@ -412,11 +412,11 @@ public class FqlToSqlConverterService {
 
   /**
    * Handle $empty operator.
-   * <p>
+   *
    * "empty" means:
-   * - SQL NULL
-   * - empty array
-   * - OR any element of array is NULL (and "" for string elements)
+   *   - SQL NULL
+   *   - empty array
+   *   - OR any element of array is NULL (and "" for string elements)
    */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
@@ -443,10 +443,7 @@ public class FqlToSqlConverterService {
               .where(v.isNull().or(emptyStringCheck))
           );
 
-        Condition isJsonArray = DSL.field("jsonb_typeof({0})", String.class, field).eq("array");
-
         yield field.isNull()
-          .or(isJsonArray.not())
           .or(cardinality(array).eq(0))
           .or(hasEmptyElement);
       }

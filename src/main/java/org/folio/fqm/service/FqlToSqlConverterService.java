@@ -424,9 +424,7 @@ public class FqlToSqlConverterService {
     String elementType = resolveArrayElementType(entityType, emptyCondition);
 
     Condition empty = switch (fieldType) {
-      case STRING_TYPE -> {
-        yield field.isNull().or(cast(field, String.class).eq(""));
-      }
+      case STRING_TYPE -> field.isNull().or(cast(field, String.class).eq(""));
 
       case ARRAY_TYPE -> {
         org.jooq.Field<String[]> array = cast(field, String[].class);
@@ -482,9 +480,7 @@ public class FqlToSqlConverterService {
             )
           );
       }
-      default -> {
-        yield field.isNull();
-      }
+      default -> field.isNull();
     };
     return isEmpty ? empty : empty.not();
   }
@@ -526,7 +522,7 @@ public class FqlToSqlConverterService {
     return entityType.getColumns()
       .stream()
       .filter(col -> fieldCondition.field().getColumnName().equals(col.getName()))
-      .map(col -> col.getDataType())
+      .map(Field::getDataType)
       .findFirst()
       .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
   }

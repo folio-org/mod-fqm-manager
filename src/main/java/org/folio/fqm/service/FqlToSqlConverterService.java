@@ -23,6 +23,7 @@ import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -457,10 +458,7 @@ public class FqlToSqlConverterService {
         org.jooq.Field<String> valueText = DSL.field("({0})::text", String.class, DSL.field(name("v")));
         Condition containsNullValue = valueText.eq("null");
 
-        Condition containsEmptyString =
-          STRING_TYPE.equals(elementType)
-            ? valueText.eq("\"\"")
-            : DSL.falseCondition();
+        Condition containsEmptyString = STRING_TYPE.equals(elementType) ? valueText.eq("\"\"") : DSL.falseCondition();
 
         Condition containsEmptyElement =
           exists(
@@ -544,10 +542,8 @@ public class FqlToSqlConverterService {
       return itemType.getDataType();
     }
 
-    if (JSONB_ARRAY_TYPE.equals(fieldType.getDataType())) {
-      return getFieldForFiltering(condition, entityType)
-        .getDataType()
-        .getDataType();
+    if (fieldType instanceof JsonbArrayType jsonbArrayType) {
+      return jsonbArrayType.getItemDataType().getDataType();
     }
 
     // Not a collection

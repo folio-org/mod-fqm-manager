@@ -412,11 +412,11 @@ public class FqlToSqlConverterService {
 
   /**
    * Handle $empty operator.
-   *
+   * <p>
    * "empty" means:
-   *   - SQL NULL
-   *   - empty array
-   *   - OR any element of array is NULL (and "" for string elements)
+   * - SQL NULL
+   * - empty array
+   * - OR any element of array is NULL (and "" for string elements)
    */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
@@ -443,15 +443,17 @@ public class FqlToSqlConverterService {
               .where(v.isNull().or(emptyStringCheck))
           );
 
+        Condition isJsonArray = DSL.field("jsonb_typeof({0})", String.class, field).eq("array");
+
         yield field.isNull()
+          .or(isJsonArray.not())
           .or(cardinality(array).eq(0))
           .or(hasEmptyElement);
       }
 
       case JSONB_ARRAY_TYPE -> {
-        org.jooq.Field<Integer> jsonbCardinality =
-          DSL.field("jsonb_array_length({0})", Integer.class, field);
-
+        org.jooq.Field<Integer> jsonbCardinality = DSL.field("jsonb_array_length({0})", Integer.class, field);
+        Condition isEmptyArray = jsonbCardinality.eq(0);
 
         /// ////
         org.jooq.Field<String> jsonbType = DSL.field("jsonb_typeof({0})", String.class, field);
@@ -476,9 +478,6 @@ public class FqlToSqlConverterService {
               )
               .where(jsonbNull.or(emptyString))
           );
-
-
-        Condition isEmptyArray = jsonbCardinality.eq(0);
 
         var returnValue = field.isNull()
           .or(jsonbIsNull)

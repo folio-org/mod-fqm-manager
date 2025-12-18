@@ -75,10 +75,10 @@ class EntityTypeValidationServiceTest {
     .name("test")
     ._private(false)
     .isCustom(true)
-    .columns(null)
     .sources(
       List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
-    );
+    )
+    .columns(null);
 
   @Mock
   private EntityTypeRepository repo;
@@ -99,7 +99,7 @@ class EntityTypeValidationServiceTest {
   }
 
   // shorthand to build a variant of the base CustomEntityType
-  private static EntityType customETFactory(UnaryOperator<CustomEntityType.CustomEntityTypeBuilder<?, ?>> op) {
+  private static CustomEntityType customETFactory(UnaryOperator<CustomEntityType.CustomEntityTypeBuilder<?, ?>> op) {
     return op.apply(BASE_VALID_CUSTOM_ENTITY_TYPE.toBuilder()).build();
   }
 
@@ -121,20 +121,27 @@ class EntityTypeValidationServiceTest {
   }
 
   @Test
-  void testValidCustomEntityTypePasses() {
+  void testValidCustomEntityPasses() {
     UUID id = UUID.fromString(BASE_VALID_CUSTOM_ENTITY_TYPE.getId());
     assertDoesNotThrow(() -> entityTypeValidationService.validateCustomEntityType(id, BASE_VALID_CUSTOM_ENTITY_TYPE));
   }
 
   @Test
-  void testValidEntityTypePassesWithSourceFromRepositoryMock() {
+  void testValidCustomEntityWithEmptyColumnListPasses() {
+    UUID id = UUID.fromString(BASE_VALID_CUSTOM_ENTITY_TYPE.getId());
+    CustomEntityType entityWithEmptyColumnList = customETFactory(b -> b.columns(List.of()));
+    assertDoesNotThrow(() -> entityTypeValidationService.validateCustomEntityType(id, entityWithEmptyColumnList));
+  }
+
+  @Test
+  void testValidEntityPassesWithSourceFromRepositoryMock() {
     UUID id = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(id, BASE_VALID_ENTITY_TYPE, null));
     verify(repo, atLeastOnce()).getEntityTypeDefinition(EXISTING_TARGET_ET_ID, TENANT_ID);
   }
 
   @Test
-  void testValidEntityTypePassesWithSourceFromInput() {
+  void testValidEntityPassesWithSourceFromInput() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
     EntityType entity = entityTypeWithSourcesFactory(
@@ -147,7 +154,7 @@ class EntityTypeValidationServiceTest {
 
   // case without the parameter list is handled by parameterized entityTypeInvalidCases
   @Test
-  void testEntityTypeWithSourcePointingToUnknownTargetFromParameterFails() {
+  void testEntityWithSourcePointingToUnknownTargetFromParameterFails() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
     EntityType entity = entityTypeWithSourcesFactory(
@@ -168,7 +175,7 @@ class EntityTypeValidationServiceTest {
   }
 
   @Test
-  void testEntityTypeWithValidCustomFieldMetadata() {
+  void testEntityWithValidCustomFieldMetadata() {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     EntityType entity = entityTypeWithCustomFieldColumnFactory(
       new CustomFieldMetadata().configurationView("view").dataExtractionPath("path")

@@ -13,6 +13,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
@@ -212,7 +213,8 @@ class EntityTypeRepositoryTest {
       .id(ENTITY_TYPE_02_ID.toString())
       ._private(false)
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
-      .columns(expectedColumns);
+      .columns(expectedColumns)
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source").target("src_consortia_tenant")));
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }

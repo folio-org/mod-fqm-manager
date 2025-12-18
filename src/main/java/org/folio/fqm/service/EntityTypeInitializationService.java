@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.exception.FqmException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.JSON5ObjectMapperFactory;
 import org.folio.querytool.domain.dto.EntityType;
@@ -239,8 +240,13 @@ public class EntityTypeInitializationService {
       List<String> existingUsedBy = usedByMap.getOrDefault(entityType.getId(), Collections.emptyList());
       entityType.setUsedBy(existingUsedBy);
 
-      log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
-      entityTypeValidationService.validateEntityType(UUID.fromString(entityType.getId()), entityType, entityTypeIds);
+      try {
+        log.debug("Checking entity type: {} ({})", entityType.getName(), entityType.getId());
+        entityTypeValidationService.validateEntityType(UUID.fromString(entityType.getId()), entityType, entityTypeIds);
+      } catch (FqmException e) {
+        log.error("Entity type {} ({}) is invalid: {}", entityType.getName(), entityType.getId(), e.getMessage());
+        throw log.throwing(e);
+      }
     }
   }
 

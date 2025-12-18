@@ -1,23 +1,23 @@
 package org.folio.fqm.service;
 
+import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.flattening.SourceUtils;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
 import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
@@ -33,38 +33,49 @@ public class EntityTypeValidationService {
       throw new InvalidEntityTypeDefinitionException("Custom entity type must have an owner", customEntityType);
     }
     if (customEntityType.getShared() == null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity type must have a shared property", customEntityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity type must have a shared property",
+        customEntityType
+      );
     }
     if (!Boolean.TRUE.equals(customEntityType.getIsCustom())) {
-      throw new EntityTypeNotFoundException(entityTypeId,
-          String.format("Entity type %s is not a custom entity type", entityTypeId));
+      throw new EntityTypeNotFoundException(
+        entityTypeId,
+        "Entity type %s is not a custom entity type".formatted(entityTypeId)
+      );
     }
-    if (customEntityType.getSources() != null && !customEntityType.getSources()
-      .stream()
-      .allMatch(EntityTypeSourceEntityType.class::isInstance)) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must contain only entity-type sources", customEntityType);
+    if (!customEntityType.getSources().stream().allMatch(EntityTypeSourceEntityType.class::isInstance)) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity types must contain only entity-type sources",
+        customEntityType
+      );
     }
-    if (customEntityType.getColumns() != null && !customEntityType.getColumns()
-      .isEmpty()) {
+    if (customEntityType.getColumns() != null && !customEntityType.getColumns().isEmpty()) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", customEntityType);
     }
     if (customEntityType.getCustomFieldEntityTypeId() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom field entity type id must not be defined for custom entity types",
-          customEntityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom field entity type ID must not be defined for custom entity types",
+        customEntityType
+      );
     }
     if (customEntityType.getSourceView() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceView property",
-          customEntityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity types must not contain a sourceView property",
+        customEntityType
+      );
     }
     if (customEntityType.getSourceViewExtractor() != null) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain a sourceViewExtractor property",
-          customEntityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity types must not contain a sourceViewExtractor property",
+        customEntityType
+      );
     }
     if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
-      throw new InvalidEntityTypeDefinitionException("Custom entity must not have cross-tenant queries enabled", customEntityType);
-    }
-    if (customEntityType.getPrivate() == null) {
-      throw new InvalidEntityTypeDefinitionException("The \"private\" property must be set", customEntityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity must not have cross-tenant queries enabled",
+        customEntityType
+      );
     }
   }
 
@@ -95,13 +106,13 @@ public class EntityTypeValidationService {
     } catch (IllegalArgumentException e) {
       throw new InvalidEntityTypeDefinitionException("Invalid string provided for entity type ID", entityTypeId);
     }
-    if (!entityTypeId.toString()
-      .equals(entityType.getId())) {
+    if (!entityTypeId.toString().equals(entityType.getId())) {
       throw new InvalidEntityTypeDefinitionException(
-          "Entity type ID in the request body does not match the entity type ID in the URL", entityTypeId);
+        "Entity type ID in the request body does not match the entity type ID in the URL",
+        entityTypeId
+      );
     }
-    if (entityType.getName() == null || entityType.getName()
-      .isBlank()) {
+    if (entityType.getName() == null || entityType.getName().isBlank()) {
       throw new InvalidEntityTypeDefinitionException("Entity type name cannot be null or blank", entityTypeId);
     }
     if (entityType.getPrivate() == null) {
@@ -114,47 +125,125 @@ public class EntityTypeValidationService {
 
   @SuppressWarnings({ "java:S2589", "java:S2583" }) // Suppress incorrect warnings about null check always returning false
   private void validateSources(EntityType entityType, List<UUID> validTargetIds) {
-    if (entityType.getSources() == null) {
-      throw new InvalidEntityTypeDefinitionException("Entity type must have at least one source defined", entityType);
+    if (entityType.getSources() == null || entityType.getSources().isEmpty()) {
+      throw new InvalidEntityTypeDefinitionException("Entity types must have at least one source defined", entityType);
     }
+
+    boolean baseSourceExists = false;
     for (EntityTypeSource source : entityType.getSources()) {
-      if (source.getAlias() == null || source.getAlias()
-        .isBlank()) {
+      if (source.getAlias() == null || source.getAlias().isBlank()) {
         throw new InvalidEntityTypeDefinitionException("Source alias cannot be null or blank", entityType);
       }
-      if (source.getAlias()
-        .contains(".")) {
+      if (source.getAlias().contains(".")) {
         throw new InvalidEntityTypeDefinitionException(
-            String.format("Invalid source alias: '%s'. Source aliases must not contain '.'", source.getAlias()), entityType);
+          "Invalid source alias: '%s'. Source aliases must not contain '.'".formatted(source.getAlias()),
+          entityType
+        );
       }
       if (source.getType() == null) {
-        throw new InvalidEntityTypeDefinitionException("Source type cannot be null", entityType);
+        throw new InvalidEntityTypeDefinitionException(
+          "Source %s's type cannot be null".formatted(source.getAlias()),
+          entityType
+        );
       }
-      if (!source.getType()
-        .equals("db")
-          && !source.getType()
-            .equals("entity-type")) {
-        throw new InvalidEntityTypeDefinitionException("Source type must be either 'db' or 'entity-type'", entityType);
+      String expectedType =
+        switch (source) {
+          case EntityTypeSourceDatabase type -> "db";
+          case EntityTypeSourceEntityType type -> "entity-type";
+          default -> throw new InvalidEntityTypeDefinitionException(
+            "Source %s is not a known type".formatted(source.getAlias()),
+            entityType
+          );
+        };
+      if (!source.getType().equals(expectedType)) {
+        throw new InvalidEntityTypeDefinitionException(
+          "Source %s's type must be '%s'".formatted(source.getAlias(), expectedType),
+          entityType
+        );
       }
       if (source instanceof EntityTypeSourceEntityType entityTypeSource) {
-        validateEntityTypeSource(entityType, entityTypeSource.getTargetId(), validTargetIds);
+        validateEntityTypeSource(entityType, entityTypeSource, validTargetIds);
       }
+
+      if (!SourceUtils.isJoined(source)) {
+        if (baseSourceExists) {
+          throw new InvalidEntityTypeDefinitionException(
+            "Entity types can have only one base source; all others must define a join",
+            entityType
+          );
+        }
+        baseSourceExists = true;
+      }
+    }
+
+    if (!baseSourceExists) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Entity types must have one base source without a join defined",
+        entityType
+      );
     }
   }
 
-  private void validateEntityTypeSource(EntityType entityType, UUID targetId, List<UUID> validTargetIds) {
+  private void validateEntityTypeSource(
+    EntityType entityType,
+    EntityTypeSourceEntityType source,
+    List<UUID> validTargetIds
+  ) {
+    UUID targetId = source.getTargetId();
     if (targetId == null) {
-      throw new InvalidEntityTypeDefinitionException("Source entity type ID cannot be null for entity-type sources", entityType);
+      throw new InvalidEntityTypeDefinitionException(
+        "Source %s's target ID cannot be null".formatted(source.getAlias()),
+        entityType
+      );
     }
     if (validTargetIds == null) {
-      if (entityTypeRepository.getEntityTypeDefinition(targetId, folioExecutionContext.getTenantId())
-        .isEmpty()) {
+      if (entityTypeRepository.getEntityTypeDefinition(targetId, folioExecutionContext.getTenantId()).isEmpty()) {
         throw new InvalidEntityTypeDefinitionException(
-            "Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
+          "Source %s's target ID %s refers to an unknown entity type".formatted(source.getAlias(), targetId),
+          entityType
+        );
       }
     } else if (!validTargetIds.contains(UUID.fromString(targetId.toString()))) {
       throw new InvalidEntityTypeDefinitionException(
-          "Source with target ID " + targetId + " does not correspond to a valid entity type", entityType);
+        "Source %s's target ID %s refers to an unknown entity type".formatted(source.getAlias(), targetId),
+        entityType
+      );
+    }
+
+    validateEntityTypeSourceJoinProperties(entityType, source);
+  }
+
+  private static void validateEntityTypeSourceJoinProperties(EntityType entityType, EntityTypeSourceEntityType source) {
+    List<Boolean> possessedRequiredJoinProperties = List.of(
+      source.getTargetField() != null,
+      source.getSourceField() != null
+    );
+    long numRequiredJoinProperties = possessedRequiredJoinProperties.size();
+    long numPossessedRequiredJoinProperties = possessedRequiredJoinProperties
+      .stream()
+      .filter(Boolean.TRUE::equals)
+      .count();
+    boolean hasAllRequiredJoinProperties = numPossessedRequiredJoinProperties == numRequiredJoinProperties;
+    boolean hasNoRequiredJoinProperties = numPossessedRequiredJoinProperties == 0;
+
+    boolean hasOptionalJoinProperties = source.getOverrideJoinDirection() != null; // optional
+
+    // we only have some, not all
+    if (!hasAllRequiredJoinProperties && !hasNoRequiredJoinProperties) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Source %s must contain both targetField and sourceField or neither".formatted(source.getAlias()),
+        entityType
+      );
+    }
+
+    // case with optional + some properties is already covered above
+    if (hasOptionalJoinProperties && hasNoRequiredJoinProperties) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Source %s may only contain overrideJoinDirection if targetField and sourceField are also defined".formatted(
+            source.getAlias()
+          ),
+        entityType
+      );
     }
   }
 
@@ -164,15 +253,21 @@ public class EntityTypeValidationService {
       for (EntityTypeColumn column : entityType.getColumns()) {
         if (column.getDataType() instanceof CustomFieldType customFieldType) {
           CustomFieldMetadata customFieldMetadata = customFieldType.getCustomFieldMetadata();
-          if (customFieldMetadata.getConfigurationView() == null || customFieldMetadata.getConfigurationView()
-            .isBlank()) {
-            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a configuration view defined",
-                UUID.fromString(entityType.getId()));
+          if (
+            customFieldMetadata.getConfigurationView() == null || customFieldMetadata.getConfigurationView().isBlank()
+          ) {
+            throw new InvalidEntityTypeDefinitionException(
+              "Custom field metadata must have a configuration view defined",
+              UUID.fromString(entityType.getId())
+            );
           }
-          if (customFieldMetadata.getDataExtractionPath() == null || customFieldMetadata.getDataExtractionPath()
-            .isBlank()) {
-            throw new InvalidEntityTypeDefinitionException("Custom field metadata must have a data extraction path defined",
-                UUID.fromString(entityType.getId()));
+          if (
+            customFieldMetadata.getDataExtractionPath() == null || customFieldMetadata.getDataExtractionPath().isBlank()
+          ) {
+            throw new InvalidEntityTypeDefinitionException(
+              "Custom field metadata must have a data extraction path defined",
+              UUID.fromString(entityType.getId())
+            );
           }
         }
       }

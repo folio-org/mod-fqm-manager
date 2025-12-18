@@ -1661,7 +1661,7 @@
       valueFunction: 'lower(:value)'
     },
     {
-      name: 'with_holdings',
+      name: 'withHoldings',
       sourceAlias: 'inst',
       essential: true,
       dataType: {

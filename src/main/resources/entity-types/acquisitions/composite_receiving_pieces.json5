@@ -66,6 +66,15 @@
       order: 60,
     },
     {
+      alias: 'holdings_permanent_location',
+      type: 'entity-type',
+      targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple location
+      targetField: 'id',
+      sourceField: 'holding.location_id',
+      essentialOnly: true,
+      order: 65,
+    },
+    {
       alias: 'created_by',
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user

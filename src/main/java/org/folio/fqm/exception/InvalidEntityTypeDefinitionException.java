@@ -3,7 +3,6 @@ package org.folio.fqm.exception;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.folio.querytool.domain.dto.EntityType;
-import org.springframework.http.HttpStatus;
 
 import java.util.UUID;
 
@@ -29,5 +28,4 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
   public Error getError() {
     return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityTypeId));
   }
-
 }

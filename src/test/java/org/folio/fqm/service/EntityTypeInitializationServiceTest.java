@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -12,12 +13,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -51,6 +54,9 @@ class EntityTypeInitializationServiceTest {
 
   @Mock
   private EntityTypeService entityTypeService;
+
+  @Mock
+  private EntityTypeValidationService entityTypeValidationService;
 
   @Mock
   private FolioExecutionContext folioExecutionContext;
@@ -306,6 +312,21 @@ class EntityTypeInitializationServiceTest {
         }
       ),
       is("recovered")
+    );
+  }
+
+  @Test
+  void testThrowsOnInvalidEntityType() {
+    List<EntityType> input = List.of(new EntityType().id("66a4210c-e775-5fc7-8b89-587aa7a9b6f3"));
+
+    when(entityTypeRepository.getEntityTypeDefinitions(any(), any())).thenReturn(new ArrayList<EntityType>().stream());
+    doThrow(new InvalidEntityTypeDefinitionException("simulated invalid entity type", input.get(0)))
+      .when(entityTypeValidationService)
+      .validateEntityType(any(), any(), any());
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input)
     );
   }
 }

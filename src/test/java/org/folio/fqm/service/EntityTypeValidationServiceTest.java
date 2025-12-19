@@ -1,36 +1,84 @@
 package org.folio.fqm.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
-import org.folio.fqm.exception.EntityTypeNotFoundException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.UnaryOperator;
+import org.folio.fqm.exception.FqmException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.CustomFieldMetadata;
+import org.folio.querytool.domain.dto.CustomFieldType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.JoinDirection;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 @ExtendWith(MockitoExtension.class)
 class EntityTypeValidationServiceTest {
 
   private static final String TENANT_ID = "tenant_01";
+  private static final UUID EXISTING_TARGET_ET_ID = UUID.fromString("937aa998-abd9-53ed-b94f-58f1b121d47f");
+
+  private static final EntityType BASE_VALID_ENTITY_TYPE = new EntityType()
+    .id("9e98c39d-0935-56ca-86d9-98bfab27188a")
+    .name("test")
+    ._private(false)
+    .sources(
+      List.of(
+        new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID),
+        new EntityTypeSourceEntityType()
+          .alias("source2")
+          .type("entity-type")
+          .targetId(EXISTING_TARGET_ET_ID)
+          .sourceField("source")
+          .targetField("target"),
+        new EntityTypeSourceEntityType()
+          .alias("source3")
+          .type("entity-type")
+          .targetId(EXISTING_TARGET_ET_ID)
+          .sourceField("source2")
+          .targetField("target2")
+          .overrideJoinDirection(JoinDirection.LEFT)
+      )
+    )
+    .columns(null);
+
+  private static final CustomEntityType BASE_VALID_CUSTOM_ENTITY_TYPE = new CustomEntityType()
+    .id("c1396aa4-c125-5235-b14a-84cf7b0d0c51")
+    .owner(UUID.fromString("81dc8e91-c93b-5e86-b8de-dd5b7b4c75d2"))
+    .name("test")
+    ._private(false)
+    .isCustom(true)
+    .sources(
+      List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
+    )
+    .columns(null);
 
   @Mock
   private EntityTypeRepository repo;
@@ -42,548 +90,319 @@ class EntityTypeValidationServiceTest {
   @InjectMocks
   private EntityTypeValidationService entityTypeValidationService;
 
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenSourceViewIsNotNull() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .sourceView("some_source_view");
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when sourceView is not null");
-
-    assertEquals("Custom entity types must not contain a sourceView property", exception.getMessage());
+  @BeforeEach
+  void baseMocks() {
+    lenient().when(executionContext.getTenantId()).thenReturn(TENANT_ID);
+    lenient()
+      .when(repo.getEntityTypeDefinition(EXISTING_TARGET_ET_ID, TENANT_ID))
+      .thenReturn(Optional.of(new EntityType()));
   }
 
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenSourceViewExtractorIsNotNull() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .sourceViewExtractor("some_source_view_extractor");
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when sourceViewExtractor is not null");
-
-    assertEquals("Custom entity types must not contain a sourceViewExtractor property", exception.getMessage());
+  // shorthand to build a variant of the base CustomEntityType
+  private static CustomEntityType customETFactory(UnaryOperator<CustomEntityType.CustomEntityTypeBuilder<?, ?>> op) {
+    return op.apply(BASE_VALID_CUSTOM_ENTITY_TYPE.toBuilder()).build();
   }
 
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenCustomFieldEntityTypeIdIsPresent() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .customFieldEntityTypeId(entityTypeId.toString());
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when customFieldEntityTypeId refers to itself");
-
-    assertEquals("Custom field entity type id must not be defined for custom entity types", exception.getMessage());
+  // shorthand to build a variant of the base EntityType
+  private static EntityType entityTypeFactory(UnaryOperator<EntityType.EntityTypeBuilder<?, ?>> op) {
+    return op.apply(BASE_VALID_ENTITY_TYPE.toBuilder()).build();
   }
 
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenOwnerIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .name("test")
-      ._private(false)
-      .isCustom(true);
-
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when owner is null");
-
-    assertEquals("Custom entity type must have an owner", exception.getMessage());
+  private static EntityType entityTypeWithSourcesFactory(EntityTypeSource... sources) {
+    return entityTypeFactory(b -> b.sources(List.of(sources)));
   }
 
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenIsCustomIsNull() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(null); // isCustom is null
-
-    // Act & Assert
-    EntityTypeNotFoundException exception = assertThrows(EntityTypeNotFoundException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw EntityTypeNotFoundException when isCustom is null");
-
-    assertEquals("Entity type " + entityTypeId + " is not a custom entity type", exception.getMessage());
-  }
-
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenSharedIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .shared(null);
-
-    InvalidEntityTypeDefinitionException exception = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType)
+  private static EntityType entityTypeWithCustomFieldColumnFactory(CustomFieldMetadata metadata) {
+    return entityTypeFactory(b ->
+      b.columns(
+        List.of(new EntityTypeColumn().name("col").dataType(new CustomFieldType().customFieldMetadata(metadata)))
+      )
     );
-    assertEquals("Custom entity type must have a shared property", exception.getMessage());
   }
 
   @Test
-  void validateCustomEntityType_shouldThrowException_whenIsCustomIsFalse() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(false)
-      .shared(true);
+  void testValidCustomEntityPasses() {
+    UUID id = UUID.fromString(BASE_VALID_CUSTOM_ENTITY_TYPE.getId());
+    assertDoesNotThrow(() -> entityTypeValidationService.validateCustomEntityType(id, BASE_VALID_CUSTOM_ENTITY_TYPE));
+  }
 
-    EntityTypeNotFoundException exception = assertThrows(
-      EntityTypeNotFoundException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType)
+  @Test
+  void testValidCustomEntityWithEmptyColumnListPasses() {
+    UUID id = UUID.fromString(BASE_VALID_CUSTOM_ENTITY_TYPE.getId());
+    CustomEntityType entityWithEmptyColumnList = customETFactory(b -> b.columns(List.of()));
+    assertDoesNotThrow(() -> entityTypeValidationService.validateCustomEntityType(id, entityWithEmptyColumnList));
+  }
+
+  @Test
+  void testValidEntityPassesWithSourceFromRepositoryMock() {
+    UUID id = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
+    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(id, BASE_VALID_ENTITY_TYPE, null));
+    verify(repo, atLeastOnce()).getEntityTypeDefinition(EXISTING_TARGET_ET_ID, TENANT_ID);
+  }
+
+  @Test
+  void testValidEntityPassesWithSourceFromInput() {
+    UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
+    UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
+    EntityType entity = entityTypeWithSourcesFactory(
+      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
     );
 
-    assertEquals("Entity type " + entityTypeId + " is not a custom entity type", exception.getMessage());
+    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entity, List.of(targetId)));
+    verifyNoInteractions(repo);
   }
 
+  // case without the parameter list is handled by parameterized entityTypeInvalidCases
   @Test
-  void validateCustomEntityType_shouldThrowException_whenSourcesAreNotEntityTypeSourceEntityType() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1"))); // Not an EntityTypeSourceEntityType
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when sources are not all EntityTypeSourceEntityType");
-
-    assertEquals("Custom entity types must contain only entity-type sources", exception.getMessage());
-  }
-
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenColumnsAreNotEmpty() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .columns(List.of(new EntityTypeColumn().name("test_column"))); // Non-empty columns
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when columns are not empty");
-
-    assertEquals("Custom entity types must not contain columns", exception.getMessage());
-  }
-
-  @Test
-  void validateCustomEntityType_shouldThrowException_whenCrossTenantQueriesEnabled() {
-    // Arrange
-    UUID entityTypeId = UUID.randomUUID();
-    CustomEntityType customEntityType = new CustomEntityType()
-      .id(entityTypeId.toString())
-      .owner(UUID.randomUUID())
-      .name("test")
-      ._private(false)
-      .isCustom(true)
-      .crossTenantQueriesEnabled(true); // Cross-tenant queries enabled
-
-    // Act & Assert
-    InvalidEntityTypeDefinitionException exception = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateCustomEntityType(entityTypeId, customEntityType),
-      "Should throw InvalidEntityTypeDefinitionException when crossTenantQueriesEnabled is true");
-
-    assertEquals("Custom entity must not have cross-tenant queries enabled", exception.getMessage());
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenIdIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id(null)
-      .name("Test")
-      ._private(true)
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Entity type ID cannot be null"));
-
-    EntityType entityTypeWithId = entityType.id(entityTypeId.toString());
-    ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(null, entityTypeWithId, null));
-    assertTrue(ex.getMessage().contains("Entity type ID cannot be null"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenIdDoesNotMatch() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID differentId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id(differentId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Entity type ID in the request body does not match"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenIdIsInvalidUUID() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id("not-a-uuid")
-      .name("Test")
-      ._private(true)
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Invalid string provided for entity type ID"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenNameIsNullOrBlank() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name(null)
-      ._private(true)
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    InvalidEntityTypeDefinitionException ex1 = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex1.getMessage().contains("Entity type name cannot be null or blank"));
-
-    entityType.name("");
-    InvalidEntityTypeDefinitionException ex2 = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex2.getMessage().contains("Entity type name cannot be null or blank"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenPrivateIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(null)
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Entity type must have private property set"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceAliasIsInvalid() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias(null).type("entity-type").targetId(entityTypeId).build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
-
-    InvalidEntityTypeDefinitionException ex1 = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex1.getMessage().contains("Source alias cannot be null or blank"));
-
-    source.alias("");
-    InvalidEntityTypeDefinitionException ex2 = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex2.getMessage().contains("Source alias cannot be null or blank"));
-
-    source.alias("dot.alias");
-    InvalidEntityTypeDefinitionException ex3 = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex3.getMessage().contains("must not contain '.'"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceTypeIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias("alias").type(null).targetId(entityTypeId).build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Source type cannot be null"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceTypeIsInvalid() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder()
-      .alias("alias")
-      .type("invalid-type")
-      .targetId(entityTypeId)
-      .build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
+  void testEntityWithSourcePointingToUnknownTargetFromParameterFails() {
+    UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
+    UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
+    EntityType entity = entityTypeWithSourcesFactory(
+      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
+    );
+    List<UUID> availableTargetIds = List.of();
 
     InvalidEntityTypeDefinitionException ex = assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null)
+      () -> entityTypeValidationService.validateEntityType(entityTypeId, entity, availableTargetIds)
     );
-    assertTrue(ex.getMessage().contains("Source type must be either 'db' or 'entity-type'"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceEntityTypeIdIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(null).build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Source entity type ID cannot be null for entity-type sources"));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceEntityTypeIdDoesNotExist() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID targetId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(targetId).build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
-
-    when(repo.getEntityTypeDefinition(targetId, null)).thenReturn(Optional.empty());
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-    assertTrue(ex.getMessage().contains("Source with target ID " + targetId + " does not correspond to a valid entity type"));
-  }
-
-  @Test
-  void validateEntityType_shouldNotThrowException_whenSourceEntityTypeIdIsValid() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID targetId = UUID.randomUUID();
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(targetId).build();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .sources(List.of(source));
-
-    when(repo.getEntityTypeDefinition(targetId, null)).thenReturn(Optional.of(new EntityType()));
-    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenCustomFieldMetadataConfigurationViewIsNullOrBlank() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomFieldMetadata metadataWithNullView = new CustomFieldMetadata().configurationView(null).dataExtractionPath("path");
-    CustomFieldMetadata metadataWithBlankView = new CustomFieldMetadata().configurationView("").dataExtractionPath("path");
-    EntityTypeColumn columnWithNullView = new EntityTypeColumn()
-      .name("cf1")
-      .dataType(new org.folio.querytool.domain.dto.CustomFieldType().customFieldMetadata(metadataWithNullView));
-    EntityTypeColumn columnWithBlankView = new EntityTypeColumn()
-      .name("cf2")
-      .dataType(new org.folio.querytool.domain.dto.CustomFieldType().customFieldMetadata(metadataWithBlankView));
-    EntityType entityTypeNull = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .columns(List.of(columnWithNullView))
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-    EntityType entityTypeBlank = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .columns(List.of(columnWithBlankView))
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID)).thenReturn(Optional.of(new EntityType()));
-
-    InvalidEntityTypeDefinitionException ex1 = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityTypeNull, null)
+    assertThat(
+      ex.getMessage(),
+      containsString("Source source1's target ID " + targetId + " refers to an unknown entity type")
     );
-    assertEquals("Custom field metadata must have a configuration view defined", ex1.getMessage());
 
-    InvalidEntityTypeDefinitionException ex2 = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityTypeBlank, null)
-    );
-    assertEquals("Custom field metadata must have a configuration view defined", ex2.getMessage());
+    verifyNoInteractions(repo);
   }
 
   @Test
-  void validateEntityType_shouldThrowException_whenCustomFieldMetadataDataExtractionPathIsNullOrBlank() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomFieldMetadata metadataWithNullPath = new CustomFieldMetadata().configurationView("view").dataExtractionPath(null);
-    CustomFieldMetadata metadataWithBlankPath = new CustomFieldMetadata().configurationView("view").dataExtractionPath("");
-    EntityTypeColumn columnWithNullPath = new EntityTypeColumn()
-      .name("cf1")
-      .dataType(new org.folio.querytool.domain.dto.CustomFieldType().customFieldMetadata(metadataWithNullPath));
-    EntityTypeColumn columnWithBlankPath = new EntityTypeColumn()
-      .name("cf2")
-      .dataType(new org.folio.querytool.domain.dto.CustomFieldType().customFieldMetadata(metadataWithBlankPath));
-    EntityType entityTypeNull = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .columns(List.of(columnWithNullPath))
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-    EntityType entityTypeBlank = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .columns(List.of(columnWithBlankPath))
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID)).thenReturn(Optional.of(new EntityType()));
-
-    InvalidEntityTypeDefinitionException ex1 = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityTypeNull, null)
+  void testEntityWithValidCustomFieldMetadata() {
+    UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
+    EntityType entity = entityTypeWithCustomFieldColumnFactory(
+      new CustomFieldMetadata().configurationView("view").dataExtractionPath("path")
     );
-    assertEquals("Custom field metadata must have a data extraction path defined", ex1.getMessage());
 
-    InvalidEntityTypeDefinitionException ex2 = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityTypeBlank, null)
-    );
-    assertEquals("Custom field metadata must have a data extraction path defined", ex2.getMessage());
+    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entity, null));
   }
 
-  @Test
-  void validateEntityType_shouldNotThrow_whenCustomFieldMetadataIsValid() {
-    UUID entityTypeId = UUID.randomUUID();
-    CustomFieldMetadata validMetadata = new CustomFieldMetadata().configurationView("view").dataExtractionPath("path");
-    EntityTypeColumn validColumn = new EntityTypeColumn()
-      .name("cf1")
-      .dataType(new org.folio.querytool.domain.dto.CustomFieldType().customFieldMetadata(validMetadata));
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test")
-      ._private(true)
-      .columns(List.of(validColumn))
-      .sources(List.of(EntityTypeSourceEntityType.builder().alias("alias").type("entity-type").targetId(entityTypeId).build()));
-
-    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-    when(repo.getEntityTypeDefinition(entityTypeId, TENANT_ID)).thenReturn(Optional.of(new EntityType()));
-
-    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourceIdNotInValidSources() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID sourceId = UUID.randomUUID();
-    List<UUID> validSources = List.of(new UUID(1, 0), new UUID(1, 1));
-
-    EntityTypeSourceEntityType source = new EntityTypeSourceEntityType();
-    source.setAlias("sourceAlias");
-    source.setType("entity-type");
-    source.setTargetId(sourceId);
-
-    EntityType entityType = new EntityType();
-    entityType.setId(entityTypeId.toString());
-    entityType.setName("Test Entity");
-    entityType.setPrivate(false);
-    entityType.setSources(List.of(source));
-    entityType.setColumns(List.of());
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, validSources)
+  static List<Arguments> customEntityTypeInvalidCases() {
+    // input, expected exception message (supports regex)
+    return List.of(
+      Arguments.of(
+        customETFactory(b -> b.sourceView("something")),
+        "Custom entity types must not contain a sourceView property"
+      ),
+      Arguments.of(
+        customETFactory(b -> b.sourceViewExtractor("something")),
+        "Custom entity types must not contain a sourceViewExtractor property"
+      ),
+      Arguments.of(
+        customETFactory(b -> b.customFieldEntityTypeId(BASE_VALID_CUSTOM_ENTITY_TYPE.getId())),
+        "Custom field entity type ID must not be defined for custom entity types"
+      ),
+      Arguments.of(customETFactory(b -> b.owner(null)), "Custom entity type must have an owner"),
+      Arguments.of(customETFactory(b -> b.isCustom(null)), "Entity type .+ is not a custom entity type"),
+      Arguments.of(customETFactory(b -> b.isCustom(false)), "Entity type .+ is not a custom entity type"),
+      Arguments.of(customETFactory(b -> b.shared(null)), "Custom entity type must have a shared property"),
+      Arguments.of(
+        customETFactory(b ->
+          b.sources(
+            List.of(
+              BASE_VALID_CUSTOM_ENTITY_TYPE.getSources().get(0),
+              new EntityTypeSourceDatabase().type("db").alias("source1").join(new EntityTypeSourceDatabaseJoin())
+            )
+          )
+        ),
+        "Custom entity types must contain only entity-type sources"
+      ),
+      Arguments.of(
+        customETFactory(b -> b.columns(List.of(new EntityTypeColumn().name("col1")))),
+        "Custom entity types must not contain columns"
+      ),
+      Arguments.of(
+        customETFactory(b -> b.crossTenantQueriesEnabled(true)),
+        "Custom entity must not have cross-tenant queries enabled"
+      )
     );
-    assertTrue(ex.getMessage().contains("Source with target ID " + sourceId + " does not correspond to a valid entity type"));
   }
 
-  @Test
-  void validateEntityType_shouldNotThrow_whenSourceIdIsInValidEntityTypeIds() {
-    UUID entityTypeId = UUID.randomUUID();
-    UUID sourceId = UUID.randomUUID();
-    List<UUID> validEntityTypeIds = List.of(sourceId, new UUID(0, 1));
+  @ParameterizedTest
+  @MethodSource("customEntityTypeInvalidCases")
+  void testCustomEntityTypeInvalidCases(CustomEntityType entity, String expectedExceptionPattern) {
+    UUID entityId = UUID.fromString(entity.getId());
 
-    EntityTypeSourceEntityType source = EntityTypeSourceEntityType.builder()
-      .alias("sourceAlias")
-      .type("entity-type")
-      .targetId(sourceId)
-      .build();
-
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test Entity")
-      ._private(false)
-      .sources(List.of(source))
-      .columns(List.of());
-
-    assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, validEntityTypeIds));
-  }
-
-  @Test
-  void validateEntityType_shouldThrowException_whenSourcesIsNull() {
-    UUID entityTypeId = UUID.randomUUID();
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("Test Entity")
-      ._private(true)
-      .sources(null);
-
-    InvalidEntityTypeDefinitionException ex = assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> entityTypeValidationService.validateEntityType(entityTypeId, entityType, null)
+    FqmException exception = assertThrows(
+      FqmException.class,
+      () -> entityTypeValidationService.validateCustomEntityType(entityId, entity)
     );
-    assertEquals("Entity type must have at least one source defined", ex.getMessage());
+
+    assertThat(exception.getMessage(), matchesRegex(expectedExceptionPattern));
+  }
+
+  static List<Arguments> entityTypeInvalidCases() {
+    // input, expected exception message (supports regex)
+    return List.of(
+      Arguments.of(entityTypeFactory(b -> b.name(null)), "Entity type name cannot be null or blank"),
+      Arguments.of(entityTypeFactory(b -> b.name("")), "Entity type name cannot be null or blank"),
+      Arguments.of(entityTypeFactory(b -> b._private(null)), "Entity type must have private property set"),
+      Arguments.of(entityTypeFactory(b -> b.sources(null)), "Entity types must have at least one source defined"),
+      Arguments.of(entityTypeWithSourcesFactory(), "Entity types must have at least one source defined"),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias(null)),
+        "Source alias cannot be null or blank"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("")),
+        "Source alias cannot be null or blank"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("foo.bar")),
+        "Invalid source alias: .+ must not contain '\\.'"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type(null)
+        ),
+        "Source a's type cannot be null"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSourceDatabase().alias("a").type("bad")),
+        "Source a's type must be 'db'"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType().alias("a").targetId(EXISTING_TARGET_ET_ID).type("bad")
+        ),
+        "Source a's type must be 'entity-type'"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSource() {}.alias("a").type("foo")),
+        "Source a is not a known type"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(new EntityTypeSourceEntityType().alias("a").type("entity-type").targetId(null)),
+        "Source a's target ID cannot be null"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .sourceField("foo")
+        ),
+        "Source a must contain both targetField and sourceField or neither"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .overrideJoinDirection(JoinDirection.LEFT)
+        ),
+        "Source a may only contain overrideJoinDirection if targetField and sourceField are also defined"
+      ),
+      // this checks against EntityTypeRepository via mock; see testEntityTypeWithSourcePointingToUnknownTargetFromParameterFails
+      // for the version which checks against the parameter list
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceEntityType()
+            .alias("a")
+            .type("entity-type")
+            .targetId(UUID.fromString("95632cd9-2559-57ad-942c-90b145b6c8ea"))
+        ),
+        "Source a's target ID 95632cd9-2559-57ad-942c-90b145b6c8ea refers to an unknown entity type"
+      ),
+      Arguments.of(entityTypeWithSourcesFactory(), "Entity types must have at least one source defined"),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          // no base sources present to join against
+          new EntityTypeSourceDatabase()
+            .alias("a1")
+            .type("db")
+            .target("db")
+            .join(EntityTypeSourceDatabaseJoin.builder().joinTo("other").build()),
+          new EntityTypeSourceEntityType()
+            .alias("a2")
+            .type("entity-type")
+            .sourceField("source3")
+            .targetId(EXISTING_TARGET_ET_ID)
+            .targetField("field2")
+        ),
+        "Entity types must have one base source without a join defined"
+      ),
+      Arguments.of(
+        entityTypeWithSourcesFactory(
+          new EntityTypeSourceDatabase().alias("a1").type("db").target("db"),
+          new EntityTypeSourceEntityType().alias("a2").type("entity-type").targetId(EXISTING_TARGET_ET_ID)
+        ),
+        "Entity types can have only one base source; all others must define a join"
+      ),
+      Arguments.of(
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView(null).dataExtractionPath("path")
+        ),
+        "Custom field metadata must have a configuration view defined"
+      ),
+      Arguments.of(
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("").dataExtractionPath("path")
+        ),
+        "Custom field metadata must have a configuration view defined"
+      ),
+      Arguments.of(
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("view").dataExtractionPath(null)
+        ),
+        "Custom field metadata must have a data extraction path defined"
+      ),
+      Arguments.of(
+        entityTypeWithCustomFieldColumnFactory(
+          new CustomFieldMetadata().configurationView("view").dataExtractionPath("")
+        ),
+        "Custom field metadata must have a data extraction path defined"
+      )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("entityTypeInvalidCases")
+  void testEntityTypeInvalidCases(EntityType entity, String expectedExceptionPattern) {
+    UUID entityId = UUID.fromString(entity.getId());
+
+    FqmException exception = assertThrows(
+      FqmException.class,
+      () -> entityTypeValidationService.validateEntityType(entityId, entity, null)
+    );
+
+    assertThat(exception.getMessage(), matchesRegex(expectedExceptionPattern));
+  }
+
+  static List<Arguments> entityTypeIdCases() {
+    UUID validId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
+
+    // entity type ID parameter, entity type, expected exception message (supports regex)
+    return List.of(
+      Arguments.of(validId, entityTypeFactory(b -> b.id(null)), "Entity type ID cannot be null"),
+      Arguments.of(validId, entityTypeFactory(b -> b.id("")), "Invalid string provided for entity type ID"),
+      Arguments.of(validId, entityTypeFactory(b -> b.id("invalid")), "Invalid string provided for entity type ID"),
+      Arguments.of(null, BASE_VALID_ENTITY_TYPE, "Entity type ID cannot be null"),
+      Arguments.of(
+        UUID.fromString("a6dd246c-f8c7-579d-9a07-bee592631a80"),
+        entityTypeFactory(b -> b.id("b2ad53c2-d4a3-53e0-b04f-f3446cab4b11")),
+        "Entity type ID in the request body does not match.+"
+      )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("entityTypeIdCases")
+  void testEntityTypeIdCases(UUID idParameter, EntityType entity, String expectedExceptionPattern) {
+    FqmException exception = assertThrows(
+      FqmException.class,
+      () -> entityTypeValidationService.validateEntityType(idParameter, entity, null)
+    );
+
+    assertThat(exception.getMessage(), matchesRegex(expectedExceptionPattern));
   }
 }

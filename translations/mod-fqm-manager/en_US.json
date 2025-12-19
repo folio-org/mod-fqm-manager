@@ -1841,7 +1841,7 @@
     "entityType.composite_receiving_pieces.location": "Location",
     "entityType.composite_receiving_pieces.pol": "POL",
     "entityType.composite_receiving_pieces.title": "Title",
-    "entityType.composite_receiving_pieces.holding": "Holding",
+    "entityType.composite_receiving_pieces.holding": "Holdings",
     "entityType.composite_receiving_pieces.created_by": "Created by",
     "entityType.composite_receiving_pieces.updated_by": "Updated by",
     "entityType.composite_receiving_titles": "Receiving titles",

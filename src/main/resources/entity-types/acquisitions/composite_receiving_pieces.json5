@@ -70,7 +70,7 @@
       type: 'entity-type',
       targetId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4', // simple location
       targetField: 'id',
-      sourceField: 'holding.location_id',
+      sourceField: 'holding.permanent_location_id',
       essentialOnly: true,
       order: 65,
     },

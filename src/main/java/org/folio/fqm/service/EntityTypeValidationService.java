@@ -129,8 +129,12 @@ public class EntityTypeValidationService {
       throw new InvalidEntityTypeDefinitionException("Entity types must have at least one source defined", entityType);
     }
 
+    int defaultSourceOrder = 100;
     boolean baseSourceExists = false;
     for (EntityTypeSource source : entityType.getSources()) {
+      if (source.getOrder() == null) {
+        source.setOrder(defaultSourceOrder);
+      }
       if (source.getAlias() == null || source.getAlias().isBlank()) {
         throw new InvalidEntityTypeDefinitionException("Source alias cannot be null or blank", entityType);
       }
@@ -174,6 +178,8 @@ public class EntityTypeValidationService {
         }
         baseSourceExists = true;
       }
+
+      defaultSourceOrder += 100;
     }
 
     if (!baseSourceExists) {

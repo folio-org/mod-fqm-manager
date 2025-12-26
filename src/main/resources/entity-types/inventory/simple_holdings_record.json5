@@ -2,6 +2,7 @@
   id: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
   name: 'simple_holdings_record',
   private: true,
+  crossTenantQueriesEnabled: true,
   sources: [
     {
       type: 'db',

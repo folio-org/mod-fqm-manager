@@ -48,7 +48,7 @@ class EntityTypeFlatteningTranslationTest {
               "id": "00000000-0000-0000-0000-000000000001",
               "name": "simple_1",
               "sources": [
-                { "type": "db", "alias": "simple_1Source", "target": "simple_1_view" }
+                { "type": "db", "alias": "simple_1Source", "target": "simple_1_view", "order": 100 }
               ],
               "columns": [
                 { "name": "field1", "dataType": { "dataType": "stringType" }, "valueGetter": "field1ValueGetter" },

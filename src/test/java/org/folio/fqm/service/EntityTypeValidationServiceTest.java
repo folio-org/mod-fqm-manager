@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +11,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -404,5 +407,49 @@ class EntityTypeValidationServiceTest {
     );
 
     assertThat(exception.getMessage(), matchesRegex(expectedExceptionPattern));
+  }
+
+  static List<Arguments> customEntityTypeSourceOrderCases() {
+    List<Integer> listOfSingleNull = new ArrayList<>(); // Arrays.asList complains about varargs with single null
+    listOfSingleNull.add(null);
+
+    // input source order, expected source order after validation
+    return List.of(
+      Arguments.of(listOfSingleNull, Arrays.asList(100)),
+      Arguments.of(Arrays.asList(1), Arrays.asList(1)),
+      Arguments.of(Arrays.asList(null, 1), Arrays.asList(100, 1)),
+      Arguments.of(Arrays.asList(1, null), Arrays.asList(1, 200)),
+      Arguments.of(Arrays.asList(null, null, null), Arrays.asList(100, 200, 300)),
+      Arguments.of(Arrays.asList(null, 10000, null), Arrays.asList(100, 10000, 300))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("customEntityTypeSourceOrderCases")
+  void testCustomEntityTypeSourceOrderCases(List<Integer> inputOrder, List<Integer> expectedOrder) {
+    CustomEntityType entity = customETFactory(b -> {
+      List<EntityTypeSource> sources = new ArrayList<>();
+      for (int i = 0; i < inputOrder.size(); i++) {
+        Integer order = inputOrder.get(i);
+        EntityTypeSourceEntityType source = new EntityTypeSourceEntityType()
+          .alias("source" + i)
+          .type("entity-type")
+          .targetId(EXISTING_TARGET_ET_ID);
+        if (order != null) {
+          source.setOrder(order);
+        }
+        if (i > 0) {
+          source.setSourceField("source" + (i - 1));
+          source.setTargetField("target" + (i - 1));
+        }
+        sources.add(source);
+      }
+      return b.sources(sources);
+    });
+
+    UUID entityId = UUID.fromString(entity.getId());
+    assertDoesNotThrow(() -> entityTypeValidationService.validateCustomEntityType(entityId, entity));
+
+    assertThat(entity.getSources().stream().map(EntityTypeSource::getOrder).toList(), is(expectedOrder));
   }
 }

@@ -1,6 +1,6 @@
 {
   "entityType.mod_patron_blocks__user_summary": "Overzicht gebruikersblokken",
-  "entityType.mod_patron_blocks__user_summary._description": "Simple entity type for user blocks summary data.",
+  "entityType.mod_patron_blocks__user_summary._description": "Eenvoudig entiteittype voor overzichtsgegevens van gebruikersblokken.",
   "entityType.mod_patron_blocks__user_summary.id": "UUID",
   "entityType.mod_patron_blocks__user_summary.version": "Record versie",
   "entityType.mod_patron_blocks__user_summary.user_id": "Gebruiker UUID",

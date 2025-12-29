@@ -1,6 +1,6 @@
 {
   "entityType.mod_patron_blocks__user_summary": "Resumo dos bloqueios de usuário",
-  "entityType.mod_patron_blocks__user_summary._description": "Simple entity type for user blocks summary data.",
+  "entityType.mod_patron_blocks__user_summary._description": "Tipo de entidade simples para dados resumidos de blocos de usuário.",
   "entityType.mod_patron_blocks__user_summary.id": "UUID",
   "entityType.mod_patron_blocks__user_summary.version": "Versão do registro",
   "entityType.mod_patron_blocks__user_summary.user_id": "UUID do usuário",

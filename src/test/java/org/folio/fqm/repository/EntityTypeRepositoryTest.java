@@ -214,7 +214,7 @@ class EntityTypeRepositoryTest {
       ._private(false)
       .defaultSort(List.of(new EntityTypeDefaultSort().columnName("column-01").direction(EntityTypeDefaultSort.DirectionEnum.ASC)))
       .columns(expectedColumns)
-      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source").target("src_consortia_tenant")));
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source").target("src_consortia_tenant").order(100)));
     EntityType actualEntityType = repo.getEntityTypeDefinition(ENTITY_TYPE_02_ID, "").orElseThrow();
     assertEquals(expectedEntityType, actualEntityType);
   }

@@ -157,7 +157,8 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "db",
                 "alias": "source1",
-                "target": "source1_target"
+                "target": "source1_target",
+                "order": 200
               }
             ],
             "requiredPermissions": ["simple_permission1", "simple_permission2"],
@@ -193,7 +194,8 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "db",
                 "alias": "sourceZ",
-                "target": "sourceZ_target"
+                "target": "sourceZ_target",
+                "order": 110
               }
             ],
             "requiredPermissions": []
@@ -213,7 +215,8 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "simple_1",
-                "targetId": "00000000-0000-0000-0000-000000000001"
+                "targetId": "00000000-0000-0000-0000-000000000001",
+                "order": 120
               }
             ],
             "filterConditions": [":simple_1.source1.field2 != 'abc'"]
@@ -232,7 +235,8 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "simple_2",
-                "targetId": "00000000-0000-0000-0000-000000000002"
+                "targetId": "00000000-0000-0000-0000-000000000002",
+                "order": 130
               }
             ]
           }
@@ -252,7 +256,8 @@ class EntityTypeFlatteningServiceTest {
                 "alias": "simple_1",
                 "targetId": "00000000-0000-0000-0000-000000000001",
                 "targetField": "field1",
-                "sourceField": "simple_2.fieldZ"
+                "sourceField": "simple_2.fieldZ",
+                "order": 140
               },
               {
                 "type": "entity-type",
@@ -276,14 +281,16 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "simple_1",
-                "targetId": "00000000-0000-0000-0000-000000000001"
+                "targetId": "00000000-0000-0000-0000-000000000001",
+                "order": 150
               },
               {
                 "type": "entity-type",
                 "alias": "simple_2",
                 "targetId": "00000000-0000-0000-0000-000000000002",
                 "targetField": "fieldZ",
-                "sourceField": "simple_1.field1"
+                "sourceField": "simple_1.field1",
+                "order": 160
               }
             ]
           }
@@ -301,14 +308,16 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "composite_1",
-                "targetId": "cccccccc-0000-0000-0000-000000000001"
+                "targetId": "cccccccc-0000-0000-0000-000000000001",
+                "order": 170
               },
               {
                 "type": "entity-type",
                 "alias": "composite_2",
                 "targetId": "cccccccc-0000-0000-0000-000000000002",
                 "targetField": "simple_2.fieldZ",
-                "sourceField": "composite_1.simple_1.field1"
+                "sourceField": "composite_1.simple_1.field1",
+                "order": 180
               }
             ]
           }
@@ -326,14 +335,16 @@ class EntityTypeFlatteningServiceTest {
               {
                 "type": "entity-type",
                 "alias": "composite_wrapper_to_wrapper",
-                "targetId": "eeeeeeee-0000-0000-0000-000000000102"
+                "targetId": "eeeeeeee-0000-0000-0000-000000000102",
+                "order": 190
               },
               {
                 "type": "entity-type",
                 "alias": "composite_1_to_2",
                 "targetId": "dddddddd-0000-0000-0000-000000000012",
                 "targetField": "simple_2.fieldZ",
-                "sourceField": "composite_wrapper_to_wrapper.composite_1.simple_1.field1"
+                "sourceField": "composite_wrapper_to_wrapper.composite_1.simple_1.field1",
+                "order": 210
               }
             ],
             "requiredPermissions": ["extra_perm"]

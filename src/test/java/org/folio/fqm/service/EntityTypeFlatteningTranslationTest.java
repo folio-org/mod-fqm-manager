@@ -48,7 +48,7 @@ class EntityTypeFlatteningTranslationTest {
               "id": "00000000-0000-0000-0000-000000000001",
               "name": "simple_1",
               "sources": [
-                { "type": "db", "alias": "simple_1Source", "target": "simple_1_view" }
+                { "type": "db", "alias": "simple_1Source", "target": "simple_1_view", "order": 100 }
               ],
               "columns": [
                 { "name": "field1", "dataType": { "dataType": "stringType" }, "valueGetter": "field1ValueGetter" },
@@ -94,7 +94,7 @@ class EntityTypeFlatteningTranslationTest {
               "id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
               "name": "composite_1",
               "sources": [
-                { "type": "entity-type", "alias": "s1", "targetId": "00000000-0000-0000-0000-000000000001" }
+                { "type": "entity-type", "alias": "s1", "targetId": "00000000-0000-0000-0000-000000000001", "order": 100 }
               ]
             }
             """,
@@ -107,8 +107,8 @@ class EntityTypeFlatteningTranslationTest {
               "id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
               "name": "deeply_composite",
               "sources": [
-                { "type": "entity-type", "alias": "c1", "targetId": "cccccccc-cccc-cccc-cccc-cccccccccccc" },
-                { "type": "entity-type", "alias": "s2", "targetId": "00000000-0000-0000-0000-000000000002" }
+                { "type": "entity-type", "alias": "c1", "targetId": "cccccccc-cccc-cccc-cccc-cccccccccccc", "order": 100 },
+                { "type": "entity-type", "alias": "s2", "targetId": "00000000-0000-0000-0000-000000000002", "order": 100 }
               ]
             }
             """,

@@ -137,10 +137,12 @@ class EntityTypeServiceAvailableJoinsTest {
         new EntityTypeSourceEntityType()
           .type("entity-type")
           .alias("et1")
+          .order(100)
           .targetId(UUID.fromString("00000000-0000-0000-0000-000000000001")),
         new EntityTypeSourceEntityType()
           .type("entity-type")
           .alias("et2")
+          .order(100)
           .sourceField("et1.colA")
           .targetId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
           .targetField("col1")

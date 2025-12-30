@@ -406,22 +406,28 @@
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
     },
     {
-      name: 'created_date',
+      // [MODFQMMGR-1006] This was deprecated many years before FQM inside mod-users,
+      // and none of our testing in any env has shown it to be in use.
+      name: 'created_date_deprecated',
       sourceAlias: 'user',
       dataType: {
         dataType: 'dateTimeType',
       },
+      hidden: true,
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'createdDate'",
     },
     {
-      name: 'updated_date',
+      // [MODFQMMGR-1006] This was deprecated many years before FQM inside mod-users,
+      // and none of our testing in any env has shown it to be in use.
+      name: 'updated_date_deprecated',
       sourceAlias: 'user',
       dataType: {
         dataType: 'dateTimeType',
       },
+      hidden: true,
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,

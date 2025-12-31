@@ -280,6 +280,8 @@ public class EntityTypeService {
 
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
     Set<ValueWithLabel> resultSet = new HashSet<>();
+    int failureCount = 0;
+    FeignException lastException = null;
 
     for (String tenantId : tenantsToQuery) {
       try {
@@ -302,10 +304,19 @@ public class EntityTypeService {
         }
       } catch (FeignException.Unauthorized e) {
         log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
+        failureCount++;
+        lastException = e;
       }
       catch (FeignException.NotFound e) {
         log.error("Value source API {} not found in tenant {}", field.getValueSourceApi().getPath(), tenantId);
+        failureCount++;
+        lastException = e;
       }
+    }
+
+    if (failureCount > 0 && failureCount == tenantsToQuery.size()) {
+      log.error("Failed to get column values from all tenants. Rethrowing last exception.");
+      throw lastException;
     }
 
     List<ValueWithLabel> results = new ArrayList<>(resultSet);

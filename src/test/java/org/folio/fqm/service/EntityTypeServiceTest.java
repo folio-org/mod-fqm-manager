@@ -517,8 +517,67 @@ class EntityTypeServiceTest {
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(FeignException.NotFound.class);
 
+    assertThrows(FeignException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
+  }
+
+  @Test
+  void shouldReturnValuesWhenSomeTenantsFail() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "column_name";
+    List<String> tenantList = List.of(TENANT_ID, "tenant_02");
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .valueSourceApi(new ValueSourceApi()
+          .path("fake-path")
+          .valueJsonPath("$.theValue")
+          .labelJsonPath("$.theLabel")
+        )
+      ));
+
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenReturn("""
+      {
+        "theValue": ["v1"],
+        "theLabel": ["l1"]
+      }
+      """);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.NotFound.class);
+
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-    assertTrue(actualColumnValueLabel.getContent().isEmpty());
+
+    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("v1").label("l1")
+    ));
+    assertEquals(expectedColumnValues, actualColumnValueLabel);
+  }
+
+  @Test
+  void shouldRethrowWhenAllTenantsFail() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "column_name";
+    List<String> tenantList = List.of(TENANT_ID, "tenant_02");
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("the entity type")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .valueSourceApi(new ValueSourceApi()
+          .path("fake-path")
+          .valueJsonPath("$.theValue")
+          .labelJsonPath("$.theLabel")
+        )
+      ));
+
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(FeignException.Unauthorized.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.NotFound.class);
+
+    assertThrows(FeignException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
 
   @Test

@@ -303,6 +303,9 @@ public class EntityTypeService {
       } catch (FeignException.Unauthorized e) {
         log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
       }
+      catch (FeignException.NotFound e) {
+        log.error("Value source API {} not found in tenant {}", field.getValueSourceApi().getPath(), tenantId);
+      }
     }
 
     List<ValueWithLabel> results = new ArrayList<>(resultSet);

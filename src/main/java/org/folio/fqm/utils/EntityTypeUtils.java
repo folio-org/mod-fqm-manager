@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,6 +30,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.Join;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
@@ -183,31 +183,36 @@ public class EntityTypeUtils {
       .toList();
   }
 
-  private static void runOnEveryField(EntityType entityType, BiConsumer<Field, List<Field>> consumer) {
+  private static void runOnEveryField(EntityType entityType, BiConsumer<Field, String> consumer) {
     if (entityType.getColumns() == null) {
       return;
     }
     for (EntityTypeColumn column : entityType.getColumns()) {
-      runOnEveryField(List.of(), column, consumer);
+      runOnEveryField("", column, consumer);
     }
   }
 
-  private static void runOnEveryField(List<Field> parents, Field field, BiConsumer<Field, List<Field>> consumer) {
-    consumer.accept(field, parents);
+  private static void runOnEveryField(String parentPath, Field field, BiConsumer<Field, String> consumer) {
+    consumer.accept(field, parentPath);
+    String path = parentPath + field.getName();
     if (field.getDataType() instanceof ObjectType objectType) {
-      objectType
-        .getProperties()
-        .forEach(prop -> runOnEveryField(Stream.concat(parents.stream(), Stream.of(field)).toList(), prop, consumer));
+      path += "->";
+      for (Field prop : objectType.getProperties()) {
+        runOnEveryField(path, prop, consumer);
+      }
     } else if (field.getDataType() instanceof ArrayType arrayType) {
       // unpack any number of nested arrays until we get something else
       EntityDataType innerDataType = arrayType.getItemDataType();
-      while (innerDataType instanceof ArrayType innerDataTypeA && innerDataTypeA.getItemDataType() != null) {
+      path += "[*]";
+      while (innerDataType instanceof ArrayType innerDataTypeA) {
         innerDataType = innerDataTypeA.getItemDataType();
+        path += "[*]";
       }
       if (innerDataType instanceof ObjectType objectType) {
-        objectType
-          .getProperties()
-          .forEach(prop -> runOnEveryField(Stream.concat(parents.stream(), Stream.of(field)).toList(), prop, consumer));
+        path += "->";
+        for (Field prop : objectType.getProperties()) {
+          runOnEveryField(path, prop, consumer);
+        }
       }
     }
   }
@@ -263,7 +268,9 @@ public class EntityTypeUtils {
             sourceProperties.put("target", sourceDb.getTarget());
             sourceProperties.put("join", sourceDb.getJoin());
           }
-          default -> {}
+          default -> {
+            /* do nothing */
+          }
         }
         return sourceProperties;
       })
@@ -274,12 +281,9 @@ public class EntityTypeUtils {
     List<SortedMap<String, Object>> fields = new ArrayList<>();
     runOnEveryField(
       entityType,
-      (Field field, List<Field> parents) -> {
+      (Field field, String parentPath) -> {
         SortedMap<String, Object> fieldProperties = new TreeMap<>();
-        fieldProperties.put(
-          "name",
-          parents.stream().reduce("", (acc, f) -> acc + f.getName() + ".", String::concat) + field.getName()
-        );
+        fieldProperties.put("name", parentPath + field.getName());
         fieldProperties.put("dataType", field.getDataType().getDataType());
         fieldProperties.put("valueGetter", field.getValueGetter());
         fieldProperties.put("filterValueGetter", field.getFilterValueGetter());
@@ -288,6 +292,9 @@ public class EntityTypeUtils {
         if (field instanceof EntityTypeColumn column) {
           fieldProperties.put("isIdColumn", column.getIsIdColumn());
           fieldProperties.put("isCustomField", column.getIsCustomField());
+        }
+        if (field instanceof NestedObjectProperty prop) {
+          fieldProperties.put("property", prop.getProperty());
         }
         fields.add(fieldProperties);
       }

@@ -257,7 +257,7 @@ class IdStreamerTest {
   @Test
   void shouldMonitorQueryCancellation() {
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
-    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
     when(mockQueryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(cancelledQuery));
     IdStreamer newIdStreamer = new IdStreamer(
       context,
@@ -295,7 +295,7 @@ class IdStreamerTest {
   void shouldCancelQueryWhenHandlingDataBatch() {
     IdsWithCancelCallback idsWithCancelCallback = mock(IdsWithCancelCallback.class);
     QueryRepository mockQueryRepository = mock(QueryRepository.class);
-    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    Query cancelledQuery = new Query(UUID.randomUUID(), UUID.randomUUID(), "", "", List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
     when(mockQueryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(cancelledQuery));
     IdStreamer newIdStreamer = new IdStreamer(
       context,

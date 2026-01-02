@@ -34,6 +34,7 @@ import java.util.*;
 import static org.folio.fqm.domain.QueryStatus.FAILED;
 import static org.folio.fqm.domain.QueryStatus.IN_PROGRESS;
 import static org.folio.fqm.domain.QueryStatus.QUEUED;
+import static org.folio.fqm.utils.EntityTypeUtils.verifyEntityTypeHasNotChangedDuringQueryLifetime;
 
 /**
  * Service class responsible for managing a query
@@ -121,6 +122,7 @@ public class QueryManagementService {
       }
     }
     Query query = Query.newQuery(submitQuery.getEntityTypeId(),
+      EntityTypeUtils.computeEntityTypeResultsHash(entityType),
       submitQuery.getFqlQuery(),
       fields,
       executionContext.getUserId());
@@ -198,7 +200,7 @@ public class QueryManagementService {
         if (!query.status().equals(FAILED)) {
           details.totalRecords(queryResultsRepository.getQueryResultsCount(queryId));
         }
-        details.content(getContents(queryId, query.entityTypeId(), query.fields(), includeResults, offset, limit));
+        details.content(getContents(query, includeResults, offset, limit));
         return details;
       });
   }
@@ -293,7 +295,8 @@ public class QueryManagementService {
     Query query = getPotentialZombieQuery(queryId).orElseThrow(() -> new QueryNotFoundException(queryId));
 
     // ensures it exists
-    entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);
+    EntityType entityType = entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);
+    verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entityType);
 
     return queryResultsSorterService.getSortedIds(queryId, offset, limit);
   }
@@ -312,12 +315,13 @@ public class QueryManagementService {
     return resultSetService.getResultSet(entityTypeId, fields, ids, tenantsToQuery, localize);
   }
 
-  private List<Map<String, Object>> getContents(UUID queryId, UUID entityTypeId, List<String> fields, boolean includeResults, int offset, int limit) {
+  private List<Map<String, Object>> getContents(Query query, boolean includeResults, int offset, int limit) {
     if (includeResults) {
-      EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
-      List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(queryId, offset, limit);
+      EntityType entityType = entityTypeService.getEntityTypeDefinition(query.entityTypeId(), true);
+      verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entityType);
+      List<List<String>> resultIds = queryResultsRepository.getQueryResultIds(query.queryId(), offset, limit);
       List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
-      return resultSetService.getResultSet(entityTypeId, fields, resultIds, tenantsToQuery, false);
+      return resultSetService.getResultSet(query.entityTypeId(), query.fields(), resultIds, tenantsToQuery, false);
     }
     return List.of();
   }

@@ -1,26 +1,39 @@
 package org.folio.fqm.utils;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.jooq.impl.DSL.field;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
-
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.Join;
-import org.jooq.Field;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.jooq.impl.DSL.field;
 
 /**
  * Class responsible for retrieving information related to the ID columns of an entity type.
@@ -29,7 +42,7 @@ import static org.jooq.impl.DSL.field;
 @UtilityClass
 public class EntityTypeUtils {
 
-  public static final Field<String[]> RESULT_ID_FIELD = field("result_id", String[].class);
+  public static final org.jooq.Field<String[]> RESULT_ID_FIELD = field("result_id", String[].class);
 
   /**
    * Returns a list of strings corresponding to the names of the id columns of an entity type.
@@ -38,10 +51,7 @@ public class EntityTypeUtils {
    * @return List of id column names for the entity type
    */
   public static List<String> getIdColumnNames(EntityType entityType) {
-    return getIdColumns(entityType)
-      .stream()
-      .map(EntityTypeColumn::getName)
-      .toList();
+    return getIdColumns(entityType).stream().map(EntityTypeColumn::getName).toList();
   }
 
   /**
@@ -51,10 +61,7 @@ public class EntityTypeUtils {
    * @return List of value getters for the id columns of the entity type
    */
   public static List<String> getIdColumnValueGetters(EntityType entityType) {
-    return getIdColumns(entityType)
-      .stream()
-      .map(EntityTypeColumn::getValueGetter)
-      .toList();
+    return getIdColumns(entityType).stream().map(EntityTypeColumn::getValueGetter).toList();
   }
 
   /**
@@ -63,31 +70,27 @@ public class EntityTypeUtils {
    * @param entityType Entity type to extract id column information from
    * @return JOOQ field corresponding to the valueGetters for the id columns of the entity type
    */
-  public static Field<String[]> getResultIdValueGetter(EntityType entityType) {
-    List<Field<Object>> idColumnValueGetters = getIdColumnValueGetters(entityType)
+  @SuppressWarnings("unchecked")
+  public static org.jooq.Field<String[]> getResultIdValueGetter(EntityType entityType) {
+    List<org.jooq.Field<Object>> idColumnValueGetters = getIdColumnValueGetters(entityType)
       .stream()
       .map(DSL::field)
       .toList();
-    return DSL.cast(
-      DSL.array(idColumnValueGetters.toArray(new Field[0])),
-      String[].class
-    );
+    return DSL.cast(DSL.array(idColumnValueGetters.toArray(new org.jooq.Field[0])), String[].class);
   }
 
   public static List<SortField<Object>> getSortFields(EntityType entityType, boolean sortResults) {
     if (sortResults && !isEmpty(entityType.getDefaultSort())) {
-      return entityType
-        .getDefaultSort()
-        .stream()
-        .map(EntityTypeUtils::toSortField)
-        .toList();
+      return entityType.getDefaultSort().stream().map(EntityTypeUtils::toSortField).toList();
     }
     return List.of();
   }
 
   public static SortField<Object> toSortField(EntityTypeDefaultSort entityTypeDefaultSort) {
-    Field<Object> field = field(entityTypeDefaultSort.getColumnName());
-    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC ? field.desc() : field.asc();
+    org.jooq.Field<Object> field = field(entityTypeDefaultSort.getColumnName());
+    return entityTypeDefaultSort.getDirection() == EntityTypeDefaultSort.DirectionEnum.DESC
+      ? field.desc()
+      : field.asc();
   }
 
   public static List<String> getDateTimeFields(EntityType entityType) {
@@ -145,7 +148,7 @@ public class EntityTypeUtils {
       .stream()
       .filter(j ->
         j.getTargetId().equals(target.getOriginalEntityTypeId()) &&
-          j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
+        j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
       )
       .findFirst();
   }
@@ -166,9 +169,7 @@ public class EntityTypeUtils {
   }
 
   public static boolean isSimple(EntityType entityType) {
-    return entityType.getSources()
-      .stream()
-      .allMatch(source -> source.getType().equals("db"));
+    return entityType.getSources().stream().allMatch(source -> source.getType().equals("db"));
   }
 
   private static List<EntityTypeColumn> getIdColumns(EntityType entityType) {
@@ -180,5 +181,136 @@ public class EntityTypeUtils {
       // Required for compatibility with bulk-edit.
       .sorted(Comparator.comparing(column -> column.getName().contains("tenant_id") ? 1 : 0))
       .toList();
+  }
+
+  private static void runOnEveryField(EntityType entityType, BiConsumer<Field, List<Field>> consumer) {
+    if (entityType.getColumns() == null) {
+      return;
+    }
+    for (EntityTypeColumn column : entityType.getColumns()) {
+      runOnEveryField(List.of(), column, consumer);
+    }
+  }
+
+  private static void runOnEveryField(List<Field> parents, Field field, BiConsumer<Field, List<Field>> consumer) {
+    consumer.accept(field, parents);
+    if (field.getDataType() instanceof ObjectType objectType) {
+      objectType
+        .getProperties()
+        .forEach(prop -> runOnEveryField(Stream.concat(parents.stream(), Stream.of(field)).toList(), prop, consumer));
+    } else if (field.getDataType() instanceof ArrayType arrayType) {
+      // unpack any number of nested arrays until we get something else
+      EntityDataType innerDataType = arrayType.getItemDataType();
+      while (innerDataType instanceof ArrayType innerDataTypeA && innerDataTypeA.getItemDataType() != null) {
+        innerDataType = innerDataTypeA.getItemDataType();
+      }
+      if (innerDataType instanceof ObjectType objectType) {
+        objectType
+          .getProperties()
+          .forEach(prop -> runOnEveryField(Stream.concat(parents.stream(), Stream.of(field)).toList(), prop, consumer));
+      }
+    }
+  }
+
+  /**
+   * Computes a simple hash for the given entity type (flattened or unflattened). This hash does
+   * <strong>NOT</strong> consider the entire entity type definition, only some properties used in
+   * querying. Notable exclusions include owner information, any localized fields, and the ordering
+   * of sources and columns.
+   *
+   * This DOES take into effect values which affect queries and results, including but not limited
+   * to:
+   * - Sources (alias, type, target)
+   * - Columns (name, data type, ID state, getters)
+   * - Cross-tenant status
+   *
+   * No assumptions should be made about the specific algorithm used to compute the hash, the hash
+   * length, and the result should never be used to check if two entity types are equivalent. It
+   * is only intended to detect changes which may affect query results. Additionally, no guarantees
+   * are made about hash stability across different versions of FQM.
+   *
+   * @param entityType the entity type to compute the hash for
+   * @return a string of the computed hash
+   */
+  public static String computeEntityTypeResultsHash(EntityType entityType) {
+    SortedMap<String, Object> relevantProperties = new TreeMap<>();
+
+    relevantProperties.put("id", entityType.getId());
+    relevantProperties.put("crossTenantQueriesEnabled", entityType.getCrossTenantQueriesEnabled());
+    relevantProperties.put("groupByFields", entityType.getGroupByFields());
+    relevantProperties.put("filterConditions", entityType.getFilterConditions());
+    relevantProperties.put("additionalEcsConditions", entityType.getAdditionalEcsConditions());
+
+    List<SortedMap<String, Object>> sources = Optional
+      .ofNullable(entityType.getSources())
+      .orElse(List.of())
+      .stream()
+      .map((EntityTypeSource source) -> {
+        SortedMap<String, Object> sourceProperties = new TreeMap<>();
+        sourceProperties.put("alias", source.getAlias());
+        sourceProperties.put("type", source.getType());
+        switch (source) {
+          case EntityTypeSourceEntityType sourceEt -> {
+            sourceProperties.put("sourceField", sourceEt.getSourceField());
+            sourceProperties.put("targetId", sourceEt.getTargetId());
+            sourceProperties.put("targetField", sourceEt.getTargetField());
+            sourceProperties.put("overrideJoinDirection", sourceEt.getOverrideJoinDirection());
+            sourceProperties.put("useIdColumns", sourceEt.getUseIdColumns());
+            sourceProperties.put("essentialOnly", sourceEt.getEssentialOnly());
+            sourceProperties.put("inheritCustomFields", sourceEt.getInheritCustomFields());
+          }
+          case EntityTypeSourceDatabase sourceDb -> {
+            sourceProperties.put("target", sourceDb.getTarget());
+            sourceProperties.put("join", sourceDb.getJoin());
+          }
+          default -> {}
+        }
+        return sourceProperties;
+      })
+      .sorted((a, b) -> ((String) a.get("alias")).compareTo((String) b.get("alias")))
+      .toList();
+    relevantProperties.put("sources", sources);
+
+    List<SortedMap<String, Object>> fields = new ArrayList<>();
+    runOnEveryField(
+      entityType,
+      (Field field, List<Field> parents) -> {
+        SortedMap<String, Object> fieldProperties = new TreeMap<>();
+        fieldProperties.put(
+          "name",
+          parents.stream().reduce("", (acc, f) -> acc + f.getName() + ".", String::concat) + field.getName()
+        );
+        fieldProperties.put("dataType", field.getDataType().getDataType());
+        fieldProperties.put("valueGetter", field.getValueGetter());
+        fieldProperties.put("filterValueGetter", field.getFilterValueGetter());
+        fieldProperties.put("valueFunction", field.getValueFunction());
+        fieldProperties.put("idColumnName", field.getIdColumnName());
+        if (field instanceof EntityTypeColumn column) {
+          fieldProperties.put("isIdColumn", column.getIsIdColumn());
+          fieldProperties.put("isCustomField", column.getIsCustomField());
+        }
+        fields.add(fieldProperties);
+      }
+    );
+    fields.sort((a, b) -> ((String) a.get("name")).compareTo((String) b.get("name")));
+    relevantProperties.put("fields", fields);
+
+    try {
+      return DigestUtils.sha256Hex(new ObjectMapper().writeValueAsString(relevantProperties));
+    } catch (JsonProcessingException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  public static void verifyEntityTypeHasNotChangedDuringQueryLifetime(Query query, EntityType entityType) {
+    String currentHash = computeEntityTypeResultsHash(entityType);
+    if (!currentHash.equals(query.entityTypeHash())) {
+      throw log.throwing(
+        new InvalidEntityTypeDefinitionException(
+          "Entity type definition has changed since the query was submitted; please restart the query.",
+          entityType
+        )
+      );
+    }
   }
 }

@@ -235,7 +235,7 @@ class EntityTypeUtilsTest {
 
   @Test
   void testVerifyWithSameEntity() {
-    EntityType entity = new EntityType();
+    EntityType entity = new EntityType().columns(null);
     String hash = EntityTypeUtils.computeEntityTypeResultsHash(entity);
     Query query = Query.newQuery(null, hash, null, null, null);
 

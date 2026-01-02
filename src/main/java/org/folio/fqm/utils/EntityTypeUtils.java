@@ -194,22 +194,22 @@ public class EntityTypeUtils {
 
   private static void runOnEveryField(String parentPath, Field field, BiConsumer<Field, String> consumer) {
     consumer.accept(field, parentPath);
-    String path = parentPath + field.getName();
+    StringBuilder pathBuilder = new StringBuilder(parentPath).append(field.getName());
     if (field.getDataType() instanceof ObjectType objectType) {
-      path += "->";
+      String path = pathBuilder.append("->").toString();
       for (Field prop : objectType.getProperties()) {
         runOnEveryField(path, prop, consumer);
       }
     } else if (field.getDataType() instanceof ArrayType arrayType) {
       // unpack any number of nested arrays until we get something else
       EntityDataType innerDataType = arrayType.getItemDataType();
-      path += "[*]";
+      pathBuilder.append("[*]");
       while (innerDataType instanceof ArrayType innerDataTypeA) {
         innerDataType = innerDataTypeA.getItemDataType();
-        path += "[*]";
+        pathBuilder.append("[*]");
       }
       if (innerDataType instanceof ObjectType objectType) {
-        path += "->";
+        String path = pathBuilder.append("->").toString();
         for (Field prop : objectType.getProperties()) {
           runOnEveryField(path, prop, consumer);
         }

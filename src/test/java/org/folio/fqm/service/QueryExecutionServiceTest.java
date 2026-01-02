@@ -48,7 +48,7 @@ class QueryExecutionServiceTest {
     UUID createdById = UUID.randomUUID();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
-    Query query = Query.newQuery(entityTypeId, fqlQuery, fields, createdById);
+    Query query = Query.newQuery(entityTypeId, "", fqlQuery, fields, createdById);
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
 
@@ -75,7 +75,7 @@ class QueryExecutionServiceTest {
     EntityType entityType = new EntityType();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
-    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
 
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
@@ -97,7 +97,7 @@ class QueryExecutionServiceTest {
     EntityType entityType = new EntityType();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
-    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
 
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
@@ -118,7 +118,7 @@ class QueryExecutionServiceTest {
     EntityType entityType = new EntityType();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
     List<String> fields = List.of();
-    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", fqlQuery, fields, UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
 
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);
@@ -139,7 +139,7 @@ class QueryExecutionServiceTest {
     String tenantId = "tenant_01";
     EntityType entityType = new EntityType();
     String fqlQuery = "{“item_status“: {“$in“: [\"missing\", \"lost\"]}}";
-    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), fqlQuery, List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", fqlQuery, List.of(), UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
 
     int maxSize = 100;
     when(executionContext.getTenantId()).thenReturn(tenantId);

@@ -51,7 +51,7 @@ class EntityTypePermissionsAspectTest {
   void testQueryIdCanBeHandled() {
     var queryId = UUID.randomUUID();
     var entityTypeId = UUID.randomUUID();
-    Query query = new Query(queryId, entityTypeId, null, null, null, null, null, null, null);
+    Query query = new Query(queryId, entityTypeId, null, null, null, null, null, null, null, null);
     when(queryRepository.getQuery(any(UUID.class), anyBoolean())).thenReturn(Optional.of(query));
     testMethodSignatureCanBeHandled(EntityTypePermissionsAspect::validatePermissionsWithId,
       "methodWithQueryIdParam",

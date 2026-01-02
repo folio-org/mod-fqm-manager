@@ -9,5 +9,10 @@
     </sql>
   </changeSet>
 
+  <changeSet id="MODFQMMGR-1023-add-et-hash-to-query-details" author="novercash@ebsco.com">
+    <addColumn tableName="query_details">
+      <column name="entity_type_hash" type="text" remarks="Hash from EntityTypeUtils.computeEntityTypeResultsHash of the flattened entity containing all columns" />
+    </addColumn>
+  </changeSet>
 
 </databaseChangeLog>

@@ -3,6 +3,7 @@ package org.folio.fqm.context;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -33,12 +34,12 @@ public class ReadWriteSplitTestConfiguration {
   @Primary
   @Bean("jooqContext")
   public DSLContext writerJooqContext(DataSource dataSource) {
-    return DSL.using(dataSource, SQLDialect.POSTGRES);
+    return DSL.using(dataSource, SQLDialect.POSTGRES, new Settings().withMapConstructorParameterNames(true));
   }
 
   @Bean("readerJooqContext")
   public DSLContext readerJooqContext(@Qualifier("readerDataSource") DataSource dataSource) {
-    return DSL.using(dataSource, SQLDialect.POSTGRES);
+    return DSL.using(dataSource, SQLDialect.POSTGRES, new Settings().withMapConstructorParameterNames(true));
   }
 
   @Bean

@@ -1,6 +1,5 @@
 package org.folio.fqm.resource;
 
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
 import org.folio.fqm.service.QueryManagementService;

@@ -1,26 +1,34 @@
 package org.folio.fqm.utils;
 
+import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
+import static org.folio.fqm.utils.EntityTypeUtils.verifyEntityTypeHasNotChangedDuringQueryLifetime;
+import static org.jooq.impl.DSL.field;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.UUID;
+import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
+import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.querytool.domain.dto.IntegerType;
+import org.folio.querytool.domain.dto.NestedObjectProperty;
+import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static org.jooq.impl.DSL.field;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EntityTypeUtilsTest {
 
@@ -55,9 +63,7 @@ class EntityTypeUtilsTest {
 
   @Test
   void shouldGetSortFields() {
-    List<SortField<Object>> expectedSortFields = List.of(
-      field("id").asc()
-    );
+    List<SortField<Object>> expectedSortFields = List.of(field("id").asc());
     List<SortField<Object>> actualSortFields = EntityTypeUtils.getSortFields(TEST_ENTITY_TYPE_DEFINITION, true);
     assertEquals(expectedSortFields, actualSortFields);
   }
@@ -66,15 +72,9 @@ class EntityTypeUtilsTest {
   void shouldHandleDescendingSortFields() {
     EntityType entityType = new EntityType()
       .defaultSort(
-        List.of(
-          new EntityTypeDefaultSort()
-            .columnName("id")
-            .direction(EntityTypeDefaultSort.DirectionEnum.DESC)
-        )
+        List.of(new EntityTypeDefaultSort().columnName("id").direction(EntityTypeDefaultSort.DirectionEnum.DESC))
       );
-    List<SortField<Object>> expectedSortFields = List.of(
-      field("id").desc()
-    );
+    List<SortField<Object>> expectedSortFields = List.of(field("id").desc());
     List<SortField<Object>> actualSortFields = EntityTypeUtils.getSortFields(entityType, true);
     assertEquals(expectedSortFields, actualSortFields);
   }
@@ -167,5 +167,91 @@ class EntityTypeUtilsTest {
 
     assertTrue(EntityTypeUtils.isSimple(simpleEntityType));
     assertFalse(EntityTypeUtils.isSimple(compositeEntityType));
+  }
+
+  @Test
+  void testHashingYieldsDifferentResultsForSourceContents() {
+    List<List<EntityTypeSource>> cases = List.of(
+      List.of(),
+      List.of(new EntityTypeSource("type", "alias") {}),
+      List.of(new EntityTypeSourceDatabase().alias("alias").type("type").target("table")),
+      List.of(
+        new EntityTypeSourceEntityType()
+          .alias("alias")
+          .type("type")
+          .targetId(UUID.fromString("2812614d-2c09-56b1-8daf-3d6351d2cb7b"))
+      )
+    );
+
+    assertEquals(
+      cases.size(),
+      cases
+        .stream()
+        .map(s -> new EntityType().sources(s))
+        .map(EntityTypeUtils::computeEntityTypeResultsHash)
+        .distinct()
+        .count()
+    );
+  }
+
+  @Test
+  void testHashingYieldsDifferentResultsForNestedFields() {
+    List<List<EntityTypeColumn>> cases = List.of(
+      List.of(),
+      List.of(new EntityTypeColumn().name("outer").dataType(new ArrayType().itemDataType(new StringType()))),
+      List.of(
+        new EntityTypeColumn()
+          .name("outer")
+          .dataType(
+            new ObjectType().properties(List.of(new NestedObjectProperty().name("inner").dataType(new IntegerType())))
+          )
+      ),
+      List.of(
+        new EntityTypeColumn()
+          .name("outer")
+          .dataType(
+            new ArrayType()
+              .itemDataType(
+                new ArrayType()
+                  .itemDataType(
+                    new ObjectType()
+                      .properties(List.of(new NestedObjectProperty().name("inner").dataType(new IntegerType())))
+                  )
+              )
+          )
+      )
+    );
+
+    assertEquals(
+      cases.size(),
+      cases
+        .stream()
+        .map(s -> new EntityType().columns(s))
+        .map(EntityTypeUtils::computeEntityTypeResultsHash)
+        .distinct()
+        .count()
+    );
+  }
+
+  @Test
+  void testVerifyWithSameEntity() {
+    EntityType entity = new EntityType().columns(null);
+    String hash = EntityTypeUtils.computeEntityTypeResultsHash(entity);
+    Query query = Query.newQuery(null, hash, null, null, null);
+
+    assertDoesNotThrow(() -> verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entity));
+  }
+
+  @Test
+  void testVerifyWithDifferentEntity() {
+    EntityType entity1 = new EntityType().crossTenantQueriesEnabled(false);
+    EntityType entity2 = new EntityType().crossTenantQueriesEnabled(true);
+    String hash = EntityTypeUtils.computeEntityTypeResultsHash(entity1);
+    Query query = Query.newQuery(null, hash, null, null, null);
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entity2)
+    );
   }
 }

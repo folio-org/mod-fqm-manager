@@ -2,7 +2,6 @@ package org.folio.fqm.repository;
 
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +38,7 @@ class QueryResultsRepositoryTest {
     );
     List<String[]> expectedResultIdArray = new ArrayList<>();
     expectedResultIds.forEach(id -> expectedResultIdArray.add(id.toArray(new String[0])));
-    Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
+    Query query = new Query(queryId, UUID.randomUUID(), "", fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(query);
     queryResultsRepository.saveQueryResults(queryId, expectedResultIdArray);
@@ -58,7 +57,7 @@ class QueryResultsRepositoryTest {
       new String[]{UUID.randomUUID().toString()},
       new String[]{UUID.randomUUID().toString()}
     );
-    Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
+    Query mockQuery = new Query(queryId, UUID.randomUUID(), "", fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);
     queryResultsRepository.saveQueryResults(queryId, resultIds);
@@ -77,7 +76,7 @@ class QueryResultsRepositoryTest {
       new String[]{UUID.randomUUID().toString()},
       new String[]{UUID.randomUUID().toString()}
     );
-    Query mockQuery = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
+    Query mockQuery = new Query(queryId, UUID.randomUUID(), "", fqlQuery, fields,
       UUID.randomUUID(), OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     queryRepository.saveQuery(mockQuery);
     queryResultsRepository.saveQueryResults(queryId, resultIds);

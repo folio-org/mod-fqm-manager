@@ -27,6 +27,7 @@ public class TestDataFixture {
   private static final Query mockQuery = new Query(
     UUID.randomUUID(),
     UUID.randomUUID(),
+    "",
     EXAMPLE_FQL,
     List.of("id", "field1", "field2"),
     UUID.randomUUID(),
@@ -40,6 +41,7 @@ public class TestDataFixture {
     return new Query(
       mockQuery.queryId(),
       mockQuery.entityTypeId(),
+      mockQuery.entityTypeHash(),
       mockQuery.fqlQuery(),
       mockQuery.fields(),
       mockQuery.createdBy(),
@@ -54,6 +56,7 @@ public class TestDataFixture {
     return new Query(
       mockQuery.queryId(),
       mockQuery.entityTypeId(),
+      mockQuery.entityTypeHash(),
       mockQuery.fqlQuery(),
       fields,
       mockQuery.createdBy(),

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
@@ -27,7 +28,7 @@ public class TestDataFixture {
   private static final Query mockQuery = new Query(
     UUID.randomUUID(),
     UUID.randomUUID(),
-    "",
+    EntityTypeUtils.computeEntityTypeResultsHash(new EntityType()),
     EXAMPLE_FQL,
     List.of("id", "field1", "field2"),
     UUID.randomUUID(),

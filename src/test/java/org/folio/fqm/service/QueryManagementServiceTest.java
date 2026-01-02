@@ -16,6 +16,7 @@ import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
+import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,8 +102,8 @@ class QueryManagementServiceTest {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -127,8 +128,8 @@ class QueryManagementServiceTest {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -152,8 +153,8 @@ class QueryManagementServiceTest {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -248,6 +249,7 @@ class QueryManagementServiceTest {
     when(queryResultsRepository.getQueryResultIds(expectedQuery.queryId(), offset, limit)).thenReturn(resultIds);
     when(crossTenantQueryService.getTenantsToQuery(any())).thenReturn(tenantIds);
     when(resultSetService.getResultSet(expectedQuery.entityTypeId(), expectedQuery.fields(), resultIds, tenantIds, false)).thenReturn(contents);
+    when(entityTypeService.getEntityTypeDefinition(expectedQuery.entityTypeId(),true)).thenReturn(new EntityType());
     Optional<QueryDetails> actualDetails = queryManagementService.getQuery(expectedQuery.queryId(), includeResults, offset, limit);
     assertEquals(expectedDetails, actualDetails);
   }
@@ -256,8 +258,8 @@ class QueryManagementServiceTest {
   void shouldRunSynchronousQueryAndReturnResultSet() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -284,8 +286,8 @@ class QueryManagementServiceTest {
   void shouldRunSynchronousQueryAndReturnResultWithFieldAndIdsIfIdsNotProvided() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -314,8 +316,8 @@ class QueryManagementServiceTest {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -353,8 +355,8 @@ class QueryManagementServiceTest {
   void shouldVerifyQueryIsUpToDateWhenRunningSynchronousQuery() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")
@@ -532,8 +534,8 @@ class QueryManagementServiceTest {
   void shouldGetContents() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType().columns(columns);
     List<List<String>> ids = List.of(
@@ -557,8 +559,8 @@ class QueryManagementServiceTest {
   void shouldGetContentsWithIdsIfIdsNotProvided() {
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType().columns(columns);
     List<List<String>> ids = List.of(
@@ -809,8 +811,8 @@ class QueryManagementServiceTest {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     List<EntityTypeColumn> columns = List.of(
-      new EntityTypeColumn().name("id").isIdColumn(true),
-      new EntityTypeColumn().name("field1")
+      new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+      new EntityTypeColumn().name("field1").dataType(new StringType())
     );
     EntityType entityType = new EntityType()
       .name("test-entity")

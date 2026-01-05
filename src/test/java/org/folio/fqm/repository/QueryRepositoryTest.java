@@ -57,7 +57,7 @@ class QueryRepositoryTest {
       """;
     List<String> fields = List.of("id", "field1", "field2");
 
-    Query expectedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+    Query expectedQuery = new Query(queryId, entityTypeId, "", fqlQuery, fields,
       createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(expectedQuery);
     Query actualQuery = repo.getQuery(queryIdentifier.getQueryId(), false).get();
@@ -78,11 +78,11 @@ class QueryRepositoryTest {
     UUID createdBy = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     OffsetDateTime endDate = OffsetDateTime.now();
-    Query query = new Query(queryId, entityTypeId, fqlQuery, fields,
+    Query query = new Query(queryId, entityTypeId, "", fqlQuery, fields,
       createdBy, OffsetDateTime.now(), null, QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(query);
     assertFalse(hasText(query.failureReason()));
-    Query updatedQuery = new Query(queryId, entityTypeId, fqlQuery, fields,
+    Query updatedQuery = new Query(queryId, entityTypeId, "", fqlQuery, fields,
       createdBy, null, endDate, QueryStatus.FAILED, "something went wrong");
     repo.updateQuery(updatedQuery.queryId(), updatedQuery.status(), updatedQuery.endDate(), updatedQuery.failureReason());
     assertEquals("FAILED", updatedQuery.status().toString());
@@ -103,14 +103,14 @@ class QueryRepositoryTest {
     UUID createdBy = UUID.randomUUID();
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    Query queryToDelete = new Query(queryIdToDelete, entityTypeId, fqlQuery, fields, createdBy, now.minusHours(2), null,
-      QueryStatus.IN_PROGRESS, null);
+    Query queryToDelete = new Query(queryIdToDelete, entityTypeId, "", fqlQuery, fields, createdBy,
+      now.minusHours(2), null,QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(queryToDelete);
 
     OffsetDateTime endDate = now.minusHours(1);
     repo.updateQuery(queryIdToDelete, QueryStatus.SUCCESS, endDate, null);
 
-    Query queryToKeep = new Query(queryIdToKeep, UUID.randomUUID(), fqlQuery, fields,
+    Query queryToKeep = new Query(queryIdToKeep, UUID.randomUUID(), "", fqlQuery, fields,
       UUID.randomUUID(), now.plusMinutes(10), null, QueryStatus.IN_PROGRESS, null);
     repo.saveQuery(queryToKeep);
 
@@ -129,7 +129,7 @@ class QueryRepositoryTest {
       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
       """;
     List<String> fields = List.of("id", "field1");
-    Query query = new Query(queryId, UUID.randomUUID(), fqlQuery, fields,
+    Query query = new Query(queryId, UUID.randomUUID(), "", fqlQuery, fields,
       UUID.randomUUID(), testNowUtc, null, QueryStatus.IN_PROGRESS, null);
     QueryIdentifier queryIdentifier = repo.saveQuery(query);
     assertFalse(repo.getQuery(queryIdentifier.getQueryId()).isEmpty());

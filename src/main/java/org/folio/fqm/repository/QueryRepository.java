@@ -19,7 +19,6 @@ import java.util.UUID;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
-
 @Repository
 @Log4j2
 public class QueryRepository {
@@ -46,6 +45,7 @@ public class QueryRepository {
       .set(field("created_by"), query.createdBy())
       .set(field("start_date"), field("timezone('UTC', now())", OffsetDateTime.class))
       .set(field("status"), query.status().toString())
+      .set(field("entity_type_hash"), query.entityTypeHash())
       .execute();
     return new QueryIdentifier().queryId(query.queryId());
   }

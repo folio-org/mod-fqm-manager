@@ -101,7 +101,7 @@ class QueryProcessorServiceTest {
 
   @Test
   void successHandlerShouldHandleCancelledQuery() {
-    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", List.of(), UUID.randomUUID(),
+    Query query = new Query(UUID.randomUUID(), UUID.randomUUID(), "", "", List.of(), UUID.randomUUID(),
       OffsetDateTime.now(), null, QueryStatus.CANCELLED, null);
     when(queryRepository.getQuery(query.queryId(), false)).thenReturn(Optional.of(query));
     service.handleSuccess(query);

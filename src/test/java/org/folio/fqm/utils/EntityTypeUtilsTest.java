@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.folio.fqm.domain.Query;
@@ -171,7 +172,8 @@ class EntityTypeUtilsTest {
 
   @Test
   void testHashingYieldsDifferentResultsForSourceContents() {
-    List<List<EntityTypeSource>> cases = List.of(
+    List<List<EntityTypeSource>> cases = Arrays.asList(
+      null,
       List.of(),
       List.of(new EntityTypeSource("type", "alias") {}),
       List.of(new EntityTypeSourceDatabase().alias("alias").type("type").target("table")),

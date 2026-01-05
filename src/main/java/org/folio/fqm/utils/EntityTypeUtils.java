@@ -297,7 +297,7 @@ public class EntityTypeUtils {
           }
           return sourceProperties;
         })
-        .sorted(Comparator.comparing(m -> (String) m.get("alias")))
+        .sorted(Comparator.comparing(m -> m.get("alias")))
         .toList();
       relevantProperties.put("sources", sources);
     }
@@ -323,7 +323,7 @@ public class EntityTypeUtils {
         fields.add(fieldProperties);
       }
     );
-    fields.sort(Comparator.comparing(m -> (String) m.get("name")));
+    fields.sort(Comparator.comparing(m -> m.get("name")));
     relevantProperties.put("fields", fields);
 
     try {

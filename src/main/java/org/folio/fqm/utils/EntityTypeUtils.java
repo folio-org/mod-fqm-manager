@@ -183,7 +183,29 @@ public class EntityTypeUtils {
       .toList();
   }
 
-  private static void runOnEveryField(EntityType entityType, BiConsumer<Field, String> consumer) {
+  /**
+   * Runs a consumer on every {@link Field field} in the entity type, resolving nested fields.
+   * No guarantees are made about the order in which fields are visited, however, this will include
+   * every field, no matter how deeply nested.
+   *
+   * @example
+   * An entity type with columns `obj` and `arrobj`, where `obj` is an object with two properties
+   * and `arrobj` is an array of objects with three properties, the following calls will be made:
+   * <pre>
+   * - consumer.accept(obj, "") // base column
+   * - consumer.accept(child1, "obj->") // first property of obj
+   * - consumer.accept(child2, "obj->") // second property of obj
+   * - consumer.accept(arrobj, "") // base column
+   * - consumer.accept(arrChild1, "arrobj[*]->") // first property
+   * - consumer.accept(arrChild2, "arrobj[*]->") // second property
+   * - consumer.accept(arrChild3, "arrobj[*]->") // third property
+   * </pre>
+   *
+   * @param entityType the entity to traverse
+   * @param consumer the consumer to run on each field. The first parameter is the
+   *                 {@link Field field} itself and the second parameter is the path to that field
+   */
+  public static void runOnEveryField(EntityType entityType, BiConsumer<Field, String> consumer) {
     if (entityType.getColumns() == null) {
       return;
     }
@@ -246,43 +268,44 @@ public class EntityTypeUtils {
     relevantProperties.put("filterConditions", entityType.getFilterConditions());
     relevantProperties.put("additionalEcsConditions", entityType.getAdditionalEcsConditions());
 
-    List<SortedMap<String, Object>> sources = Optional
-      .ofNullable(entityType.getSources())
-      .orElse(List.of())
-      .stream()
-      .map((EntityTypeSource source) -> {
-        SortedMap<String, Object> sourceProperties = new TreeMap<>();
-        sourceProperties.put("alias", source.getAlias());
-        sourceProperties.put("type", source.getType());
-        switch (source) {
-          case EntityTypeSourceEntityType sourceEt -> {
-            sourceProperties.put("sourceField", sourceEt.getSourceField());
-            sourceProperties.put("targetId", sourceEt.getTargetId());
-            sourceProperties.put("targetField", sourceEt.getTargetField());
-            sourceProperties.put("overrideJoinDirection", sourceEt.getOverrideJoinDirection());
-            sourceProperties.put("useIdColumns", sourceEt.getUseIdColumns());
-            sourceProperties.put("essentialOnly", sourceEt.getEssentialOnly());
-            sourceProperties.put("inheritCustomFields", sourceEt.getInheritCustomFields());
+    if (entityType.getSources() != null) {
+      List<SortedMap<String, String>> sources = entityType
+        .getSources()
+        .stream()
+        .map((EntityTypeSource source) -> {
+          SortedMap<String, String> sourceProperties = new TreeMap<>();
+          sourceProperties.put("alias", source.getAlias());
+          sourceProperties.put("type", source.getType());
+          switch (source) {
+            case EntityTypeSourceEntityType sourceEt -> {
+              sourceProperties.put("sourceField", sourceEt.getSourceField());
+              sourceProperties.put("targetId", sourceEt.getTargetId().toString());
+              sourceProperties.put("targetField", sourceEt.getTargetField());
+              sourceProperties.put("overrideJoinDirection", sourceEt.getOverrideJoinDirection().toString());
+              sourceProperties.put("useIdColumns", sourceEt.getUseIdColumns().toString());
+              sourceProperties.put("essentialOnly", sourceEt.getEssentialOnly().toString());
+              sourceProperties.put("inheritCustomFields", sourceEt.getInheritCustomFields().toString());
+            }
+            case EntityTypeSourceDatabase sourceDb -> {
+              sourceProperties.put("target", sourceDb.getTarget());
+              sourceProperties.put("join", sourceDb.getJoin().toString());
+            }
+            default -> {
+              /* do nothing */
+            }
           }
-          case EntityTypeSourceDatabase sourceDb -> {
-            sourceProperties.put("target", sourceDb.getTarget());
-            sourceProperties.put("join", sourceDb.getJoin());
-          }
-          default -> {
-            /* do nothing */
-          }
-        }
-        return sourceProperties;
-      })
-      .sorted((a, b) -> ((String) a.get("alias")).compareTo((String) b.get("alias")))
-      .toList();
-    relevantProperties.put("sources", sources);
+          return sourceProperties;
+        })
+        .sorted(Comparator.comparing(m -> (String) m.get("alias")))
+        .toList();
+      relevantProperties.put("sources", sources);
+    }
 
-    List<SortedMap<String, Object>> fields = new ArrayList<>();
+    List<SortedMap<String, String>> fields = new ArrayList<>();
     runOnEveryField(
       entityType,
       (Field field, String parentPath) -> {
-        SortedMap<String, Object> fieldProperties = new TreeMap<>();
+        SortedMap<String, String> fieldProperties = new TreeMap<>();
         fieldProperties.put("name", parentPath + field.getName());
         fieldProperties.put("dataType", field.getDataType().getDataType());
         fieldProperties.put("valueGetter", field.getValueGetter());
@@ -290,8 +313,8 @@ public class EntityTypeUtils {
         fieldProperties.put("valueFunction", field.getValueFunction());
         fieldProperties.put("idColumnName", field.getIdColumnName());
         if (field instanceof EntityTypeColumn column) {
-          fieldProperties.put("isIdColumn", column.getIsIdColumn());
-          fieldProperties.put("isCustomField", column.getIsCustomField());
+          fieldProperties.put("isIdColumn", column.getIsIdColumn().toString());
+          fieldProperties.put("isCustomField", column.getIsCustomField().toString());
         }
         if (field instanceof NestedObjectProperty prop) {
           fieldProperties.put("property", prop.getProperty());
@@ -299,7 +322,7 @@ public class EntityTypeUtils {
         fields.add(fieldProperties);
       }
     );
-    fields.sort((a, b) -> ((String) a.get("name")).compareTo((String) b.get("name")));
+    fields.sort(Comparator.comparing(m -> (String) m.get("name")));
     relevantProperties.put("fields", fields);
 
     try {

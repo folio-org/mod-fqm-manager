@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -279,16 +280,16 @@ public class EntityTypeUtils {
           switch (source) {
             case EntityTypeSourceEntityType sourceEt -> {
               sourceProperties.put("sourceField", sourceEt.getSourceField());
-              sourceProperties.put("targetId", sourceEt.getTargetId().toString());
+              sourceProperties.put("targetId", Objects.toString(sourceEt.getTargetId()));
               sourceProperties.put("targetField", sourceEt.getTargetField());
-              sourceProperties.put("overrideJoinDirection", sourceEt.getOverrideJoinDirection().toString());
-              sourceProperties.put("useIdColumns", sourceEt.getUseIdColumns().toString());
-              sourceProperties.put("essentialOnly", sourceEt.getEssentialOnly().toString());
-              sourceProperties.put("inheritCustomFields", sourceEt.getInheritCustomFields().toString());
+              sourceProperties.put("overrideJoinDirection", Objects.toString(sourceEt.getOverrideJoinDirection()));
+              sourceProperties.put("useIdColumns", Objects.toString(sourceEt.getUseIdColumns()));
+              sourceProperties.put("essentialOnly", Objects.toString(sourceEt.getEssentialOnly()));
+              sourceProperties.put("inheritCustomFields", Objects.toString(sourceEt.getInheritCustomFields()));
             }
             case EntityTypeSourceDatabase sourceDb -> {
               sourceProperties.put("target", sourceDb.getTarget());
-              sourceProperties.put("join", sourceDb.getJoin().toString());
+              sourceProperties.put("join", Objects.toString(sourceDb.getJoin()));
             }
             default -> {
               /* do nothing */
@@ -313,8 +314,8 @@ public class EntityTypeUtils {
         fieldProperties.put("valueFunction", field.getValueFunction());
         fieldProperties.put("idColumnName", field.getIdColumnName());
         if (field instanceof EntityTypeColumn column) {
-          fieldProperties.put("isIdColumn", column.getIsIdColumn().toString());
-          fieldProperties.put("isCustomField", column.getIsCustomField().toString());
+          fieldProperties.put("isIdColumn", Objects.toString(column.getIsIdColumn()));
+          fieldProperties.put("isCustomField", Objects.toString(column.getIsCustomField()));
         }
         if (field instanceof NestedObjectProperty prop) {
           fieldProperties.put("property", prop.getProperty());

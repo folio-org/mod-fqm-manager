@@ -1949,5 +1949,6 @@
     "entityType.simple_holdings_type.metadata_updated_by_user_id": "由用户UUID更新",
     "entityType.simple_holdings_type.metadata_updated_date": "更新日期",
     "entityType.simple_holdings_type.name": "类型",
-    "entityType.simple_holdings_type.source": "来源"
+    "entityType.simple_holdings_type.source": "来源",
+    "entityType.composite_receiving_pieces.holdings_permanent_location": "Holdings permanent location"
 }

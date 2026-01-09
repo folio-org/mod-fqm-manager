@@ -1,7 +1,7 @@
 {
   id: 'b079dfb1-4d40-5fca-9da5-bc9419265d28',
   name: 'mod_feesfines__comment_requirements',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -9,9 +9,7 @@
       target: 'src__circulation__feesfines__comments',
     },
   ],
-  requiredPermissions: [
-    'comments.collection.get',
-  ],
+  requiredPermissions: ['comments.collection.get'],
   defaultSort: [
     {
       columnName: 'id',

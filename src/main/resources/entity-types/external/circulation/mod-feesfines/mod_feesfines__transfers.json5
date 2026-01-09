@@ -1,7 +1,7 @@
 {
   id: '6f6e4d04-d018-5e56-a4c1-260b19e5cd3f',
   name: 'mod_feesfines__transfers',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -9,9 +9,7 @@
       target: 'src__circulation__feesfines__transfers',
     },
   ],
-  requiredPermissions: [
-    'transfers.collection.get',
-  ],
+  requiredPermissions: ['transfers.collection.get'],
   defaultSort: [
     {
       columnName: 'id',

@@ -1,7 +1,7 @@
 {
   id: '1743cbb4-922b-5042-bb9e-62a82758f00f',
   name: 'mod_feesfines__refunds',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -9,9 +9,7 @@
       target: 'src__circulation__feesfines__refunds',
     },
   ],
-  requiredPermissions: [
-    'refunds.collection.get',
-  ],
+  requiredPermissions: ['refunds.collection.get'],
   defaultSort: [
     {
       columnName: 'id',

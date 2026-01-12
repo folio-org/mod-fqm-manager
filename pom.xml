@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>4.0.1</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
@@ -25,25 +25,25 @@
     <!-- runtime dependencies -->
     <folio-spring-support.version>10.0.0-SNAPSHOT</folio-spring-support.version>
     <folio-query-tool-metadata.version>4.0.0-SNAPSHOT</folio-query-tool-metadata.version>
-    <mapstruct.version>1.5.2.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
     <lib-fqm-query-processor.version>4.1.0-SNAPSHOT</lib-fqm-query-processor.version>
     <coffee-boots.version>4.0.0</coffee-boots.version>
-    <snakeyaml.version>2.0</snakeyaml.version>
-    <org.postgresql.version>42.5.4</org.postgresql.version>
-    <org.jooq.version>3.20.9</org.jooq.version>
-    <org.apache.commons.version>4.4</org.apache.commons.version>
-    <org.apache.commons-lang3.version>3.17.0</org.apache.commons-lang3.version>
-    <spring-retry.version>2.0.10</spring-retry.version>
+    <snakeyaml.version>2.5</snakeyaml.version>
+    <org.postgresql.version>42.7.8</org.postgresql.version>
+    <org.jooq.version>3.20.10</org.jooq.version>
+    <org.apache.commons.version>4.5.0</org.apache.commons.version>
+    <org.apache.commons-lang3.version>3.20.0</org.apache.commons-lang3.version>
+    <spring-retry.version>2.0.12</spring-retry.version>
 
     <!-- test dependencies -->
     <wiremock.version>3.13.1</wiremock.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
 
     <!-- plugins -->
-    <openapi-generator.version>7.4.0</openapi-generator.version>
+    <openapi-generator.version>7.18.0</openapi-generator.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
-    <lombok.version>1.18.30</lombok.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+    <lombok.version>1.18.42</lombok.version>
 
     <!-- other properties -->
     <java.version>21</java.version>
@@ -179,7 +179,7 @@
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
-      <version>2.9.0</version>
+      <version>2.10.0</version>
     </dependency>
 
     <!-- Test dependencies -->

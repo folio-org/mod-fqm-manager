@@ -11,7 +11,7 @@ public class CustomEntityTypeAccessDeniedException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error(getMessage()).code(Error.CodeEnum.ENTITY_TYPE_ACCESS_DENIED);
+    return new Error().message(getMessage()).code(Error.CodeEnum.ENTITY_TYPE_ACCESS_DENIED);
   }
 
   @Override

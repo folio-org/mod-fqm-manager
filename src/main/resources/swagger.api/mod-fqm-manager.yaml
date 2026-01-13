@@ -5,7 +5,7 @@ info:
   description: mod-fqm-manager API
 
 servers:
-  - url: https://falcon.ci.folio.org/fqm/
+  - url: https://folio-etesting-snapshot-kong.ci.folio.org/
 
 paths:
   /entity-types:
@@ -25,7 +25,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/entityTypeSummaries'
-        '400':
+        '4XX':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
@@ -42,7 +42,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/purgedQueries'
-        '400':
+        '4XX':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
@@ -59,7 +59,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/dataRefreshResponse'
-        '400':
+        '4XX':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
@@ -89,7 +89,7 @@ paths:
             text/plain:
               schema:
                 type: string
-        '400':
+        '4XX':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
@@ -117,7 +117,7 @@ paths:
                 description: Mapped to schemas in folio-query-tool-metadata
                 type: object
                 format: FqmMigrateResponse
-        '400':
+        '4XX':
           $ref: '#/components/responses/badRequestResponse'
         '500':
           $ref: '#/components/responses/internalServerErrorResponse'
@@ -165,7 +165,7 @@ components:
         type: boolean
   schemas:
     errorResponse:
-      $ref: schemas/errors.json
+      $ref: schemas/error.json
     contents:
       type: array
       items:
@@ -192,13 +192,12 @@ components:
 
   responses:
     badRequestResponse:
-      description: Validation errors
+      description: Invalid request
       content:
         application/json:
           example:
-            errors:
-              - message: Request is invalid
-                code: invalid.request
+            message: Entity type ID 6c611396-b6bc-56a7-aada-3a90683d559c was not found
+            code: entity.type.not.found
           schema:
             $ref: "#/components/schemas/errorResponse"
     internalServerErrorResponse:
@@ -206,8 +205,7 @@ components:
       content:
         application/json:
           example:
-            errors:
-              - message: Unexpected error
-                code: unexpected.error
+            message: Unexpected error
+            code: unknown.error
           schema:
             $ref: "#/components/schemas/errorResponse"

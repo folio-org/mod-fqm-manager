@@ -247,7 +247,7 @@ class IdStreamerTest {
     IdsWithCancelCallback idsWithCancelCallback = new IdsWithCancelCallback(resultIds, () -> {
     });
     String expectedMessage = String.format("Query %s with size %d has exceeded the maximum size of %d.", IN_PROGRESS_QUERY_ID, 2, maxQuerySize);
-    org.folio.fqm.domain.dto.Error expectedError = new Error().message(expectedMessage);
+    Error expectedError = new Error().message(expectedMessage).code(Error.CodeEnum.QUERY_TOO_LARGE);
     var total = new AtomicInteger(0);
     MaxQuerySizeExceededException actualException = assertThrows(MaxQuerySizeExceededException.class, () -> idStreamer.handleBatch(IN_PROGRESS_QUERY_ID, idsWithCancelCallback, maxQuerySize, total));
     assertEquals(expectedMessage, actualException.getMessage());

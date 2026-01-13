@@ -24,10 +24,9 @@ public class FqmExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Error> handleGenericExceptions(Exception exception, ServletWebRequest webRequest) {
     log.error(
-      "Request failed with an unhandled exception. URL: {} {}. Failure reason:",
+      "Request failed with an unhandled exception. URL: {} {}.",
       webRequest.getHttpMethod(),
-      webRequest.getRequest().getRequestURI(),
-      exception
+      webRequest.getRequest().getRequestURI()
     );
     FqmException fqmException = log.throwing(new UnknownException(exception));
     return new ResponseEntity<>(fqmException.getError(), fqmException.getHttpStatus());

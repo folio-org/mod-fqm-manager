@@ -45,7 +45,7 @@ public class EntityTypeSourceNotFoundException extends FqmException {
   public Error getError() {
     return new Error()
       .message(getMessage())
-      .code("entity.type.source.missing")
+      .code(Error.CodeEnum.ENTITY_TYPE_SOURCE_MISSING)
       .addParametersItem(new Parameter().key("parentEntityTypeId").value(parentEntityTypeID.toString()))
       .addParametersItem(new Parameter().key("parentEntityTypeName").value(parentEntityTypeName))
       .addParametersItem(new Parameter().key("sourceEntityTypeId").value(sourceEntityTypeId.toString()))

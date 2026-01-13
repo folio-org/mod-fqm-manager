@@ -6,13 +6,23 @@
       "type": "string",
       "description": "Error message text"
     },
-    "type": {
-      "type": "string",
-      "description": "Error message type"
-    },
     "code": {
       "type": "string",
-      "description": "Error message code"
+      "description": "Error message code",
+      "enum": [
+        "entity.type.access.denied",
+        "entity.type.in.use",
+        "entity.type.invalid",
+        "entity.type.not.found",
+        "entity.type.source.missing",
+        "field.not.found",
+        "migration.query.changed",
+        "permissions.missing",
+        "query.invalid",
+        "query.not.found",
+        "query.too.large",
+        "unknown.error"
+      ]
     },
     "parameters": {
       "description": "Error message parameters",
@@ -20,7 +30,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [
-    "message"
-  ]
+  "required": ["message"]
 }

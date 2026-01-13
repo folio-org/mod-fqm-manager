@@ -1,12 +1,12 @@
 package org.folio.fqm.exception;
 
+import java.util.UUID;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.springframework.http.HttpStatus;
 
-import java.util.UUID;
-
 public class EntityTypeNotFoundException extends FqmException {
+
   private final UUID entityTypeId;
   private final String message;
 
@@ -31,7 +31,9 @@ public class EntityTypeNotFoundException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage())
+    return new Error()
+      .message(getMessage())
+      .code(Error.CodeEnum.ENTITY_TYPE_NOT_FOUND)
       .addParametersItem(new Parameter().key("entityTypeId").value(entityTypeId.toString()));
   }
 }

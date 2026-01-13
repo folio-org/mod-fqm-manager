@@ -29,7 +29,9 @@ public class FieldNotFoundException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getLocalizedMessage())
+    return new Error()
+      .message(getLocalizedMessage())
+      .code(Error.CodeEnum.FIELD_NOT_FOUND)
       .addParametersItem(new Parameter().key("entityTypeName").value(entityTypeName))
       .addParametersItem(new Parameter().key("field").value(field));
   }

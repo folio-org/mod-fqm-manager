@@ -1,5 +1,6 @@
 package org.folio.fqm.migration;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
@@ -17,7 +18,8 @@ public record MigratableQueryInformation(
   @Singular List<Warning> warnings,
   String version,
   boolean hadBreakingChanges
-) {
+)
+  implements Serializable {
   public MigratableQueryInformation(UUID entityTypeId, String fqlQuery, List<String> fields) {
     this(entityTypeId, fqlQuery, fields, List.of(), null, false);
   }

@@ -92,7 +92,7 @@ class MigrationQueryChangedExceptionTest {
   }
 
   @Test
-  void testGetErrorWithSerializationError() throws IOException {
+  void testGetErrorWithSerializationError() {
     // mocks always fail Jackson serialization
     final class UnserializableWarning implements Warning {
 

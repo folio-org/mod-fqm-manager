@@ -7,7 +7,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.folio.fqm.migration.MigratableQueryInformation;
-import org.springframework.http.HttpStatus;
 
 /**
  * Exception thrown when a migration changes something other than the version in a MigratableQueryInformation object.
@@ -28,7 +27,7 @@ public class MigrationQueryChangedException extends FqmException {
   public Error getError() {
     Error error = new Error()
       .message("Migration changed more than just the version")
-      .code("migration.query.changed");
+      .code(Error.CodeEnum.MIGRATION_QUERY_CHANGED);
 
     // Add the entire migrated query information as a single parameter
     if (migratedQueryInformation != null) {

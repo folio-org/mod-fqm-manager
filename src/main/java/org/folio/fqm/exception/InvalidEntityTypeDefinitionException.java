@@ -1,12 +1,12 @@
 package org.folio.fqm.exception;
 
+import java.util.UUID;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.folio.querytool.domain.dto.EntityType;
 
-import java.util.UUID;
-
 public class InvalidEntityTypeDefinitionException extends FqmException {
+
   private final String entityTypeId;
 
   public InvalidEntityTypeDefinitionException(String message, UUID entityTypeId) {
@@ -26,6 +26,9 @@ public class InvalidEntityTypeDefinitionException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage()).addParametersItem(new Parameter().key("id").value(entityTypeId));
+    return new Error()
+      .message(getMessage())
+      .code(Error.CodeEnum.ENTITY_TYPE_INVALID)
+      .addParametersItem(new Parameter().key("id").value(entityTypeId));
   }
 }

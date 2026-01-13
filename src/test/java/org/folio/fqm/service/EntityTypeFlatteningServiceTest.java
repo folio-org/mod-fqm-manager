@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import lombok.SneakyThrows;
 
+import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.EntityTypeSourceNotFoundException;
@@ -821,7 +822,7 @@ class EntityTypeFlatteningServiceTest {
       () -> entityTypeFlatteningService.getFlattenedEntityType(compositeId, TENANT_ID, false)
     );
 
-    assertThat(ex.getError().getCode(), is("entity.type.source.missing"));
+    assertThat(ex.getError().getCode(), is(Error.CodeEnum.ENTITY_TYPE_SOURCE_MISSING));
     assertThat(ex.getError().getParameters(), containsInAnyOrder(
       new Parameter("parentEntityTypeId").value(compositeId.toString()),
       new Parameter("parentEntityTypeName").value("parent"),

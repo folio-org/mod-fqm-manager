@@ -1,10 +1,9 @@
 package org.folio.fqm.exception;
 
+import java.util.Map;
 import org.folio.fqm.domain.dto.Error;
 import org.folio.fqm.domain.dto.Parameter;
 import org.springframework.http.HttpStatus;
-
-import java.util.Map;
 
 public class InvalidFqlException extends FqmException {
 
@@ -23,7 +22,7 @@ public class InvalidFqlException extends FqmException {
 
   @Override
   public Error getError() {
-    Error error = new Error().message("FQL Query " + fqlQuery + " is invalid");
+    Error error = new Error().message("FQL Query " + fqlQuery + " is invalid").code(Error.CodeEnum.QUERY_INVALID);
     errors.forEach((key, value) -> error.addParametersItem(new Parameter().key(key).value(value)));
     return error;
   }

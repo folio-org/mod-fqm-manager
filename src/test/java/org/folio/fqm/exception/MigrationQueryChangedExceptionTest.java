@@ -1,290 +1,137 @@
 package org.folio.fqm.exception;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-
 import org.folio.fqm.domain.dto.Error;
-import org.folio.fqm.domain.dto.Parameter;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class MigrationQueryChangedExceptionTest {
 
-    @Test
-    void testConstructorAndBasicProperties() {
-        // Create a MigratableQueryInformation object
-        UUID entityTypeId = UUID.randomUUID();
-        String fqlQuery = "{\"_version\":\"1.0\",\"test\":{\"$eq\":\"foo\"}}";
-        List<String> fields = List.of("field1", "field2");
-        MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation.builder()
-            .entityTypeId(entityTypeId)
-            .fqlQuery(fqlQuery)
-            .fields(fields)
-            .build();
+  private static final UUID ENTITY_TYPE_ID = UUID.fromString("83376069-0de9-5900-9a8c-38e50fc4ac4d");
+  private static final String FQL_QUERY = "{\"_version\":\"1\",\"test\":{\"\":\"foo\"}}";
+  private static final List<String> FIELDS = List.of("field1", "field2");
+  private static final MigratableQueryInformation MIGRATABLE_QUERY_INFORMATION_FULL = MigratableQueryInformation
+    .builder()
+    .entityTypeId(ENTITY_TYPE_ID)
+    .fqlQuery(FQL_QUERY)
+    .fields(FIELDS)
+    .build();
 
-        // Create the exception
-        MigrationQueryChangedException exception = new MigrationQueryChangedException(migratedQueryInformation);
+  @Test
+  void testConstructorAndBasicProperties() throws IOException {
+    MigrationQueryChangedException exception = new MigrationQueryChangedException(MIGRATABLE_QUERY_INFORMATION_FULL);
 
-        // Verify basic properties
-        assertEquals("Migration changed more than just the version", exception.getMessage());
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
-        assertEquals(migratedQueryInformation, exception.getMigratedQueryInformation());
+    assertThat(exception.getMessage(), is("Migration changed more than just the version"));
+    assertThat(exception.getHttpStatus(), is(HttpStatus.BAD_REQUEST));
+    assertThat(exception.getMigratedQueryInformation(), is(MIGRATABLE_QUERY_INFORMATION_FULL));
+
+    Error error = exception.getError();
+
+    assertThat(error.getMessage(), is("Migration changed more than just the version"));
+    assertThat(error.getCode(), is(Error.CodeEnum.MIGRATION_QUERY_CHANGED));
+    assertThat(
+      error.getParameters(),
+      contains(allOf(hasProperty("key", equalTo("migratedQueryInformation")), hasProperty("value", notNullValue())))
+    );
+
+    String parameterValue = error.getParameters().get(0).getValue();
+    assertThat(
+      new ObjectMapper().readValue(parameterValue, MigratableQueryInformation.class),
+      is(equalTo(MIGRATABLE_QUERY_INFORMATION_FULL))
+    );
+  }
+
+  @Test
+  void testGetErrorWithNullMigratableQueryInformation() {
+    MigrationQueryChangedException exception = new MigrationQueryChangedException(null);
+    Error error = exception.getError();
+
+    assertThat(error, is(notNullValue()));
+    assertThat(error.getParameters(), is(anyOf(nullValue(), empty())));
+  }
+
+  @Test
+  void testGetErrorWithPartialMigratableQueryInformation() throws IOException {
+    MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation
+      .builder()
+      .entityTypeId(ENTITY_TYPE_ID)
+      .fqlQuery(null)
+      .fields(null)
+      .build();
+
+    MigrationQueryChangedException exception = new MigrationQueryChangedException(migratedQueryInformation);
+    Error error = exception.getError();
+
+    assertThat(
+      error.getParameters(),
+      contains(allOf(hasProperty("key", equalTo("migratedQueryInformation")), hasProperty("value", notNullValue())))
+    );
+
+    String parameterValue = error.getParameters().get(0).getValue();
+    assertThat(
+      new ObjectMapper().readValue(parameterValue, MigratableQueryInformation.class),
+      is(equalTo(migratedQueryInformation))
+    );
+  }
+
+  @Test
+  void testGetErrorWithSerializationError() {
+    // mocks always fail Jackson serialization
+    final class UnserializableWarning implements Warning {
+
+      private final UnserializableWarning self = this;
+
+      @Override
+      public String toString() {
+        return self.getClass().getName();
+      }
+
+      @Override
+      public WarningType getType() {
+        throw new UnsupportedOperationException("Unimplemented method 'getType'");
+      }
+
+      @Override
+      public String getDescription(TranslationService translationService) {
+        throw new UnsupportedOperationException("Unimplemented method 'getDescription'");
+      }
     }
 
-    @Test
-    void testGetErrorWithCompleteMigratableQueryInformation() {
-        // Create a MigratableQueryInformation object with all fields
-        UUID entityTypeId = UUID.randomUUID();
-        String fqlQuery = "{\"_version\":\"1.0\",\"test\":{\"$eq\":\"foo\"}}";
-        List<String> fields = List.of("field1", "field2");
-        MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation.builder()
-            .entityTypeId(entityTypeId)
-            .fqlQuery(fqlQuery)
-            .fields(fields)
-            .build();
+    MigratableQueryInformation explosiveInformation = MIGRATABLE_QUERY_INFORMATION_FULL.withWarnings(
+      List.of(new UnserializableWarning())
+    );
+    MigrationQueryChangedException exception = new MigrationQueryChangedException(explosiveInformation);
+    Error error = exception.getError();
 
-        // Create the exception
-        MigrationQueryChangedException exception = new MigrationQueryChangedException(migratedQueryInformation);
-
-        // Get the error
-        Error error = exception.getError();
-
-        // Verify error properties
-        assertNotNull(error);
-        assertEquals("Migration changed more than just the version", error.getMessage());
-        assertEquals("migration.query.changed", error.getCode());
-
-        // Verify parameters
-        List<Parameter> parameters = error.getParameters();
-        assertNotNull(parameters);
-        assertEquals(1, parameters.size());
-
-        Parameter parameter = parameters.get(0);
-        assertEquals("migratedQueryInformation", parameter.getKey());
-        assertNotNull(parameter.getValue());
-
-        // Verify the parameter value contains the expected information
-        String paramValue = parameter.getValue();
-        assertTrue(paramValue.contains(entityTypeId.toString()), "Parameter value should contain entityTypeId");
-        // The JSON serialization might escape quotes, so check for parts of the FQL query instead
-        assertTrue(paramValue.contains("_version"), "Parameter value should contain _version field from FQL query");
-        assertTrue(paramValue.contains("test"), "Parameter value should contain test field from FQL query");
-        assertTrue(paramValue.contains("foo"), "Parameter value should contain foo value from FQL query");
-        assertTrue(paramValue.contains("field1"), "Parameter value should contain field1");
-        assertTrue(paramValue.contains("field2"), "Parameter value should contain field2");
-    }
-
-    @Test
-    void testGetErrorWithNullMigratableQueryInformation() {
-        // Create the exception with null MigratableQueryInformation
-        MigrationQueryChangedException exception = new MigrationQueryChangedException(null);
-
-        // Get the error
-        Error error = exception.getError();
-
-        // Verify error properties
-        assertNotNull(error);
-        assertEquals("Migration changed more than just the version", error.getMessage());
-        assertEquals("migration.query.changed", error.getCode());
-
-        // Verify parameters - should be empty or null since migratedQueryInformation is null
-        List<Parameter> parameters = error.getParameters();
-        assertTrue(parameters == null || parameters.isEmpty(),
-            "Parameters should be null or empty when migratedQueryInformation is null");
-    }
-
-    @Test
-    void testGetErrorWithPartialMigratableQueryInformation() {
-        // Create a MigratableQueryInformation object with some null fields
-        UUID entityTypeId = UUID.randomUUID();
-        MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation.builder()
-            .entityTypeId(entityTypeId)
-            .fqlQuery(null)
-            .fields(null)
-            .build();
-
-        // Create the exception
-        MigrationQueryChangedException exception = new MigrationQueryChangedException(migratedQueryInformation);
-
-        // Get the error
-        Error error = exception.getError();
-
-        // Verify error properties
-        assertNotNull(error);
-        assertEquals("Migration changed more than just the version", error.getMessage());
-        assertEquals("migration.query.changed", error.getCode());
-
-        // Verify parameters
-        List<Parameter> parameters = error.getParameters();
-        assertNotNull(parameters);
-        assertEquals(1, parameters.size());
-
-        Parameter parameter = parameters.get(0);
-        assertEquals("migratedQueryInformation", parameter.getKey());
-        assertNotNull(parameter.getValue());
-
-        // Verify the parameter value contains the expected information
-        String paramValue = parameter.getValue();
-        assertTrue(paramValue.contains(entityTypeId.toString()), "Parameter value should contain entityTypeId");
-        assertTrue(paramValue.contains("null"), "Parameter value should contain null values");
-    }
-
-    @Test
-    void testGetErrorWithSerializationError() throws JsonProcessingException {
-        // Create a mock ObjectMapper that throws an exception when writeValueAsString is called
-        ObjectMapper mockMapper = Mockito.mock(ObjectMapper.class);
-        Mockito.when(mockMapper.writeValueAsString(Mockito.any()))
-            .thenThrow(new JsonProcessingException("Test serialization error") {});
-
-        // Create a test subclass that uses the mock ObjectMapper
-        class TestMigrationQueryChangedException extends MigrationQueryChangedException {
-            private final ObjectMapper objectMapper;
-
-            public TestMigrationQueryChangedException(MigratableQueryInformation migratedQueryInformation, ObjectMapper objectMapper) {
-                super(migratedQueryInformation);
-                this.objectMapper = objectMapper;
-            }
-
-            @Override
-            public Error getError() {
-                Error error = new Error()
-                    .message("Migration changed more than just the version")
-                    .code("migration.query.changed");
-
-                // Add the entire migrated query information as a single parameter
-                if (getMigratedQueryInformation() != null) {
-                    try {
-                        String migratedQueryInfoJson = objectMapper.writeValueAsString(getMigratedQueryInformation());
-                        error.addParametersItem(new Parameter().key("migratedQueryInformation").value(migratedQueryInfoJson));
-                    } catch (JsonProcessingException e) {
-                        // If serialization fails, fall back to MigratableQueryInformation.toString()
-                        error.addParametersItem(new Parameter().key("serializationError").value("Failed to serialize migrated query information"));
-                        error.addParametersItem(new Parameter().key("migratedQueryInformationText").value(getMigratedQueryInformation().toString()));
-                    }
-                }
-
-                return error;
-            }
-        }
-
-        // Create a MigratableQueryInformation object
-        UUID entityTypeId = UUID.randomUUID();
-        String fqlQuery = "{\"_version\":\"1.0\",\"test\":{\"$eq\":\"foo\"}}";
-        List<String> fields = List.of("field1", "field2");
-        MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation.builder()
-            .entityTypeId(entityTypeId)
-            .fqlQuery(fqlQuery)
-            .fields(fields)
-            .build();
-
-        // Create the exception with the mock ObjectMapper
-        TestMigrationQueryChangedException exception = new TestMigrationQueryChangedException(migratedQueryInformation, mockMapper);
-
-        // Get the error
-        Error error = exception.getError();
-
-        // Verify error properties
-        assertNotNull(error);
-        assertEquals("Migration changed more than just the version", error.getMessage());
-        assertEquals("migration.query.changed", error.getCode());
-
-        // Verify parameters - should include serialization error and fallback text
-        List<Parameter> parameters = error.getParameters();
-        assertNotNull(parameters);
-        assertEquals(2, parameters.size());
-
-        // First parameter should be the serialization error
-        Parameter errorParam = parameters.get(0);
-        assertEquals("serializationError", errorParam.getKey());
-        assertEquals("Failed to serialize migrated query information", errorParam.getValue());
-
-        // Second parameter should be the toString() representation
-        Parameter textParam = parameters.get(1);
-        assertEquals("migratedQueryInformationText", textParam.getKey());
-        assertNotNull(textParam.getValue());
-        assertTrue(textParam.getValue().contains(entityTypeId.toString()),
-            "Parameter value should contain entityTypeId");
-    }
-
-    @Test
-    void testGetErrorWithRealSerializationError() {
-        // Create a custom Warning implementation that will cause serialization issues
-        @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-        class UnserializableWarning implements Warning {
-            // Create a circular reference that will cause serialization to fail
-            private UnserializableWarning self = this;
-
-            @Override
-            public WarningType getType() {
-                return WarningType.DEPRECATED_FIELD;
-            }
-
-            @Override
-            public String getDescription(TranslationService translationService) {
-                return "This warning will cause serialization to fail";
-            }
-
-            // Override toString to provide a meaningful representation for the test
-            @Override
-            public String toString() {
-                return "UnserializableWarning[type=DEPRECATED_FIELD]";
-            }
-        }
-
-        // Create a MigratableQueryInformation object with the unserializable warning
-        UUID entityTypeId = UUID.randomUUID();
-        String fqlQuery = "{\"_version\":\"1.0\",\"test\":{\"$eq\":\"foo\"}}";
-        List<String> fields = List.of("field1", "field2");
-        MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation.builder()
-            .entityTypeId(entityTypeId)
-            .fqlQuery(fqlQuery)
-            .fields(fields)
-            .warning(new UnserializableWarning())
-            .build();
-
-        // Create the exception with the problematic MigratableQueryInformation
-        MigrationQueryChangedException exception = new MigrationQueryChangedException(migratedQueryInformation);
-
-        // Get the error - this should trigger the catch block in getError()
-        Error error = exception.getError();
-
-        // Verify error properties
-        assertNotNull(error);
-        assertEquals("Migration changed more than just the version", error.getMessage());
-        assertEquals("migration.query.changed", error.getCode());
-
-        // Verify parameters - should include serialization error and fallback text
-        List<Parameter> parameters = error.getParameters();
-        assertNotNull(parameters);
-        assertEquals(2, parameters.size());
-
-        // First parameter should be the serialization error
-        Parameter errorParam = parameters.get(0);
-        assertEquals("serializationError", errorParam.getKey());
-        assertEquals("Failed to serialize migrated query information", errorParam.getValue());
-
-        // Second parameter should be the toString() representation
-        Parameter textParam = parameters.get(1);
-        assertEquals("migratedQueryInformationText", textParam.getKey());
-        assertNotNull(textParam.getValue());
-
-        // Verify the parameter value contains the expected information
-        String paramValue = textParam.getValue();
-        assertTrue(paramValue.contains(entityTypeId.toString()),
-            "Parameter value should contain entityTypeId");
-        assertTrue(paramValue.contains("UnserializableWarning"),
-            "Parameter value should contain the warning class name");
-    }
+    assertThat(
+      error.getParameters(),
+      contains(
+        allOf(
+          hasProperty("key", equalTo("serializationError")),
+          hasProperty("value", equalTo("Failed to serialize migrated query information"))
+        ),
+        allOf(
+          hasProperty("key", equalTo("migratedQueryInformationText")),
+          hasProperty("value", equalTo(explosiveInformation.toString()))
+        )
+      )
+    );
+  }
 }

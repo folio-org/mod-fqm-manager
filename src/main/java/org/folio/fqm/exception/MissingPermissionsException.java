@@ -1,11 +1,11 @@
 package org.folio.fqm.exception;
 
+import java.util.Set;
 import org.folio.fqm.domain.dto.Error;
 import org.springframework.http.HttpStatus;
 
-import java.util.Set;
-
 public class MissingPermissionsException extends FqmException {
+
   private final Set<String> missingPermissions;
 
   public MissingPermissionsException(Set<String> missingPermissions) {
@@ -14,8 +14,9 @@ public class MissingPermissionsException extends FqmException {
 
   @Override
   public String getMessage() {
-    return "User is missing permissions that are required for this operation: [%s]"
-      .formatted(String.join(", ", missingPermissions));
+    return "User is missing permissions that are required for this operation: [%s]".formatted(
+        String.join(", ", missingPermissions)
+      );
   }
 
   @Override
@@ -25,7 +26,7 @@ public class MissingPermissionsException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage());
+    return new Error().message(getMessage()).code(Error.CodeEnum.PERMISSIONS_MISSING);
   }
 
   public Set<String> getMissingPermissions() {

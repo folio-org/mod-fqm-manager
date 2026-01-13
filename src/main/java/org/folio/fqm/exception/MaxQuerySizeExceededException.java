@@ -1,13 +1,13 @@
 package org.folio.fqm.exception;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.domain.dto.Error;
 import org.springframework.http.HttpStatus;
 
-import java.util.UUID;
-
 @RequiredArgsConstructor
 public class MaxQuerySizeExceededException extends FqmException {
+
   private final UUID queryId;
   private final int querySize;
   private final int maxSize;
@@ -24,6 +24,6 @@ public class MaxQuerySizeExceededException extends FqmException {
 
   @Override
   public Error getError() {
-    return new Error().message(getMessage());
+    return new Error().message(getMessage()).code(Error.CodeEnum.QUERY_TOO_LARGE);
   }
 }

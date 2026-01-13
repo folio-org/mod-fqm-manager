@@ -6,6 +6,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.springframework.http.HttpStatus;
 
 public class EntityTypeInUseException extends FqmException {
+
   private final String entityTypeId;
 
   public EntityTypeInUseException(EntityType entityType, String message) {
@@ -13,10 +14,12 @@ public class EntityTypeInUseException extends FqmException {
     this.entityTypeId = entityType.getId();
   }
 
-
   @Override
   public Error getError() {
-    return new Error().message(getMessage()).addParametersItem(new Parameter().key("entityTypeId").value(entityTypeId));
+    return new Error()
+      .message(getMessage())
+      .code(Error.CodeEnum.ENTITY_TYPE_IN_USE)
+      .addParametersItem(new Parameter().key("entityTypeId").value(entityTypeId));
   }
 
   @Override

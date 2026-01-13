@@ -27,8 +27,7 @@ paths:
                 $ref: '#/components/schemas/entityTypeSummaries'
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
+
   /query/purge:
     post:
       operationId: deleteOldQueries
@@ -44,8 +43,7 @@ paths:
                 $ref: '#/components/schemas/purgedQueries'
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
+
   /entity-types/materialized-views/refresh:
     post:
       operationId: refreshData
@@ -61,8 +59,7 @@ paths:
                 $ref: '#/components/schemas/dataRefreshResponse'
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
+
   /entity-types/install:
     post:
       operationId: installEntityTypes
@@ -74,8 +71,7 @@ paths:
       responses:
         '204':
           description: 'Entity types installed'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
+
   /fqm/version:
     get:
       operationId: getFqmVersion
@@ -91,8 +87,7 @@ paths:
                 type: string
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
+
   /fqm/migrate:
     post:
       summary: fqm migrate request
@@ -119,8 +114,6 @@ paths:
                 format: FqmMigrateResponse
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
-        '500':
-          $ref: '#/components/responses/internalServerErrorResponse'
 
 components:
   parameters:
@@ -199,13 +192,4 @@ components:
             message: Entity type ID 6c611396-b6bc-56a7-aada-3a90683d559c was not found
             code: entity.type.not.found
           schema:
-            $ref: "#/components/schemas/errorResponse"
-    internalServerErrorResponse:
-      description: When unhandled exception occurred during code execution, e.g. NullPointerException
-      content:
-        application/json:
-          example:
-            message: Unexpected error
-            code: unknown.error
-          schema:
-            $ref: "#/components/schemas/errorResponse"
+            $ref: '#/components/schemas/errorResponse'

@@ -1469,4 +1469,65 @@ class EntityTypeServiceTest {
     assertEquals(List.of("my-module"), result.get().getUsedBy());
     verify(repo).updateEntityType(any(EntityType.class));
   }
+
+  @Test
+  void shouldReturnValuesFromApiWhenSourcedEntityTypeFieldUsesValueSourceApi() {
+    UUID originalEntityTypeId = UUID.randomUUID();
+    UUID sourceEntityTypeId = UUID.randomUUID();
+
+    String originalColumnName = "originalColumn";
+    String sourceColumnName = "sourceColumn";
+
+    List<String> tenantList = List.of(TENANT_ID);
+
+    EntityType originalEntityType = new EntityType()
+      .id(originalEntityTypeId.toString())
+      .name("originalEntityType")
+      .columns(List.of(new EntityTypeColumn()
+        .name(originalColumnName)
+        .source(new SourceColumn(sourceEntityTypeId, sourceColumnName)
+          .type(SourceColumn.TypeEnum.ENTITY_TYPE))
+      ));
+
+    EntityType sourceEntityType = new EntityType()
+      .id(sourceEntityTypeId.toString())
+      .name("sourceEntityType")
+      .columns(List.of(new EntityTypeColumn()
+        .name(sourceColumnName)
+        .valueSourceApi(new ValueSourceApi()
+          .path("path")
+          .valueJsonPath("$.*.value")
+          .labelJsonPath("$.*.label")
+        )
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(originalEntityTypeId, null, false)).thenReturn(originalEntityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(sourceEntityTypeId, null, false)).thenReturn(sourceEntityType);
+    when(crossTenantQueryService.getTenantsToQueryForColumnValues(originalEntityType)).thenReturn(tenantList);
+
+    when(crossTenantHttpClient.get(eq("path"), anyMap(), eq(TENANT_ID))).thenReturn("""
+      [
+        {
+          "value": "value1",
+          "label": "label1"
+        },
+        {
+          "value": "value2",
+          "label": "label2"
+        }
+      ]
+      """);
+
+    ColumnValues actual = entityTypeService.getFieldValues(originalEntityTypeId, originalColumnName, "");
+
+    ColumnValues expected = new ColumnValues().content(List.of(
+      new ValueWithLabel().value("value1").label("label1"),
+      new ValueWithLabel().value("value2").label("label2")
+    ));
+    assertEquals(expected, actual);
+
+    // Ensure this goes through the API path and not the query processor
+    verify(crossTenantHttpClient).get(eq("path"), anyMap(), eq(TENANT_ID));
+    verify(queryProcessorService, never()).processQuery(any(), any(), any(), any());
+  }
 }

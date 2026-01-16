@@ -697,10 +697,8 @@
     "entityType.simple_instance.classifications.type_name": "Тип ідентифікатора класифікації",
     "entityType.simple_instance.classifications.type_name._qualified": "Тип ідентифікатора класифікації",
     "entityType.simple_instance.contributors": "Контрибутори",
-    "entityType.simple_instance.contributors.contributor_name_type_id": "UUID типу імені контрибутора",
     "entityType.simple_instance.contributors.contributor_name_type": "Тип імені контрибутора",
     "entityType.simple_instance.contributors.contributor_name_type._qualified": "Тип імені контрибутора для контрибуторів",
-    "entityType.simple_instance.contributors.contributor_name_type_id._qualified": "UUID типу імені контрибутора для контрибуторів",
     "entityType.simple_instance.contributors.contributor_type": "Тип контрибутора",
     "entityType.simple_instance.contributors.contributor_type._qualified": "Тип контрибутора для контрибуторів",
     "entityType.simple_instance.contributors.name": "Ім'я/назва",
@@ -1841,7 +1839,7 @@
     "entityType.composite_receiving_pieces.location": "Location",
     "entityType.composite_receiving_pieces.pol": "POL",
     "entityType.composite_receiving_pieces.title": "Title",
-    "entityType.composite_receiving_pieces.holding": "Holding",
+    "entityType.composite_receiving_pieces.holding": "Holdings",
     "entityType.composite_receiving_pieces.created_by": "Created by",
     "entityType.composite_receiving_pieces.updated_by": "Updated by",
     "entityType.composite_receiving_titles": "Receiving titles",
@@ -1949,5 +1947,6 @@
     "entityType.simple_holdings_type.metadata_updated_by_user_id": "Updated by user UUID",
     "entityType.simple_holdings_type.metadata_updated_date": "Updated date",
     "entityType.simple_holdings_type.name": "Type",
-    "entityType.simple_holdings_type.source": "Source"
+    "entityType.simple_holdings_type.source": "Source",
+    "entityType.composite_receiving_pieces.holdings_permanent_location": "Holdings permanent location"
 }

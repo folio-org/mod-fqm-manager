@@ -51,7 +51,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @Override
   public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible, Boolean includeAll) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
-    // Permissions are handled in the service layer// Permissions are handled in the service layer
+    // Permissions are handled in the service layer
     return ResponseEntity.ok(
       new EntityTypeSummaries()
         .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible), Boolean.TRUE.equals(includeAll)))
@@ -59,9 +59,19 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     );
   }
 
+  /**
+   * @deprecated use getFieldValues from org.folio.querytool.rest.resource.EntityTypesApi
+   */
   @EntityTypePermissionsRequired
   @Override
+  @Deprecated
   public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String fieldName, String search) {
+    return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
+  }
+
+  @EntityTypePermissionsRequired
+  @Override
+  public ResponseEntity<ColumnValues> getFieldValues(UUID entityTypeId, String fieldName, String search) {
     return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
   }
 

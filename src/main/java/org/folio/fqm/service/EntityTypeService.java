@@ -193,10 +193,16 @@ public class EntityTypeService {
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
         EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), folioExecutionContext.getTenantId(), false);
-
         permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 
-        return getFieldValuesFromEntityType(sourceEntityType, field.getSource().getColumnName(), searchText);
+        Field sourceField = FqlValidationService
+          .findFieldDefinition(new FqlField(field.getSource().getColumnName()), sourceEntityType)
+          .orElseThrow(() -> new FieldNotFoundException(sourceEntityType.getName(), field.getSource().getColumnName()));
+        if (sourceField.getValueSourceApi() != null) {
+          return getFieldValuesFromApi(sourceField, searchText, tenantsToQuery);
+        }
+
+        return getFieldValuesFromEntityType(sourceEntityType, sourceField.getName(), searchText);
       } else if (field.getSource().getType() == SourceColumn.TypeEnum.FQM) {
         return switch (Objects.requireNonNull(field.getSource().getName(), "Value sources with the FQM type require the source name to be configured")) {
           // entity types using this MUST declare a dependency on view `_mod_finance_storage_exchange_rate_availability_indicator`

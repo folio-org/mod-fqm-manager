@@ -503,6 +503,66 @@ class EntityTypeControllerTest {
     verifyNoMoreInteractions(entityTypeInitializationService, sourceViewService);
   }
 
+  @Test
+  void shouldReturnFieldValuesWithLabel() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    String fieldName = "field.name";
+    ColumnValues columnValues = new ColumnValues();
+    List<ValueWithLabel> expected = List.of(
+      new ValueWithLabel().value("value_01").label("label_01"),
+      new ValueWithLabel().value("value_02").label("label_02")
+    );
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .get("/entity-types/{id}/field-values", entityTypeId)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .queryParam("field", fieldName);
+
+    when(entityTypeService.getFieldValues(entityTypeId, fieldName, null))
+      .thenReturn(columnValues.content(expected));
+
+    mockMvc
+      .perform(requestBuilder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.content[0].value", is(expected.get(0).getValue())))
+      .andExpect(jsonPath("$.content[0].label", is(expected.get(0).getLabel())))
+      .andExpect(jsonPath("$.content[1].value", is(expected.get(1).getValue())))
+      .andExpect(jsonPath("$.content[1].label", is(expected.get(1).getLabel())));
+
+    verify(entityTypeService, times(1)).getFieldValues(entityTypeId, fieldName, null);
+  }
+
+  @Test
+  void shouldReturnFieldValuesWithLabelWithSearch() throws Exception {
+    UUID entityTypeId = UUID.randomUUID();
+    String fieldName = "field.name";
+    String search = "label_01";
+
+    ColumnValues columnValues = new ColumnValues();
+    List<ValueWithLabel> expected = List.of(
+      new ValueWithLabel().value("value_01").label("label_01")
+    );
+
+    RequestBuilder requestBuilder = MockMvcRequestBuilders
+      .get("/entity-types/{id}/field-values", entityTypeId)
+      .accept(MediaType.APPLICATION_JSON)
+      .header(XOkapiHeaders.TENANT, "tenant_01")
+      .queryParam("field", fieldName)
+      .queryParam("search", search);
+
+    when(entityTypeService.getFieldValues(entityTypeId, fieldName, search))
+      .thenReturn(columnValues.content(expected));
+
+    mockMvc
+      .perform(requestBuilder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.content[0].value", is(expected.get(0).getValue())))
+      .andExpect(jsonPath("$.content[0].label", is(expected.get(0).getLabel())));
+
+    verify(entityTypeService, times(1)).getFieldValues(entityTypeId, fieldName, search);
+  }
+
   private static EntityType getEntityType(EntityTypeColumn col) {
     UUID id = UUID.randomUUID();
     return new EntityType()

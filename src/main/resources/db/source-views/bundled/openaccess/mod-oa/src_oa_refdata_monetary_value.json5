@@ -1,0 +1,5 @@
+{
+  name: 'src_oa_monetary_value',
+  dependsOn: [['${tenant_id}_mod_oa', 'monetary_value']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_oa.monetary_value',
+}

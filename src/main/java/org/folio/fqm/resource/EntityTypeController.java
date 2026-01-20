@@ -67,6 +67,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @EntityTypePermissionsRequired
   @Override
   @Deprecated(since = "4.1.0", forRemoval = false)
+  @SuppressWarnings("java:S1133")
   public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String fieldName, String search) {
     return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
   }

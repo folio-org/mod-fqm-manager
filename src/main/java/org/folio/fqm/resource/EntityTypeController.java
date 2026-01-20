@@ -60,7 +60,9 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   /**
-   * @deprecated use getFieldValues from org.folio.querytool.rest.resource.EntityTypesApi
+   * @deprecated Deprecated as part of MODFQMMGR-1048. Use
+   * {@link org.folio.querytool.rest.resource.EntityTypesApi#getFieldValues(UUID, String, String)} instead.
+   * Scheduled for removal in MODFQMMGR-1052.
    */
   @EntityTypePermissionsRequired
   @Override

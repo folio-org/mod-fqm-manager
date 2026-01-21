@@ -1,6 +1,7 @@
 {
   id: 'da92e15d-5b25-4400-bc2b-5c1c0b3c069e',
   name: 'drv_openaccess_publication_request',
+  private: false,
   fromClause: 'src_oa_publication_request AS publication_request \
     LEFT JOIN src_oa_refdata_value AS pr_status ON pr_status.rdv_id = publication_request.pr_request_status \
     LEFT JOIN src_oa_refdata_value AS pr_pub_type ON pr_pub_type.rdv_id = publication_request.pr_pub_type_fk \

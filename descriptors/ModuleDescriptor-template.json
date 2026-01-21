@@ -43,6 +43,12 @@
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "mod-settings.global.read.stripes-core.prefs.manage"]
         },
         {
+          "methods": ["GET"],
+          "pathPattern": "/entity-types/{entity-type-id}/field-values",
+          "permissionsRequired": ["fqm.entityTypes.item.columnValues.get"],
+          "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get","search.facets.collection.get", "mod-settings.global.read.stripes-core.prefs.manage"]
+        },
+        {
           "methods": ["POST"],
           "pathPattern": "/entity-types/materialized-views/refresh",
           "permissionsRequired": ["fqm.materializedViews.post"],

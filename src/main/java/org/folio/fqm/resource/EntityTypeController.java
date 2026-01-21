@@ -51,7 +51,7 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   @Override
   public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible, Boolean includeAll) {
     Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
-    // Permissions are handled in the service layer// Permissions are handled in the service layer
+    // Permissions are handled in the service layer
     return ResponseEntity.ok(
       new EntityTypeSummaries()
         .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible), Boolean.TRUE.equals(includeAll)))
@@ -59,9 +59,22 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
     );
   }
 
+  /**
+   * @deprecated Deprecated as part of MODFQMMGR-1048.
+   * Use {@link org.folio.querytool.rest.resource.EntityTypesApi#getFieldValues(UUID, String, String)} instead.
+   * Scheduled for removal in MODFQMMGR-1052.
+   */
   @EntityTypePermissionsRequired
   @Override
+  @Deprecated(since = "4.1.0", forRemoval = false)
+  @SuppressWarnings("java:S1133")
   public ResponseEntity<ColumnValues> getColumnValues(UUID entityTypeId, String fieldName, String search) {
+    return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
+  }
+
+  @EntityTypePermissionsRequired
+  @Override
+  public ResponseEntity<ColumnValues> getFieldValues(UUID entityTypeId, String fieldName, String search) {
     return ResponseEntity.ok(entityTypeService.getFieldValues(entityTypeId, fieldName, search));
   }
 

@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -169,9 +170,10 @@ class EntityTypeServiceAvailableJoinsTest {
     // When there's a request for available joins without a custom entity type
     AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null);
 
-    // Then it should return all available target entity types
+    // Then it should return all available target entity types (excluding composites)
     AvailableJoinsResponse expected = new AvailableJoinsResponse()
       .availableTargetIds(entityTypeService.getAccessibleEntityTypesById().values().stream()
+        .filter(EntityTypeUtils::isSimple)
         .map(et -> new LabeledValueWithDescription(et.getLabelAlias()).value(et.getId()))
         .sorted(comparing(LabeledValueWithDescription::getLabel, String.CASE_INSENSITIVE_ORDER))
         .toList())
@@ -213,17 +215,18 @@ class EntityTypeServiceAvailableJoinsTest {
   }
 
   @Test
-  void getAvailableJoins_shouldReturnAllAccessibleEntityTypesWhenCustomEntityTypeIsNull() {
+  void getAvailableJoins_shouldReturnAllSimpleAccessibleEntityTypesWhenCustomEntityTypeIsNull() {
     // When there's a request for target entity types without a custom entity type set
     AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null);
 
-    // Then it should return all accessible entity types
+    // Then it should return all accessible entity types that are simple
     assertNotNull(result.getAvailableTargetIds());
-    assertEquals(entityTypeService.getAccessibleEntityTypesById().size(), result.getAvailableTargetIds().size());
+    long expectedSize = entityTypeService.getAccessibleEntityTypesById().values().stream().filter(EntityTypeUtils::isSimple).count();
+    assertEquals(expectedSize, result.getAvailableTargetIds().size());
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 1".equals(lv.getLabel())));
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 2".equals(lv.getLabel())));
     assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Test Entity 3".equals(lv.getLabel())));
-    assertTrue(result.getAvailableTargetIds().stream().anyMatch(lv -> "Composite Entity 1-2".equals(lv.getLabel())));
+    assertFalse(result.getAvailableTargetIds().stream().anyMatch(lv -> "Composite Entity 1-2".equals(lv.getLabel())));
   }
 
   @Test
@@ -577,5 +580,110 @@ class EntityTypeServiceAvailableJoinsTest {
 
     AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
     assertTrue(result.getAvailableJoinConditions().isEmpty());
+  }
+
+  @Test
+  void getAvailableJoins_shouldNotFailWhenTargetIdIsComposite() {
+    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000004"); // et4 (composite)
+    List<EntityTypeSourceEntityType> sources = List.of(
+      new EntityTypeSourceEntityType()
+        .type("entity-type")
+        .alias("et1")
+        .targetId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+    );
+
+    // Note: entityTypes includes the et4 composite
+    doReturn(entityTypes).when(entityTypeService).getAccessibleEntityTypesById();
+
+    // Mock flattening for the temporary custom ET
+    EntityType customEt = new EntityType().id(UUID.randomUUID().toString()).columns(List.of(new EntityTypeColumn().name("col1")));
+    when(entityTypeFlatteningService.getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true))).thenReturn(customEt);
+
+    // This should not fail (prior to MODFQMMGR-1040, a composite targetId was invalid)
+    AvailableJoinsResponse availableJoins = entityTypeService.getAvailableJoins(sources, targetEtId);
+    assertNull(availableJoins.getAvailableTargetIds());
+  }
+
+  @Test
+  void getAvailableJoins_shouldExcludeCompositesFromSuggestions() {
+    // Given that getAccessibleEntityTypesById includes the composite et4 (assert, to ensure this is actually testing what we want)
+    assertTrue(entityTypeService.getAccessibleEntityTypesById().containsKey(UUID.fromString("00000000-0000-0000-0000-000000000004")));
+
+    // When there's a request for available joins without a custom entity type
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(null, null);
+
+    // Then it should return only simple available target entity types (excluding et4)
+    List<String> resultIds = result.getAvailableTargetIds().stream().map(LabeledValueWithDescription::getValue).toList();
+    assertTrue(resultIds.contains("00000000-0000-0000-0000-000000000001"));
+    assertTrue(resultIds.contains("00000000-0000-0000-0000-000000000002"));
+    assertTrue(resultIds.contains("00000000-0000-0000-0000-000000000003"));
+    assertFalse(resultIds.contains("00000000-0000-0000-0000-000000000004")); // et4 is composite
+  }
+
+  @Test
+  void getAvailableJoins_shouldExcludeCompositesFromSuggestionsWithSources() {
+    // Given a custom entity type with a field that joins to et1
+    UUID customEtId = UUID.randomUUID();
+    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    List<EntityTypeSourceEntityType> sources = List.of(
+      new EntityTypeSourceEntityType()
+        .type("entity-type")
+        .alias("superCoolAlias")
+        .targetId(targetEtId)
+    );
+    EntityType customEt = new EntityType().id(customEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("superCoolAlias.col1")
+          .labelAlias("Col 1")
+          .joinsTo(List.of(new Join().targetId(UUID.fromString("00000000-0000-0000-0000-000000000002")).targetField("colA")))
+      ));
+
+    // Mock flattening for the temporary custom ET
+    doReturn(customEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
+
+    // When requesting available joins without a specific targetId
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, null);
+
+    // Then it should return only simple available target entity types (excluding et4)
+    assertNotNull(result.getAvailableTargetIds());
+    List<String> resultIds = result.getAvailableTargetIds().stream().map(LabeledValueWithDescription::getValue).toList();
+    assertFalse(resultIds.contains("00000000-0000-0000-0000-000000000004")); // et4 is composite
+  }
+
+  @Test
+  void getAvailableJoins_shouldReturnJoinConditionsForCompositeTarget() {
+    // Given a custom entity type (et3) and a composite target entity type (et4)
+    // et3.colY joins to et1.col1. et4 contains et1.
+    UUID customEtId = UUID.fromString("00000000-0000-0000-0000-000000000003"); // et3
+    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000004"); // et4 (composite)
+
+    List<EntityTypeSourceEntityType> sources = List.of(
+      new EntityTypeSourceEntityType()
+        .type("entity-type")
+        .alias("et3")
+        .targetId(customEtId)
+    );
+
+    // Use the default flattened mock from BeforeEach, but we need to mock flattening for the custom ET
+    EntityType flattenedCustomEt = new EntityType().id(customEtId.toString())
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("colY")
+          .labelAlias("Column Y")
+          .originalEntityTypeId(customEtId)
+          .joinsTo(List.of(new Join().targetId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+            .targetField("col1")))
+      ));
+    doReturn(flattenedCustomEt).when(entityTypeFlatteningService).getFlattenedEntityType(any(CustomEntityType.class), any(), eq(true));
+
+    // When requesting available joins for the composite target
+    AvailableJoinsResponse result = entityTypeService.getAvailableJoins(sources, targetEtId);
+
+    // Then it should find the join condition
+    assertNotNull(result.getAvailableJoinConditions());
+    assertFalse(result.getAvailableJoinConditions().isEmpty());
+    assertEquals("colY", result.getAvailableJoinConditions().get(0).getSourceField().getValue());
+    assertEquals("et1.col1", result.getAvailableJoinConditions().get(0).getTargetField().getValue());
   }
 }

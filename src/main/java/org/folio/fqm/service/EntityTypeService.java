@@ -548,7 +548,6 @@ public class EntityTypeService {
     return entityTypeRepository
       .getEntityTypeDefinitions(Set.of(), folioExecutionContext.getTenantId())
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getDeleted()))
-      .filter(EntityTypeUtils::isSimple)
       .filter(entityType -> !Boolean.TRUE.equals(entityType.getAdditionalProperty("isCustom")) || currentUserCanAccessCustomEntityType(entityType.getId()))
       .map(entityType -> entityTypeFlatteningService.getFlattenedEntityType(UUID.fromString(entityType.getId()), folioExecutionContext.getTenantId(), true))
       .filter(entityType -> userPermissions.containsAll(permissionsService.getRequiredPermissions(entityType)))
@@ -564,7 +563,7 @@ public class EntityTypeService {
     // Special case where the custom ET isn't provided: provide all accessible entity types as possible targets
     if (sources == null) {
       return new AvailableJoinsResponse()
-        .availableTargetIds(entityTypesToSortedLabeledValues(accessibleEntityTypesById.values().stream()));
+        .availableTargetIds(entityTypesToSortedLabeledValues(accessibleEntityTypesById.values().stream().filter(EntityTypeUtils::isSimple)));
     }
 
     CustomEntityType tempCustomEntityType = new CustomEntityType()
@@ -657,6 +656,9 @@ public class EntityTypeService {
     Set<EntityType> targetEntityTypes = new HashSet<>();
     for (EntityTypeColumn customColumn : customEntityTypeColumns) {
       for (EntityType potentialTargetEntityType : accessibleEntityTypesById.values()) {
+        if (!EntityTypeUtils.isSimple(potentialTargetEntityType)) {
+          continue;
+        }
         for (EntityTypeColumn targetColumn : potentialTargetEntityType.getColumns()) {
           if (canColumnsJoin(customColumn, targetColumn, potentialTargetEntityType)) {
             targetEntityTypes.add(potentialTargetEntityType);

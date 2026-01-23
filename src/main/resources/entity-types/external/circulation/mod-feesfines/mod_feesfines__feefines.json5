@@ -1,7 +1,7 @@
 {
   id: 'b721ddae-0e0e-52f9-83cb-aa5cf83008fe',
   name: 'mod_feesfines__feefines',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -25,7 +25,7 @@
         dataType: 'booleanType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->>'automatic'",
       sourceAlias: 'src__circulation__feesfines__feefines',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefines.jsonb->>'automatic'::text))",
@@ -40,6 +40,7 @@
           label: 'False',
         },
       ],
+      essential: true,
     },
     {
       name: 'fee_fine_type',
@@ -47,11 +48,12 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->>'feeFineType'",
       sourceAlias: 'src__circulation__feesfines__feefines',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__feefines.jsonb->>'feeFineType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'default_amount',
@@ -59,7 +61,7 @@
         dataType: 'numberType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'defaultAmount')::float",
       valueFunction: '(:value)::float',
       sourceAlias: 'src__circulation__feesfines__feefines',
@@ -92,10 +94,19 @@
         dataType: 'rangedUUIDType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'ownerId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__feefines',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'a49dc8b4-8316-534d-94af-c5ca7748d6e9',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'metadata_created_date',
@@ -114,6 +125,20 @@
       },
       queryable: true,
       visibleByDefault: false,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__feefines',
@@ -135,6 +160,20 @@
       },
       queryable: true,
       visibleByDefault: false,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__feefines',

@@ -142,6 +142,39 @@
       queryable: false,
       visibleByDefault: false,
       hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'call_number_type',
+      sourceAlias: 'hrd',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          call_number_type.jsonb ->> 'name' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_inventory_call_number_type call_number_type \
+        WHERE \
+          call_number_type.id = :hrd.callNumberTypeId \
+      )",
+      filterValueGetter: ":sourceAlias.callnumbertypeid",
+      valueFunction: 'lower(:value)',
+      idColumnName: 'call_number_type_id',
+      source: {
+        entityTypeId: 'd9338ced-3e71-4f24-b605-7912d590f005', // simple_call_number_type
+        columnName: 'name',
+      }
     },
     {
       name: 'effective_location_id',

@@ -748,6 +748,7 @@
   "entityType.simple_holdings_record.call_number_prefix": "Call number prefix",
   "entityType.simple_holdings_record.call_number_suffix": "Call number suffix",
   "entityType.simple_holdings_record.call_number_type_id": "Call number type UUID",
+  "entityType.simple_holdings_record.call_number_type": "Call number type",
   "entityType.simple_holdings_record.copy_number": "Copy number",
   "entityType.simple_holdings_record.created_at": "Created date",
   "entityType.simple_holdings_record.created_by": "Created by user UUID",

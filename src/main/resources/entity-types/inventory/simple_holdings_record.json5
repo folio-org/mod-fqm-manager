@@ -129,8 +129,8 @@
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'hrid'",
       essential: true,
-      filterValueGetter: "lower(fs09000000_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'))",
-      valueFunction: 'lower(fs09000000_mod_inventory_storage.f_unaccent(:value))',
+      filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'))",
+      valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
     },
     {
       name: 'call_number_type_id',
@@ -164,7 +164,7 @@
         SELECT \
           call_number_type.jsonb ->> 'name' \
         FROM \
-          fs09000000_mod_fqm_manager.src_inventory_call_number_types call_number_type \
+          ${tenant_id}_mod_fqm_manager.src_inventory_call_number_types call_number_type \
         WHERE \
           call_number_type.id = :hrd.callNumberTypeId \
       )",
@@ -425,8 +425,8 @@
       idColumnName: 'statistical_code_ids',
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN fs09000000_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
-      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN fs09000000_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      valueGetter: "( SELECT array_agg(statcode.statistical_code) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
+      filterValueGetter: "( SELECT array_agg(lower(statcode.statistical_code)) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'statisticalCodeIds'::text) record(value) JOIN ${tenant_id}_mod_fqm_manager.drv_inventory_statistical_codes_full statcode ON record.value::text = statcode.id::text)",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',
@@ -694,7 +694,7 @@
                                       jsonb_build_object('relationship', class_type.jsonb ->> 'name') \
                        ORDER BY record.value ->> 'relationshipId') \
                      FROM jsonb_array_elements((:sourceAlias.jsonb -> 'electronicAccess')) record(value) \
-                       LEFT join fs09000000_mod_fqm_manager.src_inventory_electronic_access_relationship class_type \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_electronic_access_relationship class_type \
                          ON (record.value ->> 'relationshipId') = class_type.id::text)::text"
     },
     {
@@ -924,7 +924,7 @@
                                       jsonb_build_object('holdingsNoteType', class_type.jsonb ->> 'name') \
                        ORDER BY record.value ->> 'holdingsNoteTypeId') \
                      FROM jsonb_array_elements((:sourceAlias.jsonb -> 'notes')) record(value) \
-                       LEFT join fs09000000_mod_fqm_manager.src_inventory_holdings_note_type class_type \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_holdings_note_type class_type \
                          ON (record.value ->> 'holdingsNoteTypeId') = class_type.id::text)::text"
     },
     {
@@ -936,7 +936,7 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "'fs09000000'",
+      valueGetter: "'${tenant_id}'",
       source: {
         columnName: 'tenant_id',
         entityTypeId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
@@ -953,8 +953,8 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = 'fs09000000')",
-      filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = 'fs09000000')",
+      valueGetter: "(SELECT name FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
+      filterValueGetter: "(SELECT lower(name) FROM ${central_tenant_id}_mod_fqm_manager.src_consortia_tenant WHERE id = '${tenant_id}')",
       valueFunction: 'lower(:value)',
       idColumnName: 'tenant_id',
       source: {
@@ -1041,7 +1041,7 @@
                               jsonb_build_object('callNumberType', call_number_type.jsonb ->> 'name') \
                  ORDER BY record.value ->> 'callNumberType') \
                FROM jsonb_array_elements((:sourceAlias.jsonb -> 'additionalCallNumbers')) record(value) \
-                 LEFT JOIN fs09000000_mod_fqm_manager.src_inventory_call_number_type call_number_type \
+                 LEFT JOIN ${tenant_id}_mod_fqm_manager.src_inventory_call_number_type call_number_type \
                    ON (record.value ->> 'typeId') = call_number_type.id::text)::text"
     },
     {

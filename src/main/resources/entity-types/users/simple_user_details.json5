@@ -304,6 +304,10 @@
               valueGetter: "( SELECT array_agg(elems.value->>'addressTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
+              source: {
+                columnName: 'type',
+                entityTypeId: '9176c676-0485-4f6c-b1fc-585355bac679',
+              },
             },
             {
               name: 'primary_address',

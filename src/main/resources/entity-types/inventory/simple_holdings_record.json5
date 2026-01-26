@@ -164,7 +164,7 @@
         SELECT \
           call_number_type.jsonb ->> 'name' \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src_inventory_call_number_types call_number_type \
+          ${tenant_id}_mod_fqm_manager.src_inventory_call_number_type call_number_type \
         WHERE \
           call_number_type.id = :hrd.callNumberTypeId \
       )",

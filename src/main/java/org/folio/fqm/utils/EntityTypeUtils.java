@@ -5,6 +5,7 @@ import static org.jooq.impl.DSL.field;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,9 +15,11 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
+
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -33,6 +36,7 @@ import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.Join;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
+import org.folio.querytool.domain.dto.SourceColumn;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
@@ -44,6 +48,8 @@ import org.jooq.impl.DSL;
 public class EntityTypeUtils {
 
   public static final org.jooq.Field<String[]> RESULT_ID_FIELD = field("result_id", String[].class);
+
+  private static final String COUNTRIES_SOURCE = "countries";
 
   /**
    * Returns a list of strings corresponding to the names of the id columns of an entity type.
@@ -149,7 +155,7 @@ public class EntityTypeUtils {
       .stream()
       .filter(j ->
         j.getTargetId().equals(target.getOriginalEntityTypeId()) &&
-        j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
+          j.getTargetField().equals(splitFieldIntoAliasAndField(target.getName()).getRight())
       )
       .findFirst();
   }
@@ -189,8 +195,10 @@ public class EntityTypeUtils {
    * No guarantees are made about the order in which fields are visited, however, this will include
    * every field, no matter how deeply nested.
    *
-   * @example
-   * An entity type with columns `obj` and `arrobj`, where `obj` is an object with two properties
+   * @param entityType the entity to traverse
+   * @param consumer   the consumer to run on each field. The first parameter is the
+   *                   {@link Field field} itself and the second parameter is the path to that field
+   * @example An entity type with columns `obj` and `arrobj`, where `obj` is an object with two properties
    * and `arrobj` is an array of objects with three properties, the following calls will be made:
    * <pre>
    * - consumer.accept(obj, "") // base column
@@ -201,10 +209,6 @@ public class EntityTypeUtils {
    * - consumer.accept(arrChild2, "arrobj[*]->") // second property
    * - consumer.accept(arrChild3, "arrobj[*]->") // third property
    * </pre>
-   *
-   * @param entityType the entity to traverse
-   * @param consumer the consumer to run on each field. The first parameter is the
-   *                 {@link Field field} itself and the second parameter is the path to that field
    */
   public static void runOnEveryField(EntityType entityType, BiConsumer<Field, String> consumer) {
     if (entityType.getColumns() == null) {
@@ -245,13 +249,13 @@ public class EntityTypeUtils {
    * <strong>NOT</strong> consider the entire entity type definition, only some properties used in
    * querying. Notable exclusions include owner information, any localized fields, and the ordering
    * of sources and columns.
-   *
+   * <p>
    * This DOES take into effect values which affect queries and results, including but not limited
    * to:
    * - Sources (alias, type, target)
    * - Columns (name, data type, ID state, getters)
    * - Cross-tenant status
-   *
+   * <p>
    * No assumptions should be made about the specific algorithm used to compute the hash, the hash
    * length, and the result should never be used to check if two entity types are equivalent. It
    * is only intended to detect changes which may affect query results. Additionally, no guarantees
@@ -343,5 +347,26 @@ public class EntityTypeUtils {
         )
       );
     }
+  }
+
+  public static List<String> getCountryLocalizationFieldPaths(EntityType entityType) {
+    List<String> paths = new ArrayList<>();
+    EntityTypeUtils.runOnEveryField(entityType, (field, parentPath) -> {
+      if (field.getSource() == null
+        || field.getSource().getType() != SourceColumn.TypeEnum.FQM
+        || !COUNTRIES_SOURCE.equals(field.getSource().getName())) {
+        return;
+      }
+
+      // Use the underlying JSON property name for nested fields
+      String leaf = (field instanceof NestedObjectProperty prop
+        && !StringUtils.isEmpty(prop.getProperty()))
+        ? prop.getProperty()
+        : field.getName();
+
+      paths.add(parentPath + leaf);
+    });
+
+    return paths;
   }
 }

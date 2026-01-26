@@ -1,11 +1,17 @@
 package org.folio.fqm.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -36,10 +43,15 @@ public class ResultSetService {
     .optionalStart().appendOffsetId() // optional Z/timezone at end
     .toFormatter().withZone(ZoneOffset.UTC); // force interpretation as UTC
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
+  private static final String NESTED_FIELD_MARKER = "[*]->";
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final SettingsClient settingsClient;
   private final FolioExecutionContext executionContext;
+  private final TranslationService translationService;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -64,6 +76,7 @@ public class ResultSetService {
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
+    List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
 
     return contentIds
       .stream()
@@ -79,6 +92,7 @@ public class ResultSetService {
         }
 
         Map<String, Object> copiedContents = new HashMap<>(contents);
+        localizeCountries(copiedContents, countryFields);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
         }
@@ -98,6 +112,99 @@ public class ResultSetService {
         return value;
       });
     }
+  }
+
+  private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {
+    if (CollectionUtils.isEmpty(countryFieldPaths)) {
+      return;
+    }
+    for (String fieldPath : countryFieldPaths) {
+      localizeCountryField(contents, fieldPath);
+    }
+  }
+
+  private void localizeCountryField(Map<String, Object> contents, String fieldPath) {
+    if (StringUtils.isEmpty(fieldPath)) {
+      return;
+    }
+
+    int markerIndex = fieldPath.indexOf(NESTED_FIELD_MARKER);
+    if (markerIndex < 0) {
+      localizeTopLevelCountryField(contents, fieldPath);
+      return;
+    }
+
+    String rootField = fieldPath.substring(0, markerIndex);
+    String nestedField = fieldPath.substring(markerIndex + NESTED_FIELD_MARKER.length());
+    localizeNestedCountryField(contents, rootField, nestedField);
+  }
+
+  private void localizeTopLevelCountryField(Map<String, Object> contents, String fieldName) {
+    Object value = contents.get(fieldName);
+    if (!(value instanceof String code) || code.isBlank()) {
+      return;
+    }
+    localizeCountryCode(code).ifPresent(translated -> contents.put(fieldName, translated));
+  }
+
+  private void localizeNestedCountryField(Map<String, Object> contents, String rootField, String nestedField) {
+    if (rootField.isBlank() || nestedField.isBlank()) {
+      return;
+    }
+
+    Object root = contents.get(rootField);
+    if (!(root instanceof String rootJson) || rootJson.isBlank()) {
+      return;
+    }
+
+    try {
+      JsonNode node = OBJECT_MAPPER.readTree(rootJson);
+      if (!node.isArray()) {
+        return;
+      }
+
+      boolean changed = false;
+      for (JsonNode elementNode : node) {
+        changed |= localizeCountryCodeIfPresent(elementNode, nestedField);
+      }
+      if (changed) {
+        contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
+      }
+    } catch (Exception e) {
+      log.debug("Unable to localize country field '{}[*]->{}' (unexpected JSON): {}", rootField, nestedField, e.getMessage());
+    }
+  }
+
+  private boolean localizeCountryCodeIfPresent(JsonNode elementNode, String fieldName) {
+    if (!elementNode.isObject()) {
+      return false;
+    }
+
+    ObjectNode objectNode = (ObjectNode) elementNode;
+    JsonNode valueNode = objectNode.get(fieldName);
+    if (valueNode == null || !valueNode.isTextual()) {
+      return false;
+    }
+
+    String code = valueNode.asText();
+    Optional<String> localized = localizeCountryCode(code);
+    if (localized.isEmpty()) {
+      return false;
+    }
+
+    objectNode.put(fieldName, localized.get());
+    return true;
+  }
+
+  private Optional<String> localizeCountryCode(String code) {
+    String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+    String localized = translationService.format(translationKey);
+
+    // If translation is missing, don't modify the original value
+    if (localized == null || localized.isBlank() || localized.equals(translationKey)) {
+      return Optional.empty();
+    }
+    return Optional.of(localized);
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

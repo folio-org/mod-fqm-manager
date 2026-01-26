@@ -1,0 +1,5 @@
+{
+  name: 'src_oa_checklist_item',
+  dependsOn: [['${tenant_id}_mod_oa', 'checklist_item']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_oa.checklist_item',
+}

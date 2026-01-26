@@ -296,7 +296,7 @@
             },
             {
               name: 'address_type_id',
-              property: 'addressTypeId',
+              property: 'addressType',
               dataType: {
                 dataType: 'stringType',
               },
@@ -347,7 +347,12 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'personal'->>'addresses'",
+      valueGetter: "(SELECT jsonb_agg(record.value || \
+                              jsonb_build_object('addressType', address_type.jsonb ->> 'type') \
+                 ORDER BY record.value ->> 'addressType') \
+               FROM jsonb_array_elements((:sourceAlias.jsonb -> 'addresses')) record(value) \
+                 LEFT JOIN ${tenant_id}_mod_fqm_manager.src_users_addresstype address_type \
+                   ON (record.value ->> 'addressTypeId') = address_type.id::text)::text"
     },
     {
       name: 'middle_name',

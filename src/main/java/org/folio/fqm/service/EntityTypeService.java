@@ -750,23 +750,20 @@ public class EntityTypeService {
 
     try (InputStream input = getClass().getClassLoader().getResourceAsStream(COUNTRIES_FILEPATH)) {
       if (input == null) {
-        log.warn("Countries file {} not found on classpath", COUNTRIES_FILEPATH);
+        log.warn("Country code file {} not found on classpath", COUNTRIES_FILEPATH);
         return new ColumnValues().content(List.of());
       }
 
-      // countries.json is a simple list of ISO 3166-1 alpha-2 codes
+      // List of ISO 3166-1 alpha-2 codes
       List<String> codes = mapper.readValue(input, new TypeReference<>() {
       });
 
       List<ValueWithLabel> values = codes.stream()
-        .filter(Objects::nonNull)
-        .map(String::trim)
-        .filter(StringUtils::isNotBlank)
         .map(code -> {
           String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
           String label = translationService.format(translationKey);
-          // Fallback if translation missing or returns the key
-          if (label == null || label.equals(translationKey) || StringUtils.isBlank(label)) {
+          // Fallback if translation missing
+          if (label == null || StringUtils.isBlank(label) || label.equals(translationKey)) {
             label = code;
           }
           return new ValueWithLabel().value(code).label(label);

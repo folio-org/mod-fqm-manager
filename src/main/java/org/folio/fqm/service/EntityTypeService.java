@@ -44,6 +44,7 @@ import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -86,8 +87,9 @@ public class EntityTypeService {
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
     "MZM", "XPD", "PHP", "XPT", "PTE", "ROL", "RUR", "CSD", "SLE", "SLL", "XAG", "SKK", "SIT", "ESP", "XDR", "XSU", "SDD", "SRG", "STD", "XTS",
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
-  private static final String COUNTRIES_FIELD = "REPLACE_ME";
-  private static final String COUNTRIES_FILEPATH = "countries.json";
+  private static final String COUNTRIES_FIELD = "country";
+  private static final String COUNTRIES_FILEPATH = "country_codes.json";
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
@@ -101,6 +103,7 @@ public class EntityTypeService {
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
   private final SimpleHttpClient simpleHttpClient;
+  private final TranslationService translationService;
 
   /**
    * Returns the list of all entity types.
@@ -755,12 +758,23 @@ public class EntityTypeService {
         return new ColumnValues().content(List.of());
       }
 
-      List<Map<String, String>> countries = mapper.readValue(input, new TypeReference<>() {
+      // countries.json is a simple list of ISO 3166-1 alpha-2 codes
+      List<String> codes = mapper.readValue(input, new TypeReference<>() {
       });
-      List<ValueWithLabel> values = countries
-        .stream()
-        .map(c -> new ValueWithLabel().value(c.get("code")).label(c.get("country")))
-        .filter(v -> v.getValue() != null && v.getLabel() != null)
+
+      List<ValueWithLabel> values = codes.stream()
+        .filter(Objects::nonNull)
+        .map(String::trim)
+        .filter(StringUtils::isNotBlank)
+        .map(code -> {
+          String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+          String label = translationService.format(translationKey);
+          // Fallback if translation missing or returns the key
+          if (label == null || label.equals(translationKey) || StringUtils.isBlank(label)) {
+            label = code;
+          }
+          return new ValueWithLabel().value(code).label(label);
+        })
         .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
         .toList();
 

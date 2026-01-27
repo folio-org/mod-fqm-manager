@@ -271,6 +271,11 @@
               valueGetter: "( SELECT array_agg(elems.value->>'countryId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'countryId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
+              source: {
+                entityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+                type: 'fqm',
+                name: 'countries',
+              }
             },
             {
               name: 'postal_code',

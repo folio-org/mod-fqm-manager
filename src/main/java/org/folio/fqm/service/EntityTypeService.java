@@ -87,7 +87,6 @@ public class EntityTypeService {
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
     "MZM", "XPD", "PHP", "XPT", "PTE", "ROL", "RUR", "CSD", "SLE", "SLL", "XAG", "SKK", "SIT", "ESP", "XDR", "XSU", "SDD", "SRG", "STD", "XTS",
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
-  private static final String COUNTRIES_FIELD = "country";
   private static final String COUNTRIES_FILEPATH = "country_codes.json";
   private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
 
@@ -181,10 +180,6 @@ public class EntityTypeService {
     searchText = searchText == null ? "" : searchText;
     verifyAccessForPossibleCustomEntityType(entityTypeId);
 
-    if (COUNTRIES_FIELD.equals(fieldName)) {
-      return getCountries();
-    }
-
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, folioExecutionContext.getTenantId(), false);
 
     Field field = FqlValidationService
@@ -221,6 +216,7 @@ public class EntityTypeService {
           // entity types using this MUST declare a dependency on view `_mod_search_languages_availability_indicator`
           // to ensure that this source is available
           case "languages" -> getLanguages(searchText, tenantsToQuery);
+          case "countries" -> getCountries();
           case "tenant_id" -> getTenantIds(entityType);
           case "tenant_name" -> getTenantNames(entityType);
           // instructs query builder to provide organization finder plugin, so no values need be returned here

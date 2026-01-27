@@ -762,6 +762,7 @@ public class EntityTypeService {
         .map(code -> {
           String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
           String label = translationService.format(translationKey);
+
           // Fallback if translation missing
           if (label == null || StringUtils.isBlank(label) || label.equals(translationKey)) {
             label = code;

@@ -11,9 +11,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Triple;
+import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
+import org.folio.fqm.migration.types.MigrationResult;
+import org.folio.fqm.migration.types.SingleFieldMigrationResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -56,11 +61,11 @@ class MigrationUtilsValuesTest {
           Triple.of("field3", "baz", "{\"$ne\":\"baz\"}")
         ),
         """
-          {
-            "field1": {"$eq": "[foo]"},
-            "field2": {"$le": "[bar]"},
-            "field3": {"$ne": "[baz]"}
-          }
+          {"$and":[
+            {"field1": {"$eq": "[foo]"}},
+            {"field2": {"$le": "[bar]"}},
+            {"field3": {"$ne": "[baz]"}}
+      ]}
           """
       ),
       // multi-field query, limited predicate, without $and
@@ -75,11 +80,11 @@ class MigrationUtilsValuesTest {
         (Predicate<String>) "field2"::equals,
         List.of(Triple.of("field2", "bar", "{\"$le\":\"bar\"}")),
         """
-          {
-            "field1": {"$eq": "foo"},
-            "field2": {"$le": "[bar]"},
-            "field3": {"$ne": "baz"}
-          }
+          {"$and":[
+            {"field1": {"$eq": "foo"}},
+            {"field2": {"$le": "[bar]"}},
+            {"field3": {"$ne": "baz"}}
+          ]}
           """
       ),
       // multi-operator single-field query + multi-type
@@ -96,13 +101,13 @@ class MigrationUtilsValuesTest {
         alwaysTrue,
         List.of(Triple.of("field1", "foo", "{\"$eq\":\"foo\"}"), Triple.of("field1", "bar", "{\"$ne\":\"bar\"}")),
         """
-          {"field1": {
-            "$le": 500,
-            "$ge": 100,
-            "$empty": false,
-            "$eq": "[foo]",
-            "$ne": "[bar]"
-          }}
+          {"$and":[
+            {"field1": {"$le": 500}},
+            {"field1": {"$ge": 100}},
+            {"field1": {"$empty": false}},
+            {"field1": {"$eq": "[foo]"}},
+            {"field1": {"$ne": "[bar]"}}
+          ]}
           """
       ),
       // query with $and
@@ -138,11 +143,11 @@ class MigrationUtilsValuesTest {
           Triple.of("field1", "baz", "{\"$in\":[\"bar\",\"baz\",1234]}")
         ),
         """
-          {"field1": {
-            "$empty": false,
-            "$eq": "[foo]",
-            "$in": ["[bar]", "[baz]", 1234]
-          }}
+          {"$and":[
+            {"field1": {"$empty": false}},
+            {"field1": {"$eq": "[foo]"}},
+            {"field1": {"$in": ["[bar]", "[baz]", 1234]}}
+          ]}
           """
       )
     );
@@ -158,10 +163,9 @@ class MigrationUtilsValuesTest {
   ) throws JsonProcessingException {
     List<Triple<String, String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
 
-    String actualQuery = MigrationUtils.migrateFqlValues(
-      query,
-        predicate,
-      (String key, String value, Supplier<String> fql) -> {
+    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler = MigrationUtils.migrateFqlValues(
+      f -> predicate.test(f.field()),
+      (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) -> {
         assertThat(key, is(notNullValue()));
         assertThat(value, is(notNullValue()));
         assertThat(fql.get(), is(notNullValue()));
@@ -169,7 +173,7 @@ class MigrationUtilsValuesTest {
         // re-parse JSON to compact, for test sanity
         Triple<String, String, String> actual;
         try {
-          actual = Triple.of(key, value, objectMapper.readTree(fql.get()).toString());
+          actual = Triple.of(key.field(), value, objectMapper.readTree(fql.get()).toString());
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
@@ -184,9 +188,13 @@ class MigrationUtilsValuesTest {
           );
         }
 
-        return "[%s]".formatted(value);
+        return MigrationResult.withResult("[%s]".formatted(value));
       }
     );
+
+    String actualQuery = MigrationUtils
+      .migrateFql(UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"), query, handler)
+      .result();
 
     assertThat(fieldArgumentsLeftToGet, is(empty()));
     assertThat(
@@ -209,18 +217,23 @@ class MigrationUtilsValuesTest {
       """;
     String expectedQuery =
       """
-        {
-          "do-not-touch": {"$eq": "remove-me"},
-          "field1": {"$eq": "keep-me"},
-          "field2": {"$eq": "keep-me", "$in": ["keep-me"]}
-        }
+        {"$and":[
+          {"do-not-touch": {"$eq": "remove-me"}},
+          {"field1": {"$eq": "keep-me"}},
+          {"field2": {"$eq": "keep-me"}},
+          {"field2": {"$in": ["keep-me"]}}
+        ]}
         """;
 
-    String actualQuery = MigrationUtils.migrateFqlValues(
-      originalQuery,
-        k -> !k.equals("do-not-touch"),
-      (String key, String value, Supplier<String> fql) -> "keep-me".equals(value) ? value : null
+    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler = MigrationUtils.migrateFqlValues(
+      k -> !k.field().equals("do-not-touch"),
+      (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) ->
+        "keep-me".equals(value) ? MigrationResult.noop(value) : MigrationResult.removed()
     );
+
+    String actualQuery = MigrationUtils
+      .migrateFql(UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"), originalQuery, handler)
+      .result();
 
     assertThat(
       ((ObjectNode) objectMapper.readTree(actualQuery)).without("_version"),

@@ -50,11 +50,15 @@ public class MigrationService {
     boolean hadBreakingChanges = false;
     if (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (MigrationUtils.compareVersions(migratableQueryInformation.version(), strategy.getMaximumApplicableVersion()) <= 0
-            && strategy.applies(migratableQueryInformation)
+        if (
+          MigrationUtils.compareVersions(
+            migratableQueryInformation.version(),
+            strategy.getMaximumApplicableVersion()
+          ) <=
+          0
         ) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
-          migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
+          migratableQueryInformation = strategy.apply(migratableQueryInformation);
           hadBreakingChanges |= migratableQueryInformation.hadBreakingChanges();
         }
       }

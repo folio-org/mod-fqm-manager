@@ -263,7 +263,7 @@ class MigrationUtilsTest {
         "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
         // this is solely responsible for determining what gets set back into the query
         // (excluding the special _version)
-        original -> List.of(new MigrationUtils.FqlFieldAndCondition("field", "op", new TextNode("value")))
+        original -> List.of(new MigrationUtils.MigratableFqlFieldAndCondition("field", "op", new TextNode("value")))
       ),
       is(equalTo("{\"_version\":\"old\",\"field\":{\"op\":\"value\"}}"))
     );
@@ -278,9 +278,9 @@ class MigrationUtilsTest {
         // (excluding the special _version)
         original ->
           List.of(
-            new MigrationUtils.FqlFieldAndCondition("field", "op", new TextNode("value")),
-            new MigrationUtils.FqlFieldAndCondition("field", "op2", new TextNode("value2")),
-            new MigrationUtils.FqlFieldAndCondition("field2", "op3", new TextNode("value3"))
+            new MigrationUtils.MigratableFqlFieldAndCondition("field", "op", new TextNode("value")),
+            new MigrationUtils.MigratableFqlFieldAndCondition("field", "op2", new TextNode("value2")),
+            new MigrationUtils.MigratableFqlFieldAndCondition("field2", "op3", new TextNode("value3"))
           )
       ),
       is(

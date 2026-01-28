@@ -1,5 +1,7 @@
 package org.folio.fqm.migration.strategies;
 
+import java.util.Map;
+import java.util.UUID;
 import org.folio.fqm.migration.MigratableQueryInformation;
 
 /**
@@ -21,5 +23,8 @@ public interface MigrationStrategy {
   /**
    * Migrate a query.
    */
-  MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation);
+  MigratableQueryInformation apply(
+    MigratableQueryInformation migratableQueryInformation,
+    Map<UUID, Map<String, UUID>> customEntityTypeMappings
+  );
 }

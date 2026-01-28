@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -179,7 +180,8 @@ class MigrationUtilsTest {
         }
 
         return SingleFieldMigrationResult.removed();
-      }
+      },
+      Map.of()
     );
 
     assertThat(fieldArgumentsLeftToGet, is(empty()));
@@ -194,7 +196,8 @@ class MigrationUtilsTest {
           "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
           // this is solely responsible for determining what gets set back into the query
           // (excluding the special _version)
-          original -> SingleFieldMigrationResult.removed()
+          original -> SingleFieldMigrationResult.removed(),
+          Map.of()
         )
         .result(),
       is(equalTo("{\"_version\":\"old\"}"))
@@ -213,7 +216,8 @@ class MigrationUtilsTest {
           original ->
             SingleFieldMigrationResult.withField(
               new MigratableFqlFieldAndCondition(null, "prefix.", "field", "op", new TextNode("value"))
-            )
+            ),
+          Map.of()
         )
         .result(),
       is(equalTo("{\"_version\":\"old\",\"prefix.field\":{\"op\":\"value\"}}"))
@@ -238,7 +242,8 @@ class MigrationUtilsTest {
               ),
               List.of(),
               false
-            )
+            ),
+          Map.of()
         )
         .result(),
       is(
@@ -251,14 +256,17 @@ class MigrationUtilsTest {
 
   @Test
   void testInvalidJson() {
-    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null));
+    assertThrows(
+      UncheckedIOException.class,
+      () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null, Map.of())
+    );
   }
 
   @Test
   void testInvalidVersionNesting() {
     assertThrows(
       InvalidFqlException.class,
-      () -> MigrationUtils.migrateFql(TEST_UUID, "{\"$and\":[{\"_version\":\"old\"}]}", r -> null)
+      () -> MigrationUtils.migrateFql(TEST_UUID, "{\"$and\":[{\"_version\":\"old\"}]}", r -> null, Map.of())
     );
   }
 

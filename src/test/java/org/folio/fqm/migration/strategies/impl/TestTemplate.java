@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import javax.annotation.CheckForNull;
 import org.folio.fqm.migration.MigratableQueryInformation;
@@ -53,7 +54,7 @@ public abstract class TestTemplate {
   ) throws JsonProcessingException {
     MigrationStrategy strategy = getStrategy();
 
-    MigratableQueryInformation actual = strategy.apply(source);
+    MigratableQueryInformation actual = strategy.apply(source, Map.of());
 
     assertThat("[ET ID] " + label, actual.entityTypeId(), is(expected.entityTypeId()));
     assertThat(

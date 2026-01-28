@@ -324,7 +324,7 @@ class AbstractSimpleMigrationStrategyTest {
   @MethodSource("sourcesForMigrationResults")
   void testMigrationResults(MigratableQueryInformation source, MigratableQueryInformation expected)
     throws JsonProcessingException {
-    MigratableQueryInformation result = new Impl().apply(source);
+    MigratableQueryInformation result = new Impl().apply(source, Map.of());
 
     assertThat(result.entityTypeId(), is(expected.entityTypeId()));
     // deserialize to help prevent whitespace/etc breaking the test

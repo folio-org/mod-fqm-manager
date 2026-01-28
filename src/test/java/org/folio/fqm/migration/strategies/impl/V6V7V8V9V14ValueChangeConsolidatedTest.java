@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -92,9 +93,12 @@ class V6V7V8V9V14ValueChangeConsolidatedTest extends TestTemplate {
       }
 
       @Override
-      public MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation) {
+      public MigratableQueryInformation apply(
+        MigratableQueryInformation migratableQueryInformation,
+        Map<UUID, Map<String, UUID>> sourceMappings
+      ) {
         for (MigrationStrategy strategy : strategies) {
-          migratableQueryInformation = strategy.apply(migratableQueryInformation);
+          migratableQueryInformation = strategy.apply(migratableQueryInformation, sourceMappings);
         }
         return migratableQueryInformation;
       }

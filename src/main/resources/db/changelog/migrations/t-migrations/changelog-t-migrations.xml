@@ -15,4 +15,11 @@
     </addColumn>
   </changeSet>
 
+  <changeSet id="MODFQMMGR-1034" author="novercash@ebsco.com">
+    <comment>Create a table to store custom entity migration mapping</comment>
+    <createTable tableName="custom_entity_type_migration_mapping">
+      <column name="mapping" type="json" />
+    </createTable>
+  </changeSet>
+
 </databaseChangeLog>

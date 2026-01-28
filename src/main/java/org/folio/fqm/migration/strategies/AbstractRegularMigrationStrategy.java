@@ -1,8 +1,11 @@
 package org.folio.fqm.migration.strategies;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationUtils;
@@ -21,6 +24,27 @@ public abstract class AbstractRegularMigrationStrategy<S> implements MigrationSt
    */
   public S getStartingState() {
     return null;
+  }
+
+  /**
+   * Defines the relationship of composite entities to the entity being migrated here. For example,
+   * a migration which alters `simple_instance_status` would need to define that
+   * `composite_instances` and `composite_item_details` inherited it. This must be provided in the
+   * migration as, without this, we cannot guarantee that a future `composite_instances` will refer
+   * to `simple_instance_status` in the same way.
+   *
+   * Note that this map needs to only contain relevant sources; it is not necessary to define every
+   * other source/composite.
+   *
+   * To define these relationships, return a map like:
+   * @example
+   * Map.of(
+   *  COMPOSITE_INSTANCES_ID, Map.of("inst_stat", SIMPLE_INSTANCE_STATUS_ID),
+   *  COMPOSITE_ITEM_DETAILS_ID, Map.of("instance_status", SIMPLE_INSTANCE_STATUS_ID)
+   * )
+   */
+  public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
+    return Map.of();
   }
 
   /**
@@ -77,18 +101,26 @@ public abstract class AbstractRegularMigrationStrategy<S> implements MigrationSt
   }
 
   @Override
-  public final MigratableQueryInformation apply(MigratableQueryInformation query) {
+  public final MigratableQueryInformation apply(
+    MigratableQueryInformation query,
+    Map<UUID, Map<String, UUID>> customEntityTypeMappings
+  ) {
     S state = getStartingState();
+
+    Map<UUID, Map<String, UUID>> sourceMappings = new HashMap<>(getEntityTypeSourceMaps());
+    sourceMappings.putAll(customEntityTypeMappings);
 
     MigrationResult<String> fqlMigration = MigrationUtils.migrateFql(
       query.entityTypeId(),
       query.fqlQuery(),
-      f -> this.migrateFql(state, f)
+      f -> this.migrateFql(state, f),
+      sourceMappings
     );
     MigrationResult<List<String>> fieldsMigration = MigrationUtils.migrateFieldNames(
       query.entityTypeId(),
       query.fields(),
-      f -> this.migrateFieldName(state, f)
+      f -> this.migrateFieldName(state, f),
+      sourceMappings
     );
 
     return additionalChanges(

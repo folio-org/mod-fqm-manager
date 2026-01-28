@@ -141,8 +141,8 @@ public class MigrationService {
             .map(EntityTypeSourceEntityType.class::cast)
             .collect(
               Collectors.toMap(
-                source -> ((EntityTypeSourceEntityType) source).getAlias(),
-                source -> ((EntityTypeSourceEntityType) source).getTargetId(),
+                EntityTypeSourceEntityType::getAlias,
+                EntityTypeSourceEntityType::getTargetId,
                 (existing, replacement) -> existing
               )
             )

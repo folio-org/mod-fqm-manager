@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class MigrationUtilsTest {
 
   private static final UUID TEST_UUID = UUID.fromString("d686ef05-fb3d-5edc-a87f-c3001c579dfb");
+  private static final Map<UUID, Map<String, UUID>> EMPTY_SOURCE_MAP = Map.of();
 
   static List<Arguments> functionCallTestCases() {
     return List.of(
@@ -181,7 +182,7 @@ class MigrationUtilsTest {
 
         return SingleFieldMigrationResult.removed();
       },
-      Map.of()
+      EMPTY_SOURCE_MAP
     );
 
     assertThat(fieldArgumentsLeftToGet, is(empty()));
@@ -197,7 +198,7 @@ class MigrationUtilsTest {
           // this is solely responsible for determining what gets set back into the query
           // (excluding the special _version)
           original -> SingleFieldMigrationResult.removed(),
-          Map.of()
+          EMPTY_SOURCE_MAP
         )
         .result(),
       is(equalTo("{\"_version\":\"old\"}"))
@@ -217,7 +218,7 @@ class MigrationUtilsTest {
             SingleFieldMigrationResult.withField(
               new MigratableFqlFieldAndCondition(null, "prefix.", "field", "op", new TextNode("value"))
             ),
-          Map.of()
+          EMPTY_SOURCE_MAP
         )
         .result(),
       is(equalTo("{\"_version\":\"old\",\"prefix.field\":{\"op\":\"value\"}}"))
@@ -243,7 +244,7 @@ class MigrationUtilsTest {
               List.of(),
               false
             ),
-          Map.of()
+          EMPTY_SOURCE_MAP
         )
         .result(),
       is(
@@ -258,7 +259,7 @@ class MigrationUtilsTest {
   void testInvalidJson() {
     assertThrows(
       UncheckedIOException.class,
-      () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null, Map.of())
+      () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null, EMPTY_SOURCE_MAP)
     );
   }
 
@@ -266,7 +267,7 @@ class MigrationUtilsTest {
   void testInvalidVersionNesting() {
     assertThrows(
       InvalidFqlException.class,
-      () -> MigrationUtils.migrateFql(TEST_UUID, "{\"$and\":[{\"_version\":\"old\"}]}", r -> null, Map.of())
+      () -> MigrationUtils.migrateFql(TEST_UUID, "{\"$and\":[{\"_version\":\"old\"}]}", r -> null, EMPTY_SOURCE_MAP)
     );
   }
 

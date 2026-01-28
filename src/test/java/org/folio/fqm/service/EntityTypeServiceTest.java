@@ -87,6 +87,9 @@ class EntityTypeServiceTest {
   @Mock
   private EntityTypeValidationService entityTypeValidationService;
 
+  @Mock
+  private MigrationService migrationService;
+
   @Spy
   @InjectMocks
   private EntityTypeService entityTypeService;
@@ -972,6 +975,7 @@ class EntityTypeServiceTest {
     verify(repo, times(1)).createCustomEntityType(refEq(expectedCustomEntityType, "createdAt", "updatedAt"));
     verifyNoMoreInteractions(repo);
     assertEquals(expectedCustomEntityType, actual, "Should return the expected custom entity type");
+    verify(migrationService).updateCustomEntityMigrationMappings();
   }
 
   @Test
@@ -1102,6 +1106,7 @@ class EntityTypeServiceTest {
     assertEquals("Updated name", result.getName());
     verify(repo).updateEntityType(result);
     verify(entityTypeValidationService).validateCustomEntityType(eq(entityTypeId), any(CustomEntityType.class));
+    verify(migrationService).updateCustomEntityMigrationMappings();
   }
 
   @Test

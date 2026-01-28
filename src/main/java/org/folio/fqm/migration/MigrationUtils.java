@@ -77,7 +77,7 @@ public class MigrationUtils {
       if (resultingFields.isEmpty()) {
         log.warn("Migrating {} yielded zero fields", fqlQuery);
       } else if (resultingFields.size() == 1) {
-        result.set(resultingFields.get(0).field(), resultingFields.get(0).getConditionObject());
+        result.set(resultingFields.get(0).getFullField(), resultingFields.get(0).getConditionObject());
       } else {
         ArrayNode arrayNode = objectMapper.createArrayNode();
         resultingFields.forEach(field -> arrayNode.add(field.getFieldAndConditionObject()));
@@ -130,7 +130,6 @@ public class MigrationUtils {
     BiPredicate<F, SingleFieldMigrationResult<F>> didModify
   ) {
     SingleFieldMigrationResult<F> transformed = handler.apply(original);
-    int fieldDelimiterIndex = original.field().indexOf('.');
 
     // stub for follow-up ticket
     return transformed;

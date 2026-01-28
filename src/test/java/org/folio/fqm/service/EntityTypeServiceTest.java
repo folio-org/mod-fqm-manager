@@ -1590,7 +1590,7 @@ class EntityTypeServiceTest {
     // Convert a known code into a different label; fall back to the code for everything else.
     when(translationService.format(anyString())).thenAnswer(inv -> {
       String key = inv.getArgument(0);
-      return "US".equals(key) ? "United States" : key;
+      return "mod-fqm-manager.countries.US".equals(key) ? "United States" : key;
     });
 
     ColumnValues actual = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "US");

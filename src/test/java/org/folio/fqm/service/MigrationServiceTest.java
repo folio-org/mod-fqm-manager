@@ -12,9 +12,10 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
@@ -112,7 +113,8 @@ class MigrationServiceTest {
           .fqlQuery()
       )
     );
-    verify(migrationStrategy, times(1)).apply(MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
+    verify(migrationStrategy, times(1))
+      .apply(MigratableQueryInformation.builder().fqlQuery(fql).version("0").build(), Map.of());
   }
 
   // Common test FQL query
@@ -130,7 +132,7 @@ class MigrationServiceTest {
     );
 
     verify(migrationStrategy, times(1))
-      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build());
+      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build(), Map.of());
   }
 
   @Test
@@ -138,7 +140,7 @@ class MigrationServiceTest {
     // Test when entityTypeId changes
     testMigrationException(
       // Strategy that changes entityTypeId
-      info ->
+      (info, sourceMap) ->
         MigratableQueryInformation
           .builder()
           .fqlQuery(info.fqlQuery())
@@ -164,7 +166,7 @@ class MigrationServiceTest {
    * @param exceptionVerifier A consumer that verifies the exception
    */
   private void testMigrationException(
-    Function<MigratableQueryInformation, MigratableQueryInformation> strategyApply,
+    BiFunction<MigratableQueryInformation, Map<UUID, Map<String, UUID>>, MigratableQueryInformation> strategyApply,
     MigratableQueryInformation inputQuery,
     Consumer<MigrationQueryChangedException> exceptionVerifier
   ) {
@@ -172,8 +174,11 @@ class MigrationServiceTest {
     MigrationStrategy migrationStrategy = spy(
       new TestMigrationStrategy(1) {
         @Override
-        public MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation) {
-          return strategyApply.apply(migratableQueryInformation);
+        public MigratableQueryInformation apply(
+          MigratableQueryInformation migratableQueryInformation,
+          Map<UUID, Map<String, UUID>> sourceMap
+        ) {
+          return strategyApply.apply(migratableQueryInformation, sourceMap);
         }
       }
     );
@@ -197,7 +202,10 @@ class MigrationServiceTest {
     int count = 0;
 
     @Override
-    public MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation) {
+    public MigratableQueryInformation apply(
+      MigratableQueryInformation migratableQueryInformation,
+      Map<UUID, Map<String, UUID>> sourceMap
+    ) {
       if (++count != requiredCount) {
         return migratableQueryInformation;
       }

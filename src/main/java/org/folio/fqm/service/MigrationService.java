@@ -18,17 +18,15 @@ import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategyRepository;
 import org.folio.fqm.migration.MigrationUtils;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
-@AllArgsConstructor(onConstructor_ = @Autowired)
+@AllArgsConstructor
 public class MigrationService {
 
   private final CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
@@ -55,6 +53,8 @@ public class MigrationService {
       migratableQueryInformation = migratableQueryInformation.withVersion(migrationConfiguration.getDefaultVersion());
     }
 
+    Map<UUID, Map<String, UUID>> customEntityTypeMappings = customEntityTypeMigrationMappingRepository.getMappings();
+
     boolean hadBreakingChanges = false;
     if (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
@@ -66,7 +66,7 @@ public class MigrationService {
           0
         ) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
-          migratableQueryInformation = strategy.apply(migratableQueryInformation);
+          migratableQueryInformation = strategy.apply(migratableQueryInformation, customEntityTypeMappings);
           hadBreakingChanges |= migratableQueryInformation.hadBreakingChanges();
         }
       }

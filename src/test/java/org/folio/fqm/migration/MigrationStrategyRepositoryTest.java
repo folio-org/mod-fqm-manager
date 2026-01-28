@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -102,7 +103,7 @@ class MigrationStrategyRepositoryTest {
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("migrationStrategiesAndQueries")
   void testStrategies(String label, MigrationStrategy strategy, MigratableQueryInformation query) {
-    strategy.apply(query);
+    strategy.apply(query, Map.of());
 
     // migration application is thoroughly tested for this shared logic
     // these test the maps/etc all are set up correctly

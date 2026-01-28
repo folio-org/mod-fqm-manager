@@ -155,12 +155,31 @@ public class ResultSetService {
 
     String marker = "[*]->";
     int markerIdx = fieldPath.indexOf(marker);
+
+    if (markerIdx < 0) {
+      localizeTopLevelCountryField(contents, fieldPath);
+      return;
+    }
+
     if (markerIdx <= 0) {
       return;
     }
 
     String rootField = fieldPath.substring(0, markerIdx);
     String leafField = fieldPath.substring(markerIdx + marker.length());
+    localizeNestedCountryField(contents, rootField, leafField);
+  }
+
+  private void localizeTopLevelCountryField(Map<String, Object> contents, String fieldName) {
+    Object valueObj = contents.get(fieldName);
+    if (!(valueObj instanceof String code) || code.isBlank()) {
+      return;
+    }
+
+    translateCountry(code).ifPresent(translated -> contents.put(fieldName, translated));
+  }
+
+  private void localizeNestedCountryField(Map<String, Object> contents, String rootField, String leafField) {
     if (rootField.isBlank() || leafField.isBlank()) {
       return;
     }
@@ -178,36 +197,51 @@ public class ResultSetService {
 
       boolean changed = false;
       for (com.fasterxml.jackson.databind.JsonNode elementNode : node) {
-        if (!elementNode.isObject()) {
-          continue;
-        }
-        var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) elementNode;
-
-        // TODO: check
-        var valueNode = objNode.get(leafField);
-        if (valueNode == null || !valueNode.isTextual()) {
-          continue;
-        }
-
-        String code = valueNode.asText();
-        if (code == null || code.isBlank()) {
-          continue;
-        }
-
-        String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
-        String translated = translationService.format(translationKey);
-        if (translated != null && !translated.isBlank() && !translated.equals(code)) {
-          objNode.put(leafField, translated);
-          changed = true;
-        }
+        changed |= translateLeafIfPresent(elementNode, leafField);
       }
 
       if (changed) {
         contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
       }
     } catch (Exception e) {
-      log.debug("Unable to localize country field '{}' (unexpected JSON): {}", fieldPath, e.getMessage());
+      log.debug("Unable to localize country field '{}[*]->{}' (unexpected JSON): {}", rootField, leafField, e.getMessage());
     }
+  }
+
+  private boolean translateLeafIfPresent(com.fasterxml.jackson.databind.JsonNode elementNode, String leafField) {
+    if (!elementNode.isObject()) {
+      return false;
+    }
+
+    var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) elementNode;
+    var valueNode = objNode.get(leafField);
+    if (valueNode == null || !valueNode.isTextual()) {
+      return false;
+    }
+
+    String code = valueNode.asText();
+    var translatedOpt = translateCountry(code);
+    if (translatedOpt.isEmpty()) {
+      return false;
+    }
+
+    objNode.put(leafField, translatedOpt.get());
+    return true;
+  }
+
+  private java.util.Optional<String> translateCountry(String code) {
+    if (code == null || code.isBlank()) {
+      return java.util.Optional.empty();
+    }
+
+    String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+    String translated = translationService.format(translationKey);
+
+    if (translated == null || translated.isBlank() || translated.equals(code)) {
+      return java.util.Optional.empty();
+    }
+
+    return java.util.Optional.of(translated);
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

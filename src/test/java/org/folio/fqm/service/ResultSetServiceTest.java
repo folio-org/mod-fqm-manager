@@ -398,4 +398,23 @@ class ResultSetServiceTest {
     );
     verify(translationService, never()).format(anyString());
   }
+
+  // TODO: replace with actual full-path test
+  @Test
+  void localizeCountryField_shouldLocalizeNonNestedCountryCodeField() throws Exception {
+    Map<String, Object> contents = new HashMap<>(Map.of(
+      "countryId",
+      "US"
+    ));
+
+    when(translationService.format("mod-fqm-manager.countries.US")).thenReturn("United States");
+
+    Method m = ResultSetService.class.getDeclaredMethod("localizeCountryField", Map.class, String.class);
+    m.setAccessible(true);
+
+    // Non-nested path (top-level field)
+    m.invoke(service, contents, "countryId");
+
+    assertEquals("United States", contents.get("countryId"));
+  }
 }

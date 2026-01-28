@@ -115,13 +115,10 @@ public class ResultSetService {
 
     // Find all fields whose configured source is FQM("countries"). For nested fields, this yields paths like "addresses[*]->countryId".
     EntityTypeUtils.runOnEveryField(entityType, (field, parentPath) -> {
-      if (!(field instanceof org.folio.querytool.domain.dto.Field f)) {
+      if (field.getSource() == null || field.getSource().getType() != org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM) {
         return;
       }
-      if (f.getSource() == null || f.getSource().getType() != org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM) {
-        return;
-      }
-      if (!"countries".equals(f.getSource().getName())) {
+      if (!"countries".equals(field.getSource().getName())) {
         return;
       }
 
@@ -129,7 +126,7 @@ public class ResultSetService {
       String leaf = (field instanceof org.folio.querytool.domain.dto.NestedObjectProperty prop
         && !StringUtils.isEmpty(prop.getProperty()))
         ? prop.getProperty()
-        : f.getName();
+        : field.getName();
 
       paths.add(parentPath + leaf);
     });

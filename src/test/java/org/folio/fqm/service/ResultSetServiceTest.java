@@ -287,52 +287,6 @@ class ResultSetServiceTest {
     );
   }
 
-//  @Test
-//  void shouldNotAttemptCountryLocalizationWhenVisitedFieldIsNotDtoField() {
-//    UUID entityTypeId = UUID.randomUUID();
-//    UUID contentId = UUID.randomUUID();
-//
-//    String addressesJson = "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]";
-//
-//    // Build a nested field using EntityTypeColumn (NOT dto.Field) so it gets skipped by the instanceof guard.
-//    var addressesColumn = new EntityTypeColumn()
-//      .name("addresses")
-//      .dataType(
-//        new org.folio.querytool.domain.dto.ArrayType().itemDataType(
-//          new org.folio.querytool.domain.dto.ObjectType().properties(List.of(
-//            new NestedObjectProperty()
-//              .name("country_id")
-//              .source(new org.folio.querytool.domain.dto.SourceColumn(entityTypeId, "country_id")
-//                .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
-//                .name("countries"))
-//          ))
-//        )
-//      );
-//
-//    EntityType entityType = new EntityType()
-//      .name("test_entity")
-//      .id(entityTypeId.toString())
-//      .columns(List.of(new EntityTypeColumn().name("id").isIdColumn(true), addressesColumn))
-//      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")));
-//
-//    List<String> fields = List.of("id", "addresses");
-//    List<String> tenantIds = List.of("tenant_01");
-//    List<List<String>> listIds = List.of(List.of(contentId.toString()));
-//
-//    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
-//    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-//    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
-//    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
-//      .thenReturn(List.of(Map.of("id", contentId.toString(), "addresses", addressesJson)));
-//
-//    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
-//
-//    assertEquals(1, actual.size());
-//    assertEquals(addressesJson, actual.getFirst().get("addresses"));
-//
-//    verify(translationService, never()).format(anyString());
-//  }
-
   @Test
   void shouldNotAttemptCountryLocalizationWhenFqmSourceNameIsNotCountries() {
     UUID entityTypeId = UUID.randomUUID();

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.google.common.collect.Lists;
 
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -19,7 +20,6 @@ import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
-import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
@@ -377,6 +377,25 @@ class ResultSetServiceTest {
     assertEquals(1, actual.size());
     assertEquals(addressesJson, actual.getFirst().get("addresses"));
 
+    verify(translationService, never()).format(anyString());
+  }
+
+  @Test
+  void localizeCountryField_shouldReturnEarlyWhenCountryFieldPathIsNull() throws Exception {
+    Map<String, Object> contents = new HashMap<>(Map.of(
+      "addresses",
+      "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]"
+    ));
+
+    Method m = ResultSetService.class.getDeclaredMethod("localizeCountryField", Map.class, String.class);
+    m.setAccessible(true);
+
+    m.invoke(service, contents, null);
+
+    assertEquals(
+      "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]",
+      contents.get("addresses")
+    );
     verify(translationService, never()).format(anyString());
   }
 }

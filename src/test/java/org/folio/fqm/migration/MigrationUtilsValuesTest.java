@@ -12,13 +12,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.apache.commons.lang3.tuple.Triple;
 import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
 import org.folio.fqm.migration.types.MigrationResult;
-import org.folio.fqm.migration.types.SingleFieldMigrationResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -163,37 +161,41 @@ class MigrationUtilsValuesTest {
   ) throws JsonProcessingException {
     List<Triple<String, String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
 
-    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler = MigrationUtils.migrateFqlValues(
-      f -> predicate.test(f.field()),
-      (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) -> {
-        assertThat(key, is(notNullValue()));
-        assertThat(value, is(notNullValue()));
-        assertThat(fql.get(), is(notNullValue()));
-
-        // re-parse JSON to compact, for test sanity
-        Triple<String, String, String> actual;
-        try {
-          actual = Triple.of(key.field(), value, objectMapper.readTree(fql.get()).toString());
-        } catch (JsonProcessingException e) {
-          throw new RuntimeException(e);
-        }
-
-        if (!fieldArgumentsLeftToGet.remove(actual)) {
-          fail(
-            "Unexpected field transformation call: %s -> %s (%s)".formatted(
-                actual.getLeft(),
-                actual.getMiddle(),
-                actual.getRight()
-              )
-          );
-        }
-
-        return MigrationResult.withResult("[%s]".formatted(value));
-      }
-    );
-
     String actualQuery = MigrationUtils
-      .migrateFql(UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"), query, handler)
+      .migrateFql(
+        UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"),
+        query,
+        input ->
+          MigrationUtils.migrateFqlValues(
+            input,
+            f -> predicate.test(f.field()),
+            (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) -> {
+              assertThat(key, is(notNullValue()));
+              assertThat(value, is(notNullValue()));
+              assertThat(fql.get(), is(notNullValue()));
+
+              // re-parse JSON to compact, for test sanity
+              Triple<String, String, String> actual;
+              try {
+                actual = Triple.of(key.field(), value, objectMapper.readTree(fql.get()).toString());
+              } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+              }
+
+              if (!fieldArgumentsLeftToGet.remove(actual)) {
+                fail(
+                  "Unexpected field transformation call: %s -> %s (%s)".formatted(
+                      actual.getLeft(),
+                      actual.getMiddle(),
+                      actual.getRight()
+                    )
+                );
+              }
+
+              return MigrationResult.withResult("[%s]".formatted(value));
+            }
+          )
+      )
       .result();
 
     assertThat(fieldArgumentsLeftToGet, is(empty()));
@@ -225,14 +227,18 @@ class MigrationUtilsValuesTest {
         ]}
         """;
 
-    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler = MigrationUtils.migrateFqlValues(
-      k -> !k.field().equals("do-not-touch"),
-      (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) ->
-        "keep-me".equals(value) ? MigrationResult.noop(value) : MigrationResult.removed()
-    );
-
     String actualQuery = MigrationUtils
-      .migrateFql(UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"), originalQuery, handler)
+      .migrateFql(
+        UUID.fromString("01248b03-ebd0-5cf3-9251-f0a3db6046f1"),
+        originalQuery,
+        input ->
+          MigrationUtils.migrateFqlValues(
+            input,
+            k -> !k.field().equals("do-not-touch"),
+            (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) ->
+              "keep-me".equals(value) ? MigrationResult.noop(value) : MigrationResult.removed()
+          )
+      )
       .result();
 
     assertThat(

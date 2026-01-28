@@ -57,49 +57,48 @@ public class V8LocationValueChange extends AbstractRegularMigrationStrategy<Atom
     AtomicReference<List<Location>> state,
     MigratableFqlFieldAndCondition cond
   ) {
-    return MigrationUtils
-      .migrateFqlValues(
-        condition ->
-          (
-            HOLDINGS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) ||
-            ITEMS_ENTITY_TYPE_ID.equals(condition.entityTypeId())
-          ) &&
-          FIELD_NAMES.contains(condition.field()),
-        (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
-          if (state.get() == null) {
-            state.set(locationsClient.getLocations().locations());
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition ->
+        (
+          HOLDINGS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) ||
+          ITEMS_ENTITY_TYPE_ID.equals(condition.entityTypeId())
+        ) &&
+        FIELD_NAMES.contains(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
+        if (state.get() == null) {
+          state.set(locationsClient.getLocations().locations());
 
-            log.info("Fetched {} records from API", state.get().size());
-          }
-
-          return state
-            .get()
-            .stream()
-            .filter(r -> r.id().equals(value))
-            .findFirst()
-            .map(Location::name)
-            .map(MigrationResult::withResult)
-            .orElseGet(() -> {
-              // some of these may already be the correct value, as both the name and ID fields
-              // got mapped to the same place. If the name is already being used, we want to make
-              // sure not to discard it
-              boolean existsAsName = state.get().stream().anyMatch(r -> r.name().equals(value));
-
-              if (existsAsName) {
-                return MigrationResult.withResult(value);
-              } else {
-                return MigrationResult
-                  .<String>removed()
-                  .withWarnings(
-                    List.of(
-                      ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
-                    )
-                  )
-                  .withHadBreakingChange(true);
-              }
-            });
+          log.info("Fetched {} records from API", state.get().size());
         }
-      )
-      .apply(cond);
+
+        return state
+          .get()
+          .stream()
+          .filter(r -> r.id().equals(value))
+          .findFirst()
+          .map(Location::name)
+          .map(MigrationResult::withResult)
+          .orElseGet(() -> {
+            // some of these may already be the correct value, as both the name and ID fields
+            // got mapped to the same place. If the name is already being used, we want to make
+            // sure not to discard it
+            boolean existsAsName = state.get().stream().anyMatch(r -> r.name().equals(value));
+
+            if (existsAsName) {
+              return MigrationResult.withResult(value);
+            } else {
+              return MigrationResult
+                .<String>removed()
+                .withWarnings(
+                  List.of(
+                    ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
+                  )
+                )
+                .withHadBreakingChange(true);
+            }
+          });
+      }
+    );
   }
 }

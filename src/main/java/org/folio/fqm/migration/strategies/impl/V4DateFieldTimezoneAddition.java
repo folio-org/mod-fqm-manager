@@ -103,29 +103,28 @@ public class V4DateFieldTimezoneAddition extends AbstractRegularMigrationStrateg
     AtomicReference<ZoneId> state,
     MigratableFqlFieldAndCondition cond
   ) {
-    return MigrationUtils
-      .migrateFqlValues(
-        condition -> DATE_FIELDS.contains(condition.field()),
-        (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
-          // no-op, we already have a time component
-          if (value.contains("T")) {
-            return MigrationResult.withResult(value);
-          }
-
-          if (state.get() == null) {
-            state.set(settingsClient.getTenantTimezone());
-          }
-
-          try {
-            return MigrationResult.withResult(
-              FqlToSqlConverterService.DATE_TIME_FORMATTER.format(LocalDate.parse(value).atStartOfDay(state.get()))
-            );
-          } catch (DateTimeParseException e) {
-            log.warn("Could not migrate date {}", value, e);
-            return MigrationResult.withResult(value);
-          }
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition -> DATE_FIELDS.contains(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
+        // no-op, we already have a time component
+        if (value.contains("T")) {
+          return MigrationResult.withResult(value);
         }
-      )
-      .apply(cond);
+
+        if (state.get() == null) {
+          state.set(settingsClient.getTenantTimezone());
+        }
+
+        try {
+          return MigrationResult.withResult(
+            FqlToSqlConverterService.DATE_TIME_FORMATTER.format(LocalDate.parse(value).atStartOfDay(state.get()))
+          );
+        } catch (DateTimeParseException e) {
+          log.warn("Could not migrate date {}", value, e);
+          return MigrationResult.withResult(value);
+        }
+      }
+    );
   }
 }

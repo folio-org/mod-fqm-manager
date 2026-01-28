@@ -53,49 +53,47 @@ public class V7PatronGroupsValueChange extends AbstractRegularMigrationStrategy<
     AtomicReference<List<PatronGroup>> state,
     MigratableFqlFieldAndCondition cond
   ) {
-    return MigrationUtils
-      .migrateFqlValues(
-        condition ->
-          (
-            LOANS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) ||
-            USERS_ENTITY_TYPE_ID.equals(condition.entityTypeId())
-          ) &&
-          FIELD_NAME.equals(condition.field()),
-        (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
-          if (state.get() == null) {
-            state.set(patronGroupsClient.getGroups().usergroups());
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition ->
+        (
+          LOANS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) || USERS_ENTITY_TYPE_ID.equals(condition.entityTypeId())
+        ) &&
+        FIELD_NAME.equals(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
+        if (state.get() == null) {
+          state.set(patronGroupsClient.getGroups().usergroups());
 
-            log.info("Fetched {} records from API", state.get().size());
-          }
-
-          return state
-            .get()
-            .stream()
-            .filter(r -> r.id().equals(value))
-            .findFirst()
-            .map(PatronGroup::group)
-            .map(MigrationResult::withResult)
-            .orElseGet(() -> {
-              // some of these may already be the correct value, as both the name and ID fields
-              // got mapped to the same place. If the name is already being used, we want to make
-              // sure not to discard it
-              boolean existsAsName = state.get().stream().anyMatch(r -> r.group().equals(value));
-
-              if (existsAsName) {
-                return MigrationResult.withResult(value);
-              } else {
-                return MigrationResult
-                  .<String>removed()
-                  .withWarnings(
-                    List.of(
-                      ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
-                    )
-                  )
-                  .withHadBreakingChange(true);
-              }
-            });
+          log.info("Fetched {} records from API", state.get().size());
         }
-      )
-      .apply(cond);
+
+        return state
+          .get()
+          .stream()
+          .filter(r -> r.id().equals(value))
+          .findFirst()
+          .map(PatronGroup::group)
+          .map(MigrationResult::withResult)
+          .orElseGet(() -> {
+            // some of these may already be the correct value, as both the name and ID fields
+            // got mapped to the same place. If the name is already being used, we want to make
+            // sure not to discard it
+            boolean existsAsName = state.get().stream().anyMatch(r -> r.group().equals(value));
+
+            if (existsAsName) {
+              return MigrationResult.withResult(value);
+            } else {
+              return MigrationResult
+                .<String>removed()
+                .withWarnings(
+                  List.of(
+                    ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
+                  )
+                )
+                .withHadBreakingChange(true);
+            }
+          });
+      }
+    );
   }
 }

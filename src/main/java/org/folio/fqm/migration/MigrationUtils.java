@@ -223,73 +223,73 @@ public class MigrationUtils {
 
   /**
    * Helper function to transform values in an FQL query. The returned function is intended to be
-   * passed to {@link #migrateFql(UUID, String, Function, Map)} as the {@code handler} parameter
+   * called inside {@link #migrateFql(UUID, String, Function, Map)}'s {@code handler} parameter
    * (or wrapped by `migrateFieldAndCondition` in {@link AbstractRegularMigrationStrategy#migrateFieldAndCondition}).
    *
+   * @param input            The field/condition being evaluated
    * @param applies          If the valueTransformer should be applied to the field (for optimization)
    * @param valueTransformer Something that takes an incoming field, value, and a supplier (to get
    *                         the original fql for warnings), returning either the transformed value,
    *                         or `null` if it should be removed (the transformer is responsible for
    *                         directly adding warnings in the caller's context, if applicable)
    */
-  public static Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> migrateFqlValues(
+  public static SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFqlValues(
+    MigratableFqlFieldAndCondition input,
     Predicate<MigratableFqlFieldAndCondition> applies,
     ValueTransformer valueTransformer
   ) {
-    return input -> {
-      if (!applies.test(input)) {
-        return SingleFieldMigrationResult.noop(input);
-      }
+    if (!applies.test(input)) {
+      return SingleFieldMigrationResult.noop(input);
+    }
 
-      JsonNode result = null;
-      List<Warning> warnings = new ArrayList<>();
-      AtomicBoolean hadBreakingChange = new AtomicBoolean(false);
+    JsonNode result = null;
+    List<Warning> warnings = new ArrayList<>();
+    AtomicBoolean hadBreakingChange = new AtomicBoolean(false);
 
-      if (input.value().isArray()) {
-        ArrayNode node = (ArrayNode) input.value();
+    if (input.value().isArray()) {
+      ArrayNode node = (ArrayNode) input.value();
 
-        List<JsonNode> transformedValues = new ArrayList<>();
-        node.forEach(element -> {
-          MigrationResult<JsonNode> transformedValue = transformIfStringOnly(
-            element,
-            textValue -> valueTransformer.apply(input, textValue, () -> input.getConditionObject().toPrettyString())
-          );
-
-          if (transformedValue.result() != null) {
-            transformedValues.add(transformedValue.result());
-          }
-          warnings.addAll(transformedValue.warnings());
-          hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
-        });
-
-        if (!transformedValues.isEmpty()) {
-          result = objectMapper.createArrayNode().addAll(transformedValues);
-        }
-      } else {
+      List<JsonNode> transformedValues = new ArrayList<>();
+      node.forEach(element -> {
         MigrationResult<JsonNode> transformedValue = transformIfStringOnly(
-          input.value(),
+          element,
           textValue -> valueTransformer.apply(input, textValue, () -> input.getConditionObject().toPrettyString())
         );
-        warnings.addAll(transformedValue.warnings());
-        hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
 
         if (transformedValue.result() != null) {
-          result = transformedValue.result();
+          transformedValues.add(transformedValue.result());
         }
-      }
+        warnings.addAll(transformedValue.warnings());
+        hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
+      });
 
-      if (result == null) {
-        return SingleFieldMigrationResult
-          .<MigratableFqlFieldAndCondition>removed()
-          .withWarnings(warnings)
-          .withHadBreakingChange(hadBreakingChange.get());
-      } else {
-        return SingleFieldMigrationResult
-          .withField(input.withValue(result))
-          .withWarnings(warnings)
-          .withHadBreakingChange(hadBreakingChange.get());
+      if (!transformedValues.isEmpty()) {
+        result = objectMapper.createArrayNode().addAll(transformedValues);
       }
-    };
+    } else {
+      MigrationResult<JsonNode> transformedValue = transformIfStringOnly(
+        input.value(),
+        textValue -> valueTransformer.apply(input, textValue, () -> input.getConditionObject().toPrettyString())
+      );
+      warnings.addAll(transformedValue.warnings());
+      hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
+
+      if (transformedValue.result() != null) {
+        result = transformedValue.result();
+      }
+    }
+
+    if (result == null) {
+      return SingleFieldMigrationResult
+        .<MigratableFqlFieldAndCondition>removed()
+        .withWarnings(warnings)
+        .withHadBreakingChange(hadBreakingChange.get());
+    } else {
+      return SingleFieldMigrationResult
+        .withField(input.withValue(result))
+        .withWarnings(warnings)
+        .withHadBreakingChange(hadBreakingChange.get());
+    }
   }
 
   /**

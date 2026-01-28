@@ -39,56 +39,55 @@ public abstract class AbstractLibraryValueChangeMigration
     AtomicReference<List<LibraryLocation>> state,
     MigratableFqlFieldAndCondition cond
   ) {
-    return MigrationUtils
-      .migrateFqlValues(
-        condition -> getEntityTypeId().equals(condition.entityTypeId()) && getFieldNames().contains(condition.field()),
-        (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
-          if (state.get() == null) {
-            state.set(locationUnitsClient.getLibraries().loclibs());
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition -> getEntityTypeId().equals(condition.entityTypeId()) && getFieldNames().contains(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
+        if (state.get() == null) {
+          state.set(locationUnitsClient.getLibraries().loclibs());
 
-            log.info("Fetched {} records from API", state.get().size());
-          }
-
-          return state
-            .get()
-            .stream()
-            .filter(r -> r.id().equals(value))
-            .findFirst()
-            .map(loclib -> {
-              if (condition.field().contains(".name")) {
-                return loclib.name();
-              } else {
-                return loclib.code();
-              }
-            })
-            .map(MigrationResult::withResult)
-            .orElseGet(() -> {
-              // some of these may already be the correct value, as both the name and ID fields
-              // got mapped to the same place. If the name is already being used, we want to make
-              // sure not to discard it
-              boolean existsAsValue = state
-                .get()
-                .stream()
-                .anyMatch(r ->
-                  (condition.field().contains(".name") && r.name().equals(value)) ||
-                  (condition.field().contains(".code") && r.code().equals(value))
-                );
-
-              if (existsAsValue) {
-                return MigrationResult.withResult(value);
-              } else {
-                return MigrationResult
-                  .<String>removed()
-                  .withWarnings(
-                    List.of(
-                      ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
-                    )
-                  )
-                  .withHadBreakingChange(true);
-              }
-            });
+          log.info("Fetched {} records from API", state.get().size());
         }
-      )
-      .apply(cond);
+
+        return state
+          .get()
+          .stream()
+          .filter(r -> r.id().equals(value))
+          .findFirst()
+          .map(loclib -> {
+            if (condition.field().contains(".name")) {
+              return loclib.name();
+            } else {
+              return loclib.code();
+            }
+          })
+          .map(MigrationResult::withResult)
+          .orElseGet(() -> {
+            // some of these may already be the correct value, as both the name and ID fields
+            // got mapped to the same place. If the name is already being used, we want to make
+            // sure not to discard it
+            boolean existsAsValue = state
+              .get()
+              .stream()
+              .anyMatch(r ->
+                (condition.field().contains(".name") && r.name().equals(value)) ||
+                (condition.field().contains(".code") && r.code().equals(value))
+              );
+
+            if (existsAsValue) {
+              return MigrationResult.withResult(value);
+            } else {
+              return MigrationResult
+                .<String>removed()
+                .withWarnings(
+                  List.of(
+                    ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
+                  )
+                )
+                .withHadBreakingChange(true);
+            }
+          });
+      }
+    );
   }
 }

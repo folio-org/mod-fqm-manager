@@ -44,13 +44,12 @@ public class V10OrganizationStatusValueChange extends AbstractRegularMigrationSt
     Void state,
     MigratableFqlFieldAndCondition cond
   ) {
-    return MigrationUtils
-      .migrateFqlValues(
-        condition ->
-          ORGANIZATIONS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) && FIELD_NAME.equals(condition.field()),
-        (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) ->
-          MigrationResult.withResult(NEW_VALUES.getOrDefault(value, value))
-      )
-      .apply(cond);
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition ->
+        ORGANIZATIONS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) && FIELD_NAME.equals(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) ->
+        MigrationResult.withResult(NEW_VALUES.getOrDefault(value, value))
+    );
   }
 }

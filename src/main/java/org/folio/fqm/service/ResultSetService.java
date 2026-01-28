@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -126,8 +127,7 @@ public class ResultSetService {
 
       // Use the underlying JSON property name for the leaf when available (nested fields).
       String leaf = (field instanceof org.folio.querytool.domain.dto.NestedObjectProperty prop
-        && prop.getProperty() != null
-        && !prop.getProperty().isBlank())
+        && !StringUtils.isEmpty(prop.getProperty()))
         ? prop.getProperty()
         : f.getName();
 
@@ -152,7 +152,7 @@ public class ResultSetService {
    * Currently supports the array-of-objects shape: "<root>[*]-><leaf>", e.g. "addresses[*]->countryId".
    */
   private void localizeCountryField(Map<String, Object> contents, String fieldPath) {
-    if (fieldPath == null || fieldPath.isBlank()) {
+    if (StringUtils.isEmpty(fieldPath)) {
       return;
     }
 

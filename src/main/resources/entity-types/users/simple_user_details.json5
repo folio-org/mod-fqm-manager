@@ -353,6 +353,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      // TODO: clean up formatting
       valueGetter: "(SELECT jsonb_agg(record.value || \
                               jsonb_build_object('addressType', address_type.jsonb ->> 'type') \
                  ORDER BY record.value ->> 'addressType') \

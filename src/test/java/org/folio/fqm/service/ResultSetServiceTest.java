@@ -20,6 +20,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,7 @@ class ResultSetServiceTest {
   private SettingsClient settingsClient;
   private ResultSetService service;
   private FolioExecutionContext executionContext;
+  private TranslationService translationService;
 
   @BeforeEach
   void setUp() {
@@ -60,7 +62,8 @@ class ResultSetServiceTest {
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     this.settingsClient = mock(SettingsClient.class);
     this.executionContext = mock(FolioExecutionContext.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext);
+    this.translationService = mock(TranslationService.class);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext, translationService);
   }
 
   @Test

@@ -21,6 +21,7 @@ import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategyRepository;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
+import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,6 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MigrationServiceTest {
+
+  @Mock
+  private CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
 
   @Spy
   private MigrationConfiguration migrationConfiguration;

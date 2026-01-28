@@ -48,6 +48,8 @@ class MigrationStrategyRepositoryTest {
   );
   MigrationService migrationService = new MigrationService(
     null,
+    null,
+    null,
     new MigrationConfiguration(),
     null,
     new ObjectMapper()

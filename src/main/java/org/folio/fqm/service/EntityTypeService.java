@@ -91,6 +91,7 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
+  private final MigrationService migrationService;
   private final QueryProcessorService queryService;
   private final CrossTenantHttpClient crossTenantHttpClient;
   private final PermissionsService permissionsService;
@@ -495,6 +496,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -510,6 +512,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(entityTypeId, updatedCustomEntityType);
     entityTypeRepository.updateEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -538,6 +541,7 @@ public class EntityTypeService {
       .updatedAt(clockService.now())
       .build();
     entityTypeRepository.updateEntityType(deletedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
   }
 
   /**

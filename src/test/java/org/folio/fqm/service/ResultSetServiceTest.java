@@ -2,11 +2,12 @@ package org.folio.fqm.service;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 import com.google.common.collect.Lists;
 
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -19,7 +20,9 @@ import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
+import org.folio.querytool.domain.dto.SourceColumn;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +56,7 @@ class ResultSetServiceTest {
   private SettingsClient settingsClient;
   private ResultSetService service;
   private FolioExecutionContext executionContext;
+  private TranslationService translationService;
 
   @BeforeEach
   void setUp() {
@@ -60,7 +64,8 @@ class ResultSetServiceTest {
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
     this.settingsClient = mock(SettingsClient.class);
     this.executionContext = mock(FolioExecutionContext.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext);
+    this.translationService = mock(TranslationService.class);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext, translationService);
   }
 
   @Test
@@ -217,5 +222,244 @@ class ResultSetServiceTest {
       true
     );
     assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void shouldLocalizeNestedCountryCodesFromFqmCountriesSource() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    // Root field is "addresses" stored as a JSON string in the result set.
+    String addressesJson = "[" +
+      "{\"city\":\"Auburn\",\"countryId\":\"US\"}," +
+      "{\"city\":\"Auburn\",\"countryId\":\"MO\"}" +
+      "]";
+
+    // Build entity type with nested field addresses[*]->countryId that is sourced from FQM "countries".
+    var addressesColumn = new EntityTypeColumn()
+      .name("addresses")
+      .dataType(
+        new org.folio.querytool.domain.dto.ArrayType().itemDataType(
+          new org.folio.querytool.domain.dto.ObjectType().properties(List.of(
+            new org.folio.querytool.domain.dto.NestedObjectProperty()
+              .name("country_id")
+              .property("countryId")
+              .source(new org.folio.querytool.domain.dto.SourceColumn(entityTypeId, "country_id")
+                .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
+                .name("countries"))
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        addressesColumn
+      ))
+      .sources(List.of(
+        new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")
+      ));
+
+    List<String> fields = List.of("id", "addresses");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "addresses", addressesJson)));
+
+    when(translationService.format("mod-fqm-manager.countries.US")).thenReturn("United States");
+    when(translationService.format("mod-fqm-manager.countries.MO")).thenReturn("Macao");
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals(contentId.toString(), actual.getFirst().get("id"));
+
+    String localizedAddresses = (String) actual.getFirst().get("addresses");
+    assertEquals(
+      "[{\"city\":\"Auburn\",\"countryId\":\"United States\"},{\"city\":\"Auburn\",\"countryId\":\"Macao\"}]",
+      localizedAddresses
+    );
+  }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationWhenFqmSourceNameIsNotCountries() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    String addressesJson = "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]";
+
+    // Source is FQM but name is not "countries" so it should be skipped by the name guard.
+    var addressesColumn = new EntityTypeColumn()
+      .name("addresses")
+      .dataType(
+        new org.folio.querytool.domain.dto.ArrayType().itemDataType(
+          new org.folio.querytool.domain.dto.ObjectType().properties(List.of(
+            new org.folio.querytool.domain.dto.NestedObjectProperty()
+              .name("country_id")
+              .property("countryId")
+              .source(new org.folio.querytool.domain.dto.SourceColumn(entityTypeId, "country_id")
+                .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
+                .name("not-countries"))
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(new EntityTypeColumn().name("id").isIdColumn(true), addressesColumn))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")));
+
+    List<String> fields = List.of("id", "addresses");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "addresses", addressesJson)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals(addressesJson, actual.getFirst().get("addresses"));
+
+    verify(translationService, never()).format(anyString());
+  }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationForNonFqmSource() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    String addressesJson = "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]";
+
+    var addressesColumn = new EntityTypeColumn()
+      .name("addresses")
+      .dataType(
+        new org.folio.querytool.domain.dto.ArrayType().itemDataType(
+          new org.folio.querytool.domain.dto.ObjectType().properties(List.of(
+            new org.folio.querytool.domain.dto.NestedObjectProperty()
+              .name("country_id")
+              .property("countryId")
+              .source(new SourceColumn(entityTypeId, "country_id")
+                .type(SourceColumn.TypeEnum.ENTITY_TYPE)
+                .name("countries"))
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(new EntityTypeColumn().name("id").isIdColumn(true), addressesColumn))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")));
+
+    List<String> fields = List.of("id", "addresses");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "addresses", addressesJson)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals(addressesJson, actual.getFirst().get("addresses"));
+
+    verify(translationService, never()).format(anyString());
+  }
+
+  @Test
+  void localizeCountryField_shouldReturnEarlyWhenCountryFieldPathIsNull() throws Exception {
+    Map<String, Object> contents = new HashMap<>(Map.of(
+      "addresses",
+      "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]"
+    ));
+
+    Method m = ResultSetService.class.getDeclaredMethod("localizeCountryField", Map.class, String.class);
+    m.setAccessible(true);
+
+    m.invoke(service, contents, null);
+
+    assertEquals(
+      "[{\"city\":\"Auburn\",\"countryId\":\"US\"}]",
+      contents.get("addresses")
+    );
+    verify(translationService, never()).format(anyString());
+  }
+
+  // TODO: replace with actual full-path test
+  @Test
+  void localizeCountryField_shouldLocalizeNonNestedCountryCodeField() throws Exception {
+    Map<String, Object> contents = new HashMap<>(Map.of(
+      "countryId",
+      "US"
+    ));
+
+    when(translationService.format("mod-fqm-manager.countries.US")).thenReturn("United States");
+
+    Method m = ResultSetService.class.getDeclaredMethod("localizeCountryField", Map.class, String.class);
+    m.setAccessible(true);
+
+    // Non-nested path (top-level field)
+    m.invoke(service, contents, "countryId");
+
+    assertEquals("United States", contents.get("countryId"));
+  }
+
+  @ParameterizedTest
+  @MethodSource("missingCountryTranslationCases")
+  void shouldNotLocalizeTopLevelCountryWhenTranslationIsMissing(String translationResult) {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn().name("countryId")
+          .source(new SourceColumn(entityTypeId, "countryId")
+            .type(SourceColumn.TypeEnum.FQM)
+            .name("countries"))
+      ))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")));
+
+    List<String> fields = List.of("id", "countryId");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "countryId", "US")));
+
+    String translationKey = "mod-fqm-manager.countries.US";
+    when(translationService.format(translationKey)).thenReturn(translationResult);
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals("US", actual.getFirst().get("countryId"));
+  }
+
+  static java.util.stream.Stream<Arguments> missingCountryTranslationCases() {
+    return java.util.stream.Stream.of(
+      Arguments.of((String) null),
+      Arguments.of("   "),
+      Arguments.of("mod-fqm-manager.countries.US")
+    );
   }
 }

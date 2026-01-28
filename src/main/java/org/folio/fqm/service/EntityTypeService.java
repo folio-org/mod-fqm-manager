@@ -44,6 +44,7 @@ import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -86,6 +87,8 @@ public class EntityTypeService {
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
     "MZM", "XPD", "PHP", "XPT", "PTE", "ROL", "RUR", "CSD", "SLE", "SLL", "XAG", "SKK", "SIT", "ESP", "XDR", "XSU", "SDD", "SRG", "STD", "XTS",
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
+  private static final String COUNTRIES_FILEPATH = "country_codes.json";
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
@@ -99,6 +102,7 @@ public class EntityTypeService {
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
   private final SimpleHttpClient simpleHttpClient;
+  private final TranslationService translationService;
 
   /**
    * Returns the list of all entity types.
@@ -175,6 +179,7 @@ public class EntityTypeService {
   public ColumnValues getFieldValues(UUID entityTypeId, String fieldName, @Nullable String searchText) {
     searchText = searchText == null ? "" : searchText;
     verifyAccessForPossibleCustomEntityType(entityTypeId);
+
     EntityType entityType = entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, folioExecutionContext.getTenantId(), false);
 
     Field field = FqlValidationService
@@ -211,6 +216,7 @@ public class EntityTypeService {
           // entity types using this MUST declare a dependency on view `_mod_search_languages_availability_indicator`
           // to ensure that this source is available
           case "languages" -> getLanguages(searchText, tenantsToQuery);
+          case "countries" -> getCountries();
           case "tenant_id" -> getTenantIds(entityType);
           case "tenant_name" -> getTenantNames(entityType);
           // instructs query builder to provide organization finder plugin, so no values need be returned here
@@ -737,5 +743,39 @@ public class EntityTypeService {
       )
       .sorted(comparing(LabeledValueWithDescription::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
+  }
+
+  private ColumnValues getCountries() {
+    ObjectMapper mapper = new ObjectMapper();
+
+    try (InputStream input = getClass().getClassLoader().getResourceAsStream(COUNTRIES_FILEPATH)) {
+      if (input == null) {
+        log.warn("Country code file {} not found on classpath", COUNTRIES_FILEPATH);
+        return new ColumnValues().content(List.of());
+      }
+
+      // List of ISO 3166-1 alpha-2 codes
+      List<String> codes = mapper.readValue(input, new TypeReference<>() {
+      });
+
+      List<ValueWithLabel> values = codes.stream()
+        .map(code -> {
+          String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+          String label = translationService.format(translationKey);
+
+          // Fallback if translation missing
+          if (label == null || StringUtils.isBlank(label) || label.equals(translationKey)) {
+            label = code;
+          }
+          return new ValueWithLabel().value(code).label(label);
+        })
+        .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+        .toList();
+
+      return new ColumnValues().content(values);
+    } catch (IOException e) {
+      log.warn("Failed to read countries from {}", COUNTRIES_FILEPATH, e);
+      return new ColumnValues().content(List.of());
+    }
   }
 }

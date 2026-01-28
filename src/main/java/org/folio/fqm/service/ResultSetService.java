@@ -1,11 +1,14 @@
 package org.folio.fqm.service;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +38,16 @@ public class ResultSetService {
     .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     .optionalStart().appendOffsetId() // optional Z/timezone at end
     .toFormatter().withZone(ZoneOffset.UTC); // force interpretation as UTC
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final SettingsClient settingsClient;
   private final FolioExecutionContext executionContext;
+  private final TranslationService translationService;
+
+  // Reuse mapper; parsing/serializing per record is expensive.
+  private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -64,6 +72,7 @@ public class ResultSetService {
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
+    List<String> countryFields = localize ? getCountryLocalizationFieldPaths(entityType) : List.of();
 
     return contentIds
       .stream()
@@ -81,6 +90,7 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
+          localizeCountries(copiedContents, countryFields);
         }
         return copiedContents;
       })
@@ -98,6 +108,135 @@ public class ResultSetService {
         return value;
       });
     }
+  }
+
+  // Good
+  private static List<String> getCountryLocalizationFieldPaths(EntityType entityType) {
+    List<String> paths = new ArrayList<>();
+
+    // Find all fields whose configured source is FQM("countries"). For nested fields, this yields paths like "addresses[*]->countryId".
+    EntityTypeUtils.runOnEveryField(entityType, (field, parentPath) -> {
+      if (field.getSource() == null || field.getSource().getType() != org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM) {
+        return;
+      }
+      if (!"countries".equals(field.getSource().getName())) {
+        return;
+      }
+
+      // Use the underlying JSON property name for the leaf when available (nested fields).
+      String leaf = (field instanceof org.folio.querytool.domain.dto.NestedObjectProperty prop
+        && !StringUtils.isEmpty(prop.getProperty()))
+        ? prop.getProperty()
+        : field.getName();
+
+      paths.add(parentPath + leaf);
+    });
+
+    return paths;
+  }
+
+  // Good
+  private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {
+    if (CollectionUtils.isEmpty(countryFieldPaths)) {
+      return;
+    }
+
+    for (String fieldPath : countryFieldPaths) {
+      localizeCountryField(contents, fieldPath);
+    }
+  }
+
+  /**
+   * Localizes a single field path that points to a nested element inside a JSON-string field.
+   * Currently supports the array-of-objects shape: "<root>[*]-><leaf>", e.g. "addresses[*]->countryId".
+   */
+  private void localizeCountryField(Map<String, Object> contents, String fieldPath) {
+    if (StringUtils.isEmpty(fieldPath)) {
+      return;
+    }
+
+    String marker = "[*]->";
+    int markerIdx = fieldPath.indexOf(marker);
+
+    if (markerIdx < 0) {
+      localizeTopLevelCountryField(contents, fieldPath);
+      return;
+    }
+
+    String rootField = fieldPath.substring(0, markerIdx);
+    String leafField = fieldPath.substring(markerIdx + marker.length());
+    localizeNestedCountryField(contents, rootField, leafField);
+  }
+
+  private void localizeTopLevelCountryField(Map<String, Object> contents, String fieldName) {
+    Object valueObj = contents.get(fieldName);
+    if (!(valueObj instanceof String code) || code.isBlank()) {
+      return;
+    }
+
+    translateCountry(code).ifPresent(translated -> contents.put(fieldName, translated));
+  }
+
+  private void localizeNestedCountryField(Map<String, Object> contents, String rootField, String leafField) {
+    if (rootField.isBlank() || leafField.isBlank()) {
+      return;
+    }
+
+    Object rootObj = contents.get(rootField);
+    if (!(rootObj instanceof String rootJson) || rootJson.isBlank()) {
+      return;
+    }
+
+    try {
+      var node = OBJECT_MAPPER.readTree(rootJson);
+      if (!node.isArray()) {
+        return;
+      }
+
+      boolean changed = false;
+      for (com.fasterxml.jackson.databind.JsonNode elementNode : node) {
+        changed |= translateLeafIfPresent(elementNode, leafField);
+      }
+
+      if (changed) {
+        contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
+      }
+    } catch (Exception e) {
+      log.debug("Unable to localize country field '{}[*]->{}' (unexpected JSON): {}", rootField, leafField, e.getMessage());
+    }
+  }
+
+  private boolean translateLeafIfPresent(com.fasterxml.jackson.databind.JsonNode elementNode, String leafField) {
+    if (!elementNode.isObject()) {
+      return false;
+    }
+
+    var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) elementNode;
+    var valueNode = objNode.get(leafField);
+    if (valueNode == null || !valueNode.isTextual()) {
+      return false;
+    }
+
+    String code = valueNode.asText();
+    var translatedOpt = translateCountry(code);
+    if (translatedOpt.isEmpty()) {
+      return false;
+    }
+
+    objNode.put(leafField, translatedOpt.get());
+    return true;
+  }
+
+  private java.util.Optional<String> translateCountry(String code) {
+    String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+    String translated = translationService.format(translationKey);
+
+    // If translation is missing, don't modify the original value
+    if (translated == null || translated.isBlank() || translated.equals(translationKey)) {
+      return java.util.Optional.empty();
+    }
+
+    return java.util.Optional.of(translated);
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

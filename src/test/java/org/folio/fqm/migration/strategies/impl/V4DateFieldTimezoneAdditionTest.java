@@ -25,7 +25,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
   SettingsClient settingsClient;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     lenient().when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
   }
 

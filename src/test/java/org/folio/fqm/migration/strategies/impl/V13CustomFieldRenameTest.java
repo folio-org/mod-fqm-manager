@@ -45,7 +45,7 @@ class V13CustomFieldRenameTest extends TestTemplate {
   FolioExecutionContext executionContext;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     DSLContext creator = DSL.using(new DefaultConfiguration()); // for creating results
 
     Result<Record2<Object, Object>> result = creator.newResult(ID_FIELD, NAME_FIELD);

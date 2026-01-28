@@ -2,9 +2,7 @@ package org.folio.fqm.migration.strategies;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationUtils;
@@ -14,14 +12,14 @@ import org.folio.fqm.migration.types.MigrationResult;
 import org.folio.fqm.migration.types.SingleFieldMigrationResult;
 import org.springframework.data.util.StreamUtils;
 
-public abstract class AbstractRegularMigrationStrategy<State> implements MigrationStrategy {
+public abstract class AbstractRegularMigrationStrategy<S> implements MigrationStrategy {
 
   /**
    * Called before any migration starts; this variable will be retained and passed to each call
    * of the other methods. This is useful if you want to cache values or other state across calls
    * (such as loading values from an external API).
    */
-  public State getStartingState() {
+  public S getStartingState() {
     return null;
   }
 
@@ -36,9 +34,13 @@ public abstract class AbstractRegularMigrationStrategy<State> implements Migrati
    * } else {
    *   return SingleFieldMigrationResult.noop(condition);
    * }
+   *
+   * @param state The state of type {@link S}, shared by all method calls for this query
+   * @param condition The {@link MigratableFqlFieldAndCondition} to migrate
+   * @return The migration result
    */
   public SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(
-    State state,
+    S state,
     MigratableFqlFieldAndCondition condition
   ) {
     return SingleFieldMigrationResult.noop(condition);
@@ -54,24 +56,29 @@ public abstract class AbstractRegularMigrationStrategy<State> implements Migrati
    * } else {
    *   return SingleFieldMigrationResult.noop(field);
    * }
+   *
+   * @param state The state of type {@link S}, shared by all method calls for this query
+   * @param field The {@link MigratableFqlFieldOnly} to migrate
+   * @return The migration result
    */
-  public SingleFieldMigrationResult<MigratableFqlFieldOnly> migrateFieldName(
-    State state,
-    MigratableFqlFieldOnly field
-  ) {
+  public SingleFieldMigrationResult<MigratableFqlFieldOnly> migrateFieldName(S state, MigratableFqlFieldOnly field) {
     return SingleFieldMigrationResult.noop(field);
   }
 
   /**
    * Perform any additional changes after field and FQL migrations have been applied.
+   *
+   * @param state The state of type {@link S}, shared by all method calls for this query
+   * @param query The {@link MigratableQueryInformation} after the rest of the migrations have been applied
+   * @return The migration result to be returned
    */
-  public MigratableQueryInformation additionalChanges(State state, MigratableQueryInformation query) {
+  public MigratableQueryInformation additionalChanges(S state, MigratableQueryInformation query) {
     return query;
   }
 
   @Override
   public final MigratableQueryInformation apply(MigratableQueryInformation query) {
-    State state = getStartingState();
+    S state = getStartingState();
 
     MigrationResult<String> fqlMigration = MigrationUtils.migrateFql(
       query.entityTypeId(),

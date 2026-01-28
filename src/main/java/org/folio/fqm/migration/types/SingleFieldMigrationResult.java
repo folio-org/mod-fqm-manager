@@ -12,12 +12,12 @@ public record SingleFieldMigrationResult<F extends MigratableFqlField<F>>(
   boolean hadBreakingChange
 ) {
   public static <T extends MigratableFqlField<T>> SingleFieldMigrationResult<T> withField(T field) {
-    return new SingleFieldMigrationResult<T>(List.of(field), List.of(), false);
+    return new SingleFieldMigrationResult<>(List.of(field), List.of(), false);
   }
   public static <T extends MigratableFqlField<T>> SingleFieldMigrationResult<T> removed() {
-    return new SingleFieldMigrationResult<T>(List.of(), List.of(), false);
+    return new SingleFieldMigrationResult<>(List.of(), List.of(), false);
   }
   public static <T extends MigratableFqlField<T>> SingleFieldMigrationResult<T> noop(T original) {
-    return new SingleFieldMigrationResult<T>(List.of(original), List.of(), false);
+    return new SingleFieldMigrationResult<>(List.of(original), List.of(), false);
   }
 }

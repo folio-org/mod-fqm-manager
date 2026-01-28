@@ -24,7 +24,7 @@ class V11OrganizationCodeOperatorChangeTest extends TestTemplate {
   OrganizationsClient organizationsClient;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     lenient()
       .when(organizationsClient.getOrganizations())
       .thenReturn(

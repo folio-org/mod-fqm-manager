@@ -115,9 +115,7 @@ public abstract class AbstractSimpleMigrationStrategy extends AbstractRegularMig
         case QueryBreakingWarning w -> {
           break;
         }
-        default -> {
-          result = result.withWarnings(List.of(warning));
-        }
+        default -> result = result.withWarnings(List.of(warning));
       }
     }
 

@@ -111,7 +111,7 @@ public class MigrationUtils {
       )
       .toList();
 
-    return new MigrationResult<List<String>>(
+    return new MigrationResult<>(
       transformed
         .stream()
         .map(SingleFieldMigrationResult::result)
@@ -132,6 +132,8 @@ public class MigrationUtils {
     SingleFieldMigrationResult<F> transformed = handler.apply(original);
 
     // stub for follow-up ticket
+    didModify.test(original, transformed);
+
     return transformed;
   }
 

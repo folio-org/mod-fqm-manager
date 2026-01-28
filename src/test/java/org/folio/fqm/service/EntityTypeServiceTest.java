@@ -1569,4 +1569,39 @@ class EntityTypeServiceTest {
     assertTrue(actual.getContent().stream().anyMatch(v -> "US".equals(v.getValue())));
     assertTrue(actual.getContent().stream().anyMatch(v -> "CA".equals(v.getValue())));
   }
+
+  @Test
+  void shouldTranslateCountryLabelsFromFqmSource() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "country";
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("country-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("countries")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+
+    // Convert a known code into a different label; fall back to the code for everything else.
+    when(translationService.format(anyString())).thenAnswer(inv -> {
+      String key = inv.getArgument(0);
+      return "US".equals(key) ? "United States" : key;
+    });
+
+    ColumnValues actual = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "US");
+
+    assertNotNull(actual);
+    assertNotNull(actual.getContent());
+    assertFalse(actual.getContent().isEmpty());
+
+    assertTrue(
+      actual.getContent().stream().anyMatch(v -> "US".equals(v.getValue()) && "United States".equals(v.getLabel())),
+      "Expected label to be translated for value 'US'"
+    );
+  }
 }

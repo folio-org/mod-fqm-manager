@@ -81,6 +81,8 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
+          // TODO: might want to always localize this
+          localizeCountries(copiedContents);
         }
         return copiedContents;
       })
@@ -98,6 +100,10 @@ public class ResultSetService {
         return value;
       });
     }
+  }
+
+  private void localizeCountries(Map<String, Object> contents) {
+    log.info("Localizing countries");
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

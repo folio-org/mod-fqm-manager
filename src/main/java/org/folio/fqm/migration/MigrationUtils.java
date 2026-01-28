@@ -41,9 +41,11 @@ public class MigrationUtils {
    * Helper function to transform an FQL query where each field gets turned into a new quantity of fields.
    * This runs a given function on each field's condition in the query, potentially adding or removing $and as needed.
    *
+   * @param entityTypeId The entity type ID of the query being migrated
    * @param fqlQuery The root query to migrate
    * @param handler  something that takes an {@link MigratableFqlFieldAndCondition} and returns a list of
-   *                 {@link MigratableFqlFieldAndCondition FqlFieldAndCondition(s)} to replace it with
+   *                 {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and whether
+   *                 a breaking change occurred
    */
   public static MigrationResult<String> migrateFql(
     UUID entityTypeId,
@@ -95,6 +97,15 @@ public class MigrationUtils {
     }
   }
 
+  /**
+   * Similar to {@link #migrateFql(UUID, String, Function)} but for field name lists.
+   *
+   * @param entityTypeId the entity type ID of the query being migrated
+   * @param fields the list of fields to migrate
+   * @param handler something that takes an {@link MigratableFqlFieldOnly} and returns a list of
+   *                {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and
+   *                whether a breaking change occurred
+   */
   public static MigrationResult<List<String>> migrateFieldNames(
     UUID entityTypeId,
     List<String> fields,

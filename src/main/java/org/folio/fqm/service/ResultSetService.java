@@ -109,7 +109,15 @@ public class ResultSetService {
       if (!"countries".equals(f.getSource().getName())) {
         return;
       }
-      paths.add(parentPath + f.getName());
+
+      // Use the underlying JSON property name for the leaf when available (nested fields).
+      String leaf = (field instanceof org.folio.querytool.domain.dto.NestedObjectProperty prop
+        && prop.getProperty() != null
+        && !prop.getProperty().isBlank())
+        ? prop.getProperty()
+        : f.getName();
+
+      paths.add(parentPath + leaf);
     });
 
     return paths;
@@ -177,7 +185,7 @@ public class ResultSetService {
         }
         var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) elementNode;
 
-        // TODO: fix (countryId vs country_id)
+        // TODO: check
         var valueNode = objNode.get(leafField);
         if (valueNode == null || !valueNode.isTextual()) {
           continue;

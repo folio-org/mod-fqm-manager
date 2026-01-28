@@ -6,6 +6,7 @@ import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +36,13 @@ public class ResultSetService {
     .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     .optionalStart().appendOffsetId() // optional Z/timezone at end
     .toFormatter().withZone(ZoneOffset.UTC); // force interpretation as UTC
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final SettingsClient settingsClient;
   private final FolioExecutionContext executionContext;
+  private final TranslationService translationService;
 
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
@@ -102,8 +105,52 @@ public class ResultSetService {
     }
   }
 
+  // TODO: make sure handles nulls correctly
   private void localizeCountries(Map<String, Object> contents) {
-    log.info("Localizing countries");
+    Object addressesObj = contents.get("addresses");
+    if (!(addressesObj instanceof String addressesJson) || addressesJson.isBlank()) {
+      return;
+    }
+
+    // DB values may come back as a JSON string. We only touch addresses[*].countryId, leaving all other content unchanged.
+    try {
+      var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+      var node = mapper.readTree(addressesJson);
+      if (!node.isArray()) {
+        return;
+      }
+
+      boolean changed = false;
+      for (com.fasterxml.jackson.databind.JsonNode addressNode : node) {
+        if (!addressNode.isObject()) {
+          continue;
+        }
+        var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) addressNode;
+        var countryNode = objNode.get("countryId");
+        if (countryNode == null || !countryNode.isTextual()) {
+          continue;
+        }
+
+        String countryCode = countryNode.asText();
+        if (countryCode == null || countryCode.isBlank()) {
+          continue;
+        }
+
+        String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(countryCode);
+        String translated = translationService.format(translationKey);
+        if (translated != null && !translated.isBlank() && !translated.equals(countryCode)) {
+          objNode.put("countryId", translated);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        contents.put("addresses", mapper.writeValueAsString(node));
+      }
+    } catch (Exception e) {
+      // Best-effort localization: if parsing fails, return original value.
+      log.debug("Unable to localize addresses countryId values (unexpected JSON): {}", e.getMessage());
+    }
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

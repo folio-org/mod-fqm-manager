@@ -1,6 +1,7 @@
 package org.folio.fqm.service;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -137,7 +138,7 @@ public class ResultSetService {
   }
 
   private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {
-    if (countryFieldPaths == null || countryFieldPaths.isEmpty()) {
+    if (CollectionUtils.isEmpty(countryFieldPaths)) {
       return;
     }
 

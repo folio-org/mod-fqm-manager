@@ -9,14 +9,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.migration.strategies.AbstractSimpleMigrationStrategy;
 import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
 import org.folio.fqm.migration.warnings.DeprecatedFieldWarning;
-import org.folio.fqm.migration.warnings.EntityTypeWarning;
-import org.folio.fqm.migration.warnings.FieldWarning;
+import org.folio.fqm.migration.warnings.EntityTypeWarningFactory;
+import org.folio.fqm.migration.warnings.FieldWarningFactory;
 import org.folio.fqm.migration.warnings.QueryBreakingWarning;
 import org.folio.fqm.migration.warnings.RemovedEntityWarning;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
@@ -27,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AbstractSimpleMigrationStrategyTest {
 
-  FqlService fqlService = new FqlService();
   ObjectMapper objectMapper = new ObjectMapper();
 
   // A -> B, field changes
@@ -77,7 +74,7 @@ class AbstractSimpleMigrationStrategyTest {
     }
 
     @Override
-    public Map<UUID, Function<String, EntityTypeWarning>> getEntityTypeWarnings() {
+    public Map<UUID, EntityTypeWarningFactory> getEntityTypeWarnings() {
       return Map.ofEntries(
         Map.entry(UUID_0A, DeprecatedEntityWarning.withoutAlternative("0a")),
         Map.entry(UUID_0B, RemovedEntityWarning.withoutAlternative("0b"))
@@ -85,7 +82,7 @@ class AbstractSimpleMigrationStrategyTest {
     }
 
     @Override
-    public Map<UUID, Map<String, BiFunction<String, String, FieldWarning>>> getFieldWarnings() {
+    public Map<UUID, Map<String, FieldWarningFactory>> getFieldWarnings() {
       return Map.ofEntries(
         Map.entry(
           UUID_0C,
@@ -171,10 +168,8 @@ class AbstractSimpleMigrationStrategyTest {
           """
           {"_version":"version","$and":[
             {"field1": {"$eq": true}},
-            {"$and": [
-              {"field2": {"$gte": 2}},
-              {"bar": {"$eq": "aaa"}}
-            ]},
+            {"field2": {"$gte": 2}},
+            {"bar": {"$eq": "aaa"}},
             {"field3": {"$lte": 3}}
           ]}
           """,
@@ -291,11 +286,11 @@ class AbstractSimpleMigrationStrategyTest {
           """,
           List.of("unrelated", "deprecated", "query_breaking"),
           List.of(
-            DeprecatedFieldWarning.build().apply("deprecated", "{\n  \"$lte\" : 2\n}"),
-            DeprecatedFieldWarning.build().apply("deprecated", null),
-            QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}"),
-            RemovedFieldWarning.withAlternative("alt").apply("removed", "{\n  \"$lte\" : 3\n}"),
-            RemovedFieldWarning.withAlternative("alt").apply("removed", null)
+            DeprecatedFieldWarning.build().apply("", "deprecated", "{\n  \"$lte\" : 2\n}"),
+            DeprecatedFieldWarning.build().apply("", "deprecated", null),
+            QueryBreakingWarning.withAlternative("alt").apply("", "query_breaking", "{\n  \"$ne\" : 2\n}"),
+            RemovedFieldWarning.withAlternative("alt").apply("", "removed", "{\n  \"$lte\" : 3\n}"),
+            RemovedFieldWarning.withAlternative("alt").apply("", "removed", null)
           ),
           null,
           false
@@ -317,7 +312,7 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_0C,
           "{\"_version\":\"version\"}",
           List.of("query_breaking"),
-          List.of(QueryBreakingWarning.withAlternative("alt").apply("query_breaking", "{\n  \"$ne\" : 2\n}")),
+          List.of(QueryBreakingWarning.withAlternative("alt").apply("", "query_breaking", "{\n  \"$ne\" : 2\n}")),
           null,
           false
         )
@@ -329,7 +324,7 @@ class AbstractSimpleMigrationStrategyTest {
   @MethodSource("sourcesForMigrationResults")
   void testMigrationResults(MigratableQueryInformation source, MigratableQueryInformation expected)
     throws JsonProcessingException {
-    MigratableQueryInformation result = new Impl().apply(fqlService, source);
+    MigratableQueryInformation result = new Impl().apply(source);
 
     assertThat(result.entityTypeId(), is(expected.entityTypeId()));
     // deserialize to help prevent whitespace/etc breaking the test

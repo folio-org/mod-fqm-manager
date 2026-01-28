@@ -1,36 +1,37 @@
 package org.folio.fqm.migration;
 
 import java.util.List;
-import org.folio.fqm.client.SettingsClient;
 import org.folio.fqm.client.LocationUnitsClient;
 import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.ModesOfIssuanceClient;
 import org.folio.fqm.client.OrganizationsClient;
 import org.folio.fqm.client.PatronGroupsClient;
-import org.folio.fqm.migration.strategies.V0POCMigration;
-import org.folio.fqm.migration.strategies.V10OrganizationStatusValueChange;
-import org.folio.fqm.migration.strategies.V11OrganizationNameCodeOperatorChange;
-import org.folio.fqm.migration.strategies.V12PurchaseOrderIdFieldRemoval;
-import org.folio.fqm.migration.strategies.V13CustomFieldRename;
-import org.folio.fqm.migration.strategies.V14ItemLocLibraryValueChange;
-import org.folio.fqm.migration.strategies.V17ContainsAnyToInOperatorMigration;
-import org.folio.fqm.migration.strategies.V18NotContainsAnyToNinOperatorMigration;
-import org.folio.fqm.migration.strategies.V19RegexOperatorMigration;
-import org.folio.fqm.migration.strategies.V1ModeOfIssuanceConsolidation;
-import org.folio.fqm.migration.strategies.V20ContainsAllToEqOperatorMigration;
-import org.folio.fqm.migration.strategies.V22UserCustomFieldMigration;
-import org.folio.fqm.migration.strategies.V23UserCreatedUpdatedDateFieldDeprecation;
-import org.folio.fqm.migration.strategies.V2ResourceTypeConsolidation;
-import org.folio.fqm.migration.strategies.V3RamsonsFieldCleanup;
-import org.folio.fqm.migration.strategies.V4DateFieldTimezoneAddition;
-import org.folio.fqm.migration.strategies.V5UUIDNotEqualOperatorRemoval;
-import org.folio.fqm.migration.strategies.V6ModeOfIssuanceValueChange;
-import org.folio.fqm.migration.strategies.V7PatronGroupsValueChange;
-import org.folio.fqm.migration.strategies.V8LocationValueChange;
-import org.folio.fqm.migration.strategies.V9LocLibraryValueChange;
-import org.folio.fqm.migration.strategies.V15AlertsAndReportingCodesRemoval;
-import org.folio.fqm.migration.strategies.V16OrganizationSimpleToCompositeMigration;
-import org.folio.fqm.migration.strategies.V21NotContainsAllToNeqOperatorMigration;
+import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.migration.strategies.MigrationStrategy;
+import org.folio.fqm.migration.strategies.impl.V0POCMigration;
+import org.folio.fqm.migration.strategies.impl.V10OrganizationStatusValueChange;
+import org.folio.fqm.migration.strategies.impl.V11OrganizationNameCodeOperatorChange;
+import org.folio.fqm.migration.strategies.impl.V12PurchaseOrderIdFieldRemoval;
+import org.folio.fqm.migration.strategies.impl.V13CustomFieldRename;
+import org.folio.fqm.migration.strategies.impl.V14ItemLocLibraryValueChange;
+import org.folio.fqm.migration.strategies.impl.V15AlertsAndReportingCodesRemoval;
+import org.folio.fqm.migration.strategies.impl.V16OrganizationSimpleToCompositeMigration;
+import org.folio.fqm.migration.strategies.impl.V17ContainsAnyToInOperatorMigration;
+import org.folio.fqm.migration.strategies.impl.V18NotContainsAnyToNinOperatorMigration;
+import org.folio.fqm.migration.strategies.impl.V19RegexOperatorMigration;
+import org.folio.fqm.migration.strategies.impl.V1ModeOfIssuanceConsolidation;
+import org.folio.fqm.migration.strategies.impl.V20ContainsAllToEqOperatorMigration;
+import org.folio.fqm.migration.strategies.impl.V21NotContainsAllToNeqOperatorMigration;
+import org.folio.fqm.migration.strategies.impl.V22UserCustomFieldMigration;
+import org.folio.fqm.migration.strategies.impl.V23UserCreatedUpdatedDateFieldDeprecation;
+import org.folio.fqm.migration.strategies.impl.V2ResourceTypeConsolidation;
+import org.folio.fqm.migration.strategies.impl.V3RamsonsFieldCleanup;
+import org.folio.fqm.migration.strategies.impl.V4DateFieldTimezoneAddition;
+import org.folio.fqm.migration.strategies.impl.V5UUIDNotEqualOperatorRemoval;
+import org.folio.fqm.migration.strategies.impl.V6ModeOfIssuanceValueChange;
+import org.folio.fqm.migration.strategies.impl.V7PatronGroupsValueChange;
+import org.folio.fqm.migration.strategies.impl.V8LocationValueChange;
+import org.folio.fqm.migration.strategies.impl.V9LocLibraryValueChange;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -76,7 +77,7 @@ public class MigrationStrategyRepository {
         new V21NotContainsAllToNeqOperatorMigration(),
         new V22UserCustomFieldMigration(),
         new V23UserCreatedUpdatedDateFieldDeprecation()
-      // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
+        // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }
 

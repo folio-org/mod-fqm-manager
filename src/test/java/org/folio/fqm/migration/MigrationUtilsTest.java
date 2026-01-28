@@ -5,16 +5,22 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
+import org.folio.fqm.migration.types.SingleFieldMigrationResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,6 +28,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @Log4j2
 class MigrationUtilsTest {
+
+  private static final UUID TEST_UUID = UUID.fromString("d686ef05-fb3d-5edc-a87f-c3001c579dfb");
 
   static List<Arguments> functionCallTestCases() {
     return List.of(
@@ -144,34 +152,6 @@ class MigrationUtilsTest {
 
   @ParameterizedTest
   @MethodSource("functionCallTestCases")
-  void testMigrateFqlFunctionCalls(
-    String query,
-    List<Pair<String, String>> fieldArguments,
-    List<Triple<String, String, String>> unused
-  ) {
-    List<Pair<String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
-
-    MigrationUtils.migrateFql(
-      query,
-      (node, field, value) -> {
-        assertThat(node, is(notNullValue()));
-        assertThat(field, is(notNullValue()));
-        assertThat(value, is(notNullValue()));
-
-        Pair<String, String> actual = Pair.of(field, value.toString());
-        if (fieldArgumentsLeftToGet.contains(actual)) {
-          fieldArgumentsLeftToGet.remove(actual);
-        } else {
-          fail("Unexpected field transformation call: " + actual.getLeft() + " -> " + actual.getRight());
-        }
-      }
-    );
-
-    assertThat(fieldArgumentsLeftToGet, is(empty()));
-  }
-
-  @ParameterizedTest
-  @MethodSource("functionCallTestCases")
   void testMigrateAndReshapeFqlFunctionCalls(
     String query,
     List<Pair<String, String>> unused,
@@ -179,7 +159,8 @@ class MigrationUtilsTest {
   ) {
     List<Triple<String, String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
 
-    MigrationUtils.migrateAndReshapeFql(
+    MigrationUtils.migrateFql(
+      TEST_UUID,
       query,
       original -> {
         assertThat(original.field(), is(notNullValue()));
@@ -197,7 +178,7 @@ class MigrationUtilsTest {
           fail("Unexpected field transformation call: " + actual.getLeft() + " -> " + actual.getRight());
         }
 
-        return List.of();
+        return SingleFieldMigrationResult.removed();
       }
     );
 
@@ -205,53 +186,17 @@ class MigrationUtilsTest {
   }
 
   @Test
-  void testReturnedResultWithNoFieldsOrVersion() {
-    assertThat(MigrationUtils.migrateFql("{}", (r, k, v) -> {}), is(equalTo("{}")));
-  }
-
-  @Test
-  void testReturnedResultWithVersionAndNoFields() {
-    assertThat(
-      MigrationUtils.migrateFql("{\"_version\":\"old\"}", (r, k, v) -> {}),
-      is(equalTo("{\"_version\":\"old\"}"))
-    );
-  }
-
-  @Test
-  void testReturnedResultWithVersionAndFields() {
-    assertThat(
-      MigrationUtils.migrateFql(
-        "{\"_version\":\"old\",\"test\":{}}",
-        // this is solely responsible for determining what gets set back into the query
-        // (excluding the special _version)
-        (result, k, v) -> result.set("foo", new TextNode("bar"))
-      ),
-      is(equalTo("{\"_version\":\"old\",\"foo\":\"bar\"}"))
-    );
-  }
-
-  @Test
-  void testReturnedResultWithAndOperator() {
-    assertThat(
-      MigrationUtils.migrateFql(
-        "{\"_version\":\"old\",\"$and\":[{\"test\":{}}]}",
-        // this is solely responsible for determining what gets set back into the query
-        // (excluding the special _version)
-        (result, k, v) -> result.set("foo", new TextNode("bar"))
-      ),
-      is(equalTo("{\"_version\":\"old\",\"$and\":[{\"foo\":\"bar\"}]}"))
-    );
-  }
-
-  @Test
   void testReshapeWithZeroFields() {
     assertThat(
-      MigrationUtils.migrateAndReshapeFql(
-        "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
-        // this is solely responsible for determining what gets set back into the query
-        // (excluding the special _version)
-        original -> List.of()
-      ),
+      MigrationUtils
+        .migrateFql(
+          TEST_UUID,
+          "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
+          // this is solely responsible for determining what gets set back into the query
+          // (excluding the special _version)
+          original -> SingleFieldMigrationResult.removed()
+        )
+        .result(),
       is(equalTo("{\"_version\":\"old\"}"))
     );
   }
@@ -259,30 +204,43 @@ class MigrationUtilsTest {
   @Test
   void testReshapeWithOneField() {
     assertThat(
-      MigrationUtils.migrateAndReshapeFql(
-        "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
-        // this is solely responsible for determining what gets set back into the query
-        // (excluding the special _version)
-        original -> List.of(new MigrationUtils.FqlFieldAndCondition("field", "op", new TextNode("value")))
-      ),
-      is(equalTo("{\"_version\":\"old\",\"field\":{\"op\":\"value\"}}"))
+      MigrationUtils
+        .migrateFql(
+          TEST_UUID,
+          "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
+          // this is solely responsible for determining what gets set back into the query
+          // (excluding the special _version)
+          original ->
+            SingleFieldMigrationResult.withField(
+              new MigratableFqlFieldAndCondition(null, "prefix.", "field", "op", new TextNode("value"))
+            )
+        )
+        .result(),
+      is(equalTo("{\"_version\":\"old\",\"prefix.field\":{\"op\":\"value\"}}"))
     );
   }
 
   @Test
   void testReshapeWithMultipleFields() {
     assertThat(
-      MigrationUtils.migrateAndReshapeFql(
-        "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
-        // this is solely responsible for determining what gets set back into the query
-        // (excluding the special _version)
-        original ->
-          List.of(
-            new MigrationUtils.FqlFieldAndCondition("field", "op", new TextNode("value")),
-            new MigrationUtils.FqlFieldAndCondition("field", "op2", new TextNode("value2")),
-            new MigrationUtils.FqlFieldAndCondition("field2", "op3", new TextNode("value3"))
-          )
-      ),
+      MigrationUtils
+        .migrateFql(
+          TEST_UUID,
+          "{\"_version\":\"old\",\"$and\":[{\"test\":{\"$eq\": 123}}]}",
+          // this is solely responsible for determining what gets set back into the query
+          // (excluding the special _version)
+          original ->
+            new SingleFieldMigrationResult<>(
+              List.of(
+                new MigratableFqlFieldAndCondition(null, "", "field", "op", new TextNode("value")),
+                new MigratableFqlFieldAndCondition(null, "", "field", "op2", new TextNode("value2")),
+                new MigratableFqlFieldAndCondition(null, "", "field2", "op3", new TextNode("value3"))
+              ),
+              List.of(),
+              false
+            )
+        )
+        .result(),
       is(
         equalTo(
           "{\"_version\":\"old\",\"$and\":[{\"field\":{\"op\":\"value\"}},{\"field\":{\"op2\":\"value2\"}},{\"field2\":{\"op3\":\"value3\"}}]}"
@@ -293,15 +251,14 @@ class MigrationUtilsTest {
 
   @Test
   void testInvalidJson() {
-    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql("invalid", (r, k, v) -> {}));
-    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateAndReshapeFql("invalid", r -> List.of()));
+    assertThrows(UncheckedIOException.class, () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null));
   }
 
   @Test
   void testInvalidVersionNesting() {
     assertThrows(
       InvalidFqlException.class,
-      () -> MigrationUtils.migrateAndReshapeFql("{\"$and\":[{\"_version\":\"old\"}]}", r -> null)
+      () -> MigrationUtils.migrateFql(TEST_UUID, "{\"$and\":[{\"_version\":\"old\"}]}", r -> null)
     );
   }
 

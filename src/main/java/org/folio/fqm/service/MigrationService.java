@@ -14,9 +14,9 @@ import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
-import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
 import org.folio.fqm.migration.MigrationUtils;
+import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,11 +50,15 @@ public class MigrationService {
     boolean hadBreakingChanges = false;
     if (isMigrationNeeded(migratableQueryInformation)) {
       for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
-        if (MigrationUtils.compareVersions(migratableQueryInformation.version(), strategy.getMaximumApplicableVersion()) <= 0
-            && strategy.applies(migratableQueryInformation)
+        if (
+          MigrationUtils.compareVersions(
+            migratableQueryInformation.version(),
+            strategy.getMaximumApplicableVersion()
+          ) <=
+          0
         ) {
           log.info("Applying {} to {}", strategy.getLabel(), migratableQueryInformation);
-          migratableQueryInformation = strategy.apply(fqlService, migratableQueryInformation);
+          migratableQueryInformation = strategy.apply(migratableQueryInformation);
           hadBreakingChanges |= migratableQueryInformation.hadBreakingChanges();
         }
       }

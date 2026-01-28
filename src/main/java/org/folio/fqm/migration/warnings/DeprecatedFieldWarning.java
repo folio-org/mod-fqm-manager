@@ -1,6 +1,5 @@
 package org.folio.fqm.migration.warnings;
 
-import java.util.function.BiFunction;
 import javax.annotation.CheckForNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -47,7 +46,7 @@ public class DeprecatedFieldWarning implements FieldWarning {
     }
   }
 
-  public static BiFunction<String, String, FieldWarning> build() {
-    return (String field, String fql) -> new DeprecatedFieldWarning(field, fql);
+  public static FieldWarningFactory build() {
+    return (String fieldPrefix, String field, String fql) -> new DeprecatedFieldWarning(fieldPrefix + field, fql);
   }
 }

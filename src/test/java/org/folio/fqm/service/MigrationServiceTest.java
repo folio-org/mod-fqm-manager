@@ -3,27 +3,24 @@ package org.folio.fqm.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
-import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
-import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
-import org.jetbrains.annotations.NotNull;
+import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,9 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MigrationServiceTest {
-
-  @Mock
-  private FqlService fqlService;
 
   @Spy
   private MigrationConfiguration migrationConfiguration;
@@ -100,7 +94,7 @@ class MigrationServiceTest {
   void testMigrationWorks() {
     String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
 
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -114,38 +108,7 @@ class MigrationServiceTest {
           .fqlQuery()
       )
     );
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
-  }
-
-  @Test
-  void testMigrationOnlyAppliesApplicable() {
-    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
-
-    MigrationStrategy migrationStrategyApplicable = spy(new TestMigrationStrategy(true, 1));
-    MigrationStrategy migrationStrategyInapplicable = spy(new TestMigrationStrategy(false, 0));
-
-    when(migrationStrategyRepository.getMigrationStrategies())
-      .thenReturn(List.of(migrationStrategyInapplicable, migrationStrategyApplicable, migrationStrategyInapplicable));
-
-    assertThat(
-      migrationService.migrate(MigratableQueryInformation.builder().fqlQuery(fql).build()).fqlQuery(),
-      is(
-        MigratableQueryInformation
-          .builder()
-          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
-          .build()
-          .fqlQuery()
-      )
-    );
-    verify(migrationStrategyApplicable, times(1))
-      .apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
-    verify(migrationStrategyApplicable, times(1)).getLabel();
-    verify(migrationStrategyApplicable, times(1)).applies(any(MigratableQueryInformation.class));
-    verify(migrationStrategyApplicable, times(1)).getMaximumApplicableVersion();
-    verify(migrationStrategyInapplicable, times(2)).applies(any(MigratableQueryInformation.class));
-    verify(migrationStrategyInapplicable, times(2)).getMaximumApplicableVersion();
-
-    verifyNoMoreInteractions(migrationStrategyApplicable, migrationStrategyInapplicable);
+    verify(migrationStrategy, times(1)).apply(MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
   }
 
   // Common test FQL query
@@ -154,13 +117,16 @@ class MigrationServiceTest {
   @Test
   void testThrowExceptionIfQueryNeedsMigrationWithNoBreakingChanges() {
     // Use the default strategy that only changes the version
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
     // This should not throw an exception because only the version changes
-    migrationService.throwExceptionIfQueryNeedsMigration(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build());
+    migrationService.throwExceptionIfQueryNeedsMigration(
+      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build()
+    );
 
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build());
+    verify(migrationStrategy, times(1))
+      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build());
   }
 
   @Test
@@ -168,15 +134,21 @@ class MigrationServiceTest {
     // Test when entityTypeId changes
     testMigrationException(
       // Strategy that changes entityTypeId
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery())
-        .entityTypeId(UUID.randomUUID())
-        .hadBreakingChanges(true)
-        .build(),
+      info ->
+        MigratableQueryInformation
+          .builder()
+          .fqlQuery(info.fqlQuery())
+          .entityTypeId(UUID.randomUUID())
+          .hadBreakingChanges(true)
+          .build(),
       // Input query
       MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(),
       // Verification
-      exception -> assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true))
+      exception ->
+        assertThat(
+          exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()),
+          is(true)
+        )
     );
   }
 
@@ -188,20 +160,19 @@ class MigrationServiceTest {
    * @param exceptionVerifier A consumer that verifies the exception
    */
   private void testMigrationException(
-    BiFunction<FqlService, MigratableQueryInformation, MigratableQueryInformation> strategyApply,
+    Function<MigratableQueryInformation, MigratableQueryInformation> strategyApply,
     MigratableQueryInformation inputQuery,
     Consumer<MigrationQueryChangedException> exceptionVerifier
   ) {
     // Create a strategy with the provided apply function
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1) {
-      @Override
-      public MigratableQueryInformation apply(
-        FqlService fqlService,
-        MigratableQueryInformation migratableQueryInformation
-      ) {
-        return strategyApply.apply(fqlService, migratableQueryInformation);
+    MigrationStrategy migrationStrategy = spy(
+      new TestMigrationStrategy(1) {
+        @Override
+        public MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation) {
+          return strategyApply.apply(migratableQueryInformation);
+        }
       }
-    });
+    );
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -218,20 +189,11 @@ class MigrationServiceTest {
   @RequiredArgsConstructor
   private class TestMigrationStrategy implements MigrationStrategy {
 
-    final boolean applies;
     final int requiredCount;
     int count = 0;
 
     @Override
-    public boolean applies(@NotNull MigratableQueryInformation migratableQueryInformation) {
-      return applies;
-    }
-
-    @Override
-    public MigratableQueryInformation apply(
-      FqlService fqlService,
-      MigratableQueryInformation migratableQueryInformation
-    ) {
+    public MigratableQueryInformation apply(MigratableQueryInformation migratableQueryInformation) {
       if (++count != requiredCount) {
         return migratableQueryInformation;
       }

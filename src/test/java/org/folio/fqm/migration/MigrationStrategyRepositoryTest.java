@@ -8,7 +8,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +15,10 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.migration.strategies.AbstractSimpleMigrationStrategy;
+import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.fqm.service.MigrationService;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -37,7 +39,12 @@ class MigrationStrategyRepositoryTest {
     null,
     null,
     null,
-    null
+    new FolioExecutionContext() {
+      @Override
+      public String getTenantId() {
+        return "test_tenant";
+      }
+    }
   );
   MigrationService migrationService = new MigrationService(
     null,
@@ -93,13 +100,7 @@ class MigrationStrategyRepositoryTest {
   @ParameterizedTest(name = "{index}: {0}")
   @MethodSource("migrationStrategiesAndQueries")
   void testStrategies(String label, MigrationStrategy strategy, MigratableQueryInformation query) {
-    boolean applies = strategy.applies(query);
-
-    log.info("{} applies={}", label, applies);
-
-    if (applies) {
-      strategy.apply(fqlService, query);
-    }
+    strategy.apply(query);
 
     // migration application is thoroughly tested for this shared logic
     // these test the maps/etc all are set up correctly
@@ -117,7 +118,7 @@ class MigrationStrategyRepositoryTest {
         .getFieldWarnings()
         .forEach((k, v) ->
           v.forEach((k2, v2) -> {
-            assertThat(v2.apply("field", "{}"), is(notNullValue()));
+            assertThat(v2.apply("", "field", "{}"), is(notNullValue()));
           })
         );
     }
@@ -129,7 +130,8 @@ class MigrationStrategyRepositoryTest {
     // We could probably just sort these in MigrationService, but we have to have them listed in the repository anyway, so we might as
     // well just insist that they are properly ordered there instead
     List<MigrationStrategy> strategies = migrationStrategyRepository.getMigrationStrategies();
-    List<MigrationStrategy> sortedStrategies = strategies.stream()
+    List<MigrationStrategy> sortedStrategies = strategies
+      .stream()
       .sorted(Comparator.comparing(MigrationStrategy::getMaximumApplicableVersion, MigrationUtils::compareVersions))
       .toList();
     assertEquals(sortedStrategies, strategies);

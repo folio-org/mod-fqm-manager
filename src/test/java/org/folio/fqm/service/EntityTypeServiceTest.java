@@ -38,6 +38,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -1604,4 +1605,67 @@ class EntityTypeServiceTest {
       "Expected label to be translated for value 'US'"
     );
   }
+
+  @Test
+  void shouldFallbackToCodeWhenCountryTranslationReturnsNull() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "country";
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("country-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("countries")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+
+    when(translationService.format(anyString())).thenAnswer(inv -> {
+      String key = inv.getArgument(0);
+      return "mod-fqm-manager.countries.US".equals(key) ? null : key;
+    });
+
+    ColumnValues actual = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "US");
+
+    assertNotNull(actual);
+    assertNotNull(actual.getContent());
+    assertFalse(actual.getContent().isEmpty());
+
+    assertTrue(actual.getContent().stream().anyMatch(v -> "US".equals(v.getValue()) && "US".equals(v.getLabel())));
+  }
+
+  @Test
+  void shouldFallbackToCodeWhenCountryTranslationReturnsBlank() {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "country";
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("country-test")
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("countries")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+
+    when(translationService.format(anyString())).thenAnswer(inv -> {
+      String key = inv.getArgument(0);
+      return "mod-fqm-manager.countries.US".equals(key) ? "   " : key;
+    });
+
+    ColumnValues actual = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "US");
+
+    assertNotNull(actual);
+    assertNotNull(actual.getContent());
+    assertFalse(actual.getContent().isEmpty());
+
+    assertTrue(actual.getContent().stream().anyMatch(v -> "US".equals(v.getValue()) && "US".equals(v.getLabel())));
+  }
+
 }

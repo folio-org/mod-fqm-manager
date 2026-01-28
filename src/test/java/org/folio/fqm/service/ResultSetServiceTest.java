@@ -221,4 +221,67 @@ class ResultSetServiceTest {
     );
     assertEquals(expectedResult, actualResult);
   }
+
+  @Test
+  void shouldLocalizeNestedCountryCodesFromFqmCountriesSource() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    // Root field is "addresses" stored as a JSON string in the result set.
+    String addressesJson = "[" +
+      "{\"city\":\"Auburn\",\"countryId\":\"US\"}," +
+      "{\"city\":\"Auburn\",\"countryId\":\"MO\"}" +
+      "]";
+
+    // Build entity type with nested field addresses[*]->countryId that is sourced from FQM "countries".
+    var addressesColumn = new EntityTypeColumn()
+      .name("addresses")
+      .dataType(
+        new org.folio.querytool.domain.dto.ArrayType().itemDataType(
+          new org.folio.querytool.domain.dto.ObjectType().properties(List.of(
+            new org.folio.querytool.domain.dto.NestedObjectProperty()
+              .name("country_id")
+              .property("countryId")
+              .source(new org.folio.querytool.domain.dto.SourceColumn(entityTypeId, "country_id")
+                .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
+                .name("countries"))
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        addressesColumn
+      ))
+      .sources(List.of(
+        new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")
+      ));
+
+    List<String> fields = List.of("id", "addresses");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "addresses", addressesJson)));
+
+    when(translationService.format("mod-fqm-manager.countries.US")).thenReturn("United States");
+    when(translationService.format("mod-fqm-manager.countries.MO")).thenReturn("Macao");
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals(contentId.toString(), actual.getFirst().get("id"));
+
+    String localizedAddresses = (String) actual.getFirst().get("addresses");
+    assertEquals(
+      "[{\"city\":\"Auburn\",\"countryId\":\"United States\"},{\"city\":\"Auburn\",\"countryId\":\"Macao\"}]",
+      localizedAddresses
+    );
+  }
 }

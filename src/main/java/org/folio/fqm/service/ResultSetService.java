@@ -95,6 +95,19 @@ public class ResultSetService {
       .toList();
   }
 
+  private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {
+    for (String fieldName : dateFields) {
+      contents.computeIfPresent(fieldName, (key, value) -> {
+        if (value instanceof Timestamp ts) {
+          return adjustDate(ts.toInstant(), tenantTimezone);
+        } else if (value instanceof String s) {
+          return parseAndAdjustDate(s, tenantTimezone);
+        }
+        return value;
+      });
+    }
+  }
+
   private static List<String> getCountryLocalizationFieldPaths(EntityType entityType) {
     List<String> paths = new ArrayList<>();
 
@@ -121,19 +134,6 @@ public class ResultSetService {
     });
 
     return paths;
-  }
-
-  private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {
-    for (String fieldName : dateFields) {
-      contents.computeIfPresent(fieldName, (key, value) -> {
-        if (value instanceof Timestamp ts) {
-          return adjustDate(ts.toInstant(), tenantTimezone);
-        } else if (value instanceof String s) {
-          return parseAndAdjustDate(s, tenantTimezone);
-        }
-        return value;
-      });
-    }
   }
 
   private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {

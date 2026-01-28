@@ -44,6 +44,9 @@ public class ResultSetService {
   private final FolioExecutionContext executionContext;
   private final TranslationService translationService;
 
+  // Reuse mapper; parsing/serializing per record is expensive.
+  private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
   public List<Map<String, Object>> getResultSet(UUID entityTypeId,
                                                 List<String> fields,
                                                 List<List<String>> ids, List<String> tenantsToQuery, boolean localize) {
@@ -67,6 +70,7 @@ public class ResultSetService {
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
+    List<String> countryFields = localize ? getCountryLocalizationFieldPaths(entityType) : List.of();
 
     return contentIds
       .stream()
@@ -84,12 +88,31 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
-          // TODO: might want to always localize this
-          localizeCountries(copiedContents);
+          localizeCountries(copiedContents, countryFields);
         }
         return copiedContents;
       })
       .toList();
+  }
+
+  private static List<String> getCountryLocalizationFieldPaths(EntityType entityType) {
+    List<String> paths = new ArrayList<>();
+
+    // Find all fields whose configured source is FQM("countries"). For nested fields, this yields paths like "addresses[*]->countryId".
+    EntityTypeUtils.runOnEveryField(entityType, (field, parentPath) -> {
+      if (!(field instanceof org.folio.querytool.domain.dto.Field f)) {
+        return;
+      }
+      if (f.getSource() == null || f.getSource().getType() != org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM) {
+        return;
+      }
+      if (!"countries".equals(f.getSource().getName())) {
+        return;
+      }
+      paths.add(parentPath + f.getName());
+    });
+
+    return paths;
   }
 
   private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {
@@ -105,51 +128,79 @@ public class ResultSetService {
     }
   }
 
-  // TODO: make sure handles nulls correctly
-  private void localizeCountries(Map<String, Object> contents) {
-    Object addressesObj = contents.get("addresses");
-    if (!(addressesObj instanceof String addressesJson) || addressesJson.isBlank()) {
+  private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {
+    if (countryFieldPaths == null || countryFieldPaths.isEmpty()) {
       return;
     }
 
-    // DB values may come back as a JSON string. We only touch addresses[*].countryId, leaving all other content unchanged.
+    for (String fieldPath : countryFieldPaths) {
+      localizeCountryField(contents, fieldPath);
+    }
+  }
+
+  /**
+   * Localizes a single field path that points to a nested element inside a JSON-string field.
+   * Currently supports the array-of-objects shape: "<root>[*]-><leaf>", e.g. "addresses[*]->countryId".
+   */
+  private void localizeCountryField(Map<String, Object> contents, String fieldPath) {
+    if (fieldPath == null || fieldPath.isBlank()) {
+      return;
+    }
+
+    String marker = "[*]->";
+    int markerIdx = fieldPath.indexOf(marker);
+    if (markerIdx <= 0) {
+      return;
+    }
+
+    String rootField = fieldPath.substring(0, markerIdx);
+    String leafField = fieldPath.substring(markerIdx + marker.length());
+    if (rootField.isBlank() || leafField.isBlank()) {
+      return;
+    }
+
+    Object rootObj = contents.get(rootField);
+    if (!(rootObj instanceof String rootJson) || rootJson.isBlank()) {
+      return;
+    }
+
     try {
-      var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-      var node = mapper.readTree(addressesJson);
+      var node = OBJECT_MAPPER.readTree(rootJson);
       if (!node.isArray()) {
         return;
       }
 
       boolean changed = false;
-      for (com.fasterxml.jackson.databind.JsonNode addressNode : node) {
-        if (!addressNode.isObject()) {
+      for (com.fasterxml.jackson.databind.JsonNode elementNode : node) {
+        if (!elementNode.isObject()) {
           continue;
         }
-        var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) addressNode;
-        var countryNode = objNode.get("countryId");
-        if (countryNode == null || !countryNode.isTextual()) {
+        var objNode = (com.fasterxml.jackson.databind.node.ObjectNode) elementNode;
+
+        // TODO: fix (countryId vs country_id)
+        var valueNode = objNode.get(leafField);
+        if (valueNode == null || !valueNode.isTextual()) {
           continue;
         }
 
-        String countryCode = countryNode.asText();
-        if (countryCode == null || countryCode.isBlank()) {
+        String code = valueNode.asText();
+        if (code == null || code.isBlank()) {
           continue;
         }
 
-        String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(countryCode);
+        String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
         String translated = translationService.format(translationKey);
-        if (translated != null && !translated.isBlank() && !translated.equals(countryCode)) {
-          objNode.put("countryId", translated);
+        if (translated != null && !translated.isBlank() && !translated.equals(code)) {
+          objNode.put(leafField, translated);
           changed = true;
         }
       }
 
       if (changed) {
-        contents.put("addresses", mapper.writeValueAsString(node));
+        contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
       }
     } catch (Exception e) {
-      // Best-effort localization: if parsing fails, return original value.
-      log.debug("Unable to localize addresses countryId values (unexpected JSON): {}", e.getMessage());
+      log.debug("Unable to localize country field '{}' (unexpected JSON): {}", fieldPath, e.getMessage());
     }
   }
 

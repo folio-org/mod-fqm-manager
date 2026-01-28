@@ -417,4 +417,49 @@ class ResultSetServiceTest {
 
     assertEquals("United States", contents.get("countryId"));
   }
+
+  @ParameterizedTest
+  @MethodSource("missingCountryTranslationCases")
+  void shouldNotLocalizeTopLevelCountryWhenTranslationIsMissing(String translationResult) {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn().name("countryId")
+          .source(new SourceColumn(entityTypeId, "countryId")
+            .type(SourceColumn.TypeEnum.FQM)
+            .name("countries"))
+      ))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("target1")));
+
+    List<String> fields = List.of("id", "countryId");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "countryId", "US")));
+
+    String translationKey = "mod-fqm-manager.countries.US";
+    when(translationService.format(translationKey)).thenReturn(translationResult);
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, true);
+
+    assertEquals(1, actual.size());
+    assertEquals("US", actual.getFirst().get("countryId"));
+  }
+
+  static java.util.stream.Stream<Arguments> missingCountryTranslationCases() {
+    return java.util.stream.Stream.of(
+      Arguments.of((String) null),
+      Arguments.of("   "),
+      Arguments.of("mod-fqm-manager.countries.US")
+    );
+  }
 }

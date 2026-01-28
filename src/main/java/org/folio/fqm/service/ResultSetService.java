@@ -110,6 +110,7 @@ public class ResultSetService {
     }
   }
 
+  // Good
   private static List<String> getCountryLocalizationFieldPaths(EntityType entityType) {
     List<String> paths = new ArrayList<>();
 
@@ -134,6 +135,7 @@ public class ResultSetService {
     return paths;
   }
 
+  // Good
   private void localizeCountries(Map<String, Object> contents, List<String> countryFieldPaths) {
     if (CollectionUtils.isEmpty(countryFieldPaths)) {
       return;
@@ -158,10 +160,6 @@ public class ResultSetService {
 
     if (markerIdx < 0) {
       localizeTopLevelCountryField(contents, fieldPath);
-      return;
-    }
-
-    if (markerIdx <= 0) {
       return;
     }
 
@@ -230,14 +228,11 @@ public class ResultSetService {
   }
 
   private java.util.Optional<String> translateCountry(String code) {
-    if (code == null || code.isBlank()) {
-      return java.util.Optional.empty();
-    }
-
     String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
     String translated = translationService.format(translationKey);
 
-    if (translated == null || translated.isBlank() || translated.equals(code)) {
+    // If translation is missing, don't modify the original value
+    if (translated == null || translated.isBlank() || translated.equals(translationKey)) {
       return java.util.Optional.empty();
     }
 

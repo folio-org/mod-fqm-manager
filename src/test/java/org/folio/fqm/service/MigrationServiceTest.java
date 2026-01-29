@@ -1,9 +1,12 @@
 package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +26,11 @@ import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategyRepository;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
+import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,6 +47,12 @@ class MigrationServiceTest {
   @Mock
   private CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
 
+  @Mock
+  private EntityTypeRepository entityTypeRepository;
+
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
+
   @Spy
   private MigrationConfiguration migrationConfiguration;
 
@@ -50,6 +64,11 @@ class MigrationServiceTest {
 
   @InjectMocks
   private MigrationService migrationService;
+
+  @BeforeEach
+  void setup() {
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenant");
+  }
 
   static List<Arguments> queriesWithExpectedVersions() {
     return List.of(
@@ -113,8 +132,7 @@ class MigrationServiceTest {
           .fqlQuery()
       )
     );
-    verify(migrationStrategy, times(1))
-      .apply(MigratableQueryInformation.builder().fqlQuery(fql).build(), Map.of());
+    verify(migrationStrategy, times(1)).apply(MigratableQueryInformation.builder().fqlQuery(fql).build(), Map.of());
   }
 
   // Common test FQL query
@@ -170,6 +188,54 @@ class MigrationServiceTest {
           exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()),
           is(true)
         )
+    );
+  }
+
+  @Test
+  void testGetCurrentCustomEntityTypeMappings() {
+    when(entityTypeRepository.getEntityTypeDefinitions(null, "tenant"))
+      .thenReturn(
+        List
+          .of(
+            // not custom
+            new EntityType().id("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").sources(List.of()),
+            // not custom + no sources
+            new EntityType().id("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb").sources(null),
+            // acceptable, will point to empty map
+            new EntityType()
+              .id("cccccccc-cccc-cccc-cccc-cccccccccccc")
+              .sources(List.of())
+              .putAdditionalProperty("isCustom", true),
+            // no sources
+            new EntityType()
+              .id("dddddddd-dddd-dddd-dddd-dddddddddddd")
+              .sources(null)
+              .putAdditionalProperty("isCustom", true),
+            // acceptable, with result
+            new EntityType()
+              .id("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+              .sources(
+                List.of(
+                  new EntityTypeSourceEntityType()
+                    .alias("source")
+                    .targetId(UUID.fromString("12341234-1234-1234-1234-123412341234"))
+                )
+              )
+              .putAdditionalProperty("isCustom", true)
+          )
+          .stream()
+      );
+
+    assertThat(
+      migrationService.getCurrentCustomEntityTypeMappings(),
+      is(
+        Map.of(
+          UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+          Map.of(),
+          UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+          Map.of("source", UUID.fromString("12341234-1234-1234-1234-123412341234"))
+        )
+      )
     );
   }
 

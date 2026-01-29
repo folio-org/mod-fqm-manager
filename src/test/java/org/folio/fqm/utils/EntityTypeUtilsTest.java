@@ -2,6 +2,8 @@ package org.folio.fqm.utils;
 
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
 import static org.folio.fqm.utils.EntityTypeUtils.verifyEntityTypeHasNotChangedDuringQueryLifetime;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.jooq.impl.DSL.field;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -150,6 +153,24 @@ class EntityTypeUtilsTest {
     assertThrows(
       InvalidEntityTypeDefinitionException.class,
       () -> EntityTypeUtils.findSourceByAlias(entityType, "missing", "ref")
+    );
+  }
+
+  @Test
+  void testGetEntityTypeSourceAliasMap() {
+    EntityType entityType = new EntityType()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")),
+          new EntityTypeSourceDatabase().alias("source2")
+        )
+      );
+
+    assertThat(
+      EntityTypeUtils.getEntityTypeSourceAliasMap(entityType),
+      is(Map.of("source1", UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")))
     );
   }
 

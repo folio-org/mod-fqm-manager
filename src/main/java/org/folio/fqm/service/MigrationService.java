@@ -31,6 +31,7 @@ import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
@@ -147,23 +148,7 @@ public class MigrationService {
       .getEntityTypeDefinitions(null, folioExecutionContext.getTenantId())
       .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
       .filter(et -> et.getSources() != null)
-      .map(et -> Map.entry(UUID.fromString(et.getId()), getCustomEntityTypeSourceMap(et)))
-      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-  }
-
-  protected Map<String, UUID> getCustomEntityTypeSourceMap(EntityType et) {
-    return et
-      .getSources()
-      .stream()
-      .filter(EntityTypeSourceEntityType.class::isInstance)
-      .map(EntityTypeSourceEntityType.class::cast)
-      .collect(
-        Collectors.toMap(
-          EntityTypeSourceEntityType::getAlias,
-          EntityTypeSourceEntityType::getTargetId,
-          (existing, replacement) -> existing
-        )
-      );
+      .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), EntityTypeUtils::getEntityTypeSourceAliasMap));
   }
 
   /**
@@ -223,7 +208,7 @@ public class MigrationService {
       .forEach(et -> {
         CustomEntityType migrated = migrateCustomEntityType(et, currentMappings);
         toMigrate.remove(UUID.fromString(migrated.getId()));
-        currentMappings.put(UUID.fromString(migrated.getId()), getCustomEntityTypeSourceMap(migrated));
+        currentMappings.put(UUID.fromString(migrated.getId()), EntityTypeUtils.getEntityTypeSourceAliasMap(migrated));
       });
 
     updateCustomEntityMigrationMappings();
@@ -282,7 +267,10 @@ public class MigrationService {
         log.info("Applying {}", strategy.getLabel());
 
         // these may change between strategy executions, so we re-compute ours each time
-        currentCustomEntityTypeMappings.put(UUID.fromString(et.getId()), getCustomEntityTypeSourceMap(et));
+        currentCustomEntityTypeMappings.put(
+          UUID.fromString(et.getId()),
+          EntityTypeUtils.getEntityTypeSourceAliasMap(et)
+        );
 
         // the order of these don't matter too much as they won't change each other
         // (any necessary hierarchy data is stored in the above derived map)

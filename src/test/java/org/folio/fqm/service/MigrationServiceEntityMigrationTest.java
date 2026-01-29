@@ -1,19 +1,32 @@
 package org.folio.fqm.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
@@ -22,13 +35,19 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.iterators.PermutationIterator;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.migration.MigrationStrategyRepository;
-import org.folio.fqm.migration.strategies.MigrationStrategy;
+import org.folio.fqm.migration.strategies.AbstractSimpleMigrationStrategy;
+import org.folio.fqm.migration.warnings.FieldWarningFactory;
+import org.folio.fqm.migration.warnings.RemovedFieldWarning;
+import org.folio.fqm.migration.warnings.Warning;
 import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeDefaultSort;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +64,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class MigrationServiceEntityMigrationTest {
 
+  private static final UUID SIMPLE_MIGRATION_ENTITY_ID1 = UUID.fromString("18f63a52-324e-5cd6-91bc-c792bfd92d85");
+  private static final UUID SIMPLE_MIGRATION_ENTITY_ID2 = UUID.fromString("23fb1748-529c-5ef8-8ef5-4a1b4d8a89eb");
+  private static final UUID SIMPLE_MIGRATION_ENTITY_ID3 = UUID.fromString("38f2aeab-0ddf-5409-9244-b91eddb29da2");
+  private static final CustomEntityType CUSTOM_MIGRATION_ENTITY_TYPE = new CustomEntityType()
+    .id("50a45b97-bb75-5b0c-bab6-3a49d430d5b1")
+    .sources(List.of(new EntityTypeSourceEntityType().alias("inner").targetId(SIMPLE_MIGRATION_ENTITY_ID1)));
+  private static final Map<UUID, Map<String, UUID>> CUSTOM_MIGRATION_MAPPINGS = Map.of(
+    UUID.fromString(CUSTOM_MIGRATION_ENTITY_TYPE.getId()),
+    Map.of("inner", SIMPLE_MIGRATION_ENTITY_ID1)
+  );
+
   @Mock
   private CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
 
@@ -58,13 +88,13 @@ class MigrationServiceEntityMigrationTest {
   private MigrationConfiguration migrationConfiguration;
 
   @Mock
-  private MigrationStrategy testStrategy;
-
-  @Mock
   private MigrationStrategyRepository migrationStrategyRepository;
 
   @Spy
   private ObjectMapper objectMapper;
+
+  @Mock
+  private TranslationService translationService;
 
   @InjectMocks
   private MigrationService migrationService;
@@ -73,7 +103,9 @@ class MigrationServiceEntityMigrationTest {
   void setup() {
     lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenant");
 
-    lenient().when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(testStrategy));
+    lenient()
+      .when(migrationStrategyRepository.getMigrationStrategies())
+      .thenReturn(List.of(new TestMigrationStrategy()));
   }
 
   @Test
@@ -200,6 +232,255 @@ class MigrationServiceEntityMigrationTest {
     // can be anywhere
     verify(entityTypeRepository)
       .updateEntityType(argThat(e -> e.getId().equals("aaaaaaaa-fb77-5995-8ead-8b1efd81fd10")));
+  }
+
+  @Test
+  void testMigrateDefaultSortNull() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE.toBuilder().build().defaultSort(null);
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntityDefaultSort(entityType, new TestMigrationStrategy(), Map.of(), warnings);
+
+    assertThat(entityType.getDefaultSort(), is(nullValue()));
+    assertThat(warnings, is(empty()));
+  }
+
+  @Test
+  void testMigrateDefaultSortChanged() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .defaultSort(List.of(new EntityTypeDefaultSort("inner.old", EntityTypeDefaultSort.DirectionEnum.ASC)));
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntityDefaultSort(
+      entityType,
+      new TestMigrationStrategy(),
+      CUSTOM_MIGRATION_MAPPINGS,
+      warnings
+    );
+
+    assertThat(
+      entityType.getDefaultSort(),
+      is(List.of(new EntityTypeDefaultSort("inner.new", EntityTypeDefaultSort.DirectionEnum.ASC)))
+    );
+    assertThat(warnings, is(empty()));
+  }
+
+  @Test
+  void testMigrateDefaultSortRemoved() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .defaultSort(
+        List.of(
+          new EntityTypeDefaultSort("inner.removed", EntityTypeDefaultSort.DirectionEnum.ASC),
+          new EntityTypeDefaultSort("inner.unchanged", EntityTypeDefaultSort.DirectionEnum.DESC)
+        )
+      );
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntityDefaultSort(
+      entityType,
+      new TestMigrationStrategy(),
+      CUSTOM_MIGRATION_MAPPINGS,
+      warnings
+    );
+
+    assertThat(
+      entityType.getDefaultSort(),
+      is(List.of(new EntityTypeDefaultSort("inner.unchanged", EntityTypeDefaultSort.DirectionEnum.DESC)))
+    );
+    assertThat(warnings, hasItem(RemovedFieldWarning.builder().field("inner.removed").build()));
+  }
+
+  @Test
+  void testMigrateGroupByFieldsNull() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE.toBuilder().build().groupByFields(null);
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntityGroupByFields(entityType, new TestMigrationStrategy(), Map.of(), warnings);
+
+    assertThat(entityType.getGroupByFields(), is(nullValue()));
+    assertThat(warnings, is(empty()));
+  }
+
+  @Test
+  void testMigrateGroupByFieldsChanged() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .groupByFields(List.of("inner.old", "inner.unchanged", "inner.removed"));
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntityGroupByFields(
+      entityType,
+      new TestMigrationStrategy(),
+      CUSTOM_MIGRATION_MAPPINGS,
+      warnings
+    );
+
+    assertThat(entityType.getGroupByFields(), containsInAnyOrder("inner.new", "inner.unchanged"));
+    assertThat(
+      warnings.stream().distinct().toList(),
+      contains(RemovedFieldWarning.builder().field("inner.removed").build())
+    );
+  }
+
+  @Test
+  void testMigrateSourcesNull() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE.toBuilder().build().sources(null);
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntitySources(entityType, new TestMigrationStrategy(), Map.of(), warnings);
+    assertThat(entityType.getSources(), is(nullValue()));
+    assertThat(warnings, is(empty()));
+  }
+
+  @Test
+  void testMigrateSourceFieldsAndEntityChanged() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType().alias("source1").targetId(SIMPLE_MIGRATION_ENTITY_ID1),
+          new EntityTypeSourceEntityType()
+            .alias("source2")
+            .targetId(SIMPLE_MIGRATION_ENTITY_ID2)
+            .targetField("antiquated")
+            .sourceField("source1.old")
+        )
+      );
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntitySources(
+      entityType,
+      new TestMigrationStrategy(),
+      Map.of(UUID.fromString(entityType.getId()), EntityTypeUtils.getEntityTypeSourceAliasMap(entityType)),
+      warnings
+    );
+
+    assertThat(
+      entityType.getSources(),
+      containsInAnyOrder(
+        new EntityTypeSourceEntityType().alias("source1").targetId(SIMPLE_MIGRATION_ENTITY_ID1),
+        new EntityTypeSourceEntityType()
+          .alias("source2")
+          .targetId(SIMPLE_MIGRATION_ENTITY_ID3)
+          .targetField("modern")
+          .sourceField("source1.new")
+      )
+    );
+    assertThat(warnings, is(empty()));
+  }
+
+  @Test
+  void testMigrateSourceFieldsRemoved() {
+    EntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType().alias("source1").targetId(SIMPLE_MIGRATION_ENTITY_ID1),
+          new EntityTypeSourceEntityType()
+            .alias("source2")
+            .targetId(SIMPLE_MIGRATION_ENTITY_ID2)
+            .targetField("banished")
+            .sourceField("source1.removed")
+        )
+      );
+    List<Warning> warnings = new ArrayList<>();
+
+    migrationService.migrateEntitySources(
+      entityType,
+      new TestMigrationStrategy(),
+      Map.of(UUID.fromString(entityType.getId()), EntityTypeUtils.getEntityTypeSourceAliasMap(entityType)),
+      warnings
+    );
+
+    // we want to leave these fields in place even though they are removed,
+    // as we don't want to remove/break the source entirely (there are fallbacks for that already)
+    assertThat(
+      entityType.getSources(),
+      containsInAnyOrder(
+        new EntityTypeSourceEntityType().alias("source1").targetId(SIMPLE_MIGRATION_ENTITY_ID1),
+        new EntityTypeSourceEntityType()
+          .alias("source2")
+          .targetId(SIMPLE_MIGRATION_ENTITY_ID3)
+          .targetField("antiquated")
+          .sourceField("source1.removed")
+      )
+    );
+    assertThat(
+      warnings.stream().distinct().toList(),
+      containsInAnyOrder(
+        RemovedFieldWarning.builder().field("source1.removed").build(),
+        RemovedFieldWarning.builder().field("source2.banished").build()
+      )
+    );
+  }
+
+  @Test
+  void testMigrateWarnings() {
+    CustomEntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE
+      .toBuilder()
+      .build()
+      .groupByFields(List.of("inner.removed"));
+
+    when(translationService.format(anyString(), any(Object[].class))).thenAnswer(i -> i.getArgument(0, String.class));
+
+    migrationService.migrateCustomEntityType(entityType, CUSTOM_MIGRATION_MAPPINGS);
+
+    assertThat(entityType.getDescription(), matchesPattern(".+warning-header(.|\n).+REMOVED_FIELD.+"));
+  }
+
+  @Test
+  void testMigrateNoWarnings() {
+    CustomEntityType entityType = CUSTOM_MIGRATION_ENTITY_TYPE.toBuilder().build();
+
+    migrationService.migrateCustomEntityType(entityType, CUSTOM_MIGRATION_MAPPINGS);
+
+    assertThat(entityType.getDescription(), is(nullValue()));
+    verifyNoInteractions(translationService);
+  }
+
+  private static class TestMigrationStrategy extends AbstractSimpleMigrationStrategy {
+
+    @Override
+    public String getLabel() {
+      return "";
+    }
+
+    @Override
+    public String getMaximumApplicableVersion() {
+      return "9999999";
+    }
+
+    @Override
+    public Map<UUID, Map<String, String>> getFieldChanges() {
+      return Map.of(
+        SIMPLE_MIGRATION_ENTITY_ID1,
+        Map.of("old", "new"),
+        SIMPLE_MIGRATION_ENTITY_ID2,
+        Map.of("antiquated", "modern")
+      );
+    }
+
+    @Override
+    public Map<UUID, Map<String, FieldWarningFactory>> getFieldWarnings() {
+      return Map.of(
+        SIMPLE_MIGRATION_ENTITY_ID1,
+        Map.of("removed", RemovedFieldWarning.withoutAlternative()),
+        SIMPLE_MIGRATION_ENTITY_ID2,
+        Map.of("banished", RemovedFieldWarning.withoutAlternative())
+      );
+    }
+
+    @Override
+    public Map<UUID, UUID> getEntityTypeChanges() {
+      return Map.of(SIMPLE_MIGRATION_ENTITY_ID2, SIMPLE_MIGRATION_ENTITY_ID3);
+    }
   }
 
   private static List<EntityType> getEntityList(String... ids) {

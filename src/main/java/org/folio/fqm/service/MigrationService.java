@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,7 @@ import org.folio.querytool.domain.dto.CustomEntityType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -49,6 +52,7 @@ public class MigrationService {
   private final MigrationConfiguration migrationConfiguration;
   private final MigrationStrategyRepository migrationStrategyRepository;
   private final ObjectMapper objectMapper;
+  private final TranslationService translationService;
 
   public String getLatestVersion() {
     return migrationConfiguration.getCurrentVersion();
@@ -201,7 +205,7 @@ public class MigrationService {
       toMigrate.remove(UUID.fromString(nextInnermost.getId()));
     }
 
-    Map<UUID, Map<String, UUID>> currentMappings = getCurrentCustomEntityTypeMappings();
+    Map<UUID, Map<String, UUID>> currentMappings = new HashMap<>(getCurrentCustomEntityTypeMappings());
 
     migrationOrder
       .stream()
@@ -260,6 +264,8 @@ public class MigrationService {
       this.getLatestVersion()
     );
 
+    Map<UUID, Map<String, UUID>> updatedMappings = new HashMap<>(currentCustomEntityTypeMappings);
+
     List<Warning> warnings = new ArrayList<>();
 
     for (MigrationStrategy strategy : migrationStrategyRepository.getMigrationStrategies()) {
@@ -267,20 +273,34 @@ public class MigrationService {
         log.info("Applying {}", strategy.getLabel());
 
         // these may change between strategy executions, so we re-compute ours each time
-        currentCustomEntityTypeMappings.put(
-          UUID.fromString(et.getId()),
-          EntityTypeUtils.getEntityTypeSourceAliasMap(et)
-        );
+        updatedMappings.put(UUID.fromString(et.getId()), EntityTypeUtils.getEntityTypeSourceAliasMap(et));
 
         // the order of these don't matter too much as they won't change each other
         // (any necessary hierarchy data is stored in the above derived map)
-        migrateEntitySources(et, strategy, currentCustomEntityTypeMappings, warnings);
-        migrateEntityGroupByFields(et, strategy, currentCustomEntityTypeMappings, warnings);
-        migrateEntityDefaultSort(et, strategy, currentCustomEntityTypeMappings, warnings);
+        migrateEntitySources(et, strategy, updatedMappings, warnings);
+        migrateEntityGroupByFields(et, strategy, updatedMappings, warnings);
+        migrateEntityDefaultSort(et, strategy, updatedMappings, warnings);
       }
     }
 
     et.setVersion(this.getLatestVersion());
+    if (!warnings.isEmpty()) {
+      et.setDescription(
+        (
+          Optional.ofNullable(et.getDescription()).orElse("") +
+          "\n\n" +
+          translationService.format(
+            LocalizationService.MIGRATION_WARNING_DESCRIPTION_HEADER,
+            "date",
+            Instant.now(),
+            "count",
+            warnings.stream().distinct().count()
+          ) +
+          "\n" +
+          warnings.stream().distinct().map(w -> w.getDescription(translationService)).collect(Collectors.joining("\n"))
+        ).trim()
+      );
+    }
 
     entityTypeRepository.updateEntityType(et);
 

@@ -1951,5 +1951,7 @@
   "migration.warning.REMOVED_FIELD.field.withoutAlternative": "Field {name} is no longer available.",
   "migration.warning.REMOVED_FIELD.query.withAlternative": "Field {name} is no longer available. You may be able to use {alternative} instead. For reference, your original query was {fql}.",
   "migration.warning.REMOVED_FIELD.query.withoutAlternative": "Field {name} is no longer available. For reference, your original query was {fql}.",
-  "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}."
+  "migration.warning.VALUE_BREAKING": "An invalid value `{value}` was found in your query for the {name} field and was removed. For reference, your original query was {fql}.",
+
+  "migration.warning-header": "This custom record type was modified as part of a module upgrade on {date, date, medium}, and produced the following {count, plural, one {warning} other {# warnings}}:"
 }

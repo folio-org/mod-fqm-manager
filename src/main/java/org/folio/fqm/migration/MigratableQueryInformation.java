@@ -16,11 +16,10 @@ public record MigratableQueryInformation(
   @CheckForNull String fqlQuery,
   List<String> fields,
   @Singular List<Warning> warnings,
-  String version,
   boolean hadBreakingChanges
 )
   implements Serializable {
   public MigratableQueryInformation(UUID entityTypeId, String fqlQuery, List<String> fields) {
-    this(entityTypeId, fqlQuery, fields, List.of(), null, false);
+    this(entityTypeId, fqlQuery, fields, List.of(), false);
   }
 }

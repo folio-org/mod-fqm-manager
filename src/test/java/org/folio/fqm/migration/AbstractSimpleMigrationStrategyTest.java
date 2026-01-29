@@ -240,7 +240,6 @@ class AbstractSimpleMigrationStrategyTest {
           "{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}",
           List.of("field1", "foo", "field2"),
           List.of(DeprecatedEntityWarning.withoutAlternative("0a").apply(null)),
-          null,
           false
         )
       ),
@@ -258,7 +257,6 @@ class AbstractSimpleMigrationStrategyTest {
           List.of(
             RemovedEntityWarning.withoutAlternative("0b").apply("{\"_version\":\"version\",\"foo\":{\"$eq\":\"foo\"}}")
           ),
-          null,
           true
         )
       ),
@@ -292,7 +290,6 @@ class AbstractSimpleMigrationStrategyTest {
             RemovedFieldWarning.withAlternative("alt").apply("", "removed", "{\n  \"$lte\" : 3\n}"),
             RemovedFieldWarning.withAlternative("alt").apply("", "removed", null)
           ),
-          null,
           false
         )
       ),
@@ -313,7 +310,6 @@ class AbstractSimpleMigrationStrategyTest {
           "{\"_version\":\"version\"}",
           List.of("query_breaking"),
           List.of(QueryBreakingWarning.withAlternative("alt").apply("", "query_breaking", "{\n  \"$ne\" : 2\n}")),
-          null,
           false
         )
       )

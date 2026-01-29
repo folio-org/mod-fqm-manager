@@ -1,9 +1,10 @@
-# Query Migration
+# Migration
 
 Entity types and their fields change over time, be it adding fields, moving them between entity types, or completely rethinking the way some fields are handled. As such, we have a robust migration system to ensure that consuming apps will not break, and their queries will continue to work despite any internal FQM changes.
 
-- [Query versions](#query-versions)
+- [Versions](#versions)
 - [Updating a query](#updating-a-query)
+- [Updating an entity type](#updating-an-entity-type)
 - [Writing migrations](#writing-migrations)
   - [Changes](#changes)
     - [Entity type changes](#entity-type-changes)
@@ -26,8 +27,9 @@ Entity types and their fields change over time, be it adding fields, moving them
     - [State](#state)
     - [Extra magic](#extra-magic)
     - [Advanced migration tips](#advanced-migration-tips)
+- [Custom entity types support](#custom-entity-types-support)
 
-## Query versions
+## Versions
 
 The version of a query is stored inside the FQL string:
 
@@ -38,13 +40,27 @@ The version of a query is stored inside the FQL string:
 }
 ```
 
-These are arbitrary strings, and consuming applications should make no assumptions about them (they are currently integers, but may be changed in the future to commit hashes, module versions, or anything else).
+And versions of custom entity types are stored inside the entity definition:
+
+```json
+{
+  "id": "d41130e9-0302-5ef3-a6b2-70f6ae1678ce",
+  "name": "my_custom_entity",
+  "_version": "3"
+}
+```
+
+These are arbitrary strings, and consuming applications should make no assumptions about them (they are currently semver-adjacent, but may be changed in the future to commit hashes, module versions, or anything else).
 
 Queries from Quesnelia or earlier will have no version associated with them and will be considered version `"0"`.
 
 ## Updating a query
 
 To update a query, send it, the entity type ID, and a list of fields (if desired) to `/fqm/migrate`. See our [API documentation](https://dev.folio.org/reference/api/#mod-fqm-manager) for more information about this endpoint. Our module will return the updated query, entity type ID, and list of fields, all of which should be saved. Additionally, the response may contain [warnings](#warnings), meaning that some parts of the query or field list was unable to be migrated.
+
+## Updating an entity type
+
+Custom entity types will be migrated when the module is installed. No additional action is required; for more information see [custom entity types support](#custom-entity-types-support).
 
 ## Writing migrations
 
@@ -108,7 +124,16 @@ public Map<UUID, UUID> getEntityTypeChanges() {
 
 ### Defining source maps
 
-<!-- TODO: describe this (in next PR) -->
+Source maps are used in migrations to define relations between composite and simple entity types. For example, if your migration alters `simple_instance_status`, it's necessary for the migration system to know that `composite_instances`'s `inst_stat` source points to `simple_instance_status`. To define these relationships, override `getEntityTypeSourceMaps` (note that the inner keys are the source aliases used by the composite):
+
+```java
+public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
+  return Map.of(
+    COMPOSITE_INSTANCES_ID, Map.of("inst_stat", SIMPLE_INSTANCE_STATUS_ID),
+    COMPOSITE_ITEM_DETAILS_ID, Map.of("instance_status", SIMPLE_INSTANCE_STATUS_ID)
+  );
+}
+```
 
 ### Warnings
 

@@ -19,6 +19,7 @@ import org.folio.fqm.repository.SourceViewDatabaseObjectRepository;
 import org.folio.fqm.repository.SourceViewRecordRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
+import org.folio.fqm.service.MigrationService;
 import org.folio.fqm.service.SourceViewService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
@@ -90,6 +91,9 @@ public class TestDbSetupConfiguration {
     private EntityTypeValidationService entityTypeValidationService;
 
     @Autowired
+    private MigrationService migrationService;
+
+    @Autowired
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
@@ -132,6 +136,7 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
+        migrationService,
         new SourceViewService(
           sourceViewDatabaseObjectRepository,
           sourceViewRecordRepository,

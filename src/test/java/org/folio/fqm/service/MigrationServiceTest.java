@@ -97,7 +97,7 @@ class MigrationServiceTest {
 
   @Test
   void testMigrationWorks() {
-    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
+    String fql = "{\"_version\":\"0\",\"test\":{\"$eq\":\"foo\"}}";
 
     MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
 
@@ -108,17 +108,17 @@ class MigrationServiceTest {
       is(
         MigratableQueryInformation
           .builder()
-          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
+          .fqlQuery(fql.replace("0", migrationService.getLatestVersion()))
           .build()
           .fqlQuery()
       )
     );
     verify(migrationStrategy, times(1))
-      .apply(MigratableQueryInformation.builder().fqlQuery(fql).version("0").build(), Map.of());
+      .apply(MigratableQueryInformation.builder().fqlQuery(fql).build(), Map.of());
   }
 
   // Common test FQL query
-  private static final String TEST_FQL = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
+  private static final String TEST_FQL = "{\"_version\":\"0\",\"test\":{\"$eq\":\"foo\"}}";
 
   @Test
   void testThrowExceptionIfQueryNeedsMigrationWithNoBreakingChanges() {
@@ -132,7 +132,22 @@ class MigrationServiceTest {
     );
 
     verify(migrationStrategy, times(1))
-      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build(), Map.of());
+      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(), Map.of());
+  }
+
+  @Test
+  void testThrowExceptionIfQueryNeedsMigrationWithNoMigrations() {
+    // Use the default strategy that only changes the version
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
+    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
+
+    // This should not throw an exception because only the version changes
+    migrationService.throwExceptionIfQueryNeedsMigration(
+      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build()
+    );
+
+    verify(migrationStrategy, times(1))
+      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(), Map.of());
   }
 
   @Test

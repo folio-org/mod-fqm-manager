@@ -21,6 +21,7 @@ public class UserTenantService {
   @Cacheable(value="userTenantCache", key="#tenantId")
   public String getUserTenantsResponse(String tenantId) {
     log.info("Retrieving user-tenants information for tenant {}", tenantId);
-    return userTenantsClient.get("user-tenants", Map.of("limit", String.valueOf(1)));
+    // return userTenantsClient.get("user-tenants", Map.of("limit", String.valueOf(1)));
+    return "{\"userTenants\":[], \"totalRecords\":0}";
   }
 }

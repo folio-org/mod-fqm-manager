@@ -18,6 +18,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.InsertSetMoreStep;
 import org.jooq.InsertSetStep;
+import org.jooq.JSONB;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectSelectStep;
@@ -134,7 +135,7 @@ class CustomEntityTypeMigrationMappingRepositoryTest {
     InsertSetStep<?> insertStep = mock(InsertSetStep.class);
     when(jooqContext.insertInto(any(Table.class))).thenReturn(insertStep);
     InsertSetMoreStep<?> insertStep2 = mock(InsertSetMoreStep.class);
-    when(insertStep.set(any(Field.class), any())).thenReturn(insertStep2);
+    when(insertStep.set(any(Field.class), any(JSONB.class))).thenReturn(insertStep2);
     when(insertStep2.execute()).thenReturn(1);
   }
 
@@ -142,7 +143,7 @@ class CustomEntityTypeMigrationMappingRepositoryTest {
     UpdateSetFirstStep<?> updateStep = mock(UpdateSetFirstStep.class);
     when(jooqContext.update(any(Table.class))).thenReturn(updateStep);
     UpdateSetMoreStep<?> updateStep2 = mock(UpdateSetMoreStep.class);
-    when(updateStep.set(any(Field.class), any())).thenReturn(updateStep2);
+    when(updateStep.set(any(Field.class), any(JSONB.class))).thenReturn(updateStep2);
     if (toThrow == null) {
       when(updateStep2.execute()).thenReturn(1);
     } else {

@@ -1,8 +1,6 @@
 package org.folio.fqm.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -199,14 +197,14 @@ class MigrationServiceTest {
           .of(
             // not custom
             new EntityType().id("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").sources(List.of()),
-            // not custom + no sources
+            // not custom
             new EntityType().id("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb").sources(null),
             // acceptable, will point to empty map
             new EntityType()
               .id("cccccccc-cccc-cccc-cccc-cccccccccccc")
               .sources(List.of())
               .putAdditionalProperty("isCustom", true),
-            // no sources
+            // acceptable, will point to empty map
             new EntityType()
               .id("dddddddd-dddd-dddd-dddd-dddddddddddd")
               .sources(null)
@@ -231,6 +229,8 @@ class MigrationServiceTest {
       is(
         Map.of(
           UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+          Map.of(),
+          UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"),
           Map.of(),
           UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
           Map.of("source", UUID.fromString("12341234-1234-1234-1234-123412341234"))

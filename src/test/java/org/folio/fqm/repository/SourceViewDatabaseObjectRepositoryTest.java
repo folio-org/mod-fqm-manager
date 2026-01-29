@@ -330,8 +330,7 @@ class SourceViewDatabaseObjectRepositoryTest {
                 } else if (field.getName().equals("table_name")) {
                   return v.getRight();
                 } else {
-                  fail();
-                  return null;
+                  return fail();
                 }
               });
             return r;

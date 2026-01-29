@@ -144,9 +144,11 @@ public class EntityTypeUtils {
 
   /**
    * Build a map of source alias to targetId for all ET sources in the given entity type.
-   * @param entityType the entity type to build for, must have sources defined!
    */
   public static Map<String, UUID> getEntityTypeSourceAliasMap(EntityType entityType) {
+    if (entityType.getSources() == null) {
+      return Map.of();
+    }
     return entityType
       .getSources()
       .stream()

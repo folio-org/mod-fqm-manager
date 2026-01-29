@@ -175,6 +175,13 @@ class EntityTypeUtilsTest {
   }
 
   @Test
+  void testGetEntityTypeSourceAliasMapNull() {
+    EntityType entityType = new EntityType().sources(null);
+
+    assertThat(EntityTypeUtils.getEntityTypeSourceAliasMap(entityType), is(Map.of()));
+  }
+
+  @Test
   void testIsEntityTypeSimple() {
     EntityType simpleEntityType = new EntityType()
       .sources(List.of(

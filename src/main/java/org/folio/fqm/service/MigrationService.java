@@ -147,7 +147,6 @@ public class MigrationService {
     return entityTypeRepository
       .getEntityTypeDefinitions(null, folioExecutionContext.getTenantId())
       .filter(et -> Boolean.TRUE.equals(et.getAdditionalProperty("isCustom")))
-      .filter(et -> et.getSources() != null)
       .collect(Collectors.toMap(et -> UUID.fromString(et.getId()), EntityTypeUtils::getEntityTypeSourceAliasMap));
   }
 
@@ -199,6 +198,7 @@ public class MigrationService {
     while (!toMigrate.isEmpty()) {
       CustomEntityType nextInnermost = getInnermostCustomEntityTypeToMigrate(toMigrate, toMigrate.firstKey());
       migrationOrder.addFirst(nextInnermost);
+      toMigrate.remove(UUID.fromString(nextInnermost.getId()));
     }
 
     Map<UUID, Map<String, UUID>> currentMappings = getCurrentCustomEntityTypeMappings();

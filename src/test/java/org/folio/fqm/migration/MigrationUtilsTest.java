@@ -312,8 +312,7 @@ class MigrationUtilsTest {
                 false
               );
             } else {
-              fail("Unexpected field transformation call: " + original);
-              return null;
+              return fail("Unexpected field transformation call: " + original);
             }
           },
           DUMMY_SOURCE_MAP

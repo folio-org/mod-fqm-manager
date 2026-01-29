@@ -18,7 +18,6 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.SimpleHttpClient;
-import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -92,7 +91,6 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
-  private final MigrationConfiguration migrationConfiguration;
   private final MigrationService migrationService;
   private final QueryProcessorService queryService;
   private final CrossTenantHttpClient crossTenantHttpClient;
@@ -491,7 +489,7 @@ public class EntityTypeService {
 
     CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
       .id(customEntityTypeId.toString())
-      .version(migrationConfiguration.getCurrentVersion())
+      .version(migrationService.getLatestVersion())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
@@ -508,7 +506,7 @@ public class EntityTypeService {
     permissionsService.verifyUserCanAccessCustomEntityType(oldET);
 
     CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
-      .version(migrationConfiguration.getCurrentVersion())
+      .version(migrationService.getLatestVersion())
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
       .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))

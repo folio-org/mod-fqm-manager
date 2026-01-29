@@ -49,10 +49,9 @@ public class CustomEntityTypeMigrationMappingRepository {
     try {
       return objectMapper.readValue(
         readerJooqContext
-          .select(field("mapping"))
+          .select(field("mapping", String.class))
           .from(table(MAPPING_TABLE))
-          .fetchOne()
-          .get(field("mapping"), String.class),
+          .fetchOne(field("mapping", String.class)),
         new TypeReference<>() {}
       );
     } catch (JsonProcessingException | IllegalArgumentException | DataAccessException e) {

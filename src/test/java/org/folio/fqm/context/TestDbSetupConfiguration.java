@@ -152,7 +152,8 @@ public class TestDbSetupConfiguration {
           executionContext,
           migrationConfiguration,
           migrationStrategyRepository,
-          JSON5ObjectMapperFactory.create()
+          JSON5ObjectMapperFactory.create(),
+          null
         ),
         new SourceViewService(
           sourceViewDatabaseObjectRepository,

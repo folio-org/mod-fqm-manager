@@ -53,7 +53,8 @@ class MigrationStrategyRepositoryTest {
     null,
     new MigrationConfiguration(),
     null,
-    new ObjectMapper()
+    new ObjectMapper(),
+    null
   );
 
   @Test

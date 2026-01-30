@@ -31,10 +31,7 @@ public class DataRefreshRepository {
   public static final Field<Double> EXCHANGE_RATE_FIELD = field("exchange_rate", Double.class);
   public static final String EXCHANGE_RATE_TABLE = "currency_exchange_rates";
   private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
-  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
-  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
-    "query", "(module==ORG and configName==localeSettings)"
-  );
+  private static final String GET_LOCALE_SETTINGS_PATH = "locale";
 
   private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
@@ -120,16 +117,12 @@ public class DataRefreshRepository {
   private String getSystemCurrencyCode() {
     log.info("Getting system currency");
     try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, Map.of());
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode
-        .path("configs")
-        .get(0)
-        .path("value")
+      return localeSettingsNode
+        .path("currency")
         .asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      return valueNode.path("currency").asText();
     } catch (Exception e) {
       log.info("No system currency defined, defaulting to USD");
       return "USD";

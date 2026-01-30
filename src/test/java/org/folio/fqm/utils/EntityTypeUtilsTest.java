@@ -182,6 +182,26 @@ class EntityTypeUtilsTest {
   }
 
   @Test
+  void testGetEntityTypeSourceAliasMapDuplicate() {
+    EntityType entityType = new EntityType()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")),
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb"))
+        )
+      );
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeUtils.getEntityTypeSourceAliasMap(entityType)
+    );
+  }
+
+  @Test
   void testIsEntityTypeSimple() {
     EntityType simpleEntityType = new EntityType()
       .sources(List.of(

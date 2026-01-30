@@ -158,7 +158,9 @@ public class EntityTypeUtils {
         Collectors.toMap(
           EntityTypeSourceEntityType::getAlias,
           EntityTypeSourceEntityType::getTargetId,
-          (existing, replacement) -> existing
+          (existing, replacement) -> {
+            throw new InvalidEntityTypeDefinitionException("Multiple sources cannot share the same alias", entityType);
+          }
         )
       );
   }

@@ -107,16 +107,12 @@ class CustomEntityTypeMigrationMappingRepositoryTest {
     mockFetchCount(1);
     mockUpdate(new DataAccessException("nope"));
 
-    assertThrows(
-      UncheckedException.class,
-      () ->
-        customEntityTypeMigrationMappingRepository.saveMappings(
-          Map.of(
-            UUID.fromString("b50630f8-eb40-5f67-8b6f-b7612314e67a"),
-            Map.of("something", UUID.fromString("d290f1ee-6c54-4b01-90e6-d701748f0851"))
-          )
-        )
+    Map<UUID, Map<String, UUID>> map = Map.of(
+      UUID.fromString("b50630f8-eb40-5f67-8b6f-b7612314e67a"),
+      Map.of("something", UUID.fromString("d290f1ee-6c54-4b01-90e6-d701748f0851"))
     );
+
+    assertThrows(UncheckedException.class, () -> customEntityTypeMigrationMappingRepository.saveMappings(map));
   }
 
   private void mockFetchCount(int count) {

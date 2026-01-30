@@ -354,7 +354,7 @@
       visibleByDefault: false,
       valueGetter: "( \
         SELECT jsonb_agg( \
-          record.value || jsonb_build_object('addressType', address_type.jsonb ->> 'type') \
+          record.value || jsonb_build_object('addressType', address_type.jsonb ->> 'addressType') \
           ORDER BY record.value ->> 'addressType' \
         ) \
         FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal' -> 'addresses')) record(value) \

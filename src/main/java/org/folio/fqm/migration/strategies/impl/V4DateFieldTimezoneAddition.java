@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.migration.MigrationUtils;
 import org.folio.fqm.migration.strategies.AbstractRegularMigrationStrategy;
 import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
@@ -86,7 +86,7 @@ public class V4DateFieldTimezoneAddition extends AbstractRegularMigrationStrateg
     "users.user_updated_date"
   );
 
-  private final SettingsClient settingsClient;
+  private final LocaleClient localeClient;
 
   @Override
   public String getLabel() {
@@ -113,7 +113,7 @@ public class V4DateFieldTimezoneAddition extends AbstractRegularMigrationStrateg
         }
 
         if (state.get() == null) {
-          state.set(settingsClient.getTenantTimezone());
+          state.set(localeClient.getLocaleSettings().getZoneId());
         }
 
         try {

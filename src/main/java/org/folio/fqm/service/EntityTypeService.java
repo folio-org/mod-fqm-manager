@@ -17,7 +17,7 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
-import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -78,7 +78,6 @@ public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILEPATH = "languages.json5";
-  private static final String GET_LOCALE_SETTINGS_PATH = "locale";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -99,7 +98,7 @@ public class EntityTypeService {
   private final LanguageClient languageClient;
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
-  private final SimpleHttpClient simpleHttpClient;
+  private final LocaleClient localeClient;
   private final TranslationService translationService;
 
   /**
@@ -392,10 +391,7 @@ public class EntityTypeService {
 
     Locale folioLocale;
     try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, Map.of());
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String localeString = localeSettingsNode.path("locale").asText();
+      String localeString = localeClient.getLocaleSettings().locale();
       folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");

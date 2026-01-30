@@ -5,11 +5,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.folio.fqm.client.SettingsClient;
+
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +22,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class V4DateFieldTimezoneAdditionTest extends TestTemplate {
 
   @Mock
-  SettingsClient settingsClient;
+  LocaleClient localeClient;
 
   @BeforeEach
   void setup() {
-    lenient().when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("America/New_York"));
+    lenient().when(localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("en-US", "USD", "America/New_York", "latn"));
   }
 
   @Override
   public MigrationStrategy getStrategy() {
-    return new V4DateFieldTimezoneAddition(settingsClient);
+    return new V4DateFieldTimezoneAddition(localeClient);
   }
 
   @Override
@@ -51,7 +51,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
           .fqlQuery("{\"name\": {\"$eq\":\"foo\"}}")
           .fields(List.of())
           .build(),
-        (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(settingsClient)
+        (Consumer<MigratableQueryInformation>) transformed -> verifyNoInteractions(localeClient)
       ),
       Arguments.of(
         "Query with dates",
@@ -101,7 +101,7 @@ class V4DateFieldTimezoneAdditionTest extends TestTemplate {
           )
           .fields(List.of())
           .build(),
-        (Consumer<MigratableQueryInformation>) (transformed -> verify(settingsClient, times(1)).getTenantTimezone())
+        (Consumer<MigratableQueryInformation>) (transformed -> verify(localeClient, times(1)).getLocaleSettings())
       )
     );
   }

@@ -94,6 +94,7 @@ public class EntityTypeService {
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
+  private final MigrationService migrationService;
   private final QueryProcessorService queryService;
   private final CrossTenantHttpClient crossTenantHttpClient;
   private final PermissionsService permissionsService;
@@ -526,8 +527,9 @@ public class EntityTypeService {
       );
     }
 
-    var updatedCustomEntityType = customEntityType.toBuilder()
+    CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
       .id(customEntityTypeId.toString())
+      .version(migrationService.getLatestVersion())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
@@ -535,6 +537,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -543,6 +546,7 @@ public class EntityTypeService {
     permissionsService.verifyUserCanAccessCustomEntityType(oldET);
 
     CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
+      .version(migrationService.getLatestVersion())
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
       .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))
@@ -550,6 +554,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(entityTypeId, updatedCustomEntityType);
     entityTypeRepository.updateEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -578,6 +583,7 @@ public class EntityTypeService {
       .updatedAt(clockService.now())
       .build();
     entityTypeRepository.updateEntityType(deletedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
   }
 
   /**

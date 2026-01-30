@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -330,8 +330,7 @@ class SourceViewDatabaseObjectRepositoryTest {
                 } else if (field.getName().equals("table_name")) {
                   return v.getRight();
                 } else {
-                  fail();
-                  return null;
+                  return fail();
                 }
               });
             return r;

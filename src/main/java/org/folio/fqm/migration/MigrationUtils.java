@@ -41,16 +41,21 @@ public class MigrationUtils {
    * Helper function to transform an FQL query where each field gets turned into a new quantity of fields.
    * This runs a given function on each field's condition in the query, potentially adding or removing $and as needed.
    *
+   * Note that, for nested fields, the handler function may be called multiple times for the same field,
+   * once for each level of nesting. If the handler modifies the field/condition, no further unwrapping will be attempted.
+   *
    * @param entityTypeId The entity type ID of the query being migrated
    * @param fqlQuery The root query to migrate
    * @param handler  something that takes an {@link MigratableFqlFieldAndCondition} and returns a list of
    *                 {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and whether
    *                 a breaking change occurred
+   * @param sourceMappings A map of entity type IDs to their sources (alias -> source target ID), used for unwrapping nested fields
    */
   public static MigrationResult<String> migrateFql(
     UUID entityTypeId,
     String fqlQuery,
-    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler
+    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler,
+    Map<UUID, Map<String, UUID>> sourceMappings
   ) {
     try {
       ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
@@ -68,7 +73,9 @@ public class MigrationUtils {
 
       List<SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> transformed = startingFields
         .stream()
-        .map(f -> handleSingleFieldWithNesting(f, handler, MigrationUtils::didMigrationModifyFieldAndCondition))
+        .map(f ->
+          handleSingleFieldWithNesting(f, handler, MigrationUtils::didMigrationModifyFieldAndCondition, sourceMappings)
+        )
         .toList();
       List<MigratableFqlFieldAndCondition> resultingFields = transformed
         .stream()
@@ -105,11 +112,13 @@ public class MigrationUtils {
    * @param handler something that takes an {@link MigratableFqlFieldOnly} and returns a list of
    *                {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and
    *                whether a breaking change occurred
+   * @param sourceMappings A map of entity type IDs to their sources (alias -> source target ID), used for unwrapping nested fields
    */
   public static MigrationResult<List<String>> migrateFieldNames(
     UUID entityTypeId,
     List<String> fields,
-    Function<MigratableFqlFieldOnly, SingleFieldMigrationResult<MigratableFqlFieldOnly>> handler
+    Function<MigratableFqlFieldOnly, SingleFieldMigrationResult<MigratableFqlFieldOnly>> handler,
+    Map<UUID, Map<String, UUID>> sourceMappings
   ) {
     List<SingleFieldMigrationResult<MigratableFqlFieldOnly>> transformed = fields
       .stream()
@@ -117,7 +126,8 @@ public class MigrationUtils {
         handleSingleFieldWithNesting(
           new MigratableFqlFieldOnly(entityTypeId, "", f),
           handler,
-          MigrationUtils::didMigrationModifyFieldOnly
+          MigrationUtils::didMigrationModifyFieldOnly,
+          sourceMappings
         )
       )
       .toList();
@@ -135,17 +145,37 @@ public class MigrationUtils {
     );
   }
 
+  /**
+   * Iteratively calls `handler` on each level of nesting for the given field, until either:
+   * - the handler modifies the field (as determined by `didModify`), or
+   * - there is no further nesting to unwrap
+   */
   private static <F extends MigratableFqlField<F>> SingleFieldMigrationResult<F> handleSingleFieldWithNesting(
     F original,
     Function<F, SingleFieldMigrationResult<F>> handler,
-    BiPredicate<F, SingleFieldMigrationResult<F>> didModify
+    BiPredicate<F, SingleFieldMigrationResult<F>> didModify,
+    Map<UUID, Map<String, UUID>> sourceMappings
   ) {
     SingleFieldMigrationResult<F> transformed = handler.apply(original);
+    int fieldDelimiterIndex = original.field().indexOf('.');
 
-    // stub for follow-up ticket
-    didModify.test(original, transformed);
+    if (didModify.test(original, transformed) || fieldDelimiterIndex == -1) {
+      return transformed;
+    }
 
-    return transformed;
+    Map<String, UUID> sourceMap = sourceMappings.get(original.entityTypeId());
+    String source = original.field().substring(0, fieldDelimiterIndex);
+    String remainder = original.field().substring(fieldDelimiterIndex + 1);
+    if (sourceMap == null || sourceMap.get(source) == null) {
+      return transformed;
+    }
+
+    return handleSingleFieldWithNesting(
+      original.dereferenced(sourceMap.get(source), source, remainder),
+      handler,
+      didModify,
+      sourceMappings
+    );
   }
 
   public static boolean didMigrationModifyFieldAndCondition(

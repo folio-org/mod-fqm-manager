@@ -10,12 +10,14 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.function.BiConsumer;
-
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -141,6 +143,29 @@ public class EntityTypeUtils {
             "Source " + alias + " (referenced by field " + ref + ") could not be found",
             entityType
           )
+        )
+      );
+  }
+
+  /**
+   * Build a map of source alias to targetId for all ET sources in the given entity type.
+   */
+  public static Map<String, UUID> getEntityTypeSourceAliasMap(EntityType entityType) {
+    if (entityType.getSources() == null) {
+      return Map.of();
+    }
+    return entityType
+      .getSources()
+      .stream()
+      .filter(EntityTypeSourceEntityType.class::isInstance)
+      .map(EntityTypeSourceEntityType.class::cast)
+      .collect(
+        Collectors.toMap(
+          EntityTypeSourceEntityType::getAlias,
+          EntityTypeSourceEntityType::getTargetId,
+          (existing, replacement) -> {
+            throw new InvalidEntityTypeDefinitionException("Multiple sources cannot share the same alias", entityType);
+          }
         )
       );
   }

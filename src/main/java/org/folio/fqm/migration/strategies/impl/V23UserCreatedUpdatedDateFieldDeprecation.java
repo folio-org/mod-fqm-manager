@@ -32,6 +32,14 @@ public class V23UserCreatedUpdatedDateFieldDeprecation extends AbstractSimpleMig
   }
 
   @Override
+  public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
+    return Map.ofEntries(
+      Map.entry(COMPOSITE_USERS_ID, Map.of("users", SIMPLE_USERS_ID)),
+      Map.entry(COMPOSITE_LOAN_DETAILS_ID, Map.of("users", SIMPLE_USERS_ID))
+    );
+  }
+
+  @Override
   public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.ofEntries(
       Map.entry(

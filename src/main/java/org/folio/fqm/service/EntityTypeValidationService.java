@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -26,9 +27,16 @@ public class EntityTypeValidationService {
 
   private final EntityTypeRepository entityTypeRepository;
   private final FolioExecutionContext folioExecutionContext;
+  private final MigrationConfiguration migrationConfiguration;
 
   public void validateCustomEntityType(UUID entityTypeId, CustomEntityType customEntityType) {
     validateEntityType(entityTypeId, customEntityType, null);
+    if (!migrationConfiguration.getCurrentVersion().equals(customEntityType.getVersion())) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity type must have _version=%s".formatted(migrationConfiguration.getCurrentVersion()),
+        customEntityType
+      );
+    }
     if (customEntityType.getOwner() == null) {
       throw new InvalidEntityTypeDefinitionException("Custom entity type must have an owner", customEntityType);
     }

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
+import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.FqmException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
@@ -77,6 +78,7 @@ class EntityTypeValidationServiceTest {
     .owner(UUID.fromString("81dc8e91-c93b-5e86-b8de-dd5b7b4c75d2"))
     .name("test")
     ._private(false)
+    .version("current")
     .isCustom(true)
     .sources(
       List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
@@ -89,6 +91,9 @@ class EntityTypeValidationServiceTest {
   @Mock
   private FolioExecutionContext executionContext;
 
+  @Mock
+  private MigrationConfiguration migrationConfiguration;
+
   @Spy
   @InjectMocks
   private EntityTypeValidationService entityTypeValidationService;
@@ -99,6 +104,7 @@ class EntityTypeValidationServiceTest {
     lenient()
       .when(repo.getEntityTypeDefinition(EXISTING_TARGET_ET_ID, TENANT_ID))
       .thenReturn(Optional.of(new EntityType()));
+    lenient().when(migrationConfiguration.getCurrentVersion()).thenReturn("current");
   }
 
   // shorthand to build a variant of the base CustomEntityType
@@ -190,6 +196,8 @@ class EntityTypeValidationServiceTest {
   static List<Arguments> customEntityTypeInvalidCases() {
     // input, expected exception message (supports regex)
     return List.of(
+      Arguments.of(customETFactory(b -> b.version(null)), "Custom entity type must have _version=current"),
+      Arguments.of(customETFactory(b -> b.version("old")), "Custom entity type must have _version=current"),
       Arguments.of(
         customETFactory(b -> b.sourceView("something")),
         "Custom entity types must not contain a sourceView property"

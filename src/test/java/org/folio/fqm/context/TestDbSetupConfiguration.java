@@ -14,12 +14,17 @@ import javax.sql.DataSource;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.migration.MigrationStrategyRepository;
+import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.repository.SourceViewDatabaseObjectRepository;
 import org.folio.fqm.repository.SourceViewRecordRepository;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.EntityTypeValidationService;
+import org.folio.fqm.service.MigrationService;
 import org.folio.fqm.service.SourceViewService;
+import org.folio.fqm.utils.JSON5ObjectMapperFactory;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,16 +89,25 @@ public class TestDbSetupConfiguration {
   static class EntityTypeInitializer {
 
     @Autowired
+    private CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
+
+    @Autowired
     private EntityTypeRepository entityTypeRepository;
 
     @Autowired
     private EntityTypeValidationService entityTypeValidationService;
 
     @Autowired
+    private FolioSpringLiquibase liquibase;
+
+    @Autowired
     private ResourcePatternResolver resourceResolver;
 
     @Autowired
-    private FolioSpringLiquibase liquibase;
+    private MigrationConfiguration migrationConfiguration;
+
+    @Autowired
+    private MigrationStrategyRepository migrationStrategyRepository;
 
     @Autowired
     private SourceViewDatabaseObjectRepository sourceViewDatabaseObjectRepository;
@@ -132,6 +146,15 @@ public class TestDbSetupConfiguration {
         null,
         entityTypeRepository,
         entityTypeValidationService,
+        new MigrationService(
+          customEntityTypeMigrationMappingRepository,
+          entityTypeRepository,
+          executionContext,
+          migrationConfiguration,
+          migrationStrategyRepository,
+          JSON5ObjectMapperFactory.create(),
+          null
+        ),
         new SourceViewService(
           sourceViewDatabaseObjectRepository,
           sourceViewRecordRepository,

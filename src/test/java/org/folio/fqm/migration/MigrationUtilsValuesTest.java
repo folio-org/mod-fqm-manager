@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -194,7 +195,8 @@ class MigrationUtilsValuesTest {
 
               return MigrationResult.withResult("[%s]".formatted(value));
             }
-          )
+          ),
+        Map.of()
       )
       .result();
 
@@ -237,7 +239,8 @@ class MigrationUtilsValuesTest {
             k -> !k.field().equals("do-not-touch"),
             (MigratableFqlFieldAndCondition key, String value, Supplier<String> fql) ->
               "keep-me".equals(value) ? MigrationResult.noop(value) : MigrationResult.removed()
-          )
+          ),
+        Map.of()
       )
       .result();
 

@@ -433,7 +433,7 @@ public class MigrationService {
     return MigratableQueryInformation
       .builder()
       .entityTypeId(entityTypeId)
-      .fqlQuery("{}")
+      .fqlQuery("{\"_unused\":{\"$eq\":\"migrating-fields-only\"}}")
       .fields(Arrays.asList(fields))
       .warnings(List.of())
       .hadBreakingChanges(false)

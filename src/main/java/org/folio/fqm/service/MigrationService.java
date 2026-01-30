@@ -386,23 +386,34 @@ public class MigrationService {
       .stream()
       .filter(EntityTypeSourceEntityType.class::isInstance)
       .map(EntityTypeSourceEntityType.class::cast)
-      // migrate the targetId and targetField
+      // migrate the targetId
       .map(source -> {
         MigratableQueryInformation toMigrate = getMigratableQueryInformationForFields(source.getTargetId());
-        if (source.getTargetField() != null) {
-          toMigrate = toMigrate.withFields(List.of(source.getTargetField()));
-        }
         MigratableQueryInformation result = strategy.apply(toMigrate, mappings);
         warnings.addAll(result.warnings());
         source.setTargetId(result.entityTypeId());
+        return source;
+      })
+      // migrate the targetField, if applicable (this is ran in the context of the outer entity,
+      // as we must preserve aliases in warnings' field names)
+      .filter(source -> source.getTargetField() != null) // source and target come together, so we know both exist now
+      .map(source -> {
+        MigratableQueryInformation result = strategy.apply(
+          getMigratableQueryInformationForFields(
+            UUID.fromString(entity.getId()),
+            "%s.%s".formatted(source.getAlias(), source.getTargetField())
+          ),
+          mappings
+        );
+        warnings.addAll(result.warnings());
         if (result.fields().size() == 1) {
-          source.setTargetField(result.fields().get(0));
+          String field = result.fields().get(0);
+          source.setTargetField(field.substring(field.indexOf('.') + 1)); // remove alias
         }
         return source;
       })
       // migrate the sourceField, if applicable (this is ran in the context of the outer entity,
       // as we must resolve between our sources)
-      .filter(source -> source.getSourceField() != null)
       .forEach(source -> {
         MigratableQueryInformation result = strategy.apply(
           getMigratableQueryInformationForFields(UUID.fromString(entity.getId()), source.getSourceField()),

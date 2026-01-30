@@ -3,7 +3,6 @@ package org.folio.fqm.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -408,7 +407,7 @@ class MigrationServiceEntityMigrationTest {
         new EntityTypeSourceEntityType()
           .alias("source2")
           .targetId(SIMPLE_MIGRATION_ENTITY_ID3)
-          .targetField("antiquated")
+          .targetField("banished")
           .sourceField("source1.removed")
       )
     );

@@ -54,7 +54,7 @@
       <!-- define sonar exclusions here -->
       src/main/java/org/folio/template/FolioSpringTemplateApplication.java
     </sonar.exclusions>
-    <argLine />
+    <argLine>-Dfile.encoding=UTF-8</argLine>
   </properties>
 
 
@@ -360,14 +360,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <useSystemClassLoader>false</useSystemClassLoader>
-          <argLine>@{argLine} -Dfile.encoding=UTF-8</argLine>
+          <systemProperties>
+            <!-- Docker API version to use for testcontainers -->
+            <api.version>1.41</api.version>
+          </systemProperties>
         </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <!-- Docker API version to use for testcontainers -->
+            <api.version>1.41</api.version>
+          </systemProperties>
+        </configuration>
       </plugin>
 
       <plugin>

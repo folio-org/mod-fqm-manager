@@ -1,5 +1,7 @@
 package org.folio.fqm.repository;
 
+import org.folio.fqm.client.LocaleClient;
+import org.folio.fqm.client.LocaleClient.LocaleSettings;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.service.SourceViewService;
 import org.jooq.DSLContext;
@@ -45,6 +47,8 @@ class DataRefreshRepositoryTest {
   private DSLContext jooqContext;
   @Mock
   private SimpleHttpClient simpleHttpClient;
+  @Mock
+  private LocaleClient localeClient;
 
   @Test
   void shouldRefreshExchangeRates() {
@@ -52,14 +56,7 @@ class DataRefreshRepositoryTest {
     String exchangeRatePath = "finance/exchange-rate";
     String fullTableName = "tenant_01_mod_fqm_manager.currency_exchange_rates";
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
-    when(simpleHttpClient.get(localeSettingsPath, Map.of())).thenReturn("""
-      {
-          "locale": "en-US",
-          "currency": "USD",
-          "timezone": "UTC",
-          "numberingSystem": "latn"
-      }
-      """);
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("en-US", "USD", "UTC", "latn"));
     when(simpleHttpClient.get(eq(exchangeRatePath), any())).thenReturn("""
        {
          "from": "someCurrency",
@@ -93,14 +90,7 @@ class DataRefreshRepositoryTest {
     String tenantId = "tenant_01";
     String fullTableName = "tenant_01_mod_fqm_manager.currency_exchange_rates";
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
-    when(simpleHttpClient.get(localeSettingsPath, Map.of())).thenReturn("""
-           {
-                "locale": "en-US",
-                "currency": "ZWD",
-                "timezone": "UTC",
-                "numberingSystem": "latn"
-            }
-      """);
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("en-US", "ZWD", "UTC", "latn"));
     assertDoesNotThrow(() -> dataRefreshRepository.refreshExchangeRates(tenantId));
     verify(jooqContext, times(0)).insertInto(table(fullTableName));
   }
@@ -115,6 +105,7 @@ class DataRefreshRepositoryTest {
       "to", "USD"
     );
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("en-US", "USD", "UTC", "latn"));
     when(simpleHttpClient.get(exchangeRatePath, exchangeRateParams)).thenReturn("""
        {
          "from": "ZAR",
@@ -149,6 +140,6 @@ class DataRefreshRepositoryTest {
 
     assertTrue(dataRefreshRepository.refreshExchangeRates(null));
 
-    verifyNoInteractions(simpleHttpClient, jooqContext);
+    verifyNoInteractions(simpleHttpClient, localeClient, jooqContext);
   }
 }

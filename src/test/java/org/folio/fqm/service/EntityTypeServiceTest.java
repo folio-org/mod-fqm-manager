@@ -4,7 +4,8 @@ import feign.FeignException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
-import org.folio.fqm.client.SimpleHttpClient;
+import org.folio.fqm.client.LocaleClient;
+import org.folio.fqm.client.LocaleClient.LocaleSettings;
 import org.folio.fqm.domain.dto.EntityTypeSummary;
 import org.folio.fqm.exception.EntityTypeInUseException;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
@@ -64,7 +65,7 @@ class EntityTypeServiceTest {
   private QueryProcessorService queryProcessorService;
 
   @Mock
-  private SimpleHttpClient simpleHttpClient;
+  private LocaleClient localeClient;
 
   @Mock
   private CrossTenantHttpClient crossTenantHttpClient;
@@ -688,14 +689,7 @@ class EntityTypeServiceTest {
              }
            }
       """);
-    when(simpleHttpClient.get(eq("locale"), anyMap())).thenReturn("""
-           {
-                "locale": "de",
-                "currency": "USD",
-                "timezone": "UTC",
-                "numberingSystem": "latn"
-            }
-      """);
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("de-DE", "USD", "UTC", "latn"));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 

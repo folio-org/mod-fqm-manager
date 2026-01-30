@@ -1,11 +1,10 @@
 package org.folio.fqm.repository;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.client.SimpleHttpClient;
 import org.folio.fqm.service.SourceViewService;
 import org.jooq.DSLContext;
@@ -31,7 +30,6 @@ public class DataRefreshRepository {
   public static final Field<Double> EXCHANGE_RATE_FIELD = field("exchange_rate", Double.class);
   public static final String EXCHANGE_RATE_TABLE = "currency_exchange_rates";
   private static final String GET_EXCHANGE_RATE_PATH = "finance/exchange-rate";
-  private static final String GET_LOCALE_SETTINGS_PATH = "locale";
 
   private static final List<String> SYSTEM_SUPPORTED_CURRENCIES = List.of(
     "USD",
@@ -72,6 +70,7 @@ public class DataRefreshRepository {
   private final DSLContext jooqContext;
   private final SourceViewService sourceViewService;
   private final SimpleHttpClient simpleHttpClient;
+  private final LocaleClient localeClient;
 
   /**
    * Refresh the currency exchange rates for a tenant, based on the tenant's default system currency.
@@ -116,17 +115,7 @@ public class DataRefreshRepository {
 
   private String getSystemCurrencyCode() {
     log.info("Getting system currency");
-    try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, Map.of());
-      ObjectMapper objectMapper = new ObjectMapper();
-      JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      return localeSettingsNode
-        .path("currency")
-        .asText();
-    } catch (Exception e) {
-      log.info("No system currency defined, defaulting to USD");
-      return "USD";
-    }
+    return localeClient.getLocaleSettings().currency();
   }
 
   private Double getExchangeRate(String fromCurrency, String toCurrency) {

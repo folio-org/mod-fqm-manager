@@ -407,7 +407,7 @@ Queries will be migrated just like any other, with the exception of:
 In the event that migration results in a ”broken” entity type (for example, a source no longer exists), it can be easily repaired. To do so, follow these steps:
 
 1. `GET` the migrated entity type via `/entity-types/custom/{id}`,
-1. Fix any noticed issues,
-1. `PUT` it back to `/entity-types/custom/{id}`,
-1. If validation fails, go back to step 2.
-1. Success! 🎉
+2. Fix any noticed issues,
+3. `PUT` it back to `/entity-types/custom/{id}`,
+4. If validation fails, go back to step 2.
+5. Success! 🎉

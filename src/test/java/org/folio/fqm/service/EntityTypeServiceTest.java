@@ -26,9 +26,12 @@ import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -86,6 +89,9 @@ class EntityTypeServiceTest {
 
   @Mock
   private EntityTypeValidationService entityTypeValidationService;
+
+  @Mock
+  private TranslationService translationService;
 
   @Spy
   @InjectMocks
@@ -1529,5 +1535,39 @@ class EntityTypeServiceTest {
     // Ensure this goes through the API path and not the query processor
     verify(crossTenantHttpClient).get(eq("path"), anyMap(), eq(TENANT_ID));
     verify(queryProcessorService, never()).processQuery(any(), any(), any(), any());
+  }
+
+  @ParameterizedTest
+  @MethodSource("countryTranslationCases")
+  void shouldTranslateCountryCodesToCountryNamesWithFallback(String translationResponse, String expectedLabel) {
+    UUID entityTypeId = UUID.randomUUID();
+    String valueColumnName = "country";
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(new EntityTypeColumn()
+        .name(valueColumnName)
+        .source(new SourceColumn(entityTypeId, valueColumnName)
+          .name("countries")
+          .type(SourceColumn.TypeEnum.FQM))
+      ));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
+    when(translationService.format(anyString())).thenAnswer(inv -> {
+      String key = inv.getArgument(0);
+      return "mod-fqm-manager.countries.US".equals(key) ? translationResponse : key;
+    });
+
+    ColumnValues actual = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "US");
+
+    assertTrue(actual.getContent().stream().anyMatch(v -> "US".equals(v.getValue()) && expectedLabel.equals(v.getLabel())));
+  }
+
+  static Stream<Arguments> countryTranslationCases() {
+    return Stream.of(
+      Arguments.of(null, "US"),
+      Arguments.of(" ", "US"),
+      Arguments.of("mod-fqm-manager.countries.US", "US"),
+      Arguments.of("United States", "United States")
+    );
   }
 }

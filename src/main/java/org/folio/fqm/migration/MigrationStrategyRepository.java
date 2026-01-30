@@ -6,7 +6,7 @@ import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.ModesOfIssuanceClient;
 import org.folio.fqm.client.OrganizationsClient;
 import org.folio.fqm.client.PatronGroupsClient;
-import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.fqm.migration.strategies.impl.V0POCMigration;
 import org.folio.fqm.migration.strategies.impl.V10OrganizationStatusValueChange;
@@ -42,7 +42,7 @@ public class MigrationStrategyRepository {
   private final List<MigrationStrategy> migrationStrategies;
 
   public MigrationStrategyRepository(
-    SettingsClient settingsClient,
+    LocaleClient localeClient,
     LocationsClient locationsClient,
     LocationUnitsClient locationUnitsClient,
     ModesOfIssuanceClient modesOfIssuanceClient,
@@ -57,7 +57,7 @@ public class MigrationStrategyRepository {
         new V1ModeOfIssuanceConsolidation(),
         new V2ResourceTypeConsolidation(),
         new V3RamsonsFieldCleanup(),
-        new V4DateFieldTimezoneAddition(settingsClient),
+        new V4DateFieldTimezoneAddition(localeClient),
         new V5UUIDNotEqualOperatorRemoval(),
         new V6ModeOfIssuanceValueChange(modesOfIssuanceClient),
         new V7PatronGroupsValueChange(patronGroupsClient),

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
@@ -49,7 +49,7 @@ public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
-  private final SettingsClient settingsClient;
+  private final LocaleClient localeClient;
   private final FolioExecutionContext executionContext;
   private final TranslationService translationService;
 
@@ -75,7 +75,7 @@ public class ResultSetService {
       );
 
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
-    ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
+    ZoneId tenantTimezone = localize ? localeClient.getLocaleSettings().getZoneId() : null;
     List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
 
     return contentIds

@@ -304,4 +304,30 @@ class EntityTypeUtilsTest {
       () -> verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entity2)
     );
   }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationWhenSourceNameIsNotCountries() {
+    EntityType entityType = new EntityType().columns(List.of(
+      new EntityTypeColumn()
+        .name("country")
+        .source(new org.folio.querytool.domain.dto.SourceColumn()
+          .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
+          .name("not-countries"))
+    ));
+    List<String> result = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    assertTrue(result.isEmpty(), "Should not return field paths when source name is not 'countries'");
+  }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationForNonFqmSource() {
+    EntityType entityType = new EntityType().columns(List.of(
+      new EntityTypeColumn()
+        .name("country")
+        .source(new org.folio.querytool.domain.dto.SourceColumn()
+          .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.ENTITY_TYPE)
+          .name("countries"))
+    ));
+    List<String> result = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    assertTrue(result.isEmpty(), "Should not return field paths when source type is not FQM");
+  }
 }

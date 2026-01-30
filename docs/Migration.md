@@ -28,6 +28,7 @@ Entity types and their fields change over time, be it adding fields, moving them
     - [Extra magic](#extra-magic)
     - [Advanced migration tips](#advanced-migration-tips)
 - [Custom entity types support](#custom-entity-types-support)
+  - [Recovery](#recovery)
 
 ## Versions
 
@@ -371,3 +372,34 @@ public MigratableQueryInformation additionalChanges(Void v, MigratableQueryInfor
   - `{entityTypeId=composite-users-et, fieldPrefix=outer_entity., field=users.id}`
   - `{entityTypeId=simple-user-et, fieldPrefix=outer_entity.users., field=id}`
   - Iterations are done in this order (from the outermost entity to the simplest) and will stop either when a transformation **does** occur (field/condition changes, warning emitted, etc) or when there's no more levels to process.
+
+## Custom entity types support
+
+> “With great power comes great responsibility”
+>
+> _- Uncle Ben, Spider-Man comics_
+
+Custom entity types are incredibly powerful, however, this very power limits the ability for the entities and their queries to be automatically migrated.
+
+Currently, FQM will migrate custom entity types based on changes to FQM itself. **No migration is supported for changes made by users to custom entity types.** Here is what FQM will migrate on the entities:
+
+- Source entity type ID changes,
+- Source/target join field changes,
+- Default sort order, and
+- Group by definitions.
+
+Queries will be migrated just like any other, with the exception of:
+
+- If a source's entity type ID changes, queries may not have migrations applicable to that source performed.
+
+Custom entity migration is done on a “best effort” basis and may not cover all edge cases, nor will it necessarily guarantee a working entity type or query after migration. In the event that something could not be automatically handled (for example, a source's `targetField` is no longer available), a warning will be emitted in the custom entity's `description`. Be sure to check these descriptions and the migration warnings after performing a migration to ensure everything is still as expected.
+
+### Recovery
+
+In the event that migration results in a ”broken” entity type (for example, a source no longer exists), it can be easily repaired. To do so, follow these steps:
+
+1. `GET` the migrated entity type via `/entity-types/custom/{id}`,
+1. Fix any noticed issues,
+1. `PUT` it back to `/entity-types/custom/{id}`,
+1. If validation fails, go back to step 2.
+1. Success! 🎉

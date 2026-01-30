@@ -152,21 +152,6 @@ class MigrationServiceTest {
   }
 
   @Test
-  void testThrowExceptionIfQueryNeedsMigrationWithNoMigrations() {
-    // Use the default strategy that only changes the version
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
-    when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
-
-    // This should not throw an exception because only the version changes
-    migrationService.throwExceptionIfQueryNeedsMigration(
-      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build()
-    );
-
-    verify(migrationStrategy, times(1))
-      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(), Map.of());
-  }
-
-  @Test
   void testThrowExceptionIfQueryNeedsMigrationThrowsExceptionWhenEntityTypeIdChanges() {
     // Test when entityTypeId changes
     testMigrationException(

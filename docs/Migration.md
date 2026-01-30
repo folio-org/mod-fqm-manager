@@ -136,6 +136,10 @@ public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
 }
 ```
 
+> [!NOTE]
+>
+> Only references from all inheriting composites to the migrated entities need to be defined here — other sources used in parent entities do not need to be explicitly stated.
+
 ### Warnings
 
 Sometimes, things do not go as planned, and we cannot be backwards compatible. A suite of `Warning` classes are provided to handle common use cases, as described below. Generally, you should use the factory methods when creating an `AbstractSimpleMigrationStrategy`, and the builders when creating a custom migration.
@@ -392,7 +396,11 @@ Queries will be migrated just like any other, with the exception of:
 
 - If a source's entity type ID changes, queries may not have migrations applicable to that source performed.
 
-Custom entity migration is done on a “best effort” basis and may not cover all edge cases, nor will it necessarily guarantee a working entity type or query after migration. In the event that something could not be automatically handled (for example, a source's `targetField` is no longer available), a warning will be emitted in the custom entity's `description`. Be sure to check these descriptions and the migration warnings after performing a migration to ensure everything is still as expected.
+> [!WARNING]
+>
+> Custom entity migration is done on a “best effort” basis and may not cover all edge cases, nor will it necessarily guarantee a working entity type or query after migration. In the event that something could not be automatically handled (for example, a source's `targetField` is no longer available), a warning will be emitted in the custom entity's `description`. Be sure to check these descriptions and the migration warnings after performing a migration to ensure everything is still as expected.
+>
+> For additional validation, or if you experience issues, follow the [recovery](#recovery) steps below.
 
 ### Recovery
 

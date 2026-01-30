@@ -78,10 +78,7 @@ public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
   private static final String LANGUAGES_FILEPATH = "languages.json5";
-  private static final String GET_LOCALE_SETTINGS_PATH = "configurations/entries";
-  private static final Map<String, String> GET_LOCALE_SETTINGS_PARAMS = Map.of(
-    "query", "(module==ORG and configName==localeSettings)"
-  );
+  private static final String GET_LOCALE_SETTINGS_PATH = "locale";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -395,16 +392,10 @@ public class EntityTypeService {
 
     Locale folioLocale;
     try {
-      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, GET_LOCALE_SETTINGS_PARAMS);
+      String localeSettingsResponse = simpleHttpClient.get(GET_LOCALE_SETTINGS_PATH, Map.of());
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode localeSettingsNode = objectMapper.readTree(localeSettingsResponse);
-      String valueString = localeSettingsNode
-        .path("configs")
-        .get(0)
-        .path("value")
-        .asText();
-      JsonNode valueNode = objectMapper.readTree(valueString);
-      String localeString = valueNode.path("locale").asText();
+      String localeString = localeSettingsNode.path("locale").asText();
       folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");

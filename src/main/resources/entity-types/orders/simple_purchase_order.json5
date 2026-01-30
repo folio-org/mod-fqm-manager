@@ -112,14 +112,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'billTo'",
-      joinsTo: [
-        {
-          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
-          targetField: 'id',
-          type: 'equality-cast-uuid',
-          direction: 'left',
-        },
-      ],
     },
     {
       name: 'close_reason',
@@ -298,14 +290,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'shipTo'",
-      joinsTo: [
-        {
-          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
-          targetField: 'id',
-          type: 'equality-cast-uuid',
-          direction: 'left',
-        },
-      ],
     },
     {
       name: 'template',

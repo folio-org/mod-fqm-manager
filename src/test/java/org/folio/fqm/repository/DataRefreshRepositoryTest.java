@@ -49,27 +49,16 @@ class DataRefreshRepositoryTest {
   @Test
   void shouldRefreshExchangeRates() {
     String tenantId = "tenant_01";
-    String localeSettingsPath = "configurations/entries";
     String exchangeRatePath = "finance/exchange-rate";
     String fullTableName = "tenant_01_mod_fqm_manager.currency_exchange_rates";
-    Map<String, String> localeSettingsParams = Map.of(
-      "query", "(module==ORG and configName==localeSettings)"
-    );
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
-           {
-             "configs": [
-               {
-                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
-                 "module":"ORG",
-                 "configName":"localeSettings",
-                 "enabled":true,
-                 "value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"USD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
-               }
-             ],
-             "totalRecords": 1,
-             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
-           }
+    when(simpleHttpClient.get(localeSettingsPath, Map.of())).thenReturn("""
+      {
+          "locale": "en-US",
+          "currency": "USD",
+          "timezone": "UTC",
+          "numberingSystem": "latn"
+      }
       """);
     when(simpleHttpClient.get(eq(exchangeRatePath), any())).thenReturn("""
        {
@@ -102,26 +91,15 @@ class DataRefreshRepositoryTest {
   @Test
   void shouldDoNothingIfSystemCurrencyIsNotSupported() {
     String tenantId = "tenant_01";
-    String localeSettingsPath = "configurations/entries";
     String fullTableName = "tenant_01_mod_fqm_manager.currency_exchange_rates";
-    Map<String, String> localeSettingsParams = Map.of(
-      "query", "(module==ORG and configName==localeSettings)"
-    );
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
+    when(simpleHttpClient.get(localeSettingsPath, Map.of())).thenReturn("""
            {
-             "configs": [
-               {
-                 "id":"2a132a01-623b-4d3a-9d9a-2feb777665c2",
-                 "module":"ORG",
-                 "configName":"localeSettings",
-                 "enabled":true,
-                 "value":"{\\"locale\\":\\"en-US\\",\\"timezone\\":\\"UTC\\",\\"currency\\":\\"ZWD\\"}","metadata":{"createdDate":"2024-03-25T17:37:22.309+00:00","createdByUserId":"db760bf8-e05a-4a5d-a4c3-8d49dc0d4e48"}
-               }
-             ],
-             "totalRecords": 1,
-             "resultInfo": {"totalRecords":1,"facets":[],"diagnostics":[]}
-           }
+                "locale": "en-US",
+                "currency": "ZWD",
+                "timezone": "UTC",
+                "numberingSystem": "latn"
+            }
       """);
     assertDoesNotThrow(() -> dataRefreshRepository.refreshExchangeRates(tenantId));
     verify(jooqContext, times(0)).insertInto(table(fullTableName));
@@ -130,24 +108,13 @@ class DataRefreshRepositoryTest {
   @Test
   void shouldUseUSDAsDefaultCurrencyIfSystemCurrencyNotDefined() {
     String tenantId = "tenant_01";
-    String localeSettingsPath = "configurations/entries";
     String exchangeRatePath = "finance/exchange-rate";
     String fullTableName = "tenant_01_mod_fqm_manager.currency_exchange_rates";
     Map<String, String> exchangeRateParams = Map.of(
       "from", "USD",
       "to", "USD"
     );
-    Map<String, String> localeSettingsParams = Map.of(
-      "query", "(module==ORG and configName==localeSettings)"
-    );
     when(sourceViewService.isModFinanceInstalled()).thenReturn(true);
-    when(simpleHttpClient.get(localeSettingsPath, localeSettingsParams)).thenReturn("""
-           {
-             "configs": [],
-             "totalRecords": 0,
-             "resultInfo": {"totalRecords":0,"facets":[],"diagnostics":[]}
-           }
-      """);
     when(simpleHttpClient.get(exchangeRatePath, exchangeRateParams)).thenReturn("""
        {
          "from": "ZAR",

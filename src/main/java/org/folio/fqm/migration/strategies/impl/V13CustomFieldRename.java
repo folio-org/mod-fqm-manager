@@ -52,7 +52,9 @@ public class V13CustomFieldRename extends AbstractSimpleMigrationStrategy {
   public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.of(
       USERS_ENTITY_TYPE_ID,
-      getNamePairs(executionContext.getTenantId()).stream().collect(Collectors.toMap(Pair::getLeft, Pair::getRight))
+      getNamePairs(executionContext.getTenantId())
+        .stream()
+        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight, (a, b) -> b))
     );
   }
 

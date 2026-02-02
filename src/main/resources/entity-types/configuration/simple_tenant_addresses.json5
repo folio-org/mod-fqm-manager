@@ -1,0 +1,78 @@
+{
+  id: '3fe1b126-52d1-4b72-a346-9a73721c6931',
+  name: 'simple_tenant_addresses',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'addr',
+      target: 'src_configuration_tenant_addresses',
+    },
+  ],
+  requiredPermissions: [
+    'tenant-addresses.collection.get'
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      sourceAlias: 'addr',
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      valueGetter: ':addr.id',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":addr.name",
+      source: {
+        entityTypeId: '3fe1b126-52d1-4b72-a346-9a73721c6931',
+        columnName: 'name',
+      },
+      valueSourceApi: {
+        path: 'tenant-addresses',
+        valueJsonPath: '$.addresses.*.name',
+        labelJsonPath: '$.addresses.*.name',
+      },
+    },
+    {
+      name: 'address',
+      sourceAlias: 'addr',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: ":sourceAlias.address",
+      idColumnName: 'id',
+      source: {
+        entityTypeId: '3fe1b126-52d1-4b72-a346-9a73721c6931',
+        columnName: 'address',
+      },
+      valueSourceApi: {
+        path: 'tenant-addresses',
+        valueJsonPath: '$.addresses.*.id',
+        labelJsonPath: '$.addresses.*.address',
+      }
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

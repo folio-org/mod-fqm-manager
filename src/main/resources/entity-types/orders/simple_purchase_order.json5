@@ -112,6 +112,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'billTo'",
+      joinsTo: [
+        {
+          targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'close_reason',
@@ -290,6 +298,14 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'shipTo'",
+      joinsTo: [
+        {
+          targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'template',

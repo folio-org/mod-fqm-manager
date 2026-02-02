@@ -1,0 +1,30 @@
+{
+  id: '5c4cb0c9-c8bf-4fe5-b844-4de90ca445dc',
+  name: 'composite_invoice',
+  private: false,
+  sources: [
+    {
+      alias: 'invoice',
+      type: 'entity-type',
+      targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+      useIdColumns: true,
+      essentialOnly: false,
+      order: 10,
+    },
+    {
+      alias: 'bill_to',
+      type: 'entity-type',
+      targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+      targetField: 'id',
+      sourceField: 'invoice.bill_to_id',
+      essentialOnly: true,
+      order: 20,
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"invoice.invoice".id',
+      direction: 'ASC',
+    },
+  ],
+}

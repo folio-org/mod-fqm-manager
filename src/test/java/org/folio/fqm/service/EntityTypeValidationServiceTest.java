@@ -198,18 +198,6 @@ class EntityTypeValidationServiceTest {
     return List.of(
       Arguments.of(customETFactory(b -> b.version(null)), "Custom entity type must have _version=current"),
       Arguments.of(customETFactory(b -> b.version("old")), "Custom entity type must have _version=current"),
-      Arguments.of(
-        customETFactory(b -> b.sourceView("something")),
-        "Custom entity types must not contain a sourceView property"
-      ),
-      Arguments.of(
-        customETFactory(b -> b.sourceViewExtractor("something")),
-        "Custom entity types must not contain a sourceViewExtractor property"
-      ),
-      Arguments.of(
-        customETFactory(b -> b.customFieldEntityTypeId(BASE_VALID_CUSTOM_ENTITY_TYPE.getId())),
-        "Custom field entity type ID must not be defined for custom entity types"
-      ),
       Arguments.of(customETFactory(b -> b.owner(null)), "Custom entity type must have an owner"),
       Arguments.of(customETFactory(b -> b.isCustom(null)), "Entity type .+ is not a custom entity type"),
       Arguments.of(customETFactory(b -> b.isCustom(false)), "Entity type .+ is not a custom entity type"),

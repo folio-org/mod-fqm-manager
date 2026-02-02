@@ -61,24 +61,6 @@ public class EntityTypeValidationService {
     if (customEntityType.getColumns() != null && !customEntityType.getColumns().isEmpty()) {
       throw new InvalidEntityTypeDefinitionException("Custom entity types must not contain columns", customEntityType);
     }
-    if (customEntityType.getCustomFieldEntityTypeId() != null) {
-      throw new InvalidEntityTypeDefinitionException(
-        "Custom field entity type ID must not be defined for custom entity types",
-        customEntityType
-      );
-    }
-    if (customEntityType.getSourceView() != null) {
-      throw new InvalidEntityTypeDefinitionException(
-        "Custom entity types must not contain a sourceView property",
-        customEntityType
-      );
-    }
-    if (customEntityType.getSourceViewExtractor() != null) {
-      throw new InvalidEntityTypeDefinitionException(
-        "Custom entity types must not contain a sourceViewExtractor property",
-        customEntityType
-      );
-    }
     if (Boolean.TRUE.equals(customEntityType.getCrossTenantQueriesEnabled())) {
       throw new InvalidEntityTypeDefinitionException(
         "Custom entity must not have cross-tenant queries enabled",

@@ -69,7 +69,7 @@ class AbstractSimpleMigrationStrategyTest {
       return Map.ofEntries(
         Map.entry(UUID_A, Map.of("foo", "bar")),
         Map.entry(UUID_E, Map.of("foo", "bar")),
-        Map.entry(UUID_F, Map.of("*", "bar.%s"))
+        Map.entry(UUID_F, Map.of("*", "bar.%s", "specific", "override"))
       );
     }
 
@@ -213,6 +213,19 @@ class AbstractSimpleMigrationStrategyTest {
           UUID_F,
           "{\"_version\":\"version\",\"bar.foo\":{\"$eq\":\"foo\"}}",
           List.of("bar.field1", "bar.foo", "bar.field2")
+        )
+      ),
+      // No ET change, FQL changes (wildcard with specific override)
+      Arguments.of(
+        new MigratableQueryInformation(
+          UUID_F,
+          "{\"_version\":\"version\",\"specific\":{\"$eq\":\"foo\"}}",
+          List.of("specific")
+        ),
+        new MigratableQueryInformation(
+          UUID_F,
+          "{\"_version\":\"version\",\"override\":{\"$eq\":\"foo\"}}",
+          List.of("override")
         )
       ),
       // No changes

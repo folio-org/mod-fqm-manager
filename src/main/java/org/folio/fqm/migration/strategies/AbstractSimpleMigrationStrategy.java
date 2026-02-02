@@ -161,10 +161,12 @@ public abstract class AbstractSimpleMigrationStrategy extends AbstractRegularMig
   protected static String getNewFieldName(Map<String, String> fieldChanges, String oldFieldName) {
     if (MigrationConfiguration.VERSION_KEY.equals(oldFieldName)) {
       return oldFieldName;
+    } else if (fieldChanges.containsKey(oldFieldName)) { // specific field changes take priority over wildcards
+      return fieldChanges.get(oldFieldName);
     } else if (fieldChanges.containsKey("*")) {
       return fieldChanges.get("*").formatted(oldFieldName);
     } else {
-      return fieldChanges.getOrDefault(oldFieldName, oldFieldName);
+      return oldFieldName;
     }
   }
 }

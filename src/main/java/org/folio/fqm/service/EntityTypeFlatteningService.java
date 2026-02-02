@@ -126,12 +126,8 @@ public class EntityTypeFlatteningService {
       .description(originalEntityType.getDescription())
       ._private(originalEntityType.getPrivate())
       .defaultSort(originalEntityType.getDefaultSort())
-      .idView(originalEntityType.getIdView())
-      .customFieldEntityTypeId(originalEntityType.getCustomFieldEntityTypeId())
       .labelAlias(originalEntityType.getLabelAlias())
       .groupByFields(originalEntityType.getGroupByFields())
-      .sourceView(originalEntityType.getSourceView())
-      .sourceViewExtractor(originalEntityType.getSourceViewExtractor())
       .crossTenantQueriesEnabled(originalEntityType.getCrossTenantQueriesEnabled())
       .filterConditions(originalEntityType.getFilterConditions())
       .additionalEcsConditions(originalEntityType.getAdditionalEcsConditions())
@@ -236,12 +232,6 @@ public class EntityTypeFlatteningService {
             .toList()
         );
       }
-    }
-
-    if (flattenedEntityType.getSourceViewExtractor() != null) {
-      flattenedEntityType.sourceViewExtractor(
-        SourceUtils.injectSourceAliasIntoViewExtractor(flattenedEntityType.getSourceViewExtractor(), renamedAliases)
-      );
     }
 
     if (!CollectionUtils.isEmpty(flattenedEntityType.getFilterConditions())) {

@@ -1229,6 +1229,7 @@
         lower(:sourceAlias.jsonb->>'staffSuppress'),\
         'false'\
       )",
+      defaultValue: 'true',
       values: [
         {
           value: 'true',
@@ -1255,6 +1256,7 @@
         lower(:sourceAlias.jsonb->>'discoverySuppress'),\
         'false'\
       )",
+      defaultValue: 'false',
       values: [
         {
           value: 'true',

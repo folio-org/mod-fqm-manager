@@ -1,7 +1,7 @@
 {
   id: 'a49dc8b4-8316-534d-94af-c5ca7748d6e9',
   name: 'mod_feesfines__owners',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -25,7 +25,7 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__owners.jsonb->>'owner'",
       sourceAlias: 'src__circulation__feesfines__owners',
     },

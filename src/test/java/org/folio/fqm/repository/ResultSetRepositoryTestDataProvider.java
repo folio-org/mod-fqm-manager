@@ -41,7 +41,6 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     )
     .defaultSort(List.of(new EntityTypeDefaultSort().columnName(EntityTypeRepository.ID_FIELD_NAME)))
     .name("TEST_ENTITY_TYPE")
-    .fromClause("TEST_ENTITY_TYPE")
     .sources(List.of(
       new EntityTypeSourceDatabase()
         .type("db")
@@ -62,7 +61,6 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
         "id", "field1"
       )
     )
-    .fromClause("TEST_GROUP_BY_ENTITY_TYPE")
     .sources(List.of(
       new EntityTypeSourceDatabase()
         .type("db")
@@ -87,7 +85,6 @@ public class ResultSetRepositoryTestDataProvider implements MockDataProvider {
     ))
     .id("6b08439b-4f8e-4468-8046-ea620f5cfb74")
     .name("TEST_ENTITY_TYPE")
-    .fromClause("TEST_ENTITY_TYPE")
     .sources(
       List.of(
         new EntityTypeSourceDatabase()

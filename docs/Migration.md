@@ -1,13 +1,15 @@
-# Query Migration
+# Migration
 
 Entity types and their fields change over time, be it adding fields, moving them between entity types, or completely rethinking the way some fields are handled. As such, we have a robust migration system to ensure that consuming apps will not break, and their queries will continue to work despite any internal FQM changes.
 
-- [Query versions](#query-versions)
+- [Versions](#versions)
 - [Updating a query](#updating-a-query)
+- [Updating an entity type](#updating-an-entity-type)
 - [Writing migrations](#writing-migrations)
   - [Changes](#changes)
     - [Entity type changes](#entity-type-changes)
     - [Field changes](#field-changes)
+  - [Defining source maps](#defining-source-maps)
   - [Warnings](#warnings)
     - [Entity type warnings](#entity-type-warnings)
       - [DeprecatedEntityWarning](#deprecatedentitywarning)
@@ -19,8 +21,16 @@ Entity types and their fields change over time, be it adding fields, moving them
       - [RemovedFieldWarning](#removedfieldwarning)
       - [Additional warnings](#additional-warnings)
   - [Advanced migrations](#advanced-migrations)
+    - [Modifying queries](#modifying-queries)
+    - [Modifying query values](#modifying-query-values)
+    - [Modifying field names](#modifying-field-names)
+    - [State](#state)
+    - [Extra magic](#extra-magic)
+    - [Advanced migration tips](#advanced-migration-tips)
+- [Custom entity types support](#custom-entity-types-support)
+  - [Recovery](#recovery)
 
-## Query versions
+## Versions
 
 The version of a query is stored inside the FQL string:
 
@@ -31,7 +41,17 @@ The version of a query is stored inside the FQL string:
 }
 ```
 
-These are arbitrary strings, and consuming applications should make no assumptions about them (they are currently integers, but may be changed in the future to commit hashes, module versions, or anything else).
+And versions of custom entity types are stored inside the entity definition:
+
+```json
+{
+  "id": "d41130e9-0302-5ef3-a6b2-70f6ae1678ce",
+  "name": "my_custom_entity",
+  "_version": "3"
+}
+```
+
+These are arbitrary strings, and consuming applications should make no assumptions about them (they are currently semver-adjacent, but may be changed in the future to commit hashes, module versions, or anything else).
 
 Queries from Quesnelia or earlier will have no version associated with them and will be considered version `"0"`.
 
@@ -39,11 +59,15 @@ Queries from Quesnelia or earlier will have no version associated with them and 
 
 To update a query, send it, the entity type ID, and a list of fields (if desired) to `/fqm/migrate`. See our [API documentation](https://dev.folio.org/reference/api/#mod-fqm-manager) for more information about this endpoint. Our module will return the updated query, entity type ID, and list of fields, all of which should be saved. Additionally, the response may contain [warnings](#warnings), meaning that some parts of the query or field list was unable to be migrated.
 
+## Updating an entity type
+
+Custom entity types will be migrated when the module is installed. No additional action is required; for more information see [custom entity types support](#custom-entity-types-support).
+
 ## Writing migrations
 
 Any change to an entity type that results in a field being removed or renamed should result in a migration script. The easiest way to do this is to do the following:
 
-1. Create a new migration strategy in `src/main/java/org/folio/fqm/migration/strategies` that extends `AbstractSimpleMigrationStrategy`
+1. Create a new migration strategy in `src/main/java/org/folio/fqm/migration/strategies/impl` that extends `AbstractSimpleMigrationStrategy`
    - Your migration strategy should start with `V#`, where `#` is the version being migrated **from**.
 1. Implement `getMaximumApplicableVersion` to return the last version to which the migration should be applied. Currently, this is the current integer version.
 1. Implement `getLabel` with a developer-friendly description of what is happening; this will be logged and will be useful for debugging any errors. It is recommended to include ticket numbers or other references to make it easy to track down why this migration/change occurred in the first place, too.
@@ -53,11 +77,14 @@ Any change to an entity type that results in a field being removed or renamed sh
 1. Update the `CURRENT_VERSION` in `src/main/java/org/folio/fqm/config/MigrationConfiguration.java`.
 1. If something fancy is being done, or you want to go above and beyond, write a custom test. You can see `src/test/java/org/folio/fqm/migration/strategies/TestTemplate` and `V0POCMigrationTest` for a framework that can easily be extended for common test case formats.
    - Implementations of `AbstractSimpleMigrationStrategy` are automatically tested via `MigrationStrategyRepositoryTest`, however, this is just for basic smoke tests and contains no logic to test specifics of an actual migration.
-   - See [Advanced migrations](#advanced-migrations) for more information
 
 Not all use cases can be covered with `AbstractSimpleMigrationStrategy`; in that case, a custom migration will be needed. See [advanced migrations](#advanced-migrations) for more details.
 
 ### Changes
+
+> [!NOTE]
+>
+> Note that only simple entity types' changes need to be described here. Composite and custom entities will automatically have the changes reflected based on their underlying simple entity types, so long as the relationships are [properly defined](#defining-source-maps).
 
 #### Entity type changes
 
@@ -95,6 +122,23 @@ public Map<UUID, UUID> getEntityTypeChanges() {
   ));
 }
 ```
+
+### Defining source maps
+
+Source maps are used in migrations to define relations between composite and simple entity types. For example, if your migration alters `simple_instance_status`, it's necessary for the migration system to know that `composite_instances`'s `inst_stat` source points to `simple_instance_status`. To define these relationships, override `getEntityTypeSourceMaps` (note that the inner keys are the source aliases used by the composite):
+
+```java
+public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
+  return Map.of(
+    COMPOSITE_INSTANCES_ID, Map.of("inst_stat", SIMPLE_INSTANCE_STATUS_ID),
+    COMPOSITE_ITEM_DETAILS_ID, Map.of("instance_status", SIMPLE_INSTANCE_STATUS_ID)
+  );
+}
+```
+
+> [!NOTE]
+>
+> Only references from all inheriting composites to the migrated entities need to be defined here — other sources used in parent entities do not need to be explicitly stated.
 
 ### Warnings
 
@@ -201,15 +245,169 @@ Warnings for more complex use cases include `OperatorBreakingWarning` and `Value
 
 ### Advanced migrations
 
-Advanced migrations that need to do more advanced logic or conditionals, or apply to a range of migration versions, require custom implementations of `MigrationStrategy`. Tutorials for this is outside the scope of this document, however, there are three methods to be implemented here which should unlock full power:
+Advanced migrations that need to do more advanced logic or conditionals, or apply to a range of migration versions, or replace operators or values, are not possible via `AbstractSimpleMigrationStrategy`. For these types of migration, you can use `AbstractRegularMigrationStrategy` which lets you handle each aspect of the migration yourself.
 
-- `getLabel` should return a descriptive label for logging, just like `AbstractSimpleMigrationStrategy`
-- `applies` can optionally be implemented to only run migration logic on matching queries
-- `apply` is responsible for the full transformation of the query, adding warnings if applicable, and anything else necessary.
-  - If the migration results in a breaking change, then make sure to set `hadBreakingChanges` to `true` on the
-    `MigrationQueryInformtaion` object returned from `apply`. This prevents queries from running if they are simply not
-    compatible with the running FQM release.
+These modifications revolve around two main data types: `MigratableFqlFieldAndCondition`/`MigratableFqlFieldOnly` and `SingleFieldMigrationResult`. The `MigratableFqlFieldAndCondition` and `MigratableFqlFieldOnly` types represent a field that needs to be migrated and contain:
 
-Helper functions are available in `MigrationUtils`; it is highly recommend to build off one of the existing migrations if possible.
+- `entityTypeId`,
+- `fieldPrefix` (for composite fields),
+- `field`,
+- `operator` (`MigratableFqlFieldAndCondition` only), and
+- `JsonNode value` (`MigratableFqlFieldAndCondition` only).
 
-**It is critical that, after `apply` is called, `applies` should return false. Otherwise, an infinite loop may occur.**
+The `entityTypeId` and `field` is typically what should be used to determine if the migration logic should apply. `fieldPrefix` indicates parent source aliases for composite usage. `operator` and `value` are only present when migrating queries, and represent the operator and value being used in the condition.
+
+Once your logic has determined the changes needed, it should return a `SingleFieldMigrationResult` which contains a list of new `MigratableFqlFieldAndCondition`/`MigratableFqlFieldOnly` to replace the original field with, a list of any `Warning`s that should be included, and whether or not this is a breaking change. There are a number of convenience methods such as `SingleFieldMigrationResult.noop(...)` for common cases, too.
+
+To create an advanced migration, implement `getMaximumApplicableVersion`, `getLabel`, and [define source maps](#defining-source-maps) the same as [simple migrations](#writing-migrations). Then, implement the following sections' functionality depending on what you need:
+
+#### Modifying queries
+
+Queries are modified by overriding the method `SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(S state, MigratableFqlFieldAndCondition condition)`. For example:
+
+```java
+@Override
+public SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(
+  Void v,
+  MigratableFqlFieldAndCondition condition
+) {
+  if (!matches(condition.entityTypeId(), condition.field())) {
+    return SingleFieldMigrationResult.noop(condition);
+  }
+
+  // remove queries with $ne operator
+  if (condition.operator().equals("$ne")) {
+    return SingleFieldMigrationResult
+              .<MigratableFqlFieldAndCondition>removed() // this is equivalent to specifying fields=List.of()
+              .withWarnings(List.of(new QueryBreakingWarning(...)))
+              .withHadBreakingChange(true);
+  }
+
+  return SingleFieldMigrationResult.withField(condition.withField("new_field_name"));
+}
+```
+
+#### Modifying query values
+
+For this common use case, you can use the helper method `MigrationUtils.migrateFqlValues` inside `migrateFql`. This method takes care of checking if the field matches and iterating over the values (including arrays). It accepts a predicate for if the field should be transformed, and a function to transform each value. All array traversal and reconstruction is automatically handled. For example:
+
+```java
+@Override
+public SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(
+  Void v,
+  MigratableFqlFieldAndCondition condition
+) {
+  return MigrationUtils.migrateFqlValues(
+    cond,
+    condition ->
+      ORGANIZATIONS_ENTITY_TYPE_ID.equals(condition.entityTypeId()) && FIELD_NAME.equals(condition.field()),
+    (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) ->
+      MigrationResult.withResult(NEW_VALUES.getOrDefault(value, value))
+  );
+}
+```
+
+The internal transformation function accepts a `MigrationResult<String>` which allows returning a variable number of results for each input, warnings, and the breaking change flag.
+
+#### Modifying field names
+
+For the list of fields in results, much of the same transformation logic applies. Overriding `SingleFieldMigrationResult<MigratableFqlFieldOnly> migrateFieldName(S state, MigratableFqlFieldOnly field)` allows you to modify field names just as `migrateFql` allows modifying query conditions.
+
+#### State
+
+`AbstractRegularMigrationStrategy` accepts a generic parameter `S` which can be used to share state between calls to its methods (typically an `AtomicReference` of some sort). This is useful when fetching data from an API, for example, as the data can be saved into this state variable and reused for each field/condition. If your migration does not need any state you can safely set this to `Void`.
+
+When using state, initialization is done via by overriding `S getStartingState()`. This should create container variables as needed **but not perform expensive requests** (as those should only be performed once we've found a field/condition to transform). Here's an example of using state to store API results:
+
+```java
+@Override
+public AtomicReference<List<Organization>> getStartingState() {
+  return new AtomicReference<>(organizations);
+}
+
+@Override
+public SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(
+  AtomicReference<List<Organization>> orgs,
+  MigratableFqlFieldAndCondition condition
+) {
+  if (/* condition entity/field does not match organization entity/name field */) {
+    return SingleFieldMigrationResult.noop(condition);
+  }
+
+  if (orgs.get() == null) {
+    // expensive API request only once
+    List<Organization> organizations = getNaughtyOrganizations();
+    orgs.set(organizations);
+  }
+
+  // now we can safely use orgs.get() to access the organizations list
+  if (/* condition value is in naughty list */) {
+    return SingleFieldMigrationResult
+              .<MigratableFqlFieldAndCondition>removed()
+              .withWarnings(List.of(new QueryBreakingWarning(...)))
+              .withHadBreakingChange(true);
+  }
+
+  return SingleFieldMigrationResult.noop(condition);
+}
+```
+
+#### Extra magic
+
+Sometimes not everything is possible at the condition and field name levels; for these cases, you can override `MigratableQueryInformation additionalChanges(S state, MigratableQueryInformation query)`. This method is called once per query after all calls to `migrateFql` and `migrateFieldName` have been made, and allows you to modify the entire query at once. This can be useful for cases such as editing the entity type ID:
+
+```java
+@Override
+public MigratableQueryInformation additionalChanges(Void v, MigratableQueryInformation query) {
+  if (!query.getEntityTypeId().equals(OLD_ENTITY_TYPE_ID)) {
+    return query;
+  }
+
+  return query.withEntityTypeId(NEW_ENTITY_TYPE_ID);
+}
+```
+
+#### Advanced migration tips
+
+- `fieldPrefix` generally should not be used in logic, however, it should always be used for warnings (typically via `condition.getFullField()`), so that users can identify exactly which field is being referred to.
+- If renaming fields in advanced migrations, ensure that the field is renamed in **both** `migrateFql` and `migrateFieldName`, otherwise the query and fields list will be out of sync.
+- As part of composite entity field resolution, `migrateFql` and `migrateFieldName` may be called multiple times for the same field with different `fieldPrefix` and `entityTypeId` values. For example, it may get called with all of:
+  - `{entityTypeId=custom-et, fieldPrefix=, field=outer_entity.users.id}`
+  - `{entityTypeId=composite-users-et, fieldPrefix=outer_entity., field=users.id}`
+  - `{entityTypeId=simple-user-et, fieldPrefix=outer_entity.users., field=id}`
+  - Iterations are done in this order (from the outermost entity to the simplest) and will stop either when a transformation **does** occur (field/condition changes, warning emitted, etc) or when there's no more levels to process.
+
+## Custom entity types support
+
+> “With great power comes great responsibility”
+>
+> _- Uncle Ben, Spider-Man comics_
+
+Custom entity types are incredibly powerful, however, this very power limits the ability for the entities and their queries to be automatically migrated.
+
+Currently, FQM will migrate custom entity types based on changes to FQM itself. **No migration is supported for changes made by users to custom entity types.** Here is what FQM will migrate on the entities:
+
+- Source entity type ID changes,
+- Source/target join field changes,
+- Default sort order, and
+- Group by definitions.
+
+Queries will be migrated just like any other, with the exception of:
+
+- If a source's entity type ID changes, queries may not have migrations applicable to that source performed.
+
+> [!WARNING]
+>
+> Custom entity migration is done on a “best effort” basis and may not cover all edge cases, nor will it necessarily guarantee a working entity type or query after migration. In the event that something could not be automatically handled (for example, a source's `targetField` is no longer available), a warning will be emitted in the custom entity's `description`. Be sure to check these descriptions and the migration warnings after performing a migration to ensure everything is still as expected.
+>
+> For additional validation, or if you experience issues, follow the [recovery](#recovery) steps below.
+
+### Recovery
+
+In the event that migration results in a ”broken” entity type (for example, a source no longer exists), it can be easily repaired. To do so, follow these steps:
+
+1. `GET` the migrated entity type via `/entity-types/custom/{id}`,
+2. Fix any noticed issues,
+3. `PUT` it back to `/entity-types/custom/{id}`,
+4. If validation fails, go back to step 2.
+5. Success! 🎉

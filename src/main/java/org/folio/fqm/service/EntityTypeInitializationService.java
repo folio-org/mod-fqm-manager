@@ -40,6 +40,7 @@ public class EntityTypeInitializationService {
   private final CrossTenantQueryService crossTenantQueryService;
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeValidationService entityTypeValidationService;
+  private final MigrationService migrationService;
   private final SourceViewService sourceViewService;
 
   private final FolioExecutionContext folioExecutionContext;
@@ -52,6 +53,7 @@ public class EntityTypeInitializationService {
     CrossTenantQueryService crossTenantQueryService,
     EntityTypeRepository entityTypeRepository,
     EntityTypeValidationService entityTypeValidationService,
+    MigrationService migrationService,
     SourceViewService sourceViewService,
     FolioExecutionContext folioExecutionContext,
     ResourcePatternResolver resourceResolver
@@ -59,6 +61,7 @@ public class EntityTypeInitializationService {
     this.crossTenantQueryService = crossTenantQueryService;
     this.entityTypeRepository = entityTypeRepository;
     this.entityTypeValidationService = entityTypeValidationService;
+    this.migrationService = migrationService;
     this.sourceViewService = sourceViewService;
     this.folioExecutionContext = folioExecutionContext;
     this.resourceResolver = resourceResolver;
@@ -85,6 +88,7 @@ public class EntityTypeInitializationService {
     );
 
     entityTypeRepository.replaceEntityTypeDefinitions(availableEntityTypes);
+    migrationService.migrateCustomEntityTypes();
   }
 
   protected Pair<String, String> getCentralTenantIdSafely(String centralTenantId) {

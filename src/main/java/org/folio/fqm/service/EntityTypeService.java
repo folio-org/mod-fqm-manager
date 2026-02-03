@@ -44,6 +44,7 @@ import org.folio.querytool.domain.dto.UpdateUsedByRequest.OperationEnum;
 import org.folio.querytool.domain.dto.ValueSourceApi;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -86,11 +87,14 @@ public class EntityTypeService {
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
     "MZM", "XPD", "PHP", "XPT", "PTE", "ROL", "RUR", "CSD", "SLE", "SLL", "XAG", "SKK", "SIT", "ESP", "XDR", "XSU", "SDD", "SRG", "STD", "XTS",
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
+  private static final String COUNTRIES_FILEPATH = "country_codes.json";
+  private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
   private final EntityTypeValidationService entityTypeValidationService;
   private final LocalizationService localizationService;
+  private final MigrationService migrationService;
   private final QueryProcessorService queryService;
   private final CrossTenantHttpClient crossTenantHttpClient;
   private final PermissionsService permissionsService;
@@ -99,6 +103,7 @@ public class EntityTypeService {
   private final FolioExecutionContext folioExecutionContext;
   private final ClockService clockService;
   private final SimpleHttpClient simpleHttpClient;
+  private final TranslationService translationService;
 
   /**
    * Returns the list of all entity types.
@@ -211,11 +216,14 @@ public class EntityTypeService {
           // entity types using this MUST declare a dependency on view `_mod_search_languages_availability_indicator`
           // to ensure that this source is available
           case "languages" -> getLanguages(searchText, tenantsToQuery);
+          case "countries" -> getCountries();
           case "tenant_id" -> getTenantIds(entityType);
           case "tenant_name" -> getTenantNames(entityType);
           // instructs query builder to provide organization finder plugin, so no values need be returned here
           case "organization", "donor_organization" -> ColumnValues.builder().content(List.of()).build();
-          default -> throw new InvalidEntityTypeDefinitionException("Unhandled source name \"" + field.getSource().getName() + "\" for the FQM value source type in column \"" + fieldName + '"', entityType);
+          default -> throw new InvalidEntityTypeDefinitionException("Unhandled source name \""
+            + field.getSource().getName() + "\" for the FQM value source type in column \""
+            + fieldName + '"', entityType);
         };
       }
     }
@@ -309,8 +317,7 @@ public class EntityTypeService {
         log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
         failureCount++;
         lastException = e;
-      }
-      catch (FeignException.NotFound e) {
+      } catch (FeignException.NotFound e) {
         log.error("Value source API {} not found in tenant {}", field.getValueSourceApi().getPath(), tenantId);
         failureCount++;
         lastException = e;
@@ -433,6 +440,40 @@ public class EntityTypeService {
     return new ColumnValues().content(results);
   }
 
+  private ColumnValues getCountries() {
+    ObjectMapper mapper = new ObjectMapper();
+    try (InputStream input = getClass().getClassLoader().getResourceAsStream(COUNTRIES_FILEPATH)) {
+      if (input == null) {
+        log.warn("Country code file {} not found on classpath", COUNTRIES_FILEPATH);
+        return new ColumnValues().content(List.of());
+      }
+
+      // List of ISO 3166-1 alpha-2 codes
+      List<String> codes = mapper.readValue(input, new TypeReference<>() {
+      });
+
+      List<ValueWithLabel> values = codes.stream()
+        .map(code -> {
+          String translationKey = COUNTRY_TRANSLATION_TEMPLATE.formatted(code);
+          String label = translationService.format(translationKey);
+
+          // Use original code as label if translation is missing
+          if (label == null || StringUtils.isBlank(label) || label.equals(translationKey)) {
+            label = code;
+          }
+
+          return new ValueWithLabel().value(code).label(label);
+        })
+        .sorted(comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+        .toList();
+
+      return new ColumnValues().content(values);
+    } catch (IOException e) {
+      log.warn("Failed to read countries from {}", COUNTRIES_FILEPATH, e);
+      return new ColumnValues().content(List.of());
+    }
+  }
+
   private static ValueWithLabel toValueWithLabel(Map<String, Object> allValues, String fieldName) {
     var valueWithLabel = new ValueWithLabel().label(getFieldValue(allValues, fieldName));
     return allValues.containsKey(ID_FIELD_NAME)
@@ -486,8 +527,9 @@ public class EntityTypeService {
       );
     }
 
-    var updatedCustomEntityType = customEntityType.toBuilder()
+    CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
       .id(customEntityTypeId.toString())
+      .version(migrationService.getLatestVersion())
       .createdAt(now)
       .updatedAt(now)
       .owner(folioExecutionContext.getUserId())
@@ -495,6 +537,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(customEntityTypeId, updatedCustomEntityType);
     entityTypeRepository.createCustomEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -503,6 +546,7 @@ public class EntityTypeService {
     permissionsService.verifyUserCanAccessCustomEntityType(oldET);
 
     CustomEntityType updatedCustomEntityType = customEntityType.toBuilder()
+      .version(migrationService.getLatestVersion())
       .createdAt(oldET.getCreatedAt())
       .updatedAt(clockService.now())
       .owner(Objects.requireNonNullElse(customEntityType.getOwner(), oldET.getOwner()))
@@ -510,6 +554,7 @@ public class EntityTypeService {
 
     entityTypeValidationService.validateCustomEntityType(entityTypeId, updatedCustomEntityType);
     entityTypeRepository.updateEntityType(updatedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
     return updatedCustomEntityType;
   }
 
@@ -538,6 +583,7 @@ public class EntityTypeService {
       .updatedAt(clockService.now())
       .build();
     entityTypeRepository.updateEntityType(deletedCustomEntityType);
+    migrationService.updateCustomEntityMigrationMappings();
   }
 
   /**
@@ -688,7 +734,7 @@ public class EntityTypeService {
     }
     return joinConditions.stream()
       .sorted(comparing((JoinFieldPair pair) -> pair.getSourceField().getLabel(), String.CASE_INSENSITIVE_ORDER)
-                .thenComparing(pair -> pair.getTargetField().getLabel(), String.CASE_INSENSITIVE_ORDER))
+        .thenComparing(pair -> pair.getTargetField().getLabel(), String.CASE_INSENSITIVE_ORDER))
       .toList();
   }
 

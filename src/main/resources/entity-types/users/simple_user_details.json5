@@ -245,7 +245,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'city') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'city')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -256,7 +256,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'region') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'region')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -267,10 +267,15 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'countryId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'countryId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
+              source: {
+                entityTypeId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+                type: 'fqm',
+                name: 'countries',
+              }
             },
             {
               name: 'postal_code',
@@ -278,7 +283,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'postalCode') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'postalCode')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -289,22 +294,25 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'addressLine1') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine1')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
             },
             {
               name: 'address_type_id',
-              property: 'addressTypeId',
+              property: 'addressType',
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
-              hidden: true,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'addressTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
+              source: {
+                columnName: 'type',
+                entityTypeId: '9176c676-0485-4f6c-b1fc-585355bac679',
+              },
             },
             {
               name: 'primary_address',
@@ -312,7 +320,7 @@
               dataType: {
                 dataType: 'booleanType',
               },
-              queryable: false,
+              queryable: true,
               values: [
                 {
                   value: 'true',
@@ -333,7 +341,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'addressLine2') FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine2')) FROM jsonb_array_elements(:sourceAlias.jsonb->'personal'->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -344,7 +352,15 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->'personal'->>'addresses'",
+      valueGetter: "( \
+        SELECT jsonb_agg( \
+          record.value || jsonb_build_object('addressType', address_type.jsonb ->> 'addressType') \
+          ORDER BY record.value ->> 'addressType' \
+        ) \
+        FROM jsonb_array_elements((:sourceAlias.jsonb -> 'personal' -> 'addresses')) record(value) \
+        LEFT JOIN ${tenant_id}_mod_fqm_manager.src_users_addresstype address_type \
+          ON (record.value ->> 'addressTypeId') = address_type.id::text \
+      )::text",
     },
     {
       name: 'middle_name',

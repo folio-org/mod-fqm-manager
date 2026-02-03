@@ -12,17 +12,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.function.TriConsumer;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.migration.types.MigratableFqlField;
+import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
+import org.folio.fqm.migration.types.MigratableFqlFieldOnly;
+import org.folio.fqm.migration.types.MigrationResult;
+import org.folio.fqm.migration.types.SingleFieldMigrationResult;
+import org.folio.fqm.migration.types.ValueTransformer;
+import org.folio.fqm.migration.warnings.Warning;
 
 @Log4j2
 @UtilityClass
@@ -34,13 +41,21 @@ public class MigrationUtils {
    * Helper function to transform an FQL query where each field gets turned into a new quantity of fields.
    * This runs a given function on each field's condition in the query, potentially adding or removing $and as needed.
    *
+   * Note that, for nested fields, the handler function may be called multiple times for the same field,
+   * once for each level of nesting. If the handler modifies the field/condition, no further unwrapping will be attempted.
+   *
+   * @param entityTypeId The entity type ID of the query being migrated
    * @param fqlQuery The root query to migrate
-   * @param handler  something that takes an {@link FqlFieldAndCondition} and returns a list of
-   *                 {@link FqlFieldAndCondition FqlFieldAndCondition(s)} to replace it with
+   * @param handler  something that takes an {@link MigratableFqlFieldAndCondition} and returns a list of
+   *                 {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and whether
+   *                 a breaking change occurred
+   * @param sourceMappings A map of entity type IDs to their sources (alias -> source target ID), used for unwrapping nested fields
    */
-  public static String migrateAndReshapeFql(
+  public static MigrationResult<String> migrateFql(
+    UUID entityTypeId,
     String fqlQuery,
-    Function<FqlFieldAndCondition, Collection<FqlFieldAndCondition>> handler
+    Function<MigratableFqlFieldAndCondition, SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> handler,
+    Map<UUID, Map<String, UUID>> sourceMappings
   ) {
     try {
       ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
@@ -48,35 +63,153 @@ public class MigrationUtils {
       ObjectNode result = objectMapper.createObjectNode();
 
       // iterate through fields in source
-      List<FqlFieldAndCondition> startingFields = new ArrayList<>();
-      extractFieldsAndConditions(fql, startingFields, v -> result.set(MigrationConfiguration.VERSION_KEY, v));
+      List<MigratableFqlFieldAndCondition> startingFields = new ArrayList<>();
+      extractFieldsAndConditions(
+        entityTypeId,
+        fql,
+        startingFields,
+        v -> result.set(MigrationConfiguration.VERSION_KEY, v)
+      );
 
-      List<FqlFieldAndCondition> resultingFields = startingFields
+      List<SingleFieldMigrationResult<MigratableFqlFieldAndCondition>> transformed = startingFields
         .stream()
-        .map(handler)
+        .map(f ->
+          handleSingleFieldWithNesting(f, handler, MigrationUtils::didMigrationModifyFieldAndCondition, sourceMappings)
+        )
+        .toList();
+      List<MigratableFqlFieldAndCondition> resultingFields = transformed
+        .stream()
+        .map(SingleFieldMigrationResult::result)
         .flatMap(Collection::stream)
         .toList();
 
       if (resultingFields.isEmpty()) {
         log.warn("Migrating {} yielded zero fields", fqlQuery);
       } else if (resultingFields.size() == 1) {
-        result.set(resultingFields.get(0).field(), resultingFields.get(0).getConditionObject());
+        result.set(resultingFields.get(0).getFullField(), resultingFields.get(0).getConditionObject());
       } else {
         ArrayNode arrayNode = objectMapper.createArrayNode();
         resultingFields.forEach(field -> arrayNode.add(field.getFieldAndConditionObject()));
         result.set("$and", arrayNode);
       }
 
-      return objectMapper.writeValueAsString(result);
+      return new MigrationResult<>(
+        objectMapper.writeValueAsString(result),
+        transformed.stream().map(SingleFieldMigrationResult::warnings).flatMap(Collection::stream).toList(),
+        transformed.stream().anyMatch(SingleFieldMigrationResult::hadBreakingChange)
+      );
     } catch (JsonProcessingException e) {
       log.error("Unable to process JSON", e);
       throw new UncheckedIOException(e);
     }
   }
 
+  /**
+   * Similar to {@link #migrateFql(UUID, String, Function)} but for field name lists.
+   *
+   * @param entityTypeId the entity type ID of the query being migrated
+   * @param fields the list of fields to migrate
+   * @param handler something that takes an {@link MigratableFqlFieldOnly} and returns a list of
+   *                {@link SingleFieldMigrationResult} indicating the new field(s), warnings, and
+   *                whether a breaking change occurred
+   * @param sourceMappings A map of entity type IDs to their sources (alias -> source target ID), used for unwrapping nested fields
+   */
+  public static MigrationResult<List<String>> migrateFieldNames(
+    UUID entityTypeId,
+    List<String> fields,
+    Function<MigratableFqlFieldOnly, SingleFieldMigrationResult<MigratableFqlFieldOnly>> handler,
+    Map<UUID, Map<String, UUID>> sourceMappings
+  ) {
+    List<SingleFieldMigrationResult<MigratableFqlFieldOnly>> transformed = fields
+      .stream()
+      .map(f ->
+        handleSingleFieldWithNesting(
+          new MigratableFqlFieldOnly(entityTypeId, "", f),
+          handler,
+          MigrationUtils::didMigrationModifyFieldOnly,
+          sourceMappings
+        )
+      )
+      .toList();
+
+    return new MigrationResult<>(
+      transformed
+        .stream()
+        .map(SingleFieldMigrationResult::result)
+        .flatMap(Collection::stream)
+        .map(MigratableFqlFieldOnly::getFullField)
+        .distinct()
+        .toList(),
+      transformed.stream().map(SingleFieldMigrationResult::warnings).flatMap(Collection::stream).toList(),
+      transformed.stream().anyMatch(SingleFieldMigrationResult::hadBreakingChange)
+    );
+  }
+
+  /**
+   * Iteratively calls `handler` on each level of nesting for the given field, until either:
+   * - the handler modifies the field (as determined by `didModify`), or
+   * - there is no further nesting to unwrap
+   */
+  private static <F extends MigratableFqlField<F>> SingleFieldMigrationResult<F> handleSingleFieldWithNesting(
+    F original,
+    Function<F, SingleFieldMigrationResult<F>> handler,
+    BiPredicate<F, SingleFieldMigrationResult<F>> didModify,
+    Map<UUID, Map<String, UUID>> sourceMappings
+  ) {
+    SingleFieldMigrationResult<F> transformed = handler.apply(original);
+    int fieldDelimiterIndex = original.field().indexOf('.');
+
+    if (didModify.test(original, transformed) || fieldDelimiterIndex == -1) {
+      return transformed;
+    }
+
+    Map<String, UUID> sourceMap = sourceMappings.get(original.entityTypeId());
+    String source = original.field().substring(0, fieldDelimiterIndex);
+    String remainder = original.field().substring(fieldDelimiterIndex + 1);
+    if (sourceMap == null || sourceMap.get(source) == null) {
+      return transformed;
+    }
+
+    return handleSingleFieldWithNesting(
+      original.dereferenced(sourceMap.get(source), source, remainder),
+      handler,
+      didModify,
+      sourceMappings
+    );
+  }
+
+  public static boolean didMigrationModifyFieldAndCondition(
+    MigratableFqlFieldAndCondition original,
+    SingleFieldMigrationResult<MigratableFqlFieldAndCondition> result
+  ) {
+    return (
+      result.hadBreakingChange() ||
+      !result.warnings().isEmpty() ||
+      result.result().size() != 1 ||
+      !result.result().iterator().next().equals(original)
+    );
+  }
+
+  public static boolean didMigrationModifyFieldOnly(
+    MigratableFqlFieldOnly original,
+    SingleFieldMigrationResult<MigratableFqlFieldOnly> result
+  ) {
+    return (
+      result.hadBreakingChange() ||
+      !result.warnings().isEmpty() ||
+      result.result().size() != 1 ||
+      !result.result().iterator().next().getFullField().equals(original.getFullField())
+    );
+  }
+
+  /**
+   * Extracts every field and condition from the given FQL node, adding them to the provided result list.
+   * This will fully unpack $ands and any other nesting as necessary.
+   */
   private static void extractFieldsAndConditions(
+    UUID entityTypeId,
     ObjectNode fql,
-    List<FqlFieldAndCondition> result,
+    List<MigratableFqlFieldAndCondition> result,
     Consumer<JsonNode> handleVersion
   ) {
     fql
@@ -87,6 +220,7 @@ public class MigrationUtils {
           ((ArrayNode) entry.getValue()).elements()
             .forEachRemaining(node -> {
               extractFieldsAndConditions(
+                entityTypeId,
                 (ObjectNode) node,
                 result,
                 // _version only applies to outer
@@ -101,7 +235,15 @@ public class MigrationUtils {
             .getValue()
             .properties()
             .forEach(condition ->
-              result.add(new FqlFieldAndCondition(entry.getKey(), condition.getKey(), condition.getValue()))
+              result.add(
+                new MigratableFqlFieldAndCondition(
+                  entityTypeId,
+                  "",
+                  entry.getKey(),
+                  condition.getKey(),
+                  condition.getValue()
+                )
+              )
             );
         } else {
           handleVersion.accept(entry.getValue());
@@ -109,156 +251,75 @@ public class MigrationUtils {
       });
   }
 
-  public record FqlFieldAndCondition(String field, String operator, JsonNode value) {
-    public JsonNode getConditionObject() {
-      return objectMapper.createObjectNode().set(operator, value);
-    }
-    public JsonNode getFieldAndConditionObject() {
-      return objectMapper.createObjectNode().set(field, objectMapper.createObjectNode().set(operator, value));
-    }
-  }
-
   /**
-   * New code should probably use {@link #migrateAndReshapeFql(String, Function)} instead.
+   * Helper function to transform values in an FQL query. The returned function is intended to be
+   * called inside {@link #migrateFql(UUID, String, Function, Map)}'s {@code handler} parameter
+   * (or wrapped by `migrateFieldAndCondition` in {@link AbstractRegularMigrationStrategy#migrateFieldAndCondition}).
    *
-   * Helper function to transform an FQL query where each field gets turned into one or zero fields.
-   * This changes a version to a new one, and runs a given function on each field in the query. See
-   * {@link #migrateFqlTree(ObjectNode, TriConsumer)} for more details on the field transformation function.
-   *
-   * @param fqlQuery The root query to migrate
-   * @param handler  something that takes the result node, the field name, and the field's query object,
-   *                 applies some transformation, and stores the results back in result
+   * @param input            The field/condition being evaluated
+   * @param applies          If the valueTransformer should be applied to the field (for optimization)
+   * @param valueTransformer Something that takes an incoming field, value, and a supplier (to get
+   *                         the original fql for warnings), returning either the transformed value,
+   *                         or `null` if it should be removed (the transformer is responsible for
+   *                         directly adding warnings in the caller's context, if applicable)
    */
-  public static String migrateFql(String fqlQuery, TriConsumer<ObjectNode, String, JsonNode> handler) {
-    try {
-      ObjectNode fql = (ObjectNode) objectMapper.readTree(fqlQuery);
-      fql = migrateFqlTree(fql, handler);
-
-      return objectMapper.writeValueAsString(fql);
-    } catch (JsonProcessingException e) {
-      log.error("Unable to process JSON", e);
-      throw new UncheckedIOException(e);
+  public static SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFqlValues(
+    MigratableFqlFieldAndCondition input,
+    Predicate<MigratableFqlFieldAndCondition> applies,
+    ValueTransformer valueTransformer
+  ) {
+    if (!applies.test(input)) {
+      return SingleFieldMigrationResult.noop(input);
     }
-  }
 
-  /**
-   * Call `handler` for each field in the FQL query tree, returning a new tree.
-   * Note that `handler` is responsible for inserting what should be left in the tree, if anything;
-   * if the function is a no-op, an empty FQL tree will be returned.
-   * <p>
-   * A true "no-op" here would look like (result, key, value) -> result.set(key, value).
-   * <p>
-   * This conveniently handles `$and`s, allowing logic to be handled on fields only.
-   *
-   * @param fql     the fql node
-   * @param handler something that takes the result node, the field name, and the field's query object,
-   *                applies some transformation, and stores the results back in result
-   * @return
-   */
-  private static ObjectNode migrateFqlTree(ObjectNode fql, TriConsumer<ObjectNode, String, JsonNode> handler) {
-    ObjectNode result = objectMapper.createObjectNode();
-    // iterate through fields in source
-    fql
-      .properties()
-      .forEach(entry -> {
-        if ("$and".equals(entry.getKey())) {
-          ArrayNode resultContents = objectMapper.createArrayNode();
-          ((ArrayNode) entry.getValue()).elements()
-            .forEachRemaining(node -> {
-              ObjectNode innerResult = migrateFqlTree((ObjectNode) node, handler);
-              // handle removed fields
-              if (!innerResult.isEmpty()) {
-                resultContents.add(innerResult);
-              }
-            });
-          result.set("$and", resultContents);
-          // ensure we don't run this on the _version
-        } else if (!MigrationConfiguration.VERSION_KEY.equals(entry.getKey())) {
-          handler.accept(result, entry.getKey(), entry.getValue());
-        } else {
-          // keep _version as-is
-          result.set(entry.getKey(), entry.getValue());
+    JsonNode result = null;
+    List<Warning> warnings = new ArrayList<>();
+    AtomicBoolean hadBreakingChange = new AtomicBoolean(false);
+
+    if (input.value().isArray()) {
+      ArrayNode node = (ArrayNode) input.value();
+
+      List<JsonNode> transformedValues = new ArrayList<>();
+      node.forEach(element -> {
+        MigrationResult<JsonNode> transformedValue = transformIfStringOnly(
+          element,
+          textValue -> valueTransformer.apply(input, textValue, () -> input.getConditionObject().toPrettyString())
+        );
+
+        if (transformedValue.result() != null) {
+          transformedValues.add(transformedValue.result());
         }
+        warnings.addAll(transformedValue.warnings());
+        hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
       });
 
-    return result;
-  }
-
-  /**
-   * Helper function to transform values in an FQL query. This changes a version to a new one, and
-   * runs a given function on each value in the query. Returning `null` from the transformation
-   * function will result in the value being removed from the query.
-   * <p>
-   * This is similar to {@link #migrateFql(String, TriConsumer)}, but operates on
-   * each value, and provides additional convenience to handle cases of array values, etc.
-   *
-   * @param fqlQuery         The root query to migrate
-   * @param applies          If the valueTransformer should be applied to the field (for optimization)
-   * @param valueTransformer Something that takes an incoming field name, value, and a supplier
-   *                         (to get the original fql for warnings), returning either the
-   *                         transformed value, or `null` if it should be removed (the transformer
-   *                         is responsible for handling warnings)
-   */
-  public static String migrateFqlValues(String fqlQuery, Predicate<String> applies, ValueTransformer valueTransformer) {
-    return migrateFql(
-      fqlQuery,
-      (result, key, value) -> {
-        if (!applies.test(key)) {
-          result.set(key, value); // no-op
-          return;
-        }
-
-        ObjectNode conditions = (ObjectNode) value;
-        ObjectNode newValues = objectMapper.createObjectNode();
-
-        conditions
-          .properties()
-          .forEach(entry -> {
-            if (entry.getValue().isArray()) {
-              ArrayNode node = (ArrayNode) entry.getValue();
-
-              List<JsonNode> transformedValues = new ArrayList<>();
-              node.forEach(element -> {
-                JsonNode transformedValue = transformIfStringOnly(
-                  element,
-                  textValue ->
-                    valueTransformer.apply(
-                      key,
-                      textValue,
-                      () -> objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString()
-                    )
-                );
-
-                if (transformedValue != null) {
-                  transformedValues.add(transformedValue);
-                }
-              });
-
-              if (!transformedValues.isEmpty()) {
-                newValues.set(entry.getKey(), objectMapper.createArrayNode().addAll(transformedValues));
-              }
-            } else {
-              JsonNode transformedValue = transformIfStringOnly(
-                entry.getValue(),
-                textValue ->
-                  valueTransformer.apply(
-                    key,
-                    textValue,
-                    () -> objectMapper.createObjectNode().set(entry.getKey(), entry.getValue()).toPrettyString()
-                  )
-              );
-
-              if (transformedValue != null) {
-                newValues.set(entry.getKey(), transformedValue);
-              }
-            }
-          });
-
-        if (newValues.size() != 0) {
-          result.set(key, newValues);
-        }
+      if (!transformedValues.isEmpty()) {
+        result = objectMapper.createArrayNode().addAll(transformedValues);
       }
-    );
+    } else {
+      MigrationResult<JsonNode> transformedValue = transformIfStringOnly(
+        input.value(),
+        textValue -> valueTransformer.apply(input, textValue, () -> input.getConditionObject().toPrettyString())
+      );
+      warnings.addAll(transformedValue.warnings());
+      hadBreakingChange.set(hadBreakingChange.get() || transformedValue.hadBreakingChange());
+
+      if (transformedValue.result() != null) {
+        result = transformedValue.result();
+      }
+    }
+
+    if (result == null) {
+      return SingleFieldMigrationResult
+        .<MigratableFqlFieldAndCondition>removed()
+        .withWarnings(warnings)
+        .withHadBreakingChange(hadBreakingChange.get());
+    } else {
+      return SingleFieldMigrationResult
+        .withField(input.withValue(result))
+        .withWarnings(warnings)
+        .withHadBreakingChange(hadBreakingChange.get());
+    }
   }
 
   /**
@@ -266,23 +327,21 @@ public class MigrationUtils {
    * node version of the supplier's response, if applicable; if the original node is non-string,
    * simply returns that.
    */
-  private static JsonNode transformIfStringOnly(JsonNode value, UnaryOperator<String> transformer) {
+  private static MigrationResult<JsonNode> transformIfStringOnly(
+    JsonNode value,
+    Function<String, MigrationResult<String>> transformer
+  ) {
     if (!value.isTextual()) {
-      return value;
+      return MigrationResult.noop(value);
     }
 
-    String newValue = transformer.apply(value.textValue());
+    MigrationResult<String> newValue = transformer.apply(value.textValue());
 
-    if (newValue == null) {
-      return null;
+    if (newValue.result() == null) {
+      return newValue.withoutResult();
     }
 
-    return new TextNode(newValue);
-  }
-
-  @FunctionalInterface
-  public interface ValueTransformer {
-    String apply(String key, String value, Supplier<String> fql);
+    return newValue.withNewResult(new TextNode(newValue.result()));
   }
 
   // Formatting note: This object is down here instead of at the top of the class because it is only used in

@@ -62,6 +62,9 @@ class EntityTypeInitializationServiceTest {
   private FolioExecutionContext folioExecutionContext;
 
   @Mock
+  private MigrationService migrationService;
+
+  @Mock
   private ResourcePatternResolver resourceResolver;
 
   @Mock

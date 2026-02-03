@@ -59,7 +59,6 @@ public class ResultSetRepositoryArrayTestDataProvider implements MockDataProvide
         .valueGetter(":sourceAlias.testJsonbArrayField")
     ))
     .name("TEST_ARRAY_ENTITY_TYPE")
-    .fromClause("TEST_ARRAY_ENTITY_TYPE")
     .sources(List.of(
       new EntityTypeSourceDatabase()
         .type("db")

@@ -32,13 +32,13 @@ public class WarningTest {
   ArgumentCaptor<Object[]> varargCaptor;
 
   public static List<Arguments> getExpectedTypes() {
-    return List.of(
+    return Arrays.asList(
       Arguments.of(DeprecatedEntityWarning.withAlternative("old", "new").apply(null), WarningType.DEPRECATED_ENTITY),
-      Arguments.of(DeprecatedFieldWarning.build().apply("old", "{}"), WarningType.DEPRECATED_FIELD),
+      Arguments.of(DeprecatedFieldWarning.build().apply("prefix.", "old", "{}"), WarningType.DEPRECATED_FIELD),
       Arguments.of(OperatorBreakingWarning.builder().build(), WarningType.OPERATOR_BREAKING),
-      Arguments.of(QueryBreakingWarning.withAlternative("new").apply("old", "{}"), WarningType.QUERY_BREAKING),
+      Arguments.of(QueryBreakingWarning.withAlternative("new").apply("prefix.", "old", "{}"), WarningType.QUERY_BREAKING),
       Arguments.of(RemovedEntityWarning.withAlternative("old", "new").apply("{}"), WarningType.REMOVED_ENTITY),
-      Arguments.of(RemovedFieldWarning.withAlternative("new").apply("old", "{}"), WarningType.REMOVED_FIELD)
+      Arguments.of(RemovedFieldWarning.withAlternative("new").apply("prefix.", "old", "{}"), WarningType.REMOVED_FIELD)
     );
   }
 
@@ -49,66 +49,76 @@ public class WarningTest {
   }
 
   public static List<Arguments> getExpectedTranslations() {
-    return List.of(
+    return Arrays.asList(
       Arguments.of(
         DeprecatedEntityWarning.withAlternative("old", "alt").apply(null),
         "mod-fqm-manager.migration.warning.DEPRECATED_ENTITY.withAlternative",
-        List.of("name", "old", "alternative", "alt")
+        Arrays.asList("name", "old", "alternative", "alt")
       ),
       Arguments.of(
         DeprecatedEntityWarning.withoutAlternative("old").apply(null),
         "mod-fqm-manager.migration.warning.DEPRECATED_ENTITY.withoutAlternative",
-        List.of("name", "old")
+        Arrays.asList("name", "old")
       ),
       Arguments.of(
-        DeprecatedFieldWarning.build().apply("old", null),
+        DeprecatedFieldWarning.build().apply("prefix.", "old", null),
         "mod-fqm-manager.migration.warning.DEPRECATED_FIELD.field",
-        List.of("name", "old")
+        Arrays.asList("name", "prefix.old")
       ),
       Arguments.of(
-        DeprecatedFieldWarning.build().apply("old", "{}"),
+        DeprecatedFieldWarning.build().apply("prefix.", "old", "{}"),
         "mod-fqm-manager.migration.warning.DEPRECATED_FIELD.query",
-        List.of("name", "old")
+        Arrays.asList("name", "prefix.old")
       ),
       Arguments.of(
         OperatorBreakingWarning.builder().field("old").operator("$ne").fql("{}").build(),
         "mod-fqm-manager.migration.warning.OPERATOR_BREAKING",
-        List.of("name", "old", "operator", "$ne", "fql", "{}")
+        Arrays.asList("name", "old", "operator", "$ne", "fql", "{}")
       ),
       Arguments.of(
-        QueryBreakingWarning.withAlternative("alt").apply("old", "{}"),
+        QueryBreakingWarning.withAlternative("alt").apply("prefix.", "old", "{}"),
         "mod-fqm-manager.migration.warning.QUERY_BREAKING.withAlternative",
-        List.of("name", "old", "alternative", "alt", "fql", "{}")
+        Arrays.asList("name", "prefix.old", "alternative", "prefix.alt", "fql", "{}")
       ),
       Arguments.of(
-        QueryBreakingWarning.withoutAlternative().apply("old", "{}"),
+        QueryBreakingWarning.withoutAlternative().apply("prefix.", "old", "{}"),
         "mod-fqm-manager.migration.warning.QUERY_BREAKING.withoutAlternative",
-        List.of("name", "old", "fql", "{}")
+        Arrays.asList("name", "prefix.old", "fql", "{}")
       ),
       Arguments.of(
         RemovedEntityWarning.withAlternative("old", "alt").apply("{}"),
         "mod-fqm-manager.migration.warning.REMOVED_ENTITY.withAlternative",
-        List.of("name", "old", "alternative", "alt", "fql", "{}")
+        Arrays.asList("name", "old", "alternative", "alt", "fql", "{}")
       ),
       Arguments.of(
         RemovedEntityWarning.withoutAlternative("old").apply("{}"),
         "mod-fqm-manager.migration.warning.REMOVED_ENTITY.withoutAlternative",
-        List.of("name", "old", "fql", "{}")
+        Arrays.asList("name", "old", "fql", "{}")
       ),
       Arguments.of(
-        RemovedFieldWarning.withAlternative("alt").apply("old", "{}"),
-        "mod-fqm-manager.migration.warning.REMOVED_FIELD.withAlternative",
-        List.of("name", "old", "alternative", "alt", "fql", "{}")
+        RemovedFieldWarning.withAlternative("alt").apply("prefix.", "old", "{}"),
+        "mod-fqm-manager.migration.warning.REMOVED_FIELD.query.withAlternative",
+        Arrays.asList("name", "prefix.old", "alternative", "prefix.alt", "fql", "{}")
       ),
       Arguments.of(
-        RemovedFieldWarning.withoutAlternative().apply("old", "{}"),
-        "mod-fqm-manager.migration.warning.REMOVED_FIELD.withoutAlternative",
-        List.of("name", "old", "fql", "{}")
+        RemovedFieldWarning.withoutAlternative().apply("prefix.", "old", "{}"),
+        "mod-fqm-manager.migration.warning.REMOVED_FIELD.query.withoutAlternative",
+        Arrays.asList("name", "prefix.old", "alternative", null, "fql", "{}")
+      ),
+      Arguments.of(
+        RemovedFieldWarning.withAlternative("alt").apply("prefix.", "old", null),
+        "mod-fqm-manager.migration.warning.REMOVED_FIELD.field.withAlternative",
+        Arrays.asList("name", "prefix.old", "alternative", "prefix.alt", "fql", null)
+      ),
+      Arguments.of(
+        RemovedFieldWarning.withoutAlternative().apply("prefix.", "old", null),
+        "mod-fqm-manager.migration.warning.REMOVED_FIELD.field.withoutAlternative",
+        Arrays.asList("name", "prefix.old", "alternative", null, "fql", null)
       ),
       Arguments.of(
         ValueBreakingWarning.builder().field("old").value("val").fql("{}").build(),
         "mod-fqm-manager.migration.warning.VALUE_BREAKING",
-        List.of("name", "old", "value", "val", "fql", "{}")
+        Arrays.asList("name", "old", "value", "val", "fql", "{}")
       )
     );
   }

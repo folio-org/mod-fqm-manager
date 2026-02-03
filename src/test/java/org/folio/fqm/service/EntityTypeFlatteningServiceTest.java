@@ -545,7 +545,6 @@ class EntityTypeFlatteningServiceTest {
       )
       .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("source1").target("source1_target")))
       .requiredPermissions(List.of("simple_permission1", "simple_permission2"))
-      .sourceViewExtractor("\"source1\".some_view_extractor")
       .filterConditions(List.of("\"source1\".field1 != 'xyz'"))
       .putAdditionalProperty("isCustom", false);
 

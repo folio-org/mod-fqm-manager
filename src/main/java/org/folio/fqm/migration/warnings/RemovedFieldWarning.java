@@ -1,12 +1,12 @@
 package org.folio.fqm.migration.warnings;
 
-import java.util.function.BiFunction;
 import javax.annotation.CheckForNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.folio.fqm.service.LocalizationService;
 import org.folio.spring.i18n.service.TranslationService;
 
 @Builder
@@ -32,14 +32,28 @@ public class RemovedFieldWarning implements FieldWarning {
 
   @Override
   public String getDescription(TranslationService translationService) {
-    return Warning.getDescriptionByAlternativeAndFql(translationService, this.getType(), field, fql, alternative);
+    String translationKey = LocalizationService.MIGRATION_WARNING_TRANSLATION_TEMPLATE.formatted(TYPE.toString());
+
+    if (fql == null) {
+      translationKey += ".field";
+    } else {
+      translationKey += ".query";
+    }
+    if (alternative == null) {
+      translationKey += ".withoutAlternative";
+    } else {
+      translationKey += ".withAlternative";
+    }
+
+    return translationService.format(translationKey, "name", field, "alternative", alternative, "fql", fql);
   }
 
-  public static BiFunction<String, String, FieldWarning> withoutAlternative() {
-    return (String field, String fql) -> new RemovedFieldWarning(field, null, fql);
+  public static FieldWarningFactory withoutAlternative() {
+    return (String fieldPrefix, String field, String fql) -> new RemovedFieldWarning(fieldPrefix + field, null, fql);
   }
 
-  public static BiFunction<String, String, FieldWarning> withAlternative(String alternative) {
-    return (String field, String fql) -> new RemovedFieldWarning(field, alternative, fql);
+  public static FieldWarningFactory withAlternative(String alternative) {
+    return (String fieldPrefix, String field, String fql) ->
+      new RemovedFieldWarning(fieldPrefix + field, fieldPrefix + alternative, fql);
   }
 }

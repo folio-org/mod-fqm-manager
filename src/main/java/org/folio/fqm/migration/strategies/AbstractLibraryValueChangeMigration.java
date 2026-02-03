@@ -1,21 +1,18 @@
 package org.folio.fqm.migration.strategies;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.folio.fql.service.FqlService;
-import org.folio.fqm.client.LocationUnitsClient;
-import org.folio.fqm.client.LocationUnitsClient.LibraryLocation;
-import org.folio.fqm.migration.MigratableQueryInformation;
-import org.folio.fqm.migration.MigrationStrategy;
-import org.folio.fqm.migration.MigrationUtils;
-import org.folio.fqm.migration.warnings.ValueBreakingWarning;
-import org.folio.fqm.migration.warnings.Warning;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.folio.fqm.client.LocationUnitsClient;
+import org.folio.fqm.client.LocationUnitsClient.LibraryLocation;
+import org.folio.fqm.migration.MigrationUtils;
+import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
+import org.folio.fqm.migration.types.MigrationResult;
+import org.folio.fqm.migration.types.SingleFieldMigrationResult;
+import org.folio.fqm.migration.warnings.ValueBreakingWarning;
 
 /**
  * Base class for library value change migrations.
@@ -23,67 +20,74 @@ import java.util.function.Supplier;
  */
 @Log4j2
 @RequiredArgsConstructor
-public abstract class AbstractLibraryValueChangeMigration implements MigrationStrategy {
+public abstract class AbstractLibraryValueChangeMigration
+  extends AbstractRegularMigrationStrategy<AtomicReference<List<LibraryLocation>>> {
 
   private final LocationUnitsClient locationUnitsClient;
 
   protected abstract UUID getEntityTypeId();
+
   protected abstract List<String> getFieldNames();
 
   @Override
-  public MigratableQueryInformation apply(FqlService fqlService, MigratableQueryInformation query) {
-    List<Warning> warnings = new ArrayList<>(query.warnings());
+  public AtomicReference<List<LibraryLocation>> getStartingState() {
+    return new AtomicReference<>();
+  }
 
-    AtomicReference<List<LibraryLocation>> records = new AtomicReference<>();
+  @Override
+  public SingleFieldMigrationResult<MigratableFqlFieldAndCondition> migrateFql(
+    AtomicReference<List<LibraryLocation>> state,
+    MigratableFqlFieldAndCondition cond
+  ) {
+    return MigrationUtils.migrateFqlValues(
+      cond,
+      condition -> getEntityTypeId().equals(condition.entityTypeId()) && getFieldNames().contains(condition.field()),
+      (MigratableFqlFieldAndCondition condition, String value, Supplier<String> fql) -> {
+        if (state.get() == null) {
+          state.set(locationUnitsClient.getLibraries().loclibs());
 
-    return query
-      .withFqlQuery(
-        MigrationUtils.migrateFqlValues(
-          query.fqlQuery(),
-          key -> getEntityTypeId().equals(query.entityTypeId()) && getFieldNames().contains(key),
-          (String key, String value, Supplier<String> fql) -> {
-            if (records.get() == null) {
-              records.set(locationUnitsClient.getLibraries().loclibs());
+          log.info("Fetched {} records from API", state.get().size());
+        }
 
-              log.info("Fetched {} records from API", records.get().size());
+        return state
+          .get()
+          .stream()
+          .filter(r -> r.id().equals(value))
+          .findFirst()
+          .map(loclib -> {
+            if (condition.field().contains(".name")) {
+              return loclib.name();
+            } else {
+              return loclib.code();
             }
-
-            return records
+          })
+          .map(MigrationResult::withResult)
+          .orElseGet(() -> {
+            // some of these may already be the correct value, as both the name and ID fields
+            // got mapped to the same place. If the name is already being used, we want to make
+            // sure not to discard it
+            boolean existsAsValue = state
               .get()
               .stream()
-              .filter(r -> r.id().equals(value))
-              .findFirst()
-              .map(loclib -> {
-                if (key.contains(".name")) {
-                  return loclib.name();
-                } else {
-                  return loclib.code();
-                }
-              })
-              .orElseGet(() -> {
-                // some of these may already be the correct value, as both the name and ID fields
-                // got mapped to the same place. If the name is already being used, we want to make
-                // sure not to discard it
-                boolean existsAsValue = records
-                  .get()
-                  .stream()
-                  .anyMatch(r ->
-                    (key.contains(".name") && r.name().equals(value)) ||
-                    (key.contains(".code") && r.code().equals(value))
-                  );
+              .anyMatch(r ->
+                (condition.field().contains(".name") && r.name().equals(value)) ||
+                (condition.field().contains(".code") && r.code().equals(value))
+              );
 
-                if (existsAsValue) {
-                  return value;
-                } else {
-                  warnings.add(ValueBreakingWarning.builder().field(key).value(value).fql(fql.get()).build());
-                  return null;
-                }
-              });
-          }
-        )
-      )
-      .withHadBreakingChanges(query.hadBreakingChanges() || !warnings.isEmpty())
-      .withWarnings(warnings);
+            if (existsAsValue) {
+              return MigrationResult.withResult(value);
+            } else {
+              return MigrationResult
+                .<String>removed()
+                .withWarnings(
+                  List.of(
+                    ValueBreakingWarning.builder().field(condition.getFullField()).value(value).fql(fql.get()).build()
+                  )
+                )
+                .withHadBreakingChange(true);
+            }
+          });
+      }
+    );
   }
 }
-

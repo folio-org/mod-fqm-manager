@@ -1,7 +1,7 @@
 {
   id: '78360363-7305-5196-a685-19d1debac5a8',
   name: 'mod_feesfines__manual_blocks',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -37,11 +37,12 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->>'desc'",
       sourceAlias: 'src__circulation__feesfines__manualblocks',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manualblocks.jsonb->>'desc'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'code',
@@ -49,11 +50,12 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->>'code'",
       sourceAlias: 'src__circulation__feesfines__manualblocks',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manualblocks.jsonb->>'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'staff_information',
@@ -112,6 +114,7 @@
           label: 'False',
         },
       ],
+      essential: true,
     },
     {
       name: 'renewals',
@@ -134,6 +137,7 @@
           label: 'False',
         },
       ],
+      essential: true,
     },
     {
       name: 'requests',
@@ -156,6 +160,7 @@
           label: 'False',
         },
       ],
+      essential: true,
     },
     {
       name: 'user_id',
@@ -167,14 +172,29 @@
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manualblocks',
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'metadata_created_date',
       dataType: {
         dataType: 'dateTimeType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'createdDate'",
       sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
@@ -183,8 +203,23 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
+      hidden: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manualblocks',
@@ -194,8 +229,9 @@
       dataType: {
         dataType: 'dateTimeType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
+      hidden: true,
       valueGetter: ":src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'updatedDate'",
       sourceAlias: 'src__circulation__feesfines__manualblocks',
     },
@@ -204,8 +240,23 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
+      hidden: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manualblocks',
@@ -215,12 +266,13 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       isIdColumn: true,
       valueGetter: "(:src__circulation__feesfines__manualblocks.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manualblocks',
+      hidden: true,
     },
     {
       name: 'jsonb',

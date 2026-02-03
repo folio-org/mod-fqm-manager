@@ -1,7 +1,7 @@
 {
   id: 'cd21b75f-0e16-5ae2-98b4-7937b26e4e7b',
   name: 'mod_feesfines__manual_block_templates',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -25,7 +25,7 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->>'name'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manual_block_templates.jsonb->>'name'::text))",
@@ -36,12 +36,14 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->>'code'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__manual_block_templates.jsonb->>'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      queryOnly: false,
+      hidden: false,
     },
     {
       name: 'desc',
@@ -70,8 +72,10 @@
       dataType: {
         dataType: 'stringType',
       },
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
+      queryOnly: false,
+      hidden: false,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'patronMessage'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
     },
@@ -81,7 +85,7 @@
         dataType: 'booleanType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       values: [
         {
           value: 'true',
@@ -92,6 +96,7 @@
           label: 'False',
         },
       ],
+      essential: true,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'borrowing'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
     },
@@ -101,7 +106,7 @@
         dataType: 'booleanType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       values: [
         {
           value: 'true',
@@ -112,6 +117,7 @@
           label: 'False',
         },
       ],
+      essential: true,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'renewals'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
     },
@@ -121,7 +127,7 @@
         dataType: 'booleanType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       values: [
         {
           value: 'true',
@@ -132,6 +138,7 @@
           label: 'False',
         },
       ],
+      essential: true,
       valueGetter: ":src__circulation__feesfines__manual_block_templates.jsonb->'blockTemplate'->>'requests'",
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
     },
@@ -152,6 +159,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'createdByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
@@ -173,6 +181,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->'metadata'->>'updatedByUserId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
@@ -188,6 +197,7 @@
       valueGetter: "(:src__circulation__feesfines__manual_block_templates.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__manual_block_templates',
+      essential: true,
     },
     {
       name: 'jsonb',

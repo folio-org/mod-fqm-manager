@@ -1,6 +1,5 @@
 package org.folio.fqm.migration.warnings;
 
-import java.util.function.BiFunction;
 import javax.annotation.CheckForNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -35,11 +34,12 @@ public class QueryBreakingWarning implements FieldWarning {
     return Warning.getDescriptionByAlternativeAndFql(translationService, this.getType(), field, fql, alternative);
   }
 
-  public static BiFunction<String, String, FieldWarning> withoutAlternative() {
-    return (String field, String fql) -> new QueryBreakingWarning(field, null, fql);
+  public static FieldWarningFactory withoutAlternative() {
+    return (String fieldPrefix, String field, String fql) -> new QueryBreakingWarning(fieldPrefix + field, null, fql);
   }
 
-  public static BiFunction<String, String, FieldWarning> withAlternative(String alternative) {
-    return (String field, String fql) -> new QueryBreakingWarning(field, alternative, fql);
+  public static FieldWarningFactory withAlternative(String alternative) {
+    return (String fieldPrefix, String field, String fql) ->
+      new QueryBreakingWarning(fieldPrefix + field, fieldPrefix + alternative, fql);
   }
 }

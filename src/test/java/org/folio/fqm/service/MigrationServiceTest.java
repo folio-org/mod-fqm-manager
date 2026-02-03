@@ -3,27 +3,32 @@ package org.folio.fqm.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-
 import lombok.RequiredArgsConstructor;
-import org.folio.fql.service.FqlService;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
-import org.folio.fqm.migration.MigrationStrategy;
 import org.folio.fqm.migration.MigrationStrategyRepository;
-import org.jetbrains.annotations.NotNull;
+import org.folio.fqm.migration.strategies.MigrationStrategy;
+import org.folio.fqm.repository.CustomEntityTypeMigrationMappingRepository;
+import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
+import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,7 +43,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class MigrationServiceTest {
 
   @Mock
-  private FqlService fqlService;
+  private CustomEntityTypeMigrationMappingRepository customEntityTypeMigrationMappingRepository;
+
+  @Mock
+  private EntityTypeRepository entityTypeRepository;
+
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
 
   @Spy
   private MigrationConfiguration migrationConfiguration;
@@ -51,6 +62,11 @@ class MigrationServiceTest {
 
   @InjectMocks
   private MigrationService migrationService;
+
+  @BeforeEach
+  void setup() {
+    lenient().when(folioExecutionContext.getTenantId()).thenReturn("tenant");
+  }
 
   static List<Arguments> queriesWithExpectedVersions() {
     return List.of(
@@ -98,9 +114,9 @@ class MigrationServiceTest {
 
   @Test
   void testMigrationWorks() {
-    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
+    String fql = "{\"_version\":\"0\",\"test\":{\"$eq\":\"foo\"}}";
 
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -109,58 +125,30 @@ class MigrationServiceTest {
       is(
         MigratableQueryInformation
           .builder()
-          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
+          .fqlQuery(fql.replace("0", migrationService.getLatestVersion()))
           .build()
           .fqlQuery()
       )
     );
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
-  }
-
-  @Test
-  void testMigrationOnlyAppliesApplicable() {
-    String fql = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
-
-    MigrationStrategy migrationStrategyApplicable = spy(new TestMigrationStrategy(true, 1));
-    MigrationStrategy migrationStrategyInapplicable = spy(new TestMigrationStrategy(false, 0));
-
-    when(migrationStrategyRepository.getMigrationStrategies())
-      .thenReturn(List.of(migrationStrategyInapplicable, migrationStrategyApplicable, migrationStrategyInapplicable));
-
-    assertThat(
-      migrationService.migrate(MigratableQueryInformation.builder().fqlQuery(fql).build()).fqlQuery(),
-      is(
-        MigratableQueryInformation
-          .builder()
-          .fqlQuery(fql.replace("source", migrationService.getLatestVersion()))
-          .build()
-          .fqlQuery()
-      )
-    );
-    verify(migrationStrategyApplicable, times(1))
-      .apply(fqlService, MigratableQueryInformation.builder().fqlQuery(fql).version("0").build());
-    verify(migrationStrategyApplicable, times(1)).getLabel();
-    verify(migrationStrategyApplicable, times(1)).applies(any(MigratableQueryInformation.class));
-    verify(migrationStrategyApplicable, times(1)).getMaximumApplicableVersion();
-    verify(migrationStrategyInapplicable, times(2)).applies(any(MigratableQueryInformation.class));
-    verify(migrationStrategyInapplicable, times(2)).getMaximumApplicableVersion();
-
-    verifyNoMoreInteractions(migrationStrategyApplicable, migrationStrategyInapplicable);
+    verify(migrationStrategy, times(1)).apply(MigratableQueryInformation.builder().fqlQuery(fql).build(), Map.of());
   }
 
   // Common test FQL query
-  private static final String TEST_FQL = "{\"_version\":\"source\",\"test\":{\"$eq\":\"foo\"}}";
+  private static final String TEST_FQL = "{\"_version\":\"0\",\"test\":{\"$eq\":\"foo\"}}";
 
   @Test
   void testThrowExceptionIfQueryNeedsMigrationWithNoBreakingChanges() {
     // Use the default strategy that only changes the version
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1));
+    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(1));
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
     // This should not throw an exception because only the version changes
-    migrationService.throwExceptionIfQueryNeedsMigration(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build());
+    migrationService.throwExceptionIfQueryNeedsMigration(
+      MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build()
+    );
 
-    verify(migrationStrategy, times(1)).apply(fqlService, MigratableQueryInformation.builder().fqlQuery(TEST_FQL).version("0").build());
+    verify(migrationStrategy, times(1))
+      .apply(MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(), Map.of());
   }
 
   @Test
@@ -168,15 +156,71 @@ class MigrationServiceTest {
     // Test when entityTypeId changes
     testMigrationException(
       // Strategy that changes entityTypeId
-      (fqlService, info) -> MigratableQueryInformation.builder()
-        .fqlQuery(info.fqlQuery())
-        .entityTypeId(UUID.randomUUID())
-        .hadBreakingChanges(true)
-        .build(),
+      (info, sourceMap) ->
+        MigratableQueryInformation
+          .builder()
+          .fqlQuery(info.fqlQuery())
+          .entityTypeId(UUID.randomUUID())
+          .hadBreakingChanges(true)
+          .build(),
       // Input query
       MigratableQueryInformation.builder().fqlQuery(TEST_FQL).build(),
       // Verification
-      exception -> assertThat(exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()), is(true))
+      exception ->
+        assertThat(
+          exception.getMigratedQueryInformation().fqlQuery().contains(migrationService.getLatestVersion()),
+          is(true)
+        )
+    );
+  }
+
+  @Test
+  void testGetCurrentCustomEntityTypeMappings() {
+    when(entityTypeRepository.getEntityTypeDefinitions(null, "tenant"))
+      .thenReturn(
+        List
+          .of(
+            // not custom
+            new EntityType().id("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").sources(List.of()),
+            // not custom
+            new EntityType().id("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb").sources(null),
+            // acceptable, will point to empty map
+            new EntityType()
+              .id("cccccccc-cccc-cccc-cccc-cccccccccccc")
+              .sources(List.of())
+              .putAdditionalProperty("isCustom", true),
+            // acceptable, will point to empty map
+            new EntityType()
+              .id("dddddddd-dddd-dddd-dddd-dddddddddddd")
+              .sources(null)
+              .putAdditionalProperty("isCustom", true),
+            // acceptable, with result
+            new EntityType()
+              .id("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+              .sources(
+                List.of(
+                  new EntityTypeSourceEntityType()
+                    .alias("source")
+                    .targetId(UUID.fromString("12341234-1234-1234-1234-123412341234"))
+                )
+              )
+              .putAdditionalProperty("isCustom", true)
+          )
+          .stream()
+      );
+
+    assertThat(
+      migrationService.getCurrentCustomEntityTypeMappings(),
+      is(
+        Map.of(
+          UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+          Map.of(),
+          UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+          Map.of(),
+          UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+          Map.of("source", UUID.fromString("12341234-1234-1234-1234-123412341234"))
+        )
+      )
     );
   }
 
@@ -188,20 +232,22 @@ class MigrationServiceTest {
    * @param exceptionVerifier A consumer that verifies the exception
    */
   private void testMigrationException(
-    BiFunction<FqlService, MigratableQueryInformation, MigratableQueryInformation> strategyApply,
+    BiFunction<MigratableQueryInformation, Map<UUID, Map<String, UUID>>, MigratableQueryInformation> strategyApply,
     MigratableQueryInformation inputQuery,
     Consumer<MigrationQueryChangedException> exceptionVerifier
   ) {
     // Create a strategy with the provided apply function
-    MigrationStrategy migrationStrategy = spy(new TestMigrationStrategy(true, 1) {
-      @Override
-      public MigratableQueryInformation apply(
-        FqlService fqlService,
-        MigratableQueryInformation migratableQueryInformation
-      ) {
-        return strategyApply.apply(fqlService, migratableQueryInformation);
+    MigrationStrategy migrationStrategy = spy(
+      new TestMigrationStrategy(1) {
+        @Override
+        public MigratableQueryInformation apply(
+          MigratableQueryInformation migratableQueryInformation,
+          Map<UUID, Map<String, UUID>> sourceMap
+        ) {
+          return strategyApply.apply(migratableQueryInformation, sourceMap);
+        }
       }
-    });
+    );
 
     when(migrationStrategyRepository.getMigrationStrategies()).thenReturn(List.of(migrationStrategy));
 
@@ -218,19 +264,13 @@ class MigrationServiceTest {
   @RequiredArgsConstructor
   private class TestMigrationStrategy implements MigrationStrategy {
 
-    final boolean applies;
     final int requiredCount;
     int count = 0;
 
     @Override
-    public boolean applies(@NotNull MigratableQueryInformation migratableQueryInformation) {
-      return applies;
-    }
-
-    @Override
     public MigratableQueryInformation apply(
-      FqlService fqlService,
-      MigratableQueryInformation migratableQueryInformation
+      MigratableQueryInformation migratableQueryInformation,
+      Map<UUID, Map<String, UUID>> sourceMap
     ) {
       if (++count != requiredCount) {
         return migratableQueryInformation;

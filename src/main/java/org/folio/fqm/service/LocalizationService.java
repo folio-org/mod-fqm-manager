@@ -43,7 +43,8 @@ public class LocalizationService {
   // the translation parameter for custom fields
   private static final String CUSTOM_FIELD_PARAMETER = "customField";
 
-  // translation logic happens in Warning classes
+  // translation logic happens in Warning/migration classes
+  public static final String MIGRATION_WARNING_DESCRIPTION_HEADER = "mod-fqm-manager.migration.warning-header";
   public static final String MIGRATION_WARNING_TRANSLATION_TEMPLATE = "mod-fqm-manager.migration.warning.%s";
 
   private TranslationService translationService;

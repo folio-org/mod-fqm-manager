@@ -2,6 +2,8 @@ package org.folio.fqm.utils;
 
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_ENTITY_TYPE_DEFINITION;
 import static org.folio.fqm.utils.EntityTypeUtils.verifyEntityTypeHasNotChangedDuringQueryLifetime;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.jooq.impl.DSL.field;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -154,6 +157,51 @@ class EntityTypeUtilsTest {
   }
 
   @Test
+  void testGetEntityTypeSourceAliasMap() {
+    EntityType entityType = new EntityType()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")),
+          new EntityTypeSourceDatabase().alias("source2")
+        )
+      );
+
+    assertThat(
+      EntityTypeUtils.getEntityTypeSourceAliasMap(entityType),
+      is(Map.of("source1", UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")))
+    );
+  }
+
+  @Test
+  void testGetEntityTypeSourceAliasMapNull() {
+    EntityType entityType = new EntityType().sources(null);
+
+    assertThat(EntityTypeUtils.getEntityTypeSourceAliasMap(entityType), is(Map.of()));
+  }
+
+  @Test
+  void testGetEntityTypeSourceAliasMapDuplicate() {
+    EntityType entityType = new EntityType()
+      .sources(
+        List.of(
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb")),
+          new EntityTypeSourceEntityType()
+            .alias("source1")
+            .targetId(UUID.fromString("24281f3e-d064-5c6f-b1b5-e26e269cc8fb"))
+        )
+      );
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> EntityTypeUtils.getEntityTypeSourceAliasMap(entityType)
+    );
+  }
+
+  @Test
   void testIsEntityTypeSimple() {
     EntityType simpleEntityType = new EntityType()
       .sources(List.of(
@@ -255,5 +303,31 @@ class EntityTypeUtilsTest {
       InvalidEntityTypeDefinitionException.class,
       () -> verifyEntityTypeHasNotChangedDuringQueryLifetime(query, entity2)
     );
+  }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationWhenSourceNameIsNotCountries() {
+    EntityType entityType = new EntityType().columns(List.of(
+      new EntityTypeColumn()
+        .name("country")
+        .source(new org.folio.querytool.domain.dto.SourceColumn()
+          .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.FQM)
+          .name("not-countries"))
+    ));
+    List<String> result = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    assertTrue(result.isEmpty(), "Should not return field paths when source name is not 'countries'");
+  }
+
+  @Test
+  void shouldNotAttemptCountryLocalizationForNonFqmSource() {
+    EntityType entityType = new EntityType().columns(List.of(
+      new EntityTypeColumn()
+        .name("country")
+        .source(new org.folio.querytool.domain.dto.SourceColumn()
+          .type(org.folio.querytool.domain.dto.SourceColumn.TypeEnum.ENTITY_TYPE)
+          .name("countries"))
+    ));
+    List<String> result = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    assertTrue(result.isEmpty(), "Should not return field paths when source type is not FQM");
   }
 }

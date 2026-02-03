@@ -40,7 +40,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      essential: true,
+      essential: false,
       valueGetter: ':record_lb.snapshot_id',
     },
     {
@@ -51,7 +51,7 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
-      essential: true,
+      essential: false,
       valueGetter: ':record_lb.matched_id',
     },
     {
@@ -72,7 +72,7 @@
       },
       queryable: true,
       visibleByDefault: true,
-      essential: true,
+      essential: false,
       valueGetter: ':record_lb.record_type',
       values: [
         {
@@ -183,7 +183,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      hidden: true,
       visibleByDefault: false,
       essential: true,
       sourceAlias: 'record_lb',
@@ -219,7 +219,7 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: true,
+      hidden: true,
       visibleByDefault: false,
       essential: true,
       sourceAlias: 'record_lb',

@@ -1,0 +1,58 @@
+{
+  id: 'bce8ea43-1271-54ca-99ad-aa185e8b5b1b',
+  name: 'composite_instance_srs_bib',
+  private: false,
+  crossTenantQueriesEnabled: true,
+  sources: [
+    {
+      alias: 'instance',
+      type: 'entity-type',
+      targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862', // simple_instance
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 100,
+    },
+    {
+      type: 'entity-type',
+      alias: 'marc_bib',
+      name: 'MARC Bibliographic',
+      order: 200,
+      sourceField: 'instance.id',
+      targetId: 'd5449a05-fd57-45e5-9383-ea615246f6f9', // simple_srs_record
+      targetField: 'external_id',
+      overrideJoinDirection: 'left',
+      useIdColumns: true,
+      essentialOnly: true,
+    },
+    {
+      type: 'entity-type',
+      alias: 'simple_folio_user_create',
+      name: 'MARC created by',
+      order: 300,
+      sourceField: 'marc_bib.created_by_user_id',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      essentialOnly: true,
+    },
+    {
+      type: 'entity-type',
+      alias: 'simple_folio_user_update',
+      name: 'MARC updated by',
+      order: 400,
+      sourceField: 'marc_bib.updated_by_user_id',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      essentialOnly: true,
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"instance.inst".id',
+      direction: 'ASC',
+    },
+  ],
+  filterConditions: [":marc_bib.record_lb.record_type = 'MARC_BIB'"],
+  additionalEcsConditions: [
+    '"left"(lower("instance.inst".jsonb ->> \'source\'::text), 600) != \'consortium-folio\' AND "left"(lower("instance.inst".jsonb ->> \'source\'::text), 600) != \'consortium-marc\'',
+  ],
+}

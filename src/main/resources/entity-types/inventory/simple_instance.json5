@@ -1225,10 +1225,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'staffSuppress'",
-      filterValueGetter: "COALESCE(\
-        lower(:sourceAlias.jsonb->>'staffSuppress'),\
-        'false'\
-      )",
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'staffSuppress'::text), 600)",
       defaultValue: 'true',
       values: [
         {
@@ -1252,10 +1249,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
-      filterValueGetter: "COALESCE(\
-        lower(:sourceAlias.jsonb->>'discoverySuppress'),\
-        'false'\
-      )",
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'discoverySuppress'::text), 600)",
       defaultValue: 'false',
       values: [
         {

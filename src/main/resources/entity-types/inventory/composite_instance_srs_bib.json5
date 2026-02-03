@@ -48,7 +48,7 @@
       direction: 'ASC',
     },
   ],
-  filterConditions: [":marc_bib.record_lb.record_type = 'MARC_BIB'"],
+  filterConditions: ["(:marc_bib.record_lb.record_type is null or :marc_bib.record_lb.record_type = 'MARC_BIB')"],
   additionalEcsConditions: [
     '"left"(lower("instance.inst".jsonb ->> \'source\'::text), 600) != \'consortium-folio\' AND "left"(lower("instance.inst".jsonb ->> \'source\'::text), 600) != \'consortium-marc\'',
   ],

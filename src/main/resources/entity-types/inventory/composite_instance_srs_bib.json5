@@ -2,7 +2,11 @@
   id: 'bce8ea43-1271-54ca-99ad-aa185e8b5b1b',
   name: 'composite_instance_srs_bib',
   private: false,
-  crossTenantQueriesEnabled: true,
+  // 2026-02-03: cross-tenant queries fail with errors like below; once fixed, we can re-enable this.
+  // Fixing it is outside the scope of the initial ticket (MODFQMMGR-1038) and cross-tenant support is not required at this time.
+  // ERROR: UNION could not convert type cs00000int_0004_mod_source_record_storage.record_state
+  //          to cs00000int_0006_mod_source_record_storage.record_state
+  crossTenantQueriesEnabled: false,
   sources: [
     {
       alias: 'instance',

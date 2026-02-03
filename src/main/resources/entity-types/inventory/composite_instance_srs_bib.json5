@@ -15,7 +15,6 @@
     {
       type: 'entity-type',
       alias: 'marc_bib',
-      name: 'MARC Bibliographic',
       order: 200,
       sourceField: 'instance.id',
       targetId: 'd5449a05-fd57-45e5-9383-ea615246f6f9', // simple_srs_record
@@ -26,8 +25,7 @@
     },
     {
       type: 'entity-type',
-      alias: 'simple_folio_user_create',
-      name: 'MARC created by',
+      alias: 'created_by',
       order: 300,
       sourceField: 'marc_bib.created_by_user_id',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
@@ -36,8 +34,7 @@
     },
     {
       type: 'entity-type',
-      alias: 'simple_folio_user_update',
-      name: 'MARC updated by',
+      alias: 'updated_by',
       order: 400,
       sourceField: 'marc_bib.updated_by_user_id',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user

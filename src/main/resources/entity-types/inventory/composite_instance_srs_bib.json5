@@ -20,7 +20,6 @@
       targetId: 'd5449a05-fd57-45e5-9383-ea615246f6f9', // simple_srs_record
       targetField: 'external_id',
       overrideJoinDirection: 'left',
-      useIdColumns: true,
       essentialOnly: true,
     },
     {

@@ -71,6 +71,10 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
+          // TODO: boolean tests?
+          new EntityTypeColumn().name("booleanDefaultValue").dataType(new EntityDataType().dataType("booleanType")).defaultValue(false),
+          new EntityTypeColumn().name("numberDefaultValue").dataType(new EntityDataType().dataType("numberType")).defaultValue(10),
+          new EntityTypeColumn().name("stringDefaultValue").dataType(new EntityDataType().dataType("stringType")).defaultValue("default"),
           new EntityTypeColumn().name("arrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(new NumberType().dataType("numberType"))),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
           new EntityTypeColumn().name("stringArrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(
@@ -575,13 +579,19 @@ class FqlToSqlConverterServiceTest {
         "not in list of invalid open UUID",
         """
           {"openUUIDField": {"$nin": ["invalid-uuid", "invalid-uuid-2"]}}""",
-        field("openUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
+        or(
+          trueCondition().and(trueCondition()),
+          field("openUUIDField").isNull()
+        )
       ),
       Arguments.of(
         "not in list of invalid ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["invalid-uuid", "invalid-uuid-2"]}}""",
-        field("rangedUUIDField").isNull().or(DSL.trueCondition().and(DSL.trueCondition()))
+        or(
+          trueCondition().and(trueCondition()),
+          field("rangedUUIDField").isNull()
+        )
       ),
       Arguments.of(
         "in list of partially invalid ranged UUID",
@@ -646,15 +656,21 @@ class FqlToSqlConverterServiceTest {
         "not in list ranged UUID",
         """
           {"rangedUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "69939c9a-aa96-440a-a873-3b48f3f4f602"]}}""",
-        field("rangedUUIDField").isNull().or(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
-          and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class))))
+        or(
+          cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class)).
+            and(cast(field("rangedUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f602")), UUID.class))),
+          field("rangedUUIDField").isNull()
+        )
       ),
       Arguments.of(
         "not in list open UUID",
         """
           {"openUUIDField": {"$nin": ["69939c9a-aa96-440a-a873-3b48f3f4f608", "invalid-uuid-2"]}}""",
-        field("openUUIDField").isNull().or(cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
-          .and(trueCondition))
+        or(
+          cast(field("openUUIDField"), UUID.class).ne(cast(inline(UUID.fromString("69939c9a-aa96-440a-a873-3b48f3f4f608")), UUID.class))
+            .and(trueCondition),
+          field("openUUIDField").isNull()
+        )
       ),
       Arguments.of(
         "validated field",
@@ -688,11 +704,12 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            field("field3").isNull().or(
+            or(
               and(
                 field("field3").notEqualIgnoreCase("value1"),
                 field("field3").notEqualIgnoreCase("value2")
-              )
+              ),
+              field("field3").isNull()
             )
           )
       ),
@@ -722,11 +739,12 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            field("field3").isNull().or(
+            or(
               and(
                 field("field3").notEqualIgnoreCase("value1"),
                 field("field3").notEqualIgnoreCase("value2")
-              )
+              ),
+              field("field3").isNull()
             )
           )
       ),
@@ -734,12 +752,13 @@ class FqlToSqlConverterServiceTest {
         "not in list",
         """
           {"field1": {"$nin": ["value1", 2, true]}}""",
-        field("field1").isNull().or(
+        or(
           and(
             field("field1").notEqualIgnoreCase("value1"),
             field("field1").notEqual(2),
             field("field1").notEqual(true)
-          )
+          ),
+          field("field1").isNull()
         )
       ),
       Arguments.of(
@@ -815,16 +834,18 @@ class FqlToSqlConverterServiceTest {
         "array field nin string",
         """
           {"arrayField": {"$nin": ["Some vALUE"]}}""",
-        field("arrayField").isNull().or(
-          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class)))
+        or(
+          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("Some vALUE"), String[].class))),
+          field("arrayField").isNull()
         )
       ),
       Arguments.of(
         "array field nin numeric",
         """
           {"arrayField": {"$nin": [10]}}""",
-        field("arrayField").isNull().or(
-          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class)))
+        or(
+          not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(10), String[].class))),
+          field("arrayField").isNull()
         )
       ),
       Arguments.of(
@@ -840,11 +861,12 @@ class FqlToSqlConverterServiceTest {
         "nin for jsonb array",
         """
           {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
-        field("jsonbArrayField").isNull().or(
+        or(
           and(
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
-          )
+          ),
+          field("jsonbArrayField").isNull()
         )
       ),
 
@@ -874,11 +896,12 @@ class FqlToSqlConverterServiceTest {
           .and(field("field5").notEqual(5).or(field("field5").isNull()))
           .and(field("field5").greaterThan(9))
           .and(
-            field("field3").isNull().or(
+            or(
               and(
                 field("field3").notEqualIgnoreCase("value1"),
                 field("field3").notEqualIgnoreCase("value2")
-              )
+              ),
+              field("field3").isNull()
             )
           )
       ),
@@ -917,12 +940,13 @@ class FqlToSqlConverterServiceTest {
         "not-in operator on a field with a valueFunction",
         """
           {"fieldWithAValueFunction": {"$nin": ["value1", 2, true]}}""",
-        field("fieldWithAValueFunction").isNull().or(
+        or(
           and(
             field("fieldWithAValueFunction").notEqualIgnoreCase(field("upper(:value)", String.class, param("value", "value1"))),
             field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", 2))),
             field("fieldWithAValueFunction").notEqual(field("upper(:value)", String.class, param("value", true)))
-          )
+          ),
+          field("fieldWithAValueFunction").isNull()
         )
       ),
 
@@ -1078,7 +1102,7 @@ class FqlToSqlConverterServiceTest {
                         )
                         .where(
                           field("({0})::text", String.class, field(name("value"))).eq("null")
-                          .or(field("({0})::text", String.class, field(name("value"))).eq("\"\""))
+                            .or(field("({0})::text", String.class, field(name("value"))).eq("\"\""))
                         )
                     )
                   )
@@ -1125,66 +1149,72 @@ class FqlToSqlConverterServiceTest {
         "not in list array string",
         """
           {"arrayField": {"$nin": ["value1", "value2"]}}""",
-        field("arrayField").isNull().or(
+        or(
           and(
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value1"), String[].class))),
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array("value2"), String[].class)))
-          )
+          ),
+          field("arrayField").isNull()
         )
       ),
       Arguments.of(
         "not in list array numeric",
         """
           {"arrayField": {"$nin": [123, 456]}}""",
-        field("arrayField").isNull().or(
+        or(
           and(
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(123), String[].class))),
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(456), String[].class)))
-          )
+          ),
+          field("arrayField").isNull()
         )
       ),
       Arguments.of(
         "not in list array boolean",
         """
           {"arrayField": {"$nin": [true, false]}}""",
-        field("arrayField").isNull().or(
+        or(
           and(
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(true), String[].class))),
             not(arrayOverlap(cast(field("arrayField"), String[].class), cast(array(false), String[].class)))
-          )
+          ),
+          field("arrayField").isNull()
         )
       ),
       Arguments.of(
         "not in list jsonb array string",
         """
           {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
-        field("jsonbArrayField").isNull().or(
+        or(
           and(
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
-          )
+          ),
+          field("jsonbArrayField").isNull()
         )
       ),
       Arguments.of(
         "not in list jsonb array numeric",
         """
           {"jsonbArrayField": {"$nin": [123, 456]}}""",
-        field("jsonbArrayField").isNull().or(
+        or(
           and(
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")),
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"456\"]"))
-          )
+          ),
+          field("jsonbArrayField").isNull()
         )
       ),
       Arguments.of(
         "not in list jsonb array boolean",
         """
           {"jsonbArrayField": {"$nin": [true, false]}}""",
-        field("jsonbArrayField").isNull().or(
+        or(
           and(
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"true\"]")),
             DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
-          )
+          ),
+          field("jsonbArrayField").isNull()
         )
       ),
       Arguments.of(
@@ -1276,6 +1306,187 @@ class FqlToSqlConverterServiceTest {
           cast(UUID.fromString("df3f3e8a-8694-59ad-ad52-3671613d02dc"), UUID.class),
           cast(null, UUID.class)
         ), String[].class))
+      ),
+      Arguments.of(
+        "equals string with matching default value",
+        """
+          {"stringDefaultValue": {"$eq": "default"}}""",
+        field("stringDefaultValue").equalIgnoreCase("default").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "equals string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$eq": "something else"}}""",
+        field("stringDefaultValue").equalIgnoreCase("something else")
+      ),
+      Arguments.of(
+        "not equals string with matching default value",
+        """
+          {"stringDefaultValue": {"$ne": "default"}}""",
+        field("stringDefaultValue").notEqualIgnoreCase("default")
+      ),
+      Arguments.of(
+        "not equals string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$ne": "something else"}}""",
+        field("stringDefaultValue").notEqualIgnoreCase("something else").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "in list with matching default value",
+        """
+          {"stringDefaultValue": {"$in": ["default", "another value"]}}""",
+        or(
+          field("stringDefaultValue").equalIgnoreCase("default"),
+          field("stringDefaultValue").equalIgnoreCase("another value"),
+          field("stringDefaultValue").isNull()
+        )
+      ),
+      Arguments.of(
+        "in list with non-matching default value",
+        """
+          {"stringDefaultValue": {"$in": ["a value", "another value"]}}""",
+        or(
+          field("stringDefaultValue").equalIgnoreCase("a value"),
+          field("stringDefaultValue").equalIgnoreCase("another value")
+        )
+      ),
+      Arguments.of(
+        "not in list with matching default value",
+        """
+          {"stringDefaultValue": {"$nin": ["default", "another value"]}}""",
+        and(
+          field("stringDefaultValue").notEqualIgnoreCase("default"),
+          field("stringDefaultValue").notEqualIgnoreCase("another value")
+        )
+      ),
+      Arguments.of(
+        "not in list with non-matching default value",
+        """
+          {"stringDefaultValue": {"$nin": ["a value", "another value"]}}""",
+        or(
+          and(
+            field("stringDefaultValue").notEqualIgnoreCase("a value"),
+            field("stringDefaultValue").notEqualIgnoreCase("another value")
+          ),
+          field("stringDefaultValue").isNull()
+        )
+      ),
+      Arguments.of(
+        "starts with string with matching default value",
+        """
+          {"stringDefaultValue": {"$starts_with": "default"}}""",
+        field("stringDefaultValue").startsWithIgnoreCase("default").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "starts with string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$starts_with": "something else"}}""",
+        field("stringDefaultValue").startsWithIgnoreCase("something else")
+      ),
+      Arguments.of(
+        "contains string with matching default value",
+        """
+          {"stringDefaultValue": {"$contains": "default"}}""",
+        field("stringDefaultValue").containsIgnoreCase("default").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "contains string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$contains": "something else"}}""",
+        field("stringDefaultValue").containsIgnoreCase("something else")
+      ),
+
+      Arguments.of(
+        "equals int with matching default value",
+        """
+          {"numberDefaultValue": {"$eq": 10}}""",
+        field("numberDefaultValue").eq(10).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "equals int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$eq": 9}}""",
+        field("numberDefaultValue").eq(9)
+      ),
+      Arguments.of(
+        "not equals int with matching default value",
+        """
+          {"numberDefaultValue": {"$ne": 10}}""",
+        field("numberDefaultValue").ne(10)
+      ),
+      Arguments.of(
+        "not equals int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$ne": 9}}""",
+        field("numberDefaultValue").ne(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "greater than int with matching default value",
+        """
+          {"numberDefaultValue": {"$gt": 9}}""",
+        field("numberDefaultValue").greaterThan(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "greater than int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$gt": 11}}""",
+        field("numberDefaultValue").greaterThan(11)
+      ),
+      Arguments.of(
+        "greater than or equal int with matching default value",
+        """
+          {"numberDefaultValue": {"$gte": 9}}""",
+        field("numberDefaultValue").greaterOrEqual(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "greater than or equal int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$gte": 11}}""",
+        field("numberDefaultValue").greaterOrEqual(11)
+      ),
+      Arguments.of(
+        "less than int with matching default value",
+        """
+          {"numberDefaultValue": {"$lt": 11}}""",
+        field("numberDefaultValue").lessThan(11).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "less than int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$lt": 9}}""",
+        field("numberDefaultValue").lessThan(9)
+      ),
+      Arguments.of(
+        "less than or equal int with matching default value",
+        """
+          {"numberDefaultValue": {"$lte": 11}}""",
+        field("numberDefaultValue").lessOrEqual(11).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "less than or equal int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$lte": 9}}""",
+        field("numberDefaultValue").lessOrEqual(9)
+      ),
+
+      // The next 2 scenarios shouldn't occur in practice, but we should still ensure the default-values code handles them gracefully
+      Arguments.of(
+        "greater than int with invalid value",
+        """
+          {"numberDefaultValue": {"$gt": "invalid"}}""",
+        field("numberDefaultValue").greaterThan("invalid")
+      ),
+      Arguments.of(
+        "less than int with invalid value",
+        """
+          {"numberDefaultValue": {"$lt": "invalid"}}""",
+        field("numberDefaultValue").lessThan("invalid")
+      ),
+      Arguments.of(
+        "empty for int with default value",
+        """
+          {"numberDefaultValue": {"$empty": true}}""",
+        falseCondition()
       )
     );
   }

@@ -2,6 +2,7 @@ package org.folio.fqm.service;
 
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -13,6 +14,8 @@ import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
+
+import lombok.SneakyThrows;
 
 import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
@@ -32,6 +35,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 
 class ResultSetServiceTest {
@@ -114,6 +119,216 @@ class ResultSetServiceTest {
       false
     );
     assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void shouldApplyDefaultValuesToNullFields() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId1 = UUID.randomUUID();
+    UUID contentId2 = UUID.randomUUID();
+    UUID contentId3 = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(
+        List.of(
+          new EntityTypeColumn().name("id").isIdColumn(true),
+          new EntityTypeColumn().name("fieldWithDefault").defaultValue("default"),
+          new EntityTypeColumn().name("fieldWithoutDefault")
+        )
+      );
+
+    List<String> fields = List.of("id", "fieldWithDefault", "fieldWithoutDefault");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(
+      List.of(contentId1.toString()),
+      List.of(contentId2.toString()),
+      List.of(contentId3.toString())
+    );
+
+    // Null value should be replaced with default
+    Map<String, Object> record1 = new HashMap<>();
+    record1.put("id", contentId1);
+    record1.put("fieldWithDefault", null);
+    record1.put("fieldWithoutDefault", null);
+
+    // Key not present, should be replaced with default
+    Map<String, Object> record2 = new HashMap<>();
+    record2.put("id", contentId2);
+
+    // Values present, should not be replaced
+    Map<String, Object> record3 = new HashMap<>();
+    record3.put("id", contentId3);
+    record3.put("fieldWithDefault", "non-default");
+    record3.put("fieldWithoutDefault", "non-default");
+
+    List<Map<String, Object>> repositoryResponse = List.of(record1, record2, record3);
+
+    Map<String, Object> expected1 = new HashMap<>();
+    expected1.put("id", contentId1);
+    expected1.put("fieldWithDefault", "default");
+    expected1.put("fieldWithoutDefault", null);
+
+    Map<String, Object> expected2 = new HashMap<>();
+    expected2.put("id", contentId2);
+    expected2.put("fieldWithDefault", "default");
+
+    Map<String, Object> expected3 = new HashMap<>();
+    expected3.put("id", contentId3);
+    expected3.put("fieldWithDefault", "non-default");
+    expected3.put("fieldWithoutDefault", "non-default");
+
+    List<Map<String, Object>> expectedResult = List.of(expected1, expected2, expected3);
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
+
+    List<Map<String, Object>> actualResult = service.getResultSet(
+      entityTypeId,
+      fields,
+      listIds,
+      tenantIds,
+      false
+    );
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldApplyDefaultValuesToNullNestedFields() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    // 1. Explicit null should be replaced with default value
+    // 2. Missing key should be replaced with default value
+    // 3. Existing non-default value should remain unchanged
+    String nestedFieldJson = """
+      [{"nestedWithDefault":null,"nestedWithoutDefault":null}, {}, {"nestedWithDefault":"non-default", "nestedWithoutDefault":"non-default"}]
+      """;
+
+    EntityTypeColumn nestedColumn = new EntityTypeColumn()
+      .name("field")
+      .dataType(
+        new ArrayType().itemDataType(
+          new ObjectType().properties(List.of(
+            new NestedObjectProperty()
+              .name("nested_with_default")
+              .property("nestedWithDefault")
+              .defaultValue("default"),
+            new NestedObjectProperty()
+              .name("nested_without_default")
+              .property("nestedWithoutDefault")
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        nestedColumn
+      ));
+
+    List<String> fields = List.of("id", "field");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "field", nestedFieldJson)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+    String actualJson = (String) actual.getFirst().get("field");
+    JsonNode arrayNode = new ObjectMapper().readTree(actualJson);
+
+    // First element: null replaced with default
+    JsonNode first = arrayNode.get(0);
+    assertEquals("default", first.get("nestedWithDefault").asText(), "First element should have default value");
+    assertTrue(first.get("nestedWithoutDefault").isNull(), "First element should have null for field without default");
+
+    // Second element: missing field gets default
+    JsonNode second = arrayNode.get(1);
+    assertEquals("default", second.get("nestedWithDefault").asText(), "Second element should have default value");
+
+    // Third element: existing value unchanged
+    JsonNode third = arrayNode.get(2);
+    assertEquals("non-default", third.get("nestedWithDefault").asText(), "Third element should keep its original value");
+  }
+
+  @Test
+  void shouldSkipDefaultValuesForNonObjectArrayElements() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+    String nestedFieldJson = """
+      ["not-an-object", 123, null]
+      """;
+    EntityTypeColumn nestedColumn = new EntityTypeColumn()
+      .name("field")
+      .dataType(
+        new ArrayType().itemDataType(
+          new ObjectType().properties(List.of(
+            new NestedObjectProperty()
+              .name("nested_with_default")
+              .property("nestedWithDefault")
+              .defaultValue("default")
+          ))
+        )
+      );
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        nestedColumn
+      ));
+
+    List<String> fields = List.of("id", "field");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "field", nestedFieldJson)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+    String actualJson = (String) actual.getFirst().get("field");
+
+    assertEquals(nestedFieldJson, actualJson, "Array should remain unchanged");
+  }
+
+  @Test
+  void shouldNotApplyDefaultValueWhenFieldPathIsEmpty() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(
+        List.of(
+          new EntityTypeColumn().name("id").isIdColumn(true),
+          new EntityTypeColumn().name("").defaultValue("shouldNotBeApplied")
+        )
+      );
+
+    List<String> fields = List.of("id", "");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put("id", contentId);
+    objectMap.put("", "originalValue");
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(objectMap));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals("originalValue", actual.getFirst().get(""), "Value should remain unchanged");
   }
 
   static List<Arguments> dateLocalizationTestCases() {
@@ -584,7 +799,7 @@ class ResultSetServiceTest {
     );
   }
 
-  static java.util.stream.Stream<Arguments>  missingTranslationCases() {
+  static java.util.stream.Stream<Arguments> missingTranslationCases() {
     return java.util.stream.Stream.of(
       Arguments.of(null, "TranslationService returned null"),
       Arguments.of(" ", "TranslationService returned blank string"),

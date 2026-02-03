@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -383,15 +384,46 @@ public class EntityTypeUtils {
         return;
       }
 
-      // Use the underlying JSON property name for nested fields
-      String leaf = (field instanceof NestedObjectProperty prop
-        && !StringUtils.isEmpty(prop.getProperty()))
-        ? prop.getProperty()
-        : field.getName();
-
-      paths.add(parentPath + leaf);
+      paths.add(getFieldPath(field, parentPath));
     });
 
     return paths;
+  }
+
+  /**
+   * Returns a map of field paths to their default values for all fields that have default values.
+   * Supports both top-level columns and nested object/array properties.
+   *
+   * @param entityType Entity type to extract default values from
+   * @return Map of field paths to default values
+   */
+  public static Map<String, Object> getFieldDefaultValues(EntityType entityType) {
+    Map<String, Object> defaultValues = new HashMap<>();
+
+    runOnEveryField(entityType, (field, parentPath) -> {
+      if (field.getDefaultValue() == null) {
+        return;
+      }
+      String fieldPath = getFieldPath(field, parentPath);
+      defaultValues.put(fieldPath, field.getDefaultValue());
+    });
+    return defaultValues;
+  }
+
+  /**
+   * Constructs the full field path for a field, using the JSON property name for nested fields.
+   * For nested object properties, uses the property name instead of the FQM field name
+   *
+   * @param field The field to get the path for
+   * @param parentPath The parent path, empty for top-level fields (e.g., "", "arr[*]->")
+   * @return The full field path (e.g., "fieldName", "arr[*]->propertyName")
+   */
+  private static String getFieldPath(Field field, String parentPath) {
+    // Use the underlying JSON property name for nested fields
+    String leaf = (field instanceof NestedObjectProperty prop
+      && !StringUtils.isEmpty(prop.getProperty()))
+      ? prop.getProperty()
+      : field.getName();
+    return parentPath + leaf;
   }
 }

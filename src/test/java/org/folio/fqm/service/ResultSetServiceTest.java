@@ -12,10 +12,9 @@ import com.google.common.collect.Lists;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.*;
 
-import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
 import org.folio.querytool.domain.dto.ArrayType;
@@ -58,7 +57,7 @@ class ResultSetServiceTest {
 
   private ResultSetRepository resultSetRepository;
   private EntityTypeFlatteningService entityTypeFlatteningService;
-  private SettingsClient settingsClient;
+  private LocaleClient localeClient;
   private ResultSetService service;
   private FolioExecutionContext executionContext;
   private TranslationService translationService;
@@ -67,10 +66,11 @@ class ResultSetServiceTest {
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
-    this.settingsClient = mock(SettingsClient.class);
+    this.localeClient = mock(LocaleClient.class);
+    when(this.localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("en-US", "USD", "UTC", "latn"));
     this.executionContext = mock(FolioExecutionContext.class);
     this.translationService = mock(TranslationService.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, settingsClient, executionContext, translationService);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, localeClient, executionContext, translationService);
   }
 
   @Test
@@ -124,23 +124,23 @@ class ResultSetServiceTest {
 
       // For a UTC+1 timezone, a record at 2024-12-23T23:30:00.000Z UTC should get localized to 2024-12-24T00:30:00.000Z,
       // which will then be truncated to 2024-12-24
-      Arguments.of(ZoneId.of("Africa/Ceuta"),
+      Arguments.of("Africa/Ceuta",
         "2024-12-23T23:30:00.000Z", Timestamp.from(Instant.parse("2024-12-23T23:30:00Z")), "2024-12-23T23:30:00.000+00:00",
         "2024-12-24"),
-      Arguments.of(ZoneId.of("Africa/Ceuta"),
+      Arguments.of("Africa/Ceuta",
         "2024-12-23T22:30:00.000Z", Timestamp.from(Instant.parse("2024-12-23T22:30:00Z")), "2024-12-23T22:30:00.000+00:00",
         "2024-12-23"),
 
       // in summer, this tz is UTC+2
-      Arguments.of(ZoneId.of("Africa/Ceuta"),
+      Arguments.of("Africa/Ceuta",
         "2024-06-23T22:30:00.000Z", Timestamp.from(Instant.parse("2024-06-23T22:30:00Z")), "2024-06-23T22:30:00.000+00:00",
         "2024-06-24"),
 
       // and sanity checks, in UTC
-      Arguments.of(ZoneId.of("UTC"),
+      Arguments.of("UTC",
         "2024-12-23T23:59:59.000Z", Timestamp.from(Instant.parse("2024-12-23T23:59:59Z")), "2024-12-23T23:59:59.000+00:00",
         "2024-12-23"),
-      Arguments.of(ZoneId.of("UTC"),
+      Arguments.of("UTC",
         "2024-12-23T00:00:00.000Z", Timestamp.from(Instant.parse("2024-12-23T00:00:00Z")), "2024-12-23T00:00:00.000+00:00",
         "2024-12-23")
     );
@@ -148,7 +148,7 @@ class ResultSetServiceTest {
 
   @ParameterizedTest(name = "should localize dates {1} to {4} for timezone {0}")
   @MethodSource("dateLocalizationTestCases")
-  void testDateLocalization(ZoneId timezone, String dateTimeField, Timestamp timestampField, String offsetdateTimeField, String expected) {
+  void testDateLocalization(String timezone, String dateTimeField, Timestamp timestampField, String offsetdateTimeField, String expected) {
     UUID entityTypeId = UUID.fromString(DATE_ENTITY_TYPE.getId());
     UUID contentId = UUID.fromString("900111ca-f498-5e8e-b12d-a90d275b5080");
 
@@ -174,7 +174,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(DATE_ENTITY_TYPE);
-    when(settingsClient.getTenantTimezone()).thenReturn(timezone);
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("en-US", "USD", timezone, "latn"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(
@@ -218,7 +218,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(DATE_ENTITY_TYPE);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(DATE_ENTITY_TYPE);
-    when(settingsClient.getTenantTimezone()).thenReturn(ZoneId.of("UTC"));
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("en-US", "USD", "UTC", "latn"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
 
     List<Map<String, Object>> actualResult = service.getResultSet(

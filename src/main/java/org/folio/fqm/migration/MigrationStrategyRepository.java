@@ -6,7 +6,7 @@ import org.folio.fqm.client.LocationsClient;
 import org.folio.fqm.client.ModesOfIssuanceClient;
 import org.folio.fqm.client.OrganizationsClient;
 import org.folio.fqm.client.PatronGroupsClient;
-import org.folio.fqm.client.SettingsClient;
+import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.fqm.migration.strategies.impl.V0POCMigration;
 import org.folio.fqm.migration.strategies.impl.V10OrganizationStatusValueChange;
@@ -24,6 +24,7 @@ import org.folio.fqm.migration.strategies.impl.V20ContainsAllToEqOperatorMigrati
 import org.folio.fqm.migration.strategies.impl.V21NotContainsAllToNeqOperatorMigration;
 import org.folio.fqm.migration.strategies.impl.V22UserCustomFieldMigration;
 import org.folio.fqm.migration.strategies.impl.V23UserCreatedUpdatedDateFieldDeprecation;
+import org.folio.fqm.migration.strategies.impl.V24InvoiceSimpleToCompositeMigration;
 import org.folio.fqm.migration.strategies.impl.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.impl.V3RamsonsFieldCleanup;
 import org.folio.fqm.migration.strategies.impl.V4DateFieldTimezoneAddition;
@@ -42,7 +43,7 @@ public class MigrationStrategyRepository {
   private final List<MigrationStrategy> migrationStrategies;
 
   public MigrationStrategyRepository(
-    SettingsClient settingsClient,
+    LocaleClient localeClient,
     LocationsClient locationsClient,
     LocationUnitsClient locationUnitsClient,
     ModesOfIssuanceClient modesOfIssuanceClient,
@@ -57,7 +58,7 @@ public class MigrationStrategyRepository {
         new V1ModeOfIssuanceConsolidation(),
         new V2ResourceTypeConsolidation(),
         new V3RamsonsFieldCleanup(),
-        new V4DateFieldTimezoneAddition(settingsClient),
+        new V4DateFieldTimezoneAddition(localeClient),
         new V5UUIDNotEqualOperatorRemoval(),
         new V6ModeOfIssuanceValueChange(modesOfIssuanceClient),
         new V7PatronGroupsValueChange(patronGroupsClient),
@@ -76,7 +77,8 @@ public class MigrationStrategyRepository {
         new V20ContainsAllToEqOperatorMigration(),
         new V21NotContainsAllToNeqOperatorMigration(),
         new V22UserCustomFieldMigration(),
-        new V23UserCreatedUpdatedDateFieldDeprecation()
+        new V23UserCreatedUpdatedDateFieldDeprecation(),
+        new V24InvoiceSimpleToCompositeMigration()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

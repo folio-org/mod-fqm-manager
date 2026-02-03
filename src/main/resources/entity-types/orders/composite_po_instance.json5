@@ -2,10 +2,6 @@
   id: '7a14b9b7-701b-4f81-bdb3-c4dee4121fdf',
   name: 'composite_po_instance',
   private: false,
-  requiredPermissions: [
-    // This inherited from simple_config_data, but is also included here because of the added columns here that also retrieve config data
-    'configuration.entries.collection.get',
-  ],
   sources: [
     {
       alias: 'pol',

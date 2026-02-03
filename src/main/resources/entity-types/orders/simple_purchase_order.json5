@@ -114,7 +114,7 @@
       valueGetter: ":sourceAlias.jsonb->>'billTo'",
       joinsTo: [
         {
-          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
+          targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -300,12 +300,12 @@
       valueGetter: ":sourceAlias.jsonb->>'shipTo'",
       joinsTo: [
         {
-          targetId: 'abb28bac-e090-48c1-a48b-3fe805638041',
+          targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
         },
-      ],
+      ]
     },
     {
       name: 'template',

@@ -1,5 +1,0 @@
-{
-  name: 'src_configuration_config_data',
-  dependsOn: [['${tenant_id}_mod_configuration', 'config_data']],
-  sql: 'SELECT * FROM ${tenant_id}_mod_configuration.config_data',
-}

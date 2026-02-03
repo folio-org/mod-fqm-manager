@@ -87,7 +87,7 @@
     // Technically, these 2 permissions get inherited from the exchange rate source, but since the table is used directly here, too, the permissions are included here
     // If we can remove the explicit reference to the currency_exchange_rates table, then we can remove these from this entity type and just inherit them
     'finance.exchange-rate.item.get',
-    'configuration.entries.collection.get', // This isn't directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
+    'locale.item.get', // This isn't directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
   ],
   columns: [
     {

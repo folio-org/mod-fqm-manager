@@ -1,12 +1,12 @@
 {
   id: 'abc777d3-2a45-43e6-82cb-71e8c96d13d2',
-  name: 'purchase_order_lines',
+  name: 'composite_purchase_order_line',
   private: false,
   sources: [
     {
       alias: 'pol',
       type: 'entity-type',
-      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // purchase_order_line
+      targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
       useIdColumns: true,
       essentialOnly: true,
       order: 10

@@ -524,7 +524,6 @@ public class FqlToSqlConverterService {
   ) {
     Object defaultValue = fqmField.getDefaultValue();
 
-    // Determine if we need to add .or(field.isNull())
     boolean includeNull;
 
     if (defaultValue == null) {
@@ -540,9 +539,6 @@ public class FqlToSqlConverterService {
     return includeNull ? baseCondition.or(field.isNull()) : baseCondition;
   }
 
-  /**
-   * Check if the operator is a "negative" operator (NOT equals, NOT in) that should include NULLs by default
-   */
   private static boolean isNegativeOperator(FqlCondition<?> fqlCondition) {
     return fqlCondition instanceof NotEqualsCondition || fqlCondition instanceof NotInCondition;
   }
@@ -621,7 +617,7 @@ public class FqlToSqlConverterService {
       return false;
     }
 
-    // For string comparisons, check if case-insensitive comparison should be used
+    // For strings, use case-insensitive comparison
     String dataType = getFieldDataTypeName(entityType, fieldCondition);
     if ((STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) && queryValue instanceof String && defaultValue instanceof String) {
       return ((String) queryValue).equalsIgnoreCase((String) defaultValue);

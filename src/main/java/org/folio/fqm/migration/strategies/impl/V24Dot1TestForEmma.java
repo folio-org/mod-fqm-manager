@@ -40,25 +40,10 @@ public class V24Dot1TestForEmma extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
-  public Map<UUID, Map<String, FieldWarningFactory>> getFieldWarnings() {
-    return Map.of(
-      SIMPLE_FOLIO_USER_DETAILS,
-      Map.of("last_name_first_name", RemovedFieldWarning.withAlternative("testing!"))
-    );
-  }
-
-  @Override
-  public Map<UUID, UUID> getEntityTypeChanges() {
-    return Map.of(SIMPLE_FOLIO_USER_DETAILS, SIMPLE_USER_DETAILS);
-  }
-
-  @Override
   public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.of(
-      SIMPLE_FOLIO_USER_DETAILS,
-      Map.of("email", "phone"),
       SIMPLE_BUDGET,
-      Map.of("updated_by_user_id", "updated_by_user_id2")
+      Map.of("updated_by_user_id2", "updated_by_user_id")
     );
   }
 }

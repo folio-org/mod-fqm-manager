@@ -92,7 +92,7 @@
       ],
     },
     {
-      name: 'updated_by_user_id2',
+      name: 'updated_by_user_id',
       dataType: {
         dataType: 'rangedUUIDType',
       },

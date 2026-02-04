@@ -31,7 +31,7 @@ public class LocaleClient {
    */
   @FeignClient(name = "locale")
   interface LocaleClientRaw {
-    @GetMapping("/locale")
+    @GetMapping
     String getLocaleSettings();
   }
 

@@ -22,15 +22,21 @@ public class V24Dot1TestForEmma extends AbstractSimpleMigrationStrategy {
   private static final UUID SIMPLE_USER_DETAILS = UUID.fromString("bb058933-cd06-4539-bd3a-6f248ff98ee2");
   private static final UUID SIMPLE_FOLIO_USER_DETAILS = UUID.fromString("f2615ea6-450b-425d-804d-6a495afd9308");
   private static final UUID SIMPLE_BUDGET = UUID.fromString("71525bf3-ea51-47c4-bb18-7ab6f07d2b42");
+  private static final UUID COMPOSITE_BUDGET = UUID.fromString("592f6e78-51f0-40d5-9857-5b47976afb8e");
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "24.2";
+    return "24.3";
   }
 
   @Override
   public String getLabel() {
     return "Test for emma";
+  }
+
+  @Override
+  public Map<UUID, Map<String, UUID>> getEntityTypeSourceMaps() {
+    return Map.of(COMPOSITE_BUDGET, Map.of("budget", SIMPLE_BUDGET));
   }
 
   @Override

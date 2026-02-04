@@ -204,7 +204,6 @@ public class FqlToSqlConverterService {
     } else {
       baseCondition = field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
     }
-    // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
     return baseCondition;
   }
 
@@ -319,8 +318,7 @@ public class FqlToSqlConverterService {
           return not(arrayOverlap(cast(field, String[].class), valueArray));
         })
         .toList();
-      // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
-      return and(conditionList);
+      return field.isNull().or(and(conditionList));
     }
 
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
@@ -337,8 +335,7 @@ public class FqlToSqlConverterService {
           }
         })
         .toList();
-      // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
-      return and(conditionList);
+      return field.isNull().or(and(conditionList));
     }
 
     List<Condition> conditionList = notInCondition
@@ -362,8 +359,7 @@ public class FqlToSqlConverterService {
         return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
-    // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
-    return and(conditionList);
+    return field.isNull().or(and(conditionList));
   }
 
   private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
@@ -522,33 +518,23 @@ public class FqlToSqlConverterService {
   private static Condition applyDefaultValueLogic(
     Condition baseCondition,
     FqlCondition<?> fqlCondition,
-    Field fqmField,
+    Field fqmField, // TODO: may be able to replace with fqmField.defaultValue()
     org.jooq.Field<Object> field,
     EntityType entityType
   ) {
     Object defaultValue = fqmField.getDefaultValue();
 
-    // Determine if we need to add .or(field.isNull())
-    boolean includeNull;
-
+    // If no default value, return the base condition unchanged
     if (defaultValue == null) {
-      // No default value: use original FQL semantics
-      // NOT operators (!=, not in) should include NULLs
-      // Positive operators should not
-      includeNull = isNegativeOperator(fqlCondition);
-    } else {
-      // Has default value: use default value logic
-      includeNull = shouldIncludeNull(fqlCondition, defaultValue, entityType);
+      return baseCondition;
     }
 
-    return includeNull ? baseCondition.or(field.isNull()) : baseCondition;
-  }
 
-  /**
-   * Check if the operator is a "negative" operator (NOT equals, NOT in) that should include NULLs by default
-   */
-  private static boolean isNegativeOperator(FqlCondition<?> fqlCondition) {
-    return fqlCondition instanceof NotEqualsCondition || fqlCondition instanceof NotInCondition;
+
+    // Determine if we need to add .or(field.isNull())
+    boolean includeNull = shouldIncludeNull(fqlCondition, defaultValue, entityType);
+
+    return includeNull ? baseCondition.or(field.isNull()) : baseCondition;
   }
 
   /**

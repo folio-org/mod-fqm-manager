@@ -13,6 +13,7 @@ import org.folio.fqm.migration.warnings.RemovedFieldWarning;
  * - simple_FOLIO_user ET is replaced with simple_user_details
  * - email field in simple_FOLIO_user ET is changed to phone
  * - last_name_first_name field in simple_FOLIO_user ET is removed with a warning
+ * - updated_by_user_id field in simple_budget ET is changed to updated_by_user_id2
  */
 @Log4j2
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class V24Dot1TestForEmma extends AbstractSimpleMigrationStrategy {
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "24.1";
+    return "24.2";
   }
 
   @Override

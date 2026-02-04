@@ -318,7 +318,6 @@ public class FqlToSqlConverterService {
           return not(arrayOverlap(cast(field, String[].class), valueArray));
         })
         .toList();
-      // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
       return and(conditionList);
     }
 
@@ -336,7 +335,6 @@ public class FqlToSqlConverterService {
           }
         })
         .toList();
-      // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
       return and(conditionList);
     }
 
@@ -361,7 +359,6 @@ public class FqlToSqlConverterService {
         return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
-    // Note: .or(field.isNull()) is handled by applyDefaultValueLogic
     return and(conditionList);
   }
 

@@ -510,7 +510,7 @@ public class FqlToSqlConverterService {
    *
    * @param baseCondition The base SQL condition before applying default value logic
    * @param fqlCondition  The FQL condition being evaluated
-   * @param fqmField      The field definition containing the default value
+   * @param fqmField      The FQM field definition containing the default value
    * @param field         The jOOQ field reference
    * @param entityType    The entity type
    * @return The condition with default value logic applied
@@ -528,11 +528,10 @@ public class FqlToSqlConverterService {
 
     if (defaultValue == null) {
       // No default value: use original FQL semantics
-      // NOT operators (!=, not in) should include NULLs
+      // NOT operators should include NULLs
       // Positive operators should not
       includeNull = isNegativeOperator(fqlCondition);
     } else {
-      // Has default value: use default value logic
       includeNull = shouldIncludeNull(fqlCondition, defaultValue, entityType);
     }
 
@@ -689,22 +688,6 @@ public class FqlToSqlConverterService {
     }
     // Case-insensitive comparison for strings
     return defaultValue.toString().toLowerCase().contains(substring.toLowerCase());
-  }
-
-  /**
-   * Check if the default value satisfies a regex condition
-   */
-  private static boolean defaultValueSatisfiesRegex(Object defaultValue, String pattern) {
-    if (defaultValue == null || pattern == null) {
-      return false;
-    }
-    try {
-      // Case-insensitive regex matching (matching the ~* operator in PostgreSQL)
-      return defaultValue.toString().matches("(?i)" + pattern);
-    } catch (Exception e) {
-      // If regex is invalid, assume default doesn't match
-      return false;
-    }
   }
 
   /**

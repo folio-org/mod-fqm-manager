@@ -506,7 +506,7 @@ public class FqlToSqlConverterService {
    *   - For "positive" operators: No change needed
    *   - For "negative" operators: Add .or(field.isNull())
    * - For comparison operators (>, <, >=, <=): Evaluate whether the default value satisfies the condition
-   * - For empty operator: Special handling needed (not yet implemented)
+   * - For empty operator: NULL is never considered empty when a default value exists
    *
    * @param baseCondition The base SQL condition before applying default value logic
    * @param fqlCondition  The FQL condition being evaluated
@@ -600,8 +600,10 @@ public class FqlToSqlConverterService {
         yield defaultValueSatisfiesRegex(defaultValue, regex.value());
       }
       case "EmptyCondition" -> {
-        // TODO: Figure out how to handle empty operator with default values
-        // For now, don't modify the condition
+        // If a field has a default value, NULL is treated as that default value
+        // Therefore, NULL is never "empty" when a default exists
+        // $empty == true: Don't include NULLs (they have the default value)
+        // $empty == false: This is handled by the base condition's .not()
         yield false;
       }
       default -> false;

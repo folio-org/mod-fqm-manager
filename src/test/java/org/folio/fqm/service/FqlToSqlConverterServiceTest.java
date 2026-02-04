@@ -71,6 +71,11 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
+          // TODO: Add default values once FieldDefaultValue factory methods are available
+          // For now, these columns exist to test default value logic when it's implemented
+          new EntityTypeColumn().name("booleanDefaultValue").dataType(new EntityDataType().dataType("booleanType")).defaultValue(false),
+          new EntityTypeColumn().name("numberDefaultValue").dataType(new EntityDataType().dataType("numberType")).defaultValue(10),
+          new EntityTypeColumn().name("stringDefaultValue").dataType(new EntityDataType().dataType("stringType")).defaultValue("default"),
           new EntityTypeColumn().name("arrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(new NumberType().dataType("numberType"))),
           new EntityTypeColumn().name("jsonbArrayField").dataType(new EntityDataType().dataType("jsonbArrayType")),
           new EntityTypeColumn().name("stringArrayField").dataType(new ArrayType().dataType("arrayType").itemDataType(

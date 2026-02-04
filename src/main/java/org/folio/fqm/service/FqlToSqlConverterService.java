@@ -590,10 +590,6 @@ public class FqlToSqlConverterService {
         ContainsCondition contains = (ContainsCondition) fqlCondition;
         yield defaultValueSatisfiesContains(defaultValue, contains.value());
       }
-      case "RegexCondition" -> {
-        RegexCondition regex = (RegexCondition) fqlCondition;
-        yield defaultValueSatisfiesRegex(defaultValue, regex.value());
-      }
       case "EmptyCondition" -> {
         // If a field has a default value, NULL is treated as that default value
         // Therefore, NULL is never "empty" when a default exists

@@ -5,6 +5,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.migration.strategies.AbstractSimpleMigrationStrategy;
+import org.folio.fqm.migration.warnings.DeprecatedFieldWarning;
 import org.folio.fqm.migration.warnings.FieldWarningFactory;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 
@@ -26,7 +27,7 @@ public class V24Dot1TestForEmma extends AbstractSimpleMigrationStrategy {
 
   @Override
   public String getMaximumApplicableVersion() {
-    return "24.3";
+    return "24.5";
   }
 
   @Override
@@ -40,10 +41,12 @@ public class V24Dot1TestForEmma extends AbstractSimpleMigrationStrategy {
   }
 
   @Override
+  public Map<UUID, Map<String, FieldWarningFactory>> getFieldWarnings() {
+    return Map.of(SIMPLE_BUDGET, Map.of("updated_by_user_id", DeprecatedFieldWarning.build()));
+  }
+
+  @Override
   public Map<UUID, Map<String, String>> getFieldChanges() {
-    return Map.of(
-      SIMPLE_BUDGET,
-      Map.of("updated_by_user_id2", "updated_by_user_id")
-    );
+    return Map.of(SIMPLE_BUDGET, Map.of("updated_by_user_id", "updated_by_user_id2"));
   }
 }

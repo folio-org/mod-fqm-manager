@@ -1293,7 +1293,6 @@ class FqlToSqlConverterServiceTest {
           cast(null, UUID.class)
         ), String[].class))
       ),
-      /// //////////////////////////
       Arguments.of(
         "equals string with matching default value",
         """
@@ -1413,6 +1412,20 @@ class FqlToSqlConverterServiceTest {
         """
           {"numberDefaultValue": {"$lte": 9}}""",
         field("numberDefaultValue").lessOrEqual(9)
+      ),
+
+      // The next 2 scenarios shouldn't occur in practice, but we should still ensure the default-values code handles them gracefully
+      Arguments.of(
+        "greater than int with invalid value",
+        """
+          {"numberDefaultValue": {"$gt": "invalid"}}""",
+        field("numberDefaultValue").greaterThan("invalid")
+      ),
+      Arguments.of(
+        "less than int with invalid value",
+        """
+          {"numberDefaultValue": {"$lt": "invalid"}}""",
+        field("numberDefaultValue").lessThan("invalid")
       )
     );
   }

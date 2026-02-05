@@ -1373,6 +1373,18 @@ class FqlToSqlConverterServiceTest {
         field("numberDefaultValue").greaterThan(9).or(field("numberDefaultValue").isNull())
       ),
       Arguments.of(
+        "greater than int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$gt": 11}}""",
+        field("numberDefaultValue").greaterThan(11)
+      ),
+      Arguments.of(
+        "greater than or equal int with matching default value",
+        """
+          {"numberDefaultValue": {"$gte": 9}}""",
+        field("numberDefaultValue").greaterOrEqual(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
         "greater than or equal int with non-matching default value",
         """
           {"numberDefaultValue": {"$gte": 11}}""",
@@ -1389,6 +1401,12 @@ class FqlToSqlConverterServiceTest {
         """
           {"numberDefaultValue": {"$lt": 9}}""",
         field("numberDefaultValue").lessThan(9)
+      ),
+      Arguments.of(
+        "less than or equal int with matching default value",
+        """
+          {"numberDefaultValue": {"$lte": 11}}""",
+        field("numberDefaultValue").lessOrEqual(11).or(field("numberDefaultValue").isNull())
       ),
       Arguments.of(
         "less than or equal int with non-matching default value",

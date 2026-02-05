@@ -620,16 +620,15 @@ public class FqlToSqlConverterService {
    */
   @SuppressWarnings("unchecked")
   private static boolean defaultValueSatisfiesGreaterThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
-    try {
-      if (defaultValue instanceof Comparable && queryValue.getClass().isAssignableFrom(defaultValue.getClass())) {
-        Comparable<Object> defaultComp = (Comparable<Object>) defaultValue;
-        int comparison = defaultComp.compareTo(queryValue);
-        return orEqualTo ? comparison >= 0 : comparison > 0;
-      }
-    } catch (ClassCastException e) {
-      // If comparison fails, assume default doesn't satisfy the condition
+    // If types don't match, can't compare
+    if (!defaultValue.getClass().equals(queryValue.getClass())) {
+      return false;
     }
-    return false;
+
+    // Both are the same type; cast and compare
+    Comparable<Object> defaultComp = (Comparable<Object>) defaultValue;
+    int comparison = defaultComp.compareTo(queryValue);
+    return orEqualTo ? comparison >= 0 : comparison > 0;
   }
 
   /**
@@ -637,16 +636,15 @@ public class FqlToSqlConverterService {
    */
   @SuppressWarnings("unchecked")
   private static boolean defaultValueSatisfiesLessThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
-    try {
-      if (defaultValue instanceof Comparable && queryValue.getClass().isAssignableFrom(defaultValue.getClass())) {
-        Comparable<Object> defaultComp = (Comparable<Object>) defaultValue;
-        int comparison = defaultComp.compareTo(queryValue);
-        return orEqualTo ? comparison <= 0 : comparison < 0;
-      }
-    } catch (ClassCastException e) {
-      // If comparison fails, assume default doesn't satisfy the condition
+    // If types don't match, can't compare
+    if (!defaultValue.getClass().equals(queryValue.getClass())) {
+      return false;
     }
-    return false;
+
+    // Both are the same type; cast and compare
+    Comparable<Object> defaultComp = (Comparable<Object>) defaultValue;
+    int comparison = defaultComp.compareTo(queryValue);
+    return orEqualTo ? comparison <= 0 : comparison < 0;
   }
 
   /**

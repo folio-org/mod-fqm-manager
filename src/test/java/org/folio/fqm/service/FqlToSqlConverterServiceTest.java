@@ -1341,6 +1341,54 @@ class FqlToSqlConverterServiceTest {
         """
           {"stringDefaultValue": {"$contains": "something else"}}""",
         field("stringDefaultValue").containsIgnoreCase("something else")
+      ),
+      Arguments.of(
+        "equals int with matching default value",
+        """
+          {"numberDefaultValue": {"$eq": 10}}""",
+        field("numberDefaultValue").eq(10).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "equals int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$eq": 9}}""",
+        field("numberDefaultValue").eq(9)
+      ),
+      Arguments.of(
+        "not equals int with matching default value",
+        """
+          {"numberDefaultValue": {"$ne": 10}}""",
+        field("numberDefaultValue").ne(10)
+      ),
+      Arguments.of(
+        "not equals int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$ne": 9}}""",
+        field("numberDefaultValue").ne(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "greater than int with matching default value",
+        """
+          {"numberDefaultValue": {"$gt": 9}}""",
+        field("numberDefaultValue").greaterThan(9).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "greater than or equal int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$gte": 11}}""",
+        field("numberDefaultValue").greaterOrEqual(11)
+      ),
+      Arguments.of(
+        "less than int with matching default value",
+        """
+          {"numberDefaultValue": {"$lt": 11}}""",
+        field("numberDefaultValue").lessThan(11).or(field("numberDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "less than or equal int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$lte": 9}}""",
+        field("numberDefaultValue").lessOrEqual(9)
       )
     );
   }

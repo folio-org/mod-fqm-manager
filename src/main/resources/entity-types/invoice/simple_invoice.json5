@@ -1,14 +1,13 @@
 {
   id: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
   name: 'simple_invoice',
-  private: false,
+  private: true,
   requiredPermissions: [
     'invoice.invoices.collection.get',
     'acquisitions-units.units.collection.get',
     'finance.fiscal-years.collection.get',
     'batch-groups.collection.get',
     'users.collection.get',
-    'configuration.entries.collection.get',
     'invoice.invoice-lines.collection.get',
     'organizations.organizations.collection.get'
   ],
@@ -144,37 +143,20 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
+      sourceAlias: 'invoice',
       queryable: true,
       visibleByDefault: false,
       essential: true,
       hidden: true,
-      valueGetter: ":invoice.jsonb->>'billTo'",
-    },
-    {
-      name: 'bill_to',
-      dataType: {
-        dataType: 'stringType',
-      },
-      queryable: false,
-      visibleByDefault: false,
-      essential: true,
-      valueGetter: "( \
-        SELECT \
-          (config_data.jsonb ->> 'value')::jsonb ->> 'address' \
-        FROM \
-          ${tenant_id}_mod_fqm_manager.src_configuration_config_data config_data \
-        WHERE \
-          config_data.id = (:invoice.jsonb ->> 'billTo')::uuid \
-      )",
-      filterValueGetter: "( \
-        SELECT \
-          lower((config_data.jsonb ->> 'value')::jsonb ->> 'address') \
-        FROM \
-          ${tenant_id}_mod_fqm_manager.src_configuration_config_data config_data \
-        WHERE \
-          config_data.id = (:invoice.jsonb ->> 'billTo')::uuid \
-      )",
-      valueFunction: 'lower(:value)',
+      valueGetter: ":sourceAlias.jsonb->>'billTo'",
+      joinsTo: [
+        {
+          targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ]
     },
     {
       name: 'chk_subscription_overlap',

@@ -1,0 +1,5 @@
+{
+  name: 'src_configuration_tenant_addresses',
+  dependsOn: [['${tenant_id}_mod_settings', 'tenant_addresses']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_settings.tenant_addresses',
+}

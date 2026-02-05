@@ -22,7 +22,7 @@
   ],
   requiredPermissions: [
     "finance.exchange-rate.item.get",
-    "configuration.entries.collection.get", // Not directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
+    "locale.item.get", // Not directly used here, but this is required to populate currency_exchange_rates; users without this permission can't access the configured system currency, so we shouldn't expose it here
   ],
   columns: [
     {

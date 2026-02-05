@@ -1369,17 +1369,18 @@ class FqlToSqlConverterServiceTest {
         field("stringDefaultValue").startsWithIgnoreCase("something else")
       ),
       Arguments.of(
-        "starts with string with matching default value",
+        "contains string with matching default value",
         """
           {"stringDefaultValue": {"$contains": "default"}}""",
         field("stringDefaultValue").containsIgnoreCase("default").or(field("stringDefaultValue").isNull())
       ),
       Arguments.of(
-        "starts with string with non-matching default value",
+        "contains string with non-matching default value",
         """
           {"stringDefaultValue": {"$contains": "something else"}}""",
         field("stringDefaultValue").containsIgnoreCase("something else")
       ),
+
       Arguments.of(
         "equals int with matching default value",
         """
@@ -1465,6 +1466,12 @@ class FqlToSqlConverterServiceTest {
         """
           {"numberDefaultValue": {"$lt": "invalid"}}""",
         field("numberDefaultValue").lessThan("invalid")
+      ),
+      Arguments.of(
+        "empty for int with default value",
+        """
+          {"numberDefaultValue": {"$empty": true}}""",
+        field("numberDefaultValue").isNull()
       )
     );
   }

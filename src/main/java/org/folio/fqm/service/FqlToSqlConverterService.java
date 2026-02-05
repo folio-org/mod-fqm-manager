@@ -542,7 +542,7 @@ public class FqlToSqlConverterService {
   }
 
   /**
-   * Determine whether NULL values should be included in the query results based on the default value logic.
+   * Determine whether NULL values should be included in the query results based on the default value.
    *
    * @param fieldCondition The FQL condition being evaluated
    * @param defaultValue   The default value for the field

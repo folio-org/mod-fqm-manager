@@ -126,7 +126,7 @@ public class FqlToSqlConverterService {
       Condition validationCondition = (validation != null) ? validation.and(baseCondition) : baseCondition;
 
       // Handle default values: if a field has a default value, NULL should be treated as that default value
-      Condition withDefault = applyDefaultValueLogic(validationCondition, fqlCondition, fqmField, field, entityType);
+      Condition withDefault = applyDefaultValueLogic(validationCondition, fieldCondition, fqmField, field, entityType);
 
       return withDefault;
     } else {
@@ -500,24 +500,24 @@ public class FqlToSqlConverterService {
    * <p>
    * Logic:
    * - If the query value matches the default value:
-   *   - For "positive" operators (equals, in, starts with, contains, regex): Add .or(field.isNull())
-   *   - For "negative" operators (not equals, not in): No change needed
+   * - For "positive" operators (equals, in, starts with, contains, regex): Add .or(field.isNull())
+   * - For "negative" operators (not equals, not in): No change needed
    * - If the query value does NOT match the default value:
-   *   - For "positive" operators: No change needed
-   *   - For "negative" operators: Add .or(field.isNull())
+   * - For "positive" operators: No change needed
+   * - For "negative" operators: Add .or(field.isNull())
    * - For comparison operators (>, <, >=, <=): Evaluate whether the default value satisfies the condition
    * - For empty operator: NULL is never considered empty when a default value exists
    *
-   * @param baseCondition The base SQL condition before applying default value logic
-   * @param fqlCondition  The FQL condition being evaluated
-   * @param fqmField      The FQM field definition containing the default value
-   * @param field         The jOOQ field reference
-   * @param entityType    The entity type
+   * @param baseCondition  The base SQL condition before applying default value logic
+   * @param fieldCondition The FQL condition being evaluated
+   * @param fqmField       The FQM field definition containing the default value
+   * @param field          The jOOQ field reference
+   * @param entityType     The entity type
    * @return The condition with default value logic applied
    */
   private static Condition applyDefaultValueLogic(
     Condition baseCondition,
-    FqlCondition<?> fqlCondition,
+    FieldCondition<?> fieldCondition,
     Field fqmField, // TODO: may be able to replace with fqmField.defaultValue()
     org.jooq.Field<Object> field,
     EntityType entityType
@@ -528,11 +528,10 @@ public class FqlToSqlConverterService {
 
     if (defaultValue == null) {
       // No default value: use original FQL semantics
-      // NOT operators should include NULLs
-      // Positive operators should not
-      includeNull = isNegativeOperator(fqlCondition);
+      // NOT operators should include NULLs, positive operators should not
+      includeNull = isNegativeOperator(fieldCondition);
     } else {
-      includeNull = shouldIncludeNull(fqlCondition, defaultValue, entityType);
+      includeNull = shouldIncludeNull(fieldCondition, defaultValue, entityType);
     }
 
     return includeNull ? baseCondition.or(field.isNull()) : baseCondition;
@@ -545,49 +544,45 @@ public class FqlToSqlConverterService {
   /**
    * Determine whether NULL values should be included in the query results based on the default value logic.
    *
-   * @param fqlCondition  The FQL condition being evaluated
-   * @param defaultValue  The default value for the field
-   * @param entityType    The entity type
+   * @param fieldCondition The FQL condition being evaluated
+   * @param defaultValue   The default value for the field
+   * @param entityType     The entity type
    * @return true if .or(field.isNull()) should be added to the condition
    */
-  private static boolean shouldIncludeNull(FqlCondition<?> fqlCondition, Object defaultValue, EntityType entityType) {
-    if (!(fqlCondition instanceof FieldCondition<?> fieldCondition)) {
-      return false;
-    }
-
-    return switch (fqlCondition.getClass().getSimpleName()) {
+  private static boolean shouldIncludeNull(FieldCondition<?> fieldCondition, Object defaultValue, EntityType entityType) {
+    return switch (fieldCondition.getClass().getSimpleName()) {
       case "EqualsCondition" -> {
-        EqualsCondition eq = (EqualsCondition) fqlCondition;
+        EqualsCondition eq = (EqualsCondition) fieldCondition;
         yield valuesMatch(eq.value(), defaultValue, fieldCondition, entityType);
       }
       case "NotEqualsCondition" -> {
-        NotEqualsCondition neq = (NotEqualsCondition) fqlCondition;
+        NotEqualsCondition neq = (NotEqualsCondition) fieldCondition;
         yield !valuesMatch(neq.value(), defaultValue, fieldCondition, entityType);
       }
       case "InCondition" -> {
-        InCondition in = (InCondition) fqlCondition;
+        InCondition in = (InCondition) fieldCondition;
         // If default value is in the list, include NULLs
         yield in.value().stream().anyMatch(val -> valuesMatch(val, defaultValue, fieldCondition, entityType));
       }
       case "NotInCondition" -> {
-        NotInCondition notIn = (NotInCondition) fqlCondition;
+        NotInCondition notIn = (NotInCondition) fieldCondition;
         // If default value is NOT in the list, include NULLs
         yield notIn.value().stream().noneMatch(val -> valuesMatch(val, defaultValue, fieldCondition, entityType));
       }
       case "GreaterThanCondition" -> {
-        GreaterThanCondition gt = (GreaterThanCondition) fqlCondition;
+        GreaterThanCondition gt = (GreaterThanCondition) fieldCondition;
         yield defaultValueSatisfiesGreaterThan(defaultValue, gt.value(), gt.orEqualTo());
       }
       case "LessThanCondition" -> {
-        LessThanCondition lt = (LessThanCondition) fqlCondition;
+        LessThanCondition lt = (LessThanCondition) fieldCondition;
         yield defaultValueSatisfiesLessThan(defaultValue, lt.value(), lt.orEqualTo());
       }
       case "StartsWithCondition" -> {
-        StartsWithCondition sw = (StartsWithCondition) fqlCondition;
+        StartsWithCondition sw = (StartsWithCondition) fieldCondition;
         yield defaultValueSatisfiesStartsWith(defaultValue, sw.value());
       }
       case "ContainsCondition" -> {
-        ContainsCondition contains = (ContainsCondition) fqlCondition;
+        ContainsCondition contains = (ContainsCondition) fieldCondition;
         yield defaultValueSatisfiesContains(defaultValue, contains.value());
       }
       case "EmptyCondition" -> {

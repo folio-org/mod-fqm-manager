@@ -1385,6 +1385,12 @@ class FqlToSqlConverterServiceTest {
         field("numberDefaultValue").lessThan(11).or(field("numberDefaultValue").isNull())
       ),
       Arguments.of(
+        "less than int with non-matching default value",
+        """
+          {"numberDefaultValue": {"$lt": 9}}""",
+        field("numberDefaultValue").lessThan(9)
+      ),
+      Arguments.of(
         "less than or equal int with non-matching default value",
         """
           {"numberDefaultValue": {"$lte": 9}}""",

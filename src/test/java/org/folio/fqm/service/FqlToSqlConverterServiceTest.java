@@ -1317,6 +1317,30 @@ class FqlToSqlConverterServiceTest {
         """
           {"stringDefaultValue": {"$ne": "something else"}}""",
         field("stringDefaultValue").notEqualIgnoreCase("something else").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "starts with string with matching default value",
+        """
+          {"stringDefaultValue": {"$starts_with": "default"}}""",
+        field("stringDefaultValue").startsWithIgnoreCase("default").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "starts with string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$starts_with": "something else"}}""",
+        field("stringDefaultValue").startsWithIgnoreCase("something else")
+      ),
+      Arguments.of(
+        "starts with string with matching default value",
+        """
+          {"stringDefaultValue": {"$contains": "default"}}""",
+        field("stringDefaultValue").containsIgnoreCase("default").or(field("stringDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "starts with string with non-matching default value",
+        """
+          {"stringDefaultValue": {"$contains": "something else"}}""",
+        field("stringDefaultValue").containsIgnoreCase("something else")
       )
     );
   }

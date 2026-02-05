@@ -1318,6 +1318,46 @@ class FqlToSqlConverterServiceTest {
         field("stringDefaultValue").notEqualIgnoreCase("something else").or(field("stringDefaultValue").isNull())
       ),
       Arguments.of(
+        "in list with matching default value",
+        """
+          {"stringDefaultValue": {"$in": ["default", "another value"]}}""",
+        or(
+          field("stringDefaultValue").equalIgnoreCase("default"),
+          field("stringDefaultValue").equalIgnoreCase("another value"),
+          field("stringDefaultValue").isNull()
+        )
+      ),
+      Arguments.of(
+        "in list with non-matching default value",
+        """
+          {"stringDefaultValue": {"$in": ["a value", "another value"]}}""",
+        or(
+          field("stringDefaultValue").equalIgnoreCase("a value"),
+          field("stringDefaultValue").equalIgnoreCase("another value")
+        )
+      ),
+      Arguments.of(
+        "not in list with matching default value",
+        """
+          {"stringDefaultValue": {"$nin": ["default", "another value"]}}""",
+        and(
+          field("stringDefaultValue").notEqualIgnoreCase("default"),
+          field("stringDefaultValue").notEqualIgnoreCase("another value")
+        )
+      ),
+      Arguments.of(
+        "not in list with non-matching default value",
+        """
+          {"stringDefaultValue": {"$nin": ["a value", "another value"]}}""",
+        or(
+          and(
+            field("stringDefaultValue").notEqualIgnoreCase("a value"),
+            field("stringDefaultValue").notEqualIgnoreCase("another value")
+          ),
+          field("stringDefaultValue").isNull()
+        )
+      ),
+      Arguments.of(
         "starts with string with matching default value",
         """
           {"stringDefaultValue": {"$starts_with": "default"}}""",

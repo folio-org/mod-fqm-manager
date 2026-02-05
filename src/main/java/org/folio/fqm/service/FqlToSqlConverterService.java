@@ -605,10 +605,7 @@ public class FqlToSqlConverterService {
    * Check if two values match, considering case-insensitivity for strings and type conversions
    */
   private static boolean valuesMatch(Object queryValue, Object defaultValue, FieldCondition<?> fieldCondition, EntityType entityType) {
-    if (queryValue == null && defaultValue == null) {
-      return true;
-    }
-    if (queryValue == null || defaultValue == null) {
+    if (queryValue == null) {
       return false;
     }
 
@@ -627,7 +624,7 @@ public class FqlToSqlConverterService {
    */
   @SuppressWarnings("unchecked")
   private static boolean defaultValueSatisfiesGreaterThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
-    if (defaultValue == null || queryValue == null) {
+    if (queryValue == null) {
       return false;
     }
 
@@ -648,7 +645,7 @@ public class FqlToSqlConverterService {
    */
   @SuppressWarnings("unchecked")
   private static boolean defaultValueSatisfiesLessThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
-    if (defaultValue == null || queryValue == null) {
+    if (queryValue == null) {
       return false;
     }
 
@@ -668,7 +665,7 @@ public class FqlToSqlConverterService {
    * Check if the default value satisfies a startsWith condition
    */
   private static boolean defaultValueSatisfiesStartsWith(Object defaultValue, String prefix) {
-    if (defaultValue == null || prefix == null) {
+    if (prefix == null) {
       return false;
     }
     // Case-insensitive comparison for strings
@@ -679,7 +676,7 @@ public class FqlToSqlConverterService {
    * Check if the default value satisfies a contains condition
    */
   private static boolean defaultValueSatisfiesContains(Object defaultValue, String substring) {
-    if (defaultValue == null || substring == null) {
+    if (substring == null) {
       return false;
     }
     // Case-insensitive comparison for strings

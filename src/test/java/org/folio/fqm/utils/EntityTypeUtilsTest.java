@@ -333,7 +333,7 @@ class EntityTypeUtilsTest {
 
   @Test
   void shouldReturnEmptyDefaultValuesMapForEntityTypeWithNoColumns() {
-    EntityType entityType = new EntityType();
+    EntityType entityType = new EntityType().columns(null);
     Map<String, Object> result = EntityTypeUtils.getFieldDefaultValues(entityType);
     assertTrue(result.isEmpty(), "Default values map should be empty for entity type with no columns");
   }

@@ -1471,7 +1471,7 @@ class FqlToSqlConverterServiceTest {
         "empty for int with default value",
         """
           {"numberDefaultValue": {"$empty": true}}""",
-        field("numberDefaultValue").isNull()
+        falseCondition()
       )
     );
   }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -393,5 +394,37 @@ public class EntityTypeUtils {
     });
 
     return paths;
+  }
+
+  /**
+   * Returns a map of field paths to their default values for all fields that have default values.
+   * Supports both top-level columns and nested object/array properties.
+   * Field paths use the same format as country localization:
+   * - Top-level: "fieldName"
+   * - Nested object: "obj->propertyName"
+   * - Array element: "arr[*]->propertyName"
+   *
+   * @param entityType Entity type to extract default values from
+   * @return Map of field paths to default values
+   */
+  public static Map<String, Object> getFieldDefaultValues(EntityType entityType) {
+    Map<String, Object> defaultValues = new HashMap<>();
+
+    runOnEveryField(entityType, (field, parentPath) -> {
+      if (field.getDefaultValue() == null) {
+        return;
+      }
+
+      // Use the underlying JSON property name for nested fields
+      String leaf = (field instanceof NestedObjectProperty prop
+        && !StringUtils.isEmpty(prop.getProperty()))
+        ? prop.getProperty()
+        : field.getName();
+
+      String fieldPath = parentPath + leaf;
+      defaultValues.put(fieldPath, field.getDefaultValue());
+    });
+
+    return defaultValues;
   }
 }

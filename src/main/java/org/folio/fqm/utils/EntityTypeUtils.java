@@ -397,23 +397,25 @@ public class EntityTypeUtils {
   }
 
   /**
-   * Returns a map of field names to their default values for all fields that have default values.
-   * Only top-level columns are included (nested object properties are not currently supported).
+   * Returns a map of field paths to their default values for all fields that have default values.
+   * Supports both top-level columns and nested object/array properties.
+   * Field paths use the same format as country localization:
+   * - Top-level: "fieldName"
+   * - Nested object: "obj->propertyName"
+   * - Array element: "arr[*]->propertyName"
    *
    * @param entityType Entity type to extract default values from
-   * @return Map of field names to default values
+   * @return Map of field paths to default values
    */
   public static Map<String, Object> getFieldDefaultValues(EntityType entityType) {
     Map<String, Object> defaultValues = new HashMap<>();
-    if (entityType.getColumns() == null) {
-      return defaultValues;
-    }
 
-    for (EntityTypeColumn column : entityType.getColumns()) {
-      if (column.getDefaultValue() != null) {
-        defaultValues.put(column.getName(), column.getDefaultValue());
+    runOnEveryField(entityType, (field, parentPath) -> {
+      if (field.getDefaultValue() != null) {
+        String fieldPath = parentPath + field.getName();
+        defaultValues.put(fieldPath, field.getDefaultValue());
       }
-    }
+    });
 
     return defaultValues;
   }

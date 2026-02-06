@@ -199,6 +199,55 @@ class ResultSetServiceTest {
     assertEquals(expectedResult, actualResult);
   }
 
+  @Test
+  void shouldApplyDefaultValuesToNestedFields() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+    String nestedFieldJson = """
+      [{"nestedWithDefault":null,"nestedWithoutDefault":null},{"nestedWithDefault":"non-default", "nestedWithoutDefault":"non-default"}]
+      """;
+    String expectedNestedFieldJson = """
+      [{"nestedWithDefault":"default","nestedWithoutDefault":null},{"nestedWithDefault":"non-default", "nestedWithoutDefault":"non-default"}]
+      """;
+
+    EntityTypeColumn nestedColumn = new EntityTypeColumn()
+      .name("field")
+      .dataType(
+        new ArrayType().itemDataType(
+          new ObjectType().properties(List.of(
+            new NestedObjectProperty()
+              .name("nested_with_default")
+              .property("nestedWithDefault")
+              .defaultValue("default"),
+            new NestedObjectProperty()
+              .name("nested_without_default")
+              .property("nestedWithoutDefault")
+          ))
+        )
+      );
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        nestedColumn
+      ));
+
+    List<String> fields = List.of("id", "field");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "field", nestedFieldJson)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+    String actualJson = (String) actual.getFirst().get("field");
+
+    assertEquals(expectedNestedFieldJson, actualJson);
+  }
+
   static List<Arguments> dateLocalizationTestCases() {
     return List.of(
       // (tz, date string, timestamp, offset date string, expected)

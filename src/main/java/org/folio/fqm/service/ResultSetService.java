@@ -104,15 +104,84 @@ public class ResultSetService {
   }
 
   private void applyDefaultValues(Map<String, Object> contents, Map<String, Object> defaultValues) {
-    for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
-      String fieldName = entry.getKey();
-      Object defaultValue = entry.getValue();
-
-      // Replace null values with the default value
-      if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
-        contents.put(fieldName, defaultValue);
-      }
+    if (defaultValues.isEmpty()) {
+      return;
     }
+    for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
+      String fieldPath = entry.getKey();
+      Object defaultValue = entry.getValue();
+      applyDefaultValueToField(contents, fieldPath, defaultValue);
+    }
+  }
+
+  private void applyDefaultValueToField(Map<String, Object> contents, String fieldPath, Object defaultValue) {
+    if (StringUtils.isEmpty(fieldPath)) {
+      return;
+    }
+
+    int markerIndex = fieldPath.indexOf(NESTED_FIELD_MARKER);
+    if (markerIndex < 0) {
+      // Top-level field
+      applyDefaultValueToTopLevelField(contents, fieldPath, defaultValue);
+      return;
+    }
+
+    // Nested field
+    String rootField = fieldPath.substring(0, markerIndex);
+    String nestedField = fieldPath.substring(markerIndex + NESTED_FIELD_MARKER.length());
+    applyDefaultValueToNestedField(contents, rootField, nestedField, defaultValue);
+  }
+
+  private void applyDefaultValueToTopLevelField(Map<String, Object> contents, String fieldName, Object defaultValue) {
+    // Replace null values with the default value
+    if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
+      contents.put(fieldName, defaultValue);
+    }
+  }
+
+  private void applyDefaultValueToNestedField(Map<String, Object> contents, String rootField, String nestedField, Object defaultValue) {
+    if (rootField.isBlank() || nestedField.isBlank()) {
+      return;
+    }
+
+    Object root = contents.get(rootField);
+    if (!(root instanceof String rootJson) || rootJson.isBlank()) {
+      return;
+    }
+
+    try {
+      JsonNode node = OBJECT_MAPPER.readTree(rootJson);
+      if (!node.isArray()) {
+        return;
+      }
+
+      boolean changed = false;
+      for (JsonNode elementNode : node) {
+        changed |= applyDefaultValueIfNull(elementNode, nestedField, defaultValue);
+      }
+      if (changed) {
+        contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
+      }
+    } catch (Exception e) {
+      log.debug("Unable to apply default value to field '{}[*]->{}' (unexpected JSON): {}", rootField, nestedField, e.getMessage());
+    }
+  }
+
+  private boolean applyDefaultValueIfNull(JsonNode elementNode, String fieldName, Object defaultValue) {
+    if (!elementNode.isObject()) {
+      return false;
+    }
+
+    ObjectNode objectNode = (ObjectNode) elementNode;
+    JsonNode valueNode = objectNode.get(fieldName);
+
+    // Apply default if field is missing or null
+    if (valueNode == null || valueNode.isNull()) {
+      objectNode.putPOJO(fieldName, defaultValue);
+      return true;
+    }
+
+    return false;
   }
 
   private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {

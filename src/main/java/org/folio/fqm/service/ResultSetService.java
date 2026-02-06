@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -220,11 +221,11 @@ public class ResultSetService {
    * @param contents The map containing the field values
    * @param rootField The name of the root field containing the JSON array
    * @param nestedField The name of the nested field within each array element
-   * @param transformer Function that transforms an array element and returns true if modified
+   * @param transformer Predicate that transforms an array element and returns true if modified
    * @param errorMessageTemplate Template for logging errors (with placeholders for rootField, nestedField, and error message)
    */
   private void processNestedArrayField(Map<String, Object> contents, String rootField, String nestedField,
-                                       Function<JsonNode, Boolean> transformer, String errorMessageTemplate) {
+                                       Predicate<JsonNode> transformer, String errorMessageTemplate) {
     if (rootField.isBlank() || nestedField.isBlank()) {
       return;
     }
@@ -242,7 +243,7 @@ public class ResultSetService {
 
       boolean changed = false;
       for (JsonNode elementNode : node) {
-        changed |= transformer.apply(elementNode);
+        changed |= transformer.test(elementNode);
       }
       if (changed) {
         contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));

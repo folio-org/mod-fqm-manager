@@ -294,6 +294,38 @@ class ResultSetServiceTest {
     assertEquals(nestedFieldJson, actualJson, "Array should remain unchanged");
   }
 
+  @Test
+  void shouldNotApplyDefaultValueWhenFieldPathIsEmpty() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(
+        List.of(
+          new EntityTypeColumn().name("id").isIdColumn(true),
+          new EntityTypeColumn().name("").defaultValue("shouldNotBeApplied")
+        )
+      );
+
+    List<String> fields = List.of("id", "");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    Map<String, Object> record = new HashMap<>();
+    record.put("id", contentId);
+    record.put("", "originalValue");
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(record));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals("originalValue", actual.getFirst().get(""));
+  }
+
   static List<Arguments> dateLocalizationTestCases() {
     return List.of(
       // (tz, date string, timestamp, offset date string, expected)

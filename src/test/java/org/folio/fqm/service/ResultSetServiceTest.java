@@ -116,6 +116,83 @@ class ResultSetServiceTest {
     assertEquals(expectedResult, actualResult);
   }
 
+  @Test
+  void shouldApplyDefaultValuesToNullFields() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId1 = UUID.randomUUID();
+    UUID contentId2 = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .name("test_entity")
+      .id(entityTypeId.toString())
+      .columns(
+        List.of(
+          new EntityTypeColumn().name("id").isIdColumn(true),
+          new EntityTypeColumn().name("fieldWithDefault").defaultValue("defaultValue"),
+          new EntityTypeColumn().name("numberWithDefault").defaultValue(42),
+          new EntityTypeColumn().name("fieldWithoutDefault")
+        )
+      )
+      .sources(List.of(
+          new EntityTypeSourceDatabase()
+            .type("db")
+            .alias("source1")
+            .target("target1")
+        )
+      );
+
+    List<String> fields = List.of("id", "fieldWithDefault", "numberWithDefault", "fieldWithoutDefault");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(
+      List.of(contentId1.toString()),
+      List.of(contentId2.toString())
+    );
+
+    // Repository returns records with some null values
+    Map<String, Object> record1 = new HashMap<>();
+    record1.put("id", contentId1);
+    record1.put("fieldWithDefault", null);
+    record1.put("numberWithDefault", null);
+    record1.put("fieldWithoutDefault", "value1");
+
+    Map<String, Object> record2 = new HashMap<>();
+    record2.put("id", contentId2);
+    record2.put("fieldWithDefault", "customValue");
+    record2.put("numberWithDefault", 100);
+    record2.put("fieldWithoutDefault", null);
+
+    List<Map<String, Object>> repositoryResponse = List.of(record1, record2);
+
+    // Expected result should have defaults applied to null values
+    Map<String, Object> expected1 = new HashMap<>();
+    expected1.put("id", contentId1);
+    expected1.put("fieldWithDefault", "defaultValue");
+    expected1.put("numberWithDefault", 42);
+    expected1.put("fieldWithoutDefault", null);
+
+    Map<String, Object> expected2 = new HashMap<>();
+    expected2.put("id", contentId2);
+    expected2.put("fieldWithDefault", "customValue");
+    expected2.put("numberWithDefault", 100);
+    expected2.put("fieldWithoutDefault", null);
+
+    List<Map<String, Object>> expectedResult = List.of(expected1, expected2);
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds)).thenReturn(repositoryResponse);
+
+    List<Map<String, Object>> actualResult = service.getResultSet(
+      entityTypeId,
+      fields,
+      listIds,
+      tenantIds,
+      false
+    );
+
+    assertEquals(expectedResult, actualResult);
+  }
+
   static List<Arguments> dateLocalizationTestCases() {
     return List.of(
       // (tz, date string, timestamp, offset date string, expected)

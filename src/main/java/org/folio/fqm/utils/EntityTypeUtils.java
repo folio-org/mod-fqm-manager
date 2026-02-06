@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -393,5 +394,27 @@ public class EntityTypeUtils {
     });
 
     return paths;
+  }
+
+  /**
+   * Returns a map of field names to their default values for all fields that have default values.
+   * Only top-level columns are included (nested object properties are not currently supported).
+   *
+   * @param entityType Entity type to extract default values from
+   * @return Map of field names to default values
+   */
+  public static Map<String, Object> getFieldDefaultValues(EntityType entityType) {
+    Map<String, Object> defaultValues = new HashMap<>();
+    if (entityType.getColumns() == null) {
+      return defaultValues;
+    }
+
+    for (EntityTypeColumn column : entityType.getColumns()) {
+      if (column.getDefaultValue() != null) {
+        defaultValues.put(column.getName(), column.getDefaultValue());
+      }
+    }
+
+    return defaultValues;
   }
 }

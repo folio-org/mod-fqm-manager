@@ -77,6 +77,7 @@ public class ResultSetService {
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? settingsClient.getTenantTimezone() : null;
     List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    Map<String, Object> defaultValues = EntityTypeUtils.getFieldDefaultValues(entityType);
 
     return contentIds
       .stream()
@@ -92,6 +93,7 @@ public class ResultSetService {
         }
 
         Map<String, Object> copiedContents = new HashMap<>(contents);
+        applyDefaultValues(copiedContents, defaultValues);
         localizeCountries(copiedContents, countryFields);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
@@ -99,6 +101,18 @@ public class ResultSetService {
         return copiedContents;
       })
       .toList();
+  }
+
+  private void applyDefaultValues(Map<String, Object> contents, Map<String, Object> defaultValues) {
+    for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
+      String fieldName = entry.getKey();
+      Object defaultValue = entry.getValue();
+
+      // Replace null values with the default value
+      if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
+        contents.put(fieldName, defaultValue);
+      }
+    }
   }
 
   private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {

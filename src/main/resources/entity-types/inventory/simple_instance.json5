@@ -1226,7 +1226,7 @@
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'staffSuppress'",
       filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'staffSuppress'::text), 600)",
-      defaultValue: 'true',
+      defaultValue: 'false',
       values: [
         {
           value: 'true',

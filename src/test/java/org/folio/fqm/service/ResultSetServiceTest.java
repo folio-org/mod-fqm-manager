@@ -260,7 +260,6 @@ class ResultSetServiceTest {
     String nestedFieldJson = """
       ["not-an-object", 123, null]
       """;
-
     EntityTypeColumn nestedColumn = new EntityTypeColumn()
       .name("field")
       .dataType(
@@ -273,7 +272,6 @@ class ResultSetServiceTest {
           ))
         )
       );
-
     EntityType entityType = new EntityType()
       .id(entityTypeId.toString())
       .columns(List.of(
@@ -293,13 +291,7 @@ class ResultSetServiceTest {
     List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
     String actualJson = (String) actual.getFirst().get("field");
 
-    // The array should remain unchanged since none of the elements are objects
-    // Verify all original elements are still present
-    assertEquals(true, actualJson.contains("\"not-an-object\""));
-    assertEquals(true, actualJson.contains("123"));
-    assertEquals(true, actualJson.contains("null"));
-    // Verify no default values were added
-    assertEquals(false, actualJson.contains("nestedWithDefault"));
+    assertEquals(nestedFieldJson, actualJson, "Array should remain unchanged");
   }
 
   static List<Arguments> dateLocalizationTestCases() {

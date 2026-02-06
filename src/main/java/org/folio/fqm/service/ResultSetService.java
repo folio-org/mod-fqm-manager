@@ -138,31 +138,9 @@ public class ResultSetService {
   }
 
   private void applyDefaultValueToNestedField(Map<String, Object> contents, String rootField, String nestedField, Object defaultValue) {
-    if (rootField.isBlank() || nestedField.isBlank()) {
-      return;
-    }
-
-    Object root = contents.get(rootField);
-    if (!(root instanceof String rootJson) || rootJson.isBlank()) {
-      return;
-    }
-
-    try {
-      JsonNode node = OBJECT_MAPPER.readTree(rootJson);
-      if (!node.isArray()) {
-        return;
-      }
-
-      boolean changed = false;
-      for (JsonNode elementNode : node) {
-        changed |= applyDefaultValueIfNull(elementNode, nestedField, defaultValue);
-      }
-      if (changed) {
-        contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
-      }
-    } catch (Exception e) {
-      log.debug("Unable to apply default value to field '{}[*]->{}' (unexpected JSON): {}", rootField, nestedField, e.getMessage());
-    }
+    processNestedArrayField(contents, rootField, nestedField,
+      elementNode -> applyDefaultValueIfNull(elementNode, nestedField, defaultValue),
+      "Unable to apply default value to field '{}[*]->{}' (unexpected JSON): {}");
   }
 
   private boolean applyDefaultValueIfNull(JsonNode elementNode, String fieldName, Object defaultValue) {
@@ -229,6 +207,24 @@ public class ResultSetService {
   }
 
   private void localizeNestedCountryField(Map<String, Object> contents, String rootField, String nestedField) {
+    processNestedArrayField(contents, rootField, nestedField,
+      elementNode -> localizeCountryCodeIfPresent(elementNode, nestedField),
+      "Unable to localize country field '{}[*]->{}' (unexpected JSON): {}");
+  }
+
+  /**
+   * Generic method to process nested fields within JSON arrays.
+   * Parses the root field as a JSON array, applies a transformation function to each element,
+   * and updates the contents if any changes were made.
+   *
+   * @param contents The map containing the field values
+   * @param rootField The name of the root field containing the JSON array
+   * @param nestedField The name of the nested field within each array element
+   * @param transformer Function that transforms an array element and returns true if modified
+   * @param errorMessageTemplate Template for logging errors (with placeholders for rootField, nestedField, and error message)
+   */
+  private void processNestedArrayField(Map<String, Object> contents, String rootField, String nestedField,
+                                       Function<JsonNode, Boolean> transformer, String errorMessageTemplate) {
     if (rootField.isBlank() || nestedField.isBlank()) {
       return;
     }
@@ -246,13 +242,13 @@ public class ResultSetService {
 
       boolean changed = false;
       for (JsonNode elementNode : node) {
-        changed |= localizeCountryCodeIfPresent(elementNode, nestedField);
+        changed |= transformer.apply(elementNode);
       }
       if (changed) {
         contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
       }
     } catch (Exception e) {
-      log.debug("Unable to localize country field '{}[*]->{}' (unexpected JSON): {}", rootField, nestedField, e.getMessage());
+      log.debug(errorMessageTemplate, rootField, nestedField, e.getMessage());
     }
   }
 

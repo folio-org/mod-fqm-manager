@@ -585,13 +585,10 @@ public class FqlToSqlConverterService {
         ContainsCondition contains = (ContainsCondition) fieldCondition;
         yield defaultValueSatisfiesContains(defaultValue, contains.value());
       }
-      case "EmptyCondition" -> {
-        // If a field has a default value, NULL is treated as that default value
-        // Therefore, NULL is never "empty" when a default exists
-        // $empty == true: Don't include NULLs (they have the default value)
-        // $empty == false: This is handled by the base condition's .not()
-        yield false;
-      }
+      // If a field has a default value, NULL is treated as that default value
+      // Therefore, a field is never "empty" when a default value exists
+      // TODO: Need to actually return no records for empty == true
+      case "EmptyCondition" -> false;
       default -> false;
     };
   }

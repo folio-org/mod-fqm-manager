@@ -597,13 +597,15 @@ public class FqlToSqlConverterService {
   }
 
   /**
-   * Check if two values match, considering case-insensitivity for strings and type conversions
+   * Check if two values match, considering case-insensitivity for strings and type conversions.
+   * Assumes default values are properly typed for their fields (validated at entity type creation).
    */
   private static boolean valuesMatch(Object queryValue, Object defaultValue, FieldCondition<?> fieldCondition, EntityType entityType) {
-    // For strings, use case-insensitive comparison
+    // For string fields, use case-insensitive comparison
     String dataType = getFieldDataTypeName(entityType, fieldCondition);
-    if ((STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) && queryValue instanceof String && defaultValue instanceof String) {
-      return ((String) queryValue).equalsIgnoreCase((String) defaultValue);
+    if (STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
+      String defaultStr = (String) defaultValue;
+      return defaultStr.equalsIgnoreCase(queryValue.toString());
     }
 
     // For other types, use standard equality

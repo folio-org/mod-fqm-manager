@@ -130,6 +130,7 @@ public class ResultSetService {
     applyDefaultValueToNestedField(contents, rootField, nestedField, defaultValue);
   }
 
+  @SuppressWarnings("java:S3824") // computeIfAbsent doesn't handle null values, only missing keys
   private void applyDefaultValueToTopLevelField(Map<String, Object> contents, String fieldName, Object defaultValue) {
     if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
       contents.put(fieldName, defaultValue);

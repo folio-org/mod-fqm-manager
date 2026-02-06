@@ -123,12 +123,10 @@ public class FqlToSqlConverterService {
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
         default -> falseCondition();
       };
+
       Condition validationCondition = (validation != null) ? validation.and(baseCondition) : baseCondition;
+      return applyDefaultValueLogic(validationCondition, fieldCondition, fqmField, field, entityType);
 
-      // Handle default values: if a field has a default value, NULL should be treated as that default value
-      Condition withDefault = applyDefaultValueLogic(validationCondition, fieldCondition, fqmField, field, entityType);
-
-      return withDefault;
     } else {
       return switch (fqlCondition.getClass().getSimpleName()) {
         case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
@@ -427,6 +425,14 @@ public class FqlToSqlConverterService {
    */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    Field fqmField = getField(emptyCondition, entityType);
+    if (fqmField.getDefaultValue() != null) {
+      // A field with a default value is never empty.
+      // Thus, return falseCondition if $empty is true and trueCondition if $empty is false
+      return isEmpty ? falseCondition() : trueCondition();
+    }
+
+
     String fieldType = getFieldDataTypeName(entityType, emptyCondition);
     String elementType = resolveArrayElementType(entityType, emptyCondition);
 
@@ -585,9 +591,6 @@ public class FqlToSqlConverterService {
         ContainsCondition contains = (ContainsCondition) fieldCondition;
         yield defaultValueSatisfiesContains(defaultValue, contains.value());
       }
-      // If a field has a default value, NULL is treated as that default value
-      // Therefore, a field is never "empty" when a default value exists
-      // TODO: Need to actually return no records for empty == true
       case "EmptyCondition" -> false;
       default -> false;
     };

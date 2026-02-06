@@ -121,6 +121,7 @@ class ResultSetServiceTest {
     UUID entityTypeId = UUID.randomUUID();
     UUID contentId1 = UUID.randomUUID();
     UUID contentId2 = UUID.randomUUID();
+    UUID contentId3 = UUID.randomUUID();
 
     EntityType entityType = new EntityType()
       .name("test_entity")
@@ -145,38 +146,43 @@ class ResultSetServiceTest {
     List<String> tenantIds = List.of("tenant_01");
     List<List<String>> listIds = List.of(
       List.of(contentId1.toString()),
-      List.of(contentId2.toString())
+      List.of(contentId2.toString()),
+      List.of(contentId3.toString())
     );
 
-    // Repository returns records with some null values
+    // Null value should be replaced with default
     Map<String, Object> record1 = new HashMap<>();
     record1.put("id", contentId1);
     record1.put("fieldWithDefault", null);
-//    record1.put("numberWithDefault", null);
     record1.put("fieldWithoutDefault", null);
 
+    // Key not present, should be replaced with default
     Map<String, Object> record2 = new HashMap<>();
     record2.put("id", contentId2);
-    record2.put("fieldWithDefault", "non-default");
-//    record2.put("numberWithDefault", 100);
-    record2.put("fieldWithoutDefault", "non-default");
 
-    List<Map<String, Object>> repositoryResponse = List.of(record1, record2);
+    // Values present, should not be replaced
+    Map<String, Object> record3 = new HashMap<>();
+    record3.put("id", contentId3);
+    record3.put("fieldWithDefault", "non-default");
+    record3.put("fieldWithoutDefault", "non-default");
 
-    // Expected result should have defaults applied to null values
+    List<Map<String, Object>> repositoryResponse = List.of(record1, record2, record3);
+
     Map<String, Object> expected1 = new HashMap<>();
     expected1.put("id", contentId1);
     expected1.put("fieldWithDefault", "default");
-//    expected1.put("numberWithDefault", 42);
     expected1.put("fieldWithoutDefault", null);
 
     Map<String, Object> expected2 = new HashMap<>();
     expected2.put("id", contentId2);
-    expected2.put("fieldWithDefault", "non-default");
-//    expected2.put("numberWithDefault", 100);
-    expected2.put("fieldWithoutDefault", "non-default");
+    expected2.put("fieldWithDefault", "default");
 
-    List<Map<String, Object>> expectedResult = List.of(expected1, expected2);
+    Map<String, Object> expected3 = new HashMap<>();
+    expected3.put("id", contentId3);
+    expected3.put("fieldWithDefault", "non-default");
+    expected3.put("fieldWithoutDefault", "non-default");
+
+    List<Map<String, Object>> expectedResult = List.of(expected1, expected2, expected3);
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);

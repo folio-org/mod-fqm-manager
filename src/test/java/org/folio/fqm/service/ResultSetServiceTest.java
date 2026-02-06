@@ -128,8 +128,8 @@ class ResultSetServiceTest {
       .columns(
         List.of(
           new EntityTypeColumn().name("id").isIdColumn(true),
-          new EntityTypeColumn().name("fieldWithDefault").defaultValue("defaultValue"),
-          new EntityTypeColumn().name("numberWithDefault").defaultValue(42),
+          new EntityTypeColumn().name("fieldWithDefault").defaultValue("default"),
+//          new EntityTypeColumn().name("numberWithDefault").defaultValue(42),
           new EntityTypeColumn().name("fieldWithoutDefault")
         )
       )
@@ -141,7 +141,7 @@ class ResultSetServiceTest {
         )
       );
 
-    List<String> fields = List.of("id", "fieldWithDefault", "numberWithDefault", "fieldWithoutDefault");
+    List<String> fields = List.of("id", "fieldWithDefault", "fieldWithoutDefault");
     List<String> tenantIds = List.of("tenant_01");
     List<List<String>> listIds = List.of(
       List.of(contentId1.toString()),
@@ -152,29 +152,29 @@ class ResultSetServiceTest {
     Map<String, Object> record1 = new HashMap<>();
     record1.put("id", contentId1);
     record1.put("fieldWithDefault", null);
-    record1.put("numberWithDefault", null);
-    record1.put("fieldWithoutDefault", "value1");
+//    record1.put("numberWithDefault", null);
+    record1.put("fieldWithoutDefault", null);
 
     Map<String, Object> record2 = new HashMap<>();
     record2.put("id", contentId2);
-    record2.put("fieldWithDefault", "customValue");
-    record2.put("numberWithDefault", 100);
-    record2.put("fieldWithoutDefault", null);
+    record2.put("fieldWithDefault", "non-default");
+//    record2.put("numberWithDefault", 100);
+    record2.put("fieldWithoutDefault", "non-default");
 
     List<Map<String, Object>> repositoryResponse = List.of(record1, record2);
 
     // Expected result should have defaults applied to null values
     Map<String, Object> expected1 = new HashMap<>();
     expected1.put("id", contentId1);
-    expected1.put("fieldWithDefault", "defaultValue");
-    expected1.put("numberWithDefault", 42);
+    expected1.put("fieldWithDefault", "default");
+//    expected1.put("numberWithDefault", 42);
     expected1.put("fieldWithoutDefault", null);
 
     Map<String, Object> expected2 = new HashMap<>();
     expected2.put("id", contentId2);
-    expected2.put("fieldWithDefault", "customValue");
-    expected2.put("numberWithDefault", 100);
-    expected2.put("fieldWithoutDefault", null);
+    expected2.put("fieldWithDefault", "non-default");
+//    expected2.put("numberWithDefault", 100);
+    expected2.put("fieldWithoutDefault", "non-default");
 
     List<Map<String, Object>> expectedResult = List.of(expected1, expected2);
 

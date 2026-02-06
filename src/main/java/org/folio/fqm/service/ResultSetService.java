@@ -121,19 +121,16 @@ public class ResultSetService {
 
     int markerIndex = fieldPath.indexOf(NESTED_FIELD_MARKER);
     if (markerIndex < 0) {
-      // Top-level field
       applyDefaultValueToTopLevelField(contents, fieldPath, defaultValue);
       return;
     }
 
-    // Nested field
     String rootField = fieldPath.substring(0, markerIndex);
     String nestedField = fieldPath.substring(markerIndex + NESTED_FIELD_MARKER.length());
     applyDefaultValueToNestedField(contents, rootField, nestedField, defaultValue);
   }
 
   private void applyDefaultValueToTopLevelField(Map<String, Object> contents, String fieldName, Object defaultValue) {
-    // Replace null values with the default value
     if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
       contents.put(fieldName, defaultValue);
     }

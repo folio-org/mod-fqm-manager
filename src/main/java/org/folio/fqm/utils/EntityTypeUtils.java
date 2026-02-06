@@ -411,10 +411,18 @@ public class EntityTypeUtils {
     Map<String, Object> defaultValues = new HashMap<>();
 
     runOnEveryField(entityType, (field, parentPath) -> {
-      if (field.getDefaultValue() != null) {
-        String fieldPath = parentPath + field.getName();
-        defaultValues.put(fieldPath, field.getDefaultValue());
+      if (field.getDefaultValue() == null) {
+        return;
       }
+
+      // Use the underlying JSON property name for nested fields
+      String leaf = (field instanceof NestedObjectProperty prop
+        && !StringUtils.isEmpty(prop.getProperty()))
+        ? prop.getProperty()
+        : field.getName();
+
+      String fieldPath = parentPath + leaf;
+      defaultValues.put(fieldPath, field.getDefaultValue());
     });
 
     return defaultValues;

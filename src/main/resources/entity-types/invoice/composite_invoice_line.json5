@@ -21,6 +21,15 @@
       order: 20,
     },
     {
+      alias: 'bill_to',
+      type: 'entity-type',
+      targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+      targetField: 'id',
+      sourceField: 'invoice.bill_to_id',
+      essentialOnly: true,
+      order: 25,
+    },
+    {
       alias: 'created_by',
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user

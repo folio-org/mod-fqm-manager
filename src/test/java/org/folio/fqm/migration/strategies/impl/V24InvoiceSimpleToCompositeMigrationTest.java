@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
-import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 import org.junit.jupiter.params.provider.Arguments;
 
 public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
@@ -44,7 +43,7 @@ public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
           .build()
       ),
       Arguments.of(
-        "Warn for bill_to and do not migrate other fields in a composite containing simple_invoice (invoice_line case)",
+        "Migrate bill_to to bill_to.address in a composite containing simple_invoice (invoice_line case)",
         MigratableQueryInformation
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_LINE_ID)
@@ -57,18 +56,13 @@ public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_LINE_ID)
           .fqlQuery(
-            "{\"invoice.accounting_code\": {\"$eq\": \"abc\"}}"
+            "{\"$and\": [{\"bill_to.address\": {\"$eq\": \"some address\"}}, {\"invoice.accounting_code\": {\"$eq\": \"abc\"}}]}"
           )
-          .fields(List.of("invoice.accounting_code"))
-          .warnings(List.of(
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", "{\n  \"$eq\" : \"some address\"\n}"),
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", null)
-          ))
-          .hadBreakingChanges(true)
+          .fields(List.of("bill_to.address", "invoice.accounting_code"))
           .build()
       ),
       Arguments.of(
-        "Warn for bill_to and do not migrate other fields in a composite containing simple_invoice (analytics case)",
+        "Migrate bill_to to bill_to.address in a composite containing simple_invoice (analytics case)",
         MigratableQueryInformation
           .builder()
           .entityTypeId(COMPOSITE_ORDER_INVOICE_ANALYTICS_ID)
@@ -81,18 +75,13 @@ public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(COMPOSITE_ORDER_INVOICE_ANALYTICS_ID)
           .fqlQuery(
-            "{\"invoice.accounting_code\": {\"$eq\": \"abc\"}}"
+            "{\"$and\": [{\"bill_to.address\": {\"$eq\": \"some address\"}}, {\"invoice.accounting_code\": {\"$eq\": \"abc\"}}]}"
           )
-          .fields(List.of("invoice.accounting_code"))
-          .warnings(List.of(
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", "{\n  \"$eq\" : \"some address\"\n}"),
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", null)
-          ))
-          .hadBreakingChanges(true)
+          .fields(List.of("bill_to.address", "invoice.accounting_code"))
           .build()
       ),
       Arguments.of(
-        "Warn for bill_to and do not migrate other fields in a composite containing simple_invoice (voucher line ledger fund org case)",
+        "Migrate bill_to to bill_to.address in a composite containing simple_invoice (voucher line ledger fund org case)",
         MigratableQueryInformation
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_VOUCHER_LINE_LEDGER_FUND_ORG_ID)
@@ -105,18 +94,13 @@ public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_VOUCHER_LINE_LEDGER_FUND_ORG_ID)
           .fqlQuery(
-            "{\"invoice.accounting_code\": {\"$eq\": \"abc\"}}"
+            "{\"$and\": [{\"bill_to.address\": {\"$eq\": \"some address\"}}, {\"invoice.accounting_code\": {\"$eq\": \"abc\"}}]}"
           )
-          .fields(List.of("invoice.accounting_code"))
-          .warnings(List.of(
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", "{\n  \"$eq\" : \"some address\"\n}"),
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", null)
-          ))
-          .hadBreakingChanges(true)
+          .fields(List.of("bill_to.address", "invoice.accounting_code"))
           .build()
       ),
       Arguments.of(
-        "Warn for bill_to and do not migrate other fields in a composite containing simple_invoice (voucher line org case)",
+        "Migrate bill_to to bill_to.address in a composite containing simple_invoice (voucher line org case)",
         MigratableQueryInformation
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_VOUCHER_LINE_ORG_ID)
@@ -129,14 +113,9 @@ public class V24InvoiceSimpleToCompositeMigrationTest extends TestTemplate {
           .builder()
           .entityTypeId(COMPOSITE_INVOICE_VOUCHER_LINE_ORG_ID)
           .fqlQuery(
-            "{\"invoice.accounting_code\": {\"$eq\": \"abc\"}}"
+            "{\"$and\": [{\"bill_to.address\": {\"$eq\": \"some address\"}}, {\"invoice.accounting_code\": {\"$eq\": \"abc\"}}]}"
           )
-          .fields(List.of("invoice.accounting_code"))
-          .warnings(List.of(
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", "{\n  \"$eq\" : \"some address\"\n}"),
-            RemovedFieldWarning.withoutAlternative().apply("", "invoice.bill_to", null)
-          ))
-          .hadBreakingChanges(true)
+          .fields(List.of("bill_to.address", "invoice.accounting_code"))
           .build()
       ),
       Arguments.of(

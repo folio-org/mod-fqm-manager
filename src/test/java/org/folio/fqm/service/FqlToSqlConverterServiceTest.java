@@ -71,7 +71,6 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("stringUUIDField").dataType(new EntityDataType().dataType("stringUUIDType")),
           new EntityTypeColumn().name("openUUIDField").dataType(new EntityDataType().dataType("openUUIDType")),
           new EntityTypeColumn().name("validatedField").dataType(new EntityDataType().dataType("rangedUUIDType")).validated(true),
-          // TODO: boolean tests?
           new EntityTypeColumn().name("booleanDefaultValue").dataType(new EntityDataType().dataType("booleanType")).defaultValue(false),
           new EntityTypeColumn().name("numberDefaultValue").dataType(new EntityDataType().dataType("numberType")).defaultValue(10),
           new EntityTypeColumn().name("stringDefaultValue").dataType(new EntityDataType().dataType("stringType")).defaultValue("default"),
@@ -1306,6 +1305,30 @@ class FqlToSqlConverterServiceTest {
           cast(UUID.fromString("df3f3e8a-8694-59ad-ad52-3671613d02dc"), UUID.class),
           cast(null, UUID.class)
         ), String[].class))
+      ),
+      Arguments.of(
+        "equals boolean with matching default value",
+        """
+          {"booleanDefaultValue": {"$eq": false}}""",
+        field("booleanDefaultValue").equal(false).or(field("booleanDefaultValue").isNull())
+      ),
+      Arguments.of(
+        "equals boolean with non-matching default value",
+        """
+          {"booleanDefaultValue": {"$eq": true}}""",
+        field("booleanDefaultValue").equal(true)
+      ),
+      Arguments.of(
+        "not equals boolean with matching default value",
+        """
+          {"booleanDefaultValue": {"$ne": false}}""",
+        field("booleanDefaultValue").notEqual(false)
+      ),
+      Arguments.of(
+        "not equals boolean with non-matching default value",
+        """
+          {"booleanDefaultValue": {"$ne": true}}""",
+        field("booleanDefaultValue").notEqual(true).or(field("booleanDefaultValue").isNull())
       ),
       Arguments.of(
         "equals string with matching default value",

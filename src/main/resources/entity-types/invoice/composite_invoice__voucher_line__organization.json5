@@ -24,6 +24,14 @@
       sourceField: 'voucher.invoice_id',
     },
     {
+      alias: 'bill_to',
+      type: 'entity-type',
+      targetId: '3fe1b126-52d1-4b72-a346-9a73721c6931', // simple_tenant_addresses
+      targetField: 'id',
+      sourceField: 'invoice.bill_to_id',
+      essentialOnly: true,
+    },
+    {
       alias: 'invoice_line',
       type: 'entity-type',
       targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line

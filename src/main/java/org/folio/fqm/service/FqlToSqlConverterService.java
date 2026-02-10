@@ -123,7 +123,10 @@ public class FqlToSqlConverterService {
         case "EmptyCondition" -> handleEmpty((EmptyCondition) fqlCondition, entityType, field);
         default -> falseCondition();
       };
-      return (validation != null) ? validation.and(baseCondition) : baseCondition;
+
+      Condition validationCondition = (validation != null) ? validation.and(baseCondition) : baseCondition;
+      return applyDefaultValueLogic(validationCondition, fieldCondition, fqmField.getDefaultValue(), field, entityType);
+
     } else {
       return switch (fqlCondition.getClass().getSimpleName()) {
         case "AndCondition" -> handleAnd((AndCondition) fqlCondition, entityType);
@@ -199,7 +202,7 @@ public class FqlToSqlConverterService {
     } else {
       baseCondition = field.ne(valueField(notEqualsCondition.value(), notEqualsCondition, entityType));
     }
-    return baseCondition.or(field.isNull());
+    return baseCondition;
   }
 
   private static Condition handleDateTime(FieldCondition<?> fieldCondition, org.jooq.Field<Object> field, EntityType entityType) {
@@ -313,7 +316,7 @@ public class FqlToSqlConverterService {
           return not(arrayOverlap(cast(field, String[].class), valueArray));
         })
         .toList();
-      return field.isNull().or(and(conditionList));
+      return and(conditionList);
     }
 
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
@@ -330,7 +333,7 @@ public class FqlToSqlConverterService {
           }
         })
         .toList();
-      return field.isNull().or(and(conditionList));
+      return and(conditionList);
     }
 
     List<Condition> conditionList = notInCondition
@@ -354,7 +357,7 @@ public class FqlToSqlConverterService {
         return field.notEqual(valueField(val, notInCondition, entityType));
       })
       .toList();
-    return field.isNull().or(and(conditionList));
+    return and(conditionList);
   }
 
   private static Condition handleGreaterThan(GreaterThanCondition greaterThanCondition, EntityType entityType, org.jooq.Field<Object> field) {
@@ -419,9 +422,20 @@ public class FqlToSqlConverterService {
    * - field is NULL
    * - empty array
    * - OR any element of array is NULL (and "" for string elements)
+   *
+   * Note: For fields with a default value, NULL is treated as that default value. Therefore, a field with a
+   * default value is never considered empty.
    */
   private static Condition handleEmpty(EmptyCondition emptyCondition, EntityType entityType, org.jooq.Field<Object> field) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    Field fqmField = getField(emptyCondition, entityType);
+    if (fqmField.getDefaultValue() != null) {
+      // A field with a default value is never empty.
+      // Thus, return falseCondition if $empty is true and trueCondition if $empty is false
+      return isEmpty ? falseCondition() : trueCondition();
+    }
+
+
     String fieldType = getFieldDataTypeName(entityType, emptyCondition);
     String elementType = resolveArrayElementType(entityType, emptyCondition);
 
@@ -488,6 +502,148 @@ public class FqlToSqlConverterService {
       default -> trueCondition();
     };
     return field.isNull().or(validationCheck);
+  }
+
+  /**
+   * Apply default value logic to a condition. When a field has a default value, NULL is treated as that default value.
+   * This method determines whether to include NULL values in query results by checking if the default value
+   * would satisfy the condition.
+   *
+   * @param baseCondition  The base SQL condition before applying default value logic
+   * @param fieldCondition The FQL condition being evaluated
+   * @param defaultValue   The default value for the field (null if no default value)
+   * @param field          The JOOQ field reference
+   * @param entityType     The entity type
+   * @return The condition with default value logic applied
+   */
+  private static Condition applyDefaultValueLogic(
+    Condition baseCondition,
+    FieldCondition<?> fieldCondition,
+    Object defaultValue,
+    org.jooq.Field<Object> field,
+    EntityType entityType
+  ) {
+
+    boolean includeNull;
+
+    if (defaultValue == null) {
+      // No default value: use original FQL semantics
+      // NOT operators should include NULLs, positive operators should not
+      includeNull = isNegativeOperator(fieldCondition);
+    } else {
+      includeNull = shouldIncludeNull(fieldCondition, defaultValue, entityType);
+    }
+
+    return includeNull ? baseCondition.or(field.isNull()) : baseCondition;
+  }
+
+  private static boolean isNegativeOperator(FqlCondition<?> fqlCondition) {
+    return fqlCondition instanceof NotEqualsCondition || fqlCondition instanceof NotInCondition;
+  }
+
+  /**
+   * Determine whether NULL values should be included in the query results based on the default value.
+   *
+   * @param fieldCondition The FQL condition being evaluated
+   * @param defaultValue   The default value for the field
+   * @param entityType     The entity type
+   * @return true if null values should be included in the results
+   */
+  private static boolean shouldIncludeNull(FieldCondition<?> fieldCondition, Object defaultValue, EntityType entityType) {
+    return switch (fieldCondition.getClass().getSimpleName()) {
+      case "EqualsCondition" -> {
+        EqualsCondition eq = (EqualsCondition) fieldCondition;
+        yield valuesMatch(eq.value(), defaultValue, fieldCondition, entityType);
+      }
+      case "NotEqualsCondition" -> {
+        NotEqualsCondition neq = (NotEqualsCondition) fieldCondition;
+        yield !valuesMatch(neq.value(), defaultValue, fieldCondition, entityType);
+      }
+      case "InCondition" -> {
+        InCondition in = (InCondition) fieldCondition;
+        // If default value is in the list, include NULLs
+        yield in.value().stream().anyMatch(val -> valuesMatch(val, defaultValue, fieldCondition, entityType));
+      }
+      case "NotInCondition" -> {
+        NotInCondition notIn = (NotInCondition) fieldCondition;
+        // If default value is NOT in the list, include NULLs
+        yield notIn.value().stream().noneMatch(val -> valuesMatch(val, defaultValue, fieldCondition, entityType));
+      }
+      case "GreaterThanCondition" -> {
+        GreaterThanCondition gt = (GreaterThanCondition) fieldCondition;
+        yield defaultValueSatisfiesGreaterThan(defaultValue, gt.value(), gt.orEqualTo());
+      }
+      case "LessThanCondition" -> {
+        LessThanCondition lt = (LessThanCondition) fieldCondition;
+        yield defaultValueSatisfiesLessThan(defaultValue, lt.value(), lt.orEqualTo());
+      }
+      case "StartsWithCondition" -> {
+        StartsWithCondition sw = (StartsWithCondition) fieldCondition;
+        yield defaultValueSatisfiesStartsWith(defaultValue, sw.value());
+      }
+      case "ContainsCondition" -> {
+        ContainsCondition contains = (ContainsCondition) fieldCondition;
+        yield defaultValueSatisfiesContains(defaultValue, contains.value());
+      }
+      case "EmptyCondition" -> false;
+      default -> false;
+    };
+  }
+
+  /**
+   * Check if two values match, considering case-insensitivity for strings.
+   * Assumes default values are properly typed for their fields (validated at entity type creation).
+   */
+  private static boolean valuesMatch(Object queryValue, Object defaultValue, FieldCondition<?> fieldCondition, EntityType entityType) {
+    // For string fields, use case-insensitive comparison
+    String dataType = getFieldDataTypeName(entityType, fieldCondition);
+    if (STRING_TYPE.equals(dataType) || STRING_UUID_TYPE.equals(dataType)) {
+      String defaultStr = (String) defaultValue;
+      return defaultStr.equalsIgnoreCase(queryValue.toString());
+    }
+
+    // For other types, use standard equality
+    return queryValue.equals(defaultValue);
+  }
+
+  /**
+   * Check if the default value satisfies a greater-than condition
+   */
+  private static boolean defaultValueSatisfiesGreaterThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
+    if (!defaultValue.getClass().equals(queryValue.getClass())) {
+      return false;
+    }
+
+    Comparable<Object> defaultComparable = (Comparable<Object>) defaultValue;
+    int comparison = defaultComparable.compareTo(queryValue);
+    return orEqualTo ? comparison >= 0 : comparison > 0;
+  }
+
+  /**
+   * Check if the default value satisfies a less-than condition
+   */
+  private static boolean defaultValueSatisfiesLessThan(Object defaultValue, Object queryValue, boolean orEqualTo) {
+    if (!defaultValue.getClass().equals(queryValue.getClass())) {
+      return false;
+    }
+
+    Comparable<Object> defaultComparable = (Comparable<Object>) defaultValue;
+    int comparison = defaultComparable.compareTo(queryValue);
+    return orEqualTo ? comparison <= 0 : comparison < 0;
+  }
+
+  /**
+   * Check if the default value satisfies a startsWith condition
+   */
+  private static boolean defaultValueSatisfiesStartsWith(Object defaultValue, String prefix) {
+    return defaultValue.toString().toLowerCase().startsWith(prefix.toLowerCase());
+  }
+
+  /**
+   * Check if the default value satisfies a contains condition
+   */
+  private static boolean defaultValueSatisfiesContains(Object defaultValue, String substring) {
+    return defaultValue.toString().toLowerCase().contains(substring.toLowerCase());
   }
 
   /**

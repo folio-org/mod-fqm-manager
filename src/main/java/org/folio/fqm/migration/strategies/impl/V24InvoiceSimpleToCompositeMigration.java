@@ -5,14 +5,12 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.migration.strategies.AbstractSimpleMigrationStrategy;
-import org.folio.fqm.migration.warnings.FieldWarningFactory;
-import org.folio.fqm.migration.warnings.RemovedFieldWarning;
 
 /**
  * Version 24, migrates from simple_invoice to composite_invoice entity type.
  * All fields from simple_invoice get "invoice." prepended to their names.
  * The (now non-existent) bill_to field is specifically migrated to bill_to.address.
- * For other composites containing simple_invoice, a warning is issued for bill_to references.
+ * For other composites containing simple_invoice, bill_to references are also migrated to bill_to.address.
  */
 @Log4j2
 @RequiredArgsConstructor
@@ -36,21 +34,6 @@ public class V24InvoiceSimpleToCompositeMigration extends AbstractSimpleMigratio
   }
 
   @Override
-  public Map<UUID, Map<String, FieldWarningFactory>> getFieldWarnings() {
-    FieldWarningFactory billToWarning = RemovedFieldWarning.withoutAlternative();
-    return Map.of(
-      COMPOSITE_INVOICE_LINE_ID,
-      Map.of("invoice.bill_to", billToWarning),
-      COMPOSITE_ORDER_INVOICE_ANALYTICS_ID,
-      Map.of("invoice.bill_to", billToWarning),
-      COMPOSITE_INVOICE_VOUCHER_LINE_LEDGER_FUND_ORG_ID,
-      Map.of("invoice.bill_to", billToWarning),
-      COMPOSITE_INVOICE_VOUCHER_LINE_ORG_ID,
-      Map.of("invoice.bill_to", billToWarning)
-    );
-  }
-
-  @Override
   public Map<UUID, UUID> getEntityTypeChanges() {
     return Map.of(SIMPLE_INVOICE_ID, COMPOSITE_INVOICE_ID);
   }
@@ -58,11 +41,22 @@ public class V24InvoiceSimpleToCompositeMigration extends AbstractSimpleMigratio
   @Override
   public Map<UUID, Map<String, String>> getFieldChanges() {
     return Map.of(
+      // Migrate queries on simple_invoice to composite_invoice (new), prepending "invoice." to all fields except bill_to
+      // which gets migrated to bill_to.address
       SIMPLE_INVOICE_ID,
       Map.of(
         "*", "invoice.%s",
         "bill_to", "bill_to.address"
-      )
+      ),
+      // Migrate bill_to to bill_to.address in the other composites containing simple_invoice
+      COMPOSITE_INVOICE_LINE_ID,
+      Map.of("invoice.bill_to", "bill_to.address"),
+      COMPOSITE_ORDER_INVOICE_ANALYTICS_ID,
+      Map.of("invoice.bill_to", "bill_to.address"),
+      COMPOSITE_INVOICE_VOUCHER_LINE_LEDGER_FUND_ORG_ID,
+      Map.of("invoice.bill_to", "bill_to.address"),
+      COMPOSITE_INVOICE_VOUCHER_LINE_ORG_ID,
+      Map.of("invoice.bill_to", "bill_to.address")
     );
   }
 }

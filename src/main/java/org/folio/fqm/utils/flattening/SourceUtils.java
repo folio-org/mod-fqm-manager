@@ -166,6 +166,53 @@ public class SourceUtils {
     return renamedAliases.keySet().stream().sorted((a, b) -> Integer.compare(b.length(), a.length()));
   }
 
+  /**
+   * Prefixes the idColumnName in a column and all nested properties with the given prefix.
+   * This is used when flattening entity types to ensure idColumnName references point to the correct source.
+   *
+   * @param column The column to update
+   * @param prefix The prefix to add (e.g., "pol.")
+   * @return The updated column
+   */
+  public static <T extends Field> T prefixIdColumnName(T column, String prefix) {
+    if (column.getIdColumnName() != null) {
+      column.idColumnName(prefix + column.getIdColumnName());
+    }
+
+    if (column.getDataType() instanceof ObjectType objectType) {
+      ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
+      column.dataType(updatedObjectType);
+    }
+
+    if (column.getDataType() instanceof ArrayType arrayType) {
+      ArrayType updatedArrayType = prefixIdColumnNameForArrayType(arrayType, prefix);
+      column.dataType(updatedArrayType);
+    }
+
+    return column;
+  }
+
+  private static ObjectType prefixIdColumnNameForObjectType(ObjectType objectType, String prefix) {
+    List<NestedObjectProperty> updatedProperties = objectType
+      .getProperties()
+      .stream()
+      .map(nestedField -> prefixIdColumnName(copyNestedProperty(nestedField), prefix))
+      .toList();
+    return objectType.toBuilder().properties(updatedProperties).build();
+  }
+
+  private static ArrayType prefixIdColumnNameForArrayType(ArrayType arrayType, String prefix) {
+    if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
+      ArrayType updatedNestedArrayType = prefixIdColumnNameForArrayType(nestedArrayType, prefix);
+      return arrayType.toBuilder().itemDataType(updatedNestedArrayType).build();
+    } else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
+      ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
+      return arrayType.toBuilder().itemDataType(updatedObjectType).build();
+    }
+    // No prefixing needed for primitive types - return as-is
+    return arrayType;
+  }
+
   public static Stream<EntityTypeColumn> copyColumns(
     EntityTypeSourceEntityType sourceFromParent,
     Stream<EntityTypeColumn> columns,

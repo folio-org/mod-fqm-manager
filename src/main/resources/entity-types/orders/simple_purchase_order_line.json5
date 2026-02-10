@@ -1280,33 +1280,13 @@
                 dataType: 'stringType',
               },
               queryable: true,
-              valueGetter: "( \
-                              SELECT \
-                                array_agg(tenant.name) \
-                                FILTER (WHERE (tenant.name) IS NOT NULL) \
-                                AS array_agg \
-                              FROM \
-                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
-                                LEFT JOIN ${safe_central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
-                                ON (record.value ->> 'tenantId') = tenant.id \
-                            )",
-              // Note: The filterValueGetter uses the tenant ID, not the name! This is because the special tenant name value source only deals with id/name pairs
-              // and idColumnName doesn't work in nested properties, so we can't do the normal config to redirect this to the ID column
-              filterValueGetter: "( \
-                              SELECT \
-                                array_agg(lower(tenant.id)) \
-                                FILTER (WHERE (tenant.id) IS NOT NULL) \
-                                AS array_agg \
-                              FROM \
-                                jsonb_array_elements((:sourceAlias.jsonb -> 'locations')) record(value) \
-                                LEFT JOIN ${safe_central_tenant_id}_mod_fqm_manager.src_consortia_tenant AS tenant \
-                                ON (record.value ->> 'tenantId') = tenant.id \
-                            )",
+              valueGetter: "",
               valueFunction: 'lower(:value)',
               source: {
                 columnName: 'name',
                 entityTypeId: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb', // simple_consortia_tenant
               },
+              idColumnName: 'locations[*]->tenant_id',
               ecsOnly: true,
             }
           ],

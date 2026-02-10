@@ -204,6 +204,7 @@ public class EntityTypeFlatteningService {
           .getColumns();
 
         // Add a prefix to each column's name and idColumnName, then add 'em to the flattened entity type
+        String columnPrefix = sourceEt.getAlias() + '.';
         childColumns.addAll(
           columns.stream()
             .filter(col ->
@@ -213,22 +214,21 @@ public class EntityTypeFlatteningService {
             )
             .filter(col -> !Boolean.TRUE.equals(col.getIsCustomField()) || Boolean.TRUE.equals(sourceEt.getInheritCustomFields()))
             // Don't use aliasPrefix here, since the prefix is already appropriately baked into the source alias in flattenedSourceDefinition
-            .map(col ->
-              SourceUtils.injectSourceAlias(
-                col
-                  .name(sourceEt.getAlias() + '.' + col.getName())
-                  .idColumnName(
-                    Optional
-                      .ofNullable(col.getIdColumnName())
-                      .map(idColumnName -> sourceEt.getAlias() + '.' + idColumnName)
-                      .orElse(null)
-                  )
-                  .originalEntityTypeId(Optional.ofNullable(col.getOriginalEntityTypeId()).orElse(sourceEntityTypeId)),
+            .map(col -> {
+              String prefixedColumnName = columnPrefix + col.getName();
+              UUID originalEntityTypeId = Optional.ofNullable(col.getOriginalEntityTypeId()).orElse(sourceEntityTypeId);
+              EntityTypeColumn updatedColumn = col
+                .name(prefixedColumnName)
+                .originalEntityTypeId(originalEntityTypeId);
+              EntityTypeColumn prefixedColumn = SourceUtils.prefixIdColumnName(updatedColumn, columnPrefix);
+
+              return SourceUtils.injectSourceAlias(
+                prefixedColumn,
                 renamedAliases,
                 col.getSourceAlias(),
                 sourceFromParent == null
-              )
-            )
+              );
+            })
             .toList()
         );
       }

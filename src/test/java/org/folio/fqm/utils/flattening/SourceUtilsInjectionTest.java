@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
 import java.util.List;
 import java.util.Map;
+
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
@@ -224,5 +226,55 @@ class SourceUtilsInjectionTest {
       ),
       is("\"bar\"->>'this is ridiculous'")
     );
+  }
+
+  @Test
+  void testPrefixIdColumnNameInNestedObjectProperties() {
+    EntityTypeColumn col = new EntityTypeColumn()
+      .name("top_level_field")
+      .idColumnName("top_level_id")
+      .dataType(
+        new ArrayType()
+          .itemDataType(
+            new ObjectType()
+              .properties(
+                List.of(
+                  new NestedObjectProperty()
+                    .name("nested_1")
+                    .idColumnName("nested_array[*]->id")
+                    .dataType(new StringType()),
+                  new NestedObjectProperty()
+                    .name("nested_2")
+                    .idColumnName("non_nested_id")
+                    .dataType(
+                      new ObjectType()
+                        .properties(
+                          List.of(
+                            new NestedObjectProperty()
+                              .name("deeply_nested")
+                              .idColumnName("deep[*]->id")
+                              .dataType(new StringType())
+                          )
+                        )
+                    )
+                )
+              )
+          )
+      );
+
+    EntityTypeColumn result = SourceUtils.prefixIdColumnName(col, "source.");
+
+    assertThat(result.getIdColumnName(), is("source.top_level_id"));
+
+    ObjectType objectType = (ObjectType) ((ArrayType) result.getDataType()).getItemDataType();
+    NestedObjectProperty nested1 = objectType.getProperties().get(0);
+    assertThat(nested1.getIdColumnName(), is("source.nested_array[*]->id"));
+
+    NestedObjectProperty nested2 = objectType.getProperties().get(1);
+    assertThat(nested2.getIdColumnName(), is("source.non_nested_id"));
+
+    ObjectType nestedObjectType = (ObjectType) nested2.getDataType();
+    NestedObjectProperty deeplyNested = nestedObjectType.getProperties().get(0);
+    assertThat(deeplyNested.getIdColumnName(), is("source.deep[*]->id"));
   }
 }

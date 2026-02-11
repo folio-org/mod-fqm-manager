@@ -1,6 +1,6 @@
 {
   id: '0f8f6d6f-504f-4aa9-9d98-9779aaaa907b',
-  name: 'drv_openaccess_party',
+  name: 'simple_openaccess_party',
   private: false,
   sources: [
     {

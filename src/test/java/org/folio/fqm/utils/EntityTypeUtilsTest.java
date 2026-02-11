@@ -330,4 +330,11 @@ class EntityTypeUtilsTest {
     List<String> result = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
     assertTrue(result.isEmpty(), "Should not return field paths when source type is not FQM");
   }
+
+  @Test
+  void shouldReturnEmptyDefaultValuesMapForEntityTypeWithNoColumns() {
+    EntityType entityType = new EntityType().columns(null);
+    Map<String, Object> result = EntityTypeUtils.getFieldDefaultValues(entityType);
+    assertTrue(result.isEmpty(), "Default values map should be empty for entity type with no columns");
+  }
 }

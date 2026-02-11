@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,6 +78,7 @@ public class ResultSetService {
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? localeClient.getLocaleSettings().getZoneId() : null;
     List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    Map<String, Object> defaultValues = EntityTypeUtils.getFieldDefaultValues(entityType);
 
     return contentIds
       .stream()
@@ -92,6 +94,7 @@ public class ResultSetService {
         }
 
         Map<String, Object> copiedContents = new HashMap<>(contents);
+        applyDefaultValues(copiedContents, defaultValues);
         localizeCountries(copiedContents, countryFields);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
@@ -99,6 +102,62 @@ public class ResultSetService {
         return copiedContents;
       })
       .toList();
+  }
+
+  /**
+   * For fields with a default value, applies that default value if the field is missing or null.
+   */
+  private void applyDefaultValues(Map<String, Object> contents, Map<String, Object> defaultValues) {
+    if (defaultValues.isEmpty()) {
+      return;
+    }
+    for (Map.Entry<String, Object> entry : defaultValues.entrySet()) {
+      String fieldPath = entry.getKey();
+      Object defaultValue = entry.getValue();
+      applyDefaultValueToField(contents, fieldPath, defaultValue);
+    }
+  }
+
+  private void applyDefaultValueToField(Map<String, Object> contents, String fieldPath, Object defaultValue) {
+    if (StringUtils.isEmpty(fieldPath)) {
+      return;
+    }
+
+    int markerIndex = fieldPath.indexOf(NESTED_FIELD_MARKER);
+    if (markerIndex < 0) {
+      applyDefaultValueToTopLevelField(contents, fieldPath, defaultValue);
+      return;
+    }
+
+    String rootField = fieldPath.substring(0, markerIndex);
+    String nestedField = fieldPath.substring(markerIndex + NESTED_FIELD_MARKER.length());
+    processNestedArrayField(contents, rootField, nestedField,
+      elementNode -> applyDefaultValueIfNull(elementNode, nestedField, defaultValue),
+      "Unable to apply default value to field '{}[*]->{}' (unexpected JSON): {}");
+  }
+
+  @SuppressWarnings("java:S3824") // computeIfAbsent doesn't handle null values, only missing keys
+  private void applyDefaultValueToTopLevelField(Map<String, Object> contents, String fieldName, Object defaultValue) {
+    if (!contents.containsKey(fieldName) || contents.get(fieldName) == null) {
+      contents.put(fieldName, defaultValue);
+    }
+  }
+
+  private boolean applyDefaultValueIfNull(JsonNode elementNode, String fieldName, Object defaultValue) {
+    if (!elementNode.isObject()) {
+      return false;
+    }
+
+    ObjectNode objectNode = (ObjectNode) elementNode;
+    JsonNode valueNode = objectNode.get(fieldName);
+
+    // Apply default if field is missing or null
+    if (valueNode == null || valueNode.isNull()) {
+      objectNode.putPOJO(fieldName, defaultValue);
+      return true;
+    }
+
+    return false;
   }
 
   private void localizeContent(Map<String, Object> contents, List<String> dateFields, ZoneId tenantTimezone) {
@@ -136,7 +195,9 @@ public class ResultSetService {
 
     String rootField = fieldPath.substring(0, markerIndex);
     String nestedField = fieldPath.substring(markerIndex + NESTED_FIELD_MARKER.length());
-    localizeNestedCountryField(contents, rootField, nestedField);
+    processNestedArrayField(contents, rootField, nestedField,
+      elementNode -> localizeCountryCodeIfPresent(elementNode, nestedField),
+      "Unable to localize country field '{}[*]->{}' (unexpected JSON): {}");
   }
 
   private void localizeTopLevelCountryField(Map<String, Object> contents, String fieldName) {
@@ -147,7 +208,19 @@ public class ResultSetService {
     localizeCountryCode(code).ifPresent(translated -> contents.put(fieldName, translated));
   }
 
-  private void localizeNestedCountryField(Map<String, Object> contents, String rootField, String nestedField) {
+  /**
+   * Generic method to process nested fields within JSON arrays.
+   * Parses the root field as a JSON array, applies a transformation function to each element,
+   * and updates the contents if any changes were made.
+   *
+   * @param contents The map containing the field values
+   * @param rootField The name of the root field containing the JSON array
+   * @param nestedField The name of the nested field within each array element
+   * @param transformer Predicate that transforms an array element and returns true if modified
+   * @param errorMessageTemplate Template for logging errors (with placeholders for rootField, nestedField, and error message)
+   */
+  private void processNestedArrayField(Map<String, Object> contents, String rootField, String nestedField,
+                                       Predicate<JsonNode> transformer, String errorMessageTemplate) {
     if (rootField.isBlank() || nestedField.isBlank()) {
       return;
     }
@@ -165,13 +238,13 @@ public class ResultSetService {
 
       boolean changed = false;
       for (JsonNode elementNode : node) {
-        changed |= localizeCountryCodeIfPresent(elementNode, nestedField);
+        changed |= transformer.test(elementNode);
       }
       if (changed) {
         contents.put(rootField, OBJECT_MAPPER.writeValueAsString(node));
       }
     } catch (Exception e) {
-      log.debug("Unable to localize country field '{}[*]->{}' (unexpected JSON): {}", rootField, nestedField, e.getMessage());
+      log.debug(errorMessageTemplate, rootField, nestedField, e.getMessage());
     }
   }
 

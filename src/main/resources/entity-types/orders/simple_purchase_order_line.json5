@@ -1280,6 +1280,8 @@
                 dataType: 'stringType',
               },
               queryable: true,
+              // Placeholder to keep things from exploding, since any null valueGetter will cause entity type retrieval
+              // to fail. This can be removed after completion of MODFQMMGR-1078.
               valueGetter: "",
               valueFunction: 'lower(:value)',
               source: {

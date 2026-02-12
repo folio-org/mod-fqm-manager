@@ -209,7 +209,6 @@ public class SourceUtils {
       ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
       return arrayType.toBuilder().itemDataType(updatedObjectType).build();
     }
-    // No prefixing needed for primitive types - return as-is
     return arrayType;
   }
 

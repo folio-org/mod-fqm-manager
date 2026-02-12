@@ -231,7 +231,7 @@ class SourceUtilsInjectionTest {
   @Test
   void testPrefixIdColumnNameInNestedObjectProperties() {
     EntityTypeColumn col = new EntityTypeColumn()
-      .name("top_level_field")
+      .name("object_array_field")
       .idColumnName("top_level_id")
       .dataType(
         new ArrayType()
@@ -241,7 +241,7 @@ class SourceUtilsInjectionTest {
                 List.of(
                   new NestedObjectProperty()
                     .name("nested_1")
-                    .idColumnName("nested_array[*]->id")
+                    .idColumnName("object_array_field[*]->id")
                     .dataType(new StringType()),
                   new NestedObjectProperty()
                     .name("nested_2")
@@ -252,9 +252,29 @@ class SourceUtilsInjectionTest {
                           List.of(
                             new NestedObjectProperty()
                               .name("deeply_nested")
-                              .idColumnName("deep[*]->id")
+                              .idColumnName("object_array_field[*]->other_id")
                               .dataType(new StringType())
                           )
+                        )
+                    ),
+                  new NestedObjectProperty()
+                    .name("nested_array_of_arrays")
+                    .idColumnName("array_id")
+                    .dataType(
+                      new ArrayType()
+                        .itemDataType(
+                          new ArrayType()
+                            .itemDataType(
+                              new ObjectType()
+                                .properties(
+                                  List.of(
+                                    new NestedObjectProperty()
+                                      .name("very_nested_field")
+                                      .idColumnName("nested_field_id")
+                                      .dataType(new StringType())
+                                  )
+                                )
+                            )
                         )
                     )
                 )
@@ -268,13 +288,23 @@ class SourceUtilsInjectionTest {
 
     ObjectType objectType = (ObjectType) ((ArrayType) result.getDataType()).getItemDataType();
     NestedObjectProperty nested1 = objectType.getProperties().get(0);
-    assertThat(nested1.getIdColumnName(), is("source.nested_array[*]->id"));
+    assertThat(nested1.getIdColumnName(), is("source.object_array_field[*]->id"));
 
     NestedObjectProperty nested2 = objectType.getProperties().get(1);
     assertThat(nested2.getIdColumnName(), is("source.non_nested_id"));
 
     ObjectType nestedObjectType = (ObjectType) nested2.getDataType();
     NestedObjectProperty deeplyNested = nestedObjectType.getProperties().get(0);
-    assertThat(deeplyNested.getIdColumnName(), is("source.deep[*]->id"));
+    assertThat(deeplyNested.getIdColumnName(), is("source.object_array_field[*]->other_id"));
+
+    // Test nested array of arrays (ArrayType containing ArrayType)
+    NestedObjectProperty nested3 = objectType.getProperties().get(2);
+    assertThat(nested3.getIdColumnName(), is("source.array_id"));
+
+    ArrayType outerArray = (ArrayType) nested3.getDataType();
+    ArrayType innerArray = (ArrayType) outerArray.getItemDataType();
+    ObjectType innerObjectType = (ObjectType) innerArray.getItemDataType();
+    NestedObjectProperty nestedInArray = innerObjectType.getProperties().get(0);
+    assertThat(nestedInArray.getIdColumnName(), is("source.nested_field_id"));
   }
 }

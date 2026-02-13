@@ -1,0 +1,5 @@
+{
+  name: 'src_oa_alternate_email_address',
+  dependsOn: [['${tenant_id}_mod_oa', 'alternate_email_address']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_oa.alternate_email_address',
+}

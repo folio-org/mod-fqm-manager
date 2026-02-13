@@ -1,0 +1,640 @@
+{
+  id: 'da92e15d-5b25-4400-bc2b-5c1c0b3c069e',
+  name: 'simple_openaccess_publication_request',
+  private: false,
+  requiredPermissions: [
+    'oa.publicationRequest.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'publication_request',
+      type: 'db',
+      target: 'src_oa_publication_request',
+    },
+    {
+      type: 'db',
+      alias: 'pr_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_request_status',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_pub_type',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_pub_type_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_subtype',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_subtype',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_publisher',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_publisher',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_license',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_license',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_doaj_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_work_indexed_in_doaj_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_oa_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_work_oa_status_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_corresponding_institution_level_1',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_corresponding_institution_level_1_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_closure_reason',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rdv_id = :that.pr_closure_reason_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_corresponding_author',
+      target: 'src_oa_request_party',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rp_id = :that.pr_corresponding_author_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'rp_role_corresponding_author',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'pr_corresponding_author',
+        condition: ':this.rdv_id = :that.rp_role',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'pr_request_contact',
+      target: 'src_oa_request_party',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_request',
+        condition: ':this.rp_id = :that.pr_request_contact_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'rp_role_request_contact',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'pr_request_contact',
+        condition: ':this.rdv_id = :that.rp_role',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'party_corresponding_author',
+      target: 'src_oa_party',
+      join: {
+        type: 'left join',
+        joinTo: 'pr_corresponding_author',
+        condition: ':this.p_id = :that.rp_party_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'party_request_contact',
+      target: 'src_oa_party',
+      join: {
+        type: 'left join',
+        joinTo: 'pr_request_contact',
+        condition: ':this.p_id = :that.rp_party_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'oa_pr_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':publication_request.pr_id',
+    },
+    {
+      name: 'oa_pr_request_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_request_date',
+    },
+    {
+      name: 'oa_pr_date_created',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_date_created',
+    },
+    {
+      name: 'oa_pr_last_updated',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_last_updated',
+    },
+    {
+      name: 'oa_pr_request_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_request_number',
+    },
+    {
+      name: 'oa_pr_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_title',
+    },
+    {
+      name: 'oa_pr_request_status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_request_status',
+    },
+    {
+      name: 'oa_pr_request_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_status.rdv_value',
+    },
+    {
+      name: 'oa_pr_request_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_status.rdv_label',
+    },
+    {
+      name: 'oa_pr_pub_type_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_pub_type_fk',
+    },
+    {
+      name: 'oa_pr_pub_type_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_pub_type.rdv_value',
+    },
+    {
+      name: 'oa_pr_pub_type_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_pub_type.rdv_label',
+    },
+    {
+      name: 'oa_pr_authnames',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_authnames',
+    },
+    {
+      name: 'oa_pr_corresponding_author_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_corresponding_author_fk',
+    },
+    {
+      name: 'oa_pr_corresponding_author_role_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':rp_role_corresponding_author.rdv_value',
+    },
+    {
+      name: 'oa_pr_corresponding_author_role_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':rp_role_corresponding_author.rdv_label',
+    },
+    {
+      name: 'oa_pr_corresponding_author_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':party_corresponding_author.p_full_name',
+    },
+    {
+      name: 'oa_pr_corresponding_author_rp_party_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_corresponding_author.rp_party_fk',
+    },
+    {
+      name: 'oa_pr_local_ref',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_local_ref',
+    },
+    {
+      name: 'oa_pr_pub_url',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_pub_url',
+    },
+    {
+      name: 'oa_pr_subtype',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_subtype',
+    },
+    {
+      name: 'oa_pr_subtype_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_subtype.rdv_value',
+    },
+    {
+      name: 'oa_pr_subtype_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_subtype.rdv_label',
+    },
+    {
+      name: 'oa_pr_publisher',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_publisher',
+    },
+    {
+      name: 'oa_pr_publisher_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_publisher.rdv_value',
+    },
+    {
+      name: 'oa_pr_publisher_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_publisher.rdv_label',
+    },
+    {
+      name: 'oa_pr_license',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_license',
+    },
+    {
+      name: 'oa_pr_license_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_license.rdv_value',
+    },
+    {
+      name: 'oa_pr_license_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_license.rdv_label',
+    },
+    {
+      name: 'oa_pr_doi',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_doi',
+    },
+    {
+      name: 'oa_pr_group_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_group_fk',
+    },
+    {
+      name: 'oa_pr_agreement_reference',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_agreement_reference',
+    },
+    {
+      name: 'oa_pr_without_agreement',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_without_agreement',
+    },
+    {
+      name: 'oa_pr_work_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_work_fk',
+    },
+    {
+      name: 'oa_pr_book_date_of_publication',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_book_date_of_publication',
+    },
+    {
+      name: 'oa_pr_book_place_of_publication',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_book_place_of_publication',
+    },
+    {
+      name: 'oa_pr_work_indexed_in_doaj_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_work_indexed_in_doaj_fk',
+    },
+    {
+      name: 'oa_pr_work_indexed_in_doaj_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_doaj_status.rdv_value',
+    },
+    {
+      name: 'oa_pr_work_indexed_in_doaj_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_doaj_status.rdv_label',
+    },
+    {
+      name: 'oa_pr_work_oa_status_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_work_oa_status_fk',
+    },
+    {
+      name: 'oa_pr_work_oa_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_oa_status.rdv_value',
+    },
+    {
+      name: 'oa_pr_work_oa_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_oa_status.rdv_label',
+    },
+    {
+      name: 'oa_pr_corresponding_institution_level_1_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_corresponding_institution_level_1_fk',
+    },
+    {
+      name: 'oa_pr_corresponding_institution_level_1_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_corresponding_institution_level_1.rdv_value',
+    },
+    {
+      name: 'oa_pr_corresponding_institution_level_1_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_corresponding_institution_level_1.rdv_label',
+    },
+    {
+      name: 'oa_pr_corresponding_institution_level_2',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_corresponding_institution_level_2',
+    },
+    {
+      name: 'oa_pr_retrospective_oa',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_request.pr_retrospective_oa',
+    },
+    {
+      name: 'oa_pr_closure_reason_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_closure_reason_fk',
+    },
+    {
+      name: 'oa_pr_closure_reason_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_closure_reason.rdv_value',
+    },
+    {
+      name: 'oa_pr_closure_reason_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pr_closure_reason.rdv_label',
+    },
+    {
+      name: 'oa_pr_request_contact_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_request.pr_request_contact_fk',
+    },
+    {
+      name: 'oa_pr_request_contact_role_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':rp_role_request_contact.rdv_value',
+    },
+    {
+      name: 'oa_pr_request_contact_role_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':rp_role_request_contact.rdv_label',
+    },
+    {
+      name: 'oa_pr_request_contact_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':party_request_contact.p_full_name',
+    },
+    {
+      name: 'oa_pr_request_contact_rp_party_fk',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pr_request_contact.rp_party_fk',
+    },
+  ],
+}

@@ -2,6 +2,9 @@
   id: '0f8f6d6f-504f-4aa9-9d98-9779aaaa907b',
   name: 'simple_openaccess_party',
   private: false,
+  requiredPermissions: [
+    'oa.party.collection.get'
+  ],
   sources: [
     {
       alias: 'party',

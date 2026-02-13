@@ -360,23 +360,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <!-- Docker API version to use for testcontainers -->
-            <api.version>1.41</api.version>
-          </systemProperties>
-        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <!-- Docker API version to use for testcontainers -->
-            <api.version>1.41</api.version>
-          </systemProperties>
-        </configuration>
       </plugin>
 
       <plugin>

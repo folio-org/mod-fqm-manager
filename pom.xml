@@ -36,6 +36,7 @@
     <spring-retry.version>2.0.10</spring-retry.version>
 
     <!-- test dependencies -->
+    <testcontainers.version>1.21.4</testcontainers.version>
     <wiremock.version>3.13.1</wiremock.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
 
@@ -359,23 +360,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <!-- Docker API version to use for testcontainers -->
-            <api.version>1.41</api.version>
-          </systemProperties>
-        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <!-- Docker API version to use for testcontainers -->
-            <api.version>1.41</api.version>
-          </systemProperties>
-        </configuration>
       </plugin>
 
       <plugin>

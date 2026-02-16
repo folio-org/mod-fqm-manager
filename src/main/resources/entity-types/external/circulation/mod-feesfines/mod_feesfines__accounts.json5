@@ -455,6 +455,7 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      essential: true,
     },
     {
       name: 'holdings_record_id',

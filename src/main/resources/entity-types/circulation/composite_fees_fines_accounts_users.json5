@@ -1,0 +1,39 @@
+{
+  id: '4a744503-fa74-40aa-a358-e7ec0b520ffb',
+  name: 'composite_fees_fines_accounts_users',
+  private: false,
+  sources: [
+    {
+      alias: 'account',
+      type: 'entity-type',
+      targetId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc', // mod_feesfines__accounts
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 1,
+    },
+    {
+      alias: 'users',
+      type: 'entity-type',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user
+      sourceField: 'accounts.user_id',
+      targetField: 'id',
+      inheritCustomFields: true,
+      order: 2,
+    },
+    {
+      alias: 'group',
+      type: 'entity-type',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
+      sourceField: 'users.group_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 3,
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"accounts.src__circulation__feesfines__accounts".id',
+      direction: 'ASC',
+    },
+  ]
+}

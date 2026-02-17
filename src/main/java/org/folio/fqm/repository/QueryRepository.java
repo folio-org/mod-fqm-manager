@@ -3,6 +3,7 @@ package org.folio.fqm.repository;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static org.jooq.impl.DSL.table;
 @Log4j2
 public class QueryRepository {
   private static final String QUERY_DETAILS_TABLE = "query_details";
+  private static final String QUERY_RESULTS_TABLE = "query_results";
   private static final String QUERY_ID = "query_id";
   private static final int MULTIPLE_FOR_STUCK_QUERIES = 3;
 
@@ -125,5 +127,30 @@ public class QueryRepository {
       log.debug("PID for the executing query: {}", pid);
       jooqContext.execute("SELECT pg_terminate_backend(?)", pid);
     }
+  }
+
+  public List<QueryStatusSummary> getStatusSummaries() {
+    return jooqContext
+      .select(
+        field("query.query_id", UUID.class).as("query_id"),
+        field("entity_type_id", UUID.class),
+        field("status"),
+        field("start_date", OffsetDateTime.class).as("started_at"),
+        field("end_date", OffsetDateTime.class).as("ended_at"),
+        field("array_length(query.fields, 1)", Integer.class).as("num_fields"),
+        field("count(results.result_id)", Integer.class).as("total_records")
+      )
+      .from(table(QUERY_DETAILS_TABLE).as("query"))
+      .leftJoin(table(QUERY_RESULTS_TABLE).as("results"))
+      .on(field("query.query_id").eq(field("results.query_id")))
+      .groupBy(
+        field("query.query_id"),
+        field("query.entity_type_id"),
+        field("query.status"),
+        field("query.start_date"),
+        field("query.end_date"),
+        field("query.fields")
+      )
+      .fetchInto(QueryStatusSummary.class);
   }
 }

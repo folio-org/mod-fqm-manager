@@ -154,6 +154,11 @@
           "pathPattern": "/query/{query-id}",
           "permissionsRequired": ["fqm.query.async.delete"],
           "modulePermissions": ["perms.users.get", "user-tenants.collection.get", "consortia.user-tenants.collection.get", "permissions.users.item.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/fqm/status",
+          "permissionsRequired": ["fqm.status.get"]
         }
       ]
     },

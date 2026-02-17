@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Query status summary",
+  "type": "object",
+  "properties": {
+    "queryId": {
+      "description": "Query ID",
+      "type": "string",
+      "format": "uuid"
+    },
+    "entityTypeId": {
+      "description": "The entity type ID used for the query (if it is available to your user, otherwise <inaccessible>)",
+      "type": "string"
+    },
+    "status": {
+      "description": "Status of the query (should match folio-query-tool-metadata enum values)",
+      "type": "string"
+    },
+    "startedAt": {
+      "description": "The timestamp when the query started",
+      "type": "string",
+      "format": "date-time"
+    },
+    "endedAt": {
+      "description": "The timestamp when the query ended",
+      "type": "string",
+      "format": "date-time"
+    },
+    "numFields": {
+      "description": "Number of fields in the query",
+      "type": "integer"
+    },
+    "totalRecords": {
+      "description": "Number of records retrieved for the query",
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["queryId", "entityTypeId", "status", "startedAt", "numFields"]
+}

@@ -9,7 +9,7 @@
       alias: 'user',
     },
   ],
-  requiredPermissions: ['users.collection.get', 'users.item.get'],
+  requiredPermissions: ['users.collection.get', 'users.item.get', 'proxiesfor.collection.get'],
   columns: [
     {
       name: 'id',

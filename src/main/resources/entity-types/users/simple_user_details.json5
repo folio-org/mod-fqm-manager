@@ -748,16 +748,6 @@
               valueGetter: "( SELECT array_agg(lower(sponsor.jsonb -> 'personal' ->> 'lastName')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users sponsor ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
               valueFunction: 'lower(:value)',
             },
-            {
-              name: 'sponsor_user_email',
-              property: 'sponsorUserEmail',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(sponsor.jsonb -> 'personal' ->> 'email')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users sponsor ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
           ],
         },
       },
@@ -771,8 +761,7 @@
               jsonb_build_object( \
                 'sponsorUserUsername', sponsor.jsonb ->> 'username', \
                 'sponsorUserFirstName', sponsor.jsonb -> 'personal' ->> 'firstName', \
-                'sponsorUserLastName', sponsor.jsonb -> 'personal' ->> 'lastName', \
-                'sponsorUserEmail', sponsor.jsonb -> 'personal' ->> 'email' \
+                'sponsorUserLastName', sponsor.jsonb -> 'personal' ->> 'lastName' \
               ) \
             ), \
             '[]'::jsonb \

@@ -1301,7 +1301,7 @@
       valueGetter: "(SELECT \
                        jsonb_agg(\
                          record.value || \
-                         jsonb_build_object('name', loc.jsonb ->> 'name', 'code', loc.jsonb ->> 'code', 'tenant_name', tenant.name) \
+                         jsonb_strip_nulls(jsonb_build_object('name', loc.jsonb ->> 'name', 'code', loc.jsonb ->> 'code', 'tenant_name', tenant.name)) \
                          ORDER BY record.value ->> 'locationId' \
                        ) \
                      FROM \

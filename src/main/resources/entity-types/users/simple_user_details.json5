@@ -565,6 +565,7 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: true,
+              hidden: true,
               valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb ->> 'id')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
               valueFunction: 'lower(:value)',
             },
@@ -589,16 +590,6 @@
               ]
             },
             {
-              name: 'user_id',
-              property: 'userId',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb ->> 'userId')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
-            {
               name: 'accrue_to',
               property: 'accrueTo',
               dataType: {
@@ -617,16 +608,6 @@
                   label: 'Sponsor',
                 },
               ],
-            },
-            {
-              name: 'proxy_user_id',
-              property: 'proxyUserId',
-              dataType: {
-                dataType: 'rangedUUIDType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb ->> 'proxyUserId')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
             },
             {
               name: 'notifications_to',
@@ -669,6 +650,15 @@
               ]
             },
             {
+              name: 'expiration_date',
+              property: 'expirationDate',
+              dataType: {
+                dataType: 'dateTimeType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg(proxy_for.jsonb ->> 'expirationDate') FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
+            },
+            {
               name: 'created_date',
               property: 'metadata.createdDate',
               dataType: {
@@ -687,12 +677,53 @@
               valueGetter: "( SELECT array_agg(proxy_for.jsonb -> 'metadata' ->> 'updatedDate') FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
             },
             {
+              name: 'sponsor_username',
+              property: 'sponsorUsername',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(sponsor.jsonb ->> 'username')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users sponsor ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'sponsor_first_name',
+              property: 'sponsorFirstName',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(sponsor.jsonb -> 'personal' ->> 'firstName')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users sponsor ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'sponsor_last_name',
+              property: 'sponsorLastName',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(sponsor.jsonb -> 'personal' ->> 'lastName')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users sponsor ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'user_id',
+              property: 'userId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb ->> 'userId')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
+              valueFunction: 'lower(:value)',
+            },
+            {
               name: 'created_by_user_id',
               property: 'metadata.createdByUserId',
               dataType: {
                 dataType: 'rangedUUIDType',
               },
               queryable: true,
+              hidden: true,
               valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb -> 'metadata' ->> 'createdByUserId')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
               valueFunction: 'lower(:value)',
             },
@@ -703,49 +734,10 @@
                 dataType: 'rangedUUIDType',
               },
               queryable: true,
+              hidden: true,
               valueGetter: "( SELECT array_agg(lower(proxy_for.jsonb -> 'metadata' ->> 'updatedByUserId')) FROM src_users_proxyfor proxy_for WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
               valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'proxy_user_username',
-              property: 'proxyUserUsername',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_user.jsonb ->> 'username')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users proxy_user ON (proxy_for.jsonb ->> 'proxyUserId')::uuid = proxy_user.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'proxy_user_first_name',
-              property: 'proxyUserFirstName',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_user.jsonb -> 'personal' ->> 'firstName')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users proxy_user ON (proxy_for.jsonb ->> 'proxyUserId')::uuid = proxy_user.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'proxy_user_last_name',
-              property: 'proxyUserLastName',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_user.jsonb -> 'personal' ->> 'lastName')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users proxy_user ON (proxy_for.jsonb ->> 'proxyUserId')::uuid = proxy_user.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
-            {
-              name: 'proxy_user_email',
-              property: 'proxyUserEmail',
-              dataType: {
-                dataType: 'stringType',
-              },
-              queryable: true,
-              valueGetter: "( SELECT array_agg(lower(proxy_user.jsonb -> 'personal' ->> 'email')) FROM src_users_proxyfor proxy_for LEFT JOIN src_users_users proxy_user ON (proxy_for.jsonb ->> 'proxyUserId')::uuid = proxy_user.id WHERE (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id)",
-              valueFunction: 'lower(:value)',
-            },
+            }
           ],
         },
       },
@@ -757,18 +749,17 @@
             jsonb_agg( \
               proxy_for.jsonb || \
               jsonb_build_object( \
-                'proxyUserUsername', proxy_user.jsonb ->> 'username', \
-                'proxyUserFirstName', proxy_user.jsonb -> 'personal' ->> 'firstName', \
-                'proxyUserLastName', proxy_user.jsonb -> 'personal' ->> 'lastName', \
-                'proxyUserEmail', proxy_user.jsonb -> 'personal' ->> 'email' \
+                'sponsorUsername', sponsor.jsonb ->> 'username', \
+                'sponsorFirstName', sponsor.jsonb -> 'personal' ->> 'firstName', \
+                'sponsorLastName', sponsor.jsonb -> 'personal' ->> 'lastName' \
               ) \
             ), \
             '[]'::jsonb \
           )::text \
         FROM \
           ${tenant_id}_mod_fqm_manager.src_users_proxyfor proxy_for \
-        LEFT JOIN ${tenant_id}_mod_fqm_manager.src_users_users proxy_user \
-          ON (proxy_for.jsonb ->> 'proxyUserId')::uuid = proxy_user.id \
+        LEFT JOIN ${tenant_id}_mod_fqm_manager.src_users_users sponsor \
+          ON (proxy_for.jsonb ->> 'userId')::uuid = sponsor.id \
         WHERE \
           (proxy_for.jsonb ->> 'proxyUserId')::uuid = :user.id \
       )",

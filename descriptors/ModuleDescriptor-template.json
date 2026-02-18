@@ -403,7 +403,7 @@
     { "id": "material-types", "version": "2.2" },
     { "id": "modes-of-issuance", "version": "1.1" },
     { "id": "nature-of-content-terms", "version": "1.0" },
-    { "id": "oa", "version": "3.0" },
+    { "id": "oa", "version": "2.4" },
     { "id": "orders-storage.acquisition-methods", "version": "1.0" },
     { "id": "orders-storage.pieces", "version": "5.0" },
     { "id": "orders-storage.po-lines", "version": "13.0" },

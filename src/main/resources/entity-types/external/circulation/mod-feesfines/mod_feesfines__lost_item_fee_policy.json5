@@ -30,6 +30,7 @@
       sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__lost_item_fee_policy.jsonb->>'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'description',
@@ -496,7 +497,8 @@
         dataType: 'dateTimeType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'createdDate'",
       sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
     },
@@ -505,9 +507,9 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
-      hidden: true,
+      essential: false,
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
@@ -531,9 +533,9 @@
       dataType: {
         dataType: 'dateTimeType',
       },
-      queryable: false,
-      visibleByDefault: false,
-      hidden: true,
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":src__circulation__feesfines__lost_item_fee_policy.jsonb->'metadata'->>'updatedDate'",
       sourceAlias: 'src__circulation__feesfines__lost_item_fee_policy',
     },
@@ -542,9 +544,9 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      queryable: false,
+      queryable: true,
       visibleByDefault: false,
-      hidden: true,
+      essential: false,
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',

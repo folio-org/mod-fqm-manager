@@ -114,7 +114,8 @@
         dataType: 'dateTimeType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->'metadata'->>'createdDate'",
       sourceAlias: 'src__circulation__feesfines__feefines',
     },
@@ -125,6 +126,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: false,
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
@@ -149,7 +151,8 @@
         dataType: 'dateTimeType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
+      essential: true,
       valueGetter: ":src__circulation__feesfines__feefines.jsonb->'metadata'->>'updatedDate'",
       sourceAlias: 'src__circulation__feesfines__feefines',
     },
@@ -160,6 +163,7 @@
       },
       queryable: true,
       visibleByDefault: false,
+      essential: false,
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',

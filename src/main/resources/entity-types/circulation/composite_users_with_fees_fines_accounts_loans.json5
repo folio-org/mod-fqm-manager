@@ -1,5 +1,5 @@
 {
-  id: '4a744503-fa74-40aa-a358-e7ec0b520ffb',
+  id: '56274633-164b-4a49-81ee-47cdbc6525d5',
   name: 'composite_users_with_fees_fines_accounts_loans',
   private: false,
   sources: [
@@ -42,7 +42,7 @@
   ],
   defaultSort: [
     {
-      columnName: '"accounts.src__circulation__feesfines__accounts".id',
+      columnName: '"users.user".id',
       direction: 'ASC',
     },
   ]

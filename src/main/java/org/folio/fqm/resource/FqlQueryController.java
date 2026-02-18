@@ -2,16 +2,18 @@ package org.folio.fqm.resource;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.fqm.annotation.EntityTypePermissionsRequired;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.fqm.service.QueryManagementService;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.querytool.rest.resource.FqlQueryApi;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.folio.querytool.rest.resource.FqlQueryApi;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -20,9 +22,14 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class FqlQueryController implements FqlQueryApi {
+public class FqlQueryController implements org.folio.fqm.resource.FqlQueryApi, org.folio.querytool.rest.resource.FqlQueryApi {
 
   private final QueryManagementService queryManagementService;
+
+  @Override
+  public ResponseEntity<List<QueryStatusSummary>> getQueryStatusSummaries() {
+    return new ResponseEntity<>(queryManagementService.getStatusSummaries(), HttpStatus.OK);
+  }
 
   @EntityTypePermissionsRequired(SubmitQuery.class)
   @Override
@@ -72,5 +79,10 @@ public class FqlQueryController implements FqlQueryApi {
   public ResponseEntity<Void> deleteQuery(UUID queryId) {
     queryManagementService.deleteQuery(queryId);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public Optional<NativeWebRequest> getRequest() {
+    return FqlQueryApi.super.getRequest();
   }
 }

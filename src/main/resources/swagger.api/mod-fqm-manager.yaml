@@ -115,6 +115,20 @@ paths:
         '4XX':
           $ref: '#/components/responses/badRequestResponse'
 
+  /fqm/status:
+    get:
+      operationId: getQueryStatusSummaries
+      tags:
+        - fqlQuery
+      description: Get the status and statistics for all running queries
+      responses:
+        '200':
+          description: 'Status and statistics for all running queries'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/queryStatusSummaries'
+
 components:
   parameters:
     entity-type-id:
@@ -182,6 +196,12 @@ components:
           type: array
           items:
             type: string
+    queryStatusSummaries:
+      type: array
+      items:
+        $ref: '#/components/schemas/queryStatusSummary'
+    queryStatusSummary:
+      $ref: schemas/QueryStatusSummary.json
 
   responses:
     badRequestResponse:

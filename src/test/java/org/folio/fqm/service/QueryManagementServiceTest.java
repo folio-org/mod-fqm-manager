@@ -6,6 +6,7 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.migration.MigratableQueryInformation;
@@ -856,5 +857,42 @@ class QueryManagementServiceTest {
       // Status should remain unchanged
       assertEquals(QueryDetails.StatusEnum.valueOf(status.toString()), queryDetails.orElseThrow().getStatus());
     }
+  }
+
+  @Test
+  void testGetStatusSummaries() {
+    UUID allowedEntityId = UUID.fromString("f53d35ef-966b-5254-971b-fc64ca002986");
+    UUID disallowedEntityId = UUID.fromString("1c7b44b4-6ea6-53f7-b12b-68690d3167c0");
+
+    when(entityTypeService.getAccessibleEntityTypesById()).thenReturn(Map.of(allowedEntityId, new EntityType()));
+    when(queryRepository.getStatusSummaries())
+      .thenReturn(
+        List.of(
+          new QueryStatusSummary().status("all done!").entityTypeId(allowedEntityId.toString()),
+          new QueryStatusSummary().status("workin on it").entityTypeId(disallowedEntityId.toString())
+        )
+      );
+
+    List<QueryStatusSummary> summaries = queryManagementService.getStatusSummaries();
+
+    assertEquals(2, summaries.size());
+    assertEquals(
+      "all done!",
+      summaries
+        .stream()
+        .filter(s -> s.getEntityTypeId().equals(allowedEntityId.toString()))
+        .findFirst()
+        .orElseThrow()
+        .getStatus()
+    );
+    assertEquals(
+      "<inaccessible>",
+      summaries
+        .stream()
+        .filter(s -> !s.getEntityTypeId().equals(allowedEntityId.toString()))
+        .findFirst()
+        .orElseThrow()
+        .getEntityTypeId()
+    );
   }
 }

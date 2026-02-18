@@ -7,6 +7,7 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.migration.MigratableQueryInformation;
@@ -203,6 +204,18 @@ public class QueryManagementService {
         details.content(getContents(query, includeResults, offset, limit));
         return details;
       });
+  }
+
+  public List<QueryStatusSummary> getStatusSummaries() {
+    Map<UUID, ?> availableEntityTypes = entityTypeService.getAccessibleEntityTypesById();
+    
+    return queryRepository.getStatusSummaries().stream().map(s -> {
+      if (!availableEntityTypes.containsKey(UUID.fromString(s.getEntityTypeId()))) {
+        return s.entityTypeId("<inaccessible>");
+      } else {
+        return s;
+      }
+    }).toList();
   }
 
   /**

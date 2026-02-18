@@ -3,6 +3,7 @@ package org.folio.fqm.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.exception.QueryNotFoundException;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.resource.FqlQueryController;
 import org.folio.fqm.service.QueryManagementService;
@@ -421,5 +422,17 @@ class FqlQueryControllerTest {
       .content(new ObjectMapper().writeValueAsString(contentsRequest));
     mockMvc.perform(builder)
       .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void testGetQueryStatusSummaries() throws Exception {
+    UUID expectedQueryId = UUID.fromString("a35082b2-9657-5815-9830-cb6d616bc688");
+
+    when(queryManagementService.getStatusSummaries()).thenReturn(List.of(new QueryStatusSummary().queryId(expectedQueryId)));
+    RequestBuilder builder = get("/fqm/status")
+      .header(XOkapiHeaders.TENANT, TENANT_ID);
+    mockMvc.perform(builder)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.[0].queryId", is(expectedQueryId.toString())));
   }
 }

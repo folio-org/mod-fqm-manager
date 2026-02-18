@@ -2,6 +2,7 @@ package org.folio.fqm.repository;
 
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
+import org.folio.fqm.domain.dto.QueryStatusSummary;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,5 +166,33 @@ class QueryRepositoryTest {
 
     assertFalse(queryThread.isAlive());
     assertNotNull(exception.get(), "Expected SQLException due to query cancellation");
+  }
+
+  @Test
+  void testGetStatusSummaries() {
+    Query query = new Query(
+      UUID.fromString("6f0656f1-649a-56dd-8d03-31aaa191b11d"),
+      UUID.fromString("6c41058e-c719-5d74-8720-a8cefd85e48b"),
+      "",
+      "",
+      List.of("a", "b", "c"),
+      UUID.fromString("91c0465e-3ff9-5ff3-9a90-dc7d8a25851b"),
+      OffsetDateTime.now(ZoneOffset.UTC),
+      OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5),
+      QueryStatus.QUEUED,
+      null
+    );
+    repo.saveQuery(query);
+    repo.updateQuery(query.queryId(), QueryStatus.QUEUED, query.endDate(), null);
+
+    List<QueryStatusSummary> summaries = repo.getStatusSummaries();
+    QueryStatusSummary summary = summaries.stream().filter(s -> s.getQueryId().equals(query.queryId())).findFirst().orElseThrow();
+    assertEquals(query.queryId(), summary.getQueryId());
+    assertEquals(QueryStatus.QUEUED.toString(), summary.getStatus());
+    assertEquals(query.entityTypeId().toString(), summary.getEntityTypeId());
+    assertTrue(query.startDate().toEpochSecond() - summary.getStartedAt().toInstant().atOffset(ZoneOffset.UTC).toEpochSecond() < 5);
+    assertTrue(query.endDate().toEpochSecond() - summary.getEndedAt().toInstant().atOffset(ZoneOffset.UTC).toEpochSecond() < 5);
+    assertEquals(query.fields().size(), summary.getNumFields());
+    assertEquals(0, summary.getTotalRecords());
   }
 }

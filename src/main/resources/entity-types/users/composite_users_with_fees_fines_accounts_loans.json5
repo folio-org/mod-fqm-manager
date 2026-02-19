@@ -1,0 +1,50 @@
+{
+  id: '56274633-164b-4a49-81ee-47cdbc6525d5',
+  name: 'composite_users_with_fees_fines_accounts_loans',
+  private: false,
+  sources: [
+    {
+      alias: 'users',
+      type: 'entity-type',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user
+      sourceField: 'account.user_id',
+      targetField: 'id',
+      inheritCustomFields: true,
+      useIdColumns: true,
+      overrideJoinDirection: 'right',
+      order: 1,
+    },
+    {
+      alias: 'group',
+      type: 'entity-type',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
+      sourceField: 'users.group_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 2,
+    },
+    {
+      alias: 'account',
+      type: 'entity-type',
+      targetId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc', // mod_feesfines__accounts
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 3,
+    },
+    {
+      alias: 'loan',
+      type: 'entity-type',
+      targetId: '00349126-c923-4045-a29f-3b6db4c6bea9', // simple_loan
+      sourceField: 'account.loan_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 4,
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"users.user".id',
+      direction: 'ASC',
+    },
+  ]
+}

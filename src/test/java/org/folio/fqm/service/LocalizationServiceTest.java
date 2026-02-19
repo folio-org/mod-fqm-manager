@@ -13,6 +13,7 @@ import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
@@ -24,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 class LocalizationServiceTest {
@@ -287,6 +287,296 @@ class LocalizationServiceTest {
     // Verify
     verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.source2");
     verify(translationService, times(1)).format("mod-fqm-manager.entityType.table_name.unknown_source");
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testJsonbArrayTypeColumn() {
+    String expectedOuterTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
+    String expectedOuterTranslation = "Outer Column";
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("column_name")
+          .dataType(new JsonbArrayType().itemDataType(new StringType()))
+      );
+
+    when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
+
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
+
+    verify(translationService, times(1)).format(expectedOuterTranslationKey);
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testJsonbArrayTypeColumnWithObjectItems() {
+    String expectedOuterTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
+    String expectedOuterTranslation = "Outer Column";
+    String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
+    String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("column_name")
+          .dataType(
+            new JsonbArrayType()
+              .itemDataType(
+                new ObjectType()
+                  .addPropertiesItem(new NestedObjectProperty().dataType(new StringType()).name("nested_property"))
+              )
+          )
+      );
+
+    when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
+    when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
+
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
+    JsonbArrayType jsonbArrayType = (JsonbArrayType) localizedColumn.getDataType();
+    ObjectType objectType = (ObjectType) jsonbArrayType.getItemDataType();
+    assertEquals(expectedInnerTranslation, objectType.getProperties().get(0).getLabelAlias());
+    assertEquals(expectedInnerQualifiedTranslation, objectType.getProperties().get(0).getLabelAliasFullyQualified());
+
+    verify(translationService, times(1)).format(expectedOuterTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testNestedJsonbArrayTypeColumn() {
+    String expectedOuterTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
+    String expectedOuterTranslation = "Outer Column";
+    String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
+    String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
+
+    // jsonb array -> jsonb array -> object
+    NestedObjectProperty innerProperty = new NestedObjectProperty()
+      .dataType(new StringType())
+      .name("nested_property");
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("column_name")
+          .dataType(
+            new JsonbArrayType()
+              .itemDataType(
+                new JsonbArrayType()
+                  .itemDataType(new ObjectType().addPropertiesItem(innerProperty))
+              )
+          )
+      );
+
+    when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
+    when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
+
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
+    assertEquals(expectedInnerTranslation, innerProperty.getLabelAlias());
+    assertEquals(expectedInnerQualifiedTranslation, innerProperty.getLabelAliasFullyQualified());
+
+    verify(translationService, times(1)).format(expectedOuterTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testArrayTypeWithJsonbArrayItems() {
+    String expectedOuterTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
+    String expectedOuterTranslation = "Outer Column";
+    String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
+    String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
+
+    // array -> jsonb array -> object
+    NestedObjectProperty innerProperty = new NestedObjectProperty()
+      .dataType(new StringType())
+      .name("nested_property");
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("column_name")
+          .dataType(
+            new ArrayType()
+              .itemDataType(
+                new JsonbArrayType()
+                  .itemDataType(new ObjectType().addPropertiesItem(innerProperty))
+              )
+          )
+      );
+
+    when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
+    when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
+
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
+    assertEquals(expectedInnerTranslation, innerProperty.getLabelAlias());
+    assertEquals(expectedInnerQualifiedTranslation, innerProperty.getLabelAliasFullyQualified());
+
+    verify(translationService, times(1)).format(expectedOuterTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testObjectTypeWithJsonbArrayProperty() {
+    String expectedOuterTranslationKey = "mod-fqm-manager.entityType.table_name.column_name";
+    String expectedOuterTranslation = "Outer Column";
+    String expectedPropertyTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.array_property";
+    String expectedPropertyTranslation = "Array Property";
+    String expectedPropertyQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.array_property._qualified";
+    String expectedPropertyQualifiedTranslation = "Outer Column's Array Property";
+    String expectedInnerTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property";
+    String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslationKey = "mod-fqm-manager.entityType.table_name.column_name.nested_property._qualified";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
+
+    // object -> jsonb array -> object
+    NestedObjectProperty deepProperty = new NestedObjectProperty()
+      .dataType(new StringType())
+      .name("nested_property");
+
+    NestedObjectProperty arrayProperty = new NestedObjectProperty()
+      .name("array_property")
+      .dataType(new JsonbArrayType().itemDataType(new ObjectType().addPropertiesItem(deepProperty)));
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("column_name")
+          .dataType(new ObjectType().addPropertiesItem(arrayProperty))
+      );
+
+    when(translationService.format(expectedOuterTranslationKey)).thenReturn(expectedOuterTranslation);
+    when(translationService.format(expectedPropertyTranslationKey)).thenReturn(expectedPropertyTranslation);
+    when(translationService.format(expectedPropertyQualifiedTranslationKey)).thenReturn(expectedPropertyQualifiedTranslation);
+    when(translationService.format(expectedInnerTranslationKey)).thenReturn(expectedInnerTranslation);
+    when(translationService.format(expectedInnerQualifiedTranslationKey)).thenReturn(expectedInnerQualifiedTranslation);
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(entityType, null, entityType.getColumns().get(0));
+
+    assertEquals(expectedOuterTranslation, localizedColumn.getLabelAlias());
+    assertEquals(expectedPropertyTranslation, arrayProperty.getLabelAlias());
+    assertEquals(expectedPropertyQualifiedTranslation, arrayProperty.getLabelAliasFullyQualified());
+    assertEquals(expectedInnerTranslation, deepProperty.getLabelAlias());
+    assertEquals(expectedInnerQualifiedTranslation, deepProperty.getLabelAliasFullyQualified());
+
+    verify(translationService, times(1)).format(expectedOuterTranslationKey);
+    verify(translationService, times(1)).format(expectedPropertyTranslationKey);
+    verify(translationService, times(1)).format(expectedPropertyQualifiedTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerTranslationKey);
+    verify(translationService, times(1)).format(expectedInnerQualifiedTranslationKey);
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testJsonbArrayTypeWithSourcePrefix() {
+    String expectedSourceTranslationKey = "mod-fqm-manager.entityType.table_name.my_source";
+    String expectedSourceTranslation = "My Source";
+    String expectedColumnTranslation = "Outer Column";
+    String expectedInnerTranslation = "Nested Property";
+    String expectedInnerQualifiedTranslation = "Outer Column's Nested Property";
+
+    NestedObjectProperty innerProperty = new NestedObjectProperty()
+      .dataType(new StringType())
+      .name("nested_property")
+      .labelAlias(expectedInnerTranslation)
+      .labelAliasFullyQualified(expectedInnerQualifiedTranslation);
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("my_source.column_name")
+          .labelAlias(expectedColumnTranslation)
+          .dataType(
+            new JsonbArrayType()
+              .itemDataType(new ObjectType().addPropertiesItem(innerProperty))
+          )
+      );
+
+    when(translationService.format(expectedSourceTranslationKey)).thenReturn(expectedSourceTranslation);
+    mockSourceLabelJoiner();
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(
+      entityType,
+      List.of(new EntityTypeSource().alias("my_source")),
+      entityType.getColumns().get(0)
+    );
+
+    assertEquals("My Source | Outer Column", localizedColumn.getLabelAlias());
+    assertEquals(expectedInnerTranslation, innerProperty.getLabelAlias());
+    assertEquals("My Source | Outer Column's Nested Property", innerProperty.getLabelAliasFullyQualified());
+
+    verify(translationService, times(2)).format(expectedSourceTranslationKey);
+    verify(translationService, times(2)).format(eq(ENTITY_TYPE_SOURCE_PREFIX_JOINER), eq("sourceLabel"), anyString(), eq("fieldLabel"), anyString());
+    verifyNoMoreInteractions(translationService);
+  }
+
+  @Test
+  void testPreTranslatedJsonbArrayColumnWithSourcePrefix() {
+    String expectedInnerTranslation = "Already Translated Property";
+    String expectedSourceTranslationKey = "mod-fqm-manager.entityType.table_name.my_source";
+    String expectedSourceTranslation = "My Source";
+
+    NestedObjectProperty innerProperty = new NestedObjectProperty()
+      .dataType(new StringType())
+      .name("nested_property")
+      .labelAlias("Already Translated Property")
+      .labelAliasFullyQualified("Already Fully Qualified");
+
+    EntityType entityType = new EntityType()
+      .name("table_name")
+      .addColumnsItem(
+        new EntityTypeColumn()
+          .name("my_source.column_name")
+          .labelAlias("Pre-translated Column")
+          .dataType(
+            new JsonbArrayType()
+              .itemDataType(new ObjectType().addPropertiesItem(innerProperty))
+          )
+      );
+
+    when(translationService.format(expectedSourceTranslationKey)).thenReturn(expectedSourceTranslation);
+    mockSourceLabelJoiner();
+
+    var localizedColumn = localizationService.localizeEntityTypeColumn(
+      entityType,
+      List.of(new EntityTypeSource().alias("my_source")),
+      entityType.getColumns().get(0)
+    );
+
+    assertEquals("My Source | Pre-translated Column", localizedColumn.getLabelAlias());
+    assertEquals(expectedInnerTranslation, innerProperty.getLabelAlias());
+    assertEquals("My Source | Already Fully Qualified", innerProperty.getLabelAliasFullyQualified());
+
+    verify(translationService, times(2)).format(expectedSourceTranslationKey);
+    verify(translationService, times(2)).format(eq(ENTITY_TYPE_SOURCE_PREFIX_JOINER), eq("sourceLabel"), anyString(), eq("fieldLabel"), anyString());
     verifyNoMoreInteractions(translationService);
   }
 

@@ -5,6 +5,7 @@ import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,8 @@ public class LocalizationService {
         localizeObjectColumn(entityType, newColumn, objectColumn);
       } else if (newColumn.getDataType() instanceof ArrayType arrayColumn) {
         localizeArrayColumn(entityType, newColumn, arrayColumn);
+      } else if (newColumn.getDataType() instanceof JsonbArrayType jsonbArrayColumn) {
+        localizeJsonbArrayColumn(entityType, newColumn, jsonbArrayColumn);
       }
     } else {
       // column has been previously translated, so just append source translations to it
@@ -89,6 +92,10 @@ public class LocalizationService {
         addSourcePrefixToProperties(entityType, newColumn, objectType, sources);
       } else if (newColumn.getDataType() instanceof ArrayType arrayType) {
         if (arrayType.getItemDataType() instanceof ObjectType itemObjectType) {
+          addSourcePrefixToProperties(entityType, newColumn, itemObjectType, sources);
+        }
+      } else if (newColumn.getDataType() instanceof JsonbArrayType jsonbArrayType) {
+        if (jsonbArrayType.getItemDataType() instanceof ObjectType itemObjectType) {
           addSourcePrefixToProperties(entityType, newColumn, itemObjectType, sources);
         }
       }
@@ -148,6 +155,8 @@ public class LocalizationService {
           localizeObjectColumn(entityType, column, nestedObject);
         } else if (property.getDataType() instanceof ArrayType nestedArray) {
           localizeArrayColumn(entityType, column, nestedArray);
+        } else if (property.getDataType() instanceof JsonbArrayType nestedArray) {
+          localizeJsonbArrayColumn(entityType, column, nestedArray);
         }
       });
   }
@@ -157,6 +166,18 @@ public class LocalizationService {
       localizeObjectColumn(entityType, column, nestedObject);
     } else if (arrayColumn.getItemDataType() instanceof ArrayType nestedArray) {
       localizeArrayColumn(entityType, column, nestedArray);
+    } else if (arrayColumn.getItemDataType() instanceof JsonbArrayType nestedArray) {
+      localizeJsonbArrayColumn(entityType, column, nestedArray);
+    }
+  }
+
+  private void localizeJsonbArrayColumn(EntityType entityType, EntityTypeColumn column, JsonbArrayType arrayColumn) {
+    if (arrayColumn.getItemDataType() instanceof ObjectType nestedObject) {
+      localizeObjectColumn(entityType, column, nestedObject);
+    } else if (arrayColumn.getItemDataType() instanceof ArrayType nestedArray) {
+      localizeArrayColumn(entityType, column, nestedArray);
+    } else if (arrayColumn.getItemDataType() instanceof JsonbArrayType nestedArray) {
+      localizeJsonbArrayColumn(entityType, column, nestedArray);
     }
   }
 

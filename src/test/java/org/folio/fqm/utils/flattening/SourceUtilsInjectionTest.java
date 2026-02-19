@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 import org.folio.querytool.domain.dto.StringType;
@@ -168,6 +169,16 @@ class SourceUtilsInjectionTest {
   }
 
   @Test
+  void testHandlesPrimitiveJsonbArray() {
+    EntityTypeColumn col = new EntityTypeColumn()
+      .valueGetter(":foo->>'field'")
+      .dataType(new JsonbArrayType().itemDataType(new StringType()));
+    EntityTypeColumn result = SourceUtils.injectSourceAlias(col, Map.of("foo", "bar"), null, true);
+
+    assertThat(result.getValueGetter(), is("\"bar\"->>'field'"));
+  }
+
+  @Test
   void testHandlesNestedObjectsAndArrays() throws JsonProcessingException {
     EntityTypeColumn col = new EntityTypeColumn()
       .valueGetter(":foo->>'field'")
@@ -189,6 +200,67 @@ class SourceUtilsInjectionTest {
                                   .valueGetter(":foo->>'nested nested field array'")
                                   .dataType(
                                     new ArrayType()
+                                      .itemDataType(
+                                        new ObjectType()
+                                          .properties(
+                                            List.of(
+                                              new NestedObjectProperty()
+                                                .valueGetter(":foo->>'this is ridiculous'")
+                                                .dataType(new StringType())
+                                            )
+                                          )
+                                      )
+                                  )
+                              )
+                            )
+                        )
+                    )
+                  )
+              )
+          )
+      );
+    EntityTypeColumn result = SourceUtils.injectSourceAlias(col, Map.of("foo", "bar"), null, true);
+
+    // easiest way to test this mess, lol
+    DocumentContext json = JsonPath.parse(new ObjectMapper().writeValueAsString(result));
+    assertThat(
+      json.read("$.dataType.itemDataType.itemDataType.properties[0].valueGetter"),
+      is("\"bar\"->>'nested field'")
+    );
+    assertThat(
+      json.read("$.dataType.itemDataType.itemDataType.properties[0].dataType.properties[0].valueGetter"),
+      is("\"bar\"->>'nested nested field array'")
+    );
+    assertThat(
+      json.read(
+        "$.dataType.itemDataType.itemDataType.properties[0].dataType.properties[0].dataType.itemDataType.properties[0].valueGetter"
+      ),
+      is("\"bar\"->>'this is ridiculous'")
+    );
+  }
+
+  @Test
+  void testHandlesNestedObjectsAndJsonbArrays() throws JsonProcessingException {
+    EntityTypeColumn col = new EntityTypeColumn()
+      .valueGetter(":foo->>'field'")
+      .dataType(
+        new JsonbArrayType()
+          .itemDataType(
+            new JsonbArrayType()
+              .itemDataType(
+                new ObjectType()
+                  .properties(
+                    List.of(
+                      new NestedObjectProperty()
+                        .valueGetter(":foo->>'nested field'")
+                        .dataType(
+                          new ObjectType()
+                            .properties(
+                              List.of(
+                                new NestedObjectProperty()
+                                  .valueGetter(":foo->>'nested nested field array'")
+                                  .dataType(
+                                    new JsonbArrayType()
                                       .itemDataType(
                                         new ObjectType()
                                           .properties(
@@ -303,6 +375,86 @@ class SourceUtilsInjectionTest {
 
     ArrayType outerArray = (ArrayType) nested3.getDataType();
     ArrayType innerArray = (ArrayType) outerArray.getItemDataType();
+    ObjectType innerObjectType = (ObjectType) innerArray.getItemDataType();
+    NestedObjectProperty nestedInArray = innerObjectType.getProperties().get(0);
+    assertThat(nestedInArray.getIdColumnName(), is("source.nested_field_id"));
+  }
+
+  @Test
+  void testPrefixIdColumnNameInJsonbNestedObjectProperties() {
+    EntityTypeColumn col = new EntityTypeColumn()
+      .name("object_array_field")
+      .idColumnName("top_level_id")
+      .dataType(
+        new JsonbArrayType()
+          .itemDataType(
+            new ObjectType()
+              .properties(
+                List.of(
+                  new NestedObjectProperty()
+                    .name("nested_1")
+                    .idColumnName("object_array_field[*]->id")
+                    .dataType(new StringType()),
+                  new NestedObjectProperty()
+                    .name("nested_2")
+                    .idColumnName("non_nested_id")
+                    .dataType(
+                      new ObjectType()
+                        .properties(
+                          List.of(
+                            new NestedObjectProperty()
+                              .name("deeply_nested")
+                              .idColumnName("object_array_field[*]->other_id")
+                              .dataType(new StringType())
+                          )
+                        )
+                    ),
+                  new NestedObjectProperty()
+                    .name("nested_array_of_arrays")
+                    .idColumnName("array_id")
+                    .dataType(
+                      new JsonbArrayType()
+                        .itemDataType(
+                          new JsonbArrayType()
+                            .itemDataType(
+                              new ObjectType()
+                                .properties(
+                                  List.of(
+                                    new NestedObjectProperty()
+                                      .name("very_nested_field")
+                                      .idColumnName("nested_field_id")
+                                      .dataType(new StringType())
+                                  )
+                                )
+                            )
+                        )
+                    )
+                )
+              )
+          )
+      );
+
+    EntityTypeColumn result = SourceUtils.prefixIdColumnName(col, "source.");
+
+    assertThat(result.getIdColumnName(), is("source.top_level_id"));
+
+    ObjectType objectType = (ObjectType) ((JsonbArrayType) result.getDataType()).getItemDataType();
+    NestedObjectProperty nested1 = objectType.getProperties().get(0);
+    assertThat(nested1.getIdColumnName(), is("source.object_array_field[*]->id"));
+
+    NestedObjectProperty nested2 = objectType.getProperties().get(1);
+    assertThat(nested2.getIdColumnName(), is("source.non_nested_id"));
+
+    ObjectType nestedObjectType = (ObjectType) nested2.getDataType();
+    NestedObjectProperty deeplyNested = nestedObjectType.getProperties().get(0);
+    assertThat(deeplyNested.getIdColumnName(), is("source.object_array_field[*]->other_id"));
+
+    // Test nested array of arrays (JsonbArrayType containing JsonbArrayType)
+    NestedObjectProperty nested3 = objectType.getProperties().get(2);
+    assertThat(nested3.getIdColumnName(), is("source.array_id"));
+
+    JsonbArrayType outerArray = (JsonbArrayType) nested3.getDataType();
+    JsonbArrayType innerArray = (JsonbArrayType) outerArray.getItemDataType();
     ObjectType innerObjectType = (ObjectType) innerArray.getItemDataType();
     NestedObjectProperty nestedInArray = innerObjectType.getProperties().get(0);
     assertThat(nestedInArray.getIdColumnName(), is("source.nested_field_id"));

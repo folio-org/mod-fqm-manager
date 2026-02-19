@@ -15,19 +15,19 @@
       order: 1,
     },
     {
-      alias: 'account',
-      type: 'entity-type',
-      targetId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc', // mod_feesfines__accounts
-      useIdColumns: true,
-      essentialOnly: true,
-      order: 2,
-    },
-    {
       alias: 'group',
       type: 'entity-type',
       targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
       sourceField: 'users.group_id',
       targetField: 'id',
+      essentialOnly: true,
+      order: 2,
+    },
+    {
+      alias: 'account',
+      type: 'entity-type',
+      targetId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc', // mod_feesfines__accounts
+      useIdColumns: true,
       essentialOnly: true,
       order: 3,
     },

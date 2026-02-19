@@ -11,6 +11,7 @@
       targetField: 'id',
       inheritCustomFields: true,
       useIdColumns: true,
+      overrideJoinDirection: 'right',
       order: 1,
     },
     {

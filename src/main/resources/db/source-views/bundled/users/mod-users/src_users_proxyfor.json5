@@ -1,0 +1,5 @@
+{
+  name: 'src_users_proxyfor',
+  dependsOn: [['${tenant_id}_mod_users', 'proxyfor']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_users.proxyfor',
+}

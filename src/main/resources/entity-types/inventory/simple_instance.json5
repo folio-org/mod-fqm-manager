@@ -415,7 +415,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -428,13 +428,12 @@
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId' ORDER BY elems.value->>'identifierTypeId') \
                                      FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId' ORDER BY elems.value->>'identifierTypeId') \
-                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'identifiers', 'identifierTypeId')",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
               source: {
                 entityTypeId: 'a0c8f96f-b630-41d5-bce3-e5b0512c4e48',
                 columnName: 'name'
               },
-              valueFunction: 'lower(:value)'
             },
             {
               name: 'identifier_value',
@@ -444,8 +443,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'identifiers') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'identifiers', 'value'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
 //            {
 //              name: 'identifier_type',
@@ -611,7 +610,7 @@
       name: 'subjects',
       sourceAlias: 'inst',
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -623,8 +622,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'subjects', 'value'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
             },
             {
               name: 'subject_source',
@@ -635,6 +634,8 @@
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'sourceId' ORDER BY elems.value->>'sourceId') \
                                      FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'subjects', 'sourceId'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
               source: {
                 entityTypeId: '4433fa88-8afd-4d39-9387-ef3c4945b4f8',
                 columnName: 'name',
@@ -649,6 +650,8 @@
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'typeId' ORDER BY elems.value->>'typeId') \
                                      FROM jsonb_array_elements(:sourceAlias.jsonb->'subjects') AS elems)",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'subjects', 'typeId'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
               source: {
                 entityTypeId: '47838a6a-41ad-4f53-a04c-9dfb923ef818',
                 columnName: 'name',
@@ -686,7 +689,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -715,6 +718,8 @@
                              FILTER (WHERE (record.value ->> 'classificationNumber') IS NOT NULL) AS array_agg \
                              FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
                             )",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'classifications', 'classificationNumber'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
             //            {
             //              name: 'type_id',
@@ -745,7 +750,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -757,8 +762,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'publisher') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'publisher')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'publication', 'publisher'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
             },
             {
               name: 'role',
@@ -768,8 +773,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'role') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'role')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'publication', 'role'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
             {
               name: 'place',
@@ -779,8 +784,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'place') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'place')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'publication', 'place'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
             {
               name: 'date_of_publication',
@@ -790,8 +795,8 @@
               },
               queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'dateOfPublication') FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'dateOfPublication')) FROM jsonb_array_elements(:sourceAlias.jsonb->'publication') AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'publication', 'dateOfPublication'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
           ],
         },
@@ -994,9 +999,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
-      filterValueGetter: "(:sourceAlias.jsonb -> 'instanceFormatIds'::text)",
-      valueFunction: 'lower(:value)',
+      valueGetter: ":sourceAlias.jsonb -> 'instanceFormatIds'",
     },
     {
       name: 'format_names',
@@ -1190,7 +1193,8 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ":sourceAlias.jsonb->>'catalogedDate'",
+      valueGetter: "${tenant_id}_mod_inventory_storage.to_timestamp(:sourceAlias.jsonb->>'catalogedDate')",
+      valueFunction: "${tenant_id}_mod_inventory_storage.to_timestamp(:value)",
     },
     {
       name: 'previously_held',

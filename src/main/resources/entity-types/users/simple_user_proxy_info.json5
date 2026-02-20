@@ -1,0 +1,47 @@
+{
+  id: '7082900d-7e46-427b-86df-0a1ea5e965ae',
+  name: 'simple_user_proxy_info',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      target: 'src_users_users',
+      alias: 'user',
+    },
+  ],
+  requiredPermissions: ['users.collection.get', 'users.item.get', 'proxiesfor.collection.get'],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      sourceAlias: 'user',
+      valueGetter: ':sourceAlias.id',
+    },
+    {
+      name: 'username',
+      sourceAlias: 'user',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ":sourceAlias.jsonb->>'username'",
+      filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'username'::text))",
+      valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+    },
+
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+}

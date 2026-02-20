@@ -552,31 +552,6 @@
       )",
     },
     {
-      name: 'proxy_for',
-      sourceAlias: 'user',
-      dataType: {
-        dataType: 'arrayType',
-        itemDataType: {
-          dataType: 'stringType',
-        },
-      },
-      isIdColumn: false,
-      queryable: false,
-      visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'proxyFor') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements(:sourceAlias.jsonb->'proxyFor') AS elems\
-      )",
-    },
-    {
       name: 'department_ids',
       sourceAlias: 'user',
       dataType: {

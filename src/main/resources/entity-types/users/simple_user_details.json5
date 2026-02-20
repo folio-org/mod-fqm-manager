@@ -748,11 +748,11 @@
           COALESCE( \
             jsonb_agg( \
               proxy_for.jsonb || \
-              jsonb_build_object( \
+              jsonb_strip_nulls(jsonb_build_object( \
                 'sponsorUsername', sponsor.jsonb ->> 'username', \
                 'sponsorFirstName', sponsor.jsonb -> 'personal' ->> 'firstName', \
                 'sponsorLastName', sponsor.jsonb -> 'personal' ->> 'lastName' \
-              ) \
+              )) \
             ), \
             '[]'::jsonb \
           )::text \

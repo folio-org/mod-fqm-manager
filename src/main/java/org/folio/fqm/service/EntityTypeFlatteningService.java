@@ -270,8 +270,8 @@ public class EntityTypeFlatteningService {
         switch (column.getDataType()) {
           case ArrayType arrayType when arrayType.getItemDataType() instanceof ObjectType objectType ->
             column.dataType(arrayType.itemDataType(filterEcsProperties(objectType, ecsEnabled)));
-          case JsonbArrayType arrayType when arrayType.getItemDataType() instanceof ObjectType objectType ->
-            column.dataType(arrayType.itemDataType(filterEcsProperties(objectType, ecsEnabled)));
+          case JsonbArrayType jsonbArrayType when jsonbArrayType.getItemDataType() instanceof ObjectType objectType ->
+            column.dataType(jsonbArrayType.itemDataType(filterEcsProperties(objectType, ecsEnabled)));
           default -> column;
         }
       )

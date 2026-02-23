@@ -10,6 +10,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.ArrayType;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
@@ -17,6 +18,7 @@ import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
 import org.folio.querytool.domain.dto.EntityTypeSourceEntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JoinDirection;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.ObjectType;
 
@@ -84,14 +86,30 @@ public class SourceUtils {
     Map<String, String> renamedAliases,
     boolean finalPass
   ) {
-    if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
-      ArrayType updatedNestedArrayType = injectSourceAliasForArrayType(nestedArrayType, renamedAliases, finalPass);
-      return arrayType.toBuilder().itemDataType(updatedNestedArrayType).build();
-    } else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
-      ObjectType updatedObjectType = injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
-      return arrayType.toBuilder().itemDataType(updatedObjectType).build();
-    }
-    return arrayType.toBuilder().build();
+    EntityDataType itemDataType = injectSourceAliasForContainerType(arrayType.getItemDataType(), renamedAliases, finalPass);
+    return arrayType.toBuilder().itemDataType(itemDataType).build();
+  }
+
+  private static JsonbArrayType injectSourceAliasForJsonbArrayType(
+    JsonbArrayType jsonbArrayType,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+    EntityDataType injectedItemDataType = injectSourceAliasForContainerType(jsonbArrayType.getItemDataType(), renamedAliases, finalPass);
+    return jsonbArrayType.toBuilder().itemDataType(injectedItemDataType).build();
+  }
+
+  private static EntityDataType injectSourceAliasForContainerType(
+    EntityDataType itemDataType,
+    Map<String, String> renamedAliases,
+    boolean finalPass
+  ) {
+      return switch (itemDataType) {
+        case ObjectType objectType -> injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
+        case ArrayType nestedArrayType -> injectSourceAliasForArrayType(nestedArrayType, renamedAliases, finalPass);
+        case JsonbArrayType jsonbArrayType -> injectSourceAliasForJsonbArrayType(jsonbArrayType, renamedAliases, finalPass);
+        case null, default -> itemDataType;
+      };
   }
 
   private static <T extends Field> T injectSourceAlias(
@@ -110,13 +128,20 @@ public class SourceUtils {
         if (column.getValueFunction() != null) {
           column.valueFunction(applyAliasReplacement(column.getValueFunction(), alias, renamedAliases, finalPass));
         }
-        if (column.getDataType() instanceof ObjectType objectType) {
-          ObjectType updatedObjectType = injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
-          column.dataType(updatedObjectType);
-        }
-        if (column.getDataType() instanceof ArrayType arrayType) {
-          ArrayType updatedArrayType = injectSourceAliasForArrayType(arrayType, renamedAliases, finalPass);
-          column.dataType(updatedArrayType);
+        switch (column.getDataType()) {
+          case ObjectType objectType -> {
+            ObjectType updatedObjectType = injectSourceAliasForObjectType(objectType, renamedAliases, finalPass);
+            column.dataType(updatedObjectType);
+          }
+          case ArrayType arrayType -> {
+            ArrayType updatedArrayType = injectSourceAliasForArrayType(arrayType, renamedAliases, finalPass);
+            column.dataType(updatedArrayType);
+          }
+          case JsonbArrayType jsonbArrayType -> {
+            JsonbArrayType updatedJsonbArrayType = injectSourceAliasForJsonbArrayType(jsonbArrayType, renamedAliases, finalPass);
+            column.dataType(updatedJsonbArrayType);
+          }
+          case null, default -> {}
         }
       });
 
@@ -179,16 +204,21 @@ public class SourceUtils {
       column.idColumnName(prefix + column.getIdColumnName());
     }
 
-    if (column.getDataType() instanceof ObjectType objectType) {
-      ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
-      column.dataType(updatedObjectType);
+    switch (column.getDataType()) {
+      case ObjectType objectType -> {
+        ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
+        column.dataType(updatedObjectType);
+      }
+      case ArrayType arrayType -> {
+        ArrayType updatedArrayType = prefixIdColumnNameForArrayType(arrayType, prefix);
+        column.dataType(updatedArrayType);
+      }
+      case JsonbArrayType jsonbArrayType -> {
+        JsonbArrayType updatedJsonbArrayType = prefixIdColumnNameForJsonbArrayType(jsonbArrayType, prefix);
+        column.dataType(updatedJsonbArrayType);
+      }
+      case null, default -> {}
     }
-
-    if (column.getDataType() instanceof ArrayType arrayType) {
-      ArrayType updatedArrayType = prefixIdColumnNameForArrayType(arrayType, prefix);
-      column.dataType(updatedArrayType);
-    }
-
     return column;
   }
 
@@ -202,14 +232,22 @@ public class SourceUtils {
   }
 
   private static ArrayType prefixIdColumnNameForArrayType(ArrayType arrayType, String prefix) {
-    if (arrayType.getItemDataType() instanceof ArrayType nestedArrayType) {
-      ArrayType updatedNestedArrayType = prefixIdColumnNameForArrayType(nestedArrayType, prefix);
-      return arrayType.toBuilder().itemDataType(updatedNestedArrayType).build();
-    } else if (arrayType.getItemDataType() instanceof ObjectType objectType) {
-      ObjectType updatedObjectType = prefixIdColumnNameForObjectType(objectType, prefix);
-      return arrayType.toBuilder().itemDataType(updatedObjectType).build();
-    }
-    return arrayType;
+    EntityDataType prefixedItemDataType = prefixIdColumnNameForContainerType(arrayType.getItemDataType(), prefix);
+    return arrayType.toBuilder().itemDataType(prefixedItemDataType).build();
+  }
+
+  private static JsonbArrayType prefixIdColumnNameForJsonbArrayType(JsonbArrayType arrayType, String prefix) {
+    EntityDataType prefixedItemDataType = prefixIdColumnNameForContainerType(arrayType.getItemDataType(), prefix);
+    return arrayType.toBuilder().itemDataType(prefixedItemDataType).build();
+  }
+
+  private static EntityDataType prefixIdColumnNameForContainerType(EntityDataType itemDataType, String prefix) {
+    return switch (itemDataType) {
+      case ObjectType objectType -> prefixIdColumnNameForObjectType(objectType, prefix);
+      case ArrayType nestedArrayType -> prefixIdColumnNameForArrayType(nestedArrayType, prefix);
+      case JsonbArrayType jsonbArrayType -> prefixIdColumnNameForJsonbArrayType(jsonbArrayType, prefix);
+      case null, default -> itemDataType;
+    };
   }
 
   public static Stream<EntityTypeColumn> copyColumns(

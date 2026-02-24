@@ -1083,7 +1083,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'objectType',
           properties: [
@@ -1110,9 +1110,9 @@
                 entityTypeId: 'c531fa3d-53e8-417f-b5bf-af389f6933a7'
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'instanceNoteTypeId') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'instanceNoteTypeId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)'
+              valueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'instanceNoteTypeId')",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'instanceNoteTypeId'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
             {
               name: 'note',
@@ -1121,9 +1121,9 @@
                 dataType: 'stringType',
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)'
+              valueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'note')",
+              filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'note'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
             },
             {
               name: 'staff_only',
@@ -1132,9 +1132,8 @@
                 dataType: 'booleanType',
               },
               queryable: true,
-              valueGetter: "( SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.jsonb->'notes') AS elems)",
-              valueFunction: 'lower(:value)',
+              valueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'staffOnly'))",
+              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
               values: [
                 {
                   value: 'true',
@@ -1164,7 +1163,7 @@
       sourceAlias: 'inst',
       essential: true,
       dataType: {
-        dataType: 'arrayType',
+        dataType: 'jsonbArrayType',
         itemDataType: {
           dataType: 'stringType',
         },
@@ -1172,19 +1171,9 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: "(\
-        SELECT\
-          array_agg(elems.value::text)\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
-      )",
-      filterValueGetter: "(\
-        SELECT\
-          array_agg(lower(elems.value::text))\
-        FROM\
-          jsonb_array_elements_text(:sourceAlias.jsonb->'administrativeNotes') AS elems\
-      )",
-      valueFunction: 'lower(:value)'
+      valueGetter: ":sourceAlias.jsonb -> 'administrativeNotes'",
+      filterValueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(:sourceAlias.jsonb -> 'administrativeNotes')",
+      valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)'
     },
     {
       name: 'cataloged_date',

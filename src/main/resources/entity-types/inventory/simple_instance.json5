@@ -700,8 +700,7 @@
                 dataType: 'stringType',
               },
               queryable: true,
-              valueGetter: "(SELECT array_agg(elems.value->>'classificationTypeId' ORDER BY elems.value->>'classificationTypeId') \
-                                     FROM jsonb_array_elements(:sourceAlias.jsonb->'classifications') AS elems)",
+              valueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'classifications', 'classificationType')",
               source: {
                 entityTypeId: '60013bee-6752-4125-aedb-5689143477ae',
                 columnName: 'name',

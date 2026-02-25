@@ -158,7 +158,7 @@
         {
           "methods": ["GET"],
           "pathPattern": "/fqm/status",
-          "permissionsRequired": ["fqm.status.get"]
+          "permissionsRequired": ["fqm.status.item.get"]
         }
       ]
     },
@@ -335,6 +335,12 @@
       "visible":  true
     },
     {
+      "permissionName": "fqm.status.item.get",
+      "displayName": "FQM - Get query status",
+      "description": "Monitor FQM query statuses",
+      "visible":  true
+    },
+    {
       "permissionName": "fqm.query.all",
       "displayName": "FQM - All permissions",
       "description": "All permissions required for executing queries in the FQM system.",
@@ -346,6 +352,7 @@
         "fqm.query.async.results.get",
         "fqm.query.async.delete",
         "fqm.query.sync.get",
+        "fqm.status.item.get",
         "fqm.version.get",
         "fqm.migrate.post"
       ],

@@ -700,7 +700,10 @@
                 dataType: 'stringType',
               },
               queryable: true,
-              valueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'classifications', 'classificationType')",
+              valueGetter: "(SELECT jsonb_agg(class_type.jsonb ->> 'name') \
+                     FROM jsonb_array_elements((:sourceAlias.jsonb -> 'classifications')) record(value) \
+                       LEFT join ${tenant_id}_mod_fqm_manager.src_inventory_classification_type class_type \
+                         ON (record.value ->> 'classificationTypeId') = class_type.id::text)",
               source: {
                 entityTypeId: '60013bee-6752-4125-aedb-5689143477ae',
                 columnName: 'name',

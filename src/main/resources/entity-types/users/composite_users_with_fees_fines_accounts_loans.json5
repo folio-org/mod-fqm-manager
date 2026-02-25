@@ -11,7 +11,7 @@
       targetField: 'id',
       inheritCustomFields: true,
       useIdColumns: true,
-      overrideJoinDirection: 'right',
+      overrideJoinDirection: 'inner',
       order: 1,
     },
     {
@@ -39,6 +39,15 @@
       targetField: 'id',
       essentialOnly: true,
       order: 4,
+    },
+    {
+      alias: 'item',
+      type: 'entity-type',
+      targetId: '372e025a-9444-473a-9ffd-fa0f63db1674', // simple_item
+      sourceField: 'account.item_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 5,
     }
   ],
   defaultSort: [

@@ -43,7 +43,7 @@
       },
       valueSourceApi: {
         path: 'classification-types',
-        valueJsonPath: '$.classificationTypes.*.id',
+        valueJsonPath: '$.classificationTypes.*.name',
         labelJsonPath: '$.classificationTypes.*.name',
       }
     },

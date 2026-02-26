@@ -270,6 +270,7 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ':marc_record_lb.content::text',
+      maxColumnWidth: 200,
     },
   ],
 }

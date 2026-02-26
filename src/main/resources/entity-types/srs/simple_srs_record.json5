@@ -51,7 +51,7 @@
       isIdColumn: true,
       queryable: true,
       visibleByDefault: false,
-      essential: false,
+      essential: true,
       valueGetter: ':record_lb.matched_id',
     },
     {

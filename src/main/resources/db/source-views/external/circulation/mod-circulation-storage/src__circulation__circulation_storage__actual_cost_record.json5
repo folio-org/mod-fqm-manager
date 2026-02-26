@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__circulation_storage__actual_cost_record',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_circulation_storage',
+      'actual_cost_record',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_circulation_storage.actual_cost_record',
+}

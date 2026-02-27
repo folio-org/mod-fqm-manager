@@ -294,7 +294,7 @@
       valueGetter: ":sourceAlias.jsonb->>'title'",
       filterValueGetter: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> \'title\'::text)), 600)',
       valueFunction: '"left"(lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value)), 600)',
-      maxColumnWidth: 200,
+      maxColumnWidth: 400,
     },
     {
       name: 'index_title',

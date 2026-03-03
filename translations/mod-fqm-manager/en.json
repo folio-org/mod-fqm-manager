@@ -356,7 +356,7 @@
   "entityType.composite_item_details.instances": "Instance",
   "entityType.composite_item_details.item_level_call_number": "Item call number",
   "entityType.composite_item_details.items": "Item",
-  "entityType.composite_item_details.last_checkin_service_point": "Last check in service point",
+  "entityType.composite_item_details.last_check_in_service_point": "Last check in service point",
   "entityType.composite_item_details.loclibrary": "Item effective library",
   "entityType.composite_item_details.mtypes": "Material type",
   "entityType.composite_item_details.permanent_loan_type": "Permanent loan type",

@@ -380,10 +380,8 @@
       essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'discoverySuppress'",
-      filterValueGetter: "COALESCE(\
-        lower(:sourceAlias.jsonb->>'discoverySuppress'::text),\
-        'false'\
-      )",
+      filterValueGetter: "\"left\"(lower(:sourceAlias.jsonb ->> 'discoverySuppress'::text), 600)",
+      defaultValue: 'false',
       values: [
         {
           label: 'True',

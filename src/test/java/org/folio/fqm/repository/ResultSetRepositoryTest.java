@@ -1,6 +1,6 @@
 package org.folio.fqm.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fql.model.EqualsCondition;
 import org.folio.fql.model.Fql;
 import org.folio.fql.model.field.FqlField;

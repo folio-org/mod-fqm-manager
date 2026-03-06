@@ -1,8 +1,8 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -255,11 +255,11 @@ public class ResultSetService {
 
     ObjectNode objectNode = (ObjectNode) elementNode;
     JsonNode valueNode = objectNode.get(fieldName);
-    if (valueNode == null || !valueNode.isTextual()) {
+    if (valueNode == null || !valueNode.isString()) {
       return false;
     }
 
-    String code = valueNode.asText();
+    String code = valueNode.asString();
     Optional<String> localized = localizeCountryCode(code);
     if (localized.isEmpty()) {
       return false;

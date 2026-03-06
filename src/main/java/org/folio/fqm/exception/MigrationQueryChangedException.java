@@ -1,7 +1,7 @@
 package org.folio.fqm.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.domain.dto.Error;
@@ -34,7 +34,7 @@ public class MigrationQueryChangedException extends FqmException {
       try {
         String migratedQueryInfoJson = OBJECT_MAPPER.writeValueAsString(migratedQueryInformation);
         error.addParametersItem(new Parameter().key("migratedQueryInformation").value(migratedQueryInfoJson));
-      } catch (JsonProcessingException e) {
+      } catch (JacksonException e) {
         log.error("Failed to serialize migrated query information", e);
         // If serialization fails, fall back to MigratableQueryInformation.toString(); the same information should be
         // present, but it won't be as easily parsed as the JSON version.

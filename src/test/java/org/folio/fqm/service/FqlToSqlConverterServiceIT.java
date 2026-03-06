@@ -1,7 +1,14 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.path.json.JsonPath;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fqm.IntegrationTestBase;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -17,14 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @Testcontainers
 class FqlToSqlConverterServiceIT extends IntegrationTestBase {
 
   @Test
-  void valueFunctionTest() throws JsonProcessingException {
+  void valueFunctionTest() throws JacksonException {
 
     // Given this dummy entity type with built-in mock data (including a column with a filterValueGetter and valueFunction)
     EntityType entityType = new EntityType()
@@ -97,26 +104,26 @@ class FqlToSqlConverterServiceIT extends IntegrationTestBase {
         "some_column": { "$eq": "aBcDeFgHiJ...and nothing else matters after 10 chars. Note that the capitalization is different than in the 'real' value, too" }
       }""";
 
+    String queryString = "query=%s&entityTypeId=%s&fields=%s".formatted(
+      URLEncoder.encode(fql, StandardCharsets.UTF_8),
+      URLEncoder.encode(entityType.getId(), StandardCharsets.UTF_8),
+      URLEncoder.encode("some_column", StandardCharsets.UTF_8)
+    );
+    var requestBuilder = HttpRequest.newBuilder()
+      .uri(URI.create(io.restassured.RestAssured.baseURI + "/query?" + queryString))
+      .GET();
+    getOkapiHeaders().forEach(requestBuilder::header);
+
+    HttpResponse<String> response;
+    try {
+      response = HttpClient.newHttpClient().send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to request /query", e);
+    }
+
     // Then we get back the 1 expected row
-    given()
-      .headers(getOkapiHeaders())
-      .contentType("application/json")
-      .when()
-      .queryParams(
-        "query", fql,
-        "entityTypeId", entityType.getId(),
-        "fields", List.of("some_column")
-      )
-      .get("/query")
-      .then()
-      .statusCode(200)
-      .body(
-        // Of the 2 possible results, only 1 should match, due to the filterValueGetter and valueFilter (despite the
-        // query not matching what's in the DB)
-        "content.size()", is(1),
-        // Also, the returned value should exactly match what's in the DB, not the truncated lower-case one from the
-        // filterValueGetter or valueGetter
-        "content[0].some_column", is("AbCdEfGhIjKlMnOpQrStUvWxYz")
-      );
+    assertThat(response.statusCode(), is(200));
+    assertThat(JsonPath.from(response.body()).getInt("content.size()"), is(1));
+    assertThat(JsonPath.from(response.body()).getString("content[0].some_column"), is("AbCdEfGhIjKlMnOpQrStUvWxYz"));
   }
 }

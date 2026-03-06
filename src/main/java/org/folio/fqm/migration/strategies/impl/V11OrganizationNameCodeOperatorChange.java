@@ -1,6 +1,6 @@
 package org.folio.fqm.migration.strategies.impl;
 
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.node.StringNode;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -78,11 +78,11 @@ public class V11OrganizationNameCodeOperatorChange
             // our earlier condition ensures that the field is either "code" or "name",
             // so no need to check both here.
             "code".equals(condition.field())
-              ? org.code().equalsIgnoreCase(condition.value().textValue())
-              : org.name().equalsIgnoreCase(condition.value().textValue())
+              ? org.code().equalsIgnoreCase(condition.value().asString())
+              : org.name().equalsIgnoreCase(condition.value().asString())
           )
           .findAny()
-          .map(org -> SingleFieldMigrationResult.withField(condition.withValue(TextNode.valueOf(org.id()))))
+          .map(org -> SingleFieldMigrationResult.withField(condition.withValue(StringNode.valueOf(org.id()))))
           .orElseGet(() ->
             SingleFieldMigrationResult
               .<MigratableFqlFieldAndCondition>removed()
@@ -91,7 +91,7 @@ public class V11OrganizationNameCodeOperatorChange
                   ValueBreakingWarning
                     .builder()
                     .field(condition.getFullField())
-                    .value(condition.value().asText())
+                    .value(condition.value().asString())
                     .fql(condition.getConditionObject().toPrettyString())
                     .build()
                 )

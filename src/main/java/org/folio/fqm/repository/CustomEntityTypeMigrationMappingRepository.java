@@ -3,9 +3,9 @@ package org.folio.fqm.repository;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.table;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
@@ -54,7 +54,7 @@ public class CustomEntityTypeMigrationMappingRepository {
           .fetchOne(field("mapping", String.class)),
         new TypeReference<>() {}
       );
-    } catch (JsonProcessingException | IllegalArgumentException | DataAccessException e) {
+    } catch (JacksonException | IllegalArgumentException | DataAccessException e) {
       log.error("Error retrieving custom entity type migration mappings", e);
       return Map.of();
     }
@@ -67,7 +67,7 @@ public class CustomEntityTypeMigrationMappingRepository {
         .update(table(MAPPING_TABLE))
         .set(field("mapping"), JSONB.jsonb(objectMapper.writeValueAsString(mappings)))
         .execute();
-    } catch (JsonProcessingException | DataAccessException e) {
+    } catch (JacksonException | DataAccessException e) {
       throw log.throwing(new UncheckedException(e));
     }
   }

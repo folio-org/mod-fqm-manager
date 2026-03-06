@@ -1,6 +1,5 @@
 package org.folio.fqm.service;
 
-import feign.FeignException;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.querytool.domain.dto.EntityType;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.web.client.RestClientException;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -200,7 +200,7 @@ class CrossTenantQueryServiceTest {
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions(CENTRAL_TENANT_ID, entityType, UUID.fromString(USER_ID), true);
     doNothing().when(permissionsService).verifyUserHasNecessaryPermissions("tenant_02", entityType, UUID.fromString(USER_ID), true);
     doThrow(MissingPermissionsException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_03", entityType, UUID.fromString(USER_ID), true);
-    doThrow(FeignException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_04", entityType, UUID.fromString(USER_ID), true);
+    doThrow(RestClientException.class).when(permissionsService).verifyUserHasNecessaryPermissions("tenant_04", entityType, UUID.fromString(USER_ID), true);
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(entityType);
     assertEquals(expectedTenants, actualTenants);
   }

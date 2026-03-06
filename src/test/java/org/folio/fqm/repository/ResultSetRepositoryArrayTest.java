@@ -10,7 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;

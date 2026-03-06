@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +35,7 @@ class MigrationQueryChangedExceptionTest {
     .build();
 
   @Test
-  void testConstructorAndBasicProperties() throws IOException {
+  void testConstructorAndBasicProperties() {
     MigrationQueryChangedException exception = new MigrationQueryChangedException(MIGRATABLE_QUERY_INFORMATION_FULL);
 
     assertThat(exception.getMessage(), is("Migration changed more than just the version"));
@@ -68,7 +68,7 @@ class MigrationQueryChangedExceptionTest {
   }
 
   @Test
-  void testGetErrorWithPartialMigratableQueryInformation() throws IOException {
+  void testGetErrorWithPartialMigratableQueryInformation() {
     MigratableQueryInformation migratedQueryInformation = MigratableQueryInformation
       .builder()
       .entityTypeId(ENTITY_TYPE_ID)

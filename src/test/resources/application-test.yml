@@ -16,6 +16,8 @@ spring:
   banner:
     location: classpath:/banner.txt
 folio:
+  exchange:
+    enabled: true
   tenant:
     validation:
       enabled: false

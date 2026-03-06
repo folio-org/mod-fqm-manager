@@ -1,6 +1,6 @@
 package org.folio.fqm.service;
 
-import feign.FeignException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.client.CrossTenantHttpClient;
 import org.folio.fqm.client.LanguageClient;
@@ -495,7 +495,7 @@ class EntityTypeServiceTest {
              }
            }
       """);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.Unauthorized.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(HttpClientErrorException.Unauthorized.class);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "r");
 
@@ -525,9 +525,9 @@ class EntityTypeServiceTest {
 
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(FeignException.NotFound.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(HttpClientErrorException.NotFound.class);
 
-    assertThrows(FeignException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
+    assertThrows(HttpClientErrorException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
 
   @Test
@@ -555,7 +555,7 @@ class EntityTypeServiceTest {
         "theLabel": ["l1"]
       }
       """);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.NotFound.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(HttpClientErrorException.NotFound.class);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
@@ -584,10 +584,10 @@ class EntityTypeServiceTest {
 
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(FeignException.Unauthorized.class);
-    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(FeignException.NotFound.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(HttpClientErrorException.Unauthorized.class);
+    when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(HttpClientErrorException.NotFound.class);
 
-    assertThrows(FeignException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
+    assertThrows(HttpClientErrorException.NotFound.class, () -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }
 
   @Test
@@ -718,7 +718,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenThrow(FeignException.BadRequest.class);
+    when(languageClient.get(TENANT_ID)).thenThrow(HttpClientErrorException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }

@@ -3,10 +3,9 @@ package org.folio.fqm.utils;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.jooq.impl.DSL.field;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.fqm.exception.JsonParsingException;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -358,8 +358,8 @@ public class EntityTypeUtils {
 
     try {
       return DigestUtils.sha256Hex(new ObjectMapper().writeValueAsString(relevantProperties));
-    } catch (JsonProcessingException e) {
-      throw new UncheckedIOException(e);
+    } catch (JacksonException e) {
+      throw new JsonParsingException(e);
     }
   }
 

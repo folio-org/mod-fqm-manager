@@ -1,17 +1,23 @@
 package org.folio.fqm.client;
 
 import java.util.List;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.MediaType;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@Service
-@FeignClient(name = "modes-of-issuance")
-// Optional dep in MD as this is only used in migrations which will only run on entity types
-// that require locations, so we can safely assume locations will exist if this is invoked.
+/**
+ * Client for retrieving mode-of-issuance reference data used by migration strategies.
+ *
+ * <p>This is an optional dependency in the module descriptor.
+ *
+ * <p>This client is only used by migrations that require modes of issuance, so it is safe to call
+ * only when the inventory module is present.
+ */
+@HttpExchange(url = "modes-of-issuance", accept = MediaType.APPLICATION_JSON_VALUE)
 public interface ModesOfIssuanceClient {
-  @GetMapping(params = "limit=1000")
-  public ModesOfIssuanceResponse getModesOfIssuance();
+
+  @GetExchange("?limit=1000")
+  ModesOfIssuanceResponse getModesOfIssuance();
 
   public record ModesOfIssuanceResponse(List<ModeOfIssuance> issuanceModes) {}
 

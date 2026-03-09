@@ -68,7 +68,7 @@
       valueGetter: ':publication_status.ps_status_note',
     },
     {
-      name: 'pub_status_pub_request_ID',
+      name: 'pub_status_pub_request_id',
       dataType: {
         dataType: 'stringType',
       },

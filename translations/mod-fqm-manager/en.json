@@ -610,7 +610,7 @@
   "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value",
   "entityType.simple_openaccess_publication_status": "OA pub status",
   "entityType.simple_openaccess_publication_status.pub_status_id": "OA pub status ID",
-  "entityType.simple_openaccess_publication_status.pub_status_pub_request_ID": "OA pub status pub request ID",
+  "entityType.simple_openaccess_publication_status.pub_status_pub_request_id": "OA pub status pub request ID",
   "entityType.simple_openaccess_publication_status.pub_status_label": "OA pub status label",
   "entityType.simple_openaccess_publication_status.pub_status_value": "OA pub status value",
   "entityType.simple_openaccess_publication_status.pub_status_date": "OA pub status date",

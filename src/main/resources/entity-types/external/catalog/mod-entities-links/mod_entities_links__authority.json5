@@ -1,0 +1,374 @@
+{
+  id: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7',
+  name: 'mod_entities_links__authority',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__catalog__entities_links__authority',
+      target: 'src__catalog__entities_links__authority',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.authorities.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'natural_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.natural_id',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'source_file_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.source_file_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'source',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.source',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'heading',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.heading',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'heading_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.heading_type',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.version',
+      valueFunction: '(:value)::integer',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'subject_heading_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.subject_heading_code',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'sft_headings',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'heading',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'heading',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'heading_type',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'headingType',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'relationship_type',
+              queryable: true,
+              values: [
+                {
+                  value: 'BROADER_TERM',
+                  label: 'Broader term',
+                },
+                {
+                  value: 'NARROWER_TERM',
+                  label: 'Narrower term',
+                },
+                {
+                  value: 'EARLIER_HEADING',
+                  label: 'Earlier heading',
+                },
+                {
+                  value: 'LATER_HEADING',
+                  label: 'Later heading',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'relationshipType',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.sft_headings',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'saft_headings',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'heading',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'heading',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'heading_type',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'headingType',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'relationship_type',
+              queryable: true,
+              values: [
+                {
+                  value: 'BROADER_TERM',
+                  label: 'Broader term',
+                },
+                {
+                  value: 'NARROWER_TERM',
+                  label: 'Narrower term',
+                },
+                {
+                  value: 'EARLIER_HEADING',
+                  label: 'Earlier heading',
+                },
+                {
+                  value: 'LATER_HEADING',
+                  label: 'Later heading',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'relationshipType',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.saft_headings',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'identifiers',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'value',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'identifier_type_id',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'identifierTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.identifiers',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'notes',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'note_type_id',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'noteTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'note',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'note') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'note')) FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'note',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'staff_only',
+              queryable: true,
+              values: [
+                {
+                  value: 'true',
+                  label: 'True',
+                },
+                {
+                  value: 'false',
+                  label: 'False',
+                },
+              ],
+              valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'staffOnly',
+              dataType: {
+                dataType: 'booleanType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.notes',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_date',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.created_by_user_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.updated_date',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.update_by_user_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__catalog__entities_links__authority',
+    },
+  ],
+}

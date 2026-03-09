@@ -1,0 +1,87 @@
+{
+  id: '34d59a60-4b1b-4c38-9cbe-a61588b3606b',
+  name: 'simple_openaccess_payer',
+  private: false,
+  requiredPermissions: [
+    'oa.charges.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'payer',
+      type: 'db',
+      target: 'src_oa_payer',
+    },
+    {
+      type: 'db',
+      alias: 'payer_name',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'payer',
+        condition: ':this.rdv_id = :that.cpy_payer_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'payer_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':payer.cpy_id',
+    },
+    {
+      name: 'payer_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':payer.cpy_version',
+    },
+    {
+      name: 'payer_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':payer_name.rdv_value',
+    },
+    {
+      name: 'payer_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':payer_name.rdv_label',
+    },
+    {
+      name: 'payer_gross_amount_in_base_currency',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':payer.cpy_payer_amount',
+    },
+    {
+      name: 'payer_note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':payer.cpy_payer_note',
+    },
+    {
+      name: 'payer_charge_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':payer.cpy_owner_fk',
+    },
+  ],
+}

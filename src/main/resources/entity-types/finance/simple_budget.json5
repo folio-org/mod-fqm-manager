@@ -453,6 +453,7 @@
         FROM\
           jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
       )",
+      valueFunction: "lower(:value)",
     }
   ],
   sources: [

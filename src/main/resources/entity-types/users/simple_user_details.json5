@@ -9,10 +9,7 @@
       alias: 'user',
     },
   ],
-  requiredPermissions: [
-    'users.collection.get',
-    'users.item.get'
-  ],
+  requiredPermissions: ['users.collection.get', 'users.item.get'],
   columns: [
     {
       name: 'id',
@@ -39,6 +36,7 @@
       valueGetter: ":sourceAlias.jsonb->>'active'",
       filterValueGetter: "lower(${tenant_id}_mod_users.f_unaccent(:sourceAlias.jsonb ->> 'active'::text))",
       valueFunction: 'lower(${tenant_id}_mod_users.f_unaccent(:value))',
+
       values: [
         {
           value: 'true',
@@ -84,8 +82,7 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
-          // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -104,8 +101,7 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
       joinsTo: [
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
-          // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -540,7 +536,7 @@
         },
       },
       isIdColumn: false,
-      queryable: true,
+      queryable: false,
       visibleByDefault: false,
       valueGetter: "(\
         SELECT\
@@ -558,7 +554,7 @@
         entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
         columnName: 'label',
       },
-      valueFunction: "lower(:value)",
+      valueFunction: "lower(:value)"
     },
     {
       name: 'department_ids',

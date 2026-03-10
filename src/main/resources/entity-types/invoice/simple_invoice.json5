@@ -690,6 +690,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
+      sourceAlias: 'invoice',
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\

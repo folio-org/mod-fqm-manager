@@ -247,7 +247,7 @@
       valueGetter: ':charge.ch_discount_note',
     },
     {
-      name: 'charge_pub_request_ID',
+      name: 'charge_pub_request_id',
       dataType: {
         dataType: 'stringType',
       },

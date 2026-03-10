@@ -140,7 +140,7 @@
     "entityType.simple_user_details.phone": "Phone",
     "entityType.simple_user_details.preferred_first_name": "Preferred first name",
     "entityType.simple_user_details.proxy_for": "Proxy for",
-    "entityType.simple_user_details.tags_tag_list": "Tags tag list",
+    "entityType.simple_user_details.tags_tag_list": "Tags",
     "entityType.simple_user_details.type": "Type",
     "entityType.simple_user_details.updated_by_user_id": "Updated by user UUID",
     "entityType.simple_user_details.updated_date": "Updated date",

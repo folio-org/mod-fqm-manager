@@ -409,8 +409,18 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "( SELECT array_agg(tnt_id.value::text) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
-      filterValueGetter: "( SELECT array_agg(lower(tnt_id.value::text)) FILTER (WHERE (tnt_id.value::text) IS NOT NULL) AS array_agg FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'tags' ->'tagList'::text) tnt_id(value))",
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
       valueFunction: 'lower(:value)',
       source: {
         entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',

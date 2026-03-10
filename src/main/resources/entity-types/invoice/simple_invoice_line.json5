@@ -137,17 +137,17 @@
               filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
               valueFunction: 'lower(:value)',
             },
-//            {
-//              name: 'invoice_line_id',
-//              property: 'invoiceLineId',
-//              dataType: {
-//                dataType: 'rangedUUIDType',
-//              },
-//              queryable: false,
-//              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
-//              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
-//              valueFunction: 'lower(:value)',
-//            },
+            //            {
+            //              name: 'invoice_line_id',
+            //              property: 'invoiceLineId',
+            //              dataType: {
+            //                dataType: 'rangedUUIDType',
+            //              },
+            //              queryable: false,
+            //              valueGetter: "( SELECT array_agg(elems.value ->> 'invoiceLineId') FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+            //              filterValueGetter: "( SELECT array_agg(lower(elems.value ->> 'invoiceLineId')) FROM jsonb_array_elements(:sourceAlias.jsonb -> 'fundDistributions') AS elems)",
+            //              valueFunction: 'lower(:value)',
+            //            },
             {
               name: 'expense_class_id',
               property: 'expenseClassId',
@@ -188,7 +188,8 @@
       valueGetter: ':sourceAlias.invoiceid',
       joinsTo: [
         {
-          targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
+          targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
+          // simple_invoice
           targetField: 'id',
           type: 'equality-simple',
           direction: 'left',
@@ -282,7 +283,8 @@
       valueGetter: ":sourceAlias.jsonb->>'poLineId'",
       joinsTo: [
         {
-          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e',
+          // simple_purchase_order_line
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -439,13 +441,15 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'createdByUserId'",
       joinsTo: [
         {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          // simple_user_details
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
         },
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -465,13 +469,15 @@
       valueGetter: ":sourceAlias.jsonb->'metadata'->>'updatedByUserId'",
       joinsTo: [
         {
-          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          // simple_user_details
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
         },
         {
-          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          // simple_FOLIO_user
           targetField: 'id',
           type: 'equality-cast-uuid',
           direction: 'left',
@@ -490,8 +496,18 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "(\n  SELECT\n    array_agg(tnt_id.value::text) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
-      filterValueGetter: "(\n  SELECT\n    array_agg(lower(tnt_id.value::text)) FILTER (\n      WHERE\n        (tnt_id.value::text) IS NOT NULL\n    ) AS ARRAY_AGG\n  FROM\n    jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList'::text) tnt_id (value)\n)",
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
       source: {
         entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
         columnName: 'label',

@@ -1627,7 +1627,7 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      sourceAlias: 'transaction',
+      sourceAlias: 'org',
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\

@@ -1,0 +1,158 @@
+{
+  id: '135545ed-28e2-417b-96b9-98d68530d9ed',
+  name: 'simple_openaccess_correspondence',
+  private: false,
+  requiredPermissions: [
+    'oa.correspondence.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'correspondence',
+      type: 'db',
+      target: 'src_oa_correspondence',
+    },
+    {
+      type: 'db',
+      alias: 'prc_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'correspondence',
+        condition: ':this.rdv_id = :that.prc_status_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'prc_mode',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'correspondence',
+        condition: ':this.rdv_id = :that.prc_mode_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'prc_category',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'correspondence',
+        condition: ':this.rdv_id = :that.prc_category_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'correspondence_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':correspondence.prc_id',
+    },
+    {
+      name: 'correspondence_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':correspondence.version',
+    },
+    {
+      name: 'correspondence_date_created',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':correspondence.prc_date_of_correspondence',
+    },
+    {
+      name: 'correspondence_last_updated',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':correspondence.prc_last_updated',
+    },
+    {
+      name: 'correspondence_content',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':correspondence.prc_content',
+    },
+    {
+      name: 'correspondence_correspondent',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':correspondence.prc_correspondent',
+    },
+    {
+      name: 'correspondence_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':prc_status.rdv_value',
+    },
+    {
+      name: 'correspondence_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':prc_status.rdv_label',
+    },
+    {
+      name: 'correspondence_mode_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':prc_mode.rdv_value',
+    },
+    {
+      name: 'correspondence_mode_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':prc_mode.rdv_label',
+    },
+    {
+      name: 'correspondence_category_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':prc_category.rdv_value',
+    },
+    {
+      name: 'correspondence_category_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':prc_category.rdv_label',
+    },
+    {
+      name: 'correspondence_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':correspondence.prc_owner_fk',
+    },
+  ],
+}

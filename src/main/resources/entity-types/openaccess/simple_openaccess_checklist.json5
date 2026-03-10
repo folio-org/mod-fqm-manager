@@ -1,0 +1,156 @@
+{
+  id: '2e55ba0b-b871-4206-bfff-ec7223ef5e92',
+  name: 'simple_openaccess_checklist',
+  private: false,
+  requiredPermissions: [
+    'oa.checklistItems.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'checklist_item',
+      type: 'db',
+      target: 'src_oa_checklist_item',
+    },
+    {
+      type: 'db',
+      alias: 'checklist_item_definition',
+      target: 'src_oa_checklist_item_definition',
+      join: {
+        type: 'left join',
+        joinTo: 'checklist_item',
+        condition: ':this.clid_id = :that.cli_definition_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'cli_outcome',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'checklist_item',
+        condition: ':this.rdv_id = :that.cli_outcome_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'cli_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'checklist_item',
+        condition: ':this.rdv_id = :that.cli_status_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'checklist_item_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':checklist_item.cli_id',
+    },
+    {
+      name: 'checklist_item_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':checklist_item.version',
+    },
+    {
+      name: 'checklist_item_date_created',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':checklist_item.cli_date_created',
+    },
+    {
+      name: 'checklist_item_last_updated',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':checklist_item.cli_last_updated',
+    },
+    {
+      name: 'checklist_item_definition_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':checklist_item_definition.clid_name',
+    },
+    {
+      name: 'checklist_item_definition_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':checklist_item_definition.clid_label',
+    },
+    {
+      name: 'checklist_item_definition_description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':checklist_item_definition.clid_description',
+    },
+    {
+      name: 'checklist_item_outcome_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':cli_outcome.rdv_value',
+    },
+    {
+      name: 'checklist_item_outcome_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':cli_outcome.rdv_label',
+    },
+    {
+      name: 'checklist_item_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':cli_status.rdv_value',
+    },
+    {
+      name: 'checklist_item_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':cli_status.rdv_label',
+    },
+    {
+      name: 'checklist_item_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':checklist_item.cli_parent_fk',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'checklist_item_definition_label',
+      direction: 'ASC',
+    },
+  ],
+}

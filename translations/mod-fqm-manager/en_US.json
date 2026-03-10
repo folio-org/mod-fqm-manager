@@ -506,7 +506,7 @@
     "entityType.simple_purchase_order.po_number_suffix": "PO number suffix",
     "entityType.simple_purchase_order.re_encumber": "Re-encumber",
     "entityType.simple_purchase_order.ship_to": "Ship to",
-    "entityType.simple_purchase_order.tags": "Tags tag list",
+    "entityType.simple_purchase_order.tags": "Tags",
     "entityType.simple_purchase_order.template": "Template",
     "entityType.simple_purchase_order.updated_at": "Updated at",
     "entityType.simple_purchase_order.updated_by": "Updated by user UUID",

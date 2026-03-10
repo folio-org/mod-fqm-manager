@@ -538,6 +538,7 @@
       isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(\
         SELECT\
           array_agg(elems.value::text)\

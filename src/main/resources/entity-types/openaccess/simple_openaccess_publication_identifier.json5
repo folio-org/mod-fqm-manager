@@ -1,0 +1,84 @@
+{
+  id: '34a7471b-dbb7-4d9a-80e5-57e6aa9c6df0',
+  name: 'simple_openaccess_publication_identifier',
+  private: false,
+  requiredPermissions: [
+    'oa.publicationRequest.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'publication_identifier',
+      type: 'db',
+      target: 'src_oa_publication_identifier',
+    },
+    {
+      type: 'db',
+      alias: 'pi_type',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_identifier',
+        condition: ':this.rdv_id = :that.pi_type',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'pub_identifier_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':publication_identifier.pi_id',
+    },
+    {
+      name: 'pub_identifier_type_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':pi_type.rdv_value',
+    },
+    {
+      name: 'pub_identifier_type_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':pi_type.rdv_label',
+    },
+    {
+      name: 'pub_identifier_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':publication_identifier.version',
+    },
+    {
+      name: 'pub_identifier',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_identifier.pi_pub_identifier',
+    },
+    {
+      name: 'pub_identifier_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_identifier.pi_owner_fk',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'pub_identifier_value',
+      direction: 'ASC',
+    },
+  ],
+}

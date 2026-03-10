@@ -1953,7 +1953,7 @@
   "entityType.simple_organization.san_code": "SAN code",
   "entityType.simple_organization.status": "Status",
   "entityType.simple_organization.subscription_interval": "Subscription interval",
-  "entityType.simple_organization.tags": "tags",
+  "entityType.simple_organization.tags": "Tags",
   "entityType.simple_organization.tax_id": "Tax ID",
   "entityType.simple_organization.tax_percentage": "Tax percentage",
   "entityType.simple_organization.type_ids": "Type UUIDs",

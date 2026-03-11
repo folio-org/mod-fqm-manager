@@ -1616,6 +1616,37 @@
       },
     },
     {
+      name: 'tags',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      sourceAlias: 'org',
+      valueGetter: "(\
+        SELECT\
+          array_agg(elems.value::text)\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      filterValueGetter: "(\
+        SELECT\
+          array_agg(lower(elems.value::text))\
+        FROM\
+          jsonb_array_elements_text(:sourceAlias.jsonb->'tags'->'tagList') AS elems\
+      )",
+      source: {
+        entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
+        columnName: 'label',
+      },
+      valueFunction: 'lower(:value)',
+    },
+    {
       name: 'edi_vendor_edi_code',
       sourceAlias: 'org',
       dataType: {

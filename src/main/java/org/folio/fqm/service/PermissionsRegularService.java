@@ -51,6 +51,7 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public Set<String> getUserPermissions() {
+    log.info("Getting permissions from context-derived tenant and user");
     return getUserPermissions(context.getTenantId(), context.getUserId());
   }
 
@@ -66,10 +67,12 @@ public class PermissionsRegularService implements PermissionsService {
 
   @Override
   public void verifyUserHasNecessaryPermissions(EntityType entityType, boolean checkFqmPermissions) {
+    log.info("Deriving tenant and user from context to verify permissions");
     verifyUserHasNecessaryPermissions(context.getTenantId(), entityType, context.getUserId(), checkFqmPermissions);
   }
 
   public void verifyUserHasNecessaryPermissions(String tenantId, EntityType entityType, UUID userId, boolean checkFqmPermissions) {
+    log.info("Verifying user permissions for tenant={}, userId={}, entityType={}, checkFqmPermissions={}", tenantId, userId, entityType.getId(), checkFqmPermissions);
     Set<String> requiredPermissions = getRequiredPermissions(entityType);
     Set<String> userPermissions = getUserPermissions(tenantId, userId);
 
@@ -113,6 +116,8 @@ public class PermissionsRegularService implements PermissionsService {
   }
 
   private Set<String> getUserPermissionsFromRolesKeycloak(String tenantId, UUID userId) {
+    log.info("Attempting to fetch permission user for tenant={} and userId={}", tenantId, userId);
+    log.info("Trace:", new Exception("Trace for getUserPermissionsFromRolesKeycloak"));
     return modRolesKeycloakClient
       .getPermissionsUser(tenantId, userId)
       .getPermissionNames();

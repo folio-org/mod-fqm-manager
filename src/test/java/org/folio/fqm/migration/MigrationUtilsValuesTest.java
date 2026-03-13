@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -159,7 +159,7 @@ class MigrationUtilsValuesTest {
     Predicate<String> predicate,
     List<Triple<String, String, String>> fieldArguments,
     String expectedQuery
-  ) throws JsonProcessingException {
+  ) throws JacksonException {
     List<Triple<String, String, String>> fieldArgumentsLeftToGet = new ArrayList<>(fieldArguments);
 
     String actualQuery = MigrationUtils
@@ -179,7 +179,7 @@ class MigrationUtilsValuesTest {
               Triple<String, String, String> actual;
               try {
                 actual = Triple.of(key.field(), value, objectMapper.readTree(fql.get()).toString());
-              } catch (JsonProcessingException e) {
+              } catch (JacksonException e) {
                 throw new RuntimeException(e);
               }
 
@@ -208,7 +208,7 @@ class MigrationUtilsValuesTest {
   }
 
   @Test
-  void testRemovesWhenApplicable() throws JsonProcessingException {
+  void testRemovesWhenApplicable() throws JacksonException {
     String originalQuery =
       """
       {

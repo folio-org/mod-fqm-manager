@@ -1,17 +1,23 @@
 package org.folio.fqm.client;
 
 import java.util.List;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.MediaType;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-@Service
-@FeignClient(name = "organizations/organizations")
-// Optional dep in MD as this is only used in migrations which will only run on entity types
-// that require locations, so we can safely assume locations will exist if this is invoked.
+/**
+ * Client for retrieving organization reference data used by migration strategies.
+ *
+ * <p>This is an optional dependency in the module descriptor.
+ *
+ * <p>This client is only used by migrations that require organizations, so it is safe to call
+ * only when the organizations module is present.
+ */
+@HttpExchange(url = "organizations/organizations", accept = MediaType.APPLICATION_JSON_VALUE)
 public interface OrganizationsClient {
-  @GetMapping(params = "limit=1000")
-  public OrganizationsResponse getOrganizations();
+
+  @GetExchange("?limit=1000")
+  OrganizationsResponse getOrganizations();
 
   public record OrganizationsResponse(List<Organization> organizations) {}
 

@@ -1,6 +1,6 @@
 package org.folio.fqm.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
 import org.folio.querytool.domain.dto.EntityDataType;

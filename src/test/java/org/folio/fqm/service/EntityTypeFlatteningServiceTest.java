@@ -9,8 +9,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -363,7 +363,7 @@ class EntityTypeFlatteningServiceTest {
       // └--- composite_1_to_2 ---------------------------------------┘
       //      ├--- simple_1 -> db (C) ---┐
       //      └--- simple_2 -> db (D) <--┘
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new ExceptionInInitializerError(e);
     }
   }

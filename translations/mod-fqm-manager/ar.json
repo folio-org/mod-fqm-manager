@@ -140,7 +140,7 @@
     "entityType.simple_user_details.phone": "الهاتف",
     "entityType.simple_user_details.preferred_first_name": "الاسم الأول المفضل",
     "entityType.simple_user_details.proxy_for": "وكيل لـ",
-    "entityType.simple_user_details.tags_tag_list": "Tags tag list",
+    "entityType.simple_user_details.tags_tag_list": "Tags",
     "entityType.simple_user_details.type": "النوع",
     "entityType.simple_user_details.updated_by_user_id": "تم التحديث بواسطة المعرف العمومي الفريد للمستخدم",
     "entityType.simple_user_details.updated_date": "تاريخ التحديث",
@@ -506,7 +506,7 @@
     "entityType.simple_purchase_order.po_number_suffix": "لاحقة رقم أمر الشراء",
     "entityType.simple_purchase_order.re_encumber": "إعادة تكلفة",
     "entityType.simple_purchase_order.ship_to": "شحن إلى",
-    "entityType.simple_purchase_order.tags": "Tags tag list",
+    "entityType.simple_purchase_order.tags": "Tags",
     "entityType.simple_purchase_order.template": "قالب",
     "entityType.simple_purchase_order.updated_at": "تم التحديث في",
     "entityType.simple_purchase_order.updated_by": "تم التحديث بواسطة المعرف العمومي الفريد للمستخدم",
@@ -2339,5 +2339,9 @@
     "entityType.simple_openaccess_publication_request.oa_pr_work_indexed_in_doaj_value": "OA pub request work indexed in DOAJ value",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_fk": "OA pub request work oa status ID",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_label": "OA pub request work oa status label",
-    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value"
+    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value",
+    "entityType.composite_users_with_fees_fines_accounts_loans.item": "Item",
+    "entityType.composite_item_details.in_transit_destination_service_point": "Destination service point",
+    "entityType.composite_item_details.last_check_in_service_point": "Last check in service point",
+    "entityType.simple_organization.tags": "Tags"
 }

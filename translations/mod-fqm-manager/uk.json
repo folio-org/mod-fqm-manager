@@ -2339,5 +2339,9 @@
     "entityType.simple_openaccess_publication_request.oa_pr_work_indexed_in_doaj_value": "OA pub request work indexed in DOAJ value",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_fk": "OA pub request work oa status ID",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_label": "OA pub request work oa status label",
-    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value"
+    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value",
+    "entityType.composite_users_with_fees_fines_accounts_loans.item": "Item",
+    "entityType.composite_item_details.in_transit_destination_service_point": "Destination service point",
+    "entityType.composite_item_details.last_check_in_service_point": "Last check in service point",
+    "entityType.simple_organization.tags": "Tags"
 }

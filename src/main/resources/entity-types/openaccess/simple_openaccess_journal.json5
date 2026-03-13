@@ -1,0 +1,283 @@
+{
+  id: '31fd41b9-0281-47b1-a6df-dd4fd61e2ba3',
+  name: 'simple_openaccess_journal',
+  private: false,
+  requiredPermissions: [
+    'oa.works.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'work',
+      type: 'db',
+      target: 'src_oa_work',
+    },
+    {
+      type: 'db',
+      alias: 'title_instance',
+      target: 'src_oa_title_instance',
+      join: {
+        type: 'left join',
+        joinTo: 'work',
+        condition: ':this.ti_work_fk = :that.w_id',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'identifier_occurrence',
+      target: 'src_oa_identifier_occurrence',
+      join: {
+        type: 'left join',
+        joinTo: 'title_instance',
+        condition: ':this.io_ti_fk = :that.ti_id',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'identifier',
+      target: 'src_oa_identifier',
+      join: {
+        type: 'left join',
+        joinTo: 'identifier_occurrence',
+        condition: ':this.id_id = :that.io_identifier_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'identifier_namespace',
+      target: 'src_oa_identifier_namespace',
+      join: {
+        type: 'left join',
+        joinTo: 'identifier',
+        condition: ':this.idns_id = :that.id_ns_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'journal_doaj_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'work',
+        condition: ':this.rdv_id = :that.w_indexed_in_doaj_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'journal_oa_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'work',
+        condition: ':this.rdv_id = :that.w_oa_status_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'ti_type',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'title_instance',
+        condition: ':this.rdv_id = :that.ti_type_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'ti_subtype',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'title_instance',
+        condition: ':this.rdv_id = :that.ti_subtype_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'ti_publication_type',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'title_instance',
+        condition: ':this.rdv_id = :that.ti_publication_type_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'work_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':work.w_id',
+    },
+    {
+      name: 'work_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':work.w_version',
+    },
+    {
+      name: 'work_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':work.w_title',
+    },
+    {
+      name: 'work_indexed_in_doaj_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':journal_doaj_status.rdv_value',
+    },
+    {
+      name: 'work_indexed_in_doaj_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':journal_doaj_status.rdv_label',
+    },
+    {
+      name: 'work_oa_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':journal_oa_status.rdv_value',
+    },
+    {
+      name: 'work_oa_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':journal_oa_status.rdv_label',
+    },
+    {
+      name: 'title_instance_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':title_instance.ti_id',
+    },
+    {
+      name: 'title_instance_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':title_instance.ti_version',
+    },
+    {
+      name: 'title_instance_type_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':ti_type.rdv_value',
+    },
+    {
+      name: 'title_instance_type_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':ti_type.rdv_label',
+    },
+    {
+      name: 'title_instance_subtype_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':ti_subtype.rdv_value',
+    },
+    {
+      name: 'title_instance_subtype_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':ti_subtype.rdv_label',
+    },
+    {
+      name: 'title_instance_pub_type_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':ti_publication_type.rdv_value',
+    },
+    {
+      name: 'title_instance_pub_type_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':ti_publication_type.rdv_label',
+    },
+    {
+      name: 'title_instance_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':title_instance.ti_title',
+    },
+    {
+      name: 'title_instance_identifier_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':identifier.id_id',
+    },
+    {
+      name: 'title_instance_identifier_id_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':identifier.id_value',
+    },
+    {
+      name: 'title_instance_identifier_namespace_id_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':identifier_namespace.idns_version',
+    },
+    {
+      name: 'title_instance_identifier_namespace_id_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':identifier_namespace.idns_value',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'work_title',
+      direction: 'ASC',
+    },
+  ],
+}

@@ -1,0 +1,85 @@
+{
+  id: '190d4ef4-8ed6-4e5e-a479-5ee743b20594',
+  name: 'simple_openaccess_publication_status',
+  private: false,
+  requiredPermissions: [
+    'oa.publicationRequest.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'publication_status',
+      type: 'db',
+      target: 'src_oa_publication_status',
+    },
+    {
+      type: 'db',
+      alias: 'refdata_value',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'publication_status',
+        condition: ':this.rdv_id = :that.ps_publication_status',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'pub_status_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':publication_status.ps_id',
+    },
+    {
+      name: 'pub_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':refdata_value.rdv_value',
+    },
+    {
+      name: 'pub_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':refdata_value.rdv_label',
+    },
+    {
+      name: 'pub_status_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_status.ps_status_date',
+    },
+    {
+      name: 'pub_status_note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':publication_status.ps_status_note',
+    },
+    {
+      name: 'pub_status_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':publication_status.ps_owner_fk',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'pub_status_date',
+      direction: 'ASC',
+    },
+  ],
+}

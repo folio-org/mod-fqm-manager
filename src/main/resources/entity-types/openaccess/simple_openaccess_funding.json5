@@ -1,0 +1,103 @@
+{
+  id: '4428d067-76be-43d9-a7ba-0e499cb30aee',
+  name: 'simple_openaccess_funding',
+  private: false,
+  requiredPermissions: [
+    'oa.publicationRequest.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'funding',
+      type: 'db',
+      target: 'src_oa_funding',
+    },
+    {
+      type: 'db',
+      alias: 'funder_description',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'funding',
+        condition: ':this.rdv_id = :that.f_funder_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'funding_aspect_description',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'funding',
+        condition: ':this.rdv_id = :that.f_aspect_funded',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'funding_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':funding.f_id',
+    },
+    {
+      name: 'funding_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':funding.version',
+    },
+    {
+      name: 'funder_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':funder_description.rdv_value',
+    },
+    {
+      name: 'funder_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':funder_description.rdv_label',
+    },
+    {
+      name: 'funding_aspect',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':funding_aspect_description.rdv_label',
+    },
+    {
+      name: 'funding_last_update',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':funding.f_last_updated',
+    },
+    {
+      name: 'funding_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':funding.f_owner_fk',
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: 'funder_name',
+      direction: 'ASC',
+    },
+  ],
+}

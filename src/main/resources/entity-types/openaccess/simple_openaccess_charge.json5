@@ -1,0 +1,258 @@
+{
+  id: 'c1cb7dc7-2479-4ec2-b646-485b962fd7e1',
+  name: 'simple_openaccess_charge',
+  private: false,
+  requiredPermissions: [
+    'oa.charges.collection.get'
+  ],
+  sources: [
+    {
+      alias: 'charge',
+      type: 'db',
+      target: 'src_oa_charge',
+    },
+    {
+      type: 'db',
+      alias: 'monetary_value',
+      target: 'src_oa_monetary_value',
+      join: {
+        type: 'left join',
+        joinTo: 'charge',
+        condition: ':this.id = :that.ch_amount_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'exchange_rate',
+      target: 'src_oa_exchange_rate',
+      join: {
+        type: 'left join',
+        joinTo: 'charge',
+        condition: ':this.id = :that.ch_exchange_rate_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'discount_type',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'charge',
+        condition: ':this.rdv_id = :that.ch_discount_type_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'category',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'charge',
+        condition: ':this.rdv_id = :that.ch_category_fk',
+      },
+    },
+    {
+      type: 'db',
+      alias: 'charge_status',
+      target: 'src_oa_refdata_value',
+      join: {
+        type: 'left join',
+        joinTo: 'charge',
+        condition: ':this.rdv_id = :that.ch_charge_status_fk',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'charge_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: true,
+      queryable: true,
+      valueGetter: ':charge.ch_id',
+    },
+    {
+      name: 'charge_version',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      valueGetter: ':charge.version',
+    },
+    {
+      name: 'charge_description',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':charge.ch_description',
+    },
+    {
+      name: 'charge_category_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':category.rdv_value',
+    },
+    {
+      name: 'charge_category_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':category.rdv_label',
+    },
+    {
+      name: 'invoice_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_invoice_reference',
+    },
+    {
+      name: 'invoice_line_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_invoice_line_item_reference',
+    },
+    {
+      name: 'charge_status_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge_status.rdv_value',
+    },
+    {
+      name: 'charge_status_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':charge_status.rdv_label',
+    },
+    {
+      name: 'charge_payment_period',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_payment_period',
+    },
+    {
+      name: 'charge_creation_date',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':charge.ch_date_created',
+    },
+    {
+      name: 'charge_last_update',
+      dataType: {
+        dataType: 'dateType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_last_updated',
+    },
+    {
+      name: 'charge_base_currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':monetary_value.basecurrency',
+    },
+    {
+      name: 'charge_net_amount_in_base_currency',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':monetary_value.monval',
+    },
+    {
+      name: 'charge_exchange_rate',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      valueGetter: ':exchange_rate.coefficient',
+    },
+    {
+      name: 'charge_exchange_from_currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':exchange_rate.from_currency',
+    },
+    {
+      name: 'charge_exchange_to_currency',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':exchange_rate.to_currency',
+    },
+    {
+      name: 'charge_tax_rate',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_tax',
+    },
+    {
+      name: 'charge_discount',
+      dataType: {
+        dataType: 'numberType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_discount',
+    },
+    {
+      name: 'charge_discount_type_value',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':discount_type.rdv_value',
+    },
+    {
+      name: 'charge_discount_type_label',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':discount_type.rdv_label',
+    },
+    {
+      name: 'charge_discount_note',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_discount_note',
+    },
+    {
+      name: 'charge_pub_request_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      valueGetter: ':charge.ch_owner_fk',
+    },
+  ],
+}

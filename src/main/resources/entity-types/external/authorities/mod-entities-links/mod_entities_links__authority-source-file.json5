@@ -1,0 +1,45 @@
+{
+  id: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5',
+  name: 'mod_entities_links__authority-source-file',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__authorities__entities_links__authority_source_file',
+      target: 'src__authorities__entities_links__authority_source_file',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.authority-source-files.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__authorities__entities_links__authority_source_file',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.name',
+      sourceAlias: 'src__authorities__entities_links__authority_source_file',
+    },
+  ],
+}

@@ -140,7 +140,7 @@
     "entityType.simple_user_details.phone": "Phone",
     "entityType.simple_user_details.preferred_first_name": "Preferred first name",
     "entityType.simple_user_details.proxy_for": "Proxy for",
-    "entityType.simple_user_details.tags_tag_list": "Tags tag list",
+    "entityType.simple_user_details.tags_tag_list": "Tags",
     "entityType.simple_user_details.type": "Type",
     "entityType.simple_user_details.updated_by_user_id": "透過使用者 UUID 更新",
     "entityType.simple_user_details.updated_date": "Updated date",
@@ -506,7 +506,7 @@
     "entityType.simple_purchase_order.po_number_suffix": "PO number suffix",
     "entityType.simple_purchase_order.re_encumber": "Re-encumber",
     "entityType.simple_purchase_order.ship_to": "Ship to",
-    "entityType.simple_purchase_order.tags": "Tags tag list",
+    "entityType.simple_purchase_order.tags": "Tags",
     "entityType.simple_purchase_order.template": "Template",
     "entityType.simple_purchase_order.updated_at": "Updated at",
     "entityType.simple_purchase_order.updated_by": "透過使用者 UUID 更新",
@@ -2339,5 +2339,9 @@
     "entityType.simple_openaccess_publication_request.oa_pr_work_indexed_in_doaj_value": "OA pub request work indexed in DOAJ value",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_fk": "OA pub request work oa status ID",
     "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_label": "OA pub request work oa status label",
-    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value"
+    "entityType.simple_openaccess_publication_request.oa_pr_work_oa_status_value": "OA pub request work oa status value",
+    "entityType.composite_users_with_fees_fines_accounts_loans.item": "Item",
+    "entityType.composite_item_details.in_transit_destination_service_point": "Destination service point",
+    "entityType.composite_item_details.last_check_in_service_point": "Last check in service point",
+    "entityType.simple_organization.tags": "Tags"
 }

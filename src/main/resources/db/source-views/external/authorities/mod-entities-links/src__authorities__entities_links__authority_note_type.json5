@@ -1,0 +1,10 @@
+{
+  name: 'src__authorities__entities_links__authority_note_type',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_entities_links',
+      'authority_note_type',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_entities_links.authority_note_type',
+}

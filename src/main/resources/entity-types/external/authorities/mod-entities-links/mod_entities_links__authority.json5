@@ -5,8 +5,8 @@
   sources: [
     {
       type: 'db',
-      alias: 'src__catalog__entities_links__authority',
-      target: 'src__catalog__entities_links__authority',
+      alias: 'src__authorities__entities_links__authority',
+      target: 'src__authorities__entities_links__authority',
     },
   ],
   requiredPermissions: [
@@ -29,7 +29,7 @@
       isIdColumn: true,
       valueGetter: ':sourceAlias.id',
       valueFunction: '(:value)::uuid',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'natural_id',
@@ -39,7 +39,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.natural_id',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'source_file_id',
@@ -50,7 +50,14 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.source_file_id',
       valueFunction: '(:value)::uuid',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
+      joinsTo: [
+        {
+          targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+        },
+      ],
     },
     {
       name: 'source',
@@ -60,7 +67,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.source',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'heading',
@@ -70,7 +77,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.heading',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'heading_type',
@@ -80,7 +87,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.heading_type',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'version',
@@ -91,7 +98,7 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.version',
       valueFunction: '(:value)::integer',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'subject_heading_code',
@@ -101,7 +108,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.subject_heading_code',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'sft_headings',
@@ -167,7 +174,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.sft_headings',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'saft_headings',
@@ -233,7 +240,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.saft_headings',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'identifiers',
@@ -269,7 +276,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.identifiers',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'notes',
@@ -281,6 +288,13 @@
             {
               name: 'note_type_id',
               queryable: true,
+              joinsTo: [
+                {
+                  targetId: '369af782-637c-5ab7-af1f-f66a3e45acad',
+                  targetField: 'id',
+                  type: 'equality-cast-uuid',
+                },
+              ],
               valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noteTypeId',
@@ -313,7 +327,7 @@
                 },
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: 'lower(:value)',
               property: 'staffOnly',
               dataType: {
@@ -326,7 +340,7 @@
       queryable: false,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.notes',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'metadata_created_date',
@@ -336,7 +350,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.created_date',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'metadata_created_by_user_id',
@@ -345,9 +359,25 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: ':sourceAlias.created_by_user_id',
       valueFunction: '(:value)::uuid',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'metadata_updated_date',
@@ -357,7 +387,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.updated_date',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
       name: 'metadata_updated_by_user_id',
@@ -366,9 +396,25 @@
       },
       queryable: true,
       visibleByDefault: false,
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
       valueGetter: ':sourceAlias.update_by_user_id',
       valueFunction: '(:value)::uuid',
-      sourceAlias: 'src__catalog__entities_links__authority',
+      sourceAlias: 'src__authorities__entities_links__authority',
     },
   ],
 }

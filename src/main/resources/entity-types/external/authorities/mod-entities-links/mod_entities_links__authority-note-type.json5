@@ -1,0 +1,45 @@
+{
+  id: '369af782-637c-5ab7-af1f-f66a3e45acad',
+  name: 'mod_entities_links__authority-note-type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__authorities__entities_links__authority_note_type',
+      target: 'src__authorities__entities_links__authority_note_type',
+    },
+  ],
+  requiredPermissions: [
+    'inventory-storage.authority-note-types.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__authorities__entities_links__authority_note_type',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.name',
+      sourceAlias: 'src__authorities__entities_links__authority_note_type',
+    },
+  ],
+}

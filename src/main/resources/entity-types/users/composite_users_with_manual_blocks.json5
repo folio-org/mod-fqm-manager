@@ -1,0 +1,59 @@
+{
+  id: '2796933a-4c17-41b1-ab3a-0eeecf69fac3',
+  name: 'composite_users_with_manual_blocks',
+  private: false,
+  sources: [
+    {
+      alias: 'user',
+      type: 'entity-type',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user
+      sourceField: 'manual_block.user_id',
+      targetField: 'id',
+      inheritCustomFields: true,
+      useIdColumns: true,
+      overrideJoinDirection: 'inner',
+      order: 1,
+    },
+    {
+      alias: 'group',
+      type: 'entity-type',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
+      sourceField: 'user.group_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 2,
+    },
+    {
+      alias: 'manual_block',
+      type: 'entity-type',
+      targetId: '78360363-7305-5196-a685-19d1debac5a8', // mod_feesfines__manual_blocks
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 3,
+    },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'manual_block.metadata_created_by_user_id',
+      essentialOnly: true,
+      order: 4,
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'manual_block.metadata_updated_by_user_id',
+      essentialOnly: true,
+      order: 5,
+    }
+  ],
+  defaultSort: [
+    {
+      columnName: '"user.user".id',
+      direction: 'ASC',
+    },
+  ]
+}

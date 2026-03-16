@@ -1,24 +1,52 @@
 package org.folio.fqm.client;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
+import java.net.URI;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import tools.jackson.databind.JsonNode;
 
-@Service
-@FeignClient(name = "simple-http-client", url = ".")
-public interface SimpleHttpClient {
+/**
+ * Wrapper client for GET requests to arbitrary FOLIO API paths.
+ *
+ * @implNote This class intentionally wraps an internal {@code @HttpExchange} interface so the
+ *           public API stays focused on the module's string-based contract while HTTP client
+ *           details remain internal.
+ */
+@Component
+public class SimpleHttpClient {
+
+  private final SimpleHttpServiceClient delegate;
+
+  @Autowired
+  public SimpleHttpClient(HttpServiceProxyFactory httpServiceProxyFactory) {
+    this(httpServiceProxyFactory.createClient(SimpleHttpServiceClient.class));
+  }
+
+  SimpleHttpClient(SimpleHttpServiceClient delegate) {
+    this.delegate = delegate;
+  }
+
   /**
-   * Retrieve arbitrary data from a FOLIO API endpoint.
-
-   * @param path        - the path of the API endpoint
-   * @param queryParams - a map of query parameters to pass to the API endpoint
-   * @return the body of the response (JSON)
+   * Retrieve arbitrary JSON data from a FOLIO API endpoint.
+   *
+   * @param path path of the API endpoint, relative to Okapi URL
+   * @param queryParams query parameters to send
+   * @return JSON response body serialized as a string
    */
-  @GetMapping(value = "/{path}", produces = MediaType.APPLICATION_JSON_VALUE)
-  String get(@PathVariable String path, @SpringQueryMap Map<String, String> queryParams);
+  public String get(String path, Map<String, String> queryParams) {
+    return delegate.fetch(URI.create(path), queryParams).toString();
+  }
+
+  @HttpExchange(url = ".", accept = MediaType.APPLICATION_JSON_VALUE)
+  interface SimpleHttpServiceClient {
+
+    @GetExchange
+    JsonNode fetch(URI uri, @RequestParam Map<String, String> queryParams);
+  }
 }

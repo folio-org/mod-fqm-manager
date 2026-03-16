@@ -1,6 +1,6 @@
 package org.folio.fqm.migration.strategies.impl;
 
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.node.StringNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.migration.strategies.AbstractRegularMigrationStrategy;
@@ -31,10 +31,10 @@ public class V19RegexOperatorMigration extends AbstractRegularMigrationStrategy<
   ) {
     return switch (condition.operator()) {
       case "$regex" -> {
-        if (condition.value().isTextual() && condition.value().asText().startsWith("^")) {
+        if (condition.value().isString() && condition.value().asString().startsWith("^")) {
           log.info("Migrating $regex to $starts_with for field: {}", condition.getFullField());
           yield SingleFieldMigrationResult.withField(
-            condition.withOperator("$starts_with").withValue(new TextNode(condition.value().asText().substring(1)))
+            condition.withOperator("$starts_with").withValue(new StringNode(condition.value().asString().substring(1)))
           );
         } else {
           log.info("Migrating $regex to $contains for field: {}", condition.getFullField());

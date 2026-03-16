@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fql.model.Fql;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;

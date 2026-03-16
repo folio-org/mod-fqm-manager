@@ -1,12 +1,11 @@
 package org.folio.fqm.migration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import java.io.UncheckedIOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +22,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.config.MigrationConfiguration;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.exception.JsonParsingException;
 import org.folio.fqm.migration.types.MigratableFqlField;
 import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
 import org.folio.fqm.migration.types.MigratableFqlFieldOnly;
@@ -98,9 +98,9 @@ public class MigrationUtils {
         transformed.stream().map(SingleFieldMigrationResult::warnings).flatMap(Collection::stream).toList(),
         transformed.stream().anyMatch(SingleFieldMigrationResult::hadBreakingChange)
       );
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("Unable to process JSON", e);
-      throw new UncheckedIOException(e);
+      throw new JsonParsingException(e);
     }
   }
 
@@ -218,7 +218,7 @@ public class MigrationUtils {
         if ("$and".equals(entry.getKey())) {
           // recurse onto nested conditions
           ((ArrayNode) entry.getValue()).elements()
-            .forEachRemaining(node -> {
+            .forEach(node -> {
               extractFieldsAndConditions(
                 entityTypeId,
                 (ObjectNode) node,
@@ -331,17 +331,17 @@ public class MigrationUtils {
     JsonNode value,
     Function<String, MigrationResult<String>> transformer
   ) {
-    if (!value.isTextual()) {
+    if (!value.isString()) {
       return MigrationResult.noop(value);
     }
 
-    MigrationResult<String> newValue = transformer.apply(value.textValue());
+    MigrationResult<String> newValue = transformer.apply(value.asString());
 
     if (newValue.result() == null) {
       return newValue.withoutResult();
     }
 
-    return newValue.withNewResult(new TextNode(newValue.result()));
+    return newValue.withNewResult(new StringNode(newValue.result()));
   }
 
   // Formatting note: This object is down here instead of at the top of the class because it is only used in

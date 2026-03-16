@@ -1,7 +1,6 @@
 package org.folio.fqm.service;
 
 import com.jayway.jsonpath.JsonPath;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.tuple.Pair;
@@ -10,6 +9,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.fqm.exception.MissingPermissionsException;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +124,7 @@ public class CrossTenantQueryService {
         tenantsToQuery.add(currentTenantMap);
       } catch (MissingPermissionsException e) {
         log.info("User with id {} does not have permissions to query tenant {}. Skipping.", currentUserId, tenantId);
-      } catch (FeignException e) {
+      } catch (RestClientException e) {
         log.error("Error retrieving permissions for user ID %s in tenant %s. Skipping.".formatted(currentUserId, tenantId), e);
       }
     }

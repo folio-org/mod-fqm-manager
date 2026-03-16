@@ -1,8 +1,8 @@
 package org.folio.fqm.utils;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -21,7 +21,7 @@ public class JSON5ObjectMapperFactory {
       // some SQL statements may be cleaner this way around
       .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
       // left side of { foo: bar }, cleaner/easier to read. JS style
-      .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
+      .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
       // nicer diffs/etc
       .enable(JsonReadFeature.ALLOW_TRAILING_COMMA)
       // allows "escaping" newlines in regular JSON, giving proper linebreaks

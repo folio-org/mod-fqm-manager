@@ -1,6 +1,6 @@
 package org.folio.fqm.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.warnings.DeprecatedEntityWarning;
 import org.folio.fqm.migration.warnings.Warning;
@@ -13,7 +13,7 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;

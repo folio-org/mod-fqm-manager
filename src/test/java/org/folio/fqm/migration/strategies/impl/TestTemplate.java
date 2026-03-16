@@ -3,8 +3,8 @@ package org.folio.fqm.migration.strategies.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -51,7 +51,7 @@ public abstract class TestTemplate {
     MigratableQueryInformation source,
     MigratableQueryInformation expected,
     @CheckForNull Consumer<MigratableQueryInformation> additionalAssertions
-  ) throws JsonProcessingException {
+  ) throws JacksonException {
     MigrationStrategy strategy = getStrategy();
 
     MigratableQueryInformation actual = strategy.apply(source, Map.of());

@@ -10,17 +10,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.TextNode;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.StringNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.exception.JsonParsingException;
 import org.folio.fqm.migration.types.MigratableFqlFieldAndCondition;
 import org.folio.fqm.migration.types.SingleFieldMigrationResult;
 import org.folio.fqm.migration.warnings.RemovedFieldWarning;
@@ -251,7 +249,7 @@ class MigrationUtilsTest {
           // (excluding the special _version)
           original ->
             SingleFieldMigrationResult.withField(
-              new MigratableFqlFieldAndCondition(null, "prefix.", "field", "op", new TextNode("value"))
+              new MigratableFqlFieldAndCondition(null, "prefix.", "field", "op", new StringNode("value"))
             ),
           EMPTY_SOURCE_MAP
         )
@@ -272,9 +270,9 @@ class MigrationUtilsTest {
           original ->
             new SingleFieldMigrationResult<>(
               List.of(
-                new MigratableFqlFieldAndCondition(null, "", "field", "op", new TextNode("value")),
-                new MigratableFqlFieldAndCondition(null, "", "field", "op2", new TextNode("value2")),
-                new MigratableFqlFieldAndCondition(null, "", "field2", "op3", new TextNode("value3"))
+                new MigratableFqlFieldAndCondition(null, "", "field", "op", new StringNode("value")),
+                new MigratableFqlFieldAndCondition(null, "", "field", "op2", new StringNode("value2")),
+                new MigratableFqlFieldAndCondition(null, "", "field2", "op3", new StringNode("value3"))
               ),
               List.of(),
               false
@@ -305,8 +303,8 @@ class MigrationUtilsTest {
               // sourceC will no longer be referenced directly in the resulting query
               return new SingleFieldMigrationResult<>(
                 List.of(
-                  original.withField("new1").withOperator("$a").withValue(new TextNode("aaa")),
-                  original.withField("new2").withOperator("$b").withValue(new TextNode("bbb"))
+                  original.withField("new1").withOperator("$a").withValue(new StringNode("aaa")),
+                  original.withField("new2").withOperator("$b").withValue(new StringNode("bbb"))
                 ),
                 List.of(),
                 false
@@ -329,7 +327,7 @@ class MigrationUtilsTest {
   @Test
   void testInvalidJson() {
     assertThrows(
-      UncheckedIOException.class,
+      JsonParsingException.class,
       () -> MigrationUtils.migrateFql(TEST_UUID, "invalid", r -> null, EMPTY_SOURCE_MAP)
     );
   }
@@ -404,7 +402,6 @@ class MigrationUtilsTest {
     return callWith(TEST_UUID, "", field, op, value);
   }
 
-  @SneakyThrows(IOException.class)
   private static MigratableFqlFieldAndCondition callWith(
     UUID entityId,
     String fieldPrefix,
@@ -412,6 +409,10 @@ class MigrationUtilsTest {
     String op,
     String value
   ) {
-    return new MigratableFqlFieldAndCondition(entityId, fieldPrefix, field, op, new ObjectMapper().readTree(value));
+    try {
+      return new MigratableFqlFieldAndCondition(entityId, fieldPrefix, field, op, new ObjectMapper().readTree(value));
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Invalid JSON in test helper value: " + value, e);
+    }
   }
 }

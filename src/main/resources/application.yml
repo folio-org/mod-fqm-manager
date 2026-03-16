@@ -7,6 +7,10 @@ mod-fqm-manager:
   zombie-query-max-wait-seconds: 300
   zombie-query-queued-threshold-duration: 1h
   convert-queued-status-to-in-progress: ${CONVERT_QUEUED_STATUS_TO_IN_PROGRESS:true}
+  cache:
+    spec:
+      queryCache: maximumSize=500,expireAfterWrite=1m
+      userTenantCache: maximumSize=100,expireAfterWrite=30s
 server:
   port: 8081
 spring:
@@ -31,12 +35,13 @@ spring:
     init:
       # to boot up application despite of any DB connection issues
       continue-on-error: false
+  # JPA/Hibernate is still used for SourceViewRecordRepository (source_views metadata persistence).
   jpa:
     hibernate:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        implicit-strategy: org.springframework.boot.hibernate.SpringImplicitNamingStrategy
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -77,12 +82,16 @@ spring:
   banner:
     location: classpath:/banner.txt
 coffee-boots:
+  # Deprecated: use mod-fqm-manager.cache.spec.* instead.
+  # This alias is retained for backward compatibility and will be removed in a future major release.
   cache:
     spec:
-      queryCache: maximumSize=500,expireAfterWrite=1m
-      userTenantCache: maximumSize=100,expireAfterWrite=30s
+      queryCache: ${mod-fqm-manager.cache.spec.queryCache}
+      userTenantCache: ${mod-fqm-manager.cache.spec.userTenantCache}
 folio:
   is-eureka: ${IS_EUREKA:false}
+  exchange:
+    enabled: true
   tenant:
     validation:
       enabled: true

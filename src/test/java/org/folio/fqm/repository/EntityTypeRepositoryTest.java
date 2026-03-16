@@ -1,8 +1,7 @@
 package org.folio.fqm.repository;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.BooleanType;
@@ -18,7 +17,6 @@ import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.ValueWithLabel;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +53,6 @@ class EntityTypeRepositoryTest {
 
   @Autowired
   private EntityTypeCacheRepository cache;
-
-  @MockitoSpyBean
-  private FolioExecutionContext folioExecutionContext;
 
   @BeforeEach
   void setUp() {
@@ -223,7 +218,7 @@ class EntityTypeRepositoryTest {
   @SneakyThrows
   void getEntityTypeDefinitions_shouldHandleJsonProcessingErrors() {
     // Mock ObjectMapper to throw exception when reading value
-    doThrow(new JsonProcessingException("Test JSON processing failure") {})
+    doThrow(new JacksonException("Test JSON processing failure") {})
       .when(objectMapper).readValue(any(String.class), eq(EntityType.class));
 
     // This should return empty stream instead of throwing exception
@@ -279,9 +274,7 @@ class EntityTypeRepositoryTest {
     // Generate a random UUID for the test
     UUID entityTypeId = UUID.randomUUID();
     UUID owner = UUID.randomUUID();
-    when(folioExecutionContext.getUserId()).thenReturn(owner);
-    when(folioExecutionContext.getTenantId()).thenReturn("diku");
-      // 1. Create a custom entity type
+    // 1. Create a custom entity type
     CustomEntityType customEntityType = new CustomEntityType()
       .id(entityTypeId.toString())
       .owner(owner)
@@ -335,7 +328,7 @@ class EntityTypeRepositoryTest {
       .name("test-invalid-entity");
 
     when(objectMapper.writeValueAsString(any(CustomEntityType.class)))
-      .thenThrow(new JsonParseException("Test JSON processing failure"));
+      .thenThrow(new JacksonException("Test JSON processing failure") {});
 
     // This should throw an InvalidEntityTypeDefinitionException
     assertThrows(InvalidEntityTypeDefinitionException.class, () ->
@@ -352,15 +345,13 @@ class EntityTypeRepositoryTest {
       .id(entityTypeId.toString())
       .owner(owner)
       .name("test-invalid-update-entity");
-    when(folioExecutionContext.getUserId()).thenReturn(owner);
-    when(folioExecutionContext.getTenantId()).thenReturn("diku");
 
     // First create a valid entity
     repo.createCustomEntityType(customEntityType);
 
-    // Use a spy on our actual ObjectMapper to cause a JsonProcessingException
+    // Use a spy on our actual ObjectMapper to cause a JacksonException
     when(objectMapper.writeValueAsString(any(CustomEntityType.class)))
-      .thenThrow(new JsonParseException("Test JSON processing failure"));
+      .thenThrow(new JacksonException("Test JSON processing failure") {});
 
     // This should throw an InvalidEntityTypeDefinitionException
     assertThrows(InvalidEntityTypeDefinitionException.class, () ->

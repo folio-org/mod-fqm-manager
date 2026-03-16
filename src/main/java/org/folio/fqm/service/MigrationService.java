@@ -1,10 +1,9 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.UncheckedIOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +23,7 @@ import javax.annotation.CheckForNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.config.MigrationConfiguration;
+import org.folio.fqm.exception.JsonParsingException;
 import org.folio.fqm.exception.MigrationQueryChangedException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.MigrationStrategyRepository;
@@ -90,9 +90,9 @@ public class MigrationService {
       ObjectNode fql = (ObjectNode) objectMapper.readTree(migratableQueryInformation.fqlQuery());
       fql.set(MigrationConfiguration.VERSION_KEY, objectMapper.valueToTree(migrationConfiguration.getCurrentVersion()));
       migratableQueryInformation = migratableQueryInformation.withFqlQuery(objectMapper.writeValueAsString(fql));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("Unable to process JSON", e);
-      throw new UncheckedIOException(e);
+      throw new JsonParsingException(e);
     }
 
     return migratableQueryInformation.withHadBreakingChanges(hadBreakingChanges);
@@ -105,9 +105,9 @@ public class MigrationService {
     try {
       return Optional
         .ofNullable(((ObjectNode) objectMapper.readTree(fqlQuery)).get(MigrationConfiguration.VERSION_KEY))
-        .map(JsonNode::asText)
+        .map(JsonNode::asString)
         .orElse(migrationConfiguration.getDefaultVersion());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       return migrationConfiguration.getDefaultVersion();
     }
   }

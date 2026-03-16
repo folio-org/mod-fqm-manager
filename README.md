@@ -68,6 +68,25 @@ mvn clean install
 > be entirely reasonable for production. In the event that an entity type was updated in the database and this must be
 > reflected quickly when the cache timeout is very high, simply restarting the module should be sufficient.
 
+### Cache Specification Properties
+
+The module uses Spring Cache with Caffeine. Cache specs are configured with these properties:
+
+| Property Key                                   | Default Value                        | Description                                 |
+|------------------------------------------------|--------------------------------------|---------------------------------------------|
+| mod-fqm-manager.cache.spec.queryCache          | maximumSize=500,expireAfterWrite=1m  | Caffeine spec for the `queryCache` cache    |
+| mod-fqm-manager.cache.spec.userTenantCache     | maximumSize=100,expireAfterWrite=30s | Caffeine spec for the `userTenantCache`     |
+
+Legacy compatibility keys are still recognized:
+
+| Deprecated Property Key                        | Status     | Notes                                                                 |
+|------------------------------------------------|------------|-----------------------------------------------------------------------|
+| coffee-boots.cache.spec.queryCache             | Deprecated | Use `mod-fqm-manager.cache.spec.queryCache` instead                   |
+| coffee-boots.cache.spec.userTenantCache        | Deprecated | Use `mod-fqm-manager.cache.spec.userTenantCache` instead              |
+
+If both new and deprecated keys are set, the `mod-fqm-manager.cache.spec.*` values take precedence.
+Deprecated `coffee-boots.cache.spec.*` keys will be removed in a future major release.
+
 ### Resource requirements
 
 #### Short version

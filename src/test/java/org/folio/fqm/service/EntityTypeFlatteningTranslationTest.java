@@ -1,7 +1,7 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.folio.fqm.repository.EntityTypeCacheRepository;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -114,7 +114,7 @@ class EntityTypeFlatteningTranslationTest {
             """,
           EntityType.class
         );
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new ExceptionInInitializerError(e);
     }
   }

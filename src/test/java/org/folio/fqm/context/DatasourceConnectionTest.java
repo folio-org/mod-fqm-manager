@@ -5,11 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,14 +22,12 @@ import static java.lang.String.format;
 @Testcontainers
 @SpringBootTest
 class DatasourceConnectionTest {
-  @SuppressWarnings("resource")
   @Container
-  public static PostgreSQLContainer<?> readerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine")
+  public static PostgreSQLContainer readerDbContainer = new PostgreSQLContainer("postgres:16-alpine")
       .withStartupAttempts(3);
 
-  @SuppressWarnings("resource")
   @Container
-  public static PostgreSQLContainer<?> writerDbContainer = new PostgreSQLContainer<>("postgres:16-alpine")
+  public static PostgreSQLContainer writerDbContainer = new PostgreSQLContainer("postgres:16-alpine")
       .withStartupAttempts(3);
 
   @Autowired
@@ -65,7 +64,10 @@ class DatasourceConnectionTest {
     String expectedWriterDbUrl = format(dbUrlFormat, getProperty("DB_HOST"), getProperty("DB_PORT"),
       getProperty("DB_DATABASE"));
 
-    assertEquals(expectedReaderDbUrl, readerDatasource.getConnection().getMetaData().getURL());
-    assertEquals(expectedWriterDbUrl, writerDatasource.getConnection().getMetaData().getURL());
+    try (Connection readerConnection = readerDatasource.getConnection();
+      Connection writerConnection = writerDatasource.getConnection()) {
+      assertEquals(expectedReaderDbUrl, readerConnection.getMetaData().getURL());
+      assertEquals(expectedWriterDbUrl, writerConnection.getMetaData().getURL());
+    }
   }
 }

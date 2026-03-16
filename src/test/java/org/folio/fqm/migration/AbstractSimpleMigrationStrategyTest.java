@@ -4,8 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -332,7 +332,7 @@ class AbstractSimpleMigrationStrategyTest {
   @ParameterizedTest(name = "{0} -> {1}")
   @MethodSource("sourcesForMigrationResults")
   void testMigrationResults(MigratableQueryInformation source, MigratableQueryInformation expected)
-    throws JsonProcessingException {
+    throws JacksonException {
     MigratableQueryInformation result = new Impl().apply(source, Map.of());
 
     assertThat(result.entityTypeId(), is(expected.entityTypeId()));

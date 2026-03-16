@@ -1,8 +1,8 @@
 package org.folio.fqm.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.flattening.SourceUtils;
@@ -311,7 +311,7 @@ public class EntityTypeRepository {
       .toList();
   }
 
-  private List<ValueWithLabel> parseCustomFieldValues(String customFieldValueJson) throws JsonProcessingException {
+  private List<ValueWithLabel> parseCustomFieldValues(String customFieldValueJson) throws JacksonException {
     List<Map<String, String>> optionList = objectMapper.readValue(customFieldValueJson, new TypeReference<>() {
     });
     return optionList
@@ -460,7 +460,7 @@ public class EntityTypeRepository {
     }
     try {
       return objectMapper.readValue(rawCustomEntityType, CustomEntityType.class);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), entityTypeId);
     }
   }
@@ -473,7 +473,7 @@ public class EntityTypeRepository {
         .values(UUID.fromString(customEntityType.getId()), JSONB.jsonb(objectMapper.writeValueAsString(customEntityType)))
         .execute();
       entityTypeCacheRepository.invalidateEntityType(executionContext.getTenantId(), customEntityType.getId());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), customEntityType);
     }
   }
@@ -486,7 +486,7 @@ public class EntityTypeRepository {
         .where(field(ID_FIELD_NAME, UUID.class).eq(UUID.fromString(entityType.getId())))
         .execute();
       entityTypeCacheRepository.invalidateEntityType(executionContext.getTenantId(), entityType.getId());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new InvalidEntityTypeDefinitionException(e.getMessage(), entityType);
     }
   }

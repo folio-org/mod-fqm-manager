@@ -1,13 +1,11 @@
 package org.folio.fqm.service;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,6 +45,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static java.util.Comparator.comparing;
 import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
@@ -288,7 +288,7 @@ public class EntityTypeService {
   private ColumnValues getFieldValuesFromApi(Field field, String searchText, List<String> tenantsToQuery) {
     Set<ValueWithLabel> resultSet = new HashSet<>();
     int failureCount = 0;
-    FeignException lastException = null;
+    HttpStatusCodeException lastException = null;
 
     for (String tenantId : tenantsToQuery) {
       try {
@@ -309,11 +309,11 @@ public class EntityTypeService {
             resultSet.add(new ValueWithLabel().value(value).label(label));
           }
         }
-      } catch (FeignException.Unauthorized e) {
+      } catch (HttpClientErrorException.Unauthorized e) {
         log.error("Failed to get column values from {} tenant due to exception:", tenantId, e);
         failureCount++;
         lastException = e;
-      } catch (FeignException.NotFound e) {
+      } catch (HttpClientErrorException.NotFound e) {
         log.error("Value source API {} not found in tenant {}", field.getValueSourceApi().getPath(), tenantId);
         failureCount++;
         lastException = e;
@@ -368,7 +368,7 @@ public class EntityTypeService {
         DocumentContext parsedJson = JsonPath.parse(rawJson);
         List<String> values = parsedJson.read("$.facets.languages.values.*.id");
         langSet.addAll(values);
-      } catch (FeignException.Unauthorized | FeignException.BadRequest e) {
+      } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.BadRequest e) {
         log.error("Failed to get languages for tenant {} due to exception {}", tenantId, e.getMessage());
       }
     }
@@ -378,7 +378,7 @@ public class EntityTypeService {
       JsonMapper
         .builder()
         .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-        .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
+        .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
         .build();
 
     List<Map<String, String>> languages = List.of();

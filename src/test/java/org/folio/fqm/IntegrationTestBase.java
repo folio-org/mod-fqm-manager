@@ -3,6 +3,7 @@ package org.folio.fqm;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -19,12 +20,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 
 import javax.sql.DataSource;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
@@ -32,7 +37,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 
 public class IntegrationTestBase {
 
@@ -50,8 +57,8 @@ public class IntegrationTestBase {
 
   @SuppressWarnings("resource")
   @Container
-  private static final PostgreSQLContainer<?> postgres =
-    new PostgreSQLContainer<>("postgres:16-alpine")
+  private static final PostgreSQLContainer postgres =
+    new PostgreSQLContainer("postgres:16-alpine")
       .withNetwork(network)
       .withNetworkAliases("mypostgres")
       .withExposedPorts(5432)
@@ -148,14 +155,22 @@ public class IntegrationTestBase {
   }
 
   private static void smokeTest() {
-    given()
-      .headers(getOkapiHeaders())
-      .contentType("application/json")
-      .when()
-      .get("/entity-types?includeInaccessible=true")
-      .then()
-      .statusCode(200)
-      .body("entityTypes.size()", greaterThan(0));
+    var requestBuilder = HttpRequest.newBuilder()
+      .uri(URI.create(RestAssured.baseURI + "/entity-types?includeInaccessible=true"))
+      .GET();
+    getOkapiHeaders().forEach(requestBuilder::header);
+
+    HttpResponse<String> response;
+    try {
+      response = HttpClient.newHttpClient().send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to run /entity-types smoke test", e);
+    }
+
+    assertThat(response.statusCode(), is(200));
+
+    Integer entityTypeCount = JsonPath.from(response.body()).getInt("entityTypes.size()");
+    assertThat(entityTypeCount, greaterThan(0));
   }
 
   protected static Map<String, String> getOkapiHeaders() {

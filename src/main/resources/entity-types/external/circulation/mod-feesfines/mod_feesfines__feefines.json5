@@ -193,6 +193,7 @@
       valueGetter: "(:src__circulation__feesfines__feefines.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__feefines',
+      essential: true,
     },
     {
       name: 'jsonb',

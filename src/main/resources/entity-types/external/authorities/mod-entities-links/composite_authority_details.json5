@@ -7,9 +7,17 @@
     {
       alias: 'authorities',
       type: 'entity-type',
-      targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // simple_item
+      targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // src__authorities__entities_links__authority
       useIdColumns: true,
       order: 10,
+    },
+    {
+      alias: 'source_file',
+      type: 'entity-type',
+      targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5', // mod_entities_links__authority
+      targetField: 'id',
+      sourceField: 'authorities.source_file_id',
+      order: 40,
     },
     {
       alias: 'created_by_user',

@@ -140,7 +140,7 @@
     "entityType.simple_user_details.phone": "Telefon",
     "entityType.simple_user_details.preferred_first_name": "Preferované křestní jméno",
     "entityType.simple_user_details.proxy_for": "Zástupce pro",
-    "entityType.simple_user_details.tags_tag_list": "Štítky, seznam štítků",
+    "entityType.simple_user_details.tags_tag_list": "Štítky",
     "entityType.simple_user_details.type": "Typ",
     "entityType.simple_user_details.updated_by_user_id": "Aktualizoval/a (UUID uživatele)",
     "entityType.simple_user_details.updated_date": "Datum aktualizace",
@@ -506,7 +506,7 @@
     "entityType.simple_purchase_order.po_number_suffix": "Suffix čísla NO",
     "entityType.simple_purchase_order.re_encumber": "Opětovné zatížení",
     "entityType.simple_purchase_order.ship_to": "Odeslat do",
-    "entityType.simple_purchase_order.tags": "Štítky, seznam štítků",
+    "entityType.simple_purchase_order.tags": "Štítky",
     "entityType.simple_purchase_order.template": "Šablona",
     "entityType.simple_purchase_order.updated_at": "Aktualizováno na",
     "entityType.simple_purchase_order.updated_by": "Aktualizoval/a (UUID uživatele)",
@@ -2343,5 +2343,12 @@
     "entityType.composite_users_with_fees_fines_accounts_loans.item": "Jednotka",
     "entityType.composite_item_details.in_transit_destination_service_point": "Cílový pult služeb",
     "entityType.composite_item_details.last_check_in_service_point": "Pult služeb poslední výpůjčky",
-    "entityType.simple_organization.tags": "Tags"
+    "entityType.simple_organization.tags": "Štítky",
+    "entityType.composite_users_with_manual_blocks": "Users with manual blocks",
+    "entityType.composite_users_with_manual_blocks._description": "Composite entity type where each record is a combination of user and manual block. Records include user data along with related manual block and patron group data.",
+    "entityType.composite_users_with_manual_blocks.user": "User",
+    "entityType.composite_users_with_manual_blocks.group": "User — Patron group",
+    "entityType.composite_users_with_manual_blocks.manual_block": "Manual blocks",
+    "entityType.composite_users_with_manual_blocks.created_by_user": "Manual blocks — Created by",
+    "entityType.composite_users_with_manual_blocks.updated_by_user": "Manual blocks — Updated by"
 }

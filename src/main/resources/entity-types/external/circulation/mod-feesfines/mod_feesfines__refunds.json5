@@ -142,6 +142,7 @@
       valueGetter: "(:src__circulation__feesfines__refunds.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__refunds',
+      essential: true,
     },
     {
       name: 'jsonb',

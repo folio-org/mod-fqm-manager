@@ -2343,5 +2343,12 @@
     "entityType.composite_users_with_fees_fines_accounts_loans.item": "Item",
     "entityType.composite_item_details.in_transit_destination_service_point": "Destination service point",
     "entityType.composite_item_details.last_check_in_service_point": "Last check in service point",
-    "entityType.simple_organization.tags": "Mots-clés"
+    "entityType.simple_organization.tags": "Mots-clés",
+    "entityType.composite_users_with_manual_blocks": "Users with manual blocks",
+    "entityType.composite_users_with_manual_blocks._description": "Composite entity type where each record is a combination of user and manual block. Records include user data along with related manual block and patron group data.",
+    "entityType.composite_users_with_manual_blocks.user": "User",
+    "entityType.composite_users_with_manual_blocks.group": "User — Patron group",
+    "entityType.composite_users_with_manual_blocks.manual_block": "Manual blocks",
+    "entityType.composite_users_with_manual_blocks.created_by_user": "Manual blocks — Created by",
+    "entityType.composite_users_with_manual_blocks.updated_by_user": "Manual blocks — Updated by"
 }

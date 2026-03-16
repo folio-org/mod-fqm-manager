@@ -1,0 +1,33 @@
+{
+  id: '04faac48-588d-41ac-8187-8309808f5f2b',
+  name: 'composite_authority_details',
+  private: false,
+  crossTenantQueriesEnabled: true,
+  sources: [
+    {
+      alias: 'authorities',
+      type: 'entity-type',
+      targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // simple_item
+      useIdColumns: true,
+      order: 10,
+    },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'authorities.metadata_created_by_user_id',
+      essentialOnly: true,
+      order: 130,
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'authorities.metadata_updated_by_user_id',
+      essentialOnly: true,
+      order: 140,
+    },
+  ]
+}

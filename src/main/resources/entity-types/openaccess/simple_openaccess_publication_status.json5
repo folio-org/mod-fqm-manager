@@ -3,7 +3,8 @@
   name: 'simple_openaccess_publication_status',
   private: false,
   requiredPermissions: [
-    'oa.publicationRequest.collection.get'
+    'oa.publicationRequest.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

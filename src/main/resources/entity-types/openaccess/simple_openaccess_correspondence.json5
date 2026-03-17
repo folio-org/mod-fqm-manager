@@ -3,7 +3,8 @@
   name: 'simple_openaccess_correspondence',
   private: false,
   requiredPermissions: [
-    'oa.correspondence.collection.get'
+    'oa.correspondence.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

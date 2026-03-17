@@ -3,7 +3,8 @@
   name: 'simple_openaccess_funding',
   private: false,
   requiredPermissions: [
-    'oa.publicationRequest.collection.get'
+    'oa.publicationRequest.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

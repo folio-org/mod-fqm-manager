@@ -3,7 +3,9 @@
   name: 'simple_openaccess_checklist',
   private: false,
   requiredPermissions: [
-    'oa.checklistItems.collection.get'
+    'oa.checklistItems.collection.get',
+    'oa.publicationRequest.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

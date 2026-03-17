@@ -3,7 +3,9 @@
   name: 'simple_openaccess_journal',
   private: false,
   requiredPermissions: [
-    'oa.works.collection.get'
+    'oa.works.collection.get',
+    'oa.titleInstances.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

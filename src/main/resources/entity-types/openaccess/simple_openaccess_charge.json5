@@ -3,7 +3,8 @@
   name: 'simple_openaccess_charge',
   private: false,
   requiredPermissions: [
-    'oa.charges.collection.get'
+    'oa.charges.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

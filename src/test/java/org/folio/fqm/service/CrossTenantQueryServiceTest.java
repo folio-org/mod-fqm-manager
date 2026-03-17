@@ -225,22 +225,22 @@ class CrossTenantQueryServiceTest {
     assertEquals(expectedTenants, actualTenants);
   }
 
-  @Test
-  void shouldGetListOfTenantsToQueryForColumnValues() {
-    String tenantId = "tenant_01";
-    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03", "tenant_04");
-
-    when(executionContext.getTenantId()).thenReturn(tenantId);
-    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
-    when(crossTenantClient.get(
-      "consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants",
-      Map.of("userId", USER_ID, "limit", "1000"),
-      CENTRAL_TENANT_ID
-    )).thenReturn(USER_TENANT_JSON);
-
-    List<String> actualTenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
-    assertEquals(expectedTenants, actualTenants);
-  }
+//  @Test
+//  void shouldGetListOfTenantsToQueryForColumnValues() {
+//    String tenantId = "tenant_01";
+//    List<String> expectedTenants = List.of("tenant_01", "tenant_02", "tenant_03", "tenant_04");
+//
+//    when(executionContext.getTenantId()).thenReturn(tenantId);
+//    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
+//    when(crossTenantClient.get(
+//      "consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants",
+//      Map.of("userId", USER_ID, "limit", "1000"),
+//      CENTRAL_TENANT_ID
+//    )).thenReturn(USER_TENANT_JSON);
+//
+//    List<String> actualTenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
+//    assertEquals(expectedTenants, actualTenants);
+//  }
 
   @Test
   void shouldGetListOfTenantsToQueryForSpecifiedUser() {

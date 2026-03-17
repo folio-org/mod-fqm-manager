@@ -67,9 +67,9 @@ public class CrossTenantQueryService {
    * @param entityType Entity type definition
    * @return List of tenants to query
    */
-  public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
-    return getTenantIds(entityType, executionContext.getUserId());
-  }
+//  public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
+//    return getTenantIds(entityType, executionContext.getUserId());
+//  }
 
   public List<Pair<String, String>> getTenantIdNamePairs(EntityType entityType, UUID userId) {
     log.info("Getting tenants to query for user {}", userId);

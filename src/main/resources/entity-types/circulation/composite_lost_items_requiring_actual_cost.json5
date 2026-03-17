@@ -1,0 +1,49 @@
+{
+  id: 'e747c4cd-886a-4811-aaa8-708ebe9bec4e',
+  name: 'composite_lost_items_requiring_actual_cost',
+  private: false,
+  sources: [
+    {
+      alias: 'actual_cost',
+      type: 'entity-type',
+      targetId: '308636b5-3a6f-59dc-a029-4e3540e26383', // mod_circulation_storage__actual_cost_record
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 1,
+    },
+    {
+      alias: 'users',
+      type: 'entity-type',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user_details
+      sourceField: 'actual_cost.user_id',
+      targetField: 'id',
+      essentialOnly: true,
+      inheritCustomFields: true,
+      order: 2,
+    },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      sourceField: 'actual_cost.metadata_created_by_user_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 3,
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      sourceField: 'actual_cost.metadata_updated_by_user_id',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 4,
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"actual_cost.src__circulation__circulation_storage__actual_cost_record".id',
+      direction: 'ASC',
+    },
+  ],
+}

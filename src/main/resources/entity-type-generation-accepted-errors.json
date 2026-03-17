@@ -1,14 +1,1 @@
-[
-  {
-    "severity": "warning",
-    "metadata": {
-      "team": "spitfire",
-      "domain": "authorities",
-      "module": "mod-entities-links"
-    },
-    "type": "translations-extra",
-    "extraTranslations": [
-      "fqm.entityType.authority.version"
-    ]
-  }
-]
+[]

@@ -184,6 +184,7 @@
       valueGetter: "(:src__circulation__feesfines__comments.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__comments',
+      essential: true,
     },
     {
       name: 'jsonb',

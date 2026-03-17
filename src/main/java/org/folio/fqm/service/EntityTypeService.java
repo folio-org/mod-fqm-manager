@@ -186,7 +186,7 @@ public class EntityTypeService {
       return getFieldValuesFromEntityTypeDefinition(field, searchText);
     }
 
-    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
+    List<String> tenantsToQuery = crossTenantQueryService.getTenantsToQuery(entityType);
     if (field.getValueSourceApi() != null) {
       return getFieldValuesFromApi(field, searchText, tenantsToQuery);
     }
@@ -254,7 +254,7 @@ public class EntityTypeService {
   }
 
   private ColumnValues getTenantIds(EntityType entityType) {
-    List<String> tenants = crossTenantQueryService.getTenantsToQueryForColumnValues(entityType);
+    List<String> tenants = crossTenantQueryService.getTenantsToQuery(entityType);
     List<ValueWithLabel> tenantValues = tenants
       .stream()
       .map(tenant -> new ValueWithLabel().value(tenant).label(tenant))

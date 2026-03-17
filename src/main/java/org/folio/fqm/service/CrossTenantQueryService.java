@@ -59,18 +59,6 @@ public class CrossTenantQueryService {
     return getTenantIds(entityType, userId);
   }
 
-  /**
-   * Retrieve list of tenants to retrieve column values from. This method skips the cross-tenant query check, since the
-   * column values API uses simple entity type definitions, which don't have cross-tenant queries enabled.
-   * method skips the cross-tenant query check
-   *
-   * @param entityType Entity type definition
-   * @return List of tenants to query
-   */
-  public List<String> getTenantsToQueryForColumnValues(EntityType entityType) {
-    return getTenantIds(entityType, executionContext.getUserId());
-  }
-
   public List<Pair<String, String>> getTenantIdNamePairs(EntityType entityType, UUID userId) {
     log.info("Getting tenants to query for user {}", userId);
     // Get the ECS tenant info first, since this comes from mod-users and should work in non-ECS environments

@@ -184,7 +184,7 @@
     {
       name: 'oa_pr_date_created',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       valueGetter: ':publication_request.pr_date_created',
@@ -192,7 +192,7 @@
     {
       name: 'oa_pr_last_updated',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       valueGetter: ':publication_request.pr_last_updated',
@@ -456,7 +456,7 @@
     {
       name: 'oa_pr_book_date_of_publication',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'stringType',
       },
       queryable: true,
       visibleByDefault: true,

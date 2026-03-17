@@ -150,7 +150,7 @@
     {
       name: 'charge_creation_date',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,
@@ -159,7 +159,7 @@
     {
       name: 'charge_last_update',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       valueGetter: ':charge.ch_last_updated',

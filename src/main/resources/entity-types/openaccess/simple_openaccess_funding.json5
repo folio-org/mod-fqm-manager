@@ -79,7 +79,7 @@
     {
       name: 'funding_last_update',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,

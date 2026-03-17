@@ -72,7 +72,7 @@
     {
       name: 'correspondence_last_updated',
       dataType: {
-        dataType: 'dateType',
+        dataType: 'dateTimeType',
       },
       queryable: true,
       visibleByDefault: true,

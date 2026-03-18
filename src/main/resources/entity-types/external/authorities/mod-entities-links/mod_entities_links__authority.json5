@@ -679,8 +679,15 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.identifiers',
       sourceAlias: 'src__authorities__entities_links__authority',
+      valueGetter: "( \
+                      SELECT \
+                        jsonb_agg(\
+                          record.value \
+                          ORDER BY record.value ->> 'identifierTypeId') \
+                      FROM \
+                        jsonb_array_elements((:sourceAlias.identifiers)) record(value) \
+                    )::text"
     },
     {
       name: 'notes',

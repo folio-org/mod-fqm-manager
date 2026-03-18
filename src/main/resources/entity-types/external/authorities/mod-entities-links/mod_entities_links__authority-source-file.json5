@@ -39,6 +39,7 @@
       idColumnName: 'id',
       queryable: true,
       essential: true,
+      visibleByDefault: true,
       valueGetter: ":sourceAlias.name",
       sourceAlias: 'src__authorities__entities_links__authority_source_file',
       source: {

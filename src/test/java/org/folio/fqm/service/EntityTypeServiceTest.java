@@ -471,7 +471,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenReturn("""
            {
@@ -523,7 +523,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(HttpClientErrorException.NotFound.class);
 
@@ -547,7 +547,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenReturn("""
       {
@@ -582,7 +582,7 @@ class EntityTypeServiceTest {
         )
       ));
 
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq(TENANT_ID))).thenThrow(HttpClientErrorException.Unauthorized.class);
     when(crossTenantHttpClient.get(eq("fake-path"), anyMap(), eq("tenant_02"))).thenThrow(HttpClientErrorException.NotFound.class);
@@ -606,7 +606,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(languageClient.get(TENANT_ID)).thenReturn("""
            {
              "facets": {
@@ -662,7 +662,7 @@ class EntityTypeServiceTest {
 
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(languageClient.get(TENANT_ID)).thenReturn("""
            {
              "facets": {
@@ -717,7 +717,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(languageClient.get(TENANT_ID)).thenThrow(HttpClientErrorException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
@@ -740,7 +740,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
@@ -846,7 +846,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -904,7 +904,7 @@ class EntityTypeServiceTest {
       ));
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(entityType)).thenReturn(List.of("tenant1", "central"));
+    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(List.of("tenant1", "central"));
 
     List<ValueWithLabel> actualColumnValues = entityTypeService
       .getFieldValues(entityTypeId, valueColumnName, "")
@@ -1501,7 +1501,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(originalEntityTypeId, null, false)).thenReturn(originalEntityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(sourceEntityTypeId, null, false)).thenReturn(sourceEntityType);
-    when(crossTenantQueryService.getTenantsToQueryForColumnValues(originalEntityType)).thenReturn(tenantList);
+    when(crossTenantQueryService.getTenantsToQuery(originalEntityType)).thenReturn(tenantList);
 
     when(crossTenantHttpClient.get(eq("path"), anyMap(), eq(TENANT_ID))).thenReturn("""
       [

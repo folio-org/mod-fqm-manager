@@ -36,15 +36,20 @@
       dataType: {
         dataType: 'stringType',
       },
+      idColumnName: 'id',
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':sourceAlias.name',
+      essential: true,
+      valueGetter: ":sourceAlias.name",
       sourceAlias: 'src__authorities__entities_links__authority_source_file',
       source: {
         entityTypeId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5',
-        columnName: 'id',
+        columnName: 'name',
       },
-      idColumnName: 'id',
-    },
+      valueSourceApi: {
+        path: 'authority-source-files',
+        valueJsonPath: '$.authoritySourceFiles.*.id',
+        labelJsonPath: '$.authoritySourceFiles.*.name',
+      },
+    }
   ],
 }

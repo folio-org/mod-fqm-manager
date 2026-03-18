@@ -747,6 +747,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.created_date',
+      valueFunction: '(:value)::timestamp',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -784,6 +785,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.updated_date',
+      valueFunction: '(:value)::timestamp',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {

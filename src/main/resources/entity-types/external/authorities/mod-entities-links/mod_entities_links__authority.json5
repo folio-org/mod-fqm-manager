@@ -439,7 +439,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.sft_headings',
+      valueGetter: '(:sourceAlias.sft_headings)::text',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -643,7 +643,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.saft_headings',
+      valueGetter: '(:sourceAlias.saft_headings)::text',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -736,7 +736,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.notes',
+      valueGetter: '(:sourceAlias.notes)::text',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {

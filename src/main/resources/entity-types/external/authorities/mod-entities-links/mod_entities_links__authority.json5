@@ -249,7 +249,7 @@
               name: 'heading',
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'heading')) FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               valueFunction: 'lower(:value)',
               property: 'heading',
               dataType: {

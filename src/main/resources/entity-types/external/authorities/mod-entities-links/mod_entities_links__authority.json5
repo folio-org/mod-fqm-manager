@@ -78,6 +78,8 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.heading',
+      filterValueGetter: "lower(:sourceAlias.heading)",
+      valueFunction: 'lower(:value)',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -399,7 +401,6 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              valueFunction: 'lower(:value)',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -428,7 +429,6 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              valueFunction: 'lower(:value)',
               property: 'relationshipType',
               dataType: {
                 dataType: 'stringType',
@@ -453,7 +453,7 @@
               name: 'heading',
               queryable: true,
               valueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'heading') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'heading')) FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               valueFunction: 'lower(:value)',
               property: 'heading',
               dataType: {
@@ -603,7 +603,6 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              valueFunction: 'lower(:value)',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -632,7 +631,6 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              valueFunction: 'lower(:value)',
               property: 'relationshipType',
               dataType: {
                 dataType: 'stringType',
@@ -724,8 +722,7 @@
                 },
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              valueFunction: 'lower(:value)',
+              filterValueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               property: 'staffOnly',
               dataType: {
                 dataType: 'booleanType',

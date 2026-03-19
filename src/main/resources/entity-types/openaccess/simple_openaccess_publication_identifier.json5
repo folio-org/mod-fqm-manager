@@ -78,7 +78,7 @@
   ],
   defaultSort: [
     {
-      columnName: 'pub_identifier_value',
+      columnName: 'pub_identifier',
       direction: 'ASC',
     },
   ],

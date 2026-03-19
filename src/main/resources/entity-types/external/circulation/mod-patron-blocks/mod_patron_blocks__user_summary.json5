@@ -30,6 +30,7 @@
       valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
+      essential: true,
     },
     {
       name: 'version',
@@ -52,6 +53,7 @@
       valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'userId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
+      essential: true,
       joinsTo: [
         {
           targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
@@ -221,6 +223,7 @@
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
       filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openLoans'::text))",
       valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'open_fees_fines',
@@ -242,11 +245,21 @@
             {
               name: 'fee_fine_type_id',
               queryable: true,
-              valueGetter: "(SELECT array_agg((elems.value->>'feeFineTypeId')::uuid) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS elems)",
-              valueFunction: '(:value)::uuid',
+              valueSourceApi: {
+                path: 'feefines',
+                labelJsonPath: '$.feefines.*.feeFineType',
+                valueJsonPath: '$.feefines.*.id',
+              },
+              source: {
+                columnName: 'open_fees_fines[*]->feeFineTypeId',
+                entityTypeId: 'f5443525-d2a9-5e59-8f4a-4ac526ec8528',
+              },
+              valueGetter: "(SELECT array_agg(fee_fine_type.value->>'feeFineTypeId' ORDER BY fee_fine_type.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS fee_fine_type)",
+              filterValueGetter: "(SELECT array_agg(fee_fine_type.value->>'feeFineTypeId' ORDER BY fee_fine_type.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS fee_fine_type)",
+              valueFunction: 'lower(:value)',
               property: 'feeFineTypeId',
               dataType: {
-                dataType: 'rangedUUIDType',
+                dataType: 'stringType',
               },
             },
             {
@@ -274,10 +287,9 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: ":src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'",
+      valueGetter: "( SELECT jsonb_agg( record.value || jsonb_build_object('feeFineTypeId', fee_fine_type.jsonb ->> 'feeFineType') ORDER BY record.value ->> 'fee_fine_type_id') FROM jsonb_array_elements((:sourceAlias.jsonb -> 'openFeesFines')) record(value) LEFT JOIN ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__feefines fee_fine_type ON (record.value ->> 'feeFineTypeId') = fee_fine_type.id::text)::text",
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
-      filterValueGetter: "lower(${tenant_id}_mod_patron_blocks.f_unaccent(:src__circulation__patron_blocks__user_summary.jsonb->>'openFeesFines'::text))",
-      valueFunction: 'lower(${tenant_id}_mod_patron_blocks.f_unaccent(:value))',
+      essential: true,
     },
     {
       name: 'jsonb',

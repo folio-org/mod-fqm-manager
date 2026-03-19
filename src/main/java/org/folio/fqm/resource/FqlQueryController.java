@@ -63,17 +63,17 @@ public class FqlQueryController implements org.folio.fqm.resource.FqlQueryApi, o
 
   @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
-  public ResponseEntity<List<List<String>>> getSortedIds(UUID queryId, Integer offset, Integer limit){
+  public ResponseEntity<List<List<String>>> getSortedIds(UUID queryId, Integer offset, Integer limit) {
     return ResponseEntity.ok(queryManagementService.getSortedIds(queryId, offset, limit));
   }
 
 
   @EntityTypePermissionsRequired(parameterName = "entityTypeId")
   @Override
-  public ResponseEntity<ResultsetPage> runFqlQuery(String query, UUID entityTypeId, List<String> fields,
-                                                   List<String> afterId, Integer limit) {
+  public ResponseEntity<ResultsetPage> runFqlQuery(String query, UUID entityTypeId, List<String> fields, Integer limit) {
     return ResponseEntity.ok(queryManagementService.runFqlQuery(query, entityTypeId, fields, limit));
   }
+
   @EntityTypePermissionsRequired(idType = EntityTypePermissionsRequired.IdType.QUERY)
   @Override
   public ResponseEntity<Void> deleteQuery(UUID queryId) {

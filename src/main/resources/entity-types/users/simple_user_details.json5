@@ -569,6 +569,7 @@
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
+      essential: true,
       valueGetter: "(:sourceAlias.jsonb -> 'departments')",
       filterValueGetter: "(:sourceAlias.jsonb -> 'departments')",
     },
@@ -585,6 +586,7 @@
         },
       },
       sourceAlias: 'user',
+      essential: true,
       queryable: true,
       idColumnName: 'department_ids',
       valueSourceApi: {

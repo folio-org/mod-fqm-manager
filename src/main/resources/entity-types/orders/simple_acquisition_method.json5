@@ -3,7 +3,7 @@
   name: 'simple_acquisition_method',
   private: true,
   requiredPermissions: [
-    'orders-storage.acquisition-methods.collection.get'
+    'orders.acquisition-methods.collection.get'
   ],
   sources: [
     {
@@ -44,7 +44,7 @@
         columnName: 'name',
       },
       valueSourceApi: {
-        path: 'orders-storage/acquisition-methods',
+        path: 'orders/acquisition-methods',
         valueJsonPath: '$.acquisitionMethods.*.value',
         labelJsonPath: '$.acquisitionMethods.*.value'
       }

@@ -34,7 +34,7 @@
   ],
   requiredPermissions: [
     'orders.po-lines.item.get',
-    'orders-storage.acquisition-methods.collection.get',
+    'orders.acquisition-methods.collection.get',
   ],
   columns: [
     {

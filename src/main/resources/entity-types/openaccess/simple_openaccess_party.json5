@@ -3,7 +3,8 @@
   name: 'simple_openaccess_party',
   private: false,
   requiredPermissions: [
-    'oa.party.collection.get'
+    'oa.party.collection.get',
+    'oa.refdata.value.collection.get'
   ],
   sources: [
     {

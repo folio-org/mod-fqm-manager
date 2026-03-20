@@ -40,7 +40,7 @@
     {
       alias: 'marc_authority',
       type: 'entity-type',
-      targetId: '232fdf7c-679c-4706-81eb-78d7d43264a8', // simple_srs_record,
+      targetId: 'd5449a05-fd57-45e5-9383-ea615246f6f9', // simple_srs_record
       targetField: 'external_id',
       sourceField: 'authority.id',
       overrideJoinDirection: 'left',

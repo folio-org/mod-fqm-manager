@@ -705,10 +705,9 @@
               name: 'note_type',
               queryable: false,
               valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              valueFunction: '(:value)::uuid',
-              property: 'noteTypeId',
+              property: 'noteType',
               dataType: {
-                dataType: 'rangedUUIDType',
+                dataType: 'stringType',
               },
               source: {
                 entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',

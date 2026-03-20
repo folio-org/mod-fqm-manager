@@ -696,6 +696,24 @@
               dataType: {
                 dataType: 'rangedUUIDType',
               },
+              source: {
+                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
+                columnName: 'name',
+              }
+            },
+            {
+              name: 'note_type',
+              queryable: false,
+              valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'noteTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              source: {
+                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
+                columnName: 'name',
+              }
             },
             {
               name: 'note',
@@ -733,7 +751,17 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: '(:sourceAlias.notes)::text',
+      valueGetter: "( \
+                      SELECT \
+                        jsonb_agg( \
+                          record.value || \
+                          jsonb_build_object('noteType', note_type.name) \
+                          ORDER BY record.value ->> 'noteTypeId') \
+                      FROM \
+                        jsonb_array_elements((:sourceAlias.notes)) record(value) \
+                        LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_note_type note_type \
+                        ON (record.value ->> 'noteTypeId') = note_type.id::text \
+                    )::text",
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {

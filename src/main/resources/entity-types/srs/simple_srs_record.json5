@@ -164,7 +164,6 @@
       },
       queryable: true,
       visibleByDefault: true,
-      essential: true,
       valueGetter: ':record_lb.suppress_discovery',
       valueFunction: '(:value)::boolean',
       values: [

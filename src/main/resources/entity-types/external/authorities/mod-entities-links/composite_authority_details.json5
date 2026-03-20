@@ -5,7 +5,7 @@
   crossTenantQueriesEnabled: true,
   sources: [
     {
-      alias: 'authorities',
+      alias: 'authority',
       type: 'entity-type',
       targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // src__authorities__entities_links__authority
       useIdColumns: true,
@@ -16,7 +16,7 @@
       type: 'entity-type',
       targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5', // mod_entities_links__authority
       targetField: 'id',
-      sourceField: 'authorities.source_file_id',
+      sourceField: 'authority.source_file_id',
       order: 40,
     },
     {
@@ -24,7 +24,7 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'authorities.metadata_created_by_user_id',
+      sourceField: 'authority.metadata_created_by_user_id',
       essentialOnly: true,
       order: 130,
     },
@@ -33,9 +33,19 @@
       type: 'entity-type',
       targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
       targetField: 'id',
-      sourceField: 'authorities.metadata_updated_by_user_id',
+      sourceField: 'authority.metadata_updated_by_user_id',
       essentialOnly: true,
       order: 140,
     },
+    {
+      alias: 'marc_authority',
+      type: 'entity-type',
+      targetId: '232fdf7c-679c-4706-81eb-78d7d43264a8', // simple_srs_record,
+      targetField: 'external_id',
+      sourceField: 'authority.id',
+      overrideJoinDirection: 'left',
+      essentialOnly: true,
+      order: 200
+    }
   ]
 }

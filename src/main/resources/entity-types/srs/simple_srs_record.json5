@@ -110,6 +110,12 @@
           type: 'equality-simple',
           direction: 'left',
         },
+        {
+          targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // mod_entities_links__authority
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        }
       ]
     },
     {

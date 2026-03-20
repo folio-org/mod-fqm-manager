@@ -17,6 +17,7 @@
       targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5', // mod_entities_links__authority-source-file
       targetField: 'id',
       sourceField: 'authority.source_file_id',
+      essentialOnly: true,
       order: 40,
     },
     {

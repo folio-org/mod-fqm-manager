@@ -1,0 +1,52 @@
+{
+  id: '04faac48-588d-41ac-8187-8309808f5f2b',
+  name: 'composite_authority_details',
+  private: false,
+  crossTenantQueriesEnabled: true,
+  sources: [
+    {
+      alias: 'authority',
+      type: 'entity-type',
+      targetId: '8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7', // mod_entities_links__authority
+      useIdColumns: true,
+      order: 10,
+    },
+    {
+      alias: 'source_file',
+      type: 'entity-type',
+      targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5', // mod_entities_links__authority-source-file
+      targetField: 'id',
+      sourceField: 'authority.source_file_id',
+      essentialOnly: true,
+      order: 40,
+    },
+    {
+      alias: 'created_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'authority.metadata_created_by_user_id',
+      essentialOnly: true,
+      order: 130,
+    },
+    {
+      alias: 'updated_by_user',
+      type: 'entity-type',
+      targetId: 'f2615ea6-450b-425d-804d-6a495afd9308', // simple_FOLIO_user
+      targetField: 'id',
+      sourceField: 'authority.metadata_updated_by_user_id',
+      essentialOnly: true,
+      order: 140,
+    },
+    {
+      alias: 'marc_authority',
+      type: 'entity-type',
+      targetId: 'd5449a05-fd57-45e5-9383-ea615246f6f9', // simple_srs_record
+      targetField: 'external_id',
+      sourceField: 'authority.id',
+      overrideJoinDirection: 'left',
+      essentialOnly: true,
+      order: 200
+    }
+  ]
+}

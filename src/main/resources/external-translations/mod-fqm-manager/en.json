@@ -454,8 +454,6 @@
   "entityType.mod_entities_links__authority.notes.note._qualified": "Notes note",
   "entityType.mod_entities_links__authority.notes.note_type_id": "Note type UUID",
   "entityType.mod_entities_links__authority.notes.note_type_id._qualified": "Notes note type UUID",
-  "entityType.mod_entities_links__authority.notes.note_type": "Note type",
-  "entityType.mod_entities_links__authority.notes.note_type._qualified": "Notes note type",
   "entityType.mod_entities_links__authority.metadata_created_date": "Created at",
   "entityType.mod_entities_links__authority.metadata_created_by_user_id": "Created by user UUID",
   "entityType.mod_entities_links__authority.metadata_updated_date": "Updated at",

@@ -51,12 +51,13 @@
       valueGetter: ':sourceAlias.source_file_id',
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__authorities__entities_links__authority',
+      hidden: true,
       joinsTo: [
         {
           targetId: 'c788d4b8-2a7e-5d6c-8d6b-c548f95455e5',
           targetField: 'id',
+          direction: 'left',
           type: 'equality-cast-uuid',
-          direction: 'left'
         },
       ],
     },
@@ -78,8 +79,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.heading',
-      filterValueGetter: "lower(:sourceAlias.heading)",
-      valueFunction: 'lower(:value)',
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -401,6 +400,7 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: ':value',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -429,6 +429,7 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: ':value',
               property: 'relationshipType',
               dataType: {
                 dataType: 'stringType',
@@ -603,6 +604,7 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: ':value',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -631,6 +633,7 @@
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: ':value',
               property: 'relationshipType',
               dataType: {
                 dataType: 'stringType',
@@ -677,8 +680,8 @@
       },
       queryable: false,
       visibleByDefault: false,
+      valueGetter: '(:sourceAlias.identifiers)::text',
       sourceAlias: 'src__authorities__entities_links__authority',
-      valueGetter: "(:sourceAlias.identifiers)::text"
     },
     {
       name: 'notes',
@@ -690,29 +693,16 @@
             {
               name: 'note_type_id',
               queryable: true,
+              source: {
+                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
+                columnName: 'name',
+              },
               valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noteTypeId',
               dataType: {
                 dataType: 'rangedUUIDType',
               },
-              source: {
-                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
-                columnName: 'name',
-              }
-            },
-            {
-              name: 'note_type',
-              queryable: false,
-              valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              property: 'noteType',
-              dataType: {
-                dataType: 'stringType',
-              },
-              source: {
-                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
-                columnName: 'name',
-              }
             },
             {
               name: 'note',
@@ -739,7 +729,8 @@
                 },
               ],
               valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: 'lower(:value)',
               property: 'staffOnly',
               dataType: {
                 dataType: 'booleanType',
@@ -750,17 +741,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: "( \
-                      SELECT \
-                        jsonb_agg( \
-                          record.value || \
-                          jsonb_build_object('noteType', note_type.name) \
-                          ORDER BY record.value ->> 'noteTypeId') \
-                      FROM \
-                        jsonb_array_elements((:sourceAlias.notes)) record(value) \
-                        LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_note_type note_type \
-                        ON (record.value ->> 'noteTypeId') = note_type.id::text \
-                    )::text",
+      valueGetter: "(SELECT jsonb_agg(record.value || jsonb_build_object('noteType', note_type.name) ORDER BY record.value ->> 'noteTypeId') FROM jsonb_array_elements((:sourceAlias.notes)) record(value) LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_note_type note_type ON (record.value ->> 'noteTypeId') = note_type.id::text)::text",
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {

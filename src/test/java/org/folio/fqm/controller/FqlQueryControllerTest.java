@@ -184,7 +184,6 @@ class FqlQueryControllerTest {
   @Test
   void shouldRunSynchronousQueryWithOptionalParametersAndReturnResults() throws Exception {
     UUID entityTypeId = UUID.randomUUID();
-    UUID afterUUID = UUID.randomUUID();
     String fqlQuery = """
                       {"field1": {"$in": ["value1", "value2", "value3", "value4", "value5" ] }}
                       """;
@@ -204,7 +203,6 @@ class FqlQueryControllerTest {
       .queryParam("query", fqlQuery)
       .queryParam("entityTypeId", entityTypeId.toString())
       .queryParam("fields", fields)
-      .queryParam("afterId", afterUUID.toString())
       .queryParam("limit", limit.toString());
     mockMvc.perform(builder)
       .andExpect(status().isOk())

@@ -296,16 +296,9 @@ curl \
 Please note that query results will be automatically deleted after a period of 3 hours.
 
 # Executing query synchronously
-The process for executing the query synchronously involves the following steps:
+A query can be executed synchrnously with the GET /query API by providing the FQL query and specifying the maximum limit of results to be returned in the response.
 
-1. Make an API call by providing the FQL query and specifying the maximum limit of results to be returned in the response.
-2. Retrieve the first page of results from the API response.
-3. Make subsequent API calls using the same query, the maximum record limit, and the ID of the last result obtained in
-   the previous response.
-4. Continue this process until you receive an empty results array, indicating that all desired results have been
-   retrieved by paginating through the available data.
-
-To retrieve the first page of results, you can use the following API:
+This API can be useful for testing queries during development or for queries that are expected to return a small number of results. However, for queries that may return a large number of results, it is recommended to use the asynchronous query execution mechanism to avoid potential performance issues.
 
 ```bash
 curl \
@@ -314,9 +307,6 @@ curl \
 -H 'x-okapi-token: {{ token }}' \
 -X GET {{ base-uri }}/query?query={{ your query }}&entityTypeId={{ entityTypeId }}&limit={{ limit }}
 ```
-
-To retrieve subsequent pages, you need to include an additional query parameter called `afterId`, which should be set to
-the ID of the last result obtained in the previous page. This allows you to paginate through the results effectively.
 
 # FQL (FQM Query Language)
 FQL is the language for querying FQM. It is similar to the MongoDB query syntax but simpler.

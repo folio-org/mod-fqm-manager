@@ -78,8 +78,9 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.heading',
+      valueGetter: 'lower(:sourceAlias.heading)',
       sourceAlias: 'src__authorities__entities_links__authority',
+      valueFunction: 'lower(:value)',
     },
     {
       name: 'heading_type',

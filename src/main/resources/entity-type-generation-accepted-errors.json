@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "severity": "warning",
+    "metadata": {
+      "team": "vega",
+      "domain": "circulation",
+      "module": "mod-patron-blocks"
+    },
+    "type": "translations-extra",
+    "extraTranslations": [
+      "fqm.entityType.user_summary.open_loans.duration",
+      "fqm.entityType.user_summary.open_loans.duration._qualified",
+      "fqm.entityType.user_summary.open_loans.interval_id",
+      "fqm.entityType.user_summary.open_loans.interval_id._qualified"
+    ]
+  }
+]

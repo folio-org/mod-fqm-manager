@@ -163,6 +163,7 @@
             {
               name: 'grace_period',
               queryable: false,
+              hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'gracePeriod') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'gracePeriod')) FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans') AS elems)",
               valueFunction: 'lower(:value)',

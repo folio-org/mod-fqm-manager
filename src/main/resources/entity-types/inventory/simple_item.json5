@@ -1158,13 +1158,55 @@
       name: 'item_damaged_status_id',
       sourceAlias: 'item',
       dataType: {
-        dataType: 'stringType',
+        dataType: 'rangedUUIDType',
       },
       isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
       hidden: true,
+      essential: true,
       valueGetter: ":sourceAlias.jsonb->>'itemDamagedStatusId'",
+      joinsTo: [
+        {
+          targetId: '8b0eba45-d006-4ceb-811f-254808f3eb1d', // simple_item_damaged_status
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'item_damaged_status',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          item_damaged_status.jsonb ->> 'name' \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_inventory_item_damaged_status item_damaged_status \
+        WHERE \
+          item_damaged_status.id = (:sourceAlias.jsonb ->> 'itemDamagedStatusId')::uuid \
+      )",
+      filterValueGetter: "( \
+        SELECT \
+          lower(item_damaged_status.jsonb ->> 'name') \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_inventory_item_damaged_status item_damaged_status \
+        WHERE \
+          item_damaged_status.id = (:sourceAlias.jsonb ->> 'itemDamagedStatusId')::uuid \
+      )",
+      valueFunction: 'lower(:value)',
+      idColumnName: 'item_damaged_status_id',
+      source: {
+        entityTypeId: '8b0eba45-d006-4ceb-811f-254808f3eb1d', // simple_item_damaged_status
+        columnName: 'name',
+      },
     },
     {
       name: 'number_of_missing_pieces',
@@ -1177,6 +1219,42 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'numberOfMissingPieces'",
+    },
+    {
+      name: 'missing_pieces',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'missingPieces'",
+    },
+    {
+      name: 'missing_pieces_date',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'missingPiecesDate'",
+    },
+    {
+      name: 'item_damaged_status_date',
+      sourceAlias: 'item',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ":sourceAlias.jsonb->>'itemDamagedStatusDate'",
     },
     {
       name: 'purchase_order_line_identifier',

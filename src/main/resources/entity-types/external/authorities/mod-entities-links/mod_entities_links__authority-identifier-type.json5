@@ -1,0 +1,62 @@
+{
+  id: 'e1d77962-f469-5a9c-a0e0-30987c1bae99',
+  name: 'mod_entities_links__authority-identifier-type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__authorities__entities_links__authority_identifier_type',
+      target: 'src__authorities__entities_links__authority_identifier_type',
+    },
+  ],
+  requiredPermissions: [
+    'authority-identifier-types.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__authorities__entities_links__authority_identifier_type',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.name',
+      sourceAlias: 'src__authorities__entities_links__authority_identifier_type',
+      valueSourceApi: {
+        path: 'authority-identifier-types',
+        valueJsonPath: '$.identifierTypes.*.id',
+        labelJsonPath: '$.identifierTypes.*.name',
+      },
+      essential: true,
+      idColumnName: 'id',
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.code',
+      sourceAlias: 'src__authorities__entities_links__authority_identifier_type',
+    },
+  ],
+}

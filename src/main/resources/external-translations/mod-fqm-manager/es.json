@@ -426,7 +426,7 @@
   "entityType.mod_circulation_storage__actual_cost_record.item_effective_location": "Item effective location",
   "entityType.mod_circulation_storage__actual_cost_record.item_loan_type_id": "Item loan type UUID",
   "entityType.mod_circulation_storage__actual_cost_record.item_loan_type": "Item loan type",
-  "entityType.mod_circulation_storage__actual_cost_record.item_holdings_record_id": "Item holdings record UUID",
+  "entityType.mod_circulation_storage__actual_cost_record.item_holdings_record_id": "Holdings UUID",
   "entityType.mod_circulation_storage__actual_cost_record.item_effective_call_number_components_call_number": "Item effective call number components — Call number",
   "entityType.mod_circulation_storage__actual_cost_record.item_effective_call_number_components_prefix": "Item effective call number components — Prefix",
   "entityType.mod_circulation_storage__actual_cost_record.item_effective_call_number_components_suffix": "Item effective call number components — Suffix",

@@ -1,6 +1,6 @@
 {
   "entityType.mod_patron_blocks__user_summary": "User blocks summary",
-  "entityType.mod_patron_blocks__user_summary._description": "Simple entity type for user blocks summary data.",
+  "entityType.mod_patron_blocks__user_summary._description": "Simple entity type for user blocks summary data. This entity type can be used for debugging purposes when user summaries fall out of sync.",
   "entityType.mod_patron_blocks__user_summary.id": "UUID",
   "entityType.mod_patron_blocks__user_summary.version": "Record version",
   "entityType.mod_patron_blocks__user_summary.user_id": "User UUID",

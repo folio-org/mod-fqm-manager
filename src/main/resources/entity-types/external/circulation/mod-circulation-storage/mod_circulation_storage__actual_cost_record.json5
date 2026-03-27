@@ -30,7 +30,8 @@
       valueGetter: "(:src__circulation__circulation_storage__actual_cost_record.jsonb->>'id')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__circulation_storage__actual_cost_record',
-      hidden: true,
+      queryOnly: false,
+      hidden: false,
       essential: true,
     },
     {

@@ -314,9 +314,33 @@
       },
       queryable: true,
       visibleByDefault: true,
+      essential: true,
       valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines'), 0)",
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
-    }
+    },
+    {
+      name: 'open_loans_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb->'openLoans'), 0)",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+    },
+//    {
+//      name: 'open_fees_fines_count_method_2',
+//      dataType: {
+//        dataType: 'integerType',
+//      },
+//      queryable: true,
+//      visibleByDefault: true,
+//      valueGetter: "",
+//      valueFunction: '(:value)::int',
+//      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+//    }
   ],
 }

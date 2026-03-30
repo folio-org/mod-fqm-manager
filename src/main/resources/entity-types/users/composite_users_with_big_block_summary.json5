@@ -1,7 +1,7 @@
 {
   id: 'ffffffff-9bf1-4dc6-831b-5c0836f898ed',
-  name: 'composite_users_with_user_block_summary',
-  private: true,
+  name: 'composite_users_with_big_block_summary',
+  private: false,
   sources: [
     {
       alias: 'user',

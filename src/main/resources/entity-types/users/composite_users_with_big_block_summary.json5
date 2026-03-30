@@ -1,0 +1,31 @@
+{
+  id: 'ffffffff-9bf1-4dc6-831b-5c0836f898ed',
+  name: 'composite_users_with_user_block_summary',
+  private: true,
+  sources: [
+    {
+      alias: 'user',
+      type: 'entity-type',
+      targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user
+      sourceField: 'blocks.user_id',
+      targetField: 'id',
+      inheritCustomFields: true,
+      useIdColumns: true,
+      overrideJoinDirection: 'inner',
+      order: 1,
+    },
+    {
+      alias: 'blocks',
+      type: 'entity-type',
+      targetId: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528', // mod_feesfines__user_block_summary
+      essentialOnly: true,
+      order: 2,
+    },
+  ],
+  defaultSort: [
+    {
+      columnName: '"user.user".id',
+      direction: 'ASC',
+    },
+  ]
+}

@@ -304,5 +304,19 @@
       visibleByDefault: false,
       valueGetter: ':src__circulation__patron_blocks__user_summary.jsonb::text',
     },
+    // New columns here
+    // 2 ways: sum all rows from original fee_fine table, or sum from the open_fees_fines array in the summary table.
+    // AI said this, but idk: The former is more expensive but more accurate, as it would include any fees/fines that were paid off and thus not included in the open_fees_fines array
+    {
+      name: 'open_fees_fines_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines'), 0)",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+    }
   ],
 }

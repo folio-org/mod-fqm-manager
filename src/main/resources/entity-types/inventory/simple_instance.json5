@@ -1133,8 +1133,7 @@
                 dataType: 'booleanType',
               },
               queryable: true,
-              valueGetter: "${tenant_id}_mod_inventory_storage.normalize_jsonb_array(${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'staffOnly'))",
-              valueFunction: '${tenant_id}_mod_inventory_storage.normalize_token(:value)',
+              valueGetter: "${tenant_id}_mod_inventory_storage.extract_values(:sourceAlias.jsonb, 'notes', 'staffOnly')",
               values: [
                 {
                   value: 'true',

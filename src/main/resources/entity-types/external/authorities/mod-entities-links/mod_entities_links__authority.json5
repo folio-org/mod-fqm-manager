@@ -676,12 +676,32 @@
                 dataType: 'rangedUUIDType',
               },
             },
+            {
+              name: 'identifier_type',
+              queryable: true,
+              valueSourceApi: {
+                path: 'authority-identifier-types',
+                valueJsonPath: '$.identifierTypes.*.id',
+                labelJsonPath: '$.identifierTypes.*.name',
+              },
+              source: {
+                entityTypeId: 'e1d77962-f469-5a9c-a0e0-30987c1bae99',
+                columnName: 'name',
+              },
+              valueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
+              valueFunction: ':value',
+              property: 'identifierType',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
           ],
         },
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: '(:sourceAlias.identifiers)::text',
+      valueGetter: "(SELECT jsonb_agg(record.value || jsonb_build_object('identifierType', identifier_type.name) ORDER BY record.value->>'identifierTypeId') FROM jsonb_array_elements((:sourceAlias.identifiers)) record(value) LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_identifier_type identifier_type ON (record.value->>'identifierTypeId') = identifier_type.id::text)::text",
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -694,15 +714,31 @@
             {
               name: 'note_type_id',
               queryable: true,
-              source: {
-                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
-                columnName: 'name',
-              },
               valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noteTypeId',
               dataType: {
                 dataType: 'rangedUUIDType',
+              },
+            },
+            {
+              name: 'note_type',
+              queryable: true,
+              valueSourceApi: {
+                path: 'authority-note-types',
+                valueJsonPath: '$.authorityNoteTypes.*.id',
+                labelJsonPath: '$.authorityNoteTypes.*.name',
+              },
+              source: {
+                entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
+                columnName: 'name',
+              },
+              valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              filterValueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
+              valueFunction: ':value',
+              property: 'noteType',
+              dataType: {
+                dataType: 'stringType',
               },
             },
             {

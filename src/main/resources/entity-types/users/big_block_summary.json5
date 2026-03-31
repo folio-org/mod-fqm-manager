@@ -347,7 +347,7 @@
         FROM \
           ${tenant_id}_mod_circulation_storage.request \
         WHERE \
-          jsonb ->> 'userId' = :src__circulation__patron_blocks__user_summary.jsonb ->> 'userId' \
+          jsonb ->> 'requesterId' = :src__circulation__patron_blocks__user_summary.jsonb ->> 'userId' \
       )",
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',

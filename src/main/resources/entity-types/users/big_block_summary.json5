@@ -373,6 +373,8 @@
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
+    // TODO: decide if we want to include all blocks, or just automated ones. the bl-users API only includes automated blocks.
+    // TODO: This is a derived field that needs to be calculated from a patron group ID, patron block conidition ID, and patron block limit ID.
     {
       name: 'blocks_count',
       dataType: {

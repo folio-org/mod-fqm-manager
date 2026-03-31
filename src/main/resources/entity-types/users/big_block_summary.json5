@@ -339,7 +339,16 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "0",
+      // TODO: update to use FQM view instead of original requests table
+      // TODO: requester_id or user barcode?
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          ${tenant_id}_mod_circulation_storage.request \
+        WHERE \
+          jsonb ->> 'userId' = :src__circulation__patron_blocks__user_summary.jsonb ->> 'userId' \
+      )",
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },

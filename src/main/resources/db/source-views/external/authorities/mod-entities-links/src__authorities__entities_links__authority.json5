@@ -6,5 +6,5 @@
       'authority',
     ],
   ],
-  sql: 'SELECT * FROM ${tenant_id}_mod_entities_links.authority',
+  sql: 'SELECT * FROM ${tenant_id}_mod_entities_links.authority WHERE deleted = false',
 }

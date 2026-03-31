@@ -340,7 +340,7 @@
       visibleByDefault: false,
       essential: true,
       // TODO: update to use FQM view instead of original requests table
-      // TODO: requester_id or user barcode?
+      // TODO: requester_id or user barcode? I think requester_id
       valueGetter: "( \
         SELECT \
           COUNT(*) \

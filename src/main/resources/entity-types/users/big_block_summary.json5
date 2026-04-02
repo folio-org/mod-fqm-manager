@@ -1,7 +1,7 @@
 {
   id: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528',
   name: 'big_block_summary',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',
@@ -402,7 +402,7 @@
             SELECT \
               COUNT(*) AS auto_count \
             FROM \
-              ${tenant_id}_mod_patron_blocks.patron_group_limits limits \
+              ${tenant_id}_mod_patron_blocks.patron_block_limits limits \
               JOIN ${tenant_id}_mod_patron_blocks.patron_block_conditions conditions \
                 ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
               JOIN ${tenant_id}_mod_users.users users \
@@ -482,7 +482,7 @@
             SELECT \
               COUNT(*) AS auto_count \
             FROM \
-              ${tenant_id}_mod_patron_blocks.patron_group_limits limits \
+              ${tenant_id}_mod_patron_blocks.patron_block_limits limits \
               JOIN ${tenant_id}_mod_patron_blocks.patron_block_conditions conditions \
                 ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
               JOIN ${tenant_id}_mod_users.users users \

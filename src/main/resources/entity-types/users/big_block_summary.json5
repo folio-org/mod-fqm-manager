@@ -11,6 +11,7 @@
   ],
   requiredPermissions: [
     'patron-blocks.user-summary.item.get',
+    // TODO: more perms
   ],
   defaultSort: [
     {

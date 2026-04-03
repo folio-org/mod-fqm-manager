@@ -123,6 +123,11 @@ class SourceUtilsCopyTest {
         null,
         new EntityTypeSourceEntityType().alias("foo").sourceField("foo.long.field"),
         Map.of("sourceField", "foo.long.field")
+      ),
+      Arguments.of(
+        null,
+        new EntityTypeSourceEntityType().alias("foo").additionalJoinCondition(":foo.field = 'x' AND :other.field = 'y'"),
+        Map.of("additionalJoinCondition", ":bar.field = 'x' AND :other.field = 'y'")
       )
     );
   }

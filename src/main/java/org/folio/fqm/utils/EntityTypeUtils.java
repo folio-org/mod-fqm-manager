@@ -313,6 +313,7 @@ public class EntityTypeUtils {
               sourceProperties.put("targetId", Objects.toString(sourceEt.getTargetId()));
               sourceProperties.put("targetField", sourceEt.getTargetField());
               sourceProperties.put("overrideJoinDirection", Objects.toString(sourceEt.getOverrideJoinDirection()));
+              sourceProperties.put("additionalJoinCondition", sourceEt.getAdditionalJoinCondition());
               sourceProperties.put("useIdColumns", Objects.toString(sourceEt.getUseIdColumns()));
               sourceProperties.put("essentialOnly", Objects.toString(sourceEt.getEssentialOnly()));
               sourceProperties.put("inheritCustomFields", Objects.toString(sourceEt.getInheritCustomFields()));

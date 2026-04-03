@@ -15,7 +15,7 @@
       order: 1,
     },
     {
-      alias: 'blocks',
+      alias: 'transaction_summary',
       type: 'entity-type',
       targetId: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528', // mod_feesfines__user_block_summary
       essentialOnly: true,

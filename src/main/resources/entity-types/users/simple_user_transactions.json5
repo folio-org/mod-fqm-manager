@@ -1,6 +1,6 @@
 {
   id: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528',
-  name: 'simple_user_transactions',
+  name: 'simple_user_transaction',
   private: false,
   sources: [
     {

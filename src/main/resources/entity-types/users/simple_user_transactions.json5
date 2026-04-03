@@ -1,6 +1,6 @@
 {
   id: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528',
-  name: 'big_block_summary',
+  name: 'simple_user_transactions',
   private: false,
   sources: [
     {

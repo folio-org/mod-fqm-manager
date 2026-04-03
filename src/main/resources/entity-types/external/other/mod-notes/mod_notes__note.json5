@@ -1,0 +1,227 @@
+{
+  id: '285652bd-8742-53f4-acd5-35a120247feb',
+  name: 'mod_notes__note',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__other__notes__note',
+      target: 'src__other__notes__note',
+    },
+  ],
+  requiredPermissions: [
+    'notes.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':src__other__notes__note.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note',
+      filterValueGetter: ':src__other__notes__note.id',
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':src__other__notes__note.type_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note',
+      filterValueGetter: ':src__other__notes__note.type_id',
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '5cba8da3-3203-59a4-ad79-f91401850d9f',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':src__other__notes__note.title',
+      sourceAlias: 'src__other__notes__note',
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'domain',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':src__other__notes__note.domain',
+      sourceAlias: 'src__other__notes__note',
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'content',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':src__other__notes__note.content',
+      sourceAlias: 'src__other__notes__note',
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'pop_up_on_check_out',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':src__other__notes__note.pop_up_on_check_out',
+      sourceAlias: 'src__other__notes__note',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'pop_up_on_user',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':src__other__notes__note.pop_up_on_user',
+      sourceAlias: 'src__other__notes__note',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+      valueGetter: 'to_char(:src__other__notes__note.created_date, \'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"\')',
+      sourceAlias: 'src__other__notes__note',
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+      valueGetter: ':src__other__notes__note.created_by',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+      valueGetter: 'to_char(:src__other__notes__note.updated_date, \'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"\')',
+      sourceAlias: 'src__other__notes__note',
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      queryOnly: false,
+      hidden: false,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+      valueGetter: ':src__other__notes__note.updated_by',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note',
+    },
+  ],
+}

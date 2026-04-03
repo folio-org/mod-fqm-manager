@@ -2467,7 +2467,7 @@
   "entityType.src_users_groups": "Groups",
   "entityType.src_users_groups.group": "Group",
   "entityType.src_users_groups.id": "Id",
-  "entityType.simple_user_transaction_summary_summary": "User transactions",
+  "entityType.simple_user_transaction_summary": "User transactions",
   "entityType.simple_user_transaction_summary._description": "Simple entity type where each record is a user transaction summary. Includes a user's loans, fees/fines, requests, proxies, and patron block counts",
   "entityType.simple_user_transaction_summary.id": "UUID",
   "entityType.simple_user_transaction_summary.version": "Record version",

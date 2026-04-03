@@ -154,6 +154,25 @@ class FromClauseUtilsComputeTest {
   }
 
   @Test
+  void testComputeJoinConditionWithAdditionalJoinCondition() {
+    EntityType flattenedEntityType = new EntityType()
+      .addColumnsItem(COLUMN_A_WITH_JOINS_TO_B)
+      .addColumnsItem(COLUMN_B)
+      .addColumnsItem(new EntityTypeColumn().name("ETB.extra").valueGetter("EXTRA").filterValueGetter("FILTER_EXTRA"));
+
+    EntityTypeSourceDatabaseJoin computed = FromClauseUtils.computeJoin(
+      flattenedEntityType,
+      COLUMN_A_WITH_JOINS_TO_B,
+      COLUMN_B,
+      null,
+      ":ETB.extra = 'foo'"
+    );
+
+    assertThat(computed.getCondition(), is("A -> B AND (FILTER_EXTRA = 'foo')"));
+    assertThat(computed.getType(), is("LEFT JOIN"));
+  }
+
+  @Test
   void testComputeJoinUnknownType() {
     Join join = new Join() {};
     assertThrows(EntityTypeException.class, () -> FromClauseUtils.computeJoin(COLUMN_A, COLUMN_B, join, null, false));

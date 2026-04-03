@@ -223,7 +223,8 @@ public class EntityTypeValidationService {
     boolean hasAllRequiredJoinProperties = numPossessedRequiredJoinProperties == numRequiredJoinProperties;
     boolean hasNoRequiredJoinProperties = numPossessedRequiredJoinProperties == 0;
 
-    boolean hasOptionalJoinProperties = source.getOverrideJoinDirection() != null; // optional
+    boolean hasOptionalJoinProperties =
+      source.getOverrideJoinDirection() != null || source.getAdditionalJoinCondition() != null; // optional
 
     // we only have some, not all
     if (!hasAllRequiredJoinProperties && !hasNoRequiredJoinProperties) {
@@ -236,7 +237,7 @@ public class EntityTypeValidationService {
     // case with optional + some properties is already covered above
     if (hasOptionalJoinProperties && hasNoRequiredJoinProperties) {
       throw new InvalidEntityTypeDefinitionException(
-        "Source %s may only contain overrideJoinDirection if targetField and sourceField are also defined".formatted(
+        "Source %s may only contain overrideJoinDirection or additionalJoinCondition if targetField and sourceField are also defined".formatted(
             source.getAlias()
           ),
         entityType

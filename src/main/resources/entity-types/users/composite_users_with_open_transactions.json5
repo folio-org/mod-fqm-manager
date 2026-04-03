@@ -7,7 +7,7 @@
       alias: 'user',
       type: 'entity-type',
       targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2', // simple_user
-      sourceField: 'blocks.user_id',
+      sourceField: 'transaction_summary.user_id',
       targetField: 'id',
       inheritCustomFields: true,
       useIdColumns: true,

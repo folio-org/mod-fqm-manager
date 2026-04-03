@@ -1,0 +1,83 @@
+{
+  id: '23791126-7d57-5b96-8fb5-e513307b1877',
+  name: 'mod_notes__link',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__other__notes__link',
+      target: 'src__other__notes__link',
+    },
+  ],
+  requiredPermissions: [
+    'note.links.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'link_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      isIdColumn: true,
+      valueGetter: ':src__other__notes__link.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__link',
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '23791126-7d57-5b96-8fb5-e513307b1877',
+          targetField: 'link_id',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'object_id',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: false,
+      valueGetter: ':src__other__notes__link.object_id',
+      sourceAlias: 'src__other__notes__link',
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':src__other__notes__link.object_type',
+      sourceAlias: 'src__other__notes__link',
+      hidden: true,
+      essential: true,
+    },
+  ],
+}

@@ -1,0 +1,10 @@
+{
+  name: 'src__other__notes__link',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_notes',
+      'link',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_notes.link',
+}

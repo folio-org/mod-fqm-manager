@@ -1,0 +1,65 @@
+{
+  id: '879f82d4-d4a6-5099-844a-fe611b668809',
+  name: 'mod_notes__note_link',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__other__notes__note_link',
+      target: 'src__other__notes__note_link',
+    },
+  ],
+  requiredPermissions: [
+    'note.links.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'note_id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'note_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':src__other__notes__note_link.note_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note_link',
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '285652bd-8742-53f4-acd5-35a120247feb',
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'link_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':src__other__notes__note_link.link_id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__other__notes__note_link',
+      hidden: true,
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '23791126-7d57-5b96-8fb5-e513307b1877',
+          targetField: 'link_id',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+  ],
+}

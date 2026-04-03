@@ -340,13 +340,11 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      // TODO: update to use FQM view instead of original requests table
-      // TODO: requester_id or user barcode? I think requester_id
       valueGetter: "( \
         SELECT \
           COUNT(*) \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src__circulation_storage__request \
+          ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request \
         WHERE \
           jsonb ->> 'requesterId' = :src__circulation__patron_blocks__user_summary.jsonb ->> 'userId' \
       )",

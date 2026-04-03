@@ -1,5 +1,5 @@
 {
-  id: 'ffffffff-9bf1-4dc6-831b-5c0836f898ed',
+  id: '407e9d51-7f8b-4041-8869-b9eb238f1823',
   name: 'composite_users_with_open_transactions',
   private: false,
   sources: [
@@ -17,7 +17,7 @@
     {
       alias: 'transaction_summary',
       type: 'entity-type',
-      targetId: 'ffffffff-d2a9-5e59-8f4a-4ac526ec8528', // mod_feesfines__user_block_summary
+      targetId: '7a845f67-80b7-4ebb-9ba3-364b7de94e3e', // simple_user_transaction_summary
       essentialOnly: true,
       order: 2,
     },

@@ -1,0 +1,82 @@
+{
+  id: '8629d062-2878-5803-b8bf-f08fb1b00d31',
+  name: 'mod_entities_links__authority-heading-type',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__authorities__entities_links__authority_heading_type',
+      target: 'src__authorities__entities_links__authority_heading_type',
+    },
+  ],
+  requiredPermissions: [
+    'authority-heading-types.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':sourceAlias.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__authorities__entities_links__authority_heading_type',
+    },
+    {
+      name: 'name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':sourceAlias.name',
+      sourceAlias: 'src__authorities__entities_links__authority_heading_type',
+      valueSourceApi: {
+        path: 'authority-heading-types',
+        valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
+        labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
+      },
+      essential: true,
+      idColumnName: 'code',
+    },
+    {
+      name: 'code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.code',
+      sourceAlias: 'src__authorities__entities_links__authority_heading_type',
+    },
+    {
+      name: 'queryable',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.queryable',
+      sourceAlias: 'src__authorities__entities_links__authority_heading_type',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+  ],
+}

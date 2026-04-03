@@ -78,7 +78,7 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: 'lower(:sourceAlias.heading)',
+      valueGetter: ':sourceAlias.heading',
       sourceAlias: 'src__authorities__entities_links__authority',
       valueFunction: 'lower(:value)',
     },
@@ -89,146 +89,19 @@
       },
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.heading_type',
+      valueGetter: '(SELECT heading_type.name FROM ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_heading_type heading_type WHERE heading_type.code = :sourceAlias.heading_type)',
       sourceAlias: 'src__authorities__entities_links__authority',
-      values: [
-        {
-          value: 'personalName',
-          label: 'Personal name',
-        },
-        {
-          value: 'personalNameTitle',
-          label: 'Personal name title',
-        },
-        {
-          value: 'corporateName',
-          label: 'Corporate name',
-        },
-        {
-          value: 'corporateNameTitle',
-          label: 'Corporate name title',
-        },
-        {
-          value: 'meetingName',
-          label: 'Meeting name',
-        },
-        {
-          value: 'meetingNameTitle',
-          label: 'Meeting name title',
-        },
-        {
-          value: 'uniformTitle',
-          label: 'Uniform title',
-        },
-        {
-          value: 'namedEvent',
-          label: 'Named event',
-        },
-        {
-          value: 'topicalTerm',
-          label: 'Topical term',
-        },
-        {
-          value: 'geographicName',
-          label: 'Geographic name',
-        },
-        {
-          value: 'genreTerm',
-          label: 'Genre term',
-        },
-        {
-          value: 'chronTerm',
-          label: 'Chron term',
-        },
-        {
-          value: 'mediumPerfTerm',
-          label: 'Medium perf term',
-        },
-        {
-          value: 'generalSubdivision',
-          label: 'General subdivision',
-        },
-        {
-          value: 'geographicSubdivision',
-          label: 'Geographic subdivision',
-        },
-        {
-          value: 'chronSubdivision',
-          label: 'Chron subdivision',
-        },
-        {
-          value: 'formSubdivision',
-          label: 'Form subdivision',
-        },
-        {
-          value: 'personalNameTrunc',
-          label: 'Personal name trunc',
-        },
-        {
-          value: 'personalNameTitleTrunc',
-          label: 'Personal name title trunc',
-        },
-        {
-          value: 'corporateNameTrunc',
-          label: 'Corporate name trunc',
-        },
-        {
-          value: 'corporateNameTitleTrunc',
-          label: 'Corporate name title trunc',
-        },
-        {
-          value: 'meetingNameTrunc',
-          label: 'Meeting name trunc',
-        },
-        {
-          value: 'meetingNameTitleTrunc',
-          label: 'Meeting name title trunc',
-        },
-        {
-          value: 'uniformTitleTrunc',
-          label: 'Uniform title trunc',
-        },
-        {
-          value: 'topicalTermTrunc',
-          label: 'Topical term trunc',
-        },
-        {
-          value: 'geographicNameTrunc',
-          label: 'Geographic name trunc',
-        },
-        {
-          value: 'genreTermTrunc',
-          label: 'Genre term trunc',
-        },
-        {
-          value: 'namedEventTrunc',
-          label: 'Named event trunc',
-        },
-        {
-          value: 'chronTermTrunc',
-          label: 'Chron term trunc',
-        },
-        {
-          value: 'mediumPerfTermTrunc',
-          label: 'Medium perf term trunc',
-        },
-        {
-          value: 'generalSubdivisionTrunc',
-          label: 'General subdivision trunc',
-        },
-        {
-          value: 'geographicSubdivisionTrunc',
-          label: 'Geographic subdivision trunc',
-        },
-        {
-          value: 'chronSubdivisionTrunc',
-          label: 'Chron subdivision trunc',
-        },
-        {
-          value: 'formSubdivisionTrunc',
-          label: 'Form subdivision trunc',
-        },
-      ],
+      filterValueGetter: 'lower(:sourceAlias.heading_type)',
+      valueFunction: 'lower(:value)',
+      valueSourceApi: {
+        path: 'authority-heading-types',
+        valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
+        labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
+      },
+      source: {
+        entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
+        columnName: 'name',
+      },
     },
     {
       name: 'subject_heading_code',
@@ -261,144 +134,15 @@
             {
               name: 'heading_type',
               queryable: true,
-              values: [
-                {
-                  value: 'personalName',
-                  label: 'Personal name',
-                },
-                {
-                  value: 'personalNameTitle',
-                  label: 'Personal name title',
-                },
-                {
-                  value: 'corporateName',
-                  label: 'Corporate name',
-                },
-                {
-                  value: 'corporateNameTitle',
-                  label: 'Corporate name title',
-                },
-                {
-                  value: 'meetingName',
-                  label: 'Meeting name',
-                },
-                {
-                  value: 'meetingNameTitle',
-                  label: 'Meeting name title',
-                },
-                {
-                  value: 'uniformTitle',
-                  label: 'Uniform title',
-                },
-                {
-                  value: 'namedEvent',
-                  label: 'Named event',
-                },
-                {
-                  value: 'topicalTerm',
-                  label: 'Topical term',
-                },
-                {
-                  value: 'geographicName',
-                  label: 'Geographic name',
-                },
-                {
-                  value: 'genreTerm',
-                  label: 'Genre term',
-                },
-                {
-                  value: 'chronTerm',
-                  label: 'Chron term',
-                },
-                {
-                  value: 'mediumPerfTerm',
-                  label: 'Medium perf term',
-                },
-                {
-                  value: 'generalSubdivision',
-                  label: 'General subdivision',
-                },
-                {
-                  value: 'geographicSubdivision',
-                  label: 'Geographic subdivision',
-                },
-                {
-                  value: 'chronSubdivision',
-                  label: 'Chron subdivision',
-                },
-                {
-                  value: 'formSubdivision',
-                  label: 'Form subdivision',
-                },
-                {
-                  value: 'personalNameTrunc',
-                  label: 'Personal name trunc',
-                },
-                {
-                  value: 'personalNameTitleTrunc',
-                  label: 'Personal name title trunc',
-                },
-                {
-                  value: 'corporateNameTrunc',
-                  label: 'Corporate name trunc',
-                },
-                {
-                  value: 'corporateNameTitleTrunc',
-                  label: 'Corporate name title trunc',
-                },
-                {
-                  value: 'meetingNameTrunc',
-                  label: 'Meeting name trunc',
-                },
-                {
-                  value: 'meetingNameTitleTrunc',
-                  label: 'Meeting name title trunc',
-                },
-                {
-                  value: 'uniformTitleTrunc',
-                  label: 'Uniform title trunc',
-                },
-                {
-                  value: 'topicalTermTrunc',
-                  label: 'Topical term trunc',
-                },
-                {
-                  value: 'geographicNameTrunc',
-                  label: 'Geographic name trunc',
-                },
-                {
-                  value: 'genreTermTrunc',
-                  label: 'Genre term trunc',
-                },
-                {
-                  value: 'namedEventTrunc',
-                  label: 'Named event trunc',
-                },
-                {
-                  value: 'chronTermTrunc',
-                  label: 'Chron term trunc',
-                },
-                {
-                  value: 'mediumPerfTermTrunc',
-                  label: 'Medium perf term trunc',
-                },
-                {
-                  value: 'generalSubdivisionTrunc',
-                  label: 'General subdivision trunc',
-                },
-                {
-                  value: 'geographicSubdivisionTrunc',
-                  label: 'Geographic subdivision trunc',
-                },
-                {
-                  value: 'chronSubdivisionTrunc',
-                  label: 'Chron subdivision trunc',
-                },
-                {
-                  value: 'formSubdivisionTrunc',
-                  label: 'Form subdivision trunc',
-                },
-              ],
+              valueSourceApi: {
+                path: 'authority-heading-types',
+                valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
+                labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
+              },
+              source: {
+                entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
+                columnName: 'name',
+              },
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
               valueFunction: ':value',
@@ -441,7 +185,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: '(:sourceAlias.sft_headings)::text',
+      valueGetter: "(SELECT jsonb_agg(elems.value || jsonb_build_object('headingType', ht.name)) FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_heading_type ht ON ht.code = elems.value->>'headingType')::text",
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {
@@ -465,144 +209,15 @@
             {
               name: 'heading_type',
               queryable: true,
-              values: [
-                {
-                  value: 'personalName',
-                  label: 'Personal name',
-                },
-                {
-                  value: 'personalNameTitle',
-                  label: 'Personal name title',
-                },
-                {
-                  value: 'corporateName',
-                  label: 'Corporate name',
-                },
-                {
-                  value: 'corporateNameTitle',
-                  label: 'Corporate name title',
-                },
-                {
-                  value: 'meetingName',
-                  label: 'Meeting name',
-                },
-                {
-                  value: 'meetingNameTitle',
-                  label: 'Meeting name title',
-                },
-                {
-                  value: 'uniformTitle',
-                  label: 'Uniform title',
-                },
-                {
-                  value: 'namedEvent',
-                  label: 'Named event',
-                },
-                {
-                  value: 'topicalTerm',
-                  label: 'Topical term',
-                },
-                {
-                  value: 'geographicName',
-                  label: 'Geographic name',
-                },
-                {
-                  value: 'genreTerm',
-                  label: 'Genre term',
-                },
-                {
-                  value: 'chronTerm',
-                  label: 'Chron term',
-                },
-                {
-                  value: 'mediumPerfTerm',
-                  label: 'Medium perf term',
-                },
-                {
-                  value: 'generalSubdivision',
-                  label: 'General subdivision',
-                },
-                {
-                  value: 'geographicSubdivision',
-                  label: 'Geographic subdivision',
-                },
-                {
-                  value: 'chronSubdivision',
-                  label: 'Chron subdivision',
-                },
-                {
-                  value: 'formSubdivision',
-                  label: 'Form subdivision',
-                },
-                {
-                  value: 'personalNameTrunc',
-                  label: 'Personal name trunc',
-                },
-                {
-                  value: 'personalNameTitleTrunc',
-                  label: 'Personal name title trunc',
-                },
-                {
-                  value: 'corporateNameTrunc',
-                  label: 'Corporate name trunc',
-                },
-                {
-                  value: 'corporateNameTitleTrunc',
-                  label: 'Corporate name title trunc',
-                },
-                {
-                  value: 'meetingNameTrunc',
-                  label: 'Meeting name trunc',
-                },
-                {
-                  value: 'meetingNameTitleTrunc',
-                  label: 'Meeting name title trunc',
-                },
-                {
-                  value: 'uniformTitleTrunc',
-                  label: 'Uniform title trunc',
-                },
-                {
-                  value: 'topicalTermTrunc',
-                  label: 'Topical term trunc',
-                },
-                {
-                  value: 'geographicNameTrunc',
-                  label: 'Geographic name trunc',
-                },
-                {
-                  value: 'genreTermTrunc',
-                  label: 'Genre term trunc',
-                },
-                {
-                  value: 'namedEventTrunc',
-                  label: 'Named event trunc',
-                },
-                {
-                  value: 'chronTermTrunc',
-                  label: 'Chron term trunc',
-                },
-                {
-                  value: 'mediumPerfTermTrunc',
-                  label: 'Medium perf term trunc',
-                },
-                {
-                  value: 'generalSubdivisionTrunc',
-                  label: 'General subdivision trunc',
-                },
-                {
-                  value: 'geographicSubdivisionTrunc',
-                  label: 'Geographic subdivision trunc',
-                },
-                {
-                  value: 'chronSubdivisionTrunc',
-                  label: 'Chron subdivision trunc',
-                },
-                {
-                  value: 'formSubdivisionTrunc',
-                  label: 'Form subdivision trunc',
-                },
-              ],
+              valueSourceApi: {
+                path: 'authority-heading-types',
+                valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
+                labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
+              },
+              source: {
+                entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
+                columnName: 'name',
+              },
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
               valueFunction: ':value',
@@ -645,7 +260,7 @@
       },
       queryable: false,
       visibleByDefault: false,
-      valueGetter: '(:sourceAlias.saft_headings)::text',
+      valueGetter: "(SELECT jsonb_agg(elems.value || jsonb_build_object('headingType', ht.name)) FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems LEFT JOIN ${tenant_id}_mod_fqm_manager.src__authorities__entities_links__authority_heading_type ht ON ht.code = elems.value->>'headingType')::text",
       sourceAlias: 'src__authorities__entities_links__authority',
     },
     {

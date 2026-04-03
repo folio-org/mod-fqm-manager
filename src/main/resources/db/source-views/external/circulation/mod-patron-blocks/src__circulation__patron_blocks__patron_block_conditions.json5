@@ -1,3 +1,4 @@
+// TODO: define this in external repo instead
 {
   name: 'src__circulation__patron_blocks__patron_block_conditions',
   dependsOn: [

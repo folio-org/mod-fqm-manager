@@ -2480,7 +2480,7 @@
   "entityType.simple_user_transaction_summary.automated_blocks_count": "Automated blocks count",
   "entityType.simple_user_transaction_summary.has_open_transactions": "Has open transactions",
   "entityType.composite_users_with_open_transactions": "Users with open transactions",
-  "entityType.composite_users_with_open_transactions._description": "Composite entity type combining users with their transaction summary data. Each record includes a user along with a summary of their open transactions, including open loans, fees/fines, requests, proxies, and patron blocks.",
+  "entityType.composite_users_with_open_transactions._description": "Composite entity type where each record is a user. Records include user data along with a summary of the user's open transactions counts (including open loans, fees/fines, requests, proxies, and patron blocks)."
   "entityType.composite_users_with_open_transactions.user": "User",
   "entityType.composite_users_with_open_transactions.transaction_summary": "Transactions",
   "migration.warning.DEPRECATED_ENTITY.withAlternative": "Record type {name} is deprecated and will no longer be available in a future release. You may be able to use {alternative} instead.",

@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__patron_blocks__patron_block_limits',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_patron_blocks',
+      'patron_block_limits',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_patron_blocks.patron_block_limits',
+}

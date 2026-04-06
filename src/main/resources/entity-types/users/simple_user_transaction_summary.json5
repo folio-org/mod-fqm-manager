@@ -22,7 +22,6 @@
     'circulation-storage.requests.collection.get', // for requests_count
     'proxiesfor.collection.get' // for proxies_count
     // for has_open_transactions -> just a sum of all the others so no new perms needed
-    // TODO: more perms
   ],
   defaultSort: [
     {
@@ -252,6 +251,16 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
       valueGetter: "( \
         COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines'), 0) > 0 \
         OR COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0) > 0 \

@@ -10,7 +10,7 @@
     },
   ],
   requiredPermissions: [
-    // One-shot permission (TODO: needs bl-users dep if we use this set of perrmisions)
+    // One-shot permission (TODO: needs bl-users dep if we use this set of permissions)
     // 'users-bl.transactions.get',
     // 'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
 

@@ -299,17 +299,7 @@ class EntityTypeValidationServiceTest {
             .targetId(EXISTING_TARGET_ET_ID)
             .overrideJoinDirection(JoinDirection.LEFT)
         ),
-        "Source a may only contain overrideJoinDirection or additionalJoinCondition if targetField and sourceField are also defined"
-      ),
-      Arguments.of(
-        entityTypeWithSourcesFactory(
-          new EntityTypeSourceEntityType()
-            .alias("a")
-            .type("entity-type")
-            .targetId(EXISTING_TARGET_ET_ID)
-            .additionalJoinCondition(":a.field = 'value'")
-        ),
-        "Source a may only contain overrideJoinDirection or additionalJoinCondition if targetField and sourceField are also defined"
+        "Source a may only contain overrideJoinDirection if targetField and sourceField are also defined"
       ),
       // this checks against EntityTypeRepository via mock; see testEntityTypeWithSourcePointingToUnknownTargetFromParameterFails
       // for the version which checks against the parameter list

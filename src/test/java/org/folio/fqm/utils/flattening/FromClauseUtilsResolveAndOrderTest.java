@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mockStatic;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabase;
 import org.folio.querytool.domain.dto.EntityTypeSourceDatabaseJoin;
-import org.folio.querytool.domain.dto.JoinDirection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -57,7 +55,7 @@ class FromClauseUtilsResolveAndOrderTest {
   }
 
   static NecessaryJoin join(String source1, String source2) {
-    return new NecessaryJoin(column(source1), source(source1), column(source2), source(source2), null, null);
+    return new NecessaryJoin(column(source1), source(source1), column(source2), source(source2), null);
   }
 
   static List<Arguments> resolutionOrderTestCases() {
@@ -82,15 +80,7 @@ class FromClauseUtilsResolveAndOrderTest {
   void testResolutionOrder(List<NecessaryJoin> joins, List<String> expected) {
     try (MockedStatic<FromClauseUtils> mocked = mockStatic(FromClauseUtils.class, Mockito.CALLS_REAL_METHODS)) {
       mocked
-        .when(() ->
-          FromClauseUtils.computeJoin(
-            any(),
-            any(),
-            any(),
-            nullable(JoinDirection.class),
-            nullable(String.class)
-          )
-        )
+        .when(() -> FromClauseUtils.computeJoin(any(), any(), any(), any()))
         .thenAnswer(invocation ->
           new EntityTypeSourceDatabaseJoin()
             .condition(
@@ -117,8 +107,7 @@ class FromClauseUtilsResolveAndOrderTest {
             normalizedSources.get(join.sourceA().getAlias()),
             join.columnB(),
             normalizedSources.get(join.sourceB().getAlias()),
-            join.overrideJoinDirection(),
-            join.additionalJoinCondition()
+            join.overrideJoinDirection()
           )
         )
         .distinct()

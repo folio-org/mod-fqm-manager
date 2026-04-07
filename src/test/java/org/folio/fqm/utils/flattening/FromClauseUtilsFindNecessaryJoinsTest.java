@@ -61,7 +61,6 @@ class FromClauseUtilsFindNecessaryJoinsTest {
           .sourceField("b.bar")
           .targetField("foo")
           .overrideJoinDirection(JoinDirection.LEFT)
-          .additionalJoinCondition(":a.baz = 'qux'")
       )
       .addSourcesItem(new EntityTypeSourceEntityType().alias("b"))
       .addSourcesItem(new EntityTypeSourceDatabase().alias("a.db").joinedViaEntityType("a"))
@@ -78,7 +77,6 @@ class FromClauseUtilsFindNecessaryJoinsTest {
     assertThat(join.columnB(), is(EntityTypeUtils.findColumnByName(entity, "a.foo")));
     assertThat(join.sourceB(), is(EntityTypeUtils.findSourceByAlias(entity, "a.db", null)));
     assertThat(join.overrideJoinDirection(), is(JoinDirection.LEFT));
-    assertThat(join.additionalJoinCondition(), is(":a.baz = 'qux'"));
     assertThat(join.toString(), is("b.bar[b.db] <-> a.foo[a.db]"));
 
     assertThat(join.flip().columnA(), is(EntityTypeUtils.findColumnByName(entity, "a.foo")));
@@ -86,6 +84,5 @@ class FromClauseUtilsFindNecessaryJoinsTest {
     assertThat(join.flip().columnB(), is(EntityTypeUtils.findColumnByName(entity, "b.bar")));
     assertThat(join.flip().sourceB(), is(EntityTypeUtils.findSourceByAlias(entity, "b.db", null)));
     assertThat(join.flip().overrideJoinDirection(), is(JoinDirection.RIGHT));
-    assertThat(join.flip().additionalJoinCondition(), is(":a.baz = 'qux'"));
   }
 }

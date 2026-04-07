@@ -167,30 +167,6 @@ public class SourceUtils {
     return updatedConditions;
   }
 
-  /**
-   * Rewrites field references in an entity-type source join condition while preserving the `:alias.field` syntax.
-   * These conditions are resolved to concrete SQL later, after flattening has produced the final field names.
-   */
-  public static String injectSourceAliasIntoAdditionalJoinCondition(
-    @CheckForNull String additionalJoinCondition,
-    Map<String, String> renamedAliases
-  ) {
-    if (additionalJoinCondition == null) {
-      return null;
-    }
-
-    String updatedCondition = additionalJoinCondition;
-
-    for (String alias : getAliasReplacementOrder(renamedAliases).toList()) {
-      updatedCondition = updatedCondition.replace(
-        ":" + alias + ".",
-        ":" + renamedAliases.get(alias) + "."
-      );
-    }
-
-    return updatedCondition;
-  }
-
   public static String applyAliasReplacement(
     String input,
     String alias,
@@ -348,7 +324,6 @@ public class SourceUtils {
       .type(source.getType())
       .alias(renamedAliases.get(source.getAlias()))
       .overrideJoinDirection(source.getOverrideJoinDirection())
-      .additionalJoinCondition(injectSourceAliasIntoAdditionalJoinCondition(source.getAdditionalJoinCondition(), renamedAliases))
       .sourceField(
         Optional
           .ofNullable(source.getSourceField())

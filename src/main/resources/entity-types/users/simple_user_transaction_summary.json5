@@ -10,17 +10,17 @@
     },
   ],
   requiredPermissions: [
-    // TODO: if we do find some one-shot permission for this, it'll likely be from that user transaction summary API. But that still doesn't provide automatic blocks, so we'd at least need that perm too
-    // One-shot permission
+    // One-shot permission (TODO: needs bl-users dep if we use this set of perrmisions)
+    // 'users-bl.transactions.get',
+    // 'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
 
-    // All other permissions
+    // Individual permissions
     'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
     'patron-blocks.user-summary.item.get', // for open_loans_count and open_fees_fines_count
     'manualblocks.collection.get', // for manual_blocks_count
-    // TODO: decide if we want request-storage or BL permission for this. If we go with BL, then dep needs to be updated in module descriptor
+    // TODO: decide if we want request-storage or BL (circulation) permission for this. If we go with BL, then dep needs to be updated in module descriptor
     'circulation-storage.requests.collection.get', // for requests_count
     'proxiesfor.collection.get' // for proxies_count
-    // for has_open_transactions -> just a sum of all the others so no new perms needed
   ],
   defaultSort: [
     {

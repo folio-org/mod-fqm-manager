@@ -239,6 +239,7 @@
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
+    //
     {
       name: 'has_open_transactions',
       dataType: {

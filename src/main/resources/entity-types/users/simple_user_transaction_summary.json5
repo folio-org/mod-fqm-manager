@@ -355,17 +355,5 @@
       valueFunction: '(:value)::boolean',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
-
-//    {
-//      name: 'open_fees_fines_count_method_2',
-//      dataType: {
-//        dataType: 'integerType',
-//      },
-//      queryable: true,
-//      visibleByDefault: true,
-//      valueGetter: "",
-//      valueFunction: '(:value)::int',
-//      sourceAlias: 'src__circulation__patron_blocks__user_summary',
-//    }
   ],
 }

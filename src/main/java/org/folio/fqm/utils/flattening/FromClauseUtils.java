@@ -9,14 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.EntityTypeUtils;
-import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.EntityTypeSource;
@@ -33,10 +30,6 @@ import org.hibernate.query.sqm.EntityTypeException;
 @Log4j2
 @UtilityClass
 public class FromClauseUtils {
-
-  // Matches `:alias.field`-style references inside additionalJoinCondition so they can be resolved
-  // against flattened entity columns and replaced with the final SQL filter field expression.
-  private static final Pattern JOIN_CONDITION_FIELD_REFERENCE = Pattern.compile(":([A-Za-z0-9_.-]+)");
 
   /**
    * Build the FROM/JOIN clause for a given flattened entity type.
@@ -174,16 +167,7 @@ public class FromClauseUtils {
       columnB.getName()
     );
 
-    return Optional.of(
-      new NecessaryJoin(
-        columnA,
-        sourceA,
-        columnB,
-        sourceB,
-        parentSource.getOverrideJoinDirection(),
-        parentSource.getAdditionalJoinCondition()
-      )
-    );
+    return Optional.of(new NecessaryJoin(columnA, sourceA, columnB, sourceB, parentSource.getOverrideJoinDirection()));
   }
 
   /** Represents a join between two columns (and their sources) that must be resolved and end up in the resulting query */
@@ -192,18 +176,10 @@ public class FromClauseUtils {
     EntityTypeSourceDatabase sourceA,
     EntityTypeColumn columnB,
     EntityTypeSourceDatabase sourceB,
-    JoinDirection overrideJoinDirection,
-    String additionalJoinCondition
+    JoinDirection overrideJoinDirection
   ) {
     public NecessaryJoin flip() {
-      return new NecessaryJoin(
-        columnB,
-        sourceB,
-        columnA,
-        sourceA,
-        SourceUtils.flipDirection(overrideJoinDirection),
-        additionalJoinCondition
-      );
+      return new NecessaryJoin(columnB, sourceB, columnA, sourceA, SourceUtils.flipDirection(overrideJoinDirection));
     }
 
     public String toString() {
@@ -272,13 +248,12 @@ public class FromClauseUtils {
       // if above isn't a thing, just grab the next one
       NecessaryJoin join = joinToAlreadyJoined.orElse(necessaryJoins.getFirst());
 
-    EntityTypeSourceDatabaseJoin computedJoin = computeJoin(
-      flattenedEntityType,
-      join.columnA(),
-      join.columnB(),
-      join.overrideJoinDirection(),
-      join.additionalJoinCondition()
-    );
+      EntityTypeSourceDatabaseJoin computedJoin = computeJoin(
+        flattenedEntityType,
+        join.columnA(),
+        join.columnB(),
+        join.overrideJoinDirection()
+      );
       join.sourceB().setJoin(computedJoin);
 
       // A needs to get added to the query before B
@@ -332,8 +307,7 @@ public class FromClauseUtils {
     EntityType flattenedEntityType,
     EntityTypeColumn sourceColumn,
     EntityTypeColumn targetColumn,
-    JoinDirection overrideJoinDirection,
-    String additionalJoinCondition
+    JoinDirection overrideJoinDirection
   ) {
     Optional<Join> sourceToTargetJoin = EntityTypeUtils.findJoinBetween(sourceColumn, targetColumn);
     Optional<Join> targetToSourceJoin = EntityTypeUtils.findJoinBetween(targetColumn, sourceColumn);
@@ -356,29 +330,13 @@ public class FromClauseUtils {
         )
       );
     } else {
-      EntityTypeSourceDatabaseJoin resolvedJoin = sourceToTargetJoin
+      return sourceToTargetJoin
         .map(join -> computeJoin(sourceColumn, targetColumn, join, overrideJoinDirection, false))
         .or(() ->
           targetToSourceJoin.map(join -> computeJoin(targetColumn, sourceColumn, join, overrideJoinDirection, true))
         )
         .orElseThrow();
-
-      if (additionalJoinCondition != null && !additionalJoinCondition.isBlank()) {
-        String resolvedAdditionalCondition = resolveAdditionalJoinCondition(flattenedEntityType, additionalJoinCondition);
-        resolvedJoin.condition(resolvedJoin.getCondition() + " AND (" + resolvedAdditionalCondition + ")");
-      }
-
-      return resolvedJoin;
     }
-  }
-
-  public static EntityTypeSourceDatabaseJoin computeJoin(
-    EntityType flattenedEntityType,
-    EntityTypeColumn sourceColumn,
-    EntityTypeColumn targetColumn,
-    JoinDirection overrideJoinDirection
-  ) {
-    return computeJoin(flattenedEntityType, sourceColumn, targetColumn, overrideJoinDirection, null);
   }
 
   /** Join column A to column B. Column A MUST have the joinsTo definition referring to B; no validation is performed here */
@@ -417,15 +375,6 @@ public class FromClauseUtils {
     } else {
       throw log.throwing(new EntityTypeException("Unsupported join type", join.getClass().getSimpleName()));
     }
-  }
-
-  private static String resolveAdditionalJoinCondition(EntityType flattenedEntityType, String additionalJoinCondition) {
-    return JOIN_CONDITION_FIELD_REFERENCE.matcher(additionalJoinCondition).replaceAll(match -> {
-      String fieldName = match.group(1);
-      EntityTypeColumn field = EntityTypeUtils.findColumnByName(flattenedEntityType, fieldName);
-      String sqlField = SqlFieldIdentificationUtils.getSqlFilterField(field).toString();
-      return Matcher.quoteReplacement(sqlField);
-    });
   }
 
   /**

@@ -106,7 +106,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request \
+          ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request \
         WHERE \
           jsonb ->> 'requesterId' = :users.id::text \
       )",
@@ -125,7 +125,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          fs09000000_mod_fqm_manager.src_users_proxyfor \
+          ${tenant_id}_mod_fqm_manager.src_users_proxyfor \
         WHERE \
           jsonb ->> 'userId' = :users.id::text \
         OR \
@@ -146,7 +146,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+          ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
         WHERE \
           mb.jsonb ->> 'userId' = :users.id::text \
           AND ( \
@@ -171,10 +171,10 @@
         SELECT \
           COUNT(*) \
         FROM \
-          fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
-          JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+          ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+          JOIN ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
             ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
-          JOIN fs09000000_mod_fqm_manager.src_users_users users \
+          JOIN ${tenant_id}_mod_fqm_manager.src_users_users users \
             ON users.id = :users.id \
         WHERE \
           limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \
@@ -257,7 +257,7 @@
           SELECT \
             1 \
           FROM \
-            fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request request \
+            ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request request \
           WHERE \
             request.jsonb ->> 'requesterId' = :users.id::text \
         ) \
@@ -265,7 +265,7 @@
           SELECT \
             1 \
           FROM \
-            fs09000000_mod_fqm_manager.src_users_proxyfor proxyfor \
+            ${tenant_id}_mod_fqm_manager.src_users_proxyfor proxyfor \
           WHERE \
             proxyfor.jsonb ->> 'userId' = :users.id::text \
             OR proxyfor.jsonb ->> 'proxyUserId' = :users.id::text \
@@ -274,7 +274,7 @@
           SELECT \
             1 \
           FROM \
-            fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+            ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
           WHERE \
             mb.jsonb ->> 'userId' = :users.id::text \
             AND ( \
@@ -286,10 +286,10 @@
           SELECT \
             1 \
           FROM \
-            fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
-            JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+            ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+            JOIN ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
               ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
-            JOIN fs09000000_mod_fqm_manager.src_users_users users \
+            JOIN ${tenant_id}_mod_fqm_manager.src_users_users users \
               ON users.id = :users.id \
           WHERE \
             limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \

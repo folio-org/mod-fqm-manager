@@ -76,7 +76,7 @@
         dataType: 'integerType',
       },
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines'), 0)",
       valueFunction: '(:value)::int',
@@ -88,14 +88,14 @@
         dataType: 'integerType',
       },
       queryable: true,
-      visibleByDefault: true,
+      visibleByDefault: false,
       essential: true,
       valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0)",
       valueFunction: '(:value)::int',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
     {
-      name: 'requests_count',
+      name: 'open_requests_count',
       dataType: {
         dataType: 'integerType',
       },
@@ -109,12 +109,17 @@
           ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request \
         WHERE \
           jsonb ->> 'requesterId' = :users.id::text \
+          AND jsonb ->> 'status' LIKE 'Open%' \
+          AND ( \
+            jsonb ->> 'requestExpirationDate' IS NULL \
+            OR (jsonb ->> 'requestExpirationDate')::timestamptz > current_timestamp \
+          ) \
       )",
       valueFunction: '(:value)::int',
       sourceAlias: 'users',
     },
     {
-      name: 'proxies_count',
+      name: 'open_proxies_count',
       dataType: {
         dataType: 'integerType',
       },
@@ -127,9 +132,15 @@
         FROM \
           ${tenant_id}_mod_fqm_manager.src_users_proxyfor \
         WHERE \
-          jsonb ->> 'userId' = :users.id::text \
-        OR \
-          jsonb ->> 'proxyUserId' = :users.id::text\
+          ( \
+            jsonb ->> 'userId' = :users.id::text \
+            OR jsonb ->> 'proxyUserId' = :users.id::text \
+          ) \
+          AND jsonb ->> 'status' = 'Active' \
+          AND ( \
+            jsonb ->> 'expirationDate' IS NULL \
+            OR (jsonb ->> 'expirationDate')::timestamptz > current_timestamp \
+          ) \
       )",
       valueFunction: '(:value)::int',
       sourceAlias: 'users',
@@ -260,6 +271,11 @@
             ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request request \
           WHERE \
             request.jsonb ->> 'requesterId' = :users.id::text \
+            AND request.jsonb ->> 'status' LIKE 'Open%' \
+            AND ( \
+              request.jsonb ->> 'requestExpirationDate' IS NULL \
+              OR (request.jsonb ->> 'requestExpirationDate')::timestamptz > current_timestamp \
+            ) \
         ) \
         OR EXISTS ( \
           SELECT \
@@ -267,8 +283,15 @@
           FROM \
             ${tenant_id}_mod_fqm_manager.src_users_proxyfor proxyfor \
           WHERE \
-            proxyfor.jsonb ->> 'userId' = :users.id::text \
-            OR proxyfor.jsonb ->> 'proxyUserId' = :users.id::text \
+            ( \
+              proxyfor.jsonb ->> 'userId' = :users.id::text \
+              OR proxyfor.jsonb ->> 'proxyUserId' = :users.id::text \
+            ) \
+            AND proxyfor.jsonb ->> 'status' = 'Active' \
+            AND ( \
+              proxyfor.jsonb ->> 'expirationDate' IS NULL \
+              OR (proxyfor.jsonb ->> 'expirationDate')::timestamptz > current_timestamp \
+            ) \
         ) \
         OR EXISTS ( \
           SELECT \

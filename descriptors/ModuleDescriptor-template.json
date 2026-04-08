@@ -439,6 +439,7 @@
     { "id": "subject-types", "version": "1.0" },
     { "id": "tags", "version": "1.0" },
     { "id": "user-summary", "version": "0.1" },
+    { "id": "users-bl", "version": "6.1" },
     { "id": "voucher-storage.voucher-lines", "version": "2.1" },
     { "id": "voucher-storage.voucher-number", "version": "1.1" },
     { "id": "voucher-storage.vouchers", "version": "1.2" },

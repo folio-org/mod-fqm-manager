@@ -10,16 +10,8 @@
     },
   ],
   requiredPermissions: [
-    // One-shot permission (TODO: needs bl-users dep if we use this set of permissions)
-    // 'users-bl.transactions.get',
-    // 'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
-
-    // Individual permissions
-    'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
-    'patron-blocks.user-summary.item.get', // for open_loans_count and open_fees_fines_count
-    'manualblocks.collection.get', // for manual_blocks_count
-    'circulation.requests.collection.get', // for requests_count
-    'proxiesfor.collection.get' // for proxies_count
+     'users-bl.transactions.get',
+     'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
   ],
   defaultSort: [
     {
@@ -40,17 +32,6 @@
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
       essential: true,
-    },
-    {
-      name: 'version',
-      dataType: {
-        dataType: 'integerType',
-      },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: "(:src__circulation__patron_blocks__user_summary.jsonb->>'_version')::integer",
-      valueFunction: '(:value)::integer',
-      sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
     {
       name: 'user_id',

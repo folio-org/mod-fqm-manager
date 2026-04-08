@@ -109,7 +109,7 @@
           ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request \
         WHERE \
           jsonb ->> 'requesterId' = :users.id::text \
-          AND COALESCE(jsonb ->> 'status', '') NOT LIKE 'Closed%' \
+          AND jsonb ->> 'status' LIKE 'Open%' \
           AND ( \
             jsonb ->> 'requestExpirationDate' IS NULL \
             OR (jsonb ->> 'requestExpirationDate')::timestamptz > current_timestamp \
@@ -271,7 +271,7 @@
             ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request request \
           WHERE \
             request.jsonb ->> 'requesterId' = :users.id::text \
-            AND COALESCE(request.jsonb ->> 'status', '') NOT LIKE 'Closed%' \
+            AND request.jsonb ->> 'status' LIKE 'Open%' \
             AND ( \
               request.jsonb ->> 'requestExpirationDate' IS NULL \
               OR (request.jsonb ->> 'requestExpirationDate')::timestamptz > current_timestamp \

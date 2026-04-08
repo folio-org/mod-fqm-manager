@@ -20,8 +20,9 @@
     },
   ],
   requiredPermissions: [
-     'users-bl.transactions.get',
-     'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
+    'users.collection.get',
+    'users-bl.transactions.get',
+    'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
   ],
   defaultSort: [
     {
@@ -105,7 +106,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request \
+          fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request \
         WHERE \
           jsonb ->> 'requesterId' = :users.id::text \
       )",
@@ -124,7 +125,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src_users_proxyfor \
+          fs09000000_mod_fqm_manager.src_users_proxyfor \
         WHERE \
           jsonb ->> 'userId' = :users.id::text \
         OR \
@@ -145,7 +146,7 @@
         SELECT \
           COUNT(*) \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+          fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
         WHERE \
           mb.jsonb ->> 'userId' = :users.id::text \
           AND ( \
@@ -170,10 +171,10 @@
         SELECT \
           COUNT(*) \
         FROM \
-          ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
-          JOIN ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+          fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+          JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
             ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
-          JOIN ${tenant_id}_mod_fqm_manager.src_users_users users \
+          JOIN fs09000000_mod_fqm_manager.src_users_users users \
             ON users.id = :users.id \
         WHERE \
           limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \
@@ -256,7 +257,7 @@
           SELECT \
             1 \
           FROM \
-            ${tenant_id}_mod_fqm_manager.src__circulation__circulation_storage__request request \
+            fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request request \
           WHERE \
             request.jsonb ->> 'requesterId' = :users.id::text \
         ) \
@@ -264,7 +265,7 @@
           SELECT \
             1 \
           FROM \
-            ${tenant_id}_mod_fqm_manager.src_users_proxyfor proxyfor \
+            fs09000000_mod_fqm_manager.src_users_proxyfor proxyfor \
           WHERE \
             proxyfor.jsonb ->> 'userId' = :users.id::text \
             OR proxyfor.jsonb ->> 'proxyUserId' = :users.id::text \
@@ -273,7 +274,7 @@
           SELECT \
             1 \
           FROM \
-            ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+            fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
           WHERE \
             mb.jsonb ->> 'userId' = :users.id::text \
             AND ( \
@@ -285,10 +286,10 @@
           SELECT \
             1 \
           FROM \
-            ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
-            JOIN ${tenant_id}_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+            fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+            JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
               ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
-            JOIN ${tenant_id}_mod_fqm_manager.src_users_users users \
+            JOIN fs09000000_mod_fqm_manager.src_users_users users \
               ON users.id = :users.id \
           WHERE \
             limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \

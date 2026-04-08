@@ -1,0 +1,352 @@
+{
+  id: '7a845f67-80b7-4ebb-9ba3-364b7de94e3e',
+  name: 'simple_user_transaction_summary',
+  private: true,
+  sources: [
+    {
+      type: 'db',
+      alias: 'users',
+      target: 'src_users_users',
+    },
+    {
+      type: 'db',
+      alias: 'src__circulation__patron_blocks__user_summary',
+      target: 'src__circulation__patron_blocks__user_summary',
+      join: {
+        type: 'left join',
+        joinTo: 'users',
+        condition: "(:this.jsonb ->> 'userId')::uuid = :that.id",
+      },
+    },
+  ],
+  requiredPermissions: [
+    'users.collection.get',
+    'users-bl.transactions.get',
+    'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      isIdColumn: true,
+      valueGetter: ':users.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'users',
+      essential: true,
+    },
+    {
+      name: 'user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':users.id',
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'users',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+        {
+          targetId: 'f2615ea6-450b-425d-804d-6a495afd9308',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'open_fees_fines_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines'), 0)",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+    },
+    {
+      name: 'open_loans_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      essential: true,
+      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0)",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+    },
+    {
+      name: 'requests_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request \
+        WHERE \
+          jsonb ->> 'requesterId' = :users.id::text \
+      )",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'users',
+    },
+    {
+      name: 'proxies_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          fs09000000_mod_fqm_manager.src_users_proxyfor \
+        WHERE \
+          jsonb ->> 'userId' = :users.id::text \
+        OR \
+          jsonb ->> 'proxyUserId' = :users.id::text\
+      )",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'users',
+    },
+    {
+      name: 'manual_blocks_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+        WHERE \
+          mb.jsonb ->> 'userId' = :users.id::text \
+          AND ( \
+            mb.jsonb ->> 'expirationDate' IS NULL \
+            OR (mb.jsonb ->> 'expirationDate')::timestamptz > current_timestamp \
+          ) \
+      )",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'users',
+    },
+    {
+      name: 'automated_blocks_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      // These checks use the condition UUIDs from mod-patron-blocks directly. This is okay because the block conditions
+      // and corresponding UUIDs are built into mod-patron-blocks, and cannot be added or changed through an API.
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+          JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+            ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
+          JOIN fs09000000_mod_fqm_manager.src_users_users users \
+            ON users.id = :users.id \
+        WHERE \
+          limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \
+          AND CASE \
+            WHEN conditions.id = '3d7c52dc-c732-4223-8bf8-e5917801386f'::uuid THEN \
+              COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0) > (limits.jsonb ->> 'value')::numeric \
+            WHEN conditions.id = '584fbd4f-6a34-4730-a6ca-73a6a6a9d845'::uuid THEN \
+              ( \
+                SELECT \
+                  COUNT(*) \
+                FROM \
+                  jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                WHERE \
+                  (loan.value ->> 'dueDate')::timestamptz < current_timestamp \
+              ) > (limits.jsonb ->> 'value')::numeric \
+            WHEN conditions.id = 'e5b45031-a202-4abb-917b-e1df9346fe2c'::uuid THEN \
+              ( \
+                SELECT \
+                  COUNT(*) \
+                FROM \
+                  jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                WHERE \
+                  loan.value ->> 'recall' = 'true' \
+                  AND (loan.value ->> 'dueDate')::timestamptz < current_timestamp \
+              ) > (limits.jsonb ->> 'value')::numeric \
+            WHEN conditions.id = '08530ac4-07f2-48e6-9dda-a97bc2bf7053'::uuid THEN \
+              EXISTS ( \
+                SELECT \
+                  1 \
+                FROM \
+                  jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                WHERE \
+                  loan.value ->> 'recall' = 'true' \
+                  AND (loan.value ->> 'dueDate')::timestamptz < current_timestamp - ((limits.jsonb ->> 'value')::numeric::text || ' days')::interval \
+              ) \
+            WHEN conditions.id = '72b67965-5b73-4840-bc0b-be8f3f6e047e'::uuid THEN \
+              ( \
+                SELECT \
+                  COUNT(*) \
+                FROM \
+                  jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                WHERE \
+                  loan.value ->> 'itemLost' = 'true' \
+              ) > (limits.jsonb ->> 'value')::numeric \
+            WHEN conditions.id = 'cf7a0d5f-a327-4ca1-aa9e-dc55ec006b8a'::uuid THEN \
+              ( \
+                SELECT \
+                  COALESCE(SUM((fee_fine.value ->> 'balance')::numeric), 0) \
+                FROM \
+                  jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines', '[]'::jsonb)) AS fee_fine(value) \
+              ) > (limits.jsonb ->> 'value')::numeric \
+            ELSE false \
+          END \
+      )",
+      valueFunction: '(:value)::int',
+      sourceAlias: 'users',
+    },
+    {
+      name: 'has_open_transactions',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: "( \
+        COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines'), 0) > 0 \
+        OR COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0) > 0 \
+        OR EXISTS ( \
+          SELECT \
+            1 \
+          FROM \
+            fs09000000_mod_fqm_manager.src__circulation__circulation_storage__request request \
+          WHERE \
+            request.jsonb ->> 'requesterId' = :users.id::text \
+        ) \
+        OR EXISTS ( \
+          SELECT \
+            1 \
+          FROM \
+            fs09000000_mod_fqm_manager.src_users_proxyfor proxyfor \
+          WHERE \
+            proxyfor.jsonb ->> 'userId' = :users.id::text \
+            OR proxyfor.jsonb ->> 'proxyUserId' = :users.id::text \
+        ) \
+        OR EXISTS ( \
+          SELECT \
+            1 \
+          FROM \
+            fs09000000_mod_fqm_manager.src__circulation__feesfines__manualblocks mb \
+          WHERE \
+            mb.jsonb ->> 'userId' = :users.id::text \
+            AND ( \
+              mb.jsonb ->> 'expirationDate' IS NULL \
+              OR (mb.jsonb ->> 'expirationDate')::timestamptz > current_timestamp \
+            ) \
+        ) \
+        OR EXISTS ( \
+          SELECT \
+            1 \
+          FROM \
+            fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_limits limits \
+            JOIN fs09000000_mod_fqm_manager.src__circulation__patron_blocks__patron_block_conditions conditions \
+              ON conditions.id = (limits.jsonb ->> 'conditionId')::uuid \
+            JOIN fs09000000_mod_fqm_manager.src_users_users users \
+              ON users.id = :users.id \
+          WHERE \
+            limits.jsonb ->> 'patronGroupId' = users.jsonb ->> 'patronGroup' \
+            AND CASE \
+              WHEN conditions.id = '3d7c52dc-c732-4223-8bf8-e5917801386f'::uuid THEN \
+                COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0) > (limits.jsonb ->> 'value')::numeric \
+              WHEN conditions.id = '584fbd4f-6a34-4730-a6ca-73a6a6a9d845'::uuid THEN \
+                ( \
+                  SELECT \
+                    COUNT(*) \
+                  FROM \
+                    jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                  WHERE \
+                    (loan.value ->> 'dueDate')::timestamptz < current_timestamp \
+                ) > (limits.jsonb ->> 'value')::numeric \
+              WHEN conditions.id = 'e5b45031-a202-4abb-917b-e1df9346fe2c'::uuid THEN \
+                ( \
+                  SELECT \
+                    COUNT(*) \
+                  FROM \
+                    jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                  WHERE \
+                    loan.value ->> 'recall' = 'true' \
+                    AND (loan.value ->> 'dueDate')::timestamptz < current_timestamp \
+                ) > (limits.jsonb ->> 'value')::numeric \
+              WHEN conditions.id = '08530ac4-07f2-48e6-9dda-a97bc2bf7053'::uuid THEN \
+                EXISTS ( \
+                  SELECT \
+                    1 \
+                  FROM \
+                    jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                  WHERE \
+                    loan.value ->> 'recall' = 'true' \
+                    AND (loan.value ->> 'dueDate')::timestamptz < current_timestamp - ((limits.jsonb ->> 'value')::numeric::text || ' days')::interval \
+                ) \
+              WHEN conditions.id = '72b67965-5b73-4840-bc0b-be8f3f6e047e'::uuid THEN \
+                ( \
+                  SELECT \
+                    COUNT(*) \
+                  FROM \
+                    jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans', '[]'::jsonb)) AS loan(value) \
+                  WHERE \
+                    loan.value ->> 'itemLost' = 'true' \
+                ) > (limits.jsonb ->> 'value')::numeric \
+              WHEN conditions.id = 'cf7a0d5f-a327-4ca1-aa9e-dc55ec006b8a'::uuid THEN \
+                ( \
+                  SELECT \
+                    COALESCE(SUM((fee_fine.value ->> 'balance')::numeric), 0) \
+                  FROM \
+                    jsonb_array_elements(COALESCE(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines', '[]'::jsonb)) AS fee_fine(value) \
+                ) > (limits.jsonb ->> 'value')::numeric \
+              ELSE false \
+            END \
+        ) \
+      )",
+      valueFunction: '(:value)::boolean',
+      sourceAlias: 'users',
+    },
+  ],
+}

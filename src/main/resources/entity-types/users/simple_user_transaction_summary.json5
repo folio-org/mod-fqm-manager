@@ -95,7 +95,7 @@
       sourceAlias: 'src__circulation__patron_blocks__user_summary',
     },
     {
-      name: 'requests_count',
+      name: 'open_requests_count',
       dataType: {
         dataType: 'integerType',
       },
@@ -114,7 +114,7 @@
       sourceAlias: 'users',
     },
     {
-      name: 'proxies_count',
+      name: 'open_proxies_count',
       dataType: {
         dataType: 'integerType',
       },

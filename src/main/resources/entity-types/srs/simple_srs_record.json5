@@ -30,7 +30,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      essential: true,
+      essential: false,
       valueGetter: ':record_lb.id',
     },
     {
@@ -100,7 +100,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      essential: true,
+      essential: false,
       valueGetter: ':record_lb.external_id',
       sourceAlias: 'record_lb',
       joinsTo: [

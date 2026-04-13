@@ -32,7 +32,9 @@ public class CrossTenantQueryService {
   private static final String SIMPLE_INSTANCES_ID = "8fc4a9d2-7ccf-4233-afb8-796911839862";
   private static final String SIMPLE_INSTANCE_STATUS_ID = "9c239bfd-198f-4013-bbc4-4551c0cbdeaa";
   private static final String SIMPLE_INSTANCE_TYPE_ID = "af44e2e0-12e0-4eec-b80d-49feb33a866c";
-  private static final List<String> INSTANCE_RELATED_ENTITIES = List.of(SIMPLE_INSTANCES_ID, COMPOSITE_INSTANCES_ID, SIMPLE_INSTANCE_STATUS_ID, SIMPLE_INSTANCE_TYPE_ID);
+  private static final String COMPOSITE_INSTANCE_SRS_BIB_ID = "bce8ea43-1271-54ca-99ad-aa185e8b5b1b";
+  private static final List<String> INSTANCE_RELATED_ENTITIES = List.of(SIMPLE_INSTANCES_ID, COMPOSITE_INSTANCES_ID, SIMPLE_INSTANCE_STATUS_ID, SIMPLE_INSTANCE_TYPE_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
+  private static final List<String> COMPOSITE_INSTANCE_ENTITIES = List.of(COMPOSITE_INSTANCES_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
 
   /**
    * Retrieve list of tenants to run query against.
@@ -53,7 +55,7 @@ public class CrossTenantQueryService {
    */
   public List<String> getTenantsToQuery(EntityType entityType, UUID userId) {
     if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
-      && !COMPOSITE_INSTANCES_ID.equals(entityType.getId())) {
+      && !COMPOSITE_INSTANCE_ENTITIES.contains(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     return getTenantIds(entityType, userId);

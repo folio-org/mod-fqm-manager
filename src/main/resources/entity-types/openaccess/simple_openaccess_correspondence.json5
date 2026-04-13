@@ -78,6 +78,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':correspondence.prc_last_updated',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'correspondence_content',

@@ -70,6 +70,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':checklist_item.cli_date_created',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'checklist_item_last_updated',
@@ -79,6 +80,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':checklist_item.cli_last_updated',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'checklist_item_definition_value',

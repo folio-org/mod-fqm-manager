@@ -85,6 +85,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':funding.f_last_updated',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'funding_pub_request_id',

@@ -156,6 +156,7 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':charge.ch_date_created',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'charge_last_update',
@@ -164,6 +165,7 @@
       },
       queryable: true,
       valueGetter: ':charge.ch_last_updated',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'charge_base_currency',

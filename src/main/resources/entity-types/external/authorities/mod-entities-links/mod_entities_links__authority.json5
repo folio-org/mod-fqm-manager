@@ -284,6 +284,7 @@
             {
               name: 'identifier_type_id',
               queryable: true,
+              hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'identifierTypeId') FROM jsonb_array_elements(:sourceAlias.identifiers) AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'identifierTypeId',
@@ -329,6 +330,7 @@
             {
               name: 'note_type_id',
               queryable: true,
+              hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'noteTypeId') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: '(:value)::uuid',
               property: 'noteTypeId',
@@ -380,6 +382,7 @@
                   label: 'False',
                 },
               ],
+              hidden: true,
               valueGetter: "(SELECT array_agg(elems.value->>'staffOnly') FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               filterValueGetter: "(SELECT array_agg(lower(elems.value->>'staffOnly')) FROM jsonb_array_elements(:sourceAlias.notes) AS elems)",
               valueFunction: 'lower(:value)',

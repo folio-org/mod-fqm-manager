@@ -137,10 +137,6 @@
         dataType: 'stringType',
       },
       queryable: true,
-      values: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ],
       valueGetter: ':journal_doaj_status.rdv_value',
     },
     {
@@ -150,10 +146,6 @@
       },
       queryable: true,
       visibleByDefault: true,
-      values: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-      ],
       valueGetter: ':journal_doaj_status.rdv_label',
     },
     {
@@ -162,10 +154,6 @@
         dataType: 'stringType',
       },
       queryable: true,
-      values: [
-        { value: 'gold', label: 'Gold' },
-        { value: 'hybrid', label: 'Hybrid' },
-      ],
       valueGetter: ':journal_oa_status.rdv_value',
     },
     {
@@ -175,10 +163,6 @@
       },
       queryable: true,
       visibleByDefault: true,
-      values: [
-        { value: 'gold', label: 'Gold' },
-        { value: 'hybrid', label: 'Hybrid' },
-      ],
       valueGetter: ':journal_oa_status.rdv_label',
     },
     {

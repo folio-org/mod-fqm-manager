@@ -30,6 +30,7 @@
       valueGetter: ':sourceAlias.id',
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__authorities__entities_links__authority_source_file',
+      hidden: true,
       essential: true,
     },
     {

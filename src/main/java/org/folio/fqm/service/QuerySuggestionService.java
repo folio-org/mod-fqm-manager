@@ -1,6 +1,5 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.domain.dto.CandidateEntityType;
 import org.folio.fqm.domain.dto.QuerySuggestion;
 import org.folio.fqm.domain.dto.QuerySuggestionRequest;
 import org.folio.fqm.domain.dto.QuerySuggestionResponse;
@@ -29,10 +28,6 @@ public class QuerySuggestionService {
 
     QuerySuggestionResponse response = new QuerySuggestionResponse()
       .suggestions(List.of(suggestion).subList(0, Math.min(1, maxSuggestions)))
-      .candidateEntityTypes(List.of(new CandidateEntityType()
-        .entityTypeId(request.getEntityTypeId())
-        .label(request.getEntityTypeId() == null ? "Needs entity type selection" : "Preselected entity type")
-        .confidence(request.getEntityTypeId() == null ? 0.25 : 0.9)))
       .assumptions(sharedAssumptions)
       .clarificationQuestions(List.of(
         "Which entity type should this report start from?",

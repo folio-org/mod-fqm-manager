@@ -48,7 +48,6 @@ class QuerySuggestionsControllerTest {
         .content(request))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.suggestions", hasSize(1)))
-      .andExpect(jsonPath("$.candidateEntityTypes", hasSize(1)))
       .andExpect(jsonPath("$.suggestions[0].entityTypeId", is(entityTypeId.toString())))
       .andExpect(jsonPath("$.suggestions[0].validationStatus", is("NEEDS_REVIEW")))
       .andExpect(jsonPath("$.clarificationQuestions", hasSize(2)));

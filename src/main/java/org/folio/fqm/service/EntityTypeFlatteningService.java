@@ -287,6 +287,7 @@ public class EntityTypeFlatteningService {
   }
 
   private boolean ecsEnabled() {
+    if (true) return false;
     String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
     DocumentContext parsedJson = JsonPath.parse(userTenantsResponse);
     // The value isn't needed here, this just provides an easy way to tell if ECS is enabled

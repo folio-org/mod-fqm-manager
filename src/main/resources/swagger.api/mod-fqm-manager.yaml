@@ -248,7 +248,6 @@ components:
       type: object
       required:
         - suggestions
-        - candidateEntityTypes
         - assumptions
         - clarificationQuestions
       properties:
@@ -256,10 +255,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/querySuggestion'
-        candidateEntityTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/candidateEntityType'
         assumptions:
           type: array
           items:
@@ -268,19 +263,6 @@ components:
           type: array
           items:
             type: string
-    candidateEntityType:
-      type: object
-      required:
-        - confidence
-      properties:
-        entityTypeId:
-          type: string
-          format: UUID
-        label:
-          type: string
-        confidence:
-          type: number
-          format: double
     querySuggestion:
       type: object
       required:

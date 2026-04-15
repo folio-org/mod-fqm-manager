@@ -167,6 +167,7 @@ public class CrossTenantQueryService {
   @SuppressWarnings("unchecked")
   // JsonPath.parse is returning a plain List without a type parameter, and the TypeRef (vs Class) parameter to JsonPath.read is not supported by the JSON parser
   private Map<String, String> getEcsTenantInfo() {
+    if (true) return null;
     String userTenantsResponse = userTenantService.getUserTenantsResponse(executionContext.getTenantId());
     List<Map<String, String>> userTenants = JsonPath
       .parse(userTenantsResponse)

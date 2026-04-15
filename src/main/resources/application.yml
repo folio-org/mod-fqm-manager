@@ -7,6 +7,10 @@ mod-fqm-manager:
   zombie-query-max-wait-seconds: 300
   zombie-query-queued-threshold-duration: 1h
   convert-queued-status-to-in-progress: ${CONVERT_QUEUED_STATUS_TO_IN_PROGRESS:true}
+  mcp:
+    protocol-version: 2025-03-26
+    server-name: ${spring.application.name:mod-fqm-manager}
+    instructions: Use the available tools to inspect FQM capabilities and draft FQL queries. Review generated queries before execution.
   cache:
     spec:
       queryCache: maximumSize=500,expireAfterWrite=1m

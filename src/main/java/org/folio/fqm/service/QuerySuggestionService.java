@@ -1,50 +1,47 @@
 package org.folio.fqm.service;
 
-import org.folio.fqm.domain.dto.QuerySuggestion;
+import io.modelcontextprotocol.spec.McpSchema;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.folio.fqm.domain.dto.QuerySuggestionRequest;
 import org.folio.fqm.domain.dto.QuerySuggestionResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * Placeholder service for the proof-of-concept query suggestion API.
+ *
+ * <p>The intended end-state is that this API will call an LLM, and the LLM will use the embedded
+ * MCP service to fetch runtime FQM metadata before creating suggestions. Until that integration is
+ * added, this service returns an explicit stub response instead of pretending MCP itself generated
+ * the suggestions.
+ */
 @Service
+@RequiredArgsConstructor
 public class QuerySuggestionService {
 
+  private final FqmMcpService fqmMcpService;
+
+  /**
+   * Returns a placeholder response until the LLM-backed suggestion flow is implemented.
+   *
+   * @param request natural-language query suggestion request
+   * @return structured query suggestion response
+   */
   public QuerySuggestionResponse suggestQueries(QuerySuggestionRequest request) {
-    String trimmedQuery = request.getNaturalLanguageQuery().trim();
-    int maxSuggestions = request.getMaxSuggestions() == null ? 3 : request.getMaxSuggestions();
+    List<String> toolNames = fqmMcpService.listTools().tools().stream()
+      .map(McpSchema.Tool::name)
+      .toList();
 
-    List<String> sharedAssumptions = List.of(
-      "This is an MVP stub response and does not yet use live entity metadata.",
-      "Relative date phrases should be reviewed before running the query."
-    );
-
-    QuerySuggestion suggestion = new QuerySuggestion()
-      .entityTypeId(request.getEntityTypeId())
-      .summary("Draft suggestion for: " + trimmedQuery)
-      .fqlQuery(buildPlaceholderFql(trimmedQuery))
-      .validationStatus(QuerySuggestion.ValidationStatusEnum.NEEDS_REVIEW)
-      .assumptions(sharedAssumptions);
-
-    QuerySuggestionResponse response = new QuerySuggestionResponse()
-      .suggestions(List.of(suggestion).subList(0, Math.min(1, maxSuggestions)))
-      .assumptions(sharedAssumptions)
+    return new QuerySuggestionResponse()
+      .suggestions(List.of())
+      .assumptions(List.of(
+        "LLM integration is not yet implemented in this proof of concept.",
+        "A future LLM should use the embedded MCP tools for runtime FQM context: " + String.join(", ", toolNames) + '.',
+        "Relative date phrases should be reviewed before running any generated query."
+      ))
       .clarificationQuestions(List.of(
         "Which entity type should this report start from?",
-        "Should relative dates like \"older than 30 days\" be evaluated against today or another reference date?"
+        "Should relative dates like \"older than 30 days\" be evaluated against April 15, 2026 or another reference date?"
       ));
-
-    return response;
-  }
-
-  private String buildPlaceholderFql(String naturalLanguageQuery) {
-    String sanitizedQuery = naturalLanguageQuery.replace("\"", "\\\"");
-    return """
-      {
-        "_note": {
-          "$eq": "Placeholder generated from natural-language request: %s"
-        }
-      }
-      """.formatted(sanitizedQuery);
   }
 }

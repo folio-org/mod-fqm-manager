@@ -77,30 +77,17 @@ public class QuerySuggestionService {
   private String buildPlaceholderFql(QuerySuggestionIntent intent, String naturalLanguageQuery) {
     if (intent.filters().isEmpty()) {
       String sanitizedQuery = naturalLanguageQuery.replace("\"", "\\\"");
-      return """
-        {
-          "_note": {
-            "$eq": "Placeholder generated from natural-language request: %s"
-          }
-        }
-        """.formatted(sanitizedQuery);
+      return "{\"_note\":{\"$eq\":\"Placeholder generated from natural-language request: %s\"}}".formatted(sanitizedQuery);
     }
 
     String filters = intent.filters().stream()
       .map(this::formatFilter)
-      .collect(java.util.stream.Collectors.joining(",\n"));
-    return """
-      {
-      %s
-      }
-      """.formatted(filters);
+      .collect(java.util.stream.Collectors.joining(","));
+    return "{%s}".formatted(filters);
   }
 
   private String formatFilter(QuerySuggestionIntentFilter filter) {
-    return """
-        "%s": {
-          "%s": %s
-        }""".formatted(
+    return "\"%s\":{\"%s\":%s}".formatted(
       filter.fieldName(),
       filter.operator(),
       formatValue(filter.value())

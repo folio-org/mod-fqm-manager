@@ -423,7 +423,6 @@ public class EntityTypeService {
         results.add(new ValueWithLabel().value(code).label(label));
       }
     }
-
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }

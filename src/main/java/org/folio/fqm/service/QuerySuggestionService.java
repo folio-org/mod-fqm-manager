@@ -3,8 +3,8 @@ package org.folio.fqm.service;
 import org.folio.fqm.domain.dto.QuerySuggestion;
 import org.folio.fqm.domain.dto.QuerySuggestionRequest;
 import org.folio.fqm.domain.dto.QuerySuggestionResponse;
+import org.folio.fqm.model.QuerySuggestionBuildResult;
 import org.folio.fqm.model.QuerySuggestionIntent;
-import org.folio.fqm.model.QuerySuggestionIntentFilter;
 import org.folio.fqm.model.QuerySuggestionMetadataContext;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +21,16 @@ public class QuerySuggestionService {
 
   private final QuerySuggestionMetadataContextBuilder metadataContextBuilder;
   private final IntentInterpreter intentInterpreter;
+  private final QuerySuggestionFqlBuilder fqlBuilder;
 
-  public QuerySuggestionService(QuerySuggestionMetadataContextBuilder metadataContextBuilder, IntentInterpreter intentInterpreter) {
+  public QuerySuggestionService(
+    QuerySuggestionMetadataContextBuilder metadataContextBuilder,
+    IntentInterpreter intentInterpreter,
+    QuerySuggestionFqlBuilder fqlBuilder
+  ) {
     this.metadataContextBuilder = metadataContextBuilder;
     this.intentInterpreter = intentInterpreter;
+    this.fqlBuilder = fqlBuilder;
   }
 
   public QuerySuggestionResponse suggestQueries(QuerySuggestionRequest request) {
@@ -32,19 +38,21 @@ public class QuerySuggestionService {
     int maxSuggestions = request.getMaxSuggestions() == null ? 3 : request.getMaxSuggestions();
     QuerySuggestionMetadataContext metadataContext = metadataContextBuilder.buildContext(MVP_ENTITY_TYPE_IDS);
     QuerySuggestionIntent intent = intentInterpreter.interpret(trimmedQuery, request.getEntityTypeId(), metadataContext);
+    QuerySuggestionBuildResult buildResult = fqlBuilder.build(intent, trimmedQuery);
 
     List<String> sharedAssumptions = new java.util.ArrayList<>(List.of(
-      "This is an MVP stub response and does not yet use metadata to generate real FQL filters.",
+      "This is an MVP stub response and supports only a small set of interpreted filter patterns.",
       "Metadata context loaded for %s entity types.".formatted(metadataContext.entityTypes().size()),
       "Relative date phrases should be reviewed before running the query."
     ));
     sharedAssumptions.addAll(intent.assumptions());
+    sharedAssumptions.addAll(buildResult.assumptions());
 
     QuerySuggestion suggestion = new QuerySuggestion()
-      .entityTypeId(intent.entityTypeId() != null ? intent.entityTypeId() : request.getEntityTypeId())
+      .entityTypeId(buildResult.entityTypeId() != null ? buildResult.entityTypeId() : request.getEntityTypeId())
       .summary(buildSummary(trimmedQuery, intent))
-      .fqlQuery(buildPlaceholderFql(intent, trimmedQuery))
-      .validationStatus(QuerySuggestion.ValidationStatusEnum.NEEDS_REVIEW)
+      .fqlQuery(buildResult.fqlQuery())
+      .validationStatus(buildResult.validated() ? QuerySuggestion.ValidationStatusEnum.VALID : QuerySuggestion.ValidationStatusEnum.NEEDS_REVIEW)
       .assumptions(sharedAssumptions);
 
     QuerySuggestionResponse response = new QuerySuggestionResponse()
@@ -72,35 +80,5 @@ public class QuerySuggestionService {
     java.util.LinkedHashSet<String> questions = new java.util.LinkedHashSet<>(intent.clarificationQuestions());
     questions.add("Should relative dates like \"older than 30 days\" be evaluated against today or another reference date?");
     return List.copyOf(questions);
-  }
-
-  private String buildPlaceholderFql(QuerySuggestionIntent intent, String naturalLanguageQuery) {
-    if (intent.filters().isEmpty()) {
-      String sanitizedQuery = naturalLanguageQuery.replace("\"", "\\\"");
-      return "{\"_note\":{\"$eq\":\"Placeholder generated from natural-language request: %s\"}}".formatted(sanitizedQuery);
-    }
-
-    String filters = intent.filters().stream()
-      .map(this::formatFilter)
-      .collect(java.util.stream.Collectors.joining(","));
-    return "{%s}".formatted(filters);
-  }
-
-  private String formatFilter(QuerySuggestionIntentFilter filter) {
-    return "\"%s\":{\"%s\":%s}".formatted(
-      filter.fieldName(),
-      filter.operator(),
-      formatValue(filter.value())
-    );
-  }
-
-  private String formatValue(String value) {
-    if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-      return value.toLowerCase(java.util.Locale.ROOT);
-    }
-    if (value.chars().allMatch(Character::isDigit)) {
-      return value;
-    }
-    return "\"%s\"".formatted(value.replace("\"", "\\\""));
   }
 }

@@ -3,7 +3,10 @@ package org.folio.fqm.controller;
 import tools.jackson.databind.ObjectMapper;
 import org.folio.fqm.exceptionhandler.FqmExceptionHandler;
 import org.folio.fqm.resource.QuerySuggestionsController;
+import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.service.StubIntentInterpreter;
+import org.folio.fqm.service.ClockService;
+import org.folio.fqm.service.QuerySuggestionFqlBuilder;
 import org.folio.fqm.service.QuerySuggestionMetadataContextBuilder;
 import org.folio.fqm.service.QuerySuggestionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +34,13 @@ class QuerySuggestionsControllerTest {
       new StubEntityTypeFlatteningService(),
       new TestFolioExecutionContext("tenant_01")
     );
+    QuerySuggestionFqlBuilder fqlBuilder = new QuerySuggestionFqlBuilder(
+      new StubEntityTypeService(),
+      new StubFqlValidationService(),
+      new ClockService()
+    );
     QuerySuggestionsController controller = new QuerySuggestionsController(
-      new QuerySuggestionService(metadataContextBuilder, new StubIntentInterpreter())
+      new QuerySuggestionService(metadataContextBuilder, new StubIntentInterpreter(), fqlBuilder)
     );
     mockMvc = MockMvcBuilders.standaloneSetup(controller)
       .setControllerAdvice(new FqmExceptionHandler())
@@ -91,6 +99,36 @@ class QuerySuggestionsControllerTest {
     @Override
     public String getTenantId() {
       return tenantId;
+    }
+  }
+
+  private static class StubEntityTypeService extends org.folio.fqm.service.EntityTypeService {
+    StubEntityTypeService() {
+      super(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    @Override
+    public org.folio.querytool.domain.dto.EntityType getEntityTypeDefinition(java.util.UUID entityTypeId, boolean includeHidden) {
+      return new org.folio.querytool.domain.dto.EntityType()
+        .id(entityTypeId.toString())
+        .name("stub")
+        .labelAlias("Stub")
+        .columns(java.util.List.of(
+          new org.folio.querytool.domain.dto.EntityTypeColumn().name("status").dataType(new org.folio.querytool.domain.dto.StringType()),
+          new org.folio.querytool.domain.dto.EntityTypeColumn().name("invoiceNumber").dataType(new org.folio.querytool.domain.dto.StringType()),
+          new org.folio.querytool.domain.dto.EntityTypeColumn().name("createdDate").dataType(new org.folio.querytool.domain.dto.DateTimeType())
+        ));
+    }
+  }
+
+  private static class StubFqlValidationService extends FqlValidationService {
+    StubFqlValidationService() {
+      super(null);
+    }
+
+    @Override
+    public java.util.Map<String, String> validateFql(org.folio.querytool.domain.dto.EntityType entityType, String fqlQuery) {
+      return java.util.Map.of();
     }
   }
 }

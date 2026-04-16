@@ -7,10 +7,12 @@ import org.folio.fqm.model.QuerySuggestionBuildResult;
 import org.folio.fqm.model.QuerySuggestionIntent;
 import org.folio.fqm.model.QuerySuggestionMetadataContext;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class QuerySuggestionService {
 
@@ -38,7 +40,21 @@ public class QuerySuggestionService {
     int maxSuggestions = request.getMaxSuggestions() == null ? 3 : request.getMaxSuggestions();
     QuerySuggestionMetadataContext metadataContext = metadataContextBuilder.buildContext(MVP_ENTITY_TYPE_IDS);
     QuerySuggestionIntent intent = intentInterpreter.interpret(trimmedQuery, request.getEntityTypeId(), metadataContext);
+    log.info(
+      "Query suggestion intent received: entityTypeId={}, entityTypeLabel={}, filters={}",
+      intent.entityTypeId(),
+      intent.entityTypeLabel(),
+      intent.filters()
+    );
     QuerySuggestionBuildResult buildResult = fqlBuilder.build(intent, trimmedQuery);
+    if (buildResult.entityTypeId() == null || !buildResult.validated()) {
+      log.warn(
+        "Query suggestion fell back to placeholder/needs review. entityTypeId={}, validated={}, fql={}",
+        buildResult.entityTypeId(),
+        buildResult.validated(),
+        buildResult.fqlQuery()
+      );
+    }
 
     List<String> sharedAssumptions = new java.util.ArrayList<>(List.of(
       "This is an MVP stub response and supports only a small set of interpreted filter patterns.",

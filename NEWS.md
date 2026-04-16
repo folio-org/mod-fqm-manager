@@ -1,3 +1,122 @@
+# 4.1.0 - Trillium
+
+- [MODFQMMGR-994](https://folio-org.atlassian.net/browse/MODFQMMGR-994) Make starts-with case-insensitive
+- [MODFQMMGR-994](https://folio-org.atlassian.net/browse/MODFQMMGR-994) Make contains case-insensitive
+- [MODFQMMGR-986](https://folio-org.atlassian.net/browse/MODFQMMGR-986) Fix querying on `Instance - Identifiers - Identifier type`
+- [MODFQMMGR-980](https://folio-org.atlassian.net/browse/MODFQMMGR-980) Add Orders ET to Receiving Pieces composite ET
+- [MODFQMMGR-977](https://folio-org.atlassian.net/browse/MODFQMMGR-977) Only create entity types when their views are available
+- [MODFQMMGR-964](https://folio-org.atlassian.net/browse/MODFQMMGR-964) Statistical codes name consistency
+- [MODFQMMGR-977](https://folio-org.atlassian.net/browse/MODFQMMGR-977) Add timer endpoint for entity type install
+- [MODFQMMGR-739](https://folio-org.atlassian.net/browse/MODFQMMGR-739) Allow nested fields to be hidden from the UI
+- [MODFQMMGR-1003](https://folio-org.atlassian.net/browse/MODFQMMGR-1003) Refactor entity type caching and validation
+- [MODFQMMGR-999](https://folio-org.atlassian.net/browse/MODFQMMGR-999) Language provided in dropdown doesnt match inventory or export needs
+- [MODFQMMGR-438](https://folio-org.atlassian.net/browse/MODFQMMGR-438) Remove obsolete Liquibase entity type changesets
+- [MODFQMMGR-996](https://folio-org.atlassian.net/browse/MODFQMMGR-996) Attempt to self-heal entity types on failed query
+- [MODFQMMGR-977](https://folio-org.atlassian.net/browse/MODFQMMGR-977) Remove hard dependencies on external modules for ETs
+- [MODFQMMGR-1002](https://folio-org.atlassian.net/browse/MODFQMMGR-1002) Revert HRID and titles
+- [MODFQMMGR-977](https://folio-org.atlassian.net/browse/MODFQMMGR-977) Fix proxy module view join conditions
+- [MODFQMMGR-895](https://folio-org.atlassian.net/browse/MODFQMMGR-895) Handle record sets containing bad data
+- [MODFQMMGR-1002](https://folio-org.atlassian.net/browse/MODFQMMGR-1002) Fix HRID
+- [MODFQMMGR-999](https://folio-org.atlassian.net/browse/MODFQMMGR-999) Provide language code directly to UI
+- [MODFQMMGR-833](https://folio-org.atlassian.net/browse/MODFQMMGR-833) Add `Holdings type` field to Holdings ET
+- [MODFQMMGR-997](https://folio-org.atlassian.net/browse/MODFQMMGR-997) Implement bespoke view creation system
+- [MODFQMMGR-997](https://folio-org.atlassian.net/browse/MODFQMMGR-997) Cascade-drop old views
+- [MODFQMMGR-1002](https://folio-org.atlassian.net/browse/MODFQMMGR-1002) Fix preceding/succeeding titles
+- [MODFQMMGR-1018](https://folio-org.atlassian.net/browse/MODFQMMGR-1018) Throw special exceptions for missing entity sources
+- [MODFQMMGR-1018](https://folio-org.atlassian.net/browse/MODFQMMGR-1018) Avoid throwing when not necessary for custom entity types
+- [MODFQMMGR-936](https://folio-org.atlassian.net/browse/MODFQMMGR-936) Simplify a test in `LocalizationServiceTest`
+- [MODFQMMGR-936](https://folio-org.atlassian.net/browse/MODFQMMGR-936) Add testing for label alias translations when flattening
+- [MODFQMMGR-936](https://folio-org.atlassian.net/browse/MODFQMMGR-936) Add source prefixes to nested fields
+- [MODFQMMGR-1008](https://folio-org.atlassian.net/browse/MODFQMMGR-1008) Use central tenant ID for mod-search availability check
+- [MODFQMMGR-1021](https://folio-org.atlassian.net/browse/MODFQMMGR-1021) Add `drv_currency_exchange_rates` view
+- Revert [MODFQMMGR-999](https://folio-org.atlassian.net/browse/MODFQMMGR-999) provide language code directly to UI
+- Revert [MODFQMMGR-999](https://folio-org.atlassian.net/browse/MODFQMMGR-999) language dropdown change
+- [MODFQMMGR-999](https://folio-org.atlassian.net/browse/MODFQMMGR-999) Add `localizeForExports` flag for languages
+- [MODFQMMGR-982](https://folio-org.atlassian.net/browse/MODFQMMGR-982) Add `QUEUED` query status
+- [MODFQMMGR-982](https://folio-org.atlassian.net/browse/MODFQMMGR-982) Add tests for the new `QUEUED` status
+- [MODFQMMGR-1016](https://folio-org.atlassian.net/browse/MODFQMMGR-1016) Add join condition between `simple_srs_record` and `simple_instance`
+- [MODFQMMGR-1016](https://folio-org.atlassian.net/browse/MODFQMMGR-1016) Add `sourceAlias` for `srs.external_id`
+- [MODFQMMGR-966](https://folio-org.atlassian.net/browse/MODFQMMGR-966) Fix `$empty` queries for nested strings in object arrays
+- [MODFQMMGR-1015](https://folio-org.atlassian.net/browse/MODFQMMGR-1015) Add source join validation for custom ETs
+- [MODFQMMGR-1020](https://folio-org.atlassian.net/browse/MODFQMMGR-1020) Add `Holdings permanent location` source to Receiving pieces ET
+- [MODFQMMGR-1017](https://folio-org.atlassian.net/browse/MODFQMMGR-1017) Provide unique, sequential default source orders for custom ETs
+- [MODFQMMGR-1006](https://folio-org.atlassian.net/browse/MODFQMMGR-1006) Make deprecated user created/updated date fields hidden
+- [MODFQMMGR-1025](https://folio-org.atlassian.net/browse/MODFQMMGR-1025) Add handling of 404s from value APIs
+- [MODFQMMGR-1025](https://folio-org.atlassian.net/browse/MODFQMMGR-1025) Update 404 handling in value APIs
+- [MODFQMMGR-1023](https://folio-org.atlassian.net/browse/MODFQMMGR-1023) Add hash verification for entities when retrieving query contents
+- [MODFQMMGR-1023](https://folio-org.atlassian.net/browse/MODFQMMGR-1023) Add hash verification for entities when retrieving query contents (part 2)
+- [MODFQMMGR-840](https://folio-org.atlassian.net/browse/MODFQMMGR-840) Update instance contributor translations
+- [MODFQMMGR-1045](https://folio-org.atlassian.net/browse/MODFQMMGR-1045) Provide codes for all errors
+- [MODFQMMGR-1045](https://folio-org.atlassian.net/browse/MODFQMMGR-1045) Standardize API error response declarations
+- [MODFQMMGR-1045](https://folio-org.atlassian.net/browse/MODFQMMGR-1045) Remove 500 responses from API docs
+- [EDGFQM-41](https://folio-org.atlassian.net/browse/EDGFQM-41) Use new centralized Maven GA workflows
+- [MODFQMMGR-1048](https://folio-org.atlassian.net/browse/MODFQMMGR-1048) Create `/entity-types/{entityTypeId}/field-values` API
+- [MODFQMMGR-1040](https://folio-org.atlassian.net/browse/MODFQMMGR-1040) Reintroduce limited composite support in available-joins
+- [MODFQMMGR-1042](https://folio-org.atlassian.net/browse/MODFQMMGR-1042) Add `Holdings - Call number type` field to `simple_holdings_record`
+- [MODFQMMGR-1034](https://folio-org.atlassian.net/browse/MODFQMMGR-1034) Sweeping migration refactoring and standardization
+- [MODFQMMGR-1043](https://folio-org.atlassian.net/browse/MODFQMMGR-1043) Make user address fields queryable
+- [MODFQMMGR-1043](https://folio-org.atlassian.net/browse/MODFQMMGR-1043) Fix `User - Address Type` `valueGetter`
+- [MODFQMMGR-1034](https://folio-org.atlassian.net/browse/MODFQMMGR-1034) Handle entity type inheritance when migrating queries and custom entities
+- [MODFQMMGR-1034](https://folio-org.atlassian.net/browse/MODFQMMGR-1034) Migration minor fixes
+- [MODFQMMGR-1027](https://folio-org.atlassian.net/browse/MODFQMMGR-1027) Remove titles
+- [MODFQMMGR-1037](https://folio-org.atlassian.net/browse/MODFQMMGR-1037) Remove obsolete entity type properties
+- [MODFQMMGR-1038](https://folio-org.atlassian.net/browse/MODFQMMGR-1038) Add `composite_instance_srs_bib` entity
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Set Docker API version for testcontainers
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Switch from mod-config to mod-settings for locale
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Add `LocalClient`
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Switch to mod-settings for tenant addresses
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Add invoice ET migration
+- [MODFQMMGR-938](https://folio-org.atlassian.net/browse/MODFQMMGR-938) Rename the POL entity types
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Fix path in `LocaleClient`
+- [MODFQMMGR-1038](https://folio-org.atlassian.net/browse/MODFQMMGR-1038) Update `composite_instance_srs_bib` translation
+- [MODFQMMGR-746](https://folio-org.atlassian.net/browse/MODFQMMGR-746) Add `bill_to` to other invoice-related composites
+- [MODFQMMGR-628](https://folio-org.atlassian.net/browse/MODFQMMGR-628) Add support for default values for fields
+- [MODFQMMGR-1038](https://folio-org.atlassian.net/browse/MODFQMMGR-1038) Set default visibility for some SRS columns
+- [MODFQMMGR-976](https://folio-org.atlassian.net/browse/MODFQMMGR-976) Make `idColumnName` work for nested fields
+- [MODFQMMGR-906](https://folio-org.atlassian.net/browse/MODFQMMGR-906) Accounts with users - Fees/Fines composite ET
+- [MODFQMMGR-1007](https://folio-org.atlassian.net/browse/MODFQMMGR-1007) Update source for `User - Proxy for` field
+- [MODFQMMGR-976](https://folio-org.atlassian.net/browse/MODFQMMGR-976) Remove null tenant names when retrieving POL locations
+- [MODFQMMGR-983](https://folio-org.atlassian.net/browse/MODFQMMGR-983) Add new `/fqm/status` endpoint
+- [MODFQMMGR-1007](https://folio-org.atlassian.net/browse/MODFQMMGR-1007) `User - Proxy for` adjustments
+- [MODFQMMGR-1007](https://folio-org.atlassian.net/browse/MODFQMMGR-1007) Remove nulls from `proxy_for` nested fields
+- [MODFQMMGR-1074](https://folio-org.atlassian.net/browse/MODFQMMGR-1074) Users with accounts, loans - Fees/fines composite ET
+- [MODFQMMGR-1056](https://folio-org.atlassian.net/browse/MODFQMMGR-1056) Improve support for JSONB arrays
+- [MODFQMMGR-1056](https://folio-org.atlassian.net/browse/MODFQMMGR-1056) Update instance ET fields to use indexes
+- [MODFQMMGR-1007](https://folio-org.atlassian.net/browse/MODFQMMGR-1007) Add `simple_user_proxy_info` ET
+- [MODFQMMGR-1056](https://folio-org.atlassian.net/browse/MODFQMMGR-1056) / [MODFQMMGR-1080](https://folio-org.atlassian.net/browse/MODFQMMGR-1080) Fix instance classification type definition
+- [MODFQMMGR-983](https://folio-org.atlassian.net/browse/MODFQMMGR-983) Add missed permission for status endpoint
+- [MODFQMMGR-1083](https://folio-org.atlassian.net/browse/MODFQMMGR-1083) Adjustments to `Users with fees/fines, loans` ET
+- [MODFQMMGR-1080](https://folio-org.atlassian.net/browse/MODFQMMGR-1080) Fix `valueGetter` for instance classification type names
+- [MODFQMMGR-1075](https://folio-org.atlassian.net/browse/MODFQMMGR-1075) Add `actual-cost-record-storage` interface dependency
+- [UIPQB-261](https://folio-org.atlassian.net/browse/UIPQB-261) Set `maxColumnWidth` for some columns
+- [MODFQMMGR-1057](https://folio-org.atlassian.net/browse/MODFQMMGR-1057) Use indexes for instance notes
+- [MODFQMMGR-1070](https://folio-org.atlassian.net/browse/MODFQMMGR-1070) Make Item checkin and destination service point available
+- [MODFQMMGR-627](https://folio-org.atlassian.net/browse/MODFQMMGR-627) Use default values and available indexes for discovery suppress fields
+- [MODFQMMGR-887](https://folio-org.atlassian.net/browse/MODFQMMGR-887) Support query by tags - part 2
+- [MODFQMMGR-887](https://folio-org.atlassian.net/browse/MODFQMMGR-887) Fix tags `valueGetter`s in Users ET
+- [MODFQMMGR-984](https://folio-org.atlassian.net/browse/MODFQMMGR-984) Upgrade to Spring Boot 4
+- [MODFQMMGR-1085](https://folio-org.atlassian.net/browse/MODFQMMGR-1085) Composite ET for Fees Fines Manual blocks
+- [MODFQMMGR-764](https://folio-org.atlassian.net/browse/MODFQMMGR-764) Support cross-tenant queries for simple inventory ETs
+- [MODFQMMGR-1086](https://folio-org.atlassian.net/browse/MODFQMMGR-1086) Add `composite_lost_items_requiring_actual_cost`
+- [MODFQMMGR-1089](https://folio-org.atlassian.net/browse/MODFQMMGR-1089) Make user department fields essential
+- [MODFQMMGR-1090](https://folio-org.atlassian.net/browse/MODFQMMGR-1090) Add open access entities
+- [MODFQMMGR-1088](https://folio-org.atlassian.net/browse/MODFQMMGR-1088) Composite ET: User blocks summary
+- [MODFQMMGR-763](https://folio-org.atlassian.net/browse/MODFQMMGR-763) Remove `afterId` parameter from synchronous query endpoint
+- [MODFQMMGR-805](https://folio-org.atlassian.net/browse/MODFQMMGR-805) Define authority entities in FQM
+- [MODFQMMGR-805](https://folio-org.atlassian.net/browse/MODFQMMGR-805) Add composite authority entity type
+- [MODFQMMGR-987](https://folio-org.atlassian.net/browse/MODFQMMGR-987) Add item condition fields
+- [MODFQMMGR-1088](https://folio-org.atlassian.net/browse/MODFQMMGR-1088) Make `composite_users_with_block_summary` private
+- [MODFQMMGR-1053](https://folio-org.atlassian.net/browse/MODFQMMGR-1053) Add user notes and `additionalJoinCondition` support - TODO: UMBRELLALEAF
+- [MODFQMMGR-1095](https://folio-org.atlassian.net/browse/MODFQMMGR-1095) Make SRS ETs private
+- [MODFQMMGR-1053](https://folio-org.atlassian.net/browse/MODFQMMGR-1053) Revert `additionalJoinCondition` support
+- [MODFQMMGR-770](https://folio-org.atlassian.net/browse/MODFQMMGR-770) Add ability to query users based on blocks
+- [MODFQMMGR-770](https://folio-org.atlassian.net/browse/MODFQMMGR-770) Fix `tenant_id` in `transaction_summary` ET
+- [MODFQMMGR-770](https://folio-org.atlassian.net/browse/MODFQMMGR-770) `Users with open transactions` adjustments
+- [MODFQMMGR-1108](https://folio-org.atlassian.net/browse/MODFQMMGR-1108) Support querying shared instances from member tenants in `Instances with MARC bibliographic`
+- [MODFQMMGR-1105](https://folio-org.atlassian.net/browse/MODFQMMGR-1105) Disable `crossTenantQueriesEnabled` for `composite_authority_details` entity type
+- [MODFQMMGR-1104](https://folio-org.atlassian.net/browse/MODFQMMGR-1104) Hide `simple_srs_record` `id` and `externalId` fields
+- [MODFQMMGR-1103](https://folio-org.atlassian.net/browse/MODFQMMGR-1103) Fix OA bugs
+
 # 4.0.x - Sunflower
 
 # 4.0.15

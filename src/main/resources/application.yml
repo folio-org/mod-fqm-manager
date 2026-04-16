@@ -7,6 +7,14 @@ mod-fqm-manager:
   zombie-query-max-wait-seconds: 300
   zombie-query-queued-threshold-duration: 1h
   convert-queued-status-to-in-progress: ${CONVERT_QUEUED_STATUS_TO_IN_PROGRESS:true}
+  query-suggestions:
+    interpreter: ${QUERY_SUGGESTIONS_INTERPRETER:stub}
+    llm:
+      base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:}
+      api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:}
+      model: ${QUERY_SUGGESTIONS_LLM_MODEL:}
+      chat-completions-path: ${QUERY_SUGGESTIONS_LLM_CHAT_COMPLETIONS_PATH:/chat/completions}
+      temperature: ${QUERY_SUGGESTIONS_LLM_TEMPERATURE:0.0}
   cache:
     spec:
       queryCache: maximumSize=500,expireAfterWrite=1m

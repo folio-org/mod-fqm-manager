@@ -8,13 +8,19 @@ mod-fqm-manager:
   zombie-query-queued-threshold-duration: 1h
   convert-queued-status-to-in-progress: ${CONVERT_QUEUED_STATUS_TO_IN_PROGRESS:true}
   query-suggestions:
-    interpreter: ${QUERY_SUGGESTIONS_INTERPRETER:stub}
+    interpreter: ${QUERY_SUGGESTIONS_INTERPRETER:llm}
     llm:
-      base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:}
-      api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:}
-      model: ${QUERY_SUGGESTIONS_LLM_MODEL:}
+      # OPEN AI
+#      base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:https://api.openai.com/v1}
+#      api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:}
+#      model: ${QUERY_SUGGESTIONS_LLM_MODEL:}
+      # Ollama
+      base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:http://localhost:11434/v1}
+      api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:dummy}
+      model: ${QUERY_SUGGESTIONS_LLM_MODEL:llama3.1}
       chat-completions-path: ${QUERY_SUGGESTIONS_LLM_CHAT_COMPLETIONS_PATH:/chat/completions}
       temperature: ${QUERY_SUGGESTIONS_LLM_TEMPERATURE:0.0}
+      json-mode: ${QUERY_SUGGESTIONS_LLM_JSON_MODE:true}
   cache:
     spec:
       queryCache: maximumSize=500,expireAfterWrite=1m

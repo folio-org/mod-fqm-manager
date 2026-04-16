@@ -51,6 +51,37 @@ class LlmIntentInterpreterTest {
     assertTrue(llmIntentClient.userPrompt.contains("Metadata context"));
   }
 
+  @Test
+  void shouldExtractJsonWhenModelWrapsItInExplanatoryText() {
+    UUID entityTypeId = UUID.randomUUID();
+    LlmIntentInterpreter interpreter = new LlmIntentInterpreter(
+      new CapturingLlmIntentClient("""
+        This looks like the best interpretation:
+        ```json
+        {
+          "entityTypeId": "%s",
+          "entityTypeLabel": "Orders",
+          "filters": [],
+          "assumptions": ["Used the only matching entity type."],
+          "clarificationQuestions": []
+        }
+        ```
+        """.formatted(entityTypeId)),
+      new ObjectMapper()
+    );
+
+    QuerySuggestionIntent result = interpreter.interpret(
+      "show me orders",
+      null,
+      new QuerySuggestionMetadataContext(List.of(
+        new QuerySuggestionEntityTypeContext(entityTypeId, "orders", "Orders", List.of())
+      ))
+    );
+
+    assertEquals(entityTypeId, result.entityTypeId());
+    assertEquals("Orders", result.entityTypeLabel());
+  }
+
   private static final class CapturingLlmIntentClient implements LlmIntentClient {
     private final String response;
     private String systemPrompt;

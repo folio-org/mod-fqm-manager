@@ -67,7 +67,7 @@ public class LlmIntentInterpreter implements IntentInterpreter {
           {
             "fieldName": "string",
             "fieldLabel": "string",
-            "operator": "$eq | $isNull | $olderThanDays",
+            "operator": "$eq | $contains | $isNull | $olderThanDays",
             "value": "string"
           }
         ],
@@ -77,7 +77,9 @@ public class LlmIntentInterpreter implements IntentInterpreter {
       Rules:
       - Only use field names and entityTypeIds that are present in the provided metadata context.
       - Always return all list fields as arrays. Use [] when there are no filters, assumptions, or clarification questions.
-      - Prefer $eq for direct value matches.
+      - Use $eq for exact or enumerated matches such as boolean values, statuses, and exact identifiers.
+      - Use $contains for partial text matches or topical searches, such as requests like "about Mexico", "title contains history", "instances with publisher Oxford", or "users with email gmail.com".
+      - When the user describes a topic or subject rather than an exact full field value, prefer $contains over $eq for string fields.
       - Use $isNull with value "true" for requests like "without invoices", "missing vendor", or "no status".
       - Use $olderThanDays for relative age filters like "older than 30 days".
       - If entity type is ambiguous, set entityTypeId to null and add a clarification question.
@@ -120,6 +122,66 @@ public class LlmIntentInterpreter implements IntentInterpreter {
             "fieldLabel": "Cataloged date",
             "operator": "$olderThanDays",
             "value": "30"
+          }
+        ],
+        "assumptions": [],
+        "clarificationQuestions": []
+      }
+
+      Example 3:
+      Request: all instances about Mexico
+      Response:
+      {
+        "entityTypeId": "8fc4a9d2-7ccf-4233-afb8-796911839862",
+        "entityTypeLabel": "Instances",
+        "filters": [
+          {
+            "fieldName": "title",
+            "fieldLabel": "Resource title",
+            "operator": "$contains",
+            "value": "Mexico"
+          }
+        ],
+        "assumptions": [],
+        "clarificationQuestions": []
+      }
+
+      Example 4:
+      Request: active users without a first name
+      Response:
+      {
+        "entityTypeId": "bb058933-cd06-4539-bd3a-6f248ff98ee2",
+        "entityTypeLabel": "Simple Users",
+        "filters": [
+          {
+            "fieldName": "active",
+            "fieldLabel": "Active",
+            "operator": "$eq",
+            "value": "true"
+          },
+          {
+            "fieldName": "first_name",
+            "fieldLabel": "First name",
+            "operator": "$isNull",
+            "value": "true"
+          }
+        ],
+        "assumptions": [],
+        "clarificationQuestions": []
+      }
+
+      Example 5:
+      Request: instances with title Mexico
+      Response:
+      {
+        "entityTypeId": "8fc4a9d2-7ccf-4233-afb8-796911839862",
+        "entityTypeLabel": "Instances",
+        "filters": [
+          {
+            "fieldName": "title",
+            "fieldLabel": "Resource title",
+            "operator": "$eq",
+            "value": "Mexico"
           }
         ],
         "assumptions": [],

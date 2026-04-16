@@ -14,6 +14,7 @@ mod-fqm-manager:
 #      base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:https://api.openai.com/v1}
 #      api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:}
 #      model: ${QUERY_SUGGESTIONS_LLM_MODEL:}
+
       # Ollama
       base-url: ${QUERY_SUGGESTIONS_LLM_BASE_URL:http://localhost:11434/v1}
       api-key: ${QUERY_SUGGESTIONS_LLM_API_KEY:dummy}

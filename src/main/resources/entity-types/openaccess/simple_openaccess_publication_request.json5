@@ -190,6 +190,7 @@
       },
       queryable: true,
       valueGetter: ':publication_request.pr_date_created',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'oa_pr_last_updated',
@@ -198,6 +199,7 @@
       },
       queryable: true,
       valueGetter: ':publication_request.pr_last_updated',
+      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'oa_pr_request_number',

@@ -170,6 +170,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      isIdColumn: true,
       queryable: true,
       valueGetter: ':title_instance.ti_id',
     },
@@ -246,6 +247,7 @@
       dataType: {
         dataType: 'stringType',
       },
+      isIdColumn: true,
       queryable: true,
       valueGetter: ':identifier.id_id',
     },

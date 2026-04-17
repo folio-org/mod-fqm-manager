@@ -1,10 +1,6 @@
 # 4.1.x - Trillium
 
 # 4.1.1
-- Switch from folio-spring-support 10.0.0-RC1 to 10.0.0
-- Accept `oa` 2.3 interface
-
-# 4.1.0
 - [MODFQMMGR-994](https://folio-org.atlassian.net/browse/MODFQMMGR-994) Make `starts with` and `contains` case-insensitive
 - [MODFQMMGR-986](https://folio-org.atlassian.net/browse/MODFQMMGR-986) Fix querying on `Instance - Identifiers - Identifier type`
 - [MODFQMMGR-980](https://folio-org.atlassian.net/browse/MODFQMMGR-980) Add Orders ET to Receiving Pieces composite ET
@@ -75,6 +71,8 @@
 - [MODFQMMGR-1105](https://folio-org.atlassian.net/browse/MODFQMMGR-1105) Disable `crossTenantQueriesEnabled` for `composite_authority_details` entity type
 - [MODFQMMGR-1104](https://folio-org.atlassian.net/browse/MODFQMMGR-1104) Hide `simple_srs_record` `id` and `externalId` fields
 - [MODFQMMGR-1103](https://folio-org.atlassian.net/browse/MODFQMMGR-1103) Fix OA bugs
+- Switch from folio-spring-support 10.0.0-RC1 to 10.0.0
+- Accept `oa` 2.3 interface
 
 # 4.0.x - Sunflower
 

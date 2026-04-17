@@ -10,7 +10,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>4.1.0-SNAPSHOT</version>
+  <version>4.1.1-SNAPSHOT</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
@@ -23,7 +23,7 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-support.version>10.0.0-RC1</folio-spring-support.version>
+    <folio-spring-support.version>10.0.0</folio-spring-support.version>
     <folio-query-tool-metadata.version>4.0.0</folio-query-tool-metadata.version>
     <mapstruct.version>1.5.2.Final</mapstruct.version>
     <lib-fqm-query-processor.version>4.1.0</lib-fqm-query-processor.version>

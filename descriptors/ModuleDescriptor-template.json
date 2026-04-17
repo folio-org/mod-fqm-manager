@@ -22,7 +22,7 @@
     },
     {
       "id": "entity-types",
-      "version": "3.0",
+      "version": "2.1",
       "handlers": [
         {
           "methods": ["GET"],
@@ -94,7 +94,7 @@
     },
     {
       "id": "fqm-query",
-      "version": "3.0",
+      "version": "2.1",
       "handlers": [
         {
           "methods": ["GET"],

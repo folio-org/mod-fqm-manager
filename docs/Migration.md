@@ -59,6 +59,24 @@ Queries from Quesnelia or earlier will have no version associated with them and 
 
 To update a query, send it, the entity type ID, and a list of fields (if desired) to `/fqm/migrate`. See our [API documentation](https://dev.folio.org/reference/api/#mod-fqm-manager) for more information about this endpoint. Our module will return the updated query, entity type ID, and list of fields, all of which should be saved. Additionally, the response may contain [warnings](#warnings), meaning that some parts of the query or field list was unable to be migrated.
 
+For example, the following request to `/fqm/migrate`:
+```json
+{
+  "entityTypeId": "0cb79a4c-f7eb-4941-a104-745224ae0292",
+  "fqlQuery": "{\"_version\": \"0\", \"item_barcode\": {\"$eq\": \"value\"}}",
+  "fields": ["id", "instance_id", "item_barcode"]
+}
+```
+will produce the following response:
+```json
+{
+  "entityTypeId": "d0213d22-32cf-490f-9196-d81c3c66e53f",
+  "fqlQuery": "{\"_version\": \"24\", \"items.barcode\": {\"$eq\": \"value\"}}",
+  "fields": ["items.id", "instances.id", "items.barcode"],
+  "warnings": []
+}
+```
+
 ## Updating an entity type
 
 Custom entity types will be migrated when the module is installed. No additional action is required; for more information see [custom entity types support](#custom-entity-types-support).

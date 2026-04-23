@@ -194,6 +194,10 @@
       queryOnly: false,
       hidden: false,
       essential: true,
+      source: {
+        entityTypeId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+        columnName: 'group',
+      },
       valueGetter: ":src__circulation__circulation_storage__actual_cost_record.jsonb->'user'->>'patronGroup'",
       sourceAlias: 'src__circulation__circulation_storage__actual_cost_record',
     },
@@ -815,8 +819,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      queryOnly: false,
-      hidden: false,
+      hidden: true,
       essential: true,
       joinsTo: [
         {
@@ -866,8 +869,7 @@
       },
       queryable: true,
       visibleByDefault: false,
-      queryOnly: false,
-      hidden: false,
+      hidden: true,
       essential: true,
       joinsTo: [
         {

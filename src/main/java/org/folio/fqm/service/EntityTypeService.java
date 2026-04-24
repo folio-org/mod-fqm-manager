@@ -85,6 +85,7 @@ public class EntityTypeService {
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
   private static final String COUNTRIES_FILEPATH = "country_codes.json";
   private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
+  private static final String LANGUAGE_DISAMBIGUATION_TEMPLATE = "mod-fqm-manager.languages.disambiguated";
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
@@ -437,7 +438,11 @@ public class EntityTypeService {
       .collect(Collectors.groupingBy(ValueWithLabel::getLabel, Collectors.counting()));
     results.replaceAll(result -> {
       if (labelCounts.getOrDefault(result.getLabel(), 0L) > 1) {
-        result.setLabel("%s [%s]".formatted(result.getLabel(), result.getValue()));
+        result.setLabel(translationService.format(
+          LANGUAGE_DISAMBIGUATION_TEMPLATE,
+          "label", result.getLabel(),
+          "code", result.getValue()
+        ));
       }
       return result;
     });

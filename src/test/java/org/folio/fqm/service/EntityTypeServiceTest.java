@@ -29,6 +29,7 @@ import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -100,6 +101,15 @@ class EntityTypeServiceTest {
   @Spy
   @InjectMocks
   private EntityTypeService entityTypeService;
+
+  @BeforeEach
+  void setUpTranslationService() {
+    lenient().when(translationService.format(
+      eq("mod-fqm-manager.languages.disambiguated"),
+      eq("label"), anyString(),
+      eq("code"), anyString()
+    )).thenAnswer(invocation -> "%s [%s]".formatted(invocation.getArgument(2), invocation.getArgument(4)));
+  }
 
   @Test
   void shouldGetEntityTypeDefinitionIncludingHidden() {

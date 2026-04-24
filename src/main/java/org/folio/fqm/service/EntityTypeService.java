@@ -398,17 +398,26 @@ public class EntityTypeService {
       folioLocale = Locale.ENGLISH;
     }
 
-    Map<String, String> a3ToNameMap = new HashMap<>();
-    Map<String, String> a3ToA2Map = new HashMap<>();
+    Map<String, String> codeToNameMap = new HashMap<>();
+    Map<String, String> codeToA2Map = new HashMap<>();
     for (Map<String, String> language : languages) {
-      a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
-      a3ToNameMap.put(language.get("alpha3"), language.get("name"));
+      String alpha3 = language.get("alpha3");
+      String alpha2 = language.get("alpha2");
+      String name = language.get("name");
+
+      codeToA2Map.put(alpha3, alpha2);
+      codeToNameMap.put(alpha3, name);
+
+      if (StringUtils.isNotEmpty(alpha2)) {
+        codeToA2Map.put(alpha2, alpha2);
+        codeToNameMap.put(alpha2, name);
+      }
     }
 
     for (String code : langSet) {
       String label;
-      String a2Code = a3ToA2Map.get(code);
-      String name = a3ToNameMap.get(code);
+      String a2Code = codeToA2Map.get(code);
+      String name = codeToNameMap.get(code);
       if (StringUtils.isNotEmpty(a2Code)) {
         Locale languageLocale = new Locale(a2Code);
         label = languageLocale.getDisplayLanguage(folioLocale);

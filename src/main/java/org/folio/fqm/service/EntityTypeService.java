@@ -432,6 +432,16 @@ public class EntityTypeService {
         results.add(new ValueWithLabel().value(code).label(label));
       }
     }
+
+    Map<String, Long> labelCounts = results.stream()
+      .collect(Collectors.groupingBy(ValueWithLabel::getLabel, Collectors.counting()));
+    results.replaceAll(result -> {
+      if (labelCounts.getOrDefault(result.getLabel(), 0L) > 1) {
+        result.setLabel("%s [%s]".formatted(result.getLabel(), result.getValue()));
+      }
+      return result;
+    });
+
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }

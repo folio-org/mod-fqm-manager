@@ -372,7 +372,10 @@ public class EntityTypeService {
     Locale folioLocale;
     try {
       String localeString = localeClient.getLocaleSettings().locale();
-      folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
+      folioLocale = Locale.forLanguageTag(localeString);
+      if (folioLocale.getLanguage().isBlank()) {
+        throw new IllegalArgumentException("Invalid locale: " + localeString);
+      }
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");
       folioLocale = Locale.ENGLISH;

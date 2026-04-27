@@ -73,7 +73,7 @@ final class LanguageLocalizationUtils {
     String a2Code = LANGUAGE_METADATA.codeToA2Map().get(code);
     String name = LANGUAGE_METADATA.codeToNameMap().get(code);
     if (StringUtils.isNotEmpty(a2Code)) {
-      Locale languageLocale = new Locale(a2Code);
+      Locale languageLocale = Locale.of(a2Code);
       String label = languageLocale.getDisplayLanguage(folioLocale);
       if (StringUtils.isNotEmpty(label) && !"Undetermined".equals(label)) {
         return label;
@@ -106,6 +106,14 @@ final class LanguageLocalizationUtils {
       .build();
 
     try (InputStream input = LanguageLocalizationUtils.class.getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
+      return loadLanguageMetadata(input, mapper);
+    } catch (Exception e) {
+      throw new IllegalStateException("Failed to load language metadata", e);
+    }
+  }
+
+  static LanguageMetadata loadLanguageMetadata(InputStream input, ObjectMapper mapper) {
+    try {
       List<Map<String, String>> languages = mapper.readValue(input, new TypeReference<>() {});
       Map<String, String> codeToNameMap = new HashMap<>();
       Map<String, String> codeToA2Map = new HashMap<>();
@@ -124,12 +132,12 @@ final class LanguageLocalizationUtils {
         }
       }
       return new LanguageMetadata(codeToNameMap, codeToA2Map);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new IllegalStateException("Failed to load language metadata", e);
     }
   }
 
-  private record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {}
+  static record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {}
 
   private record LocalizedLanguageValue(String rawValue, String localizedValue) {}
 }

@@ -330,7 +330,11 @@ public class ResultSetService {
   private Locale getFolioLocale() {
     try {
       String localeString = localeClient.getLocaleSettings().locale();
-      return new Locale(localeString.substring(0, 2));
+      Locale folioLocale = Locale.forLanguageTag(localeString);
+      if (StringUtils.isBlank(folioLocale.getLanguage())) {
+        throw new IllegalArgumentException("Invalid locale: " + localeString);
+      }
+      return folioLocale;
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");
       return Locale.ENGLISH;

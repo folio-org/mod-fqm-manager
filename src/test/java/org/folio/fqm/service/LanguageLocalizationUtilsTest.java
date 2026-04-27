@@ -1,10 +1,12 @@
 package org.folio.fqm.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
+import java.io.ByteArrayInputStream;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class LanguageLocalizationUtilsTest {
@@ -70,5 +73,15 @@ class LanguageLocalizationUtilsTest {
     assertEquals("German [ger]", values.get(1).getLabel());
     assertEquals("eng", values.get(2).getValue());
     assertEquals("English", values.get(2).getLabel());
+  }
+
+  @Test
+  void shouldThrowWhenLanguageMetadataCannotBeLoaded() {
+    ByteArrayInputStream invalidJson = new ByteArrayInputStream("not valid json".getBytes());
+
+    assertThrows(
+      IllegalStateException.class,
+      () -> LanguageLocalizationUtils.loadLanguageMetadata(invalidJson, new ObjectMapper())
+    );
   }
 }

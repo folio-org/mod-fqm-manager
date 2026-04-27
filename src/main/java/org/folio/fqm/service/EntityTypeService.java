@@ -1,9 +1,7 @@
 package org.folio.fqm.service;
 
-import tools.jackson.core.json.JsonReadFeature;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.core.type.TypeReference;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +75,6 @@ import java.util.stream.Stream;
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -85,7 +82,6 @@ public class EntityTypeService {
     "TPE", "TRL", "TMM", "USN", "USS", "XXX", "UYI", "VEB", "VEF", "VED", "CHE", "CHW", "YUM", "ZWN", "ZMK", "ZWD", "ZWR");
   private static final String COUNTRIES_FILEPATH = "country_codes.json";
   private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
-  private static final String LANGUAGE_DISAMBIGUATION_TEMPLATE = "mod-fqm-manager.languages.disambiguated";
 
   private final EntityTypeRepository entityTypeRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
@@ -374,22 +370,6 @@ public class EntityTypeService {
       }
     }
 
-    List<ValueWithLabel> results = new ArrayList<>();
-    ObjectMapper mapper =
-      JsonMapper
-        .builder()
-        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-        .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
-        .build();
-
-    List<Map<String, String>> languages = List.of();
-    try (InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
-      languages = mapper.readValue(input, new TypeReference<>() {
-      });
-    } catch (IOException e) {
-      log.error("Failed to read language file. Language display names may not be properly translated.");
-    }
-
     Locale folioLocale;
     try {
       String localeString = localeClient.getLocaleSettings().locale();
@@ -399,53 +379,11 @@ public class EntityTypeService {
       folioLocale = Locale.ENGLISH;
     }
 
-    Map<String, String> codeToNameMap = new HashMap<>();
-    Map<String, String> codeToA2Map = new HashMap<>();
-    for (Map<String, String> language : languages) {
-      String alpha3 = language.get("alpha3");
-      String alpha2 = language.get("alpha2");
-      String name = language.get("name");
-
-      codeToA2Map.put(alpha3, alpha2);
-      codeToNameMap.put(alpha3, name);
-
-      if (StringUtils.isNotEmpty(alpha2)) {
-        codeToA2Map.put(alpha2, alpha2);
-        codeToNameMap.put(alpha2, name);
-      }
-    }
-
-    for (String code : langSet) {
-      String label;
-      String a2Code = codeToA2Map.get(code);
-      String name = codeToNameMap.get(code);
-      if (StringUtils.isNotEmpty(a2Code)) {
-        Locale languageLocale = new Locale(a2Code);
-        label = languageLocale.getDisplayLanguage(folioLocale);
-      } else if (StringUtils.isNotEmpty(name)) {
-        label = name;
-      } else if (StringUtils.isNotEmpty(code)) {
-        label = code;
-      } else {
-        continue;
-      }
-      if (label.toLowerCase().contains(searchText.toLowerCase())) {
-        results.add(new ValueWithLabel().value(code).label(label));
-      }
-    }
-
-    Map<String, Long> labelCounts = results.stream()
-      .collect(Collectors.groupingBy(ValueWithLabel::getLabel, Collectors.counting()));
-    results.replaceAll(result -> {
-      if (labelCounts.getOrDefault(result.getLabel(), 0L) > 1) {
-        result.setLabel(translationService.format(
-          LANGUAGE_DISAMBIGUATION_TEMPLATE,
-          "label", result.getLabel(),
-          "code", result.getValue()
-        ));
-      }
-      return result;
-    });
+    List<ValueWithLabel> results = LanguageLocalizationUtils
+      .getLanguageValues(langSet, folioLocale, translationService)
+      .stream()
+      .filter(result -> result.getLabel().toLowerCase().contains(searchText.toLowerCase()))
+      .toList();
 
     results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);

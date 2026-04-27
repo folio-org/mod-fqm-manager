@@ -30,6 +30,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -202,8 +203,8 @@ public class ResultSetService {
     }
     for (String fieldName : languageFields) {
       Object value = contents.get(fieldName);
-      if (value instanceof List<?> list) {
-        contents.put(fieldName, localizeLanguageList(list, folioLocale));
+      if (value instanceof Object[] array) {
+        contents.put(fieldName, localizeLanguageList(Arrays.asList(array), folioLocale));
       }
     }
   }

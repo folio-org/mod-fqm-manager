@@ -4,6 +4,7 @@ import static org.folio.fqm.repository.EntityTypeRepository.ID_FIELD_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -193,6 +194,69 @@ class ResultSetServiceTest {
     );
 
     assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  void shouldLocalizeLanguageFieldEvenWhenLocalizeIsFalse() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn()
+          .name("languages")
+          .source(new SourceColumn(entityTypeId, "languages")
+            .name("languages"))
+      ));
+
+    List<String> fields = List.of("id", "languages");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", List.of("de", "eng"))));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals(List.of("German", "English"), actual.getFirst().get("languages"));
+  }
+
+  @Test
+  void shouldDisambiguateLocalizedLanguageFieldValues() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn()
+          .name("languages")
+          .source(new SourceColumn(entityTypeId, "languages")
+            .name("languages"))
+      ));
+
+    List<String> fields = List.of("id", "languages");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", List.of("de", "ger", "eng"))));
+    when(translationService.format(
+      eq("mod-fqm-manager.languages.disambiguated"),
+      eq("label"), anyString(),
+      eq("code"), anyString()
+    )).thenAnswer(invocation -> "%s [%s]".formatted(invocation.getArgument(2), invocation.getArgument(4)));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals(List.of("German [de]", "German [ger]", "English"), actual.getFirst().get("languages"));
   }
 
   @Test

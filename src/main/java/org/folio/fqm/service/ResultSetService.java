@@ -1,8 +1,11 @@
 package org.folio.fqm.service;
 
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +13,7 @@ import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -26,7 +32,9 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,8 +53,11 @@ public class ResultSetService {
     .toFormatter().withZone(ZoneOffset.UTC); // force interpretation as UTC
   private static final String DATE_TIME_REGEX = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}([+-]\\d{2}:\\d{2}(:\\d{2})?|Z|)$";
   private static final String COUNTRY_TRANSLATION_TEMPLATE = "mod-fqm-manager.countries.%s";
+  private static final String LANGUAGE_DISAMBIGUATION_TEMPLATE = "mod-fqm-manager.languages.disambiguated";
+  private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final String NESTED_FIELD_MARKER = "[*]->";
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final LanguageMetadata LANGUAGE_METADATA = loadLanguageMetadata();
 
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
@@ -78,7 +89,9 @@ public class ResultSetService {
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? localeClient.getLocaleSettings().getZoneId() : null;
     List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    List<String> languageFields = getLanguageFieldNames(entityType);
     Map<String, Object> defaultValues = EntityTypeUtils.getFieldDefaultValues(entityType);
+    Locale folioLocale = getFolioLocale();
 
     return contentIds
       .stream()
@@ -96,6 +109,7 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         applyDefaultValues(copiedContents, defaultValues);
         localizeCountries(copiedContents, countryFields);
+        localizeLanguages(copiedContents, languageFields, folioLocale);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
         }
@@ -179,6 +193,18 @@ public class ResultSetService {
     }
     for (String fieldPath : countryFieldPaths) {
       localizeCountryField(contents, fieldPath);
+    }
+  }
+
+  private void localizeLanguages(Map<String, Object> contents, List<String> languageFields, Locale folioLocale) {
+    if (CollectionUtils.isEmpty(languageFields)) {
+      return;
+    }
+    for (String fieldName : languageFields) {
+      Object value = contents.get(fieldName);
+      if (value instanceof List<?> list) {
+        contents.put(fieldName, localizeLanguageList(list, folioLocale));
+      }
     }
   }
 
@@ -280,6 +306,114 @@ public class ResultSetService {
     return Optional.of(localized);
   }
 
+  private List<String> localizeLanguageList(List<?> rawValues, Locale folioLocale) {
+    List<LocalizedLanguageValue> localizedValues = rawValues.stream()
+      .map(value -> {
+        if (value == null) {
+          return new LocalizedLanguageValue(null, null);
+        }
+        String rawCode = value.toString();
+        return new LocalizedLanguageValue(rawCode, localizeLanguageCode(rawCode, folioLocale));
+      })
+      .toList();
+
+    Map<String, Long> distinctRawValueCountsByLabel = localizedValues.stream()
+      .filter(item -> item.localizedValue() != null)
+      .map(LocalizedLanguageValue::localizedValue)
+      .distinct()
+      .collect(Collectors.toMap(
+        Function.identity(),
+        label -> localizedValues.stream()
+          .filter(other -> label.equals(other.localizedValue()))
+          .map(LocalizedLanguageValue::rawValue)
+          .filter(Objects::nonNull)
+          .distinct()
+          .count()
+      ));
+
+    return localizedValues.stream()
+      .map(item -> {
+        if (item.localizedValue() == null) {
+          return null;
+        }
+        long distinctCount = distinctRawValueCountsByLabel.getOrDefault(item.localizedValue(), 0L);
+        if (distinctCount > 1) {
+          return translationService.format(
+            LANGUAGE_DISAMBIGUATION_TEMPLATE,
+            "label", item.localizedValue(),
+            "code", item.rawValue()
+          );
+        }
+        return item.localizedValue();
+      })
+      .toList();
+  }
+
+  private String localizeLanguageCode(String code, Locale folioLocale) {
+    String a2Code = LANGUAGE_METADATA.codeToA2Map().get(code);
+    String name = LANGUAGE_METADATA.codeToNameMap().get(code);
+    if (StringUtils.isNotEmpty(a2Code)) {
+      Locale languageLocale = new Locale(a2Code);
+      String label = languageLocale.getDisplayLanguage(folioLocale);
+      if (StringUtils.isNotEmpty(label) && !"Undetermined".equals(label)) {
+        return label;
+      }
+    }
+    if (StringUtils.isNotEmpty(name) && !"Undetermined".equals(name)) {
+      return name;
+    }
+    return code;
+  }
+
+  private Locale getFolioLocale() {
+    try {
+      String localeString = localeClient.getLocaleSettings().locale();
+      return new Locale(localeString.substring(0, 2));
+    } catch (Exception e) {
+      log.debug("No default locale defined. Defaulting to English for language translations.");
+      return Locale.ENGLISH;
+    }
+  }
+
+  private static List<String> getLanguageFieldNames(EntityType entityType) {
+    return entityType.getColumns().stream()
+      .filter(column -> column.getSource() != null)
+      .filter(column -> "languages".equals(column.getSource().getName()))
+      .map(EntityTypeColumn::getName)
+      .toList();
+  }
+
+  private static LanguageMetadata loadLanguageMetadata() {
+    ObjectMapper mapper = JsonMapper
+      .builder()
+      .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
+      .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
+      .build();
+
+    try (InputStream input = ResultSetService.class.getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
+      List<Map<String, String>> languages = mapper.readValue(input, new TypeReference<>() {});
+      Map<String, String> codeToNameMap = new HashMap<>();
+      Map<String, String> codeToA2Map = new HashMap<>();
+
+      for (Map<String, String> language : languages) {
+        String alpha3 = language.get("alpha3");
+        String alpha2 = language.get("alpha2");
+        String name = language.get("name");
+
+        codeToA2Map.put(alpha3, alpha2);
+        codeToNameMap.put(alpha3, name);
+
+        if (StringUtils.isNotEmpty(alpha2)) {
+          codeToA2Map.put(alpha2, alpha2);
+          codeToNameMap.put(alpha2, name);
+        }
+      }
+      return new LanguageMetadata(codeToNameMap, codeToA2Map);
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to load language metadata", e);
+    }
+  }
+
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {
     return instant.atZone(tenantTimezone).toLocalDate().toString();
   }
@@ -292,4 +426,8 @@ public class ResultSetService {
     log.warn("Database date value is in an unrecognized format: \"{}\"", value);
     return value;
   }
+
+  private record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {}
+
+  private record LocalizedLanguageValue(String rawValue, String localizedValue) {}
 }

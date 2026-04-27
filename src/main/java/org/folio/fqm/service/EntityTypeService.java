@@ -382,9 +382,8 @@ public class EntityTypeService {
       .getLanguageValues(langSet, folioLocale, translationService)
       .stream()
       .filter(result -> result.getLabel().toLowerCase().contains(searchText.toLowerCase()))
+      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
       .toList();
-
-    results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
     return new ColumnValues().content(results);
   }
 

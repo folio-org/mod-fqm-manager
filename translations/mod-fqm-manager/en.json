@@ -1236,7 +1236,7 @@
   "entityType.simple_holdings_record.electronic_access": "Electronic access",
   "entityType.simple_holdings_record.electronic_access.link_text": "Link text",
   "entityType.simple_holdings_record.electronic_access.link_text._qualified": "Electronic access — Link text",
-  "entityType.simple_holdings_record.electronic_access.materials_specification": "Materials specified",
+  "entityType.simple_holdings_record.electronic_access.materials_specification": "Material specified",
   "entityType.simple_holdings_record.electronic_access.materials_specification._qualified": "Electronic access — Material specified",
   "entityType.simple_holdings_record.electronic_access.public_note": "URL public note",
   "entityType.simple_holdings_record.electronic_access.public_note._qualified": "Electronic access — URL public note",

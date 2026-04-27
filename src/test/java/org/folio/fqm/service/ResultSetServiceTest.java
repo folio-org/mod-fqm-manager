@@ -18,6 +18,7 @@ import java.util.*;
 
 import lombok.SneakyThrows;
 
+import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.testutil.TestDataFixture;
@@ -63,6 +64,7 @@ class ResultSetServiceTest {
 
   private ResultSetRepository resultSetRepository;
   private EntityTypeFlatteningService entityTypeFlatteningService;
+  private LanguageClient languageClient;
   private LocaleClient localeClient;
   private ResultSetService service;
   private FolioExecutionContext executionContext;
@@ -72,11 +74,13 @@ class ResultSetServiceTest {
   void setUp() {
     this.resultSetRepository = mock(ResultSetRepository.class);
     this.entityTypeFlatteningService = mock(EntityTypeFlatteningService.class);
+    this.languageClient = mock(LanguageClient.class);
     this.localeClient = mock(LocaleClient.class);
     when(this.localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("en-US", "USD", "UTC", "latn"));
     this.executionContext = mock(FolioExecutionContext.class);
+    when(this.executionContext.getTenantId()).thenReturn("tenant_01");
     this.translationService = mock(TranslationService.class);
-    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, localeClient, executionContext, translationService);
+    this.service = new ResultSetService(resultSetRepository, entityTypeFlatteningService, languageClient, localeClient, executionContext, translationService);
   }
 
   @Test
@@ -217,8 +221,20 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(languageClient.get("tenant_01")).thenReturn("""
+      {
+        "facets": {
+          "languages": {
+            "values": [
+              { "id": "de", "value": "de" },
+              { "id": "eng", "value": "eng" }
+            ]
+          }
+        }
+      }
+      """);
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
-      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", List.of("de", "eng"))));
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
 
     List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
 
@@ -246,8 +262,21 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(languageClient.get("tenant_01")).thenReturn("""
+      {
+        "facets": {
+          "languages": {
+            "values": [
+              { "id": "de", "value": "de" },
+              { "id": "ger", "value": "ger" },
+              { "id": "eng", "value": "eng" }
+            ]
+          }
+        }
+      }
+      """);
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
-      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", List.of("de", "ger", "eng"))));
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "ger", "eng"})));
     when(translationService.format(
       eq("mod-fqm-manager.languages.disambiguated"),
       eq("label"), anyString(),

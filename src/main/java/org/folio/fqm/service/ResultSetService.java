@@ -6,9 +6,11 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.databind.json.JsonMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
@@ -62,6 +64,7 @@ public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final LanguageClient languageClient;
   private final LocaleClient localeClient;
   private final FolioExecutionContext executionContext;
   private final TranslationService translationService;
@@ -93,6 +96,7 @@ public class ResultSetService {
     List<String> languageFields = getLanguageFieldNames(entityType);
     Map<String, Object> defaultValues = EntityTypeUtils.getFieldDefaultValues(entityType);
     Locale folioLocale = getFolioLocale();
+    Map<String, String> languageDisplayMap = languageFields.isEmpty() ? Map.of() : getLanguageDisplayMap(folioLocale);
 
     return contentIds
       .stream()
@@ -110,7 +114,7 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         applyDefaultValues(copiedContents, defaultValues);
         localizeCountries(copiedContents, countryFields);
-        localizeLanguages(copiedContents, languageFields, folioLocale);
+        localizeLanguages(copiedContents, languageFields, languageDisplayMap, folioLocale);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
         }
@@ -197,14 +201,15 @@ public class ResultSetService {
     }
   }
 
-  private void localizeLanguages(Map<String, Object> contents, List<String> languageFields, Locale folioLocale) {
+  private void localizeLanguages(Map<String, Object> contents, List<String> languageFields,
+                                 Map<String, String> languageDisplayMap, Locale folioLocale) {
     if (CollectionUtils.isEmpty(languageFields)) {
       return;
     }
     for (String fieldName : languageFields) {
       Object value = contents.get(fieldName);
       if (value instanceof Object[] array) {
-        contents.put(fieldName, localizeLanguageList(Arrays.asList(array), folioLocale));
+        contents.put(fieldName, localizeLanguageList(Arrays.asList(array), languageDisplayMap, folioLocale));
       }
     }
   }
@@ -307,47 +312,61 @@ public class ResultSetService {
     return Optional.of(localized);
   }
 
-  private List<String> localizeLanguageList(List<?> rawValues, Locale folioLocale) {
-    List<LocalizedLanguageValue> localizedValues = rawValues.stream()
+  private List<String> localizeLanguageList(List<?> rawValues, Map<String, String> languageDisplayMap, Locale folioLocale) {
+    return rawValues.stream()
       .map(value -> {
         if (value == null) {
-          return new LocalizedLanguageValue(null, null);
-        }
-        String rawCode = value.toString();
-        return new LocalizedLanguageValue(rawCode, localizeLanguageCode(rawCode, folioLocale));
-      })
-      .toList();
-
-    Map<String, Long> distinctRawValueCountsByLabel = localizedValues.stream()
-      .filter(item -> item.localizedValue() != null)
-      .map(LocalizedLanguageValue::localizedValue)
-      .distinct()
-      .collect(Collectors.toMap(
-        Function.identity(),
-        label -> localizedValues.stream()
-          .filter(other -> label.equals(other.localizedValue()))
-          .map(LocalizedLanguageValue::rawValue)
-          .filter(Objects::nonNull)
-          .distinct()
-          .count()
-      ));
-
-    return localizedValues.stream()
-      .map(item -> {
-        if (item.localizedValue() == null) {
           return null;
         }
-        long distinctCount = distinctRawValueCountsByLabel.getOrDefault(item.localizedValue(), 0L);
-        if (distinctCount > 1) {
-          return translationService.format(
-            LANGUAGE_DISAMBIGUATION_TEMPLATE,
-            "label", item.localizedValue(),
-            "code", item.rawValue()
-          );
-        }
-        return item.localizedValue();
+        String rawCode = value.toString();
+        return languageDisplayMap.getOrDefault(rawCode, localizeLanguageCode(rawCode, folioLocale));
       })
       .toList();
+  }
+
+  private Map<String, String> getLanguageDisplayMap(Locale folioLocale) {
+    try {
+      String rawJson = languageClient.get(executionContext.getTenantId());
+      List<String> codes = JsonPath.parse(rawJson).read("$.facets.languages.values.*.id");
+      List<LocalizedLanguageValue> localizedValues = codes.stream()
+        .filter(StringUtils::isNotEmpty)
+        .distinct()
+        .map(code -> new LocalizedLanguageValue(code, localizeLanguageCode(code, folioLocale)))
+        .toList();
+
+      Map<String, Long> distinctRawValueCountsByLabel = localizedValues.stream()
+        .filter(item -> item.localizedValue() != null)
+        .map(LocalizedLanguageValue::localizedValue)
+        .distinct()
+        .collect(Collectors.toMap(
+          Function.identity(),
+          label -> localizedValues.stream()
+            .filter(other -> label.equals(other.localizedValue()))
+            .map(LocalizedLanguageValue::rawValue)
+            .filter(Objects::nonNull)
+            .distinct()
+            .count()
+        ));
+
+      return localizedValues.stream()
+        .collect(Collectors.toMap(
+          LocalizedLanguageValue::rawValue,
+          item -> {
+            long distinctCount = distinctRawValueCountsByLabel.getOrDefault(item.localizedValue(), 0L);
+            if (distinctCount > 1) {
+              return translationService.format(
+                LANGUAGE_DISAMBIGUATION_TEMPLATE,
+                "label", item.localizedValue(),
+                "code", item.rawValue()
+              );
+            }
+            return item.localizedValue();
+          }
+        ));
+    } catch (Exception e) {
+      log.warn("Failed to retrieve tenant language labels for result localization. Falling back to per-value localization.", e);
+      return Map.of();
+    }
   }
 
   private String localizeLanguageCode(String code, Locale folioLocale) {

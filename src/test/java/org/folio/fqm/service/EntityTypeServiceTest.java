@@ -617,32 +617,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "eng",
-                     "value": "eng"
-                   },
-                   {
-                     "id": "ger",
-                     "value": "ger"
-                   },
-                   {
-                     "id": "fre",
-                     "value": "fre"
-                   },
-                   {
-                     "id": "xyze",
-                     "value": "xyze"
-                   }
-                 ]
-               }
-             }
-           }
-      """);
+    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("eng", "ger", "fre", "xyze"));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "e");
 
@@ -673,32 +648,7 @@ class EntityTypeServiceTest {
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "eng",
-                     "value": "eng"
-                   },
-                   {
-                     "id": "ger",
-                     "value": "ger"
-                   },
-                   {
-                     "id": "mus",
-                     "value": "mus"
-                   },
-                   {
-                     "id": "",
-                     "value": ""
-                   }
-                 ]
-               }
-             }
-           }
-      """);
+    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("eng", "ger", "mus", ""));
     when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("de-DE", "USD", "UTC", "latn"));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
@@ -729,24 +679,7 @@ class EntityTypeServiceTest {
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "de",
-                     "value": "de"
-                   },
-                   {
-                     "id": "ger",
-                     "value": "ger"
-                   }
-                 ]
-               }
-             }
-           }
-      """);
+    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("de", "ger"));
     when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("de-DE", "USD", "UTC", "latn"));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
@@ -776,24 +709,7 @@ class EntityTypeServiceTest {
     when(executionContext.getTenantId()).thenReturn(TENANT_ID);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "de",
-                     "value": "de"
-                   },
-                   {
-                     "id": "eng",
-                     "value": "eng"
-                   }
-                 ]
-               }
-             }
-           }
-      """);
+    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("de", "eng"));
     when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("----", "USD", "UTC", "latn"));
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
@@ -822,7 +738,7 @@ class EntityTypeServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenThrow(HttpClientErrorException.BadRequest.class);
+    when(languageClient.getCodes(TENANT_ID)).thenThrow(HttpClientErrorException.BadRequest.class);
 
     assertDoesNotThrow(() -> entityTypeService.getFieldValues(entityTypeId, valueColumnName, ""));
   }

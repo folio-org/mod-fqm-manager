@@ -361,10 +361,7 @@ public class EntityTypeService {
     Set<String> langSet = new HashSet<>();
     for (String tenantId : tenantsToQuery) {
       try {
-        String rawJson = languageClient.get(tenantId);
-        DocumentContext parsedJson = JsonPath.parse(rawJson);
-        List<String> values = parsedJson.read("$.facets.languages.values.*.id");
-        langSet.addAll(values);
+        langSet.addAll(languageClient.getCodes(tenantId));
       } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.BadRequest e) {
         log.error("Failed to get languages for tenant {} due to exception {}", tenantId, e.getMessage());
       }

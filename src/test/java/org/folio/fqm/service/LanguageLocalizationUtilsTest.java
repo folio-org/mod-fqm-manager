@@ -66,13 +66,16 @@ class LanguageLocalizationUtilsTest {
 
     List<ValueWithLabel> values = LanguageLocalizationUtils.getLanguageValues(codes, Locale.ENGLISH, translationService);
 
-    assertEquals(3, values.size());
-    assertEquals("de", values.get(0).getValue());
-    assertEquals("German [de]", values.get(0).getLabel());
-    assertEquals("ger", values.get(1).getValue());
-    assertEquals("German [ger]", values.get(1).getLabel());
-    assertEquals("eng", values.get(2).getValue());
-    assertEquals("English", values.get(2).getLabel());
+    assertEquals(
+      List.of(
+        Map.entry("de", "German [de]"),
+        Map.entry("ger", "German [ger]"),
+        Map.entry("eng", "English")
+      ),
+      values.stream()
+        .map(value -> Map.entry(value.getValue(), value.getLabel()))
+        .toList()
+    );
   }
 
   @Test

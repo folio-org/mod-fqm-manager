@@ -1,9 +1,7 @@
 package org.folio.fqm.service;
 
-import tools.jackson.core.json.JsonReadFeature;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.core.type.TypeReference;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.LanguageLocalizationUtils;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;
@@ -60,7 +59,6 @@ import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +75,6 @@ import java.util.stream.Stream;
 public class EntityTypeService {
 
   private static final int COLUMN_VALUE_DEFAULT_PAGE_SIZE = 1000;
-  private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final List<String> EXCLUDED_CURRENCY_CODES = List.of(
     "XUA", "AYM", "AFA", "ADP", "ATS", "AZM", "BYB", "BYR", "BEF", "BOV", "BGL", "CLF", "COU", "CUC", "CYP", "NLG", "EEK", "XBA", "XBB",
     "XBC", "XBD", "FIM", "FRF", "XFO", "XFU", "GHC", "DEM", "XAU", "GRD", "GWP", "IEP", "ITL", "LVL", "LTL", "LUF", "MGF", "MTL", "MRO", "MXV",
@@ -364,66 +361,30 @@ public class EntityTypeService {
     Set<String> langSet = new HashSet<>();
     for (String tenantId : tenantsToQuery) {
       try {
-        String rawJson = languageClient.get(tenantId);
-        DocumentContext parsedJson = JsonPath.parse(rawJson);
-        List<String> values = parsedJson.read("$.facets.languages.values.*.id");
-        langSet.addAll(values);
+        langSet.addAll(languageClient.getCodes(tenantId));
       } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.BadRequest e) {
         log.error("Failed to get languages for tenant {} due to exception {}", tenantId, e.getMessage());
       }
     }
 
-    List<ValueWithLabel> results = new ArrayList<>();
-    ObjectMapper mapper =
-      JsonMapper
-        .builder()
-        .enable(JsonReadFeature.ALLOW_SINGLE_QUOTES)
-        .enable(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES)
-        .build();
-
-    List<Map<String, String>> languages = List.of();
-    try (InputStream input = getClass().getClassLoader().getResourceAsStream(LANGUAGES_FILEPATH)) {
-      languages = mapper.readValue(input, new TypeReference<>() {
-      });
-    } catch (IOException e) {
-      log.error("Failed to read language file. Language display names may not be properly translated.");
-    }
-
     Locale folioLocale;
     try {
       String localeString = localeClient.getLocaleSettings().locale();
-      folioLocale = new Locale(localeString.substring(0, 2)); // Java locales are in form xx, FOLIO stores locales as xx-YY
+      folioLocale = Locale.forLanguageTag(localeString);
+      if (folioLocale.getLanguage().isBlank()) {
+        throw new IllegalArgumentException("Invalid locale: " + localeString);
+      }
     } catch (Exception e) {
       log.debug("No default locale defined. Defaulting to English for language translations.");
       folioLocale = Locale.ENGLISH;
     }
 
-    Map<String, String> a3ToNameMap = new HashMap<>();
-    Map<String, String> a3ToA2Map = new HashMap<>();
-    for (Map<String, String> language : languages) {
-      a3ToA2Map.put(language.get("alpha3"), language.get("alpha2"));
-      a3ToNameMap.put(language.get("alpha3"), language.get("name"));
-    }
-
-    for (String code : langSet) {
-      String label;
-      String a2Code = a3ToA2Map.get(code);
-      String name = a3ToNameMap.get(code);
-      if (StringUtils.isNotEmpty(a2Code)) {
-        Locale languageLocale = new Locale(a2Code);
-        label = languageLocale.getDisplayLanguage(folioLocale);
-      } else if (StringUtils.isNotEmpty(name)) {
-        label = name;
-      } else if (StringUtils.isNotEmpty(code)) {
-        label = code;
-      } else {
-        continue;
-      }
-      if (label.toLowerCase().contains(searchText.toLowerCase())) {
-        results.add(new ValueWithLabel().value(code).label(label));
-      }
-    }
-    results.sort(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER));
+    List<ValueWithLabel> results = LanguageLocalizationUtils
+      .getLanguageValues(langSet, folioLocale, translationService)
+      .stream()
+      .filter(result -> result.getLabel().toLowerCase().contains(searchText.toLowerCase()))
+      .sorted(Comparator.comparing(ValueWithLabel::getLabel, String.CASE_INSENSITIVE_ORDER))
+      .toList();
     return new ColumnValues().content(results);
   }
 

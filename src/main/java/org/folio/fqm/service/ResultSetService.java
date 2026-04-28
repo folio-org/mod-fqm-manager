@@ -6,10 +6,13 @@ import tools.jackson.databind.node.ObjectNode;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.fqm.client.LanguageClient;
 import org.folio.fqm.client.LocaleClient;
 import org.folio.fqm.repository.ResultSetRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.LanguageLocalizationUtils;
 import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.i18n.service.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -24,8 +28,10 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +56,7 @@ public class ResultSetService {
 
   private final ResultSetRepository resultSetRepository;
   private final EntityTypeFlatteningService entityTypeFlatteningService;
+  private final LanguageClient languageClient;
   private final LocaleClient localeClient;
   private final FolioExecutionContext executionContext;
   private final TranslationService translationService;
@@ -78,7 +85,10 @@ public class ResultSetService {
     List<String> dateFields = localize ? EntityTypeUtils.getDateTimeFields(entityType) : List.of();
     ZoneId tenantTimezone = localize ? localeClient.getLocaleSettings().getZoneId() : null;
     List<String> countryFields = EntityTypeUtils.getCountryLocalizationFieldPaths(entityType);
+    List<String> languageFields = getLanguageFieldNames(entityType);
     Map<String, Object> defaultValues = EntityTypeUtils.getFieldDefaultValues(entityType);
+    Locale folioLocale = getFolioLocale();
+    Map<String, String> languageDisplayMap = languageFields.isEmpty() ? Map.of() : getLanguageDisplayMap(folioLocale);
 
     return contentIds
       .stream()
@@ -96,6 +106,7 @@ public class ResultSetService {
         Map<String, Object> copiedContents = new HashMap<>(contents);
         applyDefaultValues(copiedContents, defaultValues);
         localizeCountries(copiedContents, countryFields);
+        localizeLanguages(copiedContents, languageFields, languageDisplayMap, folioLocale);
         if (localize) {
           localizeContent(copiedContents, dateFields, tenantTimezone);
         }
@@ -179,6 +190,19 @@ public class ResultSetService {
     }
     for (String fieldPath : countryFieldPaths) {
       localizeCountryField(contents, fieldPath);
+    }
+  }
+
+  private void localizeLanguages(Map<String, Object> contents, List<String> languageFields,
+                                 Map<String, String> languageDisplayMap, Locale folioLocale) {
+    if (CollectionUtils.isEmpty(languageFields)) {
+      return;
+    }
+    for (String fieldName : languageFields) {
+      Object value = contents.get(fieldName);
+      if (value instanceof Object[] array) {
+        contents.put(fieldName, localizeLanguageList(Arrays.asList(array), languageDisplayMap, folioLocale));
+      }
     }
   }
 
@@ -278,6 +302,50 @@ public class ResultSetService {
       return Optional.empty();
     }
     return Optional.of(localized);
+  }
+
+  private List<String> localizeLanguageList(List<?> rawValues, Map<String, String> languageDisplayMap, Locale folioLocale) {
+    return rawValues.stream()
+      .map(value -> {
+        if (value == null) {
+          return null;
+        }
+        String rawCode = value.toString();
+        return languageDisplayMap.getOrDefault(rawCode, LanguageLocalizationUtils.localizeLanguageCode(rawCode, folioLocale));
+      })
+      .toList();
+  }
+
+  private Map<String, String> getLanguageDisplayMap(Locale folioLocale) {
+    try {
+      List<String> codes = languageClient.getCodes(executionContext.getTenantId());
+      return LanguageLocalizationUtils.getLanguageDisplayMap(codes, folioLocale, translationService);
+    } catch (Exception e) {
+      log.warn("Failed to retrieve tenant language labels for result localization. Falling back to per-value localization.", e);
+      return Map.of();
+    }
+  }
+
+  private Locale getFolioLocale() {
+    try {
+      String localeString = localeClient.getLocaleSettings().locale();
+      Locale folioLocale = Locale.forLanguageTag(localeString);
+      if (StringUtils.isBlank(folioLocale.getLanguage())) {
+        throw new IllegalArgumentException("Invalid locale: " + localeString);
+      }
+      return folioLocale;
+    } catch (Exception e) {
+      log.debug("No default locale defined. Defaulting to English for language translations.");
+      return Locale.ENGLISH;
+    }
+  }
+
+  private static List<String> getLanguageFieldNames(EntityType entityType) {
+    return entityType.getColumns().stream()
+      .filter(column -> column.getSource() != null)
+      .filter(column -> "languages".equals(column.getSource().getName()))
+      .map(EntityTypeColumn::getName)
+      .toList();
   }
 
   private static String adjustDate(Instant instant, ZoneId tenantTimezone) {

@@ -4,6 +4,7 @@ import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +13,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.i18n.service.TranslationService;
+
+import static org.apache.commons.collections4.IterableUtils.toList;
 
 final class LanguageLocalizationUtils {
 
@@ -22,7 +26,8 @@ final class LanguageLocalizationUtils {
   private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final LanguageMetadata LANGUAGE_METADATA = loadLanguageMetadata();
 
-  private LanguageLocalizationUtils() {}
+  private LanguageLocalizationUtils() {
+  }
 
   static List<ValueWithLabel> getLanguageValues(Set<String> codes, Locale folioLocale, TranslationService translationService) {
     Map<String, String> displayMap = getLanguageDisplayMap(codes, folioLocale, translationService);
@@ -34,8 +39,10 @@ final class LanguageLocalizationUtils {
   }
 
   static Map<String, String> getLanguageDisplayMap(Iterable<String> codes, Locale folioLocale, TranslationService translationService) {
-    List<LocalizedLanguageValue> localizedValues = toLocalizedLanguageValues(codes, folioLocale);
+    List<LocalizedLanguageValue> localizedValues = getLocalizedLanguageNames(codes, folioLocale);
 
+    // Count how many distinct raw codes collapse to each localized label so we only append
+    // the code for labels that would otherwise be ambiguous, like "German" for both "de" and "ger".
     Map<String, Long> distinctRawValueCountsByLabel = localizedValues.stream()
       .filter(item -> item.localizedValue() != null)
       .map(LocalizedLanguageValue::localizedValue)
@@ -83,14 +90,14 @@ final class LanguageLocalizationUtils {
     return code;
   }
 
-  private static List<LocalizedLanguageValue> toLocalizedLanguageValues(Iterable<String> codes, Locale folioLocale) {
-    return toDistinctNonEmptyCodes(codes).stream()
+  private static List<LocalizedLanguageValue> getLocalizedLanguageNames(Iterable<String> codes, Locale folioLocale) {
+    return getDistinctLanguageCodes(codes).stream()
       .map(code -> new LocalizedLanguageValue(code, localizeLanguageCode(code, folioLocale)))
       .toList();
   }
 
-  private static List<String> toDistinctNonEmptyCodes(Iterable<String> codes) {
-    return codes == null ? List.of() : org.apache.commons.collections4.IterableUtils.toList(codes).stream()
+  private static List<String> getDistinctLanguageCodes(Iterable<String> codes) {
+    return codes == null ? List.of() : toList(codes).stream()
       .filter(StringUtils::isNotEmpty)
       .distinct()
       .toList();
@@ -112,7 +119,8 @@ final class LanguageLocalizationUtils {
 
   static LanguageMetadata loadLanguageMetadata(InputStream input, ObjectMapper mapper) {
     try {
-      List<Map<String, String>> languages = mapper.readValue(input, new TypeReference<>() {});
+      List<Map<String, String>> languages = mapper.readValue(input, new TypeReference<>() {
+      });
       Map<String, String> codeToNameMap = new HashMap<>();
       Map<String, String> codeToA2Map = new HashMap<>();
 
@@ -135,7 +143,9 @@ final class LanguageLocalizationUtils {
     }
   }
 
-  static record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {}
+  static record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {
+  }
 
-  private record LocalizedLanguageValue(String rawValue, String localizedValue) {}
+  private record LocalizedLanguageValue(String rawValue, String localizedValue) {
+  }
 }

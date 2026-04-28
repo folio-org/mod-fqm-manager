@@ -61,6 +61,19 @@ class LanguageLocalizationUtilsTest {
   }
 
   @Test
+  void shouldLocalizeAndDisambiguateLabelsUsingConfiguredLocale() {
+    Set<String> codes = new LinkedHashSet<>(List.of("de", "ger", "eng"));
+
+    Map<String, String> displayMap = LanguageLocalizationUtils.getLanguageDisplayMap(codes, Locale.GERMAN, translationService);
+
+    assertEquals(Map.of(
+      "de", "Deutsch [de]",
+      "ger", "Deutsch [ger]",
+      "eng", "Englisch"
+    ), displayMap);
+  }
+
+  @Test
   void shouldBuildValueWithLabelListFromLocalizedCodes() {
     Set<String> codes = new LinkedHashSet<>(List.of("de", "ger", "eng"));
 

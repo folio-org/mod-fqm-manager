@@ -20,6 +20,7 @@ import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
+import org.folio.fqm.utils.LanguageLocalizationUtils;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.AvailableJoinsResponse;

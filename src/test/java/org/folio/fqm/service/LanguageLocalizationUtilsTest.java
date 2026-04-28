@@ -78,10 +78,11 @@ class LanguageLocalizationUtilsTest {
   @Test
   void shouldThrowWhenLanguageMetadataCannotBeLoaded() {
     ByteArrayInputStream invalidJson = new ByteArrayInputStream("not valid json".getBytes());
+    ObjectMapper objectMapper = new ObjectMapper();
 
     assertThrows(
       IllegalStateException.class,
-      () -> LanguageLocalizationUtils.loadLanguageMetadata(invalidJson, new ObjectMapper())
+      () -> LanguageLocalizationUtils.loadLanguageMetadata(invalidJson, objectMapper)
     );
   }
 }

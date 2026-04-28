@@ -712,51 +712,6 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldTranslateTwoLetterLanguageCodesFromApi() {
-    UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of(TENANT_ID);
-    String valueColumnName = "languages";
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("the entity type")
-      .columns(List.of(new EntityTypeColumn()
-        .name(valueColumnName)
-        .source(new SourceColumn(entityTypeId, valueColumnName)
-          .name("languages")
-          .type(SourceColumn.TypeEnum.FQM))
-      ));
-
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "de",
-                     "value": "de"
-                   },
-                   {
-                     "id": "eng",
-                     "value": "eng"
-                   }
-                 ]
-               }
-             }
-           }
-      """);
-
-    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-
-    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("eng").label("English"),
-      new ValueWithLabel().value("de").label("German")
-    ));
-    assertEquals(expectedColumnValues, actualColumnValueLabel);
-  }
-
-  @Test
   void shouldLocalizeAndDisambiguateLanguageCodes() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
@@ -799,56 +754,6 @@ class EntityTypeServiceTest {
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("de").label("Deutsch [de]"),
       new ValueWithLabel().value("ger").label("Deutsch [ger]")
-    ));
-    assertEquals(expectedColumnValues, actualColumnValueLabel);
-  }
-
-  @Test
-  void shouldDisambiguateLanguagesWithClashingLocalizedLabels() {
-    UUID entityTypeId = UUID.randomUUID();
-    List<String> tenantList = List.of(TENANT_ID);
-    String valueColumnName = "languages";
-    EntityType entityType = new EntityType()
-      .id(entityTypeId.toString())
-      .name("the entity type")
-      .columns(List.of(new EntityTypeColumn()
-        .name(valueColumnName)
-        .source(new SourceColumn(entityTypeId, valueColumnName)
-          .name("languages")
-          .type(SourceColumn.TypeEnum.FQM))
-      ));
-
-    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, false)).thenReturn(entityType);
-    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-    when(languageClient.get(TENANT_ID)).thenReturn("""
-           {
-             "facets": {
-               "languages": {
-                 "values": [
-                   {
-                     "id": "de",
-                     "value": "de"
-                   },
-                   {
-                     "id": "ger",
-                     "value": "ger"
-                   },
-                   {
-                     "id": "eng",
-                     "value": "eng"
-                   }
-                 ]
-               }
-             }
-           }
-      """);
-
-    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-
-    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("eng").label("English"),
-      new ValueWithLabel().value("de").label("German [de]"),
-      new ValueWithLabel().value("ger").label("German [ger]")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

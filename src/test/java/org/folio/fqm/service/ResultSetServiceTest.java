@@ -279,7 +279,7 @@ class ResultSetServiceTest {
 
     List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
 
-    assertEquals(List.of("German", null, "English"), actual.getFirst().get("languages"));
+    assertEquals(Arrays.asList("German", null, "English"), actual.getFirst().get("languages"));
   }
 
   @Test

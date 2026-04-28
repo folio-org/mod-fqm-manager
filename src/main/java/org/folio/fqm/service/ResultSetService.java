@@ -3,7 +3,6 @@ package org.folio.fqm.service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
-import com.jayway.jsonpath.JsonPath;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -319,8 +318,7 @@ public class ResultSetService {
 
   private Map<String, String> getLanguageDisplayMap(Locale folioLocale) {
     try {
-      String rawJson = languageClient.get(executionContext.getTenantId());
-      List<String> codes = JsonPath.parse(rawJson).read("$.facets.languages.values.*.id");
+      List<String> codes = languageClient.getCodes(executionContext.getTenantId());
       return LanguageLocalizationUtils.getLanguageDisplayMap(codes, folioLocale, translationService);
     } catch (Exception e) {
       log.warn("Failed to retrieve tenant language labels for result localization. Falling back to per-value localization.", e);

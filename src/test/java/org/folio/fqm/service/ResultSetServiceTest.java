@@ -221,18 +221,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-    when(languageClient.get("tenant_01")).thenReturn("""
-      {
-        "facets": {
-          "languages": {
-            "values": [
-              { "id": "de", "value": "de" },
-              { "id": "eng", "value": "eng" }
-            ]
-          }
-        }
-      }
-      """);
+    when(languageClient.getCodes("tenant_01")).thenReturn(List.of("de", "eng"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
       .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
 
@@ -262,18 +251,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-    when(languageClient.get("tenant_01")).thenReturn("""
-      {
-        "facets": {
-          "languages": {
-            "values": [
-              { "id": "de", "value": "de" },
-              { "id": "eng", "value": "eng" }
-            ]
-          }
-        }
-      }
-      """);
+    when(languageClient.getCodes("tenant_01")).thenReturn(List.of("de", "eng"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
       .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", null, "eng"})));
 
@@ -304,19 +282,7 @@ class ResultSetServiceTest {
     when(localeClient.getLocaleSettings()).thenThrow(new RuntimeException("boom"));
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-    when(languageClient.get("tenant_01")).thenReturn("""
-      {
-        "facets": {
-          "languages": {
-            "values": [
-              { "id": "de", "value": "de" },
-              { "id": "ger", "value": "ger" },
-              { "id": "eng", "value": "eng" }
-            ]
-          }
-        }
-      }
-      """);
+    when(languageClient.getCodes("tenant_01")).thenReturn(List.of("de", "ger", "eng"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
       .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "ger", "eng"})));
     when(translationService.format(
@@ -351,7 +317,7 @@ class ResultSetServiceTest {
 
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-    when(languageClient.get("tenant_01")).thenThrow(new RuntimeException("boom"));
+    when(languageClient.getCodes("tenant_01")).thenThrow(new RuntimeException("boom"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
       .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
 
@@ -382,18 +348,7 @@ class ResultSetServiceTest {
     when(localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("----", "USD", "UTC", "latn"));
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
     when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
-    when(languageClient.get("tenant_01")).thenReturn("""
-      {
-        "facets": {
-          "languages": {
-            "values": [
-              { "id": "de", "value": "de" },
-              { "id": "eng", "value": "eng" }
-            ]
-          }
-        }
-      }
-      """);
+    when(languageClient.getCodes("tenant_01")).thenReturn(List.of("de", "eng"));
     when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
       .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
 

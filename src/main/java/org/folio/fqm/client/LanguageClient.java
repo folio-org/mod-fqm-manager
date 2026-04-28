@@ -1,5 +1,7 @@
 package org.folio.fqm.client;
 
+import com.jayway.jsonpath.JsonPath;
+import java.util.List;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +42,16 @@ public class LanguageClient {
    */
   public String get(String tenantId) {
     return delegate.fetch(tenantId).toString();
+  }
+
+  /**
+   * Retrieve tenant-scoped instance language facet codes.
+   *
+   * @param tenantId target FOLIO tenant id
+   * @return language facet codes from the response payload
+   */
+  public List<String> getCodes(String tenantId) {
+    return JsonPath.parse(get(tenantId)).read("$.facets.languages.values.*.id");
   }
 
   @HttpExchange(url = ".", accept = MediaType.APPLICATION_JSON_VALUE)

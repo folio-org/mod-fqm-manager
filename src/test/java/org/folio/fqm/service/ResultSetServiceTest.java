@@ -242,6 +242,47 @@ class ResultSetServiceTest {
   }
 
   @Test
+  void shouldPreserveNullValuesWhenLocalizingLanguageField() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn()
+          .name("languages")
+          .source(new SourceColumn(entityTypeId, "languages")
+            .name("languages"))
+      ));
+
+    List<String> fields = List.of("id", "languages");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(languageClient.get("tenant_01")).thenReturn("""
+      {
+        "facets": {
+          "languages": {
+            "values": [
+              { "id": "de", "value": "de" },
+              { "id": "eng", "value": "eng" }
+            ]
+          }
+        }
+      }
+      """);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", null, "eng"})));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals(List.of("German", null, "English"), actual.getFirst().get("languages"));
+  }
+
+  @Test
   void shouldDisambiguateLocalizedLanguageFieldValues() {
     UUID entityTypeId = UUID.randomUUID();
     UUID contentId = UUID.randomUUID();
@@ -382,6 +423,78 @@ class ResultSetServiceTest {
     List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
 
     assertEquals(List.of("German [de]", "German [ger]", "English"), actual.getFirst().get("languages"));
+  }
+
+  @Test
+  void shouldFallBackToPerValueLanguageLocalizationWhenLanguageDisplayMapLookupFails() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn()
+          .name("languages")
+          .source(new SourceColumn(entityTypeId, "languages")
+            .name("languages"))
+      ));
+
+    List<String> fields = List.of("id", "languages");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(languageClient.get("tenant_01")).thenThrow(new RuntimeException("boom"));
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals(List.of("German", "English"), actual.getFirst().get("languages"));
+  }
+
+  @Test
+  void shouldFallBackToEnglishWhenConfiguredLocaleIsInvalid() {
+    UUID entityTypeId = UUID.randomUUID();
+    UUID contentId = UUID.randomUUID();
+
+    EntityType entityType = new EntityType()
+      .id(entityTypeId.toString())
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true),
+        new EntityTypeColumn()
+          .name("languages")
+          .source(new SourceColumn(entityTypeId, "languages")
+            .name("languages"))
+      ));
+
+    List<String> fields = List.of("id", "languages");
+    List<String> tenantIds = List.of("tenant_01");
+    List<List<String>> listIds = List.of(List.of(contentId.toString()));
+
+    when(localeClient.getLocaleSettings()).thenReturn(new LocaleClient.LocaleSettings("----", "USD", "UTC", "latn"));
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, null, true)).thenReturn(entityType);
+    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, "tenant_01", true)).thenReturn(entityType);
+    when(languageClient.get("tenant_01")).thenReturn("""
+      {
+        "facets": {
+          "languages": {
+            "values": [
+              { "id": "de", "value": "de" },
+              { "id": "eng", "value": "eng" }
+            ]
+          }
+        }
+      }
+      """);
+    when(resultSetRepository.getResultSet(entityTypeId, fields, listIds, tenantIds))
+      .thenReturn(List.of(Map.of("id", contentId.toString(), "languages", new Object[]{"de", "eng"})));
+
+    List<Map<String, Object>> actual = service.getResultSet(entityTypeId, fields, listIds, tenantIds, false);
+
+    assertEquals(List.of("German", "English"), actual.getFirst().get("languages"));
   }
 
   @Test

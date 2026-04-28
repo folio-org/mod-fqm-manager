@@ -601,7 +601,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnLanguagesFromApi() {
+  void shouldTranslateLanguageCodesFromApiWithCodeFallbackForUnknownValues() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -656,7 +656,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnLocalizedLanguagesFromApi() {
+  void shouldLocalizeLanguageLabelsUsingConfiguredLocale() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -712,7 +712,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnTwoLetterLanguagesFromApi() {
+  void shouldTranslateTwoLetterLanguageCodesFromApi() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -757,7 +757,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldReturnLocalizedTwoLetterLanguagesFromApi() {
+  void shouldLocalizeAndDisambiguateLanguageCodes() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -804,7 +804,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldDisambiguateClashingLanguagesFromApi() {
+  void shouldDisambiguateLanguagesWithClashingLocalizedLabels() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -854,7 +854,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldFallBackToEnglishWhenConfiguredLocaleIsInvalidForLanguages() {
+  void shouldFallBackToEnglishForLanguagesWhenConfiguredLocaleIsInvalid() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";

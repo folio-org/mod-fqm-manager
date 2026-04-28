@@ -64,8 +64,7 @@ final class LanguageLocalizationUtils {
             );
           }
           return item.localizedValue();
-        },
-        (first, second) -> first
+        }
       ));
   }
 

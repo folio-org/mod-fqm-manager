@@ -1,5 +1,12 @@
 # 4.1.x - Trillium
 
+# 4.1.2
+- [MODFQMMGR-1106](https://folio-org.atlassian.net/browse/MODFQMMGR-1106) Support cross-tenant queries for `Instances with MARC bibliographic`
+- [MODFQMMGR-1112](https://folio-org.atlassian.net/browse/MODFQMMGR-1112) Update actual cost translations
+- [MODFQMMGR-1128](https://folio-org.atlassian.net/browse/MODFQMMGR-1128) Translate and disambiguate language codes in FQM
+- [MODFQMMGR-1130](https://folio-org.atlassian.net/browse/MODFQMMGR-1130) Update a holdings records translation
+- Update migration docs
+
 # 4.1.1
 - [MODFQMMGR-994](https://folio-org.atlassian.net/browse/MODFQMMGR-994) Make `starts with` and `contains` case-insensitive
 - [MODFQMMGR-986](https://folio-org.atlassian.net/browse/MODFQMMGR-986) Fix querying on `Instance - Identifiers - Identifier type`

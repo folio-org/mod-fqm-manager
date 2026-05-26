@@ -1547,6 +1547,7 @@ class EntityTypeServiceTest {
     // Ensure this goes through the API path and not the query processor
     verify(crossTenantHttpClient).get(eq("path"), anyMap(), eq(TENANT_ID));
     verify(queryProcessorService, never()).processQuery(any(), any(), any(), any());
+    verify(permissionsService, never()).verifyUserHasNecessaryPermissions(any(EntityType.class), anyBoolean());
   }
 
   @ParameterizedTest

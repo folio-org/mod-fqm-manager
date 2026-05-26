@@ -191,7 +191,6 @@ public class EntityTypeService {
     if (field.getSource() != null) {
       if (field.getSource().getType() == SourceColumn.TypeEnum.ENTITY_TYPE) {
         EntityType sourceEntityType = entityTypeFlatteningService.getFlattenedEntityType(field.getSource().getEntityTypeId(), folioExecutionContext.getTenantId(), false);
-        permissionsService.verifyUserHasNecessaryPermissions(sourceEntityType, false);
 
         Field sourceField = FqlValidationService
           .findFieldDefinition(new FqlField(field.getSource().getColumnName()), sourceEntityType)

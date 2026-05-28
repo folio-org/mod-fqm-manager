@@ -33,6 +33,7 @@
     <org.apache.commons.version>4.4</org.apache.commons.version>
     <org.apache.commons-lang3.version>3.20.0</org.apache.commons-lang3.version>
     <spring-retry.version>2.0.10</spring-retry.version>
+    <mcp-java-sdk.version>1.1.1</mcp-java-sdk.version>
 
     <!-- test dependencies -->
     <testcontainers.version>1.21.4</testcontainers.version>
@@ -158,6 +159,11 @@
       <groupId>org.springframework.retry</groupId>
       <artifactId>spring-retry</artifactId>
       <version>${spring-retry.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.modelcontextprotocol.sdk</groupId>
+      <artifactId>mcp</artifactId>
+      <version>${mcp-java-sdk.version}</version>
     </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>

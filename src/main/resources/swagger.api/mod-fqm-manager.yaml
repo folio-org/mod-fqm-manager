@@ -129,6 +129,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/queryStatusSummaries'
 
+  /fqm-query-suggestions:
+    post:
+      operationId: suggestFqmQueries
+      tags:
+        - querySuggestions
+      description: Interpret a natural-language reporting request and return draft FQL query suggestions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/querySuggestionRequest'
+      responses:
+        '200':
+          description: Draft query suggestions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/querySuggestionResponse'
+        '4XX':
+          $ref: '#/components/responses/badRequestResponse'
+
 components:
   parameters:
     entity-type-id:
@@ -202,6 +224,69 @@ components:
         $ref: '#/components/schemas/queryStatusSummary'
     queryStatusSummary:
       $ref: schemas/QueryStatusSummary.json
+    querySuggestionRequest:
+      type: object
+      required:
+        - naturalLanguageQuery
+      properties:
+        naturalLanguageQuery:
+          type: string
+          description: Plain-language description of the report the user wants.
+          minLength: 1
+        entityTypeId:
+          type: string
+          format: UUID
+          description: Optional preselected entity type to constrain suggestions.
+        maxSuggestions:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 3
+          default: 3
+          description: Maximum number of draft query suggestions to return.
+    querySuggestionResponse:
+      type: object
+      required:
+        - suggestions
+        - assumptions
+        - clarificationQuestions
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/querySuggestion'
+        assumptions:
+          type: array
+          items:
+            type: string
+        clarificationQuestions:
+          type: array
+          items:
+            type: string
+    querySuggestion:
+      type: object
+      required:
+        - fqlQuery
+        - summary
+        - validationStatus
+        - assumptions
+      properties:
+        entityTypeId:
+          type: string
+          format: UUID
+        summary:
+          type: string
+        fqlQuery:
+          type: string
+        validationStatus:
+          type: string
+          enum:
+            - VALID
+            - NEEDS_REVIEW
+        assumptions:
+          type: array
+          items:
+            type: string
 
   responses:
     badRequestResponse:

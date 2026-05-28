@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
-class QueryResultsRepositoryTest {
+class QueryResultsRepositoryIT {
 
   @Autowired
   private QueryResultsRepository queryResultsRepository;

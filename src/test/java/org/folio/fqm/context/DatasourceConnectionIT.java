@@ -21,7 +21,7 @@ import static java.lang.String.format;
 
 @Testcontainers
 @SpringBootTest
-class DatasourceConnectionTest {
+class DatasourceConnectionIT {
   @Container
   public static PostgreSQLContainer readerDbContainer = new PostgreSQLContainer("postgres:16-alpine")
       .withStartupAttempts(3);

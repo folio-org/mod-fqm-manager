@@ -39,7 +39,7 @@ import static org.mockito.Mockito.*;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
-class EntityTypeRepositoryTest {
+class EntityTypeRepositoryIT {
 
   // Data pre-configured in postgres test container DB.
   private static final UUID ENTITY_TYPE_01_ID = UUID.fromString("0cb79a4c-f7eb-4941-a104-745224ae0291");

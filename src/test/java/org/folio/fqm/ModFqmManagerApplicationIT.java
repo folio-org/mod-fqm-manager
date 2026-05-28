@@ -18,7 +18,7 @@ import org.folio.tenant.rest.resource.TenantApi;
 
 @ActiveProfiles({"test", "db-test"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ModFqmManagerApplicationTest {
+class ModFqmManagerApplicationIT {
 
   @EnableAutoConfiguration(exclude = {FolioLiquibaseConfiguration.class})
   @RestController("folioTenantController")

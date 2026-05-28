@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
-class ReaderDatasourceFallbackTest {
+class ReaderDatasourceFallbackIT {
   @Autowired
   @Qualifier("readerDataSource")
   private DataSource readerDatasource;

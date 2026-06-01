@@ -78,7 +78,7 @@ This audit lists field and nested property definitions that contain `valueSource
 - Y `src/main/resources/entity-types/orders/simple_acquisition_method.json5:28` - `simple_acquisition_method.name`
 - Y `src/main/resources/entity-types/organizations/simple_organization.json5:120` - `simple_organization.name`
 - Y `src/main/resources/entity-types/organizations/simple_organization.json5:141` - `simple_organization.code`
-- NNN `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
+- NNNX `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
 - Y `src/main/resources/entity-types/simple_instance_date_type.json5:28` - `simple_instance_date_type.name`
 - NNN `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
 - NNN `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`

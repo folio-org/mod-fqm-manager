@@ -35,12 +35,12 @@ This audit lists field and nested property definitions that contain `valueSource
 - Y `src/main/resources/entity-types/finance/simple_fund.json5:102` - `simple_fund.allocated_to`
 - Y `src/main/resources/entity-types/finance/simple_fund.json5:138` - `simple_fund.code`
 - Y `src/main/resources/entity-types/finance/simple_fund_type.json5:36` - `simple_fund_type.name`
-- NNN `src/main/resources/entity-types/inventory/simple_alternative_title_type.json5:25` - `simple_alternative_title_type.name` (also no translation)
+- NNN `src/main/resources/entity-types/inventory/simple_alternative_title_type.json5:25` - `simple_alternative_title_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_call_number_type.json5:29` - `simple_call_number_type.name`
-- Y `src/main/resources/entity-types/inventory/simple_classification_type.json5:27` - `simple_classification_type.name` (no translation)
+- Y `src/main/resources/entity-types/inventory/simple_classification_type.json5:27` - `simple_classification_type.name`
 - NNN `src/main/resources/entity-types/inventory/simple_contributor_name_type.json5:27` - `simple_contributor_name_type.name`
 - NNN `src/main/resources/entity-types/inventory/simple_contributor_type.json5:27` - `simple_contributor_type.name`
-- NNN `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name` (no translation)
+- NNN `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name`
 - NNN `src/main/resources/entity-types/inventory/simple_holdings_note_type.json5:38` - `simple_holdings_note_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_holdings_type.json5:26` - `simple_holdings_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_identifier_type.json5:25` - `simple_identifier_type.name`

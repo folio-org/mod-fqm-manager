@@ -106,14 +106,14 @@ _None found._
 ## source without valueSourceApi (79)
 
 - `src/main/resources/entity-types/consortia/simple_consortia_tenant.json5:26` - `simple_consortia_tenant.name` -> source: `FQM.tenant_name`
-- `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:135` - `mod_orders_storage__titles.product_ids.product_id_type` -> source: `simple_identifier_type.name`
+- Y `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:135` - `mod_orders_storage__titles.product_ids.product_id_type` -> source: `simple_identifier_type.name`
 - YD `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:528` - `mod_orders_storage__titles.acq_unit_names` -> source: `simple_acq_unit.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:129` - `mod_entities_links__authority.sft_headings.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:202` - `mod_entities_links__authority.saft_headings.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:286` - `mod_entities_links__authority.identifiers.identifier_type` -> source: `mod_entities_links__authority-identifier-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:327` - `mod_entities_links__authority.notes.note_type` -> source: `mod_entities_links__authority-note-type.name`
-- `src/main/resources/entity-types/external/circulation/mod-circulation-storage/mod_circulation_storage__actual_cost_record.json5:187` - `mod_circulation_storage__actual_cost_record.user_patron_group` -> source: `simple_group.group`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:129` - `mod_entities_links__authority.sft_headings.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:202` - `mod_entities_links__authority.saft_headings.heading_type` -> source: `mod_entities_links__authority-heading-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:286` - `mod_entities_links__authority.identifiers.identifier_type` -> source: `mod_entities_links__authority-identifier-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:327` - `mod_entities_links__authority.notes.note_type` -> source: `mod_entities_links__authority-note-type.name`
+- Y `src/main/resources/entity-types/external/circulation/mod-circulation-storage/mod_circulation_storage__actual_cost_record.json5:187` - `mod_circulation_storage__actual_cost_record.user_patron_group` -> source: `simple_group.group`
 - `src/main/resources/entity-types/finance/simple_budget.json5:431` - `simple_budget.tags` -> source: `simple_tags.label`
 - `src/main/resources/entity-types/finance/simple_finance_group.json5:114` - `simple_finance_group.acquisition_unit` -> source: `simple_acq_unit.name`
 - `src/main/resources/entity-types/finance/simple_fiscal_year.json5:62` - `simple_fiscal_year.acquisition_unit` -> source: `simple_acq_unit.name`

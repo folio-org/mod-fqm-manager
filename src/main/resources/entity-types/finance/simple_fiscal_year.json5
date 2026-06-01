@@ -95,10 +95,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ":sourceAlias.jsonb->>'name'",
-      source: {
-        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
-        columnName: 'name'
-      },
       idColumnName: 'id',
       valueSourceApi: {
         path: 'finance/fiscal-years',

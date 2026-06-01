@@ -127,10 +127,6 @@
         WHERE \
           batch_group.id = (:invoice.jsonb ->> 'batchGroupId')::uuid \
       )",
-      source: {
-        entityTypeId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb',
-        columnName: 'batch_group'
-      },
       valueSourceApi: {
         path: 'batch-groups',
         valueJsonPath: '$.batchGroups.*.name',

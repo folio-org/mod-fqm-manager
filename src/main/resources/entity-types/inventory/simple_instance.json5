@@ -264,10 +264,6 @@
         labelJsonPath: '$.facets.source.values.*.id',
         valueJsonPath: '$.facets.source.values.*.id',
       },
-      source: {
-        columnName: 'source',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
     },
     {
       name: 'source_uri',

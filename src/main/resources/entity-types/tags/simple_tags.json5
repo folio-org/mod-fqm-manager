@@ -36,10 +36,6 @@
         ${tenant_id}_mod_tags.f_unaccent (:sourceAlias.jsonb->>'label'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_tags.f_unaccent (:value))',
-      source: {
-        entityTypeId: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
-        columnName: 'label',
-      },
       valueSourceApi: {
         path: 'tags',
         valueJsonPath: '$.tags.*.label',

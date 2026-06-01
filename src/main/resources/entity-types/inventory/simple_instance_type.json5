@@ -36,10 +36,6 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'code'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-      source: {
-        entityTypeId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c',
-        columnName: 'code',
-      },
       valueSourceApi: {
         path: 'instance-types',
         valueJsonPath: '$.instanceTypes.*.code',
@@ -60,10 +56,6 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-      source: {
-        entityTypeId: 'af44e2e0-12e0-4eec-b80d-49feb33a866c',
-        columnName: 'name',
-      },
       valueSourceApi: {
         path: 'instance-types',
         valueJsonPath: '$.instanceTypes.*.name',

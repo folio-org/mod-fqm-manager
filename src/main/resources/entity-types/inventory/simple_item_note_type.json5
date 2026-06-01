@@ -23,10 +23,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-      source: {
-        columnName: 'id',
-        entityTypeId: 'da991f67-df20-49d8-bf2b-281eb072240e',
-      },
       valueSourceApi: {
         path: 'item-note-types',
         labelJsonPath: '$.itemNoteTypes.*.id',
@@ -47,10 +43,6 @@
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
       idColumnName: 'id',
-      source: {
-        columnName: 'name',
-        entityTypeId: 'da991f67-df20-49d8-bf2b-281eb072240e',
-      },
       valueSourceApi: {
         path: 'item-note-types',
         labelJsonPath: '$.itemNoteTypes.*.name',

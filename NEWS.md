@@ -1,5 +1,10 @@
 # 4.1.x - Trillium
 
+# 4.1.3
+- [MODFQMMGR-1145](https://folio-org.atlassian.net/browse/MODFQMMGR-1145) Make SRS record created and updated dates non-queryable and non-essential
+- [MODFQMMGR-1163](https://folio-org.atlassian.net/browse/MODFQMMGR-1163) Remove source column permission checks from the `/field-values` API
+- [MODFQMMGR-1164](https://folio-org.atlassian.net/browse/MODFQMMGR-1164) Add dropdown value sources for Fee/Fine type, owner, material type, and location fields in Fee/Fine accounts
+
 # 4.1.2
 - [MODFQMMGR-1106](https://folio-org.atlassian.net/browse/MODFQMMGR-1106) Support cross-tenant queries for `Instances with MARC bibliographic`
 - [MODFQMMGR-1112](https://folio-org.atlassian.net/browse/MODFQMMGR-1112) Update actual cost translations

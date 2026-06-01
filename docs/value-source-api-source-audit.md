@@ -15,76 +15,76 @@ This audit lists field and nested property definitions that contain `valueSource
 
 ## valueSourceApi without source (70)
 
-- P `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
-- `src/main/resources/entity-types/circulation/simple_loan_policy.json5:79` - `simple_loan_policy.name`
-- `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:29` - `simple_tenant_addresses.name`
-- `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:45` - `simple_tenant_addresses.address`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-heading-type.json5:34` - `mod_entities_links__authority-heading-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-identifier-type.json5:34` - `mod_entities_links__authority-identifier-type.name`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-source-file.json5:36` - `mod_entities_links__authority-source-file.name`
-- `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:144` - `mod_feesfines__accounts.fee_fine_type`
-- `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:163` - `mod_feesfines__accounts.fee_fine_owner`
-- `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:219` - `mod_feesfines__accounts.material_type`
-- `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:237` - `mod_feesfines__accounts.location`
-- `src/main/resources/entity-types/external/circulation/mod-patron-blocks/mod_patron_blocks__user_summary.json5:246` - `mod_patron_blocks__user_summary.open_fees_fines.fee_fine_type_id`
-- `src/main/resources/entity-types/external/other/mod-notes/mod_notes__note_type.json5:36` - `mod_notes__note_type.name`
-- `src/main/resources/entity-types/finance/simple_expense_class.json5:34` - `simple_expense_class.name`
-- `src/main/resources/entity-types/finance/simple_expense_class.json5:53` - `simple_expense_class.code`
-- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:83` - `simple_fiscal_year.name`
-- `src/main/resources/entity-types/finance/simple_fund.json5:51` - `simple_fund.allocated_from`
-- `src/main/resources/entity-types/finance/simple_fund.json5:102` - `simple_fund.allocated_to`
-- `src/main/resources/entity-types/finance/simple_fund.json5:138` - `simple_fund.code`
-- `src/main/resources/entity-types/finance/simple_fund_type.json5:36` - `simple_fund_type.name`
-- `src/main/resources/entity-types/inventory/simple_alternative_title_type.json5:25` - `simple_alternative_title_type.name`
-- `src/main/resources/entity-types/inventory/simple_call_number_type.json5:29` - `simple_call_number_type.name`
-- `src/main/resources/entity-types/inventory/simple_classification_type.json5:27` - `simple_classification_type.name`
-- `src/main/resources/entity-types/inventory/simple_contributor_name_type.json5:27` - `simple_contributor_name_type.name`
-- `src/main/resources/entity-types/inventory/simple_contributor_type.json5:27` - `simple_contributor_type.name`
-- `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name`
-- `src/main/resources/entity-types/inventory/simple_holdings_note_type.json5:38` - `simple_holdings_note_type.name`
-- `src/main/resources/entity-types/inventory/simple_holdings_type.json5:26` - `simple_holdings_type.name`
-- `src/main/resources/entity-types/inventory/simple_identifier_type.json5:25` - `simple_identifier_type.name`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:245` - `simple_instance.source`
-- `src/main/resources/entity-types/inventory/simple_instance_format.json5:27` - `simple_instance_format.code`
-- `src/main/resources/entity-types/inventory/simple_instance_format.json5:47` - `simple_instance_format.name`
-- `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:16` - `simple_instance_note_type.id`
-- `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:32` - `simple_instance_note_type.name`
-- `src/main/resources/entity-types/inventory/simple_instance_status.json5:16` - `simple_instance_status.id`
-- `src/main/resources/entity-types/inventory/simple_instance_status.json5:34` - `simple_instance_status.name`
-- `src/main/resources/entity-types/inventory/simple_instance_type.json5:25` - `simple_instance_type.code`
-- `src/main/resources/entity-types/inventory/simple_instance_type.json5:45` - `simple_instance_type.name`
-- `src/main/resources/entity-types/inventory/simple_item_damaged_status.json5:14` - `simple_item_damaged_status.id`
-- `src/main/resources/entity-types/inventory/simple_item_damaged_status.json5:32` - `simple_item_damaged_status.name`
-- `src/main/resources/entity-types/inventory/simple_item_note_type.json5:16` - `simple_item_note_type.id`
-- `src/main/resources/entity-types/inventory/simple_item_note_type.json5:32` - `simple_item_note_type.name`
-- `src/main/resources/entity-types/inventory/simple_loan_type.json5:64` - `simple_loan_type.name`
-- `src/main/resources/entity-types/inventory/simple_location.json5:14` - `simple_location.id`
-- `src/main/resources/entity-types/inventory/simple_location.json5:32` - `simple_location.code`
-- `src/main/resources/entity-types/inventory/simple_location.json5:50` - `simple_location.name`
-- `src/main/resources/entity-types/inventory/simple_location.json5:80` - `simple_location.discovery_display_name`
-- `src/main/resources/entity-types/inventory/simple_loclibrary.json5:16` - `simple_loclibrary.id`
-- `src/main/resources/entity-types/inventory/simple_loclibrary.json5:34` - `simple_loclibrary.name`
-- `src/main/resources/entity-types/inventory/simple_loclibrary.json5:53` - `simple_loclibrary.code`
-- `src/main/resources/entity-types/inventory/simple_loclibrary.json5:70` - `simple_loclibrary.campus_id`
-- `src/main/resources/entity-types/inventory/simple_material_type.json5:14` - `simple_material_type.id`
-- `src/main/resources/entity-types/inventory/simple_material_type.json5:32` - `simple_material_type.name`
-- `src/main/resources/entity-types/inventory/simple_mode_of_issuance.json5:29` - `simple_mode_of_issuance.name`
-- `src/main/resources/entity-types/inventory/simple_nature_of_content_term.json5:27` - `simple_nature_of_content_term.name`
-- `src/main/resources/entity-types/inventory/simple_service_point.json5:14` - `simple_service_point.id`
-- `src/main/resources/entity-types/inventory/simple_service_point.json5:46` - `simple_service_point.name`
-- `src/main/resources/entity-types/inventory/simple_subject_source.json5:25` - `simple_subject_source.name`
-- `src/main/resources/entity-types/inventory/simple_subject_type.json5:25` - `simple_subject_type.name`
-- `src/main/resources/entity-types/invoice/simple_invoice.json5:106` - `simple_invoice.batch_group`
-- `src/main/resources/entity-types/orders/simple_acquisition_method.json5:28` - `simple_acquisition_method.name`
-- `src/main/resources/entity-types/organizations/simple_organization.json5:120` - `simple_organization.name`
-- `src/main/resources/entity-types/organizations/simple_organization.json5:141` - `simple_organization.code`
-- `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
-- `src/main/resources/entity-types/simple_instance_date_type.json5:28` - `simple_instance_date_type.name`
-- `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
-- `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
-- `src/main/resources/entity-types/users/simple_department.json5:27` - `simple_department.name`
-- `src/main/resources/entity-types/users/simple_group.json5:16` - `simple_group.group`
-- `src/main/resources/entity-types/users/simple_group.json5:35` - `simple_group.id`
+- Y `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
+- Y `src/main/resources/entity-types/circulation/simple_loan_policy.json5:79` - `simple_loan_policy.name`
+- Y `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:29` - `simple_tenant_addresses.name`
+- Y `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:45` - `simple_tenant_addresses.address`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-heading-type.json5:34` - `mod_entities_links__authority-heading-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-identifier-type.json5:34` - `mod_entities_links__authority-identifier-type.name`
+- Y `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority-source-file.json5:36` - `mod_entities_links__authority-source-file.name`
+- Y `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:144` - `mod_feesfines__accounts.fee_fine_type`
+- Y `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:163` - `mod_feesfines__accounts.fee_fine_owner`
+- Y `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:219` - `mod_feesfines__accounts.material_type`
+- Y `src/main/resources/entity-types/external/circulation/mod-feesfines/mod_feesfines__accounts.json5:237` - `mod_feesfines__accounts.location`
+- Y `src/main/resources/entity-types/external/circulation/mod-patron-blocks/mod_patron_blocks__user_summary.json5:246` - `mod_patron_blocks__user_summary.open_fees_fines.fee_fine_type_id`
+- Y `src/main/resources/entity-types/external/other/mod-notes/mod_notes__note_type.json5:36` - `mod_notes__note_type.name`
+- Y `src/main/resources/entity-types/finance/simple_expense_class.json5:34` - `simple_expense_class.name`
+- Y `src/main/resources/entity-types/finance/simple_expense_class.json5:53` - `simple_expense_class.code`
+- Y `src/main/resources/entity-types/finance/simple_fiscal_year.json5:83` - `simple_fiscal_year.name`
+- Y `src/main/resources/entity-types/finance/simple_fund.json5:51` - `simple_fund.allocated_from`
+- Y `src/main/resources/entity-types/finance/simple_fund.json5:102` - `simple_fund.allocated_to`
+- Y `src/main/resources/entity-types/finance/simple_fund.json5:138` - `simple_fund.code`
+- Y `src/main/resources/entity-types/finance/simple_fund_type.json5:36` - `simple_fund_type.name`
+- NNN `src/main/resources/entity-types/inventory/simple_alternative_title_type.json5:25` - `simple_alternative_title_type.name` (also no translation)
+- Y `src/main/resources/entity-types/inventory/simple_call_number_type.json5:29` - `simple_call_number_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_classification_type.json5:27` - `simple_classification_type.name` (no translation)
+- NNN `src/main/resources/entity-types/inventory/simple_contributor_name_type.json5:27` - `simple_contributor_name_type.name`
+- NNN `src/main/resources/entity-types/inventory/simple_contributor_type.json5:27` - `simple_contributor_type.name`
+- NNN `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name` (no translation)
+- NNN `src/main/resources/entity-types/inventory/simple_holdings_note_type.json5:38` - `simple_holdings_note_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_holdings_type.json5:26` - `simple_holdings_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_identifier_type.json5:25` - `simple_identifier_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_instance.json5:245` - `simple_instance.source`
+- NNN `src/main/resources/entity-types/inventory/simple_instance_format.json5:27` - `simple_instance_format.code`
+- NNN `src/main/resources/entity-types/inventory/simple_instance_format.json5:47` - `simple_instance_format.name`
+- Y `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:16` - `simple_instance_note_type.id`
+- Y `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:32` - `simple_instance_note_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_instance_status.json5:16` - `simple_instance_status.id`
+- Y `src/main/resources/entity-types/inventory/simple_instance_status.json5:34` - `simple_instance_status.name`
+- Y `src/main/resources/entity-types/inventory/simple_instance_type.json5:25` - `simple_instance_type.code`
+- Y `src/main/resources/entity-types/inventory/simple_instance_type.json5:45` - `simple_instance_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_item_damaged_status.json5:14` - `simple_item_damaged_status.id`
+- Y `src/main/resources/entity-types/inventory/simple_item_damaged_status.json5:32` - `simple_item_damaged_status.name`
+- Y `src/main/resources/entity-types/inventory/simple_item_note_type.json5:16` - `simple_item_note_type.id`
+- Y `src/main/resources/entity-types/inventory/simple_item_note_type.json5:32` - `simple_item_note_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_loan_type.json5:64` - `simple_loan_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_location.json5:14` - `simple_location.id`
+- Y `src/main/resources/entity-types/inventory/simple_location.json5:32` - `simple_location.code`
+- Y `src/main/resources/entity-types/inventory/simple_location.json5:50` - `simple_location.name`
+- Y `src/main/resources/entity-types/inventory/simple_location.json5:80` - `simple_location.discovery_display_name`
+- Y `src/main/resources/entity-types/inventory/simple_loclibrary.json5:16` - `simple_loclibrary.id`
+- Y `src/main/resources/entity-types/inventory/simple_loclibrary.json5:34` - `simple_loclibrary.name`
+- Y `src/main/resources/entity-types/inventory/simple_loclibrary.json5:53` - `simple_loclibrary.code`
+- Y `src/main/resources/entity-types/inventory/simple_loclibrary.json5:70` - `simple_loclibrary.campus_id`
+- Y `src/main/resources/entity-types/inventory/simple_material_type.json5:14` - `simple_material_type.id`
+- Y `src/main/resources/entity-types/inventory/simple_material_type.json5:32` - `simple_material_type.name`
+- Y `src/main/resources/entity-types/inventory/simple_mode_of_issuance.json5:29` - `simple_mode_of_issuance.name`
+- NNN `src/main/resources/entity-types/inventory/simple_nature_of_content_term.json5:27` - `simple_nature_of_content_term.name`
+- Y `src/main/resources/entity-types/inventory/simple_service_point.json5:14` - `simple_service_point.id`
+- Y `src/main/resources/entity-types/inventory/simple_service_point.json5:46` - `simple_service_point.name`
+- NNN `src/main/resources/entity-types/inventory/simple_subject_source.json5:25` - `simple_subject_source.name`
+- NNN `src/main/resources/entity-types/inventory/simple_subject_type.json5:25` - `simple_subject_type.name`
+- Y `src/main/resources/entity-types/invoice/simple_invoice.json5:106` - `simple_invoice.batch_group`
+- Y `src/main/resources/entity-types/orders/simple_acquisition_method.json5:28` - `simple_acquisition_method.name`
+- Y `src/main/resources/entity-types/organizations/simple_organization.json5:120` - `simple_organization.name`
+- Y `src/main/resources/entity-types/organizations/simple_organization.json5:141` - `simple_organization.code`
+- NNN `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
+- Y `src/main/resources/entity-types/simple_instance_date_type.json5:28` - `simple_instance_date_type.name`
+- NNN `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
+- NNN `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
+- NNN `src/main/resources/entity-types/users/simple_department.json5:27` - `simple_department.name`
+- Y `src/main/resources/entity-types/users/simple_group.json5:16` - `simple_group.group`
+- Y `src/main/resources/entity-types/users/simple_group.json5:35` - `simple_group.id`
 
 ## self-referential source (3)
 

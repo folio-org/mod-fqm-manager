@@ -2,7 +2,7 @@
   id: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb',
   name: 'simple_consortia_tenant',
   description: 'A simple view of tenant data within a consortium',
-  private: true,
+  private: false,
   sources: [
     {
       alias: 'tenant',

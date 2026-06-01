@@ -1,7 +1,7 @@
 {
   id: '5da93f6e-2ecb-4cf8-ad53-904b32b0b857',
   name: 'simple_alternative_title_type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

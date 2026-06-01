@@ -15,7 +15,7 @@ This audit lists field and nested property definitions that contain `valueSource
 
 ## valueSourceApi without source (70)
 
-- `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
+- P `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
 - `src/main/resources/entity-types/circulation/simple_loan_policy.json5:79` - `simple_loan_policy.name`
 - `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:29` - `simple_tenant_addresses.name`
 - `src/main/resources/entity-types/configuration/simple_tenant_addresses.json5:45` - `simple_tenant_addresses.address`

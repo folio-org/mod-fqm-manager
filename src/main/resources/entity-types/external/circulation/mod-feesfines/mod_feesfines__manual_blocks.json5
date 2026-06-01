@@ -1,7 +1,7 @@
 {
   id: '78360363-7305-5196-a685-19d1debac5a8',
   name: 'mod_feesfines__manual_blocks',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

@@ -1,7 +1,7 @@
 {
   id: '2d4bd468-720e-42b2-af41-8f4a9d7cb335',
   name: 'simple_instance_date_type',
-  private: true,
+  private: false,
   sources: [
     {
       alias: 'date_type',

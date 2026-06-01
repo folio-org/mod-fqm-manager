@@ -1,7 +1,7 @@
 {
   id: 'd3833db6-a50c-4d47-aaa3-23b69c2ac7ce',
   name: 'simple_statistical_code',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

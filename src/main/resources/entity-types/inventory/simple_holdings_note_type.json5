@@ -1,7 +1,7 @@
 {
   id: '87c79a6a-6714-4f06-b6f6-a63367ccaad0',
   name: 'simple_holdings_note_type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

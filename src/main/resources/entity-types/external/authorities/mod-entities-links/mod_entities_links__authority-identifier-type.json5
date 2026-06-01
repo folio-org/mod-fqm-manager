@@ -1,7 +1,7 @@
 {
   id: 'e1d77962-f469-5a9c-a0e0-30987c1bae99',
   name: 'mod_entities_links__authority-identifier-type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

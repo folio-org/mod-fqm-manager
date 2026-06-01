@@ -1,7 +1,7 @@
 {
   id: '3fe1b126-52d1-4b72-a346-9a73721c6931',
   name: 'simple_tenant_addresses',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

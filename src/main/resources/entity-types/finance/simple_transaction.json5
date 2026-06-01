@@ -1,7 +1,7 @@
 {
   id: 'f73e67e8-ee2d-41e1-978a-3de7b961bac0',
   name: 'simple_transaction',
-  private: true,
+  private: false,
   requiredPermissions: [
     'finance.transactions.collection.get'
   ],

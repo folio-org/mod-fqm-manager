@@ -1,7 +1,7 @@
 {
   id: '60013bee-6752-4125-aedb-5689143477ae',
   name: 'simple_classification_type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

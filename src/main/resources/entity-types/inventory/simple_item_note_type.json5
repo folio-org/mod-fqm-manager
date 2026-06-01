@@ -1,7 +1,7 @@
 {
   id: 'da991f67-df20-49d8-bf2b-281eb072240e',
   name: 'simple_item_note_type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

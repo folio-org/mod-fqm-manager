@@ -7,7 +7,7 @@
 {
   id: '4999bd5f-3898-4b44-b283-e37bc9261ad8',
   name: 'composite_invoice_line_fund_distribution',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'entity-type',

@@ -1,7 +1,7 @@
 {
   id: '308636b5-3a6f-59dc-a029-4e3540e26383',
   name: 'mod_circulation_storage__actual_cost_record',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

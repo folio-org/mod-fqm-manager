@@ -1,7 +1,7 @@
 {
   id: '80dac615-4de8-416f-85d1-27e73457f72c',
   name: 'simple_electronic_access_relationship',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

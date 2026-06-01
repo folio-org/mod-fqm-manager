@@ -1,7 +1,7 @@
 {
   id: '7a845f67-80b7-4ebb-9ba3-364b7de94e3e',
   name: 'simple_user_transaction_summary',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

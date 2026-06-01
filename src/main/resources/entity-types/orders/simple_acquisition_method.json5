@@ -1,7 +1,7 @@
 {
   id: '37288235-e59c-4db7-a3cc-eb31effd7828',
   name: 'simple_acquisition_method',
-  private: true,
+  private: false,
   requiredPermissions: [
     'orders.acquisition-methods.collection.get'
   ],

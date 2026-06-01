@@ -1,7 +1,7 @@
 {
   id: '7d92f1b8-8826-4e66-8c79-9dc25341fe54',
   name: 'simple_nature_of_content_term',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

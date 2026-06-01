@@ -1,7 +1,7 @@
 {
   id: 'af44e2e0-12e0-4eec-b80d-49feb33a866c',
   name: 'simple_instance_type',
-  private: true,
+  private: false,
   sources: [
     {
       type: 'db',

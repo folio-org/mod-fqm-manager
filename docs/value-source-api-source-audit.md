@@ -13,6 +13,13 @@ This audit lists field and nested property definitions that contain `valueSource
 | valueSourceApi with non-self source | 0 |
 | source without valueSourceApi | 79 |
 
+Y - already working |
+YC - working after direct change |
+YD - working after indirect change (change to source column) |
+NNN - not working |
+NNNX - Fix being tested |
+All YCs and YDs should be double checked before final merge |
+
 ## valueSourceApi without source (70)
 
 - Y `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
@@ -78,7 +85,7 @@ This audit lists field and nested property definitions that contain `valueSource
 - Y `src/main/resources/entity-types/orders/simple_acquisition_method.json5:28` - `simple_acquisition_method.name`
 - Y `src/main/resources/entity-types/organizations/simple_organization.json5:120` - `simple_organization.name`
 - Y `src/main/resources/entity-types/organizations/simple_organization.json5:141` - `simple_organization.code`
-- NNNX `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
+- YC `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
 - Y `src/main/resources/entity-types/simple_instance_date_type.json5:28` - `simple_instance_date_type.name`
 - NNN `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
 - NNN `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
@@ -100,7 +107,7 @@ _None found._
 
 - `src/main/resources/entity-types/consortia/simple_consortia_tenant.json5:26` - `simple_consortia_tenant.name`
 - `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:135` - `mod_orders_storage__titles.product_ids.product_id_type`
-- `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:528` - `mod_orders_storage__titles.acq_unit_names`
+- YD `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:528` - `mod_orders_storage__titles.acq_unit_names`
 - `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type`
 - `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:129` - `mod_entities_links__authority.sft_headings.heading_type`
 - `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:202` - `mod_entities_links__authority.saft_headings.heading_type`

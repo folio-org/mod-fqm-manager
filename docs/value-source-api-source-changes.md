@@ -1,14 +1,14 @@
 # Value Source API / Source Changes
 
-This file lists the fields changed while removing self-referential `source` blocks from fields that already have `valueSourceApi`.
+This file lists fields changed while removing ambiguous `source` and `valueSourceApi` pairings.
 
 ## Summary
 
 - Removed self-referential `source` blocks from 65 fields/properties.
-- Changed 40 entity type files.
+- Removed `valueSourceApi` blocks from 18 non-self source-backed fields/properties.
 - Left self-referential sources without `valueSourceApi` unchanged.
 
-## Changed Fields
+## Removed self-referential source blocks (65)
 
 - `src/main/resources/entity-types/circulation/simple_loan_policy.json5:16` - `simple_loan_policy.id`
 - `src/main/resources/entity-types/circulation/simple_loan_policy.json5:83` - `simple_loan_policy.name`
@@ -75,3 +75,24 @@ This file lists the fields changed while removing self-referential `source` bloc
 - `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
 - `src/main/resources/entity-types/users/simple_group.json5:16` - `simple_group.group`
 - `src/main/resources/entity-types/users/simple_group.json5:39` - `simple_group.id`
+
+## Removed valueSourceApi from non-self source-backed fields (18)
+
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:134` - `mod_entities_links__authority.sft_headings.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:212` - `mod_entities_links__authority.saft_headings.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:301` - `mod_entities_links__authority.identifiers.identifier_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:347` - `mod_entities_links__authority.notes.note_type`
+- `src/main/resources/entity-types/finance/simple_finance_group.json5:114` - `simple_finance_group.acquisition_unit`
+- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:62` - `simple_fiscal_year.acquisition_unit`
+- `src/main/resources/entity-types/finance/simple_fund.json5:492` - `simple_fund.acquisition_unit`
+- `src/main/resources/entity-types/finance/simple_ledger.json5:158` - `simple_ledger.acquisition_unit`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1004` - `simple_instance.format_names`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1382` - `simple_instance.nature_of_content_term`
+- `src/main/resources/entity-types/invoice/simple_invoice.json5:569` - `simple_invoice.acquisition_unit`
+- `src/main/resources/entity-types/invoice/simple_voucher.json5:218` - `simple_voucher.acquisition_units`
+- `src/main/resources/entity-types/invoice/simple_voucher.json5:267` - `simple_voucher.batch_group`
+- `src/main/resources/entity-types/orders/composite_order_invoice_analytics.json5:172` - `composite_order_invoice_analytics.all_fiscal_years`
+- `src/main/resources/entity-types/orders/simple_purchase_order.json5:384` - `simple_purchase_order.acquisition_unit`
+- `src/main/resources/entity-types/organizations/simple_organization.json5:1583` - `simple_organization.acq_unit_names`
+- `src/main/resources/entity-types/users/simple_user_details.json5:576` - `simple_user_details.departments`

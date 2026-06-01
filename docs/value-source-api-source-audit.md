@@ -10,8 +10,8 @@ This audit lists field and nested property definitions that contain `valueSource
 | --- | ---: |
 | valueSourceApi without source | 70 |
 | self-referential source | 3 |
-| valueSourceApi with non-self source | 18 |
-| source without valueSourceApi | 61 |
+| valueSourceApi with non-self source | 0 |
+| source without valueSourceApi | 79 |
 
 ## valueSourceApi without source (70)
 
@@ -30,7 +30,7 @@ This audit lists field and nested property definitions that contain `valueSource
 - `src/main/resources/entity-types/external/other/mod-notes/mod_notes__note_type.json5:36` - `mod_notes__note_type.name`
 - `src/main/resources/entity-types/finance/simple_expense_class.json5:34` - `simple_expense_class.name`
 - `src/main/resources/entity-types/finance/simple_expense_class.json5:53` - `simple_expense_class.code`
-- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:88` - `simple_fiscal_year.name`
+- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:83` - `simple_fiscal_year.name`
 - `src/main/resources/entity-types/finance/simple_fund.json5:51` - `simple_fund.allocated_from`
 - `src/main/resources/entity-types/finance/simple_fund.json5:102` - `simple_fund.allocated_to`
 - `src/main/resources/entity-types/finance/simple_fund.json5:138` - `simple_fund.code`
@@ -92,37 +92,29 @@ This audit lists field and nested property definitions that contain `valueSource
 - `src/main/resources/entity-types/inventory/simple_inventory_statistical_code_full.json5:28` - `simple_inventory_statistical_code_full.statistical_code`
 - `src/main/resources/entity-types/organizations/simple_organization_type.json5:93` - `simple_organization_type.name`
 
-## valueSourceApi with non-self source (18)
+## valueSourceApi with non-self source (0)
 
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:134` - `mod_entities_links__authority.sft_headings.heading_type`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:212` - `mod_entities_links__authority.saft_headings.heading_type`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:301` - `mod_entities_links__authority.identifiers.identifier_type`
-- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:347` - `mod_entities_links__authority.notes.note_type`
-- `src/main/resources/entity-types/finance/simple_finance_group.json5:114` - `simple_finance_group.acquisition_unit`
-- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:62` - `simple_fiscal_year.acquisition_unit`
-- `src/main/resources/entity-types/finance/simple_fund.json5:492` - `simple_fund.acquisition_unit`
-- `src/main/resources/entity-types/finance/simple_ledger.json5:158` - `simple_ledger.acquisition_unit`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1004` - `simple_instance.format_names`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1382` - `simple_instance.nature_of_content_term`
-- `src/main/resources/entity-types/invoice/simple_invoice.json5:569` - `simple_invoice.acquisition_unit`
-- `src/main/resources/entity-types/invoice/simple_voucher.json5:218` - `simple_voucher.acquisition_units`
-- `src/main/resources/entity-types/invoice/simple_voucher.json5:267` - `simple_voucher.batch_group`
-- `src/main/resources/entity-types/orders/composite_order_invoice_analytics.json5:172` - `composite_order_invoice_analytics.all_fiscal_years`
-- `src/main/resources/entity-types/orders/simple_purchase_order.json5:384` - `simple_purchase_order.acquisition_unit`
-- `src/main/resources/entity-types/organizations/simple_organization.json5:1583` - `simple_organization.acq_unit_names`
-- `src/main/resources/entity-types/users/simple_user_details.json5:576` - `simple_user_details.departments`
+_None found._
 
-## source without valueSourceApi (61)
+## source without valueSourceApi (79)
 
 - `src/main/resources/entity-types/consortia/simple_consortia_tenant.json5:26` - `simple_consortia_tenant.name`
 - `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:135` - `mod_orders_storage__titles.product_ids.product_id_type`
 - `src/main/resources/entity-types/external/acquisition/mod-orders-storage/mod_orders_storage__titles.json5:528` - `mod_orders_storage__titles.acq_unit_names`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:85` - `mod_entities_links__authority.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:129` - `mod_entities_links__authority.sft_headings.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:202` - `mod_entities_links__authority.saft_headings.heading_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:286` - `mod_entities_links__authority.identifiers.identifier_type`
+- `src/main/resources/entity-types/external/authorities/mod-entities-links/mod_entities_links__authority.json5:327` - `mod_entities_links__authority.notes.note_type`
 - `src/main/resources/entity-types/external/circulation/mod-circulation-storage/mod_circulation_storage__actual_cost_record.json5:187` - `mod_circulation_storage__actual_cost_record.user_patron_group`
 - `src/main/resources/entity-types/finance/simple_budget.json5:431` - `simple_budget.tags`
+- `src/main/resources/entity-types/finance/simple_finance_group.json5:114` - `simple_finance_group.acquisition_unit`
+- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:62` - `simple_fiscal_year.acquisition_unit`
 - `src/main/resources/entity-types/finance/simple_fund.json5:271` - `simple_fund.donor_organizations`
 - `src/main/resources/entity-types/finance/simple_fund.json5:388` - `simple_fund.tag_list`
+- `src/main/resources/entity-types/finance/simple_fund.json5:492` - `simple_fund.acquisition_unit`
 - `src/main/resources/entity-types/finance/simple_ledger.json5:85` - `simple_ledger.fiscal_year_one`
+- `src/main/resources/entity-types/finance/simple_ledger.json5:158` - `simple_ledger.acquisition_unit`
 - `src/main/resources/entity-types/finance/simple_transaction.json5:276` - `simple_transaction.tags`
 - `src/main/resources/entity-types/inventory/simple_holdings_record.json5:156` - `simple_holdings_record.call_number_type`
 - `src/main/resources/entity-types/inventory/simple_holdings_record.json5:414` - `simple_holdings_record.statistical_code_names`
@@ -142,12 +134,14 @@ This audit lists field and nested property definitions that contain `valueSource
 - `src/main/resources/entity-types/inventory/simple_instance.json5:642` - `simple_instance.subjects.subject_type`
 - `src/main/resources/entity-types/inventory/simple_instance.json5:694` - `simple_instance.classifications.type_name`
 - `src/main/resources/entity-types/inventory/simple_instance.json5:916` - `simple_instance.electronic_access.relationship`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1055` - `simple_instance.languages`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1098` - `simple_instance.notes.instance_note_type`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1274` - `simple_instance.statistical_code_names`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1328` - `simple_instance.tags`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1440` - `simple_instance.tenant_id`
-- `src/main/resources/entity-types/inventory/simple_instance.json5:1459` - `simple_instance.tenant_name`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1004` - `simple_instance.format_names`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1050` - `simple_instance.languages`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1093` - `simple_instance.notes.instance_note_type`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1269` - `simple_instance.statistical_code_names`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1323` - `simple_instance.tags`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1377` - `simple_instance.nature_of_content_term`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1430` - `simple_instance.tenant_id`
+- `src/main/resources/entity-types/inventory/simple_instance.json5:1449` - `simple_instance.tenant_name`
 - `src/main/resources/entity-types/inventory/simple_item.json5:62` - `simple_item.notes.item_note_type`
 - `src/main/resources/entity-types/inventory/simple_item.json5:555` - `simple_item.electronic_access.relationship`
 - `src/main/resources/entity-types/inventory/simple_item.json5:666` - `simple_item.statistical_code_names`
@@ -158,10 +152,15 @@ This audit lists field and nested property definitions that contain `valueSource
 - `src/main/resources/entity-types/inventory/simple_item.json5:1373` - `simple_item.additional_call_numbers.call_number_type_id`
 - `src/main/resources/entity-types/invoice/simple_invoice.json5:461` - `simple_invoice.vendor_name`
 - `src/main/resources/entity-types/invoice/simple_invoice.json5:512` - `simple_invoice.fiscal_year`
-- `src/main/resources/entity-types/invoice/simple_invoice.json5:678` - `simple_invoice.tag_list`
+- `src/main/resources/entity-types/invoice/simple_invoice.json5:569` - `simple_invoice.acquisition_unit`
+- `src/main/resources/entity-types/invoice/simple_invoice.json5:673` - `simple_invoice.tag_list`
 - `src/main/resources/entity-types/invoice/simple_invoice_line.json5:481` - `simple_invoice_line.tag_list`
+- `src/main/resources/entity-types/invoice/simple_voucher.json5:218` - `simple_voucher.acquisition_units`
+- `src/main/resources/entity-types/invoice/simple_voucher.json5:262` - `simple_voucher.batch_group`
 - `src/main/resources/entity-types/invoice/simple_voucher_line.json5:160` - `simple_voucher_line.fund_distribution.code`
-- `src/main/resources/entity-types/orders/simple_purchase_order.json5:422` - `simple_purchase_order.tags`
+- `src/main/resources/entity-types/orders/composite_order_invoice_analytics.json5:172` - `composite_order_invoice_analytics.all_fiscal_years`
+- `src/main/resources/entity-types/orders/simple_purchase_order.json5:384` - `simple_purchase_order.acquisition_unit`
+- `src/main/resources/entity-types/orders/simple_purchase_order.json5:417` - `simple_purchase_order.tags`
 - `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:156` - `simple_purchase_order_line.acquisition_method`
 - `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:173` - `simple_purchase_order_line.acquisition_method_name`
 - `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:416` - `simple_purchase_order_line.cost_currency`
@@ -172,7 +171,9 @@ This audit lists field and nested property definitions that contain `valueSource
 - `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1276` - `simple_purchase_order_line.locations.tenant_name`
 - `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1770` - `simple_purchase_order_line.tags`
 - `src/main/resources/entity-types/organizations/simple_organization.json5:239` - `simple_organization.type_names`
-- `src/main/resources/entity-types/organizations/simple_organization.json5:1608` - `simple_organization.tags`
+- `src/main/resources/entity-types/organizations/simple_organization.json5:1583` - `simple_organization.acq_unit_names`
+- `src/main/resources/entity-types/organizations/simple_organization.json5:1603` - `simple_organization.tags`
 - `src/main/resources/entity-types/users/simple_user_details.json5:264` - `simple_user_details.addresses.country_id`
 - `src/main/resources/entity-types/users/simple_user_details.json5:302` - `simple_user_details.addresses.address_type_id`
 - `src/main/resources/entity-types/users/simple_user_details.json5:529` - `simple_user_details.tags_tag_list`
+- `src/main/resources/entity-types/users/simple_user_details.json5:576` - `simple_user_details.departments`

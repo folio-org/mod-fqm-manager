@@ -45,7 +45,7 @@
     },
     {
       name: 'source',
-      sourceAlias: 'subject-source',
+      sourceAlias: 'subject_source',
       dataType: {
         dataType: 'stringType',
       },
@@ -56,7 +56,7 @@
     },
     {
       name: 'code',
-      sourceAlias: 'subject-source',
+      sourceAlias: 'subject_source',
       dataType: {
         dataType: 'stringType',
       },
@@ -67,7 +67,7 @@
     },
     {
       name: 'jsonb',
-      sourceAlias: 'subject-source',
+      sourceAlias: 'subject_source',
       dataType: {
         dataType: 'stringType',
       },

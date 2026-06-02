@@ -59,6 +59,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.created_date',
+      valueFunction: '(:value)::timestamp'
     },
     {
       name: 'metadata_updated_date',
@@ -70,6 +71,7 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.updated_date',
+      valueFunction: '(:value)::timestamp'
     },
     {
       name: 'metadata_created_by_user_id',

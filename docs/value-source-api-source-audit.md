@@ -45,15 +45,15 @@ All YCs and YDs should be double checked before final merge |
 - YC `src/main/resources/entity-types/inventory/simple_alternative_title_type.json5:25` - `simple_alternative_title_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_call_number_type.json5:29` - `simple_call_number_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_classification_type.json5:27` - `simple_classification_type.name`
-- NNNX `src/main/resources/entity-types/inventory/simple_contributor_name_type.json5:27` - `simple_contributor_name_type.name`
-- NNNX `src/main/resources/entity-types/inventory/simple_contributor_type.json5:27` - `simple_contributor_type.name`
-- NNNX `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name`
-- NNNX `src/main/resources/entity-types/inventory/simple_holdings_note_type.json5:38` - `simple_holdings_note_type.name`
+- YC `src/main/resources/entity-types/inventory/simple_contributor_name_type.json5:27` - `simple_contributor_name_type.name`
+- YC `src/main/resources/entity-types/inventory/simple_contributor_type.json5:27` - `simple_contributor_type.name`
+- YC `src/main/resources/entity-types/inventory/simple_electronic_access_relationship.json5:38` - `simple_electronic_access_relationship.name`
+- YC `src/main/resources/entity-types/inventory/simple_holdings_note_type.json5:38` - `simple_holdings_note_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_holdings_type.json5:26` - `simple_holdings_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_identifier_type.json5:25` - `simple_identifier_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_instance.json5:245` - `simple_instance.source`
-- NNNX `src/main/resources/entity-types/inventory/simple_instance_format.json5:27` - `simple_instance_format.code`
-- NNNX `src/main/resources/entity-types/inventory/simple_instance_format.json5:47` - `simple_instance_format.name`
+- YC `src/main/resources/entity-types/inventory/simple_instance_format.json5:27` - `simple_instance_format.code`
+- YC `src/main/resources/entity-types/inventory/simple_instance_format.json5:47` - `simple_instance_format.name`
 - Y `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:16` - `simple_instance_note_type.id`
 - Y `src/main/resources/entity-types/inventory/simple_instance_note_type.json5:32` - `simple_instance_note_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_instance_status.json5:16` - `simple_instance_status.id`
@@ -76,7 +76,7 @@ All YCs and YDs should be double checked before final merge |
 - Y `src/main/resources/entity-types/inventory/simple_material_type.json5:14` - `simple_material_type.id`
 - Y `src/main/resources/entity-types/inventory/simple_material_type.json5:32` - `simple_material_type.name`
 - Y `src/main/resources/entity-types/inventory/simple_mode_of_issuance.json5:29` - `simple_mode_of_issuance.name`
-- NNNX `src/main/resources/entity-types/inventory/simple_nature_of_content_term.json5:27` - `simple_nature_of_content_term.name`
+- YC `src/main/resources/entity-types/inventory/simple_nature_of_content_term.json5:27` - `simple_nature_of_content_term.name`
 - Y `src/main/resources/entity-types/inventory/simple_service_point.json5:14` - `simple_service_point.id`
 - Y `src/main/resources/entity-types/inventory/simple_service_point.json5:46` - `simple_service_point.name`
 - NNNX `src/main/resources/entity-types/inventory/simple_subject_source.json5:25` - `simple_subject_source.name`
@@ -87,9 +87,9 @@ All YCs and YDs should be double checked before final merge |
 - Y `src/main/resources/entity-types/organizations/simple_organization.json5:141` - `simple_organization.code`
 - YC `src/main/resources/entity-types/shared/simple_acq_unit.json5:25` - `simple_acq_unit.name`
 - Y `src/main/resources/entity-types/simple_instance_date_type.json5:28` - `simple_instance_date_type.name`
-- NNNX `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
-- NNNX `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
-- NNNX `src/main/resources/entity-types/users/simple_department.json5:27` - `simple_department.name`
+- YC `src/main/resources/entity-types/simple_instance_date_type.json5:43` - `simple_instance_date_type.code`
+- NNNXX `src/main/resources/entity-types/tags/simple_tags.json5:25` - `simple_tags.label`
+- YC `src/main/resources/entity-types/users/simple_department.json5:27` - `simple_department.name`
 - Y `src/main/resources/entity-types/users/simple_group.json5:16` - `simple_group.group`
 - Y `src/main/resources/entity-types/users/simple_group.json5:35` - `simple_group.id`
 

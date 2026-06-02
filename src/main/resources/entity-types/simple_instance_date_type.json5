@@ -49,6 +49,7 @@
       queryable: true,
       valueGetter: ":date_type.jsonb ->> 'code'",
       valueSourceApi: {
+        path: 'instance-date-types',
         valueJsonPath: '$.instanceDateTypes.*.id',
         labelJsonPath: '$.instanceDateTypes.*.code',
       },

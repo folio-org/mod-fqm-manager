@@ -44,7 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 @RunWith(MockitoJUnitRunner.class)
 @ActiveProfiles("db-test")
 @SpringBootTest
-class IdStreamerTest {
+class IdStreamerIT {
 
   private static final UUID IN_PROGRESS_QUERY_ID = UUID.fromString("d81b10cb-9511-4541-9646-3aaec72e41e0");
   private static final UUID CANCELLED_QUERY_ID = UUID.fromString("6dbe7cf6-ef5f-40b2-a0f2-69a705cb94c8");

@@ -28,7 +28,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 @ActiveProfiles("db-test")
 @SpringBootTest
-class QueryRepositoryTest {
+class QueryRepositoryIT {
 
   @Autowired
   private QueryRepository repo;

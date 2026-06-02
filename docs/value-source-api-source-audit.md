@@ -9,7 +9,7 @@ This audit lists field and nested property definitions that contain `valueSource
 | Category | Count |
 | --- | ---: |
 | valueSourceApi without source | 70 |
-| self-referential source | 3 |
+| self-referential source | 2 |
 | valueSourceApi with non-self source | 0 |
 | source without valueSourceApi | 79 |
 
@@ -93,11 +93,10 @@ All YCs and YDs should be double checked before final merge |
 - Y `src/main/resources/entity-types/users/simple_group.json5:16` - `simple_group.group`
 - Y `src/main/resources/entity-types/users/simple_group.json5:35` - `simple_group.id`
 
-## self-referential source (3)
+## self-referential source (2)
 
-- `src/main/resources/entity-types/finance/simple_fiscal_year.json5:17` - `simple_fiscal_year.id`
-- `src/main/resources/entity-types/inventory/simple_inventory_statistical_code_full.json5:28` - `simple_inventory_statistical_code_full.statistical_code`
-- `src/main/resources/entity-types/organizations/simple_organization_type.json5:93` - `simple_organization_type.name`
+- NNNX `src/main/resources/entity-types/inventory/simple_inventory_statistical_code_full.json5:28` - `simple_inventory_statistical_code_full.statistical_code`
+- NNNX `src/main/resources/entity-types/organizations/simple_organization_type.json5:93` - `simple_organization_type.name`
 
 ## valueSourceApi with non-self source (0)
 

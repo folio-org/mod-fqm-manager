@@ -22,6 +22,7 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
+      queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.id',
     },
@@ -32,6 +33,7 @@
         dataType: 'stringType',
       },
       visibleByDefault: true,
+      queryable: true,
       valueGetter: ':sourceAlias.statistical_code',
       source: {
         entityTypeId: 'd2da8cc7-9171-4d3e-8aba-4da286eb5f1c',

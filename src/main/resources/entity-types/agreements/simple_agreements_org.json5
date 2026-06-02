@@ -1,0 +1,129 @@
+{
+  id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004',
+  name: 'simple_agreements_org',
+  private: false,
+  requiredPermissions: [
+    'erm.orgs.collection.get',
+    'erm.refdata.value.collection.get',
+    'organizations.organizations.collection.get',
+  ],
+  sources: [
+    {
+      alias: 'org',
+      type: 'db',
+      target: 'src_agr_org',
+    },
+    {
+      alias: 'sao',
+      type: 'db',
+      target: 'src_agr_subscription_agreement_org',
+      join: {
+        type: 'left join',
+        joinTo: 'org',
+        condition: ':this.sao_org_fk = :that.org_id',
+      },
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: { dataType: 'stringType' },
+      isIdColumn: true,
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sao.sao_id',
+    },
+    {
+      name: 'org_id',
+      dataType: { dataType: 'stringType' },
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':org.org_id',
+    },
+    {
+      name: 'org_name',
+      dataType: { dataType: 'stringType' },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':org.org_name',
+      filterValueGetter: 'lower(:org.org_name)',
+      valueFunction: 'lower(:value)',
+      idColumnName: 'org_id',
+      source: {
+        entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004',
+        columnName: 'org_name',
+      },
+      valueSourceApi: {
+        path: 'erm/org',
+        valueJsonPath: '$.*.id',
+        labelJsonPath: '$.*.name',
+      },
+    },
+    {
+      name: 'org_orgs_uuid',
+      dataType: { dataType: 'rangedUUIDType' },
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':org.org_orgs_uuid',
+      joinsTo: [
+        {
+          targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'org_orgs_name',
+      dataType: { dataType: 'stringType' },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: "(SELECT organizations.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations WHERE organizations.id::text = :org.org_orgs_uuid)",
+      filterValueGetter: "(SELECT lower(organizations.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations WHERE organizations.id::text = :org.org_orgs_uuid)",
+      valueFunction: 'lower(:value)',
+      idColumnName: 'org_orgs_uuid',
+      source: {
+        entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004',
+        columnName: 'org_orgs_name',
+      },
+      valueSourceApi: {
+        path: 'organizations/organizations',
+        valueJsonPath: '$.organizations.*.id',
+        labelJsonPath: '$.organizations.*.name',
+      },
+    },
+    {
+      name: 'sao_owner_fk',
+      dataType: { dataType: 'rangedUUIDType' },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':sao.sao_owner_fk',
+      joinsTo: [
+        {
+          targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001', // simple_agreements_agreement
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'sao_roles',
+      dataType: { dataType: 'jsonbArrayType', itemDataType: { dataType: 'stringType' } },
+      essential: true,
+      queryable: false,
+      visibleByDefault: true,
+      valueGetter: "(SELECT jsonb_agg(rdv.rdv_label) FILTER (WHERE rdv.rdv_label IS NOT NULL) \
+                     FROM ${tenant_id}_mod_fqm_manager.src_agr_subscription_agreement_org_role saor \
+                     JOIN ${tenant_id}_mod_fqm_manager.src_agr_refdata_value rdv ON saor.saor_role_fk = rdv.rdv_id \
+                     WHERE saor.saor_owner_fk = :sao.sao_id)",
+    },
+  ],
+}

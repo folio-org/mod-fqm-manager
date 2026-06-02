@@ -95,7 +95,7 @@ All YCs and YDs should be double checked before final merge |
 
 ## self-referential source (2)
 
-- NNNX `src/main/resources/entity-types/inventory/simple_inventory_statistical_code_full.json5:28` - `simple_inventory_statistical_code_full.statistical_code`
+- YC `src/main/resources/entity-types/inventory/simple_inventory_statistical_code_full.json5:28` - `simple_inventory_statistical_code_full.statistical_code`
 - YC `src/main/resources/entity-types/organizations/simple_organization_type.json5:93` - `simple_organization_type.name`
 
 ## valueSourceApi with non-self source (0)

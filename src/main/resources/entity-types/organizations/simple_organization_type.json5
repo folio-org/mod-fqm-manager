@@ -104,7 +104,7 @@
       valueSourceApi: {
         path: 'organizations-storage/organization-types',
         labelJsonPath: '$.organizationTypes.*.name',
-        valueJsonPath: '$.departments.*.id',
+        valueJsonPath: '$.organizationTypes.*.id',
       }
     },
     {

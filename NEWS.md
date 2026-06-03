@@ -1,23 +1,27 @@
+# 4.2.x - Umbrellaleaf
+
+## 4.2.0 (Next)
+- [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
+
 # 4.1.x - Trillium
 
-# 4.1.4
-- [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
+## 4.1.5 (4.1.4 was skipped, as it included a feature that was intended for 4.1.x)
 - [MODFQMMGR-1168](https://folio-org.atlassian.net/browse/MODFQMMGR-1168) Set up TestMate integration and coverage reporting for the FQM module
 - Update generated authority entity type metadata for heading and relationship fields
 
-# 4.1.3
+## 4.1.3
 - [MODFQMMGR-1145](https://folio-org.atlassian.net/browse/MODFQMMGR-1145) Make SRS record created and updated dates non-queryable and non-essential
 - [MODFQMMGR-1163](https://folio-org.atlassian.net/browse/MODFQMMGR-1163) Remove source column permission checks from the `/field-values` API
 - [MODFQMMGR-1164](https://folio-org.atlassian.net/browse/MODFQMMGR-1164) Add dropdown value sources for Fee/Fine type, owner, material type, and location fields in Fee/Fine accounts
 
-# 4.1.2
+## 4.1.2
 - [MODFQMMGR-1106](https://folio-org.atlassian.net/browse/MODFQMMGR-1106) Support cross-tenant queries for `Instances with MARC bibliographic`
 - [MODFQMMGR-1112](https://folio-org.atlassian.net/browse/MODFQMMGR-1112) Update actual cost translations
 - [MODFQMMGR-1128](https://folio-org.atlassian.net/browse/MODFQMMGR-1128) Translate and disambiguate language codes in FQM
 - [MODFQMMGR-1130](https://folio-org.atlassian.net/browse/MODFQMMGR-1130) Update a holdings records translation
 - Update migration docs
 
-# 4.1.1
+## 4.1.1
 - [MODFQMMGR-994](https://folio-org.atlassian.net/browse/MODFQMMGR-994) Make `starts with` and `contains` case-insensitive
 - [MODFQMMGR-986](https://folio-org.atlassian.net/browse/MODFQMMGR-986) Fix querying on `Instance - Identifiers - Identifier type`
 - [MODFQMMGR-980](https://folio-org.atlassian.net/browse/MODFQMMGR-980) Add Orders ET to Receiving Pieces composite ET
@@ -93,38 +97,38 @@
 
 # 4.0.x - Sunflower
 
-# 4.0.15
+## 4.0.15
 - [MODFQMMGR-1000] Use pg_terminate_backend to cancel queries + kill associated db queries when deleting FQM queries
 
 [MODFQMMGR-1000]: https://folio-org.atlassian.net/browse/MODFQMMGR-1000
 
-# 4.0.14
+## 4.0.14
 - [MODFQMMGR-954] Change how unique record is identified for SRS records (Sunflower backport)
 
 [MODFQMMGR-954]: https://folio-org.atlassian.net/browse/MODFQMMGR-954
 
-# 4.0.13
+## 4.0.13
 - [MODFQMMGR-924] Join SRS records on id instead of matched_id
 
 [MODFQMMGR-924]: https://folio-org.atlassian.net/browse/MODFQMMGR-924
 
-# 4.0.12
+## 4.0.12
 - [MODFQMMGR-884] Migrate effective library fields for Items ET (Sunflower backport)
 
 [MODFQMMGR-884]: https://folio-org.atlassian.net/browse/MODFQMMGR-884
 
-# 4.0.11
+## 4.0.11
 -  [MODFQMMGR-838] Check for insert statements when checking for zombie queries
 
 [MODFQMMGR-838]: https://folio-org.atlassian.net/browse/MODFQMMGR-838
 
-# 4.0.10
+## 4.0.10
 - Remove trillium harvested views, move backported trillium views to sunflower script
 
-# 4.0.9
+## 4.0.9
 - Make composite SRS ETs private
 
-# 4.0.8
+## 4.0.8
 - [MODFQMMGR-786] Create SRS authority ET
 - [MODFQMMGR-788] Add support for entity-type-level filters
 - [MODFQMMGR-804] Create simple SRS record entity in FQM
@@ -133,10 +137,10 @@
 [MODFQMMGR-788]: https://folio-org.atlassian.net/browse/MODFQMMGR-788
 [MODFQMMGR-804]: https://folio-org.atlassian.net/browse/MODFQMMGR-804
 
-# 4.0.7
+## 4.0.7
 - Update translations
 
-# 4.0.6
+## 4.0.6
 - [MODFQMMGR-518] Handle zombie queries
 - [MODFQMMGR-750] Inline certain SQL conditions to improve performance
 - [MODFQMMGR-760] Improve query purging logic to avoid deletion of active long-running queries
@@ -151,10 +155,10 @@
 [MODFQMMGR-779]: https://folio-org.atlassian.net/browse/MODFQMMGR-779
 [MODFQMMGR-781]: https://folio-org.atlassian.net/browse/MODFQMMGR-781
 
-# 4.0.5
+## 4.0.5
 - Revert MODORDSTOR-448
 
-# 4.0.4
+## 4.0.4
 - [MODFQMMGR-749] Handle duplicate custom field aliases (#702)
 - [MODORDSTOR-448] Change type of eresource.userLimit to string; udpated po-lines interface (#703)
 - [MODFQMMGR-648] Add special source with not-so-special value source for org name/code (#704)
@@ -169,7 +173,7 @@
 [MODFQMMGR-758]: https://folio-org.atlassian.net/browse/MODFQMMGR-758
 [MODFQMMGR-765]: https://folio-org.atlassian.net/browse/MODFQMMGR-765
 
-# 4.0.3
+## 4.0.3
 - [MODFQMMGR-726]: Fix queries for 'Instance - Cataloged date' (#694)
 - [MODFQMMGR-736]: Update Item ET fields
 - [MODFQMMGR-747]: Fix export for PO entity type
@@ -179,14 +183,14 @@
 [MODFQMMGR-736]: https://folio-org.atlassian.net/browse/MODFQMMGR-736
 [MODFQMMGR-747]: https://folio-org.atlassian.net/browse/MODFQMMGR-747
 
-# 4.0.2
+## 4.0.2
 - [MODFQMMGR-723]: Introduce MAX_SIZE_EXCEEDED query status
 - [MODFQMMGR-728]: Ensure tenant_id column is last component of result_id
 
 [MODFQMMGR-723]: https://folio-org.atlassian.net/browse/MODFQMMGR-723
 [MODFQMMGR-728]: https://folio-org.atlassian.net/browse/MODFQMMGR-728
 
-# 4.0.1
+## 4.0.1
 - [MODFQMMGR-714]: Fix Fiscal year - Acquisition unit names field
 - [MODFQMMGR-720]: Fix data retrieval for ledger_fund fields
 - [MODFQMMGR-695]: Fix entity type cache bug in ECS environments
@@ -199,7 +203,7 @@
 [MODFQMMGR-709]: https://folio-org.atlassian.net/browse/MODFQMMGR-709
 [MODFQMMGR-681]: https://folio-org.atlassian.net/browse/MODFQMMGR-681
 
-# 4.0.0
+## 4.0.0
 - [MODFQMMGR-376]: Add textbox custom fields to the Users entity type (#588)
 - [MODFQMMGR-613]: Implement optimized Contains and StartsWith operators
 - [MODFQMMGR-635]: Add Query Parameter to retrieve all the ET
@@ -296,18 +300,17 @@
 
 # 3.0.x - Ramsons
 
-# 3.0.17
+## 3.0.17
 - [MODFQMMGR-955] Change how unique record is identified for SRS records
 
 [MODFQMMGR-955]: https://folio-org.atlassian.net/browse/MODFQMMGR-955
 
-# 3.0.16
+## 3.0.16
 - [MODFQMMGR-924] Join SRS records on id instead of matched_id
 
 [MODFQMMGR-924]: https://folio-org.atlassian.net/browse/MODFQMMGR-924
 
-
-# 3.0.15
+## 3.0.15
 - [MODFQMMGR-885] Migrate effective library fields for Items ET
 
 [MODFQMMGR-885]: https://folio-org.atlassian.net/browse/MODFQMMGR-885

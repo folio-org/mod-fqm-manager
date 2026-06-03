@@ -1,5 +1,10 @@
 # 4.1.x - Trillium
 
+# 4.1.4
+- [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
+- [MODFQMMGR-1168](https://folio-org.atlassian.net/browse/MODFQMMGR-1168) Set up TestMate integration and coverage reporting for the FQM module
+- Update generated authority entity type metadata for heading and relationship fields
+
 # 4.1.3
 - [MODFQMMGR-1145](https://folio-org.atlassian.net/browse/MODFQMMGR-1145) Make SRS record created and updated dates non-queryable and non-essential
 - [MODFQMMGR-1163](https://folio-org.atlassian.net/browse/MODFQMMGR-1163) Remove source column permission checks from the `/field-values` API

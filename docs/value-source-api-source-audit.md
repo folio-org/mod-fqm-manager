@@ -182,8 +182,8 @@ _None found._
 - Y `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1155` - `simple_purchase_order_line.locations.location_name` -> source: `simple_location.name`
 - Y `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1188` - `simple_purchase_order_line.locations.location_code` -> source: `simple_location.code`
 - YD `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1276` - `simple_purchase_order_line.locations.tenant_name` -> source: `simple_consortia_tenant.name`
-- DDD `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1770` - `simple_purchase_order_line.tags` -> source: `simple_tags.label`
-- DDD `src/main/resources/entity-types/organizations/simple_organization.json5:239` - `simple_organization.type_names` -> source: `simple_organization_type.name`
+- YD `src/main/resources/entity-types/orders/simple_purchase_order_line.json5:1770` - `simple_purchase_order_line.tags` -> source: `simple_tags.label`
+- YD `src/main/resources/entity-types/organizations/simple_organization.json5:239` - `simple_organization.type_names` -> source: `simple_organization_type.name`
 - YD `src/main/resources/entity-types/organizations/simple_organization.json5:1583` - `simple_organization.acq_unit_names` -> source: `simple_acq_unit.name`
 - YD `src/main/resources/entity-types/organizations/simple_organization.json5:1603` - `simple_organization.tags` -> source: `simple_tags.label`
 - Y `src/main/resources/entity-types/users/simple_user_details.json5:264` - `simple_user_details.addresses.country_id` -> source: `FQM.countries`

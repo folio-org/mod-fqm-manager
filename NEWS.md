@@ -1,5 +1,8 @@
 # 4.1.x - Trillium
 
+# 4.1.5
+- Revert the [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) changes, as they are not intended for v4.1.x
+
 # 4.1.4
 - [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
 - [MODFQMMGR-1168](https://folio-org.atlassian.net/browse/MODFQMMGR-1168) Set up TestMate integration and coverage reporting for the FQM module

@@ -1,5 +1,0 @@
-{
-  name: 'src_agr_refdata_value',
-  dependsOn: [['${tenant_id}_mod_agreements', 'refdata_value']],
-  sql: 'SELECT * FROM ${tenant_id}_mod_agreements.refdata_value',
-}

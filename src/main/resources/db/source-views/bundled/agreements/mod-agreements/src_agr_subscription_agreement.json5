@@ -1,5 +1,0 @@
-{
-  name: 'src_agr_subscription_agreement',
-  dependsOn: [['${tenant_id}_mod_agreements', 'subscription_agreement']],
-  sql: 'SELECT * FROM ${tenant_id}_mod_agreements.subscription_agreement',
-}

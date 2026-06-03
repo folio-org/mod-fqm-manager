@@ -1,7 +1,7 @@
 {
   id: 'a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2',
   name: 'simple_contributor_type',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

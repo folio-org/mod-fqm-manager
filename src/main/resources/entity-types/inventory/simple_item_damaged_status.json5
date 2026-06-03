@@ -1,7 +1,7 @@
 {
   id: '8b0eba45-d006-4ceb-811f-254808f3eb1d',
   name: 'simple_item_damaged_status',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

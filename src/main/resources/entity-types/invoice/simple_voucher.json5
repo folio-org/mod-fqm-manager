@@ -1,7 +1,7 @@
 {
   id: 'e90473d9-00c3-4b84-919b-a4caa0b07450',
   name: 'simple_voucher',
-  private: false,
+  private: true,
   requiredPermissions: [
     'voucher.vouchers.collection.get',
     'acquisitions-units.units.collection.get',

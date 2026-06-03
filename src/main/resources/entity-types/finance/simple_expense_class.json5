@@ -1,7 +1,7 @@
 {
   id: '6e11cd39-a34e-4afc-90db-957dd45d139e',
   name: 'simple_expense_class',
-  private: false,
+  private: true,
   requiredPermissions: [
     'finance.expense-classes.collection.get'
   ],

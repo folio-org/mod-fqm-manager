@@ -1,7 +1,7 @@
 {
   id: '7082900d-7e46-427b-86df-0a1ea5e965ae',
   name: 'simple_user_proxy_info',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

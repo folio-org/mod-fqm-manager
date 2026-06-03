@@ -1,7 +1,7 @@
 {
   id: '71525bf3-ea51-47c4-bb18-7ab6f07d2b42',
   name: 'simple_budget',
-  private: false,
+  private: true,
   requiredPermissions: [
     'finance.budgets.collection.get'
   ],

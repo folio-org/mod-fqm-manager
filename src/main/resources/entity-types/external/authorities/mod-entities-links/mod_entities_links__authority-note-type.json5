@@ -1,7 +1,7 @@
 {
   id: '369af782-637c-5ab7-af1f-f66a3e45acad',
   name: 'mod_entities_links__authority-note-type',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

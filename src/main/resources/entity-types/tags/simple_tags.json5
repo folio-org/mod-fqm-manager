@@ -1,7 +1,7 @@
 {
   id: 'f16363f0-f393-41f8-ae1e-f9adc16ab700',
   name: 'simple_tags',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

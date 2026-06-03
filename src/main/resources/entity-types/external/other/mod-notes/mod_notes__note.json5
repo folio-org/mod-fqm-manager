@@ -1,7 +1,7 @@
 {
   id: '285652bd-8742-53f4-acd5-35a120247feb',
   name: 'mod_notes__note',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

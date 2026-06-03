@@ -1,7 +1,7 @@
 {
   id: '4433fa88-8afd-4d39-9387-ef3c4945b4f8',
   name: 'simple_subject_source',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

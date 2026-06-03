@@ -1,7 +1,7 @@
 {
   id: 'b9eaaed8-c11b-4d53-a784-a4213c584001',
   name: 'simple_holdings_type',
-  private: false,
+  private: true,
   sources: [
     {
       type: 'db',

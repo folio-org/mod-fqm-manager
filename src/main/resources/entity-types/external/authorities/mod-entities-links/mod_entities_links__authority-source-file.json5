@@ -42,11 +42,6 @@
       visibleByDefault: true,
       valueGetter: ':sourceAlias.name',
       sourceAlias: 'src__authorities__entities_links__authority_source_file',
-      valueSourceApi: {
-        path: 'authority-source-files',
-        valueJsonPath: '$.authoritySourceFiles.*.id',
-        labelJsonPath: '$.authoritySourceFiles.*.name',
-      },
       essential: true,
       idColumnName: 'id',
     },

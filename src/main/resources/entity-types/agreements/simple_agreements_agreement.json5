@@ -375,7 +375,7 @@
       ],
     },
     {
-      name: 'agr_orgs',
+      name: 'sa_agr_orgs',
       dataType: {
         dataType: 'jsonbArrayType',
         itemDataType: { dataType: 'stringType' },

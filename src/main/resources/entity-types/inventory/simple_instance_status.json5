@@ -25,10 +25,6 @@
       valueGetter: ':sourceAlias.id',
       essential: true, // required to query by .name due to idColumnName
       hidden: true,
-      source: {
-        entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
-        columnName: 'id',
-      },
       valueSourceApi: {
         labelJsonPath: '$.instanceStatuses.*.id',
         valueJsonPath: '$.instanceStatuses.*.id',
@@ -49,10 +45,6 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-      source: {
-        entityTypeId: '9c239bfd-198f-4013-bbc4-4551c0cbdeaa',
-        columnName: 'name',
-      },
       idColumnName: 'id',
       valueSourceApi: {
         labelJsonPath: '$.instanceStatuses.*.name',

@@ -264,10 +264,6 @@
         labelJsonPath: '$.facets.source.values.*.id',
         valueJsonPath: '$.facets.source.values.*.id',
       },
-      source: {
-        columnName: 'source',
-        entityTypeId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
-      },
     },
     {
       name: 'source_uri',
@@ -1007,11 +1003,6 @@
     },
     {
       name: 'format_names',
-      valueSourceApi: {
-        path: 'instance-formats',
-        valueJsonPath: '$.instanceFormats.*.id',
-        labelJsonPath: '$.instanceFormats.*.name',
-      },
       essential: true,
       dataType: {
         dataType: 'jsonbArrayType',
@@ -1403,11 +1394,6 @@
         entityTypeId: '7d92f1b8-8826-4e66-8c79-9dc25341fe54',
         columnName: 'name',
       },
-      valueSourceApi: {
-        path: 'nature-of-content-terms',
-        valueJsonPath: '$.natureOfContentTerms.*.id',
-        labelJsonPath: '$.natureOfContentTerms.*.name',
-      }
     },
     {
       name: 'shared',

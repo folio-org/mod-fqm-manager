@@ -33,12 +33,6 @@
       visibleByDefault: true,
       valueGetter: ':tenant.name',
       ecsOnly: true,
-      source: {
-        columnName: 'name',
-        entityTypeId: 'b52c6bef-15d9-468d-b16a-88add8ba8cdb',
-        type: 'fqm',
-        name: 'tenant_name',
-      }
     },
   ],
 }

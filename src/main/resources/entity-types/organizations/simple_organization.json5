@@ -1609,11 +1609,6 @@
         entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
         columnName: 'name',
       },
-      valueSourceApi: {
-        path: 'acquisitions-units/units',
-        valueJsonPath: '$.acquisitionsUnits.*.id',
-        labelJsonPath: '$.acquisitionsUnits.*.name',
-      },
     },
     {
       name: 'tags',

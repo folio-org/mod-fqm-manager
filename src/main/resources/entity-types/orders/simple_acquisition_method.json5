@@ -39,10 +39,6 @@
         ${tenant_id}_mod_orders_storage.f_unaccent(:sourceAlias.jsonb->>'value'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_orders_storage.f_unaccent(:value))',
-      source: {
-        entityTypeId: '37288235-e59c-4db7-a3cc-eb31effd7828',
-        columnName: 'name',
-      },
       valueSourceApi: {
         path: 'orders/acquisition-methods',
         valueJsonPath: '$.acquisitionMethods.*.value',

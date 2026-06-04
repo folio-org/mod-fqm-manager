@@ -589,11 +589,6 @@
       essential: true,
       queryable: true,
       idColumnName: 'department_ids',
-      valueSourceApi: {
-        path: 'departments',
-        labelJsonPath: '$.departments.*.name',
-        valueJsonPath: '$.departments.*.id',
-      },
       visibleByDefault: false,
       valueFunction: 'lower(:value)',
       valueGetter: "( SELECT jsonb_agg(a.jsonb ->> 'name') FILTER (WHERE (a.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'departments') record(value) JOIN src_users_departments a ON record.value::text = a.id::text )",

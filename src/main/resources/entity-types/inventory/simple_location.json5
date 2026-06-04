@@ -23,10 +23,6 @@
       hidden: true,
       essential: true,
       valueGetter: ':sourceAlias.id',
-      source: {
-        columnName: 'id',
-        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-      },
       valueSourceApi: {
         path: 'locations',
         valueJsonPath: '$.locations.*.id',
@@ -45,10 +41,6 @@
       valueGetter: ":sourceAlias.jsonb ->> 'code'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'code'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      source: {
-        columnName: 'code',
-        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-      },
       valueSourceApi: {
         path: 'locations',
         valueJsonPath: '$.locations.*.code',
@@ -67,10 +59,6 @@
       valueGetter: ":sourceAlias.jsonb ->> 'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
-      source: {
-        columnName: 'name',
-        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-      },
       valueSourceApi: {
         path: 'locations',
         valueJsonPath: '$.locations.*.name',
@@ -98,10 +86,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb ->> 'discoveryDisplayName'",
-      source: {
-        columnName: 'discovery_display_name',
-        entityTypeId: '74ddf1a6-19e0-4d63-baf0-cd2da9a46ca4',
-      },
       valueSourceApi: {
         path: 'locations',
         valueJsonPath: '$.locations.*.discoveryDisplayName',

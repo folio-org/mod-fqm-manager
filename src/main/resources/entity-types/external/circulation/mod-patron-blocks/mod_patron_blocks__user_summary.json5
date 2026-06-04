@@ -251,10 +251,6 @@
                 labelJsonPath: '$.feefines.*.feeFineType',
                 valueJsonPath: '$.feefines.*.id',
               },
-              source: {
-                columnName: 'open_fees_fines[*]->fee_fine_type_id',
-                entityTypeId: 'f5443525-d2a9-5e59-8f4a-4ac526ec8528',
-              },
               property: 'feeFineType',
               valueGetter: "(SELECT array_agg(fee_fine_type.value->>'feeFineTypeId' ORDER BY fee_fine_type.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS fee_fine_type)",
               filterValueGetter: "(SELECT array_agg(fee_fine_type.value->>'feeFineTypeId' ORDER BY fee_fine_type.value->>'feeFineTypeId') FROM jsonb_array_elements(:src__circulation__patron_blocks__user_summary.jsonb->'openFeesFines') AS fee_fine_type)",

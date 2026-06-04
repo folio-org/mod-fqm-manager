@@ -158,10 +158,6 @@
         labelJsonPath: '$.feefines.*.feeFineType',
       },
       essential: true,
-      source: {
-        columnName: 'fee_fine_type',
-        entityTypeId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc',
-      },
       idColumnName: 'fee_fine_id',
     },
     {
@@ -181,10 +177,6 @@
         labelJsonPath: '$.owners.*.owner',
       },
       essential: true,
-      source: {
-        columnName: 'fee_fine_owner',
-        entityTypeId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc',
-      },
       idColumnName: 'owner_id',
     },
     {
@@ -241,10 +233,6 @@
         labelJsonPath: '$.mtypes.*.name',
       },
       essential: true,
-      source: {
-        columnName: 'material_type',
-        entityTypeId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc',
-      },
     },
     {
       name: 'location',
@@ -263,10 +251,6 @@
         labelJsonPath: '$.locations.*.name',
       },
       essential: true,
-      source: {
-        columnName: 'location',
-        entityTypeId: 'fccb5cd8-c146-5c0a-8156-837f1bd3f1cc',
-      },
     },
     {
       name: 'metadata_created_date',

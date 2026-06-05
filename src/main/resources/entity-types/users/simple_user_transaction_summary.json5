@@ -21,6 +21,8 @@
   ],
   requiredPermissions: [
     'users.collection.get',
+    'accounts.collection.get', // for open_fees_fines_count
+    'circulation.loans.collection.get', // for open_loans_count
     'users-bl.transactions.get',
     'patron-blocks.automated-patron-blocks.collection.get', // for automated_blocks_count
   ],
@@ -78,9 +80,17 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openFeesFines'), 0)",
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src__circulation__feesfines__accounts account \
+        WHERE \
+          account.jsonb ->> 'userId' = :users.id::text \
+          AND account.jsonb -> 'status' ->> 'name' = 'Open' \
+      )",
       valueFunction: '(:value)::int',
-      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+      sourceAlias: 'users',
     },
     {
       name: 'open_loans_count',
@@ -90,9 +100,17 @@
       queryable: true,
       visibleByDefault: false,
       essential: true,
-      valueGetter: "COALESCE(jsonb_array_length(:src__circulation__patron_blocks__user_summary.jsonb -> 'openLoans'), 0)",
+      valueGetter: "( \
+        SELECT \
+          COUNT(*) \
+        FROM \
+          ${tenant_id}_mod_fqm_manager.src_circulation_loan loan \
+        WHERE \
+          loan.jsonb ->> 'userId' = :users.id::text \
+          AND loan.jsonb -> 'status' ->> 'name' = 'Open' \
+      )",
       valueFunction: '(:value)::int',
-      sourceAlias: 'src__circulation__patron_blocks__user_summary',
+      sourceAlias: 'users',
     },
     {
       name: 'open_requests_count',

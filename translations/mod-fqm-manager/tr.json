@@ -336,7 +336,7 @@
     "entityType.simple_organization.acq_unit_ids": "Edinim birimi Evrensel benzersiz tanımlayıcıları",
     "entityType.simple_organization.addresses": "Adresler",
     "entityType.simple_organization.addresses.address_line1": "Adres satırı 1",
-    "entityType.simple_organization.addresses.address_line1._qualified": "Adresler satır1",
+    "entityType.simple_organization.addresses.address_line1._qualified": "Adresler satır 1",
     "entityType.simple_organization.addresses.address_line2": "Adres satırı 2",
     "entityType.simple_organization.addresses.address_line2._qualified": "Adresler satır 2",
     "entityType.simple_organization.addresses.categories": "Kategori Evrensel benzersiz tanımlayıcıları",

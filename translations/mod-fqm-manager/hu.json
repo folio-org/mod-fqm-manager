@@ -336,7 +336,7 @@
     "entityType.simple_organization.acq_unit_ids": "Acquisition unit UUIDs",
     "entityType.simple_organization.addresses": "Addresses",
     "entityType.simple_organization.addresses.address_line1": "Address line 1",
-    "entityType.simple_organization.addresses.address_line1._qualified": "Addresses line1",
+    "entityType.simple_organization.addresses.address_line1._qualified": "Addresses line 1",
     "entityType.simple_organization.addresses.address_line2": "Address line 2",
     "entityType.simple_organization.addresses.address_line2._qualified": "Addresses line 2",
     "entityType.simple_organization.addresses.categories": "Category UUIDs",

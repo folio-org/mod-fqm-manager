@@ -339,7 +339,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'addressLine1') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine1')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -350,10 +350,11 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'addressLine2') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'addressLine2')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
-              valueFunction: 'lower(:value)',
+              // This field tends to end up with trailing spaces, so we need to trim those off
+              filterValueGetter: "( SELECT array_agg(lower(trim(elems.value->>'addressLine2'))) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
+              valueFunction: 'lower(trim(:value))',
             },
             {
               name: 'city',
@@ -361,7 +362,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'city') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'city')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -372,7 +373,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'stateRegion') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'stateRegion')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -383,7 +384,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'zipCode') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'zipCode')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -394,7 +395,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'country') FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'country')) FROM jsonb_array_elements(:sourceAlias.jsonb->'addresses') AS elems)",
               valueFunction: 'lower(:value)',
@@ -444,11 +445,23 @@
                   dataType: 'stringType',
                 },
               },
-              queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'addresses'->'categories')) id \
+              queryable: true,
+              valueGetter: "(SELECT array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'addresses') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
                  JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                  WHERE id.value IS NOT NULL)",
+              filterValueGetter: "(SELECT array_agg(lower(catg_name.jsonb ->> 'value') ORDER BY lower(catg_name.jsonb ->> 'value')) \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'addresses') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)",
+              valueFunction: 'lower(:value)',
+              valueSourceApi: {
+                path: 'organizations-storage/categories',
+                valueJsonPath: '$.categories.*.value',
+                labelJsonPath: '$.categories.*.value',
+              },
             },
 
             //            {
@@ -502,7 +515,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'phoneNumber') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'phoneNumber')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
               valueFunction: 'lower(:value)',
@@ -531,11 +544,23 @@
                   dataType: 'stringType',
                 },
               },
-              queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'phoneNumbers'->'categories')) id \
+              queryable: true,
+              valueGetter: "(SELECT array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'phoneNumbers') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
                  JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                  WHERE id.value IS NOT NULL)",
+              filterValueGetter: "(SELECT array_agg(lower(catg_name.jsonb ->> 'value') ORDER BY lower(catg_name.jsonb ->> 'value')) \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'phoneNumbers') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)",
+              valueFunction: 'lower(:value)',
+              valueSourceApi: {
+                path: 'organizations-storage/categories',
+                valueJsonPath: '$.categories.*.value',
+                labelJsonPath: '$.categories.*.value',
+              },
             },
             {
               name: 'type',
@@ -543,7 +568,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'type') FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'type')) FROM jsonb_array_elements(:sourceAlias.jsonb->'phoneNumbers') AS elems)",
               valueFunction: 'lower(:value)',
@@ -638,7 +663,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
               valueFunction: 'lower(:value)',
@@ -649,7 +674,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'description') FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'description')) FROM jsonb_array_elements(:sourceAlias.jsonb->'emails') AS elems)",
               valueFunction: 'lower(:value)',
@@ -700,11 +725,23 @@
                   dataType: 'stringType',
                 },
               },
-              queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'emails'->'categories')) id \
+              queryable: true,
+              valueGetter: "(SELECT array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'emails') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
                  JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                  WHERE id.value IS NOT NULL)",
+              filterValueGetter: "(SELECT array_agg(lower(catg_name.jsonb ->> 'value') ORDER BY lower(catg_name.jsonb ->> 'value')) \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'emails') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)",
+              valueFunction: 'lower(:value)',
+              valueSourceApi: {
+                path: 'organizations-storage/categories',
+                valueJsonPath: '$.categories.*.value',
+                labelJsonPath: '$.categories.*.value',
+              },
             },
             //            {
             //              name: 'language',
@@ -757,7 +794,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               valueFunction: 'lower(:value)',
@@ -768,7 +805,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'description') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'description')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               valueFunction: 'lower(:value)',
@@ -829,11 +866,23 @@
                   dataType: 'stringType',
                 },
               },
-              queryable: false,
-              valueGetter: "(SELECT jsonb_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'urls'->'categories')) id \
+              queryable: true,
+              valueGetter: "(SELECT array_agg(catg_name.jsonb ->> 'value' ORDER BY catg_name.jsonb ->> 'value') \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'urls') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
                  JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
                  WHERE id.value IS NOT NULL)",
+              filterValueGetter: "(SELECT array_agg(lower(catg_name.jsonb ->> 'value') ORDER BY lower(catg_name.jsonb ->> 'value')) \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'urls') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'categories', '[]'::jsonb)) id(value) \
+                 JOIN src_organization_categories catg_name ON id.value::text = catg_name.id::text \
+                 WHERE id.value IS NOT NULL)",
+              valueFunction: 'lower(:value)',
+              valueSourceApi: {
+                path: 'organizations-storage/categories',
+                valueJsonPath: '$.categories.*.value',
+                labelJsonPath: '$.categories.*.value',
+              },
             },
             {
               name: 'notes',
@@ -841,7 +890,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'notes') FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'notes')) FROM jsonb_array_elements(:sourceAlias.jsonb->'urls') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1298,7 +1347,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'name') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'name')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1309,7 +1358,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'accountNo') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'accountNo')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1320,7 +1369,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'description') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'description')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1331,7 +1380,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'appSystemNo') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'appSystemNo')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1342,7 +1391,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'paymentMethod') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'paymentMethod')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1387,10 +1436,24 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'accountStatus') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'accountStatus')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'Active',
+                  label: 'Active',
+                },
+                {
+                  value: 'Inactive',
+                  label: 'Inactive',
+                },
+                {
+                  value: 'Pending',
+                  label: 'Pending',
+                },
+              ],
             },
             {
               name: 'contact_info',
@@ -1398,7 +1461,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'contactInfo') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'contactInfo')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1409,7 +1472,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'libraryCode') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'libraryCode')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1420,7 +1483,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'libraryEdiCode') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'libraryEdiCode')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1431,7 +1494,7 @@
               dataType: {
                 dataType: 'stringType',
               },
-              queryable: false,
+              queryable: true,
               valueGetter: "( SELECT array_agg(elems.value->>'notes') FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               filterValueGetter: "( SELECT array_agg(lower(elems.value->>'notes')) FROM jsonb_array_elements(:sourceAlias.jsonb->'accounts') AS elems)",
               valueFunction: 'lower(:value)',
@@ -1460,11 +1523,23 @@
                   dataType: 'stringType',
                 },
               },
-              queryable: false,
-              valueGetter: "(SELECT jsonb_agg(acq_unit.jsonb ->> 'name' ORDER BY acq_unit.jsonb ->> 'name') \
-                 FROM jsonb_array_elements_text((:sourceAlias.jsonb -> 'accounts'->'acqUnitIds')) id \
+              queryable: true,
+              valueGetter: "(SELECT array_agg(acq_unit.jsonb ->> 'name' ORDER BY acq_unit.jsonb ->> 'name') \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'accounts') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'acqUnitIds', '[]'::jsonb)) id(value) \
                  JOIN src_acquisitions_unit acq_unit ON id.value::text = acq_unit.id::text \
                  WHERE id.value IS NOT NULL)",
+              filterValueGetter: "(SELECT array_agg(lower(acq_unit.jsonb ->> 'name') ORDER BY lower(acq_unit.jsonb ->> 'name')) \
+                 FROM jsonb_array_elements(:sourceAlias.jsonb -> 'accounts') elems(value) \
+                 CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value -> 'acqUnitIds', '[]'::jsonb)) id(value) \
+                 JOIN src_acquisitions_unit acq_unit ON id.value::text = acq_unit.id::text \
+                 WHERE id.value IS NOT NULL)",
+              valueFunction: 'lower(:value)',
+              valueSourceApi: {
+                path: 'acquisitions-units/units',
+                valueJsonPath: '$.acquisitionsUnits.*.name',
+                labelJsonPath: '$.acquisitionsUnits.*.name',
+              },
             },
           ],
         },

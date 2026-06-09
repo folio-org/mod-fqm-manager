@@ -1,4 +1,8 @@
 {
+    "languages.disambiguated": "{label} [{code}]",
+    "languages.dut": "Neerlandés; flamenco",
+    "languages.eng": "Inglés",
+    "languages.ger": "Alemán",
     "entityType.src_inventory_material_type": "Material type",
     "entityType.src_inventory_material_type.id": "Id",
     "entityType.src_inventory_material_type.material_type_name": "Material type name",

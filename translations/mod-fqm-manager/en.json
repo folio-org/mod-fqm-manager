@@ -1,5 +1,8 @@
 {
   "languages.disambiguated": "{label} [{code}]",
+  "languages.dut": "Dutch; Flemish",
+  "languages.eng": "English",
+  "languages.ger": "German",
   "countries.AF": "Afghanistan",
   "countries.AX": "Aland Islands",
   "countries.AL": "Albania",

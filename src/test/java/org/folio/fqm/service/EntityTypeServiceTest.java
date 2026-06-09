@@ -631,7 +631,7 @@ class EntityTypeServiceTest {
   }
 
   @Test
-  void shouldLocalizeLanguageLabelsUsingConfiguredLocale() {
+  void shouldUseJsonLanguageLabelsWhenTranslationsAreMissing() {
     UUID entityTypeId = UUID.randomUUID();
     List<String> tenantList = List.of(TENANT_ID);
     String valueColumnName = "languages";
@@ -655,8 +655,8 @@ class EntityTypeServiceTest {
 
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
       new ValueWithLabel().value("mus").label("Creek"),
-      new ValueWithLabel().value("ger").label("Deutsch"),
-      new ValueWithLabel().value("eng").label("Englisch")
+      new ValueWithLabel().value("eng").label("English"),
+      new ValueWithLabel().value("ger").label("German")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
@@ -685,8 +685,8 @@ class EntityTypeServiceTest {
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("de").label("Deutsch [de]"),
-      new ValueWithLabel().value("ger").label("Deutsch [ger]")
+      new ValueWithLabel().value("de").label("German [de]"),
+      new ValueWithLabel().value("ger").label("German [ger]")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

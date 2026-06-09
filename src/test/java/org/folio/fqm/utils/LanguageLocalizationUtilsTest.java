@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.util.LinkedHashSet;
@@ -29,6 +30,7 @@ class LanguageLocalizationUtilsTest {
 
   @BeforeEach
   void setUp() {
+    lenient().when(translationService.format(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
     lenient().when(translationService.format(
       eq(LanguageLocalizationUtils.LANGUAGE_DISAMBIGUATION_TEMPLATE),
       eq("label"), anyString(),
@@ -61,16 +63,30 @@ class LanguageLocalizationUtilsTest {
   }
 
   @Test
-  void shouldLocalizeAndDisambiguateLabelsUsingConfiguredLocale() {
+  void shouldUseJsonLanguageNamesWhenTranslationsAreMissing() {
     Set<String> codes = new LinkedHashSet<>(List.of("de", "ger", "eng"));
 
     Map<String, String> displayMap = LanguageLocalizationUtils.getLanguageDisplayMap(codes, Locale.GERMAN, translationService);
 
     assertEquals(Map.of(
-      "de", "Deutsch [de]",
-      "ger", "Deutsch [ger]",
-      "eng", "Englisch"
+      "de", "German [de]",
+      "ger", "German [ger]",
+      "eng", "English"
     ), displayMap);
+  }
+
+  @Test
+  void shouldUseTranslatedLanguageNameWhenAvailable() {
+    when(translationService.format("mod-fqm-manager.languages.dut")).thenReturn("Neerlandes; flamenco");
+
+    assertEquals("Neerlandes; flamenco", LanguageLocalizationUtils.localizeLanguageCode("dut", Locale.ENGLISH, translationService));
+    assertEquals("Neerlandes; flamenco", LanguageLocalizationUtils.localizeLanguageCode("nl", Locale.ENGLISH, translationService));
+  }
+
+  @Test
+  void shouldUseJsonLanguageNameBeforeJavaLocaleWhenTranslationIsMissing() {
+    assertEquals("Dutch; Flemish", LanguageLocalizationUtils.localizeLanguageCode("dut", Locale.ENGLISH, translationService));
+    assertEquals("Dutch; Flemish", LanguageLocalizationUtils.localizeLanguageCode("nl", Locale.GERMAN, translationService));
   }
 
   @Test

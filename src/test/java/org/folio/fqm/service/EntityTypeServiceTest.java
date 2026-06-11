@@ -713,12 +713,13 @@ class EntityTypeServiceTest {
     when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
     when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("de", "ger"));
     when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("de-DE", "USD", "UTC", "latn"));
+    when(translationService.format("mod-fqm-manager.languages.ger")).thenReturn("Deutsch");
 
     ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
 
     ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-      new ValueWithLabel().value("de").label("German [de]"),
-      new ValueWithLabel().value("ger").label("German [ger]")
+      new ValueWithLabel().value("de").label("Deutsch [de]"),
+      new ValueWithLabel().value("ger").label("Deutsch [ger]")
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }

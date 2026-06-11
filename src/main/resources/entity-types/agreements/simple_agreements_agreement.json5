@@ -25,16 +25,6 @@
     },
     {
       type: 'db',
-      alias: 'agr_type',
-      target: 'src_agr_refdata_value',
-      join: {
-        type: 'left join',
-        joinTo: 'agr',
-        condition: ':this.rdv_id = :that.sa_agreement_type',
-      },
-    },
-    {
-      type: 'db',
       alias: 'agr_renewal_priority',
       target: 'src_agr_refdata_value',
       join: {
@@ -51,16 +41,6 @@
         type: 'left join',
         joinTo: 'agr',
         condition: ':this.rdv_id = :that.sa_is_perpetual',
-      },
-    },
-    {
-      type: 'db',
-      alias: 'agr_content_review',
-      target: 'src_agr_refdata_value',
-      join: {
-        type: 'left join',
-        joinTo: 'agr',
-        condition: ':this.rdv_id = :that.sa_content_review_needed',
       },
     },
     {
@@ -101,20 +81,6 @@
       valueGetter: ':agr.sa_description',
     },
     {
-      name: 'sa_local_reference',
-      dataType: { dataType: 'stringType' },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_local_reference',
-    },
-    {
-      name: 'sa_vendor_reference',
-      dataType: { dataType: 'stringType' },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_vendor_reference',
-    },
-    {
       name: 'sa_start_date',
       dataType: { dataType: 'dateType' },
       essential: true,
@@ -142,24 +108,6 @@
       valueFunction: '(:value)::timestamp',
     },
     {
-      name: 'sa_renewal_date',
-      dataType: { dataType: 'dateType' },
-      essential: true,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_renewal_date',
-      valueFunction: '(:value)::timestamp',
-    },
-    {
-      name: 'sa_next_review_date',
-      dataType: { dataType: 'dateType' },
-      essential: true,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_next_review_date',
-      valueFunction: '(:value)::timestamp',
-    },
-    {
       name: 'sa_date_created',
       dataType: { dataType: 'dateTimeType' },
       queryable: true,
@@ -174,18 +122,6 @@
       visibleByDefault: false,
       valueGetter: ':agr.sa_last_updated',
       valueFunction: '(:value)::timestamp',
-    },
-    {
-      name: 'sa_enabled',
-      dataType: { dataType: 'booleanType' },
-      values: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ],
-      essential: true,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_enabled',
     },
     {
       name: 'sa_agreement_status',
@@ -209,32 +145,6 @@
       },
       valueSourceApi: {
         path: 'erm/refdata/SubscriptionAgreement/agreementStatus',
-        valueJsonPath: '$.*.id',
-        labelJsonPath: '$.*.label',
-      },
-    },
-    {
-      name: 'sa_agreement_type',
-      dataType: { dataType: 'stringType' },
-      queryable: true,
-      hidden: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_agreement_type',
-    },
-    {
-      name: 'sa_agreement_type_label',
-      dataType: { dataType: 'stringType' },
-      essential: true,
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ':agr_type.rdv_label',
-      idColumnName: 'sa_agreement_type',
-      source: {
-        entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001',
-        columnName: 'sa_agreement_type_label',
-      },
-      valueSourceApi: {
-        path: 'erm/refdata/SubscriptionAgreement/agreementType',
         valueJsonPath: '$.*.id',
         labelJsonPath: '$.*.label',
       },
@@ -292,32 +202,6 @@
       },
     },
     {
-      name: 'sa_content_review_needed',
-      dataType: { dataType: 'stringType' },
-      queryable: true,
-      hidden: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_content_review_needed',
-    },
-    {
-      name: 'sa_content_review_needed_label',
-      dataType: { dataType: 'stringType' },
-      essential: true,
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr_content_review.rdv_label',
-      idColumnName: 'sa_content_review_needed',
-      source: {
-        entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001',
-        columnName: 'sa_content_review_needed_label',
-      },
-      valueSourceApi: {
-        path: 'erm/refdata/SubscriptionAgreement/contentReviewNeeded',
-        valueJsonPath: '$.*.id',
-        labelJsonPath: '$.*.label',
-      },
-    },
-    {
       name: 'sa_reason_for_closure',
       dataType: { dataType: 'stringType' },
       queryable: true,
@@ -343,7 +227,6 @@
         labelJsonPath: '$.*.label',
       },
     },
-
     {
       name: 'sa_license_note',
       dataType: { dataType: 'stringType' },
@@ -358,21 +241,6 @@
       hidden: true,
       visibleByDefault: false,
       valueGetter: ':agr.sa_licence_fk',
-    },
-    {
-      name: 'sa_vendor_fk',
-      dataType: { dataType: 'stringType' },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':agr.sa_vendor_fk',
-      joinsTo: [
-        {
-          targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004', // simple_agreements_org
-          targetField: 'org_id',
-          type: 'equality-simple',
-          direction: 'left',
-        },
-      ],
     },
     {
       name: 'sa_agr_orgs',

@@ -85,9 +85,13 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "(SELECT organizations.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations WHERE organizations.id::text = :org.org_orgs_uuid)",
-      filterValueGetter: "(SELECT lower(organizations.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations WHERE organizations.id::text = :org.org_orgs_uuid)",
-      valueFunction: 'lower(:value)',
+      valueGetter: "(SELECT organizations.jsonb->>'name' \
+                     FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations \
+                     WHERE organizations.id::text = :org.org_orgs_uuid)",
+      filterValueGetter: "(SELECT lower(${tenant_id}_mod_organizations_storage.f_unaccent(organizations.jsonb->>'name')) \
+                           FROM ${tenant_id}_mod_fqm_manager.src_organizations organizations \
+                           WHERE organizations.id::text = :org.org_orgs_uuid)",
+      valueFunction: 'lower(${tenant_id}_mod_organizations_storage.f_unaccent(:value))',
       idColumnName: 'org_orgs_uuid',
       source: {
         entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004',

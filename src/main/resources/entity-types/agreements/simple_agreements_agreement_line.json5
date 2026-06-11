@@ -77,6 +77,11 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':ent.ent_type',
+      values: [
+        { label: 'Internal', value: null },
+        { label: 'External', value: 'external' },
+        { label: 'Detached', value: 'detached' },
+      ]
     },
     {
       name: 'ent_authority',
@@ -103,14 +108,6 @@
       valueGetter: ':ent.ent_resource_fk',
     },
     {
-      name: 'ent_resource_name',
-      dataType: { dataType: 'stringType' },
-      essential: true,
-      queryable: true,
-      visibleByDefault: true,
-      valueGetter: ':ent.ent_resource_name',
-    },
-    {
       name: 'ent_description',
       dataType: { dataType: 'stringType' },
       queryable: true,
@@ -123,17 +120,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':ent.ent_note',
-    },
-    {
-      name: 'ent_enabled',
-      dataType: { dataType: 'booleanType' },
-      queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':ent.ent_enabled',
-      values: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ]
     },
     {
       name: 'ent_suppress_discovery',
@@ -190,11 +176,12 @@
       valueFunction: '(:value)::timestamp',
     },
     {
-        name: 'ent_res_name',
+      name: 'ent_res_name',
       dataType: { dataType: 'stringType' },
+      essential: true,
       queryable: true,
-      visibleByDefault: false,
-      valueGetter: ':res.res_name',
+      visibleByDefault: true,
+      valueGetter: "(CASE WHEN :ent.ent_type IS NULL THEN :res.res_name ELSE :ent.ent_resource_name END)",
     },
     {
       name: 'ent_res_description',

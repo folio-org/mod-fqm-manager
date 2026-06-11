@@ -630,37 +630,6 @@ class EntityTypeServiceTest {
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
 
-//  @Test
-//  void shouldFallBackToJsonLanguageLabelsBeforeJavaLocaleWhenTranslationsAreMissing() {
-//    UUID entityTypeId = UUID.randomUUID();
-//    List<String> tenantList = List.of(TENANT_ID);
-//    String valueColumnName = "languages";
-//    EntityType entityType = new EntityType()
-//      .id(entityTypeId.toString())
-//      .name("the entity type")
-//      .columns(List.of(new EntityTypeColumn()
-//        .name(valueColumnName)
-//        .source(new SourceColumn(entityTypeId, valueColumnName)
-//          .name("languages")
-//          .type(SourceColumn.TypeEnum.FQM))
-//      ));
-//
-//    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-//    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
-//    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-//    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("eng", "ger", "mus", ""));
-//    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("de-DE", "USD", "UTC", "latn"));
-//
-//    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-//
-//    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-//      new ValueWithLabel().value("mus").label("Creek"),
-//      new ValueWithLabel().value("eng").label("English"),
-//      new ValueWithLabel().value("ger").label("German")
-//    ));
-//    assertEquals(expectedColumnValues, actualColumnValueLabel);
-//  }
-
   @Test
   void shouldUseTranslatedLanguageLabelsForConfiguredLocale() {
     UUID entityTypeId = UUID.randomUUID();
@@ -723,36 +692,6 @@ class EntityTypeServiceTest {
     ));
     assertEquals(expectedColumnValues, actualColumnValueLabel);
   }
-
-//  @Test
-//  void shouldFallBackToEnglishForLanguagesWhenConfiguredLocaleIsInvalid() {
-//    UUID entityTypeId = UUID.randomUUID();
-//    List<String> tenantList = List.of(TENANT_ID);
-//    String valueColumnName = "languages";
-//    EntityType entityType = new EntityType()
-//      .id(entityTypeId.toString())
-//      .name("the entity type")
-//      .columns(List.of(new EntityTypeColumn()
-//        .name(valueColumnName)
-//        .source(new SourceColumn(entityTypeId, valueColumnName)
-//          .name("languages")
-//          .type(SourceColumn.TypeEnum.FQM))
-//      ));
-//
-//    when(executionContext.getTenantId()).thenReturn(TENANT_ID);
-//    when(entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, TENANT_ID, false)).thenReturn(entityType);
-//    when(crossTenantQueryService.getTenantsToQuery(entityType)).thenReturn(tenantList);
-//    when(languageClient.getCodes(TENANT_ID)).thenReturn(List.of("de", "eng"));
-//    when(localeClient.getLocaleSettings()).thenReturn(new LocaleSettings("----", "USD", "UTC", "latn"));
-//
-//    ColumnValues actualColumnValueLabel = entityTypeService.getFieldValues(entityTypeId, valueColumnName, "");
-//
-//    ColumnValues expectedColumnValues = new ColumnValues().content(List.of(
-//      new ValueWithLabel().value("eng").label("English"),
-//      new ValueWithLabel().value("de").label("German")
-//    ));
-//    assertEquals(expectedColumnValues, actualColumnValueLabel);
-//  }
 
   @Test
   void shouldCatchExceptionFromLanguagesApi() {

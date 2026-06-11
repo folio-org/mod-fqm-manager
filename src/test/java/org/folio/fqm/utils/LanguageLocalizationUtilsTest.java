@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.folio.querytool.domain.dto.ValueWithLabel;
 import org.folio.spring.i18n.service.TranslationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,28 +64,29 @@ class LanguageLocalizationUtilsTest {
   }
 
   @Test
-  void shouldUseJsonLanguageNamesWhenTranslationsAreMissing() {
+  void shouldFallBackToJsonLanguageNamesBeforeJavaLocaleWhenTranslationsAreMissing() {
     Set<String> codes = new LinkedHashSet<>(List.of("de", "ger", "eng"));
-
-    Map<String, String> displayMap = LanguageLocalizationUtils.getLanguageDisplayMap(codes, Locale.GERMAN, translationService);
-
-    assertEquals(Map.of(
+    Map<String, String> expected = Map.of(
       "de", "German [de]",
       "ger", "German [ger]",
       "eng", "English"
-    ), displayMap);
+    );
+
+    Map<String, String> actual = LanguageLocalizationUtils.getLanguageDisplayMap(codes, Locale.GERMAN, translationService);
+
+    assertEquals(expected, actual);
   }
 
   @Test
-  void shouldUseTranslatedLanguageNameWhenAvailable() {
-    when(translationService.format("mod-fqm-manager.languages.dut")).thenReturn("Neerlandes; flamenco");
+  void shouldUseTranslationServiceValueBeforeJsonNameAndJavaLocaleWhenAvailable() {
+    when(translationService.format("mod-fqm-manager.languages.dut")).thenReturn("Niederlandisch; Flamisch");
 
-    assertEquals("Neerlandes; flamenco", LanguageLocalizationUtils.localizeLanguageCode("dut", Locale.ENGLISH, translationService));
-    assertEquals("Neerlandes; flamenco", LanguageLocalizationUtils.localizeLanguageCode("nl", Locale.ENGLISH, translationService));
+    assertEquals("Niederlandisch; Flamisch", LanguageLocalizationUtils.localizeLanguageCode("dut", Locale.GERMAN, translationService));
+    assertEquals("Niederlandisch; Flamisch", LanguageLocalizationUtils.localizeLanguageCode("nl", Locale.GERMAN, translationService));
   }
 
   @Test
-  void shouldUseJsonLanguageNameBeforeJavaLocaleWhenTranslationIsMissing() {
+  void shouldFallBackToJsonLanguageNameBeforeJavaLocaleWhenTranslationIsMissing() {
     assertEquals("Dutch; Flemish", LanguageLocalizationUtils.localizeLanguageCode("dut", Locale.ENGLISH, translationService));
     assertEquals("Dutch; Flemish", LanguageLocalizationUtils.localizeLanguageCode("nl", Locale.GERMAN, translationService));
   }

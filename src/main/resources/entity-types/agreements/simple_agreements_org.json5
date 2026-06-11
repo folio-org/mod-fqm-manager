@@ -96,6 +96,7 @@
       source: {
         entityTypeId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004',
         columnName: 'org_orgs_name',
+        name: 'organization'
       },
       valueSourceApi: {
         path: 'organizations/organizations',

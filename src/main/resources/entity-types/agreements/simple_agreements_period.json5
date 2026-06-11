@@ -1,0 +1,76 @@
+{
+  id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000003',
+  name: 'simple_agreements_period',
+  private: false,
+  requiredPermissions: [
+    'erm.agreements.collection.get',
+  ],
+  sources: [
+    {
+      alias: 'per',
+      type: 'db',
+      target: 'src_agr_period',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: { dataType: 'stringType' },
+      isIdColumn: true,
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':per.per_id',
+    },
+    {
+      name: 'per_owner',
+      dataType: { dataType: 'stringType' },
+      essential: true,
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':per.per_owner',
+      joinsTo: [
+        {
+          targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001', // simple_agreements_agreement
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'per_start_date',
+      dataType: { dataType: 'dateType' },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':per.per_start_date',
+      valueFunction: '(:value)::timestamp',
+    },
+    {
+      name: 'per_end_date',
+      dataType: { dataType: 'dateType' },
+      essential: true,
+      queryable: true,
+      visibleByDefault: true,
+      valueGetter: ':per.per_end_date',
+      valueFunction: '(:value)::timestamp',
+    },
+    {
+      name: 'per_cancellation_deadline',
+      dataType: { dataType: 'dateType' },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':per.per_cancellation_deadline',
+      valueFunction: '(:value)::timestamp',
+    },
+    {
+      name: 'per_note',
+      dataType: { dataType: 'stringType' },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ':per.per_note',
+    },
+  ],
+}

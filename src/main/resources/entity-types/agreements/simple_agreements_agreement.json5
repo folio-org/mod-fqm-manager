@@ -1,7 +1,7 @@
 {
   id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001',
   name: 'simple_agreements_agreement',
-  private: false,
+  private: true,
   requiredPermissions: [
     'erm.agreements.collection.get',
     'erm.refdata.value.collection.get',

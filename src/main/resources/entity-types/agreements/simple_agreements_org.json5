@@ -27,23 +27,26 @@
   columns: [
     {
       name: 'id',
+      sourceAlias: 'sao',
       dataType: { dataType: 'stringType' },
       isIdColumn: true,
       essential: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sao.sao_id',
+      valueGetter: ':sourceAlias.sao_id',
     },
     {
       name: 'org_id',
+      sourceAlias: 'sao',
       dataType: { dataType: 'stringType' },
       queryable: true,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ':org.org_id',
+      valueGetter: ':sourceAlias.sao_org_fk',
     },
     {
       name: 'org_name',
+      sourceAlias: 'sao',
       dataType: { dataType: 'stringType' },
       essential: true,
       queryable: true,
@@ -65,6 +68,7 @@
     },
     {
       name: 'org_orgs_uuid',
+      sourceAlias: 'sao',
       dataType: { dataType: 'rangedUUIDType' },
       queryable: true,
       hidden: true,
@@ -81,6 +85,7 @@
     },
     {
       name: 'org_orgs_name',
+      sourceAlias: 'sao',
       dataType: { dataType: 'stringType' },
       essential: true,
       queryable: true,
@@ -106,12 +111,13 @@
     },
     {
       name: 'sao_owner_fk',
+      sourceAlias: 'sao',
       dataType: { dataType: 'rangedUUIDType' },
       essential: true,
       queryable: true,
       hidden: true,
       visibleByDefault: false,
-      valueGetter: ':sao.sao_owner_fk',
+      valueGetter: ':sourceAlias.sao_owner_fk',
       joinsTo: [
         {
           targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000001', // simple_agreements_agreement
@@ -123,6 +129,7 @@
     },
     {
       name: 'sao_roles',
+      sourceAlias: 'sao',
       dataType: { dataType: 'jsonbArrayType', itemDataType: { dataType: 'stringType' } },
       essential: true,
       queryable: false,
@@ -130,7 +137,7 @@
       valueGetter: "(SELECT jsonb_agg(rdv.rdv_label) FILTER (WHERE rdv.rdv_label IS NOT NULL) \
                      FROM ${tenant_id}_mod_fqm_manager.src_agr_subscription_agreement_org_role saor \
                      JOIN ${tenant_id}_mod_fqm_manager.src_agr_refdata_value rdv ON saor.saor_role_fk = rdv.rdv_id \
-                     WHERE saor.saor_owner_fk = :sao.sao_id)",
+                     WHERE saor.saor_owner_fk = :sourceAlias.sao_id)",
     },
   ],
 }

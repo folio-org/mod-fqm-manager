@@ -29,6 +29,7 @@
       targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000003', // simple_agreements_period
       targetField: 'per_owner',
       sourceField: 'agreement.id',
+      overrideJoinDirection: 'left',
       useIdColumns: true,
       essentialOnly: true,
       order: 30,
@@ -39,6 +40,7 @@
       targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000004', // simple_agreements_org
       targetField: 'sao_owner_fk',
       sourceField: 'agreement.id',
+      overrideJoinDirection: 'left',
       useIdColumns: true,
       essentialOnly: true,
       order: 40,
@@ -49,6 +51,7 @@
       targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
       targetField: 'id',
       sourceField: 'agreement_org.org_orgs_uuid',
+      overrideJoinDirection: 'left',
       essentialOnly: true,
       order: 50,
     },

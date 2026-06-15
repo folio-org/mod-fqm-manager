@@ -13,6 +13,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.fql.model.Fql;
@@ -99,13 +100,18 @@ public class IdStreamer {
                                 Fql fql, int batchSize,
                                 int maxQuerySize, UUID queryId,
                                 List<String> tenantsToQuery, boolean ecsEnabled) {
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, fql.fqlCondition());
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
-      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
-        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
+      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId())
+        ? entityType
+        : MarcFieldFactory.addSyntheticColumns(
+          entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false),
+          fql.fqlCondition()
+        );
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch

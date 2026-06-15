@@ -8,7 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import org.folio.fql.model.AndCondition;
+import org.folio.fql.model.ContainsCondition;
+import org.folio.fql.model.EqualsCondition;
+import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -47,7 +52,6 @@ class MarcFieldFactoryTest {
     assertEquals("marc_245", column.getName());
     assertEquals("245", column.getLabelAlias());
     assertInstanceOf(MarcDataType.class, column.getDataType());
-    assertEquals("matched_id", column.getIdColumnName());
     assertEquals("lower(:value)", column.getValueFunction());
     assertSqlEquals(expectedTagValueGetter("245"), column.getValueGetter());
     assertSqlEquals(expectedTagFilterValueGetter("245"), column.getFilterValueGetter());
@@ -96,7 +100,31 @@ class MarcFieldFactoryTest {
   }
 
   @Test
-  void shouldThrowWhenMarcPlaceholderOmitsCorrelationIdColumn() {
+  void shouldAddSyntheticColumnsForReferencedMarcFields() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      List.of("marc_245", "marc_245_ind1", "field_that_is_not_marc")
+    );
+
+    assertEquals(
+      List.of("matched_id", "content", "marc", "marc_245", "marc_245_ind1"),
+      entityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+  }
+
+  @Test
+  void shouldCollectReferencedFieldNamesFromFqlCondition() {
+    Set<String> fieldNames = MarcFieldFactory.getReferencedFieldNames(new AndCondition(List.of(
+      new ContainsCondition(new FqlField("marc_245"), "Shakespeare"),
+      new EqualsCondition(new FqlField("record_type"), "MARC_BIB"),
+      new ContainsCondition(new FqlField("marc_245"), "Japanese")
+    )));
+
+    assertEquals(Set.of("marc_245", "record_type"), fieldNames);
+  }
+
+  @Test
+  void shouldThrowWhenMarcPlaceholderOmitsCorrelationValueGetter() {
     EntityType entityType = new EntityType()
       .id(UUID.randomUUID().toString())
       .name("test")
@@ -128,7 +156,7 @@ class MarcFieldFactoryTest {
         new EntityTypeColumn()
           .name("marc")
           .dataType(new MarcDataType().dataType("marcDataType"))
-          .idColumnName("matched_id")
+          .valueGetter(MARC_RECORD_ID_GETTER)
       ));
   }
 

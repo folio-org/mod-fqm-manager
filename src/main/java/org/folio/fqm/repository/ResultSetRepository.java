@@ -20,6 +20,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -66,13 +67,18 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
+    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+      getEntityType(executionContext.getTenantId(), entityTypeId),
+      fields
+    );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
     SelectConditionStep<Record> query = null;
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
-      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
+      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId())
+        ? baseEntityType
+        : MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -126,7 +132,10 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
+    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+      MarcFieldFactory.addSyntheticColumns(getEntityType(executionContext.getTenantId(), entityTypeId), fields),
+      fql.fqlCondition()
+    );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
     List<Select<Record>> partialQueries = new ArrayList<>();
 
@@ -135,8 +144,13 @@ public class ResultSetRepository {
       // (due to the fact the that integration test does not select from an actual table, and instead creates a subquery
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
-      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
+      EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId())
+        ? baseEntityType
+        : MarcFieldFactory.addSyntheticColumns(
+          MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields),
+          fql.fqlCondition()
+        );
+      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
         for (String condition : baseEntityType.getFilterConditions()) {

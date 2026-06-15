@@ -2,6 +2,10 @@ package org.folio.fqm.service;
 
 import org.folio.fqm.exception.EntityTypeNotFoundException;
 import org.folio.fqm.testutil.TestDataFixture;
+import org.folio.fql.model.ContainsCondition;
+import org.folio.fql.model.Fql;
+import org.folio.fql.model.field.FqlField;
+import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
@@ -19,6 +23,7 @@ import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.SubmitQuery;
+import org.folio.querytool.domain.dto.MarcDataType;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -76,6 +81,9 @@ class QueryManagementServiceTest {
   private ResultSetService resultSetService;
 
   @Mock
+  private FqlService fqlService;
+
+  @Mock
   private FqlValidationService fqlValidationService;
 
   @Mock
@@ -90,7 +98,7 @@ class QueryManagementServiceTest {
 
   @BeforeEach
   void setup() {
-    queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlValidationService, crossTenantQueryService, migrationService, 0);
+    queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlService, fqlValidationService, crossTenantQueryService, migrationService, 0);
     queryManagementService.setMaxConfiguredQuerySize(maxConfiguredQuerySize);
 
     // Mock the behavior of migrationService.verifyQueryIsUpToDate() to do nothing
@@ -427,6 +435,32 @@ class QueryManagementServiceTest {
       .thenReturn(Map.of());
     assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
 
+  }
+
+  @Test
+  void shouldAugmentEntityTypeWithDynamicMarcFieldsDuringValidation() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("matched_id").dataType(new StringType()).valueGetter(":record_lb.matched_id"),
+        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245": {"$contains": "Shakespeare"}}
+      """;
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlService.getFql(fqlQuery)).thenReturn(new Fql(fqlQuery, new ContainsCondition(new FqlField("marc_245"), "Shakespeare")));
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+
+    assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
+
+    ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
+    verify(fqlValidationService).validateFql(entityTypeCaptor.capture(), eq(fqlQuery));
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245"),
+      entityTypeCaptor.getValue().getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
   }
 
   @Test

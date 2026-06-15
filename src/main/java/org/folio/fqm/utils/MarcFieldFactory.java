@@ -1,13 +1,21 @@
 package org.folio.fqm.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
+import org.folio.fql.model.AndCondition;
+import org.folio.fql.model.FieldCondition;
+import org.folio.fql.model.FqlCondition;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.MarcDataType;
 
 @UtilityClass
@@ -25,6 +33,46 @@ public class MarcFieldFactory {
     return parse(fieldName).isPresent();
   }
 
+  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames) {
+    if (fieldNames == null || fieldNames.isEmpty() || entityType.getColumns() == null) {
+      return entityType;
+    }
+
+    List<EntityTypeColumn> updatedColumns = new ArrayList<>(entityType.getColumns());
+    Set<String> existingFieldNames = updatedColumns.stream()
+      .map(Field::getName)
+      .collect(LinkedHashSet::new, Set::add, Set::addAll);
+
+    for (String fieldName : fieldNames) {
+      if (fieldName == null || existingFieldNames.contains(fieldName)) {
+        continue;
+      }
+
+      createSyntheticColumn(entityType, fieldName).ifPresent(column -> {
+        updatedColumns.add(column);
+        existingFieldNames.add(fieldName);
+      });
+    }
+
+    return entityType.toBuilder().columns(updatedColumns).build();
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition) {
+    return addSyntheticColumns(entityType, getReferencedFieldNames(condition));
+  }
+
+  public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {
+    if (condition instanceof FieldCondition<?> fieldCondition) {
+      return Set.of(fieldCondition.field().getColumnName());
+    }
+    if (condition instanceof AndCondition andCondition) {
+      return andCondition.value().stream()
+        .map(MarcFieldFactory::getReferencedFieldNames)
+        .collect(LinkedHashSet::new, Set::addAll, Set::addAll);
+    }
+    return Set.of();
+  }
+
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName) {
     Optional<MarcFieldName> parsedField = parse(fieldName);
     Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
@@ -34,17 +82,9 @@ public class MarcFieldFactory {
     }
 
     EntityTypeColumn marcPlaceholder = placeholder.get();
-    if (marcPlaceholder.getIdColumnName() == null || marcPlaceholder.getIdColumnName().isBlank()) {
+    if (marcPlaceholder.getValueGetter() == null || marcPlaceholder.getValueGetter().isBlank()) {
       throw new InvalidEntityTypeDefinitionException(
-        "Generic MARC column must define idColumnName so MARC indexers can be correlated",
-        entityType
-      );
-    }
-
-    EntityTypeColumn marcIdColumn = EntityTypeUtils.findColumnByName(entityType, marcPlaceholder.getIdColumnName());
-    if (marcIdColumn.getValueGetter() == null || marcIdColumn.getValueGetter().isBlank()) {
-      throw new InvalidEntityTypeDefinitionException(
-        "MARC id column %s must define a valueGetter".formatted(marcPlaceholder.getIdColumnName()),
+        "Generic MARC column must define valueGetter so MARC indexers can be correlated",
         entityType
       );
     }
@@ -57,9 +97,8 @@ public class MarcFieldFactory {
       .queryable(true)
       .visibleByDefault(false)
       .essential(false)
-      .idColumnName(marcPlaceholder.getIdColumnName())
-      .valueGetter(buildValueGetter(marcField, marcIdColumn.getValueGetter()))
-      .filterValueGetter(buildFilterValueGetter(marcField, marcIdColumn.getValueGetter()))
+      .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter()))
+      .filterValueGetter(buildFilterValueGetter(marcField, marcPlaceholder.getValueGetter()))
       .valueFunction(MARC_VALUE_FUNCTION));
   }
 

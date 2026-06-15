@@ -207,18 +207,18 @@ Example shape:
   dataType: {
     dataType: 'marcDataType'
   },
-  queryable: false,
+  queryable: true,
   hidden: true,
   visibleByDefault: false,
-  essential: false,
-  idColumnName: 'matched_id',
+  essential: true,
+  valueGetter: ':record_lb.matched_id',
 }
 ```
 
 Notes:
 
-- `idColumnName` points to the existing entity type column whose `valueGetter` should be used to correlate to `marc_indexers` / `marc_indexers_leader`.
-- This keeps the placeholder contract within the existing `Field` / `EntityTypeColumn` model and avoids needing extra metadata on `marcDataType`.
+- The placeholder `valueGetter` is being used as a correlation hint to `marc_indexers` / `marc_indexers_leader`, not as a user-facing display getter for the generic `marc` field itself.
+- This keeps the placeholder contract within the existing `Field` / `EntityTypeColumn` model and avoids needing extra metadata on `marcDataType`, though it may still be refined later.
 - At the moment, no separate expansion config is assumed to be necessary for the POC.
 
 ## Query Semantics Assumptions

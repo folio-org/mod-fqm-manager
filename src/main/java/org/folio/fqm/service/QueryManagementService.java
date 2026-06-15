@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
@@ -14,6 +15,7 @@ import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
@@ -52,6 +54,7 @@ public class QueryManagementService {
   private final QueryProcessorService queryProcessorService;
   private final QueryResultsSorterService queryResultsSorterService;
   private final ResultSetService resultSetService;
+  private final FqlService fqlService;
   private final FqlValidationService fqlValidationService;
   private final CrossTenantQueryService crossTenantQueryService;
   private final MigrationService migrationService;
@@ -79,6 +82,7 @@ public class QueryManagementService {
                                 QueryProcessorService queryProcessorService,
                                 QueryResultsSorterService queryResultsSorterService,
                                 ResultSetService resultSetService,
+                                FqlService fqlService,
                                 FqlValidationService fqlValidationService,
                                 CrossTenantQueryService crossTenantQueryService,
                                 MigrationService migrationService,
@@ -91,6 +95,7 @@ public class QueryManagementService {
     this.queryProcessorService = queryProcessorService;
     this.queryResultsSorterService = queryResultsSorterService;
     this.resultSetService = resultSetService;
+    this.fqlService = fqlService;
     this.fqlValidationService = fqlValidationService;
     this.crossTenantQueryService = crossTenantQueryService;
     this.migrationService = migrationService;
@@ -297,6 +302,11 @@ public class QueryManagementService {
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
+    try {
+      entityType = MarcFieldFactory.addSyntheticColumns(entityType, fqlService.getFql(fqlQuery).fqlCondition());
+    } catch (RuntimeException ignored) {
+      // Leave malformed FQL handling to the standard validation service.
+    }
     Map<String, String> errorMap = fqlValidationService.validateFql(entityType, fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);

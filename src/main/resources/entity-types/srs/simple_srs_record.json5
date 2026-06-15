@@ -274,11 +274,11 @@
       dataType: {
         dataType: 'marcDataType',
       },
-      queryable: false,
+      queryable: true,
       hidden: true,
       visibleByDefault: false,
-      essential: false,
-      idColumnName: 'matched_id',
+      essential: true,
+      valueGetter: ':record_lb.matched_id',
     },
     {
       name: 'content',

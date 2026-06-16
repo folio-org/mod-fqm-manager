@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.UUID;
+import org.folio.fqm.TestMate;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.spring.FolioExecutionContext;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.fqm.migration.strategies.impl.V13CustomFieldRename;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import java.util.Map;
@@ -53,8 +53,8 @@ class V13CustomFieldRenameTest extends TestTemplate {
   @Mock
   FolioExecutionContext executionContext;
 
-    @InjectMocks
-private V13CustomFieldRename v13CustomFieldRename;
+  @InjectMocks
+  private V13CustomFieldRename v13CustomFieldRename;
 
   @BeforeEach
   void setup() {
@@ -176,8 +176,8 @@ private V13CustomFieldRename v13CustomFieldRename;
   }
 
     @Test
+    @TestMate(name = "TestMate-45cb1c613cc20dd211ab277591709559")
     void testGetFieldChangesShouldHandleDuplicateCustomFieldNames() {
-      // TestMate-45cb1c613cc20dd211ab277591709559
       // Given
       // Use a unique tenant ID to avoid hitting the internal cache populated by other tests
       String tenantId = "tenant_duplicate_test";
@@ -206,8 +206,10 @@ private V13CustomFieldRename v13CustomFieldRename;
       when(selectStep.from(CUSTOM_FIELD_SOURCE_VIEW)).thenReturn(joinStep);
       when(joinStep.where(org.mockito.ArgumentMatchers.any(org.jooq.Condition.class))).thenReturn(conditionStep);
       when(conditionStep.fetch()).thenReturn(result);
+
       // When
       Map<UUID, Map<String, String>> actualChanges = localStrategy.getFieldChanges();
+
       // Then
       assertThat(actualChanges).containsOnlyKeys(USERS_ENTITY_TYPE_ID);
       Map<String, String> userFieldChanges = actualChanges.get(USERS_ENTITY_TYPE_ID);

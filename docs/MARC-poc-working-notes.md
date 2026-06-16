@@ -104,48 +104,53 @@ Current assumption:
 
 - Indicator support does not require special condition syntax in the generated column name for this POC.
 
-### 6. Tag + subfield + indicator is currently a broader semantics question
+### 6. Tag + subfield + indicator can be modeled as a constrained subfield extension
 
 We have discussed a possible desire to support a shape like:
 
 - tag + subfield + indicator
 
-However, the important distinction is whether this means:
+The important distinction is whether this means:
 
 - "query/display the indicator itself" or
 - "query/display a subfield value, but only when the same MARC row or occurrence has a matching indicator value"
 
-The second case is where the simple dynamic-field model starts to break down.
+The first case is already covered by normal indicator columns like:
 
-A normal subfield query has one natural query value:
+- `marc_245_ind1`
+- `marc_245_ind2`
 
-- `marc_245_a contains 'abc'`
+The second case is the more interesting one. We now think it can fit the dynamic-field model if it is treated as a constrained subfield field.
 
-The queried value is the subfield value itself.
+Example:
 
-A hypothetical subfield+indicator query would need two separate pieces of query data:
+- `marc_245_ind1_7_a contains 'abc'`
 
-- the subfield value, for example `contains 'abc'`
-- the indicator constraint, for example `ind2 = '7'`
+In that model:
 
-That is awkward in the current field/operator/value model because only one of those can be the actual query value. If we try to encode the indicator value into the field name, the field name stops meaning "which value are we targeting" and starts carrying part of the predicate.
+- `245` selects the tag
+- `ind1 = '7'` is a fixed row constraint
+- `a` is the value-bearing subfield
+- the user-provided query value is still applied only to `marc.value`
 
-Example of the kind of shape we do **not** want to rely on:
+That gives the field one natural query value again: the subfield value. The indicator value is not competing with the query value at runtime; it is baked into the field definition as part of the selector.
 
-- `marc_650_a_ind2_7 contains 'Nuclear energy'`
+Current proposed grammar for this extension:
 
-This is possible in principle, but it is a messy contract because:
+- `marc_<tag>_ind1_<indicatorValue>_<subfield>`
+- `marc_<tag>_ind2_<indicatorValue>_<subfield>`
 
-- the field name is now mixing selector information with a filter condition
-- the actual query value only covers the subfield content, not the indicator constraint
-- it does not generalize well to richer same-occurrence cases
-- it makes the dynamic naming grammar harder to explain and harder to trust
+Examples:
+
+- `marc_245_ind1_7_a`
+- `marc_650_ind2_7_a`
 
 Current assumption:
 
-- The first case is already covered by normal indicator columns like `marc_245_ind1`.
-- The second case should not be forced into the current grammar by making the field name longer.
-- If we ever need this later, it should probably use a MARC-specific query structure or additional predicate metadata rather than a field-name hack.
+- The constrained indicator comes before the subfield.
+- The last token still identifies the value-bearing target.
+- We do not need the reverse shape, because the point of the field is still to query the subfield value while applying a fixed indicator constraint.
+- This should be treated as a targeted extension to the MARC grammar, not as a general solution for repeatable-field correlation.
 
 This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
 

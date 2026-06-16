@@ -205,47 +205,81 @@ exists (
 )
 ```
 
-## 4. Why tag + subfield + indicator is not part of the current POC
+## 4. Proposed next extension: constrained subfield with fixed indicator value
 
-This case is intentionally **not** part of the current first-pass grammar.
+This case is **not implemented yet**, but we now think it can fit the current MARC model cleanly enough to be a reasonable next extension.
 
-The reason is not that the SQL would be impossible. The problem is that the field contract becomes messy.
+Example dynamic field name:
 
-A normal subfield field has one natural query value:
+- `marc_245_ind1_7_a`
 
-- `marc_245_a contains 'Shakespeare'`
+Meaning:
 
-The queried value is the subfield value.
+- tag `245`
+- only rows where `ind1 = '7'`
+- query and display the value of subfield `a`
 
-A hypothetical tag + subfield + indicator field would need two different pieces of query data:
+The important modeling choice is that this is still a **subfield value query**. The indicator value is not the runtime query value. It is a fixed selector built into the field name.
 
-- the subfield value, for example `contains 'Nuclear energy'`
-- the indicator constraint, for example `ind2 = '7'`
+Example synthetic column:
 
-Under the current dynamic MARC model, each predicate is still basically:
+```js
+{
+  name: 'marc_245_ind1_7_a',
+  labelAlias: '245 ind1=7 $a',
+  dataType: {
+    dataType: 'marcDataType',
+  },
+  queryable: true,
+  visibleByDefault: false,
+  essential: false,
+  valueGetter: `(
+    SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
+    WHERE marc.marc_id = "record_lb".matched_id
+      AND marc.field_no = '245'
+      AND marc.ind1 = '7'
+      AND marc.subfield_no = 'a'
+  )`,
+  filterValueGetter: 'lower(marc.value)',
+  valueFunction: 'lower(:value)',
+}
+```
 
-- field name
-- operator
-- value
+Query SQL example:
 
-That means only one of those two things can be the actual query value. If we try to solve that by putting the indicator value into the field name, the field name starts carrying part of the predicate.
+- Dynamic field name: `marc_245_ind1_7_a`
+- Representative FQL: `{"marc_245_ind1_7_a": {"$contains": "Shakespeare"}}`
+- Effective `filterValueGetter`:
 
-Example of the kind of shape we do **not** want to rely on:
+```sql
+lower(marc.value)
+```
 
-- `marc_650_a_ind2_7 contains 'Nuclear energy'`
+- Effective SQL predicate shape:
 
-Why that is a poor contract:
+```sql
+exists (
+  select 1
+  from diku_mod_source_record_storage.marc_indexers marc
+  where marc.marc_id = "record_lb".matched_id
+    and marc.field_no = '245'
+    and marc.ind1 = '7'
+    and marc.subfield_no = 'a'
+    and lower(marc.value) like '%' || lower(:value) || '%'
+)
+```
 
-- the field name is no longer just identifying the target value
-- part of the filter logic is hidden inside the field name
-- the query value only represents the subfield content, not the indicator constraint
-- it does not scale well if we later need richer same-occurrence logic
+Why this is a cleaner direction than earlier ideas:
 
-Current conclusion:
+- the queried value is still only the subfield value
+- the indicator is treated as a fixed row constraint
+- the last token still identifies the value-bearing target
 
-- `marc_<tag>`, `marc_<tag>_ind1`, `marc_<tag>_ind2`, and `marc_<tag>_<subfield>` are good fits for the current model
-- subfield+indicator combinations are not
-- if we ever need that capability later, it should probably use MARC-specific predicate metadata or a MARC-specific query structure rather than a longer field name
+Important boundary:
+
+- this would solve the "subfield value with a fixed indicator constraint" case
+- it would **not** solve the broader "multiple queried values must all match within the same repeatable MARC occurrence" problem
 
 ## Current POC status
 
@@ -257,6 +291,6 @@ Currently implemented by the POC:
 
 Not yet implemented by the current grammar:
 
-- tag with subfield and indicator in one combined field
+- constrained subfield fields like `marc_245_ind1_7_a`
 - leader position fields
 - `006` / `007` / `008` byte-position fields

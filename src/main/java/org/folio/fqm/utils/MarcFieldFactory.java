@@ -28,6 +28,9 @@ public class MarcFieldFactory {
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   private static final Pattern TAG_ONLY_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$");
   private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<indicator>ind[12])$");
+  private static final Pattern CONSTRAINED_SUBFIELD_PATTERN = Pattern.compile(
+    "^marc_(?<tag>\\d{3})_(?<indicator>ind[12])_(?<indicatorValue>[a-z0-9])_(?<subfield>[a-z0-9])$"
+  );
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
 
   public static boolean isMarcFieldName(String fieldName) {
@@ -139,7 +142,7 @@ public class MarcFieldFactory {
   public static Optional<MarcFieldName> parse(String fieldName) {
     Matcher tagOnlyMatcher = TAG_ONLY_PATTERN.matcher(fieldName);
     if (tagOnlyMatcher.matches()) {
-      return Optional.of(new MarcFieldName(fieldName, tagOnlyMatcher.group("tag"), null, null));
+      return Optional.of(new MarcFieldName(fieldName, tagOnlyMatcher.group("tag"), null, null, null));
     }
 
     Matcher indicatorMatcher = INDICATOR_PATTERN.matcher(fieldName);
@@ -148,7 +151,19 @@ public class MarcFieldFactory {
         fieldName,
         indicatorMatcher.group("tag"),
         indicatorMatcher.group("indicator"),
+        null,
         null
+      ));
+    }
+
+    Matcher constrainedSubfieldMatcher = CONSTRAINED_SUBFIELD_PATTERN.matcher(fieldName);
+    if (constrainedSubfieldMatcher.matches()) {
+      return Optional.of(new MarcFieldName(
+        fieldName,
+        constrainedSubfieldMatcher.group("tag"),
+        constrainedSubfieldMatcher.group("indicator"),
+        constrainedSubfieldMatcher.group("indicatorValue").toLowerCase(),
+        constrainedSubfieldMatcher.group("subfield")
       ));
     }
 
@@ -157,6 +172,7 @@ public class MarcFieldFactory {
       return Optional.of(new MarcFieldName(
         fieldName,
         subfieldMatcher.group("tag"),
+        null,
         null,
         subfieldMatcher.group("subfield")
       ));
@@ -189,15 +205,15 @@ public class MarcFieldFactory {
   }
 
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
-    String selectedValue = marcField.isIndicator() ? "DISTINCT marc.%s".formatted(marcField.indicator()) : "marc.value";
-    String notNullCheck = marcField.isIndicator() ? "marc.%s IS NOT NULL".formatted(marcField.indicator()) : "marc.value IS NOT NULL";
+    String selectedValue = marcField.isIndicatorQuery() ? "DISTINCT marc.%s".formatted(marcField.indicator()) : "marc.value";
+    String notNullCheck = marcField.isIndicatorQuery() ? "marc.%s IS NOT NULL".formatted(marcField.indicator()) : "marc.value IS NOT NULL";
 
     return """
       (
         SELECT jsonb_agg(%s) FILTER (WHERE %s)
         FROM %s marc
         WHERE marc.marc_id = %s
-          AND marc.field_no = '%s'%s
+          AND marc.field_no = '%s'%s%s
       )
       """.formatted(
       selectedValue,
@@ -205,12 +221,13 @@ public class MarcFieldFactory {
       interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
       marcIdGetter,
       marcField.tag(),
+      buildIndicatorConstraintCondition(marcField),
       buildSubfieldCondition(marcField)
     ).trim();
   }
 
   private static String buildFilterValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
-    return marcField.isIndicator()
+    return marcField.isIndicatorQuery()
       ? "lower(marc.%s)".formatted(marcField.indicator())
       : "lower(marc.value)";
   }
@@ -238,10 +255,25 @@ public class MarcFieldFactory {
     return "\n          AND marc.subfield_no = '%s'".formatted(marcField.subfield());
   }
 
-  public record MarcFieldName(String fieldName, String tag, String indicator, String subfield) {
+  private static String buildIndicatorConstraintCondition(MarcFieldName marcField) {
+    if (!marcField.hasIndicatorConstraint()) {
+      return "";
+    }
 
-    public boolean isIndicator() {
-      return indicator != null;
+    return "\n          AND lower(marc.%s) = '%s'".formatted(
+      marcField.indicator(),
+      marcField.indicatorValue()
+    );
+  }
+
+  public record MarcFieldName(String fieldName, String tag, String indicator, String indicatorValue, String subfield) {
+
+    public boolean isIndicatorQuery() {
+      return indicator != null && indicatorValue == null && subfield == null;
+    }
+
+    public boolean hasIndicatorConstraint() {
+      return indicator != null && indicatorValue != null && subfield != null;
     }
 
     public boolean isSubfield() {
@@ -249,10 +281,13 @@ public class MarcFieldFactory {
     }
 
     public String labelAlias() {
-      if (isIndicator()) {
+      if (isIndicatorQuery()) {
         return "%s %s".formatted(tag, indicator);
       }
       if (isSubfield()) {
+        if (hasIndicatorConstraint()) {
+          return "%s %s=%s $%s".formatted(tag, indicator, indicatorValue, subfield);
+        }
         return "%s$%s".formatted(tag, subfield);
       }
       return tag;
@@ -262,9 +297,12 @@ public class MarcFieldFactory {
   public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter, String filterValueGetter) {
 
     public String whereClause() {
-      return "marc.marc_id = %s and marc.field_no = '%s'%s".formatted(
+      return "marc.marc_id = %s and marc.field_no = '%s'%s%s".formatted(
         marcIdGetter,
         marcField.tag(),
+        marcField.hasIndicatorConstraint()
+          ? " and lower(marc.%s) = '%s'".formatted(marcField.indicator(), marcField.indicatorValue())
+          : "",
         marcField.isSubfield() ? " and marc.subfield_no = '%s'".formatted(marcField.subfield()) : ""
       );
     }

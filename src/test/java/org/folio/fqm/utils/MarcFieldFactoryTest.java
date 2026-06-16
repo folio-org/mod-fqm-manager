@@ -33,6 +33,7 @@ class MarcFieldFactoryTest {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind2"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_7_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
   }
 
@@ -43,6 +44,7 @@ class MarcFieldFactoryTest {
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind3"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_a_ind1"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1_a"));
   }
 
   @Test
@@ -76,6 +78,17 @@ class MarcFieldFactoryTest {
     assertEquals("245$a", column.getLabelAlias());
     assertInstanceOf(MarcDataType.class, column.getDataType());
     assertSqlEquals(expectedSubfieldValueGetter("245", "a"), column.getValueGetter());
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateConstrainedSubfieldSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a").orElseThrow();
+
+    assertEquals("marc_245_ind1_7_a", column.getName());
+    assertEquals("245 ind1=7 $a", column.getLabelAlias());
+    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "7", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
   }
 
@@ -217,6 +230,19 @@ class MarcFieldFactoryTest {
 
   private static String expectedSubfieldFilterValueGetter(String tag, String subfield) {
     return "lower(marc.value)";
+  }
+
+  private static String expectedConstrainedSubfieldValueGetter(String tag, String indicator, String indicatorValue, String subfield) {
+    return """
+      (
+        SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
+        WHERE marc.marc_id = "record_lb".matched_id
+          AND marc.field_no = '%s'
+          AND lower(marc.%s) = '%s'
+          AND marc.subfield_no = '%s'
+      )
+      """.formatted(tag, indicator, indicatorValue, subfield).trim();
   }
 
   private static void assertSqlEquals(String expected, String actual) {

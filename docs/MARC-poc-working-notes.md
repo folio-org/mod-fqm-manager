@@ -120,7 +120,7 @@ The first case is already covered by normal indicator columns like:
 - `marc_245_ind1`
 - `marc_245_ind2`
 
-The second case is the more interesting one. We now think it can fit the dynamic-field model if it is treated as a constrained subfield field.
+The second case is the more interesting one. We now support it by treating it as a constrained subfield field.
 
 Example:
 
@@ -135,7 +135,7 @@ In that model:
 
 That gives the field one natural query value again: the subfield value. The indicator value is not competing with the query value at runtime; it is baked into the field definition as part of the selector.
 
-Current proposed grammar for this extension:
+Supported grammar for this extension:
 
 - `marc_<tag>_ind1_<indicatorValue>_<subfield>`
 - `marc_<tag>_ind2_<indicatorValue>_<subfield>`
@@ -296,14 +296,30 @@ Meaning:
 - display should aggregate matching subfield values
 - query semantics should check whether at least one matching MARC row satisfies the operator/value
 
+### Constrained subfield columns
+
+Examples:
+
+- `marc_245_ind1_7_a`
+- `marc_650_ind2_7_a`
+
+Meaning:
+
+- query/display the subfield value for that tag
+- only consider rows whose indicator matches the baked-in indicator value
+- display should aggregate matching subfield values
+- query semantics should check whether at least one matching MARC row satisfies both the fixed indicator constraint and the user-provided operator/value
+
 ### Current POC grammar
 
-The first grammar pass should support:
+The current grammar supports:
 
 - `marc_<tag>`
 - `marc_<tag>_ind1`
 - `marc_<tag>_ind2`
 - `marc_<tag>_<subfield>`
+- `marc_<tag>_ind1_<indicatorValue>_<subfield>`
+- `marc_<tag>_ind2_<indicatorValue>_<subfield>`
 
 Examples:
 
@@ -311,10 +327,10 @@ Examples:
 - `marc_245`
 - `marc_245_ind1`
 - `marc_245_a`
+- `marc_245_ind1_7_a`
 
-Not part of this first grammar pass:
+Not part of the current grammar:
 
-- `marc_<tag>_<subfield>_<indicator condition>`
 - leader position syntax
 - `006` / `007` / `008` byte-position syntax
 

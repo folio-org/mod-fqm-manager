@@ -205,9 +205,9 @@ exists (
 )
 ```
 
-## 4. Proposed next extension: constrained subfield with fixed indicator value
+## 4. Constrained subfield with fixed indicator value
 
-This case is **not implemented yet**, but we now think it can fit the current MARC model cleanly enough to be a reasonable next extension.
+This case is now supported by the current MARC grammar.
 
 Example dynamic field name:
 
@@ -238,7 +238,7 @@ Example synthetic column:
     FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
     WHERE marc.marc_id = "record_lb".matched_id
       AND marc.field_no = '245'
-      AND marc.ind1 = '7'
+      AND lower(marc.ind1) = '7'
       AND marc.subfield_no = 'a'
   )`,
   filterValueGetter: 'lower(marc.value)',
@@ -264,7 +264,7 @@ exists (
   from diku_mod_source_record_storage.marc_indexers marc
   where marc.marc_id = "record_lb".matched_id
     and marc.field_no = '245'
-    and marc.ind1 = '7'
+    and lower(marc.ind1) = '7'
     and marc.subfield_no = 'a'
     and lower(marc.value) like '%' || lower(:value) || '%'
 )
@@ -278,7 +278,7 @@ Why this is a cleaner direction than earlier ideas:
 
 Important boundary:
 
-- this would solve the "subfield value with a fixed indicator constraint" case
+- this solves the "subfield value with a fixed indicator constraint" case
 - it would **not** solve the broader "multiple queried values must all match within the same repeatable MARC occurrence" problem
 
 ## Current POC status
@@ -288,9 +288,9 @@ Currently implemented by the POC:
 - tag only
 - tag with indicator
 - tag with subfield
+- constrained subfield with fixed indicator value
 
 Not yet implemented by the current grammar:
 
-- constrained subfield fields like `marc_245_ind1_7_a`
 - leader position fields
 - `006` / `007` / `008` byte-position fields

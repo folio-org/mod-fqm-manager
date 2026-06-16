@@ -1,6 +1,6 @@
 # MARC synthetic column examples
 
-This document shows example `EntityTypeColumn` shapes for the MARC scenarios we have been discussing.
+This document shows example `EntityTypeColumn` shapes for the MARC scenarios we have been discussing for our POC.
 
 The examples below are meant to represent the *runtime* synthetic columns created by the POC, not the generic placeholder defined in the JSON5 entity type file.
 

@@ -113,12 +113,41 @@ We have discussed a possible desire to support a shape like:
 However, the important distinction is whether this means:
 
 - "query/display the indicator itself" or
-- "query/display a subfield value, but only when the same repeatable MARC occurrence has a matching indicator"
+- "query/display a subfield value, but only when the same MARC row or occurrence has a matching indicator value"
+
+The second case is where the simple dynamic-field model starts to break down.
+
+A normal subfield query has one natural query value:
+
+- `marc_245_a contains 'abc'`
+
+The queried value is the subfield value itself.
+
+A hypothetical subfield+indicator query would need two separate pieces of query data:
+
+- the subfield value, for example `contains 'abc'`
+- the indicator constraint, for example `ind2 = '7'`
+
+That is awkward in the current field/operator/value model because only one of those can be the actual query value. If we try to encode the indicator value into the field name, the field name stops meaning "which value are we targeting" and starts carrying part of the predicate.
+
+Example of the kind of shape we do **not** want to rely on:
+
+- `marc_650_a_ind2_7 contains 'Nuclear energy'`
+
+This is possible in principle, but it is a messy contract because:
+
+- the field name is now mixing selector information with a filter condition
+- the actual query value only covers the subfield content, not the indicator constraint
+- it does not generalize well to richer same-occurrence cases
+- it makes the dynamic naming grammar harder to explain and harder to trust
 
 Current assumption:
 
 - The first case is already covered by normal indicator columns like `marc_245_ind1`.
-- The second case is tied to same-occurrence correlation semantics and should not be treated as part of the simple naming contract unless we explicitly decide to solve that broader problem.
+- The second case should not be forced into the current grammar by making the field name longer.
+- If we ever need this later, it should probably use a MARC-specific query structure or additional predicate metadata rather than a field-name hack.
+
+This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields
 

@@ -205,44 +205,47 @@ exists (
 )
 ```
 
-## 4. Tag with subfield and indicator
+## 4. Why tag + subfield + indicator is not part of the current POC
 
-This case is **not implemented in the current first-pass grammar**, but if we decide to support it later, the synthetic column would likely look something like this.
+This case is intentionally **not** part of the current first-pass grammar.
 
-Illustrative dynamic field name:
+The reason is not that the SQL would be impossible. The problem is that the field contract becomes messy.
 
-- `marc_650_a_ind2_7`
+A normal subfield field has one natural query value:
 
-Illustrative synthetic column:
+- `marc_245_a contains 'Shakespeare'`
 
-```js
-{
-  name: 'marc_650_a_ind2_7',
-  labelAlias: '650$a (ind2=7)',
-  dataType: {
-    dataType: 'marcDataType',
-  },
-  queryable: true,
-  visibleByDefault: false,
-  essential: false,
-  valueGetter: `(
-    SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
-    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-    WHERE marc.marc_id = "record_lb".matched_id
-      AND marc.field_no = '650'
-      AND marc.subfield_no = 'a'
-      AND marc.ind2 = '7'
-  )`,
-  filterValueGetter: 'lower(marc.value)',
-  valueFunction: 'lower(:value)',
-}
-```
+The queried value is the subfield value.
 
-Important note:
+A hypothetical tag + subfield + indicator field would need two different pieces of query data:
 
-- this is just an example of the likely *shape*
-- the exact future field-name grammar for this case is still undecided
-- if we add this scenario, it should be treated as one combined synthetic field so the indicator and subfield constraints apply together
+- the subfield value, for example `contains 'Nuclear energy'`
+- the indicator constraint, for example `ind2 = '7'`
+
+Under the current dynamic MARC model, each predicate is still basically:
+
+- field name
+- operator
+- value
+
+That means only one of those two things can be the actual query value. If we try to solve that by putting the indicator value into the field name, the field name starts carrying part of the predicate.
+
+Example of the kind of shape we do **not** want to rely on:
+
+- `marc_650_a_ind2_7 contains 'Nuclear energy'`
+
+Why that is a poor contract:
+
+- the field name is no longer just identifying the target value
+- part of the filter logic is hidden inside the field name
+- the query value only represents the subfield content, not the indicator constraint
+- it does not scale well if we later need richer same-occurrence logic
+
+Current conclusion:
+
+- `marc_<tag>`, `marc_<tag>_ind1`, `marc_<tag>_ind2`, and `marc_<tag>_<subfield>` are good fits for the current model
+- subfield+indicator combinations are not
+- if we ever need that capability later, it should probably use MARC-specific predicate metadata or a MARC-specific query structure rather than a longer field name
 
 ## Current POC status
 

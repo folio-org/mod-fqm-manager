@@ -25,6 +25,7 @@ public class MarcFieldFactory {
 
   private static final String MARC_INDEXERS_TABLE = "${tenant_id}_mod_source_record_storage.marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
+  private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   private static final Pattern TAG_ONLY_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$");
   private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<indicator>ind[12])$");
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
@@ -114,6 +115,27 @@ public class MarcFieldFactory {
       .valueFunction(MARC_VALUE_FUNCTION));
   }
 
+  public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
+    Optional<MarcFieldName> parsedField = parse(fieldName);
+    Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
+    Optional<EntityTypeColumn> syntheticField = findField(entityType, fieldName);
+
+    if (parsedField.isEmpty() || placeholder.isEmpty() || syntheticField.isEmpty()) {
+      return Optional.empty();
+    }
+
+    String marcIdGetter = placeholder.get().getValueGetter();
+    String valueGetter = syntheticField.get().getValueGetter();
+    String filterValueGetter = syntheticField.get().getFilterValueGetter();
+    if (marcIdGetter == null || marcIdGetter.isBlank() || valueGetter == null || valueGetter.isBlank()
+      || filterValueGetter == null || filterValueGetter.isBlank()) {
+      return Optional.empty();
+    }
+
+    return extractMarcTableName(valueGetter)
+      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter, filterValueGetter));
+  }
+
   public static Optional<MarcFieldName> parse(String fieldName) {
     Matcher tagOnlyMatcher = TAG_ONLY_PATTERN.matcher(fieldName);
     if (tagOnlyMatcher.matches()) {
@@ -155,6 +177,17 @@ public class MarcFieldFactory {
       .findFirst();
   }
 
+  public static Optional<EntityTypeColumn> findField(EntityType entityType, String fieldName) {
+    List<EntityTypeColumn> columns = entityType.getColumns();
+    if (columns == null) {
+      return Optional.empty();
+    }
+
+    return columns.stream()
+      .filter(column -> fieldName.equals(column.getName()))
+      .findFirst();
+  }
+
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
     String selectedValue = marcField.isIndicator() ? "DISTINCT marc.%s".formatted(marcField.indicator()) : "marc.value";
     String notNullCheck = marcField.isIndicator() ? "marc.%s IS NOT NULL".formatted(marcField.indicator()) : "marc.value IS NOT NULL";
@@ -177,28 +210,9 @@ public class MarcFieldFactory {
   }
 
   private static String buildFilterValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
-    String selectedValue = marcField.isIndicator()
-      ? "DISTINCT marc.%s".formatted(marcField.indicator())
-      : "marc.value";
-    String notNullCheck = marcField.isIndicator()
-      ? "marc.%s IS NOT NULL".formatted(marcField.indicator())
-      : "marc.value IS NOT NULL";
-
-    return """
-      (
-        SELECT lower(string_agg(%s, ' ') FILTER (WHERE %s))
-        FROM %s marc
-        WHERE marc.marc_id = %s
-          AND marc.field_no = '%s'%s
-      )
-      """.formatted(
-      selectedValue,
-      notNullCheck,
-      interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
-      marcIdGetter,
-      marcField.tag(),
-      buildSubfieldCondition(marcField)
-    ).trim();
+    return marcField.isIndicator()
+      ? "lower(marc.%s)".formatted(marcField.indicator())
+      : "lower(marc.value)";
   }
 
   private static String interpolateTenant(String input, String tenantId) {
@@ -206,6 +220,14 @@ public class MarcFieldFactory {
       return input;
     }
     return input.replace("${tenant_id}", tenantId);
+  }
+
+  private static Optional<String> extractMarcTableName(String valueGetter) {
+    Matcher matcher = MARC_TABLE_PATTERN.matcher(valueGetter);
+    if (!matcher.find()) {
+      return Optional.empty();
+    }
+    return Optional.of(matcher.group("table"));
   }
 
   private static String buildSubfieldCondition(MarcFieldName marcField) {
@@ -234,6 +256,17 @@ public class MarcFieldFactory {
         return "%s$%s".formatted(tag, subfield);
       }
       return tag;
+    }
+  }
+
+  public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter, String filterValueGetter) {
+
+    public String whereClause() {
+      return "marc.marc_id = %s and marc.field_no = '%s'%s".formatted(
+        marcIdGetter,
+        marcField.tag(),
+        marcField.isSubfield() ? " and marc.subfield_no = '%s'".formatted(marcField.subfield()) : ""
+      );
     }
   }
 }

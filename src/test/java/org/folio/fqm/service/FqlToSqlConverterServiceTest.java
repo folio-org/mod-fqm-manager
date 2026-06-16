@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
@@ -10,6 +11,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcDataType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
@@ -82,6 +84,9 @@ class FqlToSqlConverterServiceTest {
             ))
           )),
           new EntityTypeColumn().name("jsonbStringArray").dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType"))),
+          new EntityTypeColumn().name("marc")
+            .dataType(new MarcDataType().dataType("marcDataType"))
+            .valueGetter("\"record_lb\".matched_id"),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("jsonbArrayType"))
             .valueGetter("valueGetter")
@@ -112,6 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245", "marc_245_a", "marc_245_ind1"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -267,6 +273,15 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayFieldWithValueFunction": {"$eq": "French"}}""",
         DSL.condition("{0} @> jsonb_build_array({1}::text)", field("foo(valueGetter)").cast(JSONB.class), field("lower(:value)", String.class, param("value", "French")))
+      ),
+      Arguments.of(
+        "equals MARC indicator",
+        """
+          {"marc_245_ind1": {"$eq": "1"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) = {0})",
+          field("lower(:value)", String.class, param("value", "1"))
+        )
       ),
       Arguments.of(
         "not equals string",
@@ -547,6 +562,33 @@ class FqlToSqlConverterServiceTest {
         """
           {"field1": {"$contains": "substring"}}""",
         field("field1").containsIgnoreCase("substring")
+      ),
+      Arguments.of(
+        "contains MARC tag",
+        """
+          {"marc_245": {"$contains": "Shakespeare"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.value) like {0})",
+          DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "Shakespeare")), inline("%"))
+        )
+      ),
+      Arguments.of(
+        "contains MARC indicator",
+        """
+          {"marc_245_ind1": {"$contains": "1"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) like {0})",
+          DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "1")), inline("%"))
+        )
+      ),
+      Arguments.of(
+        "contains MARC subfield",
+        """
+          {"marc_245_a": {"$contains": "Shakespeare"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' and lower(marc.value) like {0})",
+          DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "Shakespeare")), inline("%"))
+        )
       ),
       Arguments.of(
         "in list",

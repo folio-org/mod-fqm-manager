@@ -43,7 +43,7 @@ The POC should prove the following:
 The current working expectation is:
 
 - MARC fields display like multi-valued MARC data.
-- MARC fields query like string-oriented fields.
+- MARC fields query via MARC-specific row-level `EXISTS` / `NOT EXISTS` semantics.
 - MARC fields may expose a more restricted operator set than normal array-like fields.
 
 ### 2. Expansion should follow the existing read-time pattern
@@ -233,6 +233,8 @@ Examples:
 Meaning:
 
 - query/display the values associated with the tag, without requiring subfield or indicator targeting
+- display should aggregate matching values
+- query semantics should check whether at least one matching MARC row satisfies the operator/value
 
 ### Indicator columns
 
@@ -244,6 +246,8 @@ Examples:
 Meaning:
 
 - query/display indicator values for that tag
+- display should aggregate distinct indicator values
+- query semantics should treat indicator values as membership checks, e.g. `marc_245_ind1 = '1'` means "indicator 1 has value 1 for this tag"
 
 ### Subfield columns
 
@@ -255,6 +259,8 @@ Examples:
 Meaning:
 
 - query/display the values for that subfield within that tag
+- display should aggregate matching subfield values
+- query semantics should check whether at least one matching MARC row satisfies the operator/value
 
 ### Current POC grammar
 
@@ -337,8 +343,7 @@ These are the likely places the POC will need changes:
 2. Should leader positions use the same naming grammar, and if so what should it be?
 3. How should blank indicator values be represented in display and querying?
 4. Where exactly should dynamic MARC field recognition happen in the request/query pipeline?
-5. Should the POC use a custom MARC query branch in `FqlToSqlConverterService`, or should it lean on `filterValueGetter` more heavily?
-6. Do we want the first POC to include one leader-position example, or leave leader support for the second pass?
+5. Do we want the first POC to include one leader-position example, or leave leader support for the second pass?
 
 ## Current Recommended Next Step
 

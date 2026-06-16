@@ -89,8 +89,7 @@ class MarcFieldFactoryTest {
 
     assertTrue(column.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
     assertFalse(column.getValueGetter().contains("${tenant_id}"));
-    assertTrue(column.getFilterValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
-    assertFalse(column.getFilterValueGetter().contains("${tenant_id}"));
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
   }
 
   @Test
@@ -186,14 +185,7 @@ class MarcFieldFactoryTest {
   }
 
   private static String expectedTagFilterValueGetter(String tag) {
-    return """
-      (
-        SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-        WHERE marc.marc_id = "record_lb".matched_id
-          AND marc.field_no = '%s'
-      )
-      """.formatted(tag).trim();
+    return "lower(marc.value)";
   }
 
   private static String expectedIndicatorValueGetter(String tag, String indicator) {
@@ -208,14 +200,7 @@ class MarcFieldFactoryTest {
   }
 
   private static String expectedIndicatorFilterValueGetter(String tag, String indicator) {
-    return """
-      (
-        SELECT lower(string_agg(DISTINCT marc.%s, ' ') FILTER (WHERE marc.%s IS NOT NULL))
-        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-        WHERE marc.marc_id = "record_lb".matched_id
-          AND marc.field_no = '%s'
-      )
-      """.formatted(indicator, indicator, tag).trim();
+    return "lower(marc.%s)".formatted(indicator);
   }
 
   private static String expectedSubfieldValueGetter(String tag, String subfield) {
@@ -231,15 +216,7 @@ class MarcFieldFactoryTest {
   }
 
   private static String expectedSubfieldFilterValueGetter(String tag, String subfield) {
-    return """
-      (
-        SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-        WHERE marc.marc_id = "record_lb".matched_id
-          AND marc.field_no = '%s'
-          AND marc.subfield_no = '%s'
-      )
-      """.formatted(tag, subfield).trim();
+    return "lower(marc.value)";
   }
 
   private static void assertSqlEquals(String expected, String actual) {

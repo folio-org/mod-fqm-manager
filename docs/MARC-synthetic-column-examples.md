@@ -59,12 +59,7 @@ Example synthetic column:
     WHERE marc.marc_id = "record_lb".matched_id
       AND marc.field_no = '245'
   )`,
-  filterValueGetter: `(
-    SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-    WHERE marc.marc_id = "record_lb".matched_id
-      AND marc.field_no = '245'
-  )`,
+  filterValueGetter: 'lower(marc.value)',
   valueFunction: 'lower(:value)',
 }
 ```
@@ -81,23 +76,19 @@ Query SQL example:
 - Effective `filterValueGetter`:
 
 ```sql
-(
-  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-)
+lower(marc.value)
 ```
 
 - Effective SQL predicate shape:
 
 ```sql
-(
-  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-) LIKE '%' || lower(:value) || '%'
+exists (
+  select 1
+  from diku_mod_source_record_storage.marc_indexers marc
+  where marc.marc_id = "record_lb".matched_id
+    and marc.field_no = '245'
+    and lower(marc.value) like '%' || lower(:value) || '%'
+)
 ```
 
 ## 2. Tag with indicator
@@ -124,20 +115,15 @@ Example synthetic column:
     WHERE marc.marc_id = "record_lb".matched_id
       AND marc.field_no = '245'
   )`,
-  filterValueGetter: `(
-    SELECT lower(string_agg(DISTINCT marc.ind1, ' ') FILTER (WHERE marc.ind1 IS NOT NULL))
-    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-    WHERE marc.marc_id = "record_lb".matched_id
-      AND marc.field_no = '245'
-  )`,
+  filterValueGetter: 'lower(marc.ind1)',
   valueFunction: 'lower(:value)',
 }
 ```
 
 Meaning:
 
-- display the first indicator values for tag `245`
-- query those indicator values directly
+- display the distinct indicator values for tag `245`
+- query those indicator values by checking whether a matching indicator value is present
 
 Query SQL example:
 
@@ -146,23 +132,19 @@ Query SQL example:
 - Effective `filterValueGetter`:
 
 ```sql
-(
-  SELECT lower(string_agg(DISTINCT marc.ind1, ' ') FILTER (WHERE marc.ind1 IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-)
+lower(marc.ind1)
 ```
 
 - Effective SQL predicate shape:
 
 ```sql
-(
-  SELECT lower(string_agg(DISTINCT marc.ind1, ' ') FILTER (WHERE marc.ind1 IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-) = lower(:value)
+exists (
+  select 1
+  from diku_mod_source_record_storage.marc_indexers marc
+  where marc.marc_id = "record_lb".matched_id
+    and marc.field_no = '245'
+    and lower(marc.ind1) = lower(:value)
+)
 ```
 
 ## 3. Tag with subfield
@@ -190,13 +172,7 @@ Example synthetic column:
       AND marc.field_no = '245'
       AND marc.subfield_no = 'a'
   )`,
-  filterValueGetter: `(
-    SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-    WHERE marc.marc_id = "record_lb".matched_id
-      AND marc.field_no = '245'
-      AND marc.subfield_no = 'a'
-  )`,
+  filterValueGetter: 'lower(marc.value)',
   valueFunction: 'lower(:value)',
 }
 ```
@@ -213,25 +189,20 @@ Query SQL example:
 - Effective `filterValueGetter`:
 
 ```sql
-(
-  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-    AND marc.subfield_no = 'a'
-)
+lower(marc.value)
 ```
 
 - Effective SQL predicate shape:
 
 ```sql
-(
-  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-  FROM diku_mod_source_record_storage.marc_indexers marc
-  WHERE marc.marc_id = "record_lb".matched_id
-    AND marc.field_no = '245'
-    AND marc.subfield_no = 'a'
-) LIKE '%' || lower(:value) || '%'
+exists (
+  select 1
+  from diku_mod_source_record_storage.marc_indexers marc
+  where marc.marc_id = "record_lb".matched_id
+    and marc.field_no = '245'
+    and marc.subfield_no = 'a'
+    and lower(marc.value) like '%' || lower(:value) || '%'
+)
 ```
 
 ## 4. Tag with subfield and indicator
@@ -262,14 +233,7 @@ Illustrative synthetic column:
       AND marc.subfield_no = 'a'
       AND marc.ind2 = '7'
   )`,
-  filterValueGetter: `(
-    SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
-    FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
-    WHERE marc.marc_id = "record_lb".matched_id
-      AND marc.field_no = '650'
-      AND marc.subfield_no = 'a'
-      AND marc.ind2 = '7'
-  )`,
+  filterValueGetter: 'lower(marc.value)',
   valueFunction: 'lower(:value)',
 }
 ```

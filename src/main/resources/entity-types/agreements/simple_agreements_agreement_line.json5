@@ -81,10 +81,11 @@
       visibleByDefault: true,
       valueGetter: ':sourceAlias.ent_type',
       values: [
-        { label: 'Internal', value: null },
+        { label: 'Internal', value: 'internal' },
         { label: 'External', value: 'external' },
         { label: 'Detached', value: 'detached' },
-      ]
+      ],
+      defaultValue: 'internal',
     },
     {
       name: 'ent_authority',

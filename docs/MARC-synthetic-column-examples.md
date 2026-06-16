@@ -33,6 +33,8 @@ All of the examples also assume the same common behavior:
 - `essential` is `false`
 - `valueFunction` is `lower(:value)`
 
+For the query SQL examples below, assume the tenant has already been expanded to `diku`, so the runtime table name is `diku_mod_source_record_storage.marc_indexers`.
+
 ## 1. Tag only
 
 Example dynamic field name:
@@ -72,6 +74,32 @@ Meaning:
 - display all indexed values associated with tag `245`
 - query those values as one searchable MARC field
 
+Query SQL example:
+
+- Dynamic field name: `marc_245`
+- Representative FQL: `{"marc_245": {"$contains": "Shakespeare"}}`
+- Effective `filterValueGetter`:
+
+```sql
+(
+  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+)
+```
+
+- Effective SQL predicate shape:
+
+```sql
+(
+  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+) LIKE '%' || lower(:value) || '%'
+```
+
 ## 2. Tag with indicator
 
 Example dynamic field name:
@@ -110,6 +138,32 @@ Meaning:
 
 - display the first indicator values for tag `245`
 - query those indicator values directly
+
+Query SQL example:
+
+- Dynamic field name: `marc_245_ind1`
+- Representative FQL: `{"marc_245_ind1": {"$eq": "1"}}`
+- Effective `filterValueGetter`:
+
+```sql
+(
+  SELECT lower(string_agg(DISTINCT marc.ind1, ' ') FILTER (WHERE marc.ind1 IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+)
+```
+
+- Effective SQL predicate shape:
+
+```sql
+(
+  SELECT lower(string_agg(DISTINCT marc.ind1, ' ') FILTER (WHERE marc.ind1 IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+) = lower(:value)
+```
 
 ## 3. Tag with subfield
 
@@ -151,6 +205,34 @@ Meaning:
 
 - display the indexed values for subfield `245$a`
 - query only those subfield values
+
+Query SQL example:
+
+- Dynamic field name: `marc_245_a`
+- Representative FQL: `{"marc_245_a": {"$contains": "Shakespeare"}}`
+- Effective `filterValueGetter`:
+
+```sql
+(
+  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+    AND marc.subfield_no = 'a'
+)
+```
+
+- Effective SQL predicate shape:
+
+```sql
+(
+  SELECT lower(string_agg(marc.value, ' ') FILTER (WHERE marc.value IS NOT NULL))
+  FROM diku_mod_source_record_storage.marc_indexers marc
+  WHERE marc.marc_id = "record_lb".matched_id
+    AND marc.field_no = '245'
+    AND marc.subfield_no = 'a'
+) LIKE '%' || lower(:value) || '%'
+```
 
 ## 4. Tag with subfield and indicator
 

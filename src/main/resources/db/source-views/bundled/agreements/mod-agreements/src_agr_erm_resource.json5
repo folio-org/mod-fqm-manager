@@ -1,0 +1,5 @@
+{
+  name: 'src_agr_erm_resource',
+  dependsOn: [['${tenant_id}_mod_agreements', 'erm_resource']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_agreements.erm_resource',
+}

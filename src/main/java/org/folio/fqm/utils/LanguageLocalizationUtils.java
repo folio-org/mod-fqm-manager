@@ -23,6 +23,7 @@ import static org.apache.commons.collections4.IterableUtils.toList;
 public final class LanguageLocalizationUtils {
 
   public static final String LANGUAGE_DISAMBIGUATION_TEMPLATE = "mod-fqm-manager.languages.disambiguated";
+  public static final String LANGUAGE_TRANSLATION_TEMPLATE = "mod-fqm-manager.languages.%s";
   private static final String LANGUAGES_FILEPATH = "languages.json5";
   private static final LanguageMetadata LANGUAGE_METADATA = loadLanguageMetadata();
 
@@ -39,7 +40,7 @@ public final class LanguageLocalizationUtils {
   }
 
   public static Map<String, String> getLanguageDisplayMap(Iterable<String> codes, Locale folioLocale, TranslationService translationService) {
-    List<LocalizedLanguageValue> localizedValues = getLocalizedLanguageNames(codes, folioLocale);
+    List<LocalizedLanguageValue> localizedValues = getLocalizedLanguageNames(codes, folioLocale, translationService);
 
     // Count how many distinct raw codes collapse to each localized label so we only append
     // the code for labels that would otherwise be ambiguous, like "German" for both "de" and "ger".
@@ -75,8 +76,20 @@ public final class LanguageLocalizationUtils {
   }
 
   public static String localizeLanguageCode(String code, Locale folioLocale) {
+    return localizeLanguageCode(code, folioLocale, null);
+  }
+
+  public static String localizeLanguageCode(String code, Locale folioLocale, TranslationService translationService) {
+    String translation = getLanguageTranslation(code, translationService);
+    if (StringUtils.isNotEmpty(translation)) {
+      return translation;
+    }
+
     String a2Code = LANGUAGE_METADATA.codeToA2Map().get(code);
     String name = LANGUAGE_METADATA.codeToNameMap().get(code);
+    if (StringUtils.isNotEmpty(name)) {
+      return name;
+    }
     if (StringUtils.isNotEmpty(a2Code)) {
       Locale languageLocale = Locale.of(a2Code);
       String label = languageLocale.getDisplayLanguage(folioLocale);
@@ -84,15 +97,30 @@ public final class LanguageLocalizationUtils {
         return label;
       }
     }
-    if (StringUtils.isNotEmpty(name)) {
-      return name;
-    }
     return code;
   }
 
-  private static List<LocalizedLanguageValue> getLocalizedLanguageNames(Iterable<String> codes, Locale folioLocale) {
+  private static String getLanguageTranslation(String code, TranslationService translationService) {
+    if (translationService == null) {
+      return null;
+    }
+    String canonicalCode = LANGUAGE_METADATA.codeToCanonicalCodeMap().get(code);
+    if (StringUtils.isEmpty(canonicalCode)) {
+      return null;
+    }
+
+    String translationKey = LANGUAGE_TRANSLATION_TEMPLATE.formatted(canonicalCode);
+    String translation = translationService.format(translationKey);
+    if (StringUtils.isBlank(translation) || translation.equals(translationKey)) {
+      return null;
+    }
+    return translation;
+  }
+
+  private static List<LocalizedLanguageValue> getLocalizedLanguageNames(Iterable<String> codes, Locale folioLocale,
+                                                                        TranslationService translationService) {
     return getDistinctLanguageCodes(codes).stream()
-      .map(code -> new LocalizedLanguageValue(code, localizeLanguageCode(code, folioLocale)))
+      .map(code -> new LocalizedLanguageValue(code, localizeLanguageCode(code, folioLocale, translationService)))
       .toList();
   }
 
@@ -123,6 +151,7 @@ public final class LanguageLocalizationUtils {
       });
       Map<String, String> codeToNameMap = new HashMap<>();
       Map<String, String> codeToA2Map = new HashMap<>();
+      Map<String, String> codeToCanonicalCodeMap = new HashMap<>();
 
       for (Map<String, String> language : languages) {
         String alpha3 = language.get("alpha3");
@@ -131,19 +160,22 @@ public final class LanguageLocalizationUtils {
 
         codeToA2Map.put(alpha3, alpha2);
         codeToNameMap.put(alpha3, name);
+        codeToCanonicalCodeMap.put(alpha3, alpha3);
 
         if (StringUtils.isNotEmpty(alpha2)) {
           codeToA2Map.put(alpha2, alpha2);
           codeToNameMap.put(alpha2, name);
+          codeToCanonicalCodeMap.put(alpha2, alpha3);
         }
       }
-      return new LanguageMetadata(codeToNameMap, codeToA2Map);
+      return new LanguageMetadata(codeToNameMap, codeToA2Map, codeToCanonicalCodeMap);
     } catch (Exception e) {
       throw new IllegalStateException("Failed to load language metadata", e);
     }
   }
 
-  static record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map) {
+  static record LanguageMetadata(Map<String, String> codeToNameMap, Map<String, String> codeToA2Map,
+                                 Map<String, String> codeToCanonicalCodeMap) {
   }
 
   private record LocalizedLanguageValue(String rawValue, String localizedValue) {

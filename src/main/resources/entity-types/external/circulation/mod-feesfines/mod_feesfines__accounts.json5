@@ -152,7 +152,13 @@
       sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'feeFineType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      valueSourceApi: {
+        path: 'feefines',
+        valueJsonPath: '$.feefines.*.id',
+        labelJsonPath: '$.feefines.*.feeFineType',
+      },
       essential: true,
+      idColumnName: 'fee_fine_id',
     },
     {
       name: 'fee_fine_owner',
@@ -165,7 +171,13 @@
       sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'feeFineOwner'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      valueSourceApi: {
+        path: 'owners',
+        valueJsonPath: '$.owners.*.id',
+        labelJsonPath: '$.owners.*.owner',
+      },
       essential: true,
+      idColumnName: 'owner_id',
     },
     {
       name: 'title',
@@ -215,6 +227,11 @@
       sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'materialType'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      valueSourceApi: {
+        path: 'material-types',
+        valueJsonPath: '$.mtypes.*.name',
+        labelJsonPath: '$.mtypes.*.name',
+      },
       essential: true,
     },
     {
@@ -228,6 +245,11 @@
       sourceAlias: 'src__circulation__feesfines__accounts',
       filterValueGetter: "lower(${tenant_id}_mod_feesfines.f_unaccent(:src__circulation__feesfines__accounts.jsonb->>'location'::text))",
       valueFunction: 'lower(${tenant_id}_mod_feesfines.f_unaccent(:value))',
+      valueSourceApi: {
+        path: 'locations',
+        valueJsonPath: '$.locations.*.name',
+        labelJsonPath: '$.locations.*.name',
+      },
       essential: true,
     },
     {
@@ -406,6 +428,7 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'materialTypeId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      essential: true,
       joinsTo: [
         {
           targetId: '8b1f51d6-8795-4113-a72e-3b7dc6cc6dfe',
@@ -425,6 +448,7 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'feeFineId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      essential: true,
       joinsTo: [
         {
           targetId: 'b721ddae-0e0e-52f9-83cb-aa5cf83008fe',
@@ -444,6 +468,7 @@
       valueGetter: "(:src__circulation__feesfines__accounts.jsonb->>'ownerId')::uuid",
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__circulation__feesfines__accounts',
+      essential: true,
       joinsTo: [
         {
           targetId: 'a49dc8b4-8316-534d-94af-c5ca7748d6e9',

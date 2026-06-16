@@ -196,7 +196,6 @@ class QueryManagementServiceTest {
 
   @Test
   void shouldNotSaveInvalidFqlQuery() {
-    UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();
     EntityType entityType = new EntityType().name("test-entity");
     String fqlQuery = """
@@ -204,7 +203,6 @@ class QueryManagementServiceTest {
       """;
     int maxQuerySize = 100;
     SubmitQuery submitQuery = new SubmitQuery().entityTypeId(entityTypeId).fqlQuery(fqlQuery);
-    when(executionContext.getUserId()).thenReturn(createdById);
     when(entityTypeService.getEntityTypeDefinition(entityTypeId,true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(entityType, fqlQuery)).thenReturn(Map.of("field1", "Field is invalid"));
     assertThrows(InvalidFqlException.class, () -> queryManagementService.runFqlQueryAsync(submitQuery));
@@ -470,6 +468,71 @@ class QueryManagementServiceTest {
       .orElseThrow();
     assertFalse(marc245.getValueGetter().contains("${tenant_id}"));
     assertTrue(marc245.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+  }
+
+  @Test
+  void shouldIncludeReferencedMarcFieldsInAsyncQueryResults() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+        new EntityTypeColumn().name("content").dataType(new StringType()),
+        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(new ArrayList<>(List.of("content")));
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlService.getFql(fqlQuery)).thenReturn(new Fql(fqlQuery, new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare")));
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+
+    QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
+
+    assertEquals(expectedIdentifier, actualIdentifier);
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    verify(queryRepository).saveQuery(queryCaptor.capture());
+    assertEquals(List.of("content", "id", "marc_245_a"), queryCaptor.getValue().fields());
+  }
+
+  @Test
+  void shouldIncludeReferencedMarcFieldsInSynchronousQueryResults() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+        new EntityTypeColumn().name("field1").dataType(new StringType()),
+        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+    Integer defaultLimit = 100;
+    List<String> requestedFields = new ArrayList<>(List.of("field1"));
+    List<String> expectedFields = List.of("field1", "id", "marc_245_a");
+    List<Map<String, Object>> expectedContent = List.of(
+      Map.of("id", UUID.randomUUID().toString(), "field1", "value1", "marc_245_a", List.of("Shakespeare, William"))
+    );
+
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlService.getFql(fqlQuery)).thenReturn(new Fql(fqlQuery, new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare")));
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(expectedFields), eq(defaultLimit)))
+      .thenReturn(expectedContent);
+
+    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, requestedFields, defaultLimit);
+
+    assertEquals(new ResultsetPage().content(expectedContent).totalRecords(expectedContent.size()), actualResults);
   }
 
   @Test

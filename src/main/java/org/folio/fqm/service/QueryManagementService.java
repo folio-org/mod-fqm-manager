@@ -127,17 +127,19 @@ public class QueryManagementService {
         fields.add(idColumn);
       }
     }
-    Query query = Query.newQuery(submitQuery.getEntityTypeId(),
-      EntityTypeUtils.computeEntityTypeResultsHash(entityType),
-      submitQuery.getFqlQuery(),
-      fields,
-      executionContext.getUserId());
     validateQuery(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery());
 
     // Verify that the query is up to date before execution
     // Note: Use the actual requested fields, not the default ones from the entity type
     MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(submitQuery.getEntityTypeId(), submitQuery.getFqlQuery(), submitQuery.getFields() != null ? submitQuery.getFields() : List.of());
     migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
+
+    fields = addReferencedMarcFields(fields, submitQuery.getFqlQuery());
+    Query query = Query.newQuery(submitQuery.getEntityTypeId(),
+      EntityTypeUtils.computeEntityTypeResultsHash(entityType),
+      submitQuery.getFqlQuery(),
+      fields,
+      executionContext.getUserId());
 
     QueryIdentifier queryIdentifier = queryRepository.saveQuery(query);
     int maxQuerySize = submitQuery.getMaxSize() == null ? maxConfiguredQuerySize : Math.min(submitQuery.getMaxSize(), maxConfiguredQuerySize);
@@ -171,6 +173,8 @@ public class QueryManagementService {
     // Verify that the query is up to date before execution
     MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(entityTypeId, query, fields);
     migrationService.throwExceptionIfQueryNeedsMigration(migratableQueryInformation);
+
+    fields = addReferencedMarcFields(fields, query);
 
     List<Map<String, Object>> queryResults = queryProcessorService.processQuery(entityType, query, fields, limit);
     // NOTE: unlike the async query, which returns the total number of records matching the query, the synchronous query
@@ -368,5 +372,17 @@ public class QueryManagementService {
       .stream()
       .map(Field::getName)
       .toList();
+  }
+
+  private List<String> addReferencedMarcFields(List<String> fields, String fqlQuery) {
+    LinkedHashSet<String> updatedFields = new LinkedHashSet<>(fields);
+    try {
+      MarcFieldFactory.getReferencedFieldNames(fqlService.getFql(fqlQuery).fqlCondition()).stream()
+        .filter(MarcFieldFactory::isMarcFieldName)
+        .forEach(updatedFields::add);
+    } catch (RuntimeException ignored) {
+      // Leave malformed FQL handling to the normal validation path.
+    }
+    return new ArrayList<>(updatedFields);
   }
 }

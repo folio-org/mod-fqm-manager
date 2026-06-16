@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.fqm.TestMate;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.repository.EntityTypeRepository;
 import org.folio.querytool.domain.dto.EntityType;
@@ -42,13 +43,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.postgresql.util.PSQLException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.folio.fqm.exception.FqmException;
 import java.util.stream.Stream;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.verify;
 import static org.hamcrest.Matchers.empty;
 import java.util.Collections;
-import static org.mockito.ArgumentMatchers.anyList;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeInitializationServiceTest {
@@ -340,68 +339,74 @@ class EntityTypeInitializationServiceTest {
     );
   }
 
-    @Test
-void validateEntityTypesAndFillUsedBy_shouldPopulateUsedByAndValidate() {
-  // TestMate-4c49393eaaa34d7e2d916f1630133f0d
-  // Given
-  UUID idA = UUID.fromString("11111111-1111-1111-1111-111111111111");
-  UUID idB = UUID.fromString("22222222-2222-2222-2222-222222222222");
-  String tenantId = "tenant_1";
-  EntityType entityTypeA = new EntityType().id(idA.toString()).name("Entity A");
-  EntityType entityTypeB = new EntityType().id(idB.toString()).name("Entity B");
-  List<EntityType> input = List.of(entityTypeA, entityTypeB);
-  List<UUID> entityTypeIds = List.of(idA, idB);
-  EntityType repoEntityA = new EntityType().id(idA.toString()).usedBy(List.of("mod-a"));
-  EntityType repoEntityB = new EntityType().id(idB.toString()).usedBy(List.of("mod-b"));
-  when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-  when(entityTypeRepository.getEntityTypeDefinitions(entityTypeIds, tenantId))
-    .thenReturn(Stream.of(repoEntityA, repoEntityB));
-  // When
-  entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
-  // Then
-  assertThat(entityTypeA.getUsedBy(), contains("mod-a"));
-  assertThat(entityTypeB.getUsedBy(), contains("mod-b"));
-  verify(entityTypeRepository).getEntityTypeDefinitions(entityTypeIds, tenantId);
-  verify(entityTypeValidationService).validateEntityType(idA, entityTypeA, entityTypeIds);
-  verify(entityTypeValidationService).validateEntityType(idB, entityTypeB, entityTypeIds);
-}
+  @Test
+  @TestMate(name = "TestMate-4c49393eaaa34d7e2d916f1630133f0d")
+  void validateEntityTypesAndFillUsedBy_shouldPopulateUsedByAndValidate() {
+    // Given
+    UUID idA = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    UUID idB = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    String tenantId = "tenant_1";
+    EntityType entityTypeA = new EntityType().id(idA.toString()).name("Entity A");
+    EntityType entityTypeB = new EntityType().id(idB.toString()).name("Entity B");
+    List<EntityType> input = List.of(entityTypeA, entityTypeB);
+    List<UUID> entityTypeIds = List.of(idA, idB);
+    EntityType repoEntityA = new EntityType().id(idA.toString()).usedBy(List.of("mod-a"));
+    EntityType repoEntityB = new EntityType().id(idB.toString()).usedBy(List.of("mod-b"));
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    when(entityTypeRepository.getEntityTypeDefinitions(entityTypeIds, tenantId))
+      .thenReturn(Stream.of(repoEntityA, repoEntityB));
 
-    @Test
-void validateEntityTypesAndFillUsedBy_shouldDefaultEmptyUsedByWhenNotFound() {
-  // TestMate-80d47c4a9c656be9763009ebf0c636f2
-  // Given
-  UUID entityTypeId = UUID.fromString("33333333-3333-3333-3333-333333333333");
-  String tenantId = "tenant_1";
-  EntityType newEntityType = new EntityType()
-    .id(entityTypeId.toString())
-    .name("New Entity Type");
-  List<EntityType> input = List.of(newEntityType);
-  List<UUID> entityTypeIds = List.of(entityTypeId);
-  when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-  when(entityTypeRepository.getEntityTypeDefinitions(entityTypeIds, tenantId))
-    .thenReturn(Stream.empty());
-  // When
-  entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
-  // Then
-  assertThat(newEntityType.getUsedBy(), is(empty()));
-  verify(entityTypeRepository).getEntityTypeDefinitions(entityTypeIds, tenantId);
-  verify(entityTypeValidationService).validateEntityType(entityTypeId, newEntityType, entityTypeIds);
-}
+    // When
+    entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
 
-    @Test
-void validateEntityTypesAndFillUsedBy_shouldHandleEmptyInputList() {
-  // TestMate-46c52ca9671447cfe69f36ed9a8853f0
-  // Given
-  String tenantId = "test-tenant";
-  List<EntityType> input = Collections.emptyList();
-  List<UUID> emptyIdList = Collections.emptyList();
-  when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
-  when(entityTypeRepository.getEntityTypeDefinitions(emptyIdList, tenantId))
-    .thenReturn(Stream.empty());
-  // When
-  entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
-  // Then
-  verify(entityTypeRepository).getEntityTypeDefinitions(emptyIdList, tenantId);
-  verifyNoInteractions(entityTypeValidationService);
-}
+    // Then
+    assertThat(entityTypeA.getUsedBy(), contains("mod-a"));
+    assertThat(entityTypeB.getUsedBy(), contains("mod-b"));
+    verify(entityTypeRepository).getEntityTypeDefinitions(entityTypeIds, tenantId);
+    verify(entityTypeValidationService).validateEntityType(idA, entityTypeA, entityTypeIds);
+    verify(entityTypeValidationService).validateEntityType(idB, entityTypeB, entityTypeIds);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-80d47c4a9c656be9763009ebf0c636f2")
+  void validateEntityTypesAndFillUsedBy_shouldDefaultEmptyUsedByWhenNotFound() {
+    // Given
+    UUID entityTypeId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    String tenantId = "tenant_1";
+    EntityType newEntityType = new EntityType()
+      .id(entityTypeId.toString())
+      .name("New Entity Type");
+    List<EntityType> input = List.of(newEntityType);
+    List<UUID> entityTypeIds = List.of(entityTypeId);
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    when(entityTypeRepository.getEntityTypeDefinitions(entityTypeIds, tenantId))
+      .thenReturn(Stream.empty());
+
+    // When
+    entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
+
+    // Then
+    assertThat(newEntityType.getUsedBy(), is(empty()));
+    verify(entityTypeRepository).getEntityTypeDefinitions(entityTypeIds, tenantId);
+    verify(entityTypeValidationService).validateEntityType(entityTypeId, newEntityType, entityTypeIds);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-46c52ca9671447cfe69f36ed9a8853f0")
+  void validateEntityTypesAndFillUsedBy_shouldHandleEmptyInputList() {
+    // Given
+    String tenantId = "test-tenant";
+    List<EntityType> input = Collections.emptyList();
+    List<UUID> emptyIdList = Collections.emptyList();
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    when(entityTypeRepository.getEntityTypeDefinitions(emptyIdList, tenantId))
+      .thenReturn(Stream.empty());
+
+    // When
+    entityTypeInitializationService.validateEntityTypesAndFillUsedBy(input);
+
+    // Then
+    verify(entityTypeRepository).getEntityTypeDefinitions(emptyIdList, tenantId);
+    verifyNoInteractions(entityTypeValidationService);
+  }
 }

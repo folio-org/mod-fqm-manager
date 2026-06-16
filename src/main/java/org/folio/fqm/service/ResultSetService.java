@@ -311,7 +311,10 @@ public class ResultSetService {
           return null;
         }
         String rawCode = value.toString();
-        return languageDisplayMap.getOrDefault(rawCode, LanguageLocalizationUtils.localizeLanguageCode(rawCode, folioLocale));
+        String displayLabel = languageDisplayMap.get(rawCode);
+        return displayLabel != null
+          ? displayLabel
+          : LanguageLocalizationUtils.localizeLanguageCode(rawCode, folioLocale, translationService);
       })
       .toList();
   }

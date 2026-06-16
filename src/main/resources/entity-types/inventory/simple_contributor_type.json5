@@ -37,10 +37,7 @@
         ${tenant_id}_mod_inventory_storage.f_unaccent (:sourceAlias.jsonb->>'name'::text)\
       )",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent (:value))',
-      source: {
-        entityTypeId: 'a09e4959-3a6f-4fc6-a8a8-16bb9d30dba2',
-        columnName: 'name',
-      },
+      idColumnName: 'id',
       valueSourceApi: {
         path: 'contributor-types',
         valueJsonPath: '$.contributorTypes.*.id',

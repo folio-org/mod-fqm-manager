@@ -36,10 +36,6 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":addr.name",
-      source: {
-        entityTypeId: '3fe1b126-52d1-4b72-a346-9a73721c6931',
-        columnName: 'name',
-      },
       valueSourceApi: {
         path: 'tenant-addresses',
         valueJsonPath: '$.addresses.*.name',
@@ -58,10 +54,6 @@
       essential: true,
       valueGetter: ":sourceAlias.address",
       idColumnName: 'id',
-      source: {
-        entityTypeId: '3fe1b126-52d1-4b72-a346-9a73721c6931',
-        columnName: 'address',
-      },
       valueSourceApi: {
         path: 'tenant-addresses',
         valueJsonPath: '$.addresses.*.id',

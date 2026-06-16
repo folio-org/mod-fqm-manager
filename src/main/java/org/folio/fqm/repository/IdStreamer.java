@@ -100,7 +100,7 @@ public class IdStreamer {
                                 Fql fql, int batchSize,
                                 int maxQuerySize, UUID queryId,
                                 List<String> tenantsToQuery, boolean ecsEnabled) {
-    entityType = MarcFieldFactory.addSyntheticColumns(entityType, fql.fqlCondition());
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, fql.fqlCondition(), executionContext.getTenantId());
     UUID entityTypeId = UUID.fromString(entityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
     Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
@@ -110,7 +110,8 @@ public class IdStreamer {
         ? entityType
         : MarcFieldFactory.addSyntheticColumns(
           entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false),
-          fql.fqlCondition()
+          fql.fqlCondition(),
+          tenantId
         );
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
 

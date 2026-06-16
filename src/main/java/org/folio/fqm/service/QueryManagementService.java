@@ -303,7 +303,11 @@ public class QueryManagementService {
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
     try {
-      entityType = MarcFieldFactory.addSyntheticColumns(entityType, fqlService.getFql(fqlQuery).fqlCondition());
+      entityType = MarcFieldFactory.addSyntheticColumns(
+        entityType,
+        fqlService.getFql(fqlQuery).fqlCondition(),
+        executionContext.getTenantId()
+      );
     } catch (RuntimeException ignored) {
       // Leave malformed FQL handling to the standard validation service.
     }

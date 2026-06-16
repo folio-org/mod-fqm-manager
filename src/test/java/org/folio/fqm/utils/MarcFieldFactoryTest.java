@@ -80,6 +80,20 @@ class MarcFieldFactoryTest {
   }
 
   @Test
+  void shouldInterpolateTenantIdWhenProvided() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(
+      entityTypeWithMarcSupport(),
+      "marc_245",
+      "diku"
+    ).orElseThrow();
+
+    assertTrue(column.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+    assertFalse(column.getValueGetter().contains("${tenant_id}"));
+    assertTrue(column.getFilterValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+    assertFalse(column.getFilterValueGetter().contains("${tenant_id}"));
+  }
+
+  @Test
   void shouldReturnEmptyWhenEntityTypeDoesNotSupportMarcFields() {
     EntityType entityType = new EntityType()
       .id(UUID.randomUUID().toString())

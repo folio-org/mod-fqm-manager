@@ -69,7 +69,8 @@ public class ResultSetRepository {
 
     EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
       getEntityType(executionContext.getTenantId(), entityTypeId),
-      fields
+      fields,
+      executionContext.getTenantId()
     );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
@@ -78,7 +79,7 @@ public class ResultSetRepository {
       String tenantId = tenantsToQuery.get(i);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId())
         ? baseEntityType
-        : MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields);
+        : MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields, tenantId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -133,8 +134,9 @@ public class ResultSetRepository {
     }
 
     EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
-      MarcFieldFactory.addSyntheticColumns(getEntityType(executionContext.getTenantId(), entityTypeId), fields),
-      fql.fqlCondition()
+      MarcFieldFactory.addSyntheticColumns(getEntityType(executionContext.getTenantId(), entityTypeId), fields, executionContext.getTenantId()),
+      fql.fqlCondition(),
+      executionContext.getTenantId()
     );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
     List<Select<Record>> partialQueries = new ArrayList<>();
@@ -147,8 +149,9 @@ public class ResultSetRepository {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId())
         ? baseEntityType
         : MarcFieldFactory.addSyntheticColumns(
-          MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields),
-          fql.fqlCondition()
+          MarcFieldFactory.addSyntheticColumns(getEntityType(tenantId, entityTypeId), fields, tenantId),
+          fql.fqlCondition(),
+          tenantId
         );
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 

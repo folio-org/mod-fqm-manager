@@ -33,7 +33,7 @@ public class MarcFieldFactory {
     return parse(fieldName).isPresent();
   }
 
-  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames) {
+  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames, String tenantId) {
     if (fieldNames == null || fieldNames.isEmpty() || entityType.getColumns() == null) {
       return entityType;
     }
@@ -48,7 +48,7 @@ public class MarcFieldFactory {
         continue;
       }
 
-      createSyntheticColumn(entityType, fieldName).ifPresent(column -> {
+      createSyntheticColumn(entityType, fieldName, tenantId).ifPresent(column -> {
         updatedColumns.add(column);
         existingFieldNames.add(fieldName);
       });
@@ -57,8 +57,16 @@ public class MarcFieldFactory {
     return entityType.toBuilder().columns(updatedColumns).build();
   }
 
+  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames) {
+    return addSyntheticColumns(entityType, fieldNames, null);
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
+    return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
+  }
+
   public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition) {
-    return addSyntheticColumns(entityType, getReferencedFieldNames(condition));
+    return addSyntheticColumns(entityType, condition, null);
   }
 
   public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {
@@ -74,6 +82,10 @@ public class MarcFieldFactory {
   }
 
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName) {
+    return createSyntheticColumn(entityType, fieldName, null);
+  }
+
+  public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {
     Optional<MarcFieldName> parsedField = parse(fieldName);
     Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
 
@@ -97,8 +109,8 @@ public class MarcFieldFactory {
       .queryable(true)
       .visibleByDefault(false)
       .essential(false)
-      .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter()))
-      .filterValueGetter(buildFilterValueGetter(marcField, marcPlaceholder.getValueGetter()))
+      .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
+      .filterValueGetter(buildFilterValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
       .valueFunction(MARC_VALUE_FUNCTION));
   }
 
@@ -143,7 +155,7 @@ public class MarcFieldFactory {
       .findFirst();
   }
 
-  private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter) {
+  private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
     String selectedValue = marcField.isIndicator() ? "DISTINCT marc.%s".formatted(marcField.indicator()) : "marc.value";
     String notNullCheck = marcField.isIndicator() ? "marc.%s IS NOT NULL".formatted(marcField.indicator()) : "marc.value IS NOT NULL";
 
@@ -157,14 +169,14 @@ public class MarcFieldFactory {
       """.formatted(
       selectedValue,
       notNullCheck,
-      MARC_INDEXERS_TABLE,
+      interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
       marcIdGetter,
       marcField.tag(),
       buildSubfieldCondition(marcField)
     ).trim();
   }
 
-  private static String buildFilterValueGetter(MarcFieldName marcField, String marcIdGetter) {
+  private static String buildFilterValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
     String selectedValue = marcField.isIndicator()
       ? "DISTINCT marc.%s".formatted(marcField.indicator())
       : "marc.value";
@@ -182,11 +194,18 @@ public class MarcFieldFactory {
       """.formatted(
       selectedValue,
       notNullCheck,
-      MARC_INDEXERS_TABLE,
+      interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
       marcIdGetter,
       marcField.tag(),
       buildSubfieldCondition(marcField)
     ).trim();
+  }
+
+  private static String interpolateTenant(String input, String tenantId) {
+    if (tenantId == null || tenantId.isBlank()) {
+      return input;
+    }
+    return input.replace("${tenant_id}", tenantId);
   }
 
   private static String buildSubfieldCondition(MarcFieldName marcField) {

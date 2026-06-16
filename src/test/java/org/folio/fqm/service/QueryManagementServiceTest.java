@@ -46,7 +46,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -100,6 +102,7 @@ class QueryManagementServiceTest {
   void setup() {
     queryManagementService = new QueryManagementService(entityTypeService, executionContext, queryRepository, queryResultsRepository, queryExecutionService, queryProcessorService, queryResultsSorterService, resultSetService, fqlService, fqlValidationService, crossTenantQueryService, migrationService, 0);
     queryManagementService.setMaxConfiguredQuerySize(maxConfiguredQuerySize);
+    lenient().when(executionContext.getTenantId()).thenReturn("diku");
 
     // Mock the behavior of migrationService.verifyQueryIsUpToDate() to do nothing
     // Use lenient() to avoid UnnecessaryStubbingException for tests that don't use this mock
@@ -461,6 +464,12 @@ class QueryManagementServiceTest {
       List.of("matched_id", "marc", "marc_245"),
       entityTypeCaptor.getValue().getColumns().stream().map(EntityTypeColumn::getName).toList()
     );
+    EntityTypeColumn marc245 = entityTypeCaptor.getValue().getColumns().stream()
+      .filter(column -> "marc_245".equals(column.getName()))
+      .findFirst()
+      .orElseThrow();
+    assertFalse(marc245.getValueGetter().contains("${tenant_id}"));
+    assertTrue(marc245.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
   }
 
   @Test

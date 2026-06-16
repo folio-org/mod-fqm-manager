@@ -281,6 +281,16 @@ Important boundary:
 - this solves the "subfield value with a fixed indicator constraint" case
 - it would **not** solve the broader "multiple queried values must all match within the same repeatable MARC occurrence" problem
 
+Related nuance:
+
+- a query like `marc_245_ind1_7_a = 'xyz' AND marc_245_ind2_7_a = 'xyz'` is a useful approximation for "both indicators are 7 for the same subfield value"
+- but it is not a guaranteed same-row `ind1 + ind2` match, because each constrained field is still evaluated independently
+
+Other remaining boundaries:
+
+- multiple subfield predicates still cannot be guaranteed to match within the same repeatable MARC occurrence
+- blank indicator handling still needs a dedicated naming/query rule
+
 ## Current POC status
 
 Currently implemented by the POC:

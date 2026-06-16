@@ -152,7 +152,26 @@ Current assumption:
 - We do not need the reverse shape, because the point of the field is still to query the subfield value while applying a fixed indicator constraint.
 - This should be treated as a targeted extension to the MARC grammar, not as a general solution for repeatable-field correlation.
 
+Approximation we can already make:
+
+- `marc_245_ind1_7_a = 'xyz' AND marc_245_ind2_7_a = 'xyz'`
+
+This will often behave the way a user expects, especially for nonrepeatable tags or when the subfield value is highly specific. In many real records, it is more likely that both conditions refer to the same MARC row than that two different rows happen to share the same subfield value under different indicators.
+
+However, it is still only an approximation. The query means:
+
+- there exists a row where `ind1 = '7'`, `subfield = 'a'`, and `value = 'xyz'`
+- and there exists a row where `ind2 = '7'`, `subfield = 'a'`, and `value = 'xyz'`
+
+Those two matches could still come from different rows. So this is useful in practice, but it should not be documented as guaranteeing a combined `ind1 + ind2` same-row match.
+
 This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
+
+Remaining boundaries of this approach:
+
+- multiple subfield predicates that must all match within the same repeatable MARC occurrence are still not solved
+- guaranteed combined `ind1 + ind2` same-row constraints are still not solved unless we add a dedicated combined grammar or richer MARC-specific predicate model
+- blank indicator handling still needs an explicit design decision for both field naming and query behavior
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields
 

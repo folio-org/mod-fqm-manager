@@ -167,10 +167,17 @@ Those two matches could still come from different rows. So this is useful in pra
 
 This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
 
+How this relates to the broader same-entry story:
+
+- the combined `ind1 + ind2` case should be treated as part of that broader repeatable-entry problem
+- a future implementation of same-entry correlation should also be expected to handle this MARC case
+- the current `marcDataType` / `EXISTS` approach is compatible with that direction
+- the future solution would likely need to combine compatible MARC predicates into one row-level `EXISTS` rather than evaluating them as separate independent `EXISTS` clauses
+
 Remaining boundaries of this approach:
 
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence are still not solved
-- guaranteed combined `ind1 + ind2` same-row constraints are still not solved unless we add a dedicated combined grammar or richer MARC-specific predicate model
+- guaranteed combined `ind1 + ind2` same-row constraints are still not solved by the current implementation
 - blank indicator handling still needs an explicit design decision for both field naming and query behavior
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields

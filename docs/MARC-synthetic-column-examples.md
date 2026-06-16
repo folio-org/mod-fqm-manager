@@ -285,6 +285,8 @@ Related nuance:
 
 - a query like `marc_245_ind1_7_a = 'xyz' AND marc_245_ind2_7_a = 'xyz'` is a useful approximation for "both indicators are 7 for the same subfield value"
 - but it is not a guaranteed same-row `ind1 + ind2` match, because each constrained field is still evaluated independently
+- this should be considered part of the broader same-repeatable-entry problem, so a future same-entry implementation should also cover this MARC case
+- with the current `marcDataType` approach, that future implementation would likely do this by combining compatible MARC predicates into one row-level `EXISTS`
 
 Other remaining boundaries:
 

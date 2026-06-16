@@ -25,10 +25,6 @@
       hidden: true,
       essential: true,
       valueGetter: ':sourceAlias.id',
-      source: {
-        columnName: 'id',
-        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
-      },
       valueSourceApi: {
         path: 'location-units/libraries',
         valueJsonPath: '$.loclibs.*.id',
@@ -48,10 +44,6 @@
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
-      source: {
-        columnName: 'name',
-        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
-      },
       valueSourceApi: {
         path: 'location-units/libraries',
         valueJsonPath: '$.loclibs.*.name',
@@ -69,10 +61,6 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ":sourceAlias.jsonb->>'code'",
-      source: {
-        columnName: 'code',
-        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
-      },
       valueSourceApi: {
         path: 'location-units/libraries',
         valueJsonPath: '$.loclibs.*.code',
@@ -91,10 +79,6 @@
       essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'campusId'",
-      source: {
-        columnName: 'campus_id',
-        entityTypeId: '32f58888-1a7b-4840-98f8-cc69ca93fc67',
-      },
       valueSourceApi: {
         path: 'location-units/libraries',
         valueJsonPath: '$.loclibs.*.campusId',

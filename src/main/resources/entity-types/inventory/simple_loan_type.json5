@@ -74,10 +74,6 @@
       valueGetter: ":sourceAlias.jsonb->>'name'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'name'::text))",
       valueFunction: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))",
-      source: {
-        entityTypeId: '04107b49-ad2f-47ad-879f-6737b3018027',
-        columnName: 'name',
-      },
       valueSourceApi: {
         path: 'loan-types',
         valueJsonPath: '$.loantypes.*.name',

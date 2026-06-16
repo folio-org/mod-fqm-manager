@@ -57,6 +57,7 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.code',
       sourceAlias: 'src__authorities__entities_links__authority_heading_type',
+      essential: true,
     },
     {
       name: 'queryable',

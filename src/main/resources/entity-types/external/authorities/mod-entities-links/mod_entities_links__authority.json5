@@ -93,11 +93,6 @@
       sourceAlias: 'src__authorities__entities_links__authority',
       filterValueGetter: 'lower(:sourceAlias.heading_type)',
       valueFunction: 'lower(:value)',
-      valueSourceApi: {
-        path: 'authority-heading-types',
-        valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
-        labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
-      },
       source: {
         entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
         columnName: 'name',
@@ -134,18 +129,13 @@
             {
               name: 'heading_type',
               queryable: true,
-              valueSourceApi: {
-                path: 'authority-heading-types',
-                valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
-                labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
-              },
               source: {
                 entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
                 columnName: 'name',
               },
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              valueFunction: ':value',
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'headingType')) FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -172,12 +162,15 @@
                   label: 'Later heading',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems)",
-              valueFunction: ':value',
+              valueGetter: "(SELECT array_agg(relationship_types.value) FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value->'relationshipType', '[]'::jsonb)) AS relationship_types(value))",
+              filterValueGetter: "(SELECT array_agg(lower(relationship_types.value)) FROM jsonb_array_elements(:sourceAlias.sft_headings) AS elems CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value->'relationshipType', '[]'::jsonb)) AS relationship_types(value))",
+              valueFunction: 'lower(:value)',
               property: 'relationshipType',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
             },
           ],
@@ -209,18 +202,13 @@
             {
               name: 'heading_type',
               queryable: true,
-              valueSourceApi: {
-                path: 'authority-heading-types',
-                valueJsonPath: '$.headingTypes[?(@.queryable == true)].code',
-                labelJsonPath: '$.headingTypes[?(@.queryable == true)].name',
-              },
               source: {
                 entityTypeId: '8629d062-2878-5803-b8bf-f08fb1b00d31',
                 columnName: 'name',
               },
               valueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'headingType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              valueFunction: ':value',
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'headingType')) FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
+              valueFunction: 'lower(:value)',
               property: 'headingType',
               dataType: {
                 dataType: 'stringType',
@@ -247,12 +235,15 @@
                   label: 'Later heading',
                 },
               ],
-              valueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              filterValueGetter: "(SELECT array_agg(elems.value->>'relationshipType') FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems)",
-              valueFunction: ':value',
+              valueGetter: "(SELECT array_agg(relationship_types.value) FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value->'relationshipType', '[]'::jsonb)) AS relationship_types(value))",
+              filterValueGetter: "(SELECT array_agg(lower(relationship_types.value)) FROM jsonb_array_elements(:sourceAlias.saft_headings) AS elems CROSS JOIN LATERAL jsonb_array_elements_text(COALESCE(elems.value->'relationshipType', '[]'::jsonb)) AS relationship_types(value))",
+              valueFunction: 'lower(:value)',
               property: 'relationshipType',
               dataType: {
-                dataType: 'stringType',
+                dataType: 'arrayType',
+                itemDataType: {
+                  dataType: 'stringType',
+                },
               },
             },
           ],
@@ -295,11 +286,6 @@
             {
               name: 'identifier_type',
               queryable: true,
-              valueSourceApi: {
-                path: 'authority-identifier-types',
-                valueJsonPath: '$.identifierTypes.*.id',
-                labelJsonPath: '$.identifierTypes.*.name',
-              },
               source: {
                 entityTypeId: 'e1d77962-f469-5a9c-a0e0-30987c1bae99',
                 columnName: 'name',
@@ -341,11 +327,6 @@
             {
               name: 'note_type',
               queryable: true,
-              valueSourceApi: {
-                path: 'authority-note-types',
-                valueJsonPath: '$.authorityNoteTypes.*.id',
-                labelJsonPath: '$.authorityNoteTypes.*.name',
-              },
               source: {
                 entityTypeId: '369af782-637c-5ab7-af1f-f66a3e45acad',
                 columnName: 'name',

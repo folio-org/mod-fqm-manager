@@ -78,10 +78,6 @@
                                   ) sub \
                           ), '[]'::jsonb)",
       idColumnName: "allocated_from_ids",
-      source: {
-        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
-        columnName: 'allocated_from',
-      },
       valueSourceApi: {
         path: 'finance/funds',
         valueJsonPath: '$.funds.*.id',
@@ -133,10 +129,6 @@
                                   ) sub \
                           ), '[]'::jsonb)",
       idColumnName: "allocated_to_ids",
-      source: {
-        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
-        columnName: 'allocated_to',
-      },
       valueSourceApi: {
         path: 'finance/funds',
         valueJsonPath: '$.funds.*.id',
@@ -152,10 +144,6 @@
       queryable: true,
       visibleByDefault: true,
       essential: true,
-      source: {
-        entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
-        columnName: 'code',
-      },
       valueSourceApi: {
         path: 'finance-storage/funds',
         valueJsonPath: '$.funds.*.code',
@@ -520,11 +508,6 @@
       source: {
         entityTypeId: '661633d0-4cb5-4764-a108-2132b80320ec',
         columnName: 'name'
-      },
-      valueSourceApi: {
-        path: 'acquisitions-units/units',
-        valueJsonPath: '$.acquisitionsUnits.*.id',
-        labelJsonPath: '$.acquisitionsUnits.*.name',
       },
     },
   ],

@@ -35,6 +35,13 @@ All of the examples also assume the same common behavior:
 
 For the query SQL examples below, assume the tenant has already been expanded to `diku`, so the runtime table name is `diku_mod_source_record_storage.marc_indexers`.
 
+Current parser constraints:
+
+- uppercase field-name input is accepted and normalized internally, so `MARC_245_A` resolves the same way as `marc_245_a`
+- subfield codes are currently limited to single-character alphanumeric codes
+- fixed indicator values in constrained-subfield fields are currently limited to single-character alphanumeric values
+- blank-indicator encoding is still a separate design decision and is not part of the current grammar
+
 ## 1. Tag only
 
 Example dynamic field name:

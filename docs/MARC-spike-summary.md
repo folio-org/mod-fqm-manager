@@ -59,6 +59,13 @@ The current POC demonstrates that the recommended approach is technically feasib
 - `marc_<tag>_ind1_<indicatorValue>_<subfield>`
 - `marc_<tag>_ind2_<indicatorValue>_<subfield>`
 
+Current parser constraints:
+
+- uppercase input is accepted and normalized internally, so `MARC_245_A` behaves the same as `marc_245_a`
+- subfield codes are currently modeled as single-character alphanumeric codes
+- fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values
+- blank-indicator encoding is still not part of the current grammar
+
 ## Feasibility and implementation requirements
 
 ### Feasibility

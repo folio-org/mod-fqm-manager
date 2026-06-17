@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,13 +26,15 @@ public class MarcFieldFactory {
 
   private static final String MARC_INDEXERS_TABLE = "${tenant_id}_mod_source_record_storage.marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
+  private static final int CASE_INSENSITIVE = Pattern.CASE_INSENSITIVE;
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
-  private static final Pattern TAG_ONLY_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$");
-  private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<indicator>ind[12])$");
+  private static final Pattern TAG_ONLY_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$", CASE_INSENSITIVE);
+  private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<indicator>ind[12])$", CASE_INSENSITIVE);
   private static final Pattern CONSTRAINED_SUBFIELD_PATTERN = Pattern.compile(
-    "^marc_(?<tag>\\d{3})_(?<indicator>ind[12])_(?<indicatorValue>[a-z0-9])_(?<subfield>[a-z0-9])$"
+    "^marc_(?<tag>\\d{3})_(?<indicator>ind[12])_(?<indicatorValue>[a-z0-9])_(?<subfield>[a-z0-9])$",
+    CASE_INSENSITIVE
   );
-  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
+  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$", CASE_INSENSITIVE);
 
   public static boolean isMarcFieldName(String fieldName) {
     return parse(fieldName).isPresent();
@@ -150,7 +153,7 @@ public class MarcFieldFactory {
       return Optional.of(new MarcFieldName(
         fieldName,
         indicatorMatcher.group("tag"),
-        indicatorMatcher.group("indicator"),
+        normalizeLower(indicatorMatcher.group("indicator")),
         null,
         null
       ));
@@ -161,9 +164,9 @@ public class MarcFieldFactory {
       return Optional.of(new MarcFieldName(
         fieldName,
         constrainedSubfieldMatcher.group("tag"),
-        constrainedSubfieldMatcher.group("indicator"),
-        constrainedSubfieldMatcher.group("indicatorValue").toLowerCase(),
-        constrainedSubfieldMatcher.group("subfield")
+        normalizeLower(constrainedSubfieldMatcher.group("indicator")),
+        normalizeLower(constrainedSubfieldMatcher.group("indicatorValue")),
+        normalizeLower(constrainedSubfieldMatcher.group("subfield"))
       ));
     }
 
@@ -174,7 +177,7 @@ public class MarcFieldFactory {
         subfieldMatcher.group("tag"),
         null,
         null,
-        subfieldMatcher.group("subfield")
+        normalizeLower(subfieldMatcher.group("subfield"))
       ));
     }
 
@@ -237,6 +240,10 @@ public class MarcFieldFactory {
       return input;
     }
     return input.replace("${tenant_id}", tenantId);
+  }
+
+  private static String normalizeLower(String value) {
+    return value == null ? null : value.toLowerCase(Locale.ROOT);
   }
 
   private static Optional<String> extractMarcTableName(String valueGetter) {

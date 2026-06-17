@@ -35,6 +35,9 @@ class MarcFieldFactoryTest {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_7_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_A"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_7_A"));
   }
 
   @Test
@@ -90,6 +93,32 @@ class MarcFieldFactoryTest {
     assertInstanceOf(MarcDataType.class, column.getDataType());
     assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "7", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldNormalizeUppercaseInputForMarcFields() {
+    EntityTypeColumn indicatorColumn = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_IND1").orElseThrow();
+    EntityTypeColumn subfieldColumn = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_A").orElseThrow();
+    EntityTypeColumn constrainedSubfieldColumn =
+      MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_IND1_7_A").orElseThrow();
+
+    assertEquals("MARC_245_IND1", indicatorColumn.getName());
+    assertEquals("245 ind1", indicatorColumn.getLabelAlias());
+    assertSqlEquals(expectedIndicatorValueGetter("245", "ind1"), indicatorColumn.getValueGetter());
+    assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind1"), indicatorColumn.getFilterValueGetter());
+
+    assertEquals("MARC_245_A", subfieldColumn.getName());
+    assertEquals("245$a", subfieldColumn.getLabelAlias());
+    assertSqlEquals(expectedSubfieldValueGetter("245", "a"), subfieldColumn.getValueGetter());
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), subfieldColumn.getFilterValueGetter());
+
+    assertEquals("MARC_245_IND1_7_A", constrainedSubfieldColumn.getName());
+    assertEquals("245 ind1=7 $a", constrainedSubfieldColumn.getLabelAlias());
+    assertSqlEquals(
+      expectedConstrainedSubfieldValueGetter("245", "ind1", "7", "a"),
+      constrainedSubfieldColumn.getValueGetter()
+    );
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), constrainedSubfieldColumn.getFilterValueGetter());
   }
 
   @Test

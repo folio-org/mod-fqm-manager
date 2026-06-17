@@ -90,6 +90,8 @@ Examples:
 Current assumption:
 
 - We should derive dynamic MARC field behavior from the requested field name instead of introducing a complicated selector language for the POC.
+- The parser should accept uppercase input and normalize MARC selector parts internally, so `MARC_245_A` behaves the same as `marc_245_a`.
+- The current grammar treats subfield codes as single-character alphanumeric codes.
 
 ### 5. Indicators are not a special contract category
 
@@ -103,6 +105,10 @@ That means:
 Current assumption:
 
 - Indicator support does not require special condition syntax in the generated column name for this POC.
+- Indicator positions are limited to `ind1` and `ind2`, which is the complete MARC indicator model we need to support.
+- Fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values.
+- Uppercase indicator input should be accepted and normalized internally, so `MARC_245_IND1` behaves the same as `marc_245_ind1`.
+- Blank-indicator encoding is still an open design decision and is not part of the current grammar.
 
 ### 6. Tag + subfield + indicator can be modeled as a constrained subfield extension
 
@@ -151,6 +157,7 @@ Current assumption:
 - The last token still identifies the value-bearing target.
 - We do not need the reverse shape, because the point of the field is still to query the subfield value while applying a fixed indicator constraint.
 - This should be treated as a targeted extension to the MARC grammar, not as a general solution for repeatable-field correlation.
+- The current implementation expects the baked-in indicator value and the subfield code to each be a single alphanumeric character.
 
 Approximation we can already make:
 

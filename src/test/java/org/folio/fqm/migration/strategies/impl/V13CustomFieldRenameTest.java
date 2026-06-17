@@ -1,15 +1,20 @@
 package org.folio.fqm.migration.strategies.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.fqm.migration.strategies.impl.V13CustomFieldRename.CUSTOM_FIELD_SOURCE_VIEW;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_NAME;
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_TYPE;
 import static org.folio.fqm.repository.EntityTypeRepository.SUPPORTED_CUSTOM_FIELD_TYPES;
 import static org.jooq.impl.DSL.field;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.folio.fqm.TestMate;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.migration.strategies.MigrationStrategy;
 import org.folio.spring.FolioExecutionContext;
@@ -23,8 +28,10 @@ import org.jooq.SelectSelectStep;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,11 +45,16 @@ class V13CustomFieldRenameTest extends TestTemplate {
   private static final Field<Object> ID_FIELD = field("id", Object.class);
   private static final Field<Object> NAME_FIELD = field(CUSTOM_FIELD_NAME, Object.class);
 
+    private static final UUID USERS_ENTITY_TYPE_ID = UUID.fromString("ddc93926-d15a-4a45-9d9c-93eadc3d9bbf");
+
   @Mock
   DSLContext jooqContext;
 
   @Mock
   FolioExecutionContext executionContext;
+
+  @InjectMocks
+  private V13CustomFieldRename v13CustomFieldRename;
 
   @BeforeEach
   void setup() {
@@ -162,4 +174,48 @@ class V13CustomFieldRenameTest extends TestTemplate {
       )
     );
   }
+
+    @Test
+    @TestMate(name = "TestMate-45cb1c613cc20dd211ab277591709559")
+    void testGetFieldChangesShouldHandleDuplicateCustomFieldNames() {
+      // Given
+      // Use a unique tenant ID to avoid hitting the internal cache populated by other tests
+      String tenantId = "tenant_duplicate_test";
+      String duplicateFieldName = "duplicate_field_name";
+      String id1 = "11111111-1111-1111-1111-111111111111";
+      String id2 = "22222222-2222-2222-2222-222222222222";
+      // Create a fresh instance to ensure the internal ConcurrentHashMap cache is empty for this test
+      V13CustomFieldRename localStrategy = new V13CustomFieldRename(executionContext, jooqContext);
+      // Define fields matching the types used in the implementation's select call
+      Field<String> idField = field("id", String.class);
+      Field<String> nameField = field(CUSTOM_FIELD_NAME, String.class);
+      DSLContext creator = DSL.using(new DefaultConfiguration());
+      Result<Record2<String, String>> result = creator.newResult(idField, nameField);
+      result.add(creator.newRecord(idField, nameField).values(id1, duplicateFieldName));
+      result.add(creator.newRecord(idField, nameField).values(id2, duplicateFieldName));
+      // Mock the tenant ID for this specific execution
+      when(executionContext.getTenantId()).thenReturn(tenantId);
+      // Use flexible matchers for jOOQ fluent API to avoid issues with Field object identity/equality in Mockito
+      SelectSelectStep selectStep = mock(SelectSelectStep.class);
+      SelectJoinStep joinStep = mock(SelectJoinStep.class);
+      SelectConditionStep conditionStep = mock(SelectConditionStep.class);
+      // Mock the chain: select -> from -> where -> fetch
+      // We use any() to ensure this mock takes precedence over the lenient mocks in setup()
+      when(jooqContext.select(org.mockito.ArgumentMatchers.any(Field.class), org.mockito.ArgumentMatchers.any(Field.class)))
+        .thenReturn(selectStep);
+      when(selectStep.from(CUSTOM_FIELD_SOURCE_VIEW)).thenReturn(joinStep);
+      when(joinStep.where(org.mockito.ArgumentMatchers.any(org.jooq.Condition.class))).thenReturn(conditionStep);
+      when(conditionStep.fetch()).thenReturn(result);
+
+      // When
+      Map<UUID, Map<String, String>> actualChanges = localStrategy.getFieldChanges();
+
+      // Then
+      assertThat(actualChanges).containsOnlyKeys(USERS_ENTITY_TYPE_ID);
+      Map<String, String> userFieldChanges = actualChanges.get(USERS_ENTITY_TYPE_ID);
+      // Verify collision resolution: the last entry in the result set should overwrite the first
+      assertThat(userFieldChanges)
+        .hasSize(1)
+        .containsEntry(duplicateFieldName, CUSTOM_FIELD_PREPENDER + id2);
+    }
 }

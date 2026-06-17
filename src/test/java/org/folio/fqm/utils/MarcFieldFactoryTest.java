@@ -48,6 +48,9 @@ class MarcFieldFactoryTest {
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_a_ind1"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1_a"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_001_ind1"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_001_a"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_008_ind2_7_a"));
   }
 
   @Test
@@ -152,6 +155,9 @@ class MarcFieldFactoryTest {
   @Test
   void shouldReturnEmptyForInvalidMarcFieldName() {
     assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a_ind1"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_001_ind1"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_001_a"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_008_ind2_7_a"));
   }
 
   @Test

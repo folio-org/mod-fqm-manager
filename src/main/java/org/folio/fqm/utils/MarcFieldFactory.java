@@ -150,6 +150,9 @@ public class MarcFieldFactory {
 
     Matcher indicatorMatcher = INDICATOR_PATTERN.matcher(fieldName);
     if (indicatorMatcher.matches()) {
+      if (isControlFieldTag(indicatorMatcher.group("tag"))) {
+        return Optional.empty();
+      }
       return Optional.of(new MarcFieldName(
         fieldName,
         indicatorMatcher.group("tag"),
@@ -161,6 +164,9 @@ public class MarcFieldFactory {
 
     Matcher constrainedSubfieldMatcher = CONSTRAINED_SUBFIELD_PATTERN.matcher(fieldName);
     if (constrainedSubfieldMatcher.matches()) {
+      if (isControlFieldTag(constrainedSubfieldMatcher.group("tag"))) {
+        return Optional.empty();
+      }
       return Optional.of(new MarcFieldName(
         fieldName,
         constrainedSubfieldMatcher.group("tag"),
@@ -172,6 +178,9 @@ public class MarcFieldFactory {
 
     Matcher subfieldMatcher = SUBFIELD_PATTERN.matcher(fieldName);
     if (subfieldMatcher.matches()) {
+      if (isControlFieldTag(subfieldMatcher.group("tag"))) {
+        return Optional.empty();
+      }
       return Optional.of(new MarcFieldName(
         fieldName,
         subfieldMatcher.group("tag"),
@@ -244,6 +253,10 @@ public class MarcFieldFactory {
 
   private static String normalizeLower(String value) {
     return value == null ? null : value.toLowerCase(Locale.ROOT);
+  }
+
+  private static boolean isControlFieldTag(String tag) {
+    return tag != null && tag.startsWith("00");
   }
 
   private static Optional<String> extractMarcTableName(String valueGetter) {

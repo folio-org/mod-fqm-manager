@@ -62,6 +62,7 @@ The current POC demonstrates that the recommended approach is technically feasib
 Current parser constraints:
 
 - uppercase input is accepted and normalized internally, so `MARC_245_A` behaves the same as `marc_245_a`
+- control fields (`001`-`009`) are treated as tag-only fields, so indicator/subfield/constrained-subfield forms for `00X` tags are invalid
 - subfield codes are currently modeled as single-character alphanumeric codes
 - fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values
 - blank-indicator encoding is still not part of the current grammar

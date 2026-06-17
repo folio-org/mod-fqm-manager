@@ -92,6 +92,7 @@ Current assumption:
 - We should derive dynamic MARC field behavior from the requested field name instead of introducing a complicated selector language for the POC.
 - The parser should accept uppercase input and normalize MARC selector parts internally, so `MARC_245_A` behaves the same as `marc_245_a`.
 - The current grammar treats subfield codes as single-character alphanumeric codes.
+- Control fields (`001`-`009`) should be treated as tag-only fields in the current grammar. Indicator, subfield, and constrained-subfield variants for `00X` tags should be rejected.
 
 ### 5. Indicators are not a special contract category
 

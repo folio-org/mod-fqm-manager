@@ -38,6 +38,7 @@ For the query SQL examples below, assume the tenant has already been expanded to
 Current parser constraints:
 
 - uppercase field-name input is accepted and normalized internally, so `MARC_245_A` resolves the same way as `marc_245_a`
+- control fields (`001`-`009`) are tag-only in the current grammar, so `marc_001_ind1`, `marc_001_a`, and similar shapes are invalid
 - subfield codes are currently limited to single-character alphanumeric codes
 - fixed indicator values in constrained-subfield fields are currently limited to single-character alphanumeric values
 - blank-indicator encoding is still a separate design decision and is not part of the current grammar

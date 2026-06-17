@@ -394,6 +394,28 @@ Current assumption:
 
 - This is an implementation detail to solve in getter generation, not a reason to complicate the contract
 
+### 4. Performance should be judged by platform impact, not by requiring every MARC query to be fast
+
+Current understanding:
+
+- `marc_indexers` is normalized, which is enough to make the dynamic MARC approach logically feasible
+- we should not assume that additional indexes will be available on that table
+- because of that, the main performance question is not "can this be perfectly optimized?"
+- it is "can we support this query model without causing unacceptable impact to the rest of FOLIO?"
+
+Current assumption:
+
+- it is acceptable if some MARC queries on this entity type are slow against very large datasets
+- it is not acceptable if those queries materially degrade the performance or stability of other FOLIO apps
+- performance validation should therefore focus on overall database/platform impact, not only on whether the MARC entity type itself is fast
+
+Likely implications:
+
+- operator choice matters, especially broad text `contains` searches
+- query shape matters more than whether the table is merely normalized
+- if indexes are unavailable, "do the best with what we have" is the right framing for implementation
+- any implementation recommendation should call out scale risk honestly rather than treating lack of indexes as a blocker
+
 ## Current Likely Code Touchpoints
 
 These are the likely places the POC will need changes:
@@ -419,15 +441,45 @@ These are the likely places the POC will need changes:
 2. Should leader positions use the same naming grammar, and if so what should it be?
 3. How should blank indicator values be represented in display and querying?
 4. Where exactly should dynamic MARC field recognition happen in the request/query pipeline?
-5. Do we want the first POC to include one leader-position example, or leave leader support for the second pass?
+5. Do we want the first implementation pass to include one leader-position example, or leave leader support for the second pass?
+6. What guardrails, if any, do we want if very broad MARC searches prove expensive at large scale?
 
-## Current Recommended Next Step
+## Current Recommended Next Steps
 
-Lock the generic MARC column contract before touching implementation:
+The POC has now proved the dynamic-field approach end to end for core MARC cases. The next steps should focus on turning that into a team-ready recommendation and implementation plan:
 
-1. placeholder metadata shape
-2. generated naming grammar
-3. exact first set of MARC field name patterns to support in the POC
-4. where dynamic field synthesis should happen
+1. Summarize the spike recommendation for team review.
+   The recommendation should be: one generic MARC capability with dynamic field resolution at query time, not thousands of eager predefined fields.
 
-Once those are settled, the implementation work becomes much more straightforward.
+2. Confirm the MVP support boundary.
+   This should explicitly call out what is supported now:
+   - tag only
+   - indicator only
+   - subfield only
+   - constrained subfield with fixed indicator value
+   This should also explicitly call out what remains separate:
+   - same-repeatable-entry correlation across multiple predicates
+   - combined `ind1 + ind2` guarantees
+   - leader / `006` / `007` / `008`
+   - blank-indicator semantics
+
+3. Review the approach with the development team and SA.
+   The main goal should be to validate that the internal synthetic-field grammar is an acceptable backend contract and that the documented limitations are understood.
+
+4. Do focused performance validation with the system we actually have.
+   This should test representative tag, subfield, indicator, and constrained-subfield queries against realistic data volumes, with special attention to:
+   - broad `contains` searches
+   - repeated correlated `EXISTS` predicates
+   - whether query load has unacceptable impact beyond this entity type
+
+5. Define the query-builder / UI implications.
+   The current backend approach assumes the UI will build MARC selectors dynamically rather than choosing from a giant preloaded dropdown. That needs an explicit UI story and likely a MARC-specific field builder interaction.
+
+6. Create implementation stories from the proven POC.
+   At minimum these should cover:
+   - backend hardening for dynamic MARC querying
+   - performance validation / mitigation
+   - UI/query-builder support
+   - blank indicator semantics
+   - leader and fixed-position follow-up work
+   - same-repeatable-entry correlation as a separate cross-cutting story

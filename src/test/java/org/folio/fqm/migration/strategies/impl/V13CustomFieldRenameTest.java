@@ -1,14 +1,18 @@
 package org.folio.fqm.migration.strategies.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.fqm.migration.strategies.impl.V13CustomFieldRename.CUSTOM_FIELD_SOURCE_VIEW;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_NAME;
+import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
 import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_TYPE;
 import static org.folio.fqm.repository.EntityTypeRepository.SUPPORTED_CUSTOM_FIELD_TYPES;
 import static org.jooq.impl.DSL.field;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.folio.fqm.TestMate;
 import org.folio.fqm.migration.MigratableQueryInformation;
@@ -24,16 +28,12 @@ import org.jooq.SelectSelectStep;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.provider.Arguments;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.fqm.repository.EntityTypeRepository.CUSTOM_FIELD_PREPENDER;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class V13CustomFieldRenameTest extends TestTemplate {

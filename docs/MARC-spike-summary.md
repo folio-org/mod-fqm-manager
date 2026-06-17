@@ -83,6 +83,21 @@ The main reason is that `marc_indexers` is already normalized into useful querya
 
 That structure is sufficient to support dynamic MARC selectors with row-level `EXISTS` logic even without eagerly predefining columns.
 
+There is also an important SRS-side data assumption behind the current entity model:
+
+- `matched_id` is expected to identify the logical current SRS record that FQM should treat as one record
+- the `mod-source-record-storage` team has confirmed that only one `ACTUAL` or `DELETED` record should exist for a given `matched_id`
+
+This matters because `simple_srs_record` already uses `matched_id` as its entity ID column, and the MARC POC correlates `marc_indexers` rows through that same identifier.
+
+Current interpretation:
+
+- duplicate `ACTUAL` rows for the same `matched_id` should be treated as upstream data anomalies, not as a normal case the MARC querying design must support
+
+One follow-up remains open:
+
+- whether a `DRAFT` row can coexist with an `ACTUAL` or `DELETED` row for the same `matched_id`
+
 ### What implementation requires
 
 - formalize `marcDataType` in `folio-query-tool-metadata` as a shared prerequisite

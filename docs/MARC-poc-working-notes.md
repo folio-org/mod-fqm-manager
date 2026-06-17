@@ -205,6 +205,34 @@ Important consequence:
 - For the POC, this is acceptable.
 - If better discovery is needed later, it should probably be handled through a separate MARC field discovery/help mechanism rather than eager expansion into the normal entity type response.
 
+### 8. `matched_id` is expected to identify one current SRS record
+
+The current SRS assumption behind the `simple_srs_record` model is that `matched_id` identifies the logical record we want FQM to treat as one SRS record.
+
+This assumption has been confirmed with the `mod-source-record-storage` team at least for current non-`OLD` records in these states:
+
+- `ACTUAL`
+- `DELETED`
+
+Specifically:
+
+- only one `ACTUAL` or `DELETED` record should exist for a given `matched_id`
+
+Why this matters:
+
+- `simple_srs_record` currently uses `matched_id` as the entity ID column
+- the dynamic MARC query logic correlates `marc_indexers` rows through `record_lb.matched_id`
+- duplicate current rows for the same `matched_id` would break the intended one-record-per-`matched_id` model
+
+Current interpretation:
+
+- duplicate `ACTUAL` rows for one `matched_id` should be treated as upstream data anomalies, not as a normal case this MARC work needs to support
+
+Open follow-up:
+
+- we should still confirm whether a `DRAFT` record can coexist with an `ACTUAL` or `DELETED` record for the same `matched_id`
+- until that is confirmed, we should avoid claiming a stronger invariant than “at most one `ACTUAL`/`DELETED` row per `matched_id`”
+
 ## Explicitly Out of Scope for This POC
 
 The following are intentionally not part of the first implementation pass:

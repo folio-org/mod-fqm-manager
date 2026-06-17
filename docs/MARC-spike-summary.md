@@ -156,6 +156,34 @@ Based on the current SQL shape, the likely performance profile is:
 - broad `contains` searches on tag-level or subfield-level values are likely to be the riskiest query shapes
 - cost will likely scale with the number of MARC predicates in one query, because each predicate currently becomes a separate correlated `EXISTS`
 
+### Export and result-materialization performance
+
+Export and result retrieval should be treated as a separate performance concern from predicate evaluation.
+
+Why this matters:
+
+- MARC querying currently filters with row-level `EXISTS` logic
+- but MARC values are still displayed and exported through aggregated `valueGetter` expressions
+- that means a query can be acceptable at the filtering stage and still become expensive when many MARC fields are selected in the results
+
+Important implications:
+
+- returning only IDs is not the same cost as returning one or more synthetic MARC fields
+- returning synthetic MARC fields is not the same cost as returning the full MARC `content` blob
+- exporting large result sets with many dynamic MARC fields may be more expensive than the matching step itself
+- repeated aggregated `valueGetter` evaluation across many rows and columns is a likely risk area for exports
+
+What this means for testing:
+
+- performance checks should include both query-match behavior and result-materialization behavior
+- at least some tests should compare:
+  - ID-only retrieval
+  - ID plus synthetic MARC field retrieval
+  - ID plus multiple synthetic MARC fields
+  - ID plus full `content`
+
+The practical concern is not just "can the query find the right records?" but also "can the system return or export the requested MARC data without unacceptable cost?"
+
 ### Preliminary performance checks to run on a test DB
 
 Suggested representative checks:
@@ -185,6 +213,13 @@ For each, capture at least:
 - execution plan shape if available
 - whether the query appears to scan broadly
 - whether concurrent load causes unacceptable impact beyond this entity type
+
+At least some of those checks should also be repeated with different result shapes, for example:
+
+- IDs only
+- IDs plus one synthetic MARC field
+- IDs plus several synthetic MARC fields
+- IDs plus full `content`
 
 ## Index impact
 

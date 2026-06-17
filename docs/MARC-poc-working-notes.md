@@ -186,6 +186,7 @@ Remaining boundaries of this approach:
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence are still not solved
 - guaranteed combined `ind1 + ind2` same-row constraints are still not solved by the current implementation
 - blank indicator handling still needs an explicit design decision for both field naming and query behavior
+- query-match cost and export/result-materialization cost should be treated separately, because MARC filtering uses row-level `EXISTS` but MARC display/export still uses aggregated `valueGetter` expressions
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields
 

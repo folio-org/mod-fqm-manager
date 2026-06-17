@@ -8,14 +8,42 @@ These are not meant to be final Jira tickets yet. The goal is to give us a clean
 
 Suggested order:
 
-1. Backend hardening for the dynamic MARC querying MVP
-2. Query builder / UI support for dynamic MARC selectors
-3. Performance validation and operational guardrails
-4. Blank indicator semantics
-5. Leader and fixed-position MARC follow-up
-6. Same-repeatable-entry correlation as a separate cross-cutting story
+1. Add `marcDataType` support in `folio-query-tool-metadata`
+2. Backend hardening for the dynamic MARC querying MVP
+3. Query builder / UI support for dynamic MARC selectors
+4. Performance validation and operational guardrails
+5. Blank indicator semantics
+6. Leader and fixed-position MARC follow-up
+7. Same-repeatable-entry correlation as a separate cross-cutting story
 
-## Story 1: Backend hardening for dynamic MARC querying MVP
+## Story 0: Add `marcDataType` support in `folio-query-tool-metadata`
+
+### Goal
+
+Add `marcDataType` as a first-class shared DTO/data-type concept in `folio-query-tool-metadata`.
+
+### Scope
+
+- Add the new `marcDataType` definition to the shared metadata model
+- Ensure downstream consumers can deserialize and use it cleanly
+- Align the shared metadata contract with the behavior already proven in the POC
+- Publish whatever shared-library version is needed for consuming modules
+
+### Why this story exists
+
+The current POC already depends on `marcDataType` conceptually. For implementation planning, this should be treated as an explicit cross-repo prerequisite rather than an implicit assumption.
+
+### Initial acceptance ideas
+
+- `marcDataType` exists in the shared metadata library
+- `mod-fqm-manager` can consume the shared definition without local workarounds
+- The shared contract is sufficient for the MARC-specific behavior described in this spike
+
+### Important note
+
+This story is a dependency/prerequisite for a clean production implementation even though the local POC was able to move ahead conceptually.
+
+## Story 1: Backend hardening for the dynamic MARC querying MVP
 
 ### Goal
 
@@ -114,7 +142,7 @@ Validate the dynamic MARC approach against realistic data and define guardrails 
 
 ### Why this story exists
 
-`marc_indexers` is normalized, which makes the approach feasible, but no indexes are available. The important question is not “can every MARC query be fast?” It is “can we support this safely without harming the rest of FOLIO?”
+`marc_indexers` is normalized, which makes the approach feasible, but we should not assume extra indexes will be available. The important question is not “can every MARC query be fast?” It is “can we support this safely without harming the rest of FOLIO?”
 
 ### Initial acceptance ideas
 
@@ -211,6 +239,7 @@ The current `marcDataType` approach is compatible with this future direction. A 
 
 If we want the smallest practical implementation set after the spike, I would start with:
 
+- Story 0: Add `marcDataType` support in `folio-query-tool-metadata`
 - Story 1: Backend hardening for dynamic MARC querying MVP
 - Story 2: Query builder / UI support for dynamic MARC selectors
 - Story 3: Performance validation and operational guardrails

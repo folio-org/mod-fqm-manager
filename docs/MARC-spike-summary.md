@@ -78,6 +78,7 @@ That structure is sufficient to support dynamic MARC selectors with row-level `E
 
 ### What implementation requires
 
+- formalize `marcDataType` in `folio-query-tool-metadata` as a shared prerequisite
 - keep `marcDataType` as the MARC-specific field type
 - keep one generic MARC capability on the entity type
 - synthesize concrete MARC fields dynamically from field names
@@ -224,12 +225,13 @@ The multi-indicator case is best treated as part of the broader “multiple cond
 
 Recommended stories from the spike:
 
-1. Backend hardening for dynamic MARC querying MVP
-2. Query builder / UI support for dynamic MARC selectors
-3. Performance validation and operational guardrails
-4. Blank indicator semantics
-5. Leader and fixed-position MARC follow-up
-6. Same-repeatable-entry correlation across multiple predicates
+1. Add `marcDataType` support in `folio-query-tool-metadata`
+2. Backend hardening for dynamic MARC querying MVP
+3. Query builder / UI support for dynamic MARC selectors
+4. Performance validation and operational guardrails
+5. Blank indicator semantics
+6. Leader and fixed-position MARC follow-up
+7. Same-repeatable-entry correlation across multiple predicates
 
 See [MARC-implementation-stories.md](/Users/bsharp/workspace/mod-fqm-manager/docs/MARC-implementation-stories.md) for the draft story breakdown.
 

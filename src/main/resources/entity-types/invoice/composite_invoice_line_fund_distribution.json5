@@ -1,41 +1,34 @@
-// NOTE: This auxiliary entity is tightly coupled to the main 'composite_order_invoice_analytics' entity and is not independently reusable.
-// It exists solely to normalize the 'fundDistributions' array in invoice line records by transforming each element into its own row.
-// The entity includes 'invoice_line' as a source and applies a CROSS JOIN LATERAL with jsonb_array_elements,
-// allowing fund distribution elements to be extracted cleanly and used for joins (e.g., to fund and expense class).
-// While this design means the auxiliary entity is dependent on the structure of the main entity and can't function on its own,
-// it provides a clean and maintainable solution to the array normalization problem within the overall entity model.
+// This simple ET exposes one row per (invoice line, fund distribution) pair, sourced from the dedicated
+// 'src_invoice_line_fund_distributions' DB view which already pre-joins invoice_lines with the
+// lateral expansion of the 'fundDistributions' jsonb array. Keeping the lateral expansion in the
+// view (instead of in the entity itself) lets us model this as a single-source entity with
+// straightforward column definitions.
 {
   id: '4999bd5f-3898-4b44-b283-e37bc9261ad8',
   name: 'composite_invoice_line_fund_distribution',
   private: true,
+  requiredPermissions: [
+    'invoice.invoice-lines.collection.get',
+    'invoice.invoices.collection.get',
+    'orders.po-lines.item.get',
+  ],
   sources: [
     {
-      type: 'entity-type',
-      alias: 'invoice_line',
-      targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
-      useIdColumns: true,
-    },
-    {
       type: 'db',
-      alias: 'fund_distribution',
-      target: 'jsonb_array_elements("invoice_line_fund_distribution.invoice_line.invoice_lines".jsonb -> \'fundDistributions\')',
-      join: {
-        type: 'LEFT JOIN LATERAL',
-        joinTo: 'invoice_line.invoice_lines',
-        condition: 'TRUE',
-      }
+      alias: 'invoice_line_fund_distributions',
+      target: 'src_invoice_line_fund_distributions',
     },
   ],
   columns: [
     {
       name: 'invoice_id',
-      sourceAlias: 'invoice_line.invoice_lines',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      valueGetter: ":sourceAlias.invoiceid",
-      filterValueGetter: "lower(:sourceAlias.invoiceid)",
+      valueGetter: ':sourceAlias.invoice_id',
+      filterValueGetter: 'lower(:sourceAlias.invoice_id)',
       valueFunction: 'lower(:value)',
       joinsTo: [
         {
@@ -48,7 +41,7 @@
     },
     {
       name: 'po_line_id',
-      sourceAlias: 'invoice_line.invoice_lines',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'rangedUUIDType',
       },
@@ -67,13 +60,13 @@
     },
     {
       name: 'fund_id',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      sourceAlias: 'fund_distribution',
-      valueGetter: "(:sourceAlias.jsonb->>'fundId')",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'fundId')",
+      valueGetter: "(:sourceAlias.fund_distribution->>'fundId')",
+      filterValueGetter: "lower(:sourceAlias.fund_distribution->>'fundId')",
       valueFunction: 'lower(:value)',
       joinsTo: [
         {
@@ -86,12 +79,12 @@
     },
     {
       name: 'expense_class_id',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      sourceAlias: 'fund_distribution',
-      valueGetter: "(:sourceAlias.jsonb->>'expenseClassId')",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'expenseClassId')",
+      valueGetter: "(:sourceAlias.fund_distribution->>'expenseClassId')",
+      filterValueGetter: "lower(:sourceAlias.fund_distribution->>'expenseClassId')",
       valueFunction: 'lower(:value)',
       joinsTo: [
         {
@@ -104,13 +97,14 @@
     },
     {
       name: 'fund_total_value',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'stringType',
       },
       valueGetter: "(\
-        CASE WHEN (:fund_distribution.jsonb->>'distributionType') = 'percentage' \
-          THEN (:fund_distribution.jsonb->>'value') || '%' \
-          ELSE (:fund_distribution.jsonb->>'value') \
+        CASE WHEN (:sourceAlias.fund_distribution->>'distributionType') = 'percentage' \
+          THEN (:sourceAlias.fund_distribution->>'value') || '%' \
+          ELSE (:sourceAlias.fund_distribution->>'value') \
         END \
       )",
       queryable: false,
@@ -119,12 +113,13 @@
     },
     {
       name: 'fund_total_amount',
+      sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'stringType',
       },
       valueGetter: "(\
-        CASE WHEN (:fund_distribution.jsonb->>'distributionType') = 'amount' \
-          THEN (:fund_distribution.jsonb->>'value') \
+        CASE WHEN (:sourceAlias.fund_distribution->>'distributionType') = 'amount' \
+          THEN (:sourceAlias.fund_distribution->>'value') \
           ELSE NULL \
         END \
       )",

@@ -46,6 +46,14 @@ The current working expectation is:
 - MARC fields query via MARC-specific row-level `EXISTS` / `NOT EXISTS` semantics.
 - MARC fields may expose a more restricted operator set than normal array-like fields.
 
+Important note about operators:
+
+- a single `marcDataType` is still the preferred model
+- however, not every MARC field shape should necessarily expose the same operators
+- indicator-only MARC fields behave more like coded-value fields
+- tag, subfield, and constrained-subfield MARC fields behave more like text-search fields
+- this likely means operator choice should depend on the parsed MARC selector shape, not only on `marcDataType`
+
 ### 2. Expansion should follow the existing read-time pattern
 
 The current repository already expands `customFieldType` columns at read time in:
@@ -111,7 +119,10 @@ Current assumption:
 - Uppercase indicator input should be accepted and normalized internally, so `MARC_245_IND1` behaves the same as `marc_245_ind1`.
 - Blank indicators can be represented with the public token `blank`, which the backend maps to the current `marc_indexers` storage value `#`.
 - For indicator-only queries, a runtime value like `{"marc_245_ind1": {"$eq": "blank"}}` should be supported.
-- The remaining open design question is whether we want to support raw `#` as part of the public contract, or keep it strictly as an internal storage detail.
+- Blank should remain distinct from `$empty`.
+  - `blank` means a matching MARC row exists and stores the blank indicator value.
+  - `$empty` means there is no matching usable row/value.
+- Raw `#` should be treated as an internal storage detail, not the preferred public contract.
 
 ### 6. Tag + subfield + indicator can be modeled as a constrained subfield extension
 
@@ -190,7 +201,6 @@ Remaining boundaries of this approach:
 
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence are still not solved
 - guaranteed combined `ind1 + ind2` same-row constraints are still not solved by the current implementation
-- blank indicator handling is partly supported through the `blank` token, but final public-contract and UI semantics still need an explicit decision
 - query-match cost and export/result-materialization cost should be treated separately, because MARC filtering uses row-level `EXISTS` but MARC display/export still uses aggregated `valueGetter` expressions
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields
@@ -237,6 +247,7 @@ Current interpretation:
 Open follow-up:
 
 - we should still confirm whether a `DRAFT` record can coexist with an `ACTUAL` or `DELETED` record for the same `matched_id`
+- current expectation is that `DRAFT` should behave the same general way and not introduce a second current row for the same `matched_id`, but that has not been explicitly confirmed yet
 - until that is confirmed, we should avoid claiming a stronger invariant than “at most one `ACTUAL`/`DELETED` row per `matched_id`”
 
 ## Explicitly Out of Scope for This POC
@@ -275,6 +286,21 @@ Current assumption:
 ### 3. `006` / `007` / `008` byte-position support
 
 Not part of the first POC unless explicitly added later.
+
+### 3a. Leader support
+
+Leader querying is also not part of the current first-pass grammar.
+
+It is worth calling out separately from `006` / `007` / `008` because:
+
+- leader is still an important MARC requirement area
+- leader positions are conceptually simpler than fixed-position byte ranges in `006` / `007` / `008`
+- but leader does not fit the current tag / indicator / subfield grammar and has not yet been prototyped in this spike
+
+Current assumption:
+
+- leader support should be treated as a follow-up extension with its own naming/query proposal
+- it should not be implied to already work just because the generic MARC capability exists
 
 ### 4. Full MARC validity-independent coverage
 
@@ -480,7 +506,7 @@ These are the likely places the POC will need changes:
 
 1. What exact metadata fields should live under the generic placeholder `marcDataType`?
 2. Should leader positions use the same naming grammar, and if so what should it be?
-3. How should blank indicator values be represented in display and querying?
+3. Do we want to tolerate raw `#` as a backward-compatible input in direct queries, or document only `blank`?
 4. Where exactly should dynamic MARC field recognition happen in the request/query pipeline?
 5. Do we want the first implementation pass to include one leader-position example, or leave leader support for the second pass?
 6. What guardrails, if any, do we want if very broad MARC searches prove expensive at large scale?
@@ -502,7 +528,7 @@ The POC has now proved the dynamic-field approach end to end for core MARC cases
    - same-repeatable-entry correlation across multiple predicates
    - combined `ind1 + ind2` guarantees
    - leader / `006` / `007` / `008`
-   - blank-indicator semantics
+   - blank-indicator UI/alignment work
 
 3. Review the approach with the development team and SA.
    The main goal should be to validate that the internal synthetic-field grammar is an acceptable backend contract and that the documented limitations are understood.
@@ -521,6 +547,6 @@ The POC has now proved the dynamic-field approach end to end for core MARC cases
    - backend hardening for dynamic MARC querying
    - performance validation / mitigation
    - UI/query-builder support
-   - blank indicator semantics
+   - blank indicator UI/alignment work
    - leader and fixed-position follow-up work
    - same-repeatable-entry correlation as a separate cross-cutting story

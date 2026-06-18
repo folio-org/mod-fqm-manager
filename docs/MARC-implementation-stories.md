@@ -100,6 +100,9 @@ Allow users to construct MARC queries in the UI without having to know or type s
 - Decide how users add MARC fields to visible columns or result display
 - Decide how users discover supported MARC query combinations now that MARC fields are not eagerly listed in the entity type response
 - Handle validation and guardrails for invalid combinations
+- Choose operators based on the MARC selector shape, not only on `marcDataType`
+  - indicator-only fields likely need coded-value operators like `eq`, `ne`, `in`, `nin`, and maybe `empty`
+  - tag, subfield, and constrained-subfield fields likely need text-search operators like `contains`, `starts_with`, `eq`, and `ne`
 
 ### Why this story exists
 
@@ -119,6 +122,7 @@ The spike approach intentionally avoids giant field dropdowns. That means the UI
 - Should the UI expose raw synthetic field names anywhere, or keep them fully internal?
 - How should dynamic MARC fields be surfaced in visible-columns workflows?
 - Do we want inline help/examples, a lightweight discovery panel, or both?
+- Should the backend also enforce indicator-only operator restrictions for direct API callers, even if the UI already prevents invalid combinations?
 
 ## Story 3: Performance validation and operational guardrails
 
@@ -144,6 +148,8 @@ Validate the dynamic MARC approach against realistic data and define guardrails 
 
 `marc_indexers` is normalized, which makes the approach feasible, but we should not assume extra indexes will be available. The important question is not “can every MARC query be fast?” It is “can we support this safely without harming the rest of FOLIO?”
 
+We also already have an initial baseline from preliminary manual testing against a large test dataset. That gives this story a starting point, but not a final conclusion, especially for export/result-materialization behavior and broader concurrent-load validation.
+
 ### Initial acceptance ideas
 
 - We have representative measurements for the major supported MARC query shapes
@@ -156,34 +162,30 @@ It is acceptable if some MARC queries are slow on very large datasets.
 
 It is not acceptable if MARC querying materially degrades the performance or stability of other FOLIO apps.
 
-## Story 4: Blank indicator semantics
+## Story 4: Blank indicator contract alignment
 
 ### Goal
 
-Define how blank indicators should be represented and queried.
+Align backend and UI behavior around the finalized blank-indicator contract.
 
 ### Scope
 
-- Decide how blank indicator values are represented in the synthetic-field grammar, if supported
-- Decide how blank should be treated in:
-  - querying
-  - display
-  - empty/not-empty semantics
-- Align backend and UI behavior on the same policy
+- Use `blank` as the public token for blank indicator values
+- Keep `#` as the internal/storage encoding used by `marc_indexers`
+- Keep `blank` distinct from `$empty`
+- Ensure the UI can express blank-indicator queries and constrained-subfield selectors clearly
+- Decide whether raw `#` should be tolerated in direct API queries for compatibility, even though it is not the preferred public contract
 
 ### Why this story exists
 
-Indicators are coded values, and blank is meaningful in MARC. We should not leave blank behavior undefined if indicator querying becomes a supported feature.
+The core blank-indicator contract is now chosen, but the implementation still needs consistent UI and backend alignment around that contract.
 
 ### Initial acceptance ideas
 
-- The policy for blank indicators is documented
-- The backend can apply the chosen blank-indicator rule consistently
-- The UI can express the chosen blank-indicator case without ambiguity
-
-### Example question to resolve
-
-Should blank be represented as a special token in the field grammar, a special UI option, a normal string value, or some combination of those?
+- The policy for blank indicators is documented as `blank -> #`
+- The backend applies the blank-indicator rule consistently
+- The UI can express the blank-indicator case without ambiguity
+- `blank` and `$empty` are treated as distinct concepts
 
 ## Story 5: Leader and fixed-position MARC follow-up
 
@@ -200,6 +202,11 @@ Extend the MARC query model to support leader positions and eventually `006` / `
 ### Why this story exists
 
 The current POC and grammar focus on tag, indicator, and subfield combinations. Leader and fixed-position fields are a different category and should be treated as a follow-up instead of being forced into the first MVP.
+
+Current note:
+
+- leader has not yet been prototyped in this spike
+- it should be treated as a separate design follow-up, even if it ends up being simpler than `006` / `007` / `008`
 
 ### Initial acceptance ideas
 

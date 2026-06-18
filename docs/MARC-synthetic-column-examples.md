@@ -299,7 +299,7 @@ Related nuance:
 Other remaining boundaries:
 
 - multiple subfield predicates still cannot be guaranteed to match within the same repeatable MARC occurrence
-- blank indicator handling still needs a dedicated naming/query rule
+- blank indicator handling now uses the public token `blank`, which is mapped internally to `#`
 
 ## Current POC status
 

@@ -66,7 +66,10 @@ Current parser constraints:
 - subfield codes are currently modeled as single-character alphanumeric codes
 - fixed indicator values in constrained-subfield fields are currently modeled as either a single alphanumeric character or the special token `blank`
 - the backend currently maps the public blank-indicator token `blank` to the `marc_indexers` storage value `#`
-- whether raw `#` should be considered part of the public query contract is still an open decision
+- `blank` is distinct from `$empty`
+  - `blank` means a matching MARC row exists and stores the blank indicator value
+  - `$empty` means there is no matching usable row/value
+- raw `#` should be treated as an internal storage detail, not the preferred public contract
 
 ## Feasibility and implementation requirements
 
@@ -99,6 +102,7 @@ Current interpretation:
 One follow-up remains open:
 
 - whether a `DRAFT` row can coexist with an `ACTUAL` or `DELETED` row for the same `matched_id`
+- current expectation is that `DRAFT` should not be a special problem here and should likely follow the same general uniqueness model, but that still needs explicit confirmation
 
 ### What implementation requires
 
@@ -128,8 +132,9 @@ One follow-up remains open:
 - broad MARC `contains` queries may be expensive, especially at scale
 - the current implementation does not solve the broader same-repeatable-entry correlation problem
 - guaranteed combined `ind1 + ind2` same-row semantics are not solved by the current implementation
-- blank indicator support exists in rough form through the `blank` token, but final public-contract and UI semantics still need an explicit design decision
-- leader and fixed-position fields (`006` / `007` / `008`) are not part of the current grammar
+- indicator-only operator restrictions and final UI presentation for `blank` still need follow-up work
+- leader is not part of the current grammar and has not yet been prototyped in this spike
+- fixed-position fields (`006` / `007` / `008`) are also not part of the current grammar
 
 ## Performance and scale
 
@@ -157,6 +162,86 @@ Based on the current SQL shape, the likely performance profile is:
 - subfield equality or constrained-subfield equality should usually be narrower than tag-wide text searching
 - broad `contains` searches on tag-level or subfield-level values are likely to be the riskiest query shapes
 - cost will likely scale with the number of MARC predicates in one query, because each predicate currently becomes a separate correlated `EXISTS`
+
+### Preliminary performance results
+
+Initial manual testing was run with:
+
+- `mod-fqm-manager` running locally
+- a test database with a large real dataset
+- the `simple_srs_record` entity type
+- no joins to Inventory instance data
+- roughly 8 million searched records in scope
+
+The run values below are recorded exactly as reported during testing.
+
+- Constrained subfield equality
+  - query: `{"marc_245_ind1_1_b": {"$eq": "permanent ed."}}`
+  - matching records: `6,435`
+  - runs: `13 / 6 / 6`
+
+- Constrained subfield contains
+  - query: `{"marc_650_ind2_7_a": {"$contains": "history"}}`
+  - matching records: `17,854`
+  - runs: `86 / 36 / 40`
+
+- Tag contains
+  - query: `{"marc_245": {"$contains": "the"}}`
+  - matching records: `1,260,000`
+  - runs: `188 / 199 / 177`
+
+- Indicator-only equality
+  - query: `{"marc_245_ind1": {"$eq": "1"}}`
+  - matching records: `1,260,000`
+  - runs: `216 / 217 / 219`
+
+- Subfield equality
+  - query: `{"marc_650_a": {"$eq": "history"}}`
+  - matching records: `27,222`
+  - runs: `15 / 13 / 17`
+
+- Subfield contains
+  - query: `{"marc_650_a": {"$contains": "history"}}`
+  - matching records: `197,439`
+  - runs: `42 / 40 / 43`
+
+- Subfield contains, highly selective
+  - query: `{"marc_100_a": {"$contains": "Shakespeare"}}`
+  - matching records: `2,842`
+  - runs: `4 / 4 / 5`
+
+- Control-tag starts-with
+  - query: `{"marc_001": {"$starts_with": "ins"}}`
+  - matching records: `346,332`
+  - runs: `51 / 55 / 58`
+
+- Tag contains, broad repeatable field
+  - query: `{"marc_650": {"$contains": "history"}}`
+  - matching records: `797,549`
+  - runs: `137 / 130 / 129`
+
+- Indicator-only blank-value equality
+  - query: `{"marc_035_ind1": {"$eq": "#"}}`
+  - matching records: `1,260,000`
+  - runs: `347 / 227 / 222`
+
+Note:
+
+- this test used the underlying storage value `#`
+- the finalized public contract should use the token `blank` and map it internally to `#`
+
+Initial observations from this small sample:
+
+- selective subfield and constrained-subfield queries were the most favorable shapes in this dataset
+- broad tag-level and indicator-only queries were noticeably heavier, especially when they matched very large portions of the data
+- repeated runs often improved after the first run, which suggests some caching or warm-up effects
+- the broadest indicator-only blank-value equality case was one of the heaviest tested shapes
+- these results are encouraging as an initial signal, but they do not yet replace broader validation under concurrent load
+
+One important caveat:
+
+- these measurements cover query execution only
+- they do not yet measure export-heavy or result-materialization-heavy cases where many synthetic MARC fields or full `content` are returned
 
 ### Export and result-materialization performance
 
@@ -255,6 +340,13 @@ Instead, the UI should provide a MARC-specific selector flow for:
 
 The UI should ideally let users express MARC intent directly, while keeping raw synthetic field names internal.
 
+One related design consequence:
+
+- a single `marcDataType` is still sufficient for the backend model
+- but operator choice may need to depend on the parsed MARC selector shape, not just the datatype
+- indicator-only fields likely need coded-value operators
+- tag, subfield, and constrained-subfield fields likely need text-search operators
+
 Examples of what the UI should be able to build:
 
 - tag-only query
@@ -275,8 +367,9 @@ The current recommendation does **not** solve:
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence
 - guaranteed same-row combined `ind1 + ind2` semantics
 - exact reconstructed full-field string matching
-- leader and fixed-position field support in the first pass
-- final blank-indicator semantics
+- leader support in the first pass
+- `006` / `007` / `008` fixed-position field support in the first pass
+- final UI/operator alignment for blank-indicator handling
 
 The multi-indicator case is best treated as part of the broader “multiple conditions must match within the same repeatable entry” story, not as a separate MARC-only problem.
 

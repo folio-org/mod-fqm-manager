@@ -158,6 +158,19 @@ Within one `EXISTS`, all conditions apply to the same `marc_indexers` row. Becau
 
 This also means a combined `ind1 + ind2` constraint is a **single-row** constraint, not a hard correlation problem. The only reason it is not supported today is that the field-name grammar has no form for constraining both indicators at once. Adding one would be a small grammar extension.
 
+Note on the `AND` workaround for two indicators:
+
+- a query like `marc_245_ind1_1_x = 'abc' AND marc_245_ind2_1_x = 'abc'` is **exact for non-repeatable tags** (for example `245`, `100`, `130`): the record has at most one such field, so both indicator conditions necessarily refer to the same occurrence
+- it is only an **approximation for repeatable tags** (for example `650`, `700`): the two `EXISTS` clauses could match different occurrences, so a record could match even though no single occurrence has both indicator values
+- because both indicators live on the same `marc_indexers` row, this gap is closable exactly with a small grammar extension rather than by occurrence correlation
+
+Proposed fast-follow grammar (single `EXISTS`, exact same-occurrence semantics):
+
+- `marc_<tag>_ind1_<v1>_ind2_<v2>` — constrain both indicators, no subfield
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — constrain both indicators plus a subfield value
+
+The indicator space is fixed at exactly `ind1` and `ind2` by the MARC 21 standard (there is no `ind3`/`ind4`, and control `00X` fields have none), so this extension is bounded and cannot grow further.
+
 ### Occurrence-level correlation (the genuine gap, deferred)
 
 The one case that is genuinely unsolved is requiring multiple **subfield** predicates to match within the **same repeatable occurrence** of a tag (for example, subfield `a` and subfield `x` within the *same* `650`).
@@ -413,14 +426,14 @@ The UI also needs to decide how dynamic MARC fields are surfaced in visible-colu
 The current recommendation does **not** solve:
 
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence (and this cannot be solved against `marc_indexers` alone, since it has no occurrence discriminator — see "Correlation semantics" above)
-- combined `ind1 + ind2` constraints in a single selector (a grammar gap, not a correlation-model limitation, since both indicators live on the same `marc_indexers` row)
+- combined `ind1 + ind2` constraints in a single selector (a grammar gap, not a correlation-model limitation, since both indicators live on the same `marc_indexers` row; the `AND` workaround is exact for non-repeatable tags and only approximate for repeatable ones, and a small grammar extension — `marc_<tag>_ind1_<v1>_ind2_<v2>[_<subfield>]` — would close it exactly)
 - exact reconstructed full-field string matching
 - leader support in the first pass
 - `006` / `007` / `008` fixed-position field support in the first pass
 - final UI/operator alignment for blank-indicator handling
 - final operator-restriction policy and enforcement for indicator-only MARC fields
 
-The occurrence-level correlation case is best treated as part of the broader "multiple conditions must match within the same repeatable entry" story, not as a separate MARC-only problem. Combined `ind1 + ind2` support is separable and could be delivered as a small grammar extension independently of that broader story.
+The occurrence-level correlation case is best treated as part of the broader "multiple conditions must match within the same repeatable entry" story, not as a separate MARC-only problem. Combined `ind1 + ind2` support is separable and could be delivered as a small grammar extension (`marc_<tag>_ind1_<v1>_ind2_<v2>[_<subfield>]`) independently of that broader story. Since MARC 21 fixes the indicator count at two, this extension is the natural ceiling and does not risk an exploding indicator grammar.
 
 ## Suggested implementation stories
 

@@ -116,7 +116,7 @@ That means:
 Current assumption:
 
 - Indicator support does not require special condition syntax in the generated column name for this POC.
-- Indicator positions are limited to `ind1` and `ind2`, which is the complete MARC indicator model we need to support.
+- Indicator positions are limited to `ind1` and `ind2`, which is the complete MARC indicator model we need to support. This is fixed by the MARC 21 standard (every variable data field has exactly two indicators; control `00X` fields have none), so there is no risk of needing `ind3`/`ind4` and the indicator grammar is permanently bounded.
 - Fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values.
 - Uppercase indicator input should be accepted and normalized internally, so `MARC_245_IND1` behaves the same as `marc_245_ind1`.
 - Blank indicators can be represented with the public token `blank`, which the backend maps to the current `marc_indexers` storage value `#`.
@@ -194,8 +194,16 @@ Important clarification on the `ind1 + ind2` case specifically:
 
 - this approximation only needs two separate constrained fields because the grammar has no single form for constraining both indicators at once
 - but `marc_indexers` stores both `ind1` and `ind2` on the **same** row, so "the same field occurrence has `ind1 = 7` and `ind2 = 0` and `subfield a = X`" is a single-row constraint that one `EXISTS` could express exactly
+- the `AND` workaround is in fact **exact for non-repeatable tags** (e.g. `245`, `100`, `130`), because the record has at most one such field, so both indicator conditions must refer to the same occurrence; it is only **approximate for repeatable tags** (e.g. `650`, `700`), where the two `EXISTS` clauses could match different occurrences
 - therefore combined `ind1 + ind2` is a **grammar gap**, not a same-row correlation problem, and is separable from the broader same-occurrence work below
 - the genuinely hard case is multiple **subfield** predicates within the same repeatable occurrence (see "Explicitly Out of Scope" below), which `marc_indexers` cannot express at all
+
+Proposed fast-follow grammar to close the gap exactly (a fifth MARC field shape):
+
+- `marc_<tag>_ind1_<v1>_ind2_<v2>` — both indicators constrained, no subfield
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — both indicators plus a subfield value
+
+Both compile to a single `EXISTS` and give exact same-occurrence semantics. MARC 21 fixes the indicator count at exactly two (`ind1`, `ind2`; control `00X` fields have none), so this is the natural ceiling and the indicator grammar cannot grow beyond it.
 
 This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
 

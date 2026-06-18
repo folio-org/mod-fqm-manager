@@ -88,6 +88,15 @@ This is the core recommendation from the spike. It proves we can avoid large pre
 - Leader / `006` / `007` / `008`
 - Same-repeatable-entry correlation across multiple predicates
 
+### Optional fast-follow (small, separable)
+
+A fifth MARC field shape that constrains **both** indicators in a single selector, compiling to one `EXISTS` for exact same-occurrence semantics:
+
+- `marc_<tag>_ind1_<v1>_ind2_<v2>` — both indicators, no subfield
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — both indicators plus a subfield value
+
+This closes the only case where ANDing two single-indicator selectors is inexact (repeatable tags; it is already exact for non-repeatable tags like `245`). It is bounded — MARC 21 fixes the indicator count at exactly two — so it does not risk an exploding indicator grammar. It can ship with this story or as an independent follow-up.
+
 ## Story 2: Query builder / UI support for dynamic MARC selectors
 
 ### Goal

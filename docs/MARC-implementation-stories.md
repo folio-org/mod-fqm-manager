@@ -12,9 +12,8 @@ Suggested order:
 2. Backend hardening for the dynamic MARC querying MVP
 3. Query builder / UI support for dynamic MARC selectors
 4. Performance validation and operational guardrails
-5. Blank indicator semantics
-6. Leader and fixed-position MARC follow-up
-7. Same-repeatable-entry correlation as a separate cross-cutting story
+5. Leader and fixed-position MARC follow-up
+6. Same-repeatable-entry correlation as a separate cross-cutting story
 
 ## Story 0: Add `marcDataType` support in `folio-query-tool-metadata`
 
@@ -62,6 +61,11 @@ Turn the current POC into a supported backend implementation for dynamic MARC qu
 - Keep `marcDataType` behavior aligned with the current model:
   - aggregated display values via `valueGetter`
   - row-level `EXISTS` / `NOT EXISTS` query semantics
+- Implement the finalized blank-indicator contract in the backend:
+  - public token `blank`
+  - internal/storage mapping to `#`
+  - distinct from `$empty`
+  - decide whether raw `#` is tolerated for direct API compatibility
 - Add backend validation for MARC operator restrictions where selector shape requires it
   - especially indicator-only fields versus text-like MARC fields
 - Ensure referenced synthetic MARC fields can also be returned in results
@@ -74,6 +78,7 @@ This is the core recommendation from the spike. It proves we can avoid large pre
 
 - A query referencing a valid dynamic MARC field name is accepted without that field being eagerly returned by `GET /entity-types/{id}`
 - Tag-only, indicator-only, subfield-only, and constrained-subfield queries all produce the expected SQL behavior
+- Blank-indicator queries and constrained-subfield selectors behave consistently with the finalized `blank -> #` contract
 - Invalid operator combinations for indicator-only MARC fields are rejected by the backend
 - Referenced synthetic MARC fields can be included in query results
 - Existing non-MARC query behavior is unaffected
@@ -82,7 +87,6 @@ This is the core recommendation from the spike. It proves we can avoid large pre
 
 - Leader / `006` / `007` / `008`
 - Same-repeatable-entry correlation across multiple predicates
-- Blank-indicator policy beyond the currently supported non-blank case
 
 ## Story 2: Query builder / UI support for dynamic MARC selectors
 
@@ -103,6 +107,10 @@ Allow users to construct MARC queries in the UI without having to know or type s
 - Decide how users add MARC fields to visible columns or result display
 - Decide how users discover supported MARC query combinations now that MARC fields are not eagerly listed in the entity type response
 - Handle validation and guardrails for invalid combinations
+- Use the finalized blank-indicator contract in the UI:
+  - public token `blank`
+  - no need for users to know the storage value `#`
+  - keep `blank` distinct from `$empty`
 - Choose operators based on the MARC selector shape, not only on `marcDataType`
   - indicator-only fields likely need coded-value operators like `eq`, `ne`, `in`, `nin`, and maybe `empty`
   - tag, subfield, and constrained-subfield fields likely need text-search operators like `contains`, `starts_with`, `eq`, and `ne`
@@ -117,6 +125,7 @@ The spike approach intentionally avoids giant field dropdowns. That means the UI
 - A user can build an indicator-only MARC query from the UI
 - A user can build a subfield MARC query from the UI
 - A user can build a constrained subfield query such as “245 ind1 = 7, subfield a contains X”
+- A user can build a blank-indicator query or constrained-subfield selector using `blank` without needing to know `#`
 - The UI does not require all MARC combinations to appear in the normal entity-type field list
 - Users can discover supported MARC query combinations through the UI without needing to know raw synthetic field names
 
@@ -125,12 +134,11 @@ The spike approach intentionally avoids giant field dropdowns. That means the UI
 - Should the UI expose raw synthetic field names anywhere, or keep them fully internal?
 - How should dynamic MARC fields be surfaced in visible-columns workflows?
 - Do we want inline help/examples, a lightweight discovery panel, or both?
-- Should the backend also enforce indicator-only operator restrictions for direct API callers, even if the UI already prevents invalid combinations?
 
 Current note:
 
 - the backend does not currently enforce MARC operator restrictions by field shape
-- if we want indicator-only fields to reject text-style operators, that will require explicit backend validation rather than only documentation
+- the recommended direction is for the UI to hide invalid operators for usability and for the backend to enforce the same restrictions for direct API callers
 
 ## Story 3: Performance validation and operational guardrails
 
@@ -171,32 +179,7 @@ It is acceptable if some MARC queries are slow on very large datasets.
 
 It is not acceptable if MARC querying materially degrades the performance or stability of other FOLIO apps.
 
-## Story 4: Blank indicator contract alignment
-
-### Goal
-
-Align backend and UI behavior around the finalized blank-indicator contract.
-
-### Scope
-
-- Use `blank` as the public token for blank indicator values
-- Keep `#` as the internal/storage encoding used by `marc_indexers`
-- Keep `blank` distinct from `$empty`
-- Ensure the UI can express blank-indicator queries and constrained-subfield selectors clearly
-- Decide whether raw `#` should be tolerated in direct API queries for compatibility, even though it is not the preferred public contract
-
-### Why this story exists
-
-The core blank-indicator contract is now chosen, but the implementation still needs consistent UI and backend alignment around that contract.
-
-### Initial acceptance ideas
-
-- The policy for blank indicators is documented as `blank -> #`
-- The backend applies the blank-indicator rule consistently
-- The UI can express the blank-indicator case without ambiguity
-- `blank` and `$empty` are treated as distinct concepts
-
-## Story 5: Leader and fixed-position MARC follow-up
+## Story 4: Leader and fixed-position MARC follow-up
 
 ### Goal
 
@@ -223,7 +206,7 @@ Current note:
 - We have decided whether leader support belongs in the next implementation pass
 - We have a separate recommendation for `006` / `007` / `008`
 
-## Story 6: Same-repeatable-entry correlation across multiple predicates
+## Story 5: Same-repeatable-entry correlation across multiple predicates
 
 ### Goal
 
@@ -259,6 +242,5 @@ If we want the smallest practical implementation set after the spike, I would st
 - Story 1: Backend hardening for dynamic MARC querying MVP
 - Story 2: Query builder / UI support for dynamic MARC selectors
 - Story 3: Performance validation and operational guardrails
-- Story 4: Blank indicator semantics
 
 The other stories feel more like explicit follow-up work than first-pass MVP blockers.

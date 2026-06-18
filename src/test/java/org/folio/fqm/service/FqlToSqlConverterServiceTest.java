@@ -119,7 +119,7 @@ class FqlToSqlConverterServiceTest {
       );
     entityType = MarcFieldFactory.addSyntheticColumns(
       entityType,
-      List.of("marc_245", "marc_245_a", "marc_245_ind1", "marc_245_ind1_7_a"),
+      List.of("marc_245", "marc_245_a", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a"),
       "diku"
     );
   }
@@ -285,6 +285,15 @@ class FqlToSqlConverterServiceTest {
         condition(
           "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) = {0})",
           field("lower(:value)", String.class, param("value", "1"))
+        )
+      ),
+      Arguments.of(
+        "equals MARC indicator blank token",
+        """
+          {"marc_245_ind1": {"$eq": "blank"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) = {0})",
+          field("lower(:value)", String.class, param("value", "#"))
         )
       ),
       Arguments.of(
@@ -600,6 +609,15 @@ class FqlToSqlConverterServiceTest {
           {"marc_245_ind1_7_a": {"$contains": "Shakespeare"}}""",
         condition(
           "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a' and lower(marc.value) like {0})",
+          DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "Shakespeare")), inline("%"))
+        )
+      ),
+      Arguments.of(
+        "contains MARC constrained subfield blank token",
+        """
+          {"marc_245_ind1_blank_a": {"$contains": "Shakespeare"}}""",
+        condition(
+          "exists (select 1 from diku_mod_source_record_storage.marc_indexers marc where marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and lower(marc.ind1) = '#' and marc.subfield_no = 'a' and lower(marc.value) like {0})",
           DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "Shakespeare")), inline("%"))
         )
       ),

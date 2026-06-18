@@ -34,10 +34,12 @@ class MarcFieldFactoryTest {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind2"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_7_a"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_blank_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_A"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_7_A"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_BLANK_A"));
   }
 
   @Test
@@ -99,11 +101,24 @@ class MarcFieldFactoryTest {
   }
 
   @Test
+  void shouldCreateBlankConstrainedSubfieldSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_a").orElseThrow();
+
+    assertEquals("marc_245_ind1_blank_a", column.getName());
+    assertEquals("245 ind1=blank $a", column.getLabelAlias());
+    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "#", "a"), column.getValueGetter());
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
   void shouldNormalizeUppercaseInputForMarcFields() {
     EntityTypeColumn indicatorColumn = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_IND1").orElseThrow();
     EntityTypeColumn subfieldColumn = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_A").orElseThrow();
     EntityTypeColumn constrainedSubfieldColumn =
       MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_IND1_7_A").orElseThrow();
+    EntityTypeColumn blankConstrainedSubfieldColumn =
+      MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "MARC_245_IND1_BLANK_A").orElseThrow();
 
     assertEquals("MARC_245_IND1", indicatorColumn.getName());
     assertEquals("245 ind1", indicatorColumn.getLabelAlias());
@@ -122,6 +137,14 @@ class MarcFieldFactoryTest {
       constrainedSubfieldColumn.getValueGetter()
     );
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), constrainedSubfieldColumn.getFilterValueGetter());
+
+    assertEquals("MARC_245_IND1_BLANK_A", blankConstrainedSubfieldColumn.getName());
+    assertEquals("245 ind1=blank $a", blankConstrainedSubfieldColumn.getLabelAlias());
+    assertSqlEquals(
+      expectedConstrainedSubfieldValueGetter("245", "ind1", "#", "a"),
+      blankConstrainedSubfieldColumn.getValueGetter()
+    );
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), blankConstrainedSubfieldColumn.getFilterValueGetter());
   }
 
   @Test

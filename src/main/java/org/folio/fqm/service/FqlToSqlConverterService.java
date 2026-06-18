@@ -839,7 +839,12 @@ public class FqlToSqlConverterService {
   }
 
   private static org.jooq.Field<String> marcQueryValueField(Object value, FieldCondition<?> condition, EntityType entityType) {
-    return valueField(value == null ? null : value.toString(), condition, entityType);
+    String stringValue = value == null ? null : value.toString();
+    var parsedMarcField = MarcFieldFactory.parse(condition.field().getColumnName());
+    if (parsedMarcField.isPresent() && parsedMarcField.get().isIndicatorQuery()) {
+      stringValue = MarcFieldFactory.normalizeIndicatorQueryValue(stringValue);
+    }
+    return valueField(stringValue, condition, entityType);
   }
 
   private static Condition marcRowComparison(MarcFieldFactory.MarcQueryContext marcQueryContext, String operator,

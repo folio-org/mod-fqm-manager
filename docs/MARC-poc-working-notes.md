@@ -109,7 +109,9 @@ Current assumption:
 - Indicator positions are limited to `ind1` and `ind2`, which is the complete MARC indicator model we need to support.
 - Fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values.
 - Uppercase indicator input should be accepted and normalized internally, so `MARC_245_IND1` behaves the same as `marc_245_ind1`.
-- Blank-indicator encoding is still an open design decision and is not part of the current grammar.
+- Blank indicators can be represented with the public token `blank`, which the backend maps to the current `marc_indexers` storage value `#`.
+- For indicator-only queries, a runtime value like `{"marc_245_ind1": {"$eq": "blank"}}` should be supported.
+- The remaining open design question is whether we want to support raw `#` as part of the public contract, or keep it strictly as an internal storage detail.
 
 ### 6. Tag + subfield + indicator can be modeled as a constrained subfield extension
 
@@ -150,6 +152,7 @@ Supported grammar for this extension:
 Examples:
 
 - `marc_245_ind1_7_a`
+- `marc_245_ind1_blank_a`
 - `marc_650_ind2_7_a`
 
 Current assumption:
@@ -158,7 +161,8 @@ Current assumption:
 - The last token still identifies the value-bearing target.
 - We do not need the reverse shape, because the point of the field is still to query the subfield value while applying a fixed indicator constraint.
 - This should be treated as a targeted extension to the MARC grammar, not as a general solution for repeatable-field correlation.
-- The current implementation expects the baked-in indicator value and the subfield code to each be a single alphanumeric character.
+- The current implementation expects the baked-in indicator value to be either a single alphanumeric character or the special token `blank`.
+- The current implementation expects the subfield code to be a single alphanumeric character.
 
 Approximation we can already make:
 
@@ -186,7 +190,7 @@ Remaining boundaries of this approach:
 
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence are still not solved
 - guaranteed combined `ind1 + ind2` same-row constraints are still not solved by the current implementation
-- blank indicator handling still needs an explicit design decision for both field naming and query behavior
+- blank indicator handling is partly supported through the `blank` token, but final public-contract and UI semantics still need an explicit decision
 - query-match cost and export/result-materialization cost should be treated separately, because MARC filtering uses row-level `EXISTS` but MARC display/export still uses aggregated `valueGetter` expressions
 
 ### 7. `GET /entity-types/{id}` should not eagerly return all supported MARC fields

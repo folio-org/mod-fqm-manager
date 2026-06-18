@@ -64,8 +64,9 @@ Current parser constraints:
 - uppercase input is accepted and normalized internally, so `MARC_245_A` behaves the same as `marc_245_a`
 - control fields (`001`-`009`) are treated as tag-only fields, so indicator/subfield/constrained-subfield forms for `00X` tags are invalid
 - subfield codes are currently modeled as single-character alphanumeric codes
-- fixed indicator values in constrained-subfield fields are currently modeled as single-character alphanumeric values
-- blank-indicator encoding is still not part of the current grammar
+- fixed indicator values in constrained-subfield fields are currently modeled as either a single alphanumeric character or the special token `blank`
+- the backend currently maps the public blank-indicator token `blank` to the `marc_indexers` storage value `#`
+- whether raw `#` should be considered part of the public query contract is still an open decision
 
 ## Feasibility and implementation requirements
 
@@ -127,7 +128,7 @@ One follow-up remains open:
 - broad MARC `contains` queries may be expensive, especially at scale
 - the current implementation does not solve the broader same-repeatable-entry correlation problem
 - guaranteed combined `ind1 + ind2` same-row semantics are not solved by the current implementation
-- blank indicator semantics still need an explicit design decision
+- blank indicator support exists in rough form through the `blank` token, but final public-contract and UI semantics still need an explicit design decision
 - leader and fixed-position fields (`006` / `007` / `008`) are not part of the current grammar
 
 ## Performance and scale

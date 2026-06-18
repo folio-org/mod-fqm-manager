@@ -23,15 +23,17 @@ import org.folio.querytool.domain.dto.MarcDataType;
 public class MarcFieldFactory {
 
   public static final String GENERIC_MARC_COLUMN_NAME = "marc";
+  public static final String BLANK_INDICATOR_TOKEN = "blank";
 
   private static final String MARC_INDEXERS_TABLE = "${tenant_id}_mod_source_record_storage.marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
+  private static final String BLANK_INDICATOR_STORAGE_VALUE = "#";
   private static final int CASE_INSENSITIVE = Pattern.CASE_INSENSITIVE;
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   private static final Pattern TAG_ONLY_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$", CASE_INSENSITIVE);
   private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<indicator>ind[12])$", CASE_INSENSITIVE);
   private static final Pattern CONSTRAINED_SUBFIELD_PATTERN = Pattern.compile(
-    "^marc_(?<tag>\\d{3})_(?<indicator>ind[12])_(?<indicatorValue>[a-z0-9])_(?<subfield>[a-z0-9])$",
+    "^marc_(?<tag>\\d{3})_(?<indicator>ind[12])_(?<indicatorValue>blank|[a-z0-9])_(?<subfield>[a-z0-9])$",
     CASE_INSENSITIVE
   );
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$", CASE_INSENSITIVE);
@@ -171,7 +173,7 @@ public class MarcFieldFactory {
         fieldName,
         constrainedSubfieldMatcher.group("tag"),
         normalizeLower(constrainedSubfieldMatcher.group("indicator")),
-        normalizeLower(constrainedSubfieldMatcher.group("indicatorValue")),
+        normalizeIndicatorValue(constrainedSubfieldMatcher.group("indicatorValue")),
         normalizeLower(constrainedSubfieldMatcher.group("subfield"))
       ));
     }
@@ -255,6 +257,17 @@ public class MarcFieldFactory {
     return value == null ? null : value.toLowerCase(Locale.ROOT);
   }
 
+  public static String normalizeIndicatorQueryValue(String value) {
+    if (value == null) {
+      return null;
+    }
+
+    String normalizedValue = normalizeLower(value);
+    return BLANK_INDICATOR_TOKEN.equals(normalizedValue)
+      ? BLANK_INDICATOR_STORAGE_VALUE
+      : normalizedValue;
+  }
+
   private static boolean isControlFieldTag(String tag) {
     return tag != null && tag.startsWith("00");
   }
@@ -286,6 +299,16 @@ public class MarcFieldFactory {
     );
   }
 
+  private static String normalizeIndicatorValue(String value) {
+    return normalizeIndicatorQueryValue(value);
+  }
+
+  private static String displayIndicatorValue(String indicatorValue) {
+    return BLANK_INDICATOR_STORAGE_VALUE.equals(indicatorValue)
+      ? BLANK_INDICATOR_TOKEN
+      : indicatorValue;
+  }
+
   public record MarcFieldName(String fieldName, String tag, String indicator, String indicatorValue, String subfield) {
 
     public boolean isIndicatorQuery() {
@@ -306,7 +329,7 @@ public class MarcFieldFactory {
       }
       if (isSubfield()) {
         if (hasIndicatorConstraint()) {
-          return "%s %s=%s $%s".formatted(tag, indicator, indicatorValue, subfield);
+          return "%s %s=%s $%s".formatted(tag, indicator, displayIndicatorValue(indicatorValue), subfield);
         }
         return "%s$%s".formatted(tag, subfield);
       }

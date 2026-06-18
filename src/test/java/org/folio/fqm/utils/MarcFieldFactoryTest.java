@@ -35,11 +35,18 @@ class MarcFieldFactoryTest {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_7_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_blank_a"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_1_ind2"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind2_0_ind1"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_blank_ind2"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_1_ind2_0_a"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_ind1_blank_ind2_blank_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_A"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_7_A"));
     assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_BLANK_A"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_1_IND2"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_IND1_1_IND2_0_A"));
   }
 
   @Test
@@ -50,9 +57,14 @@ class MarcFieldFactoryTest {
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_a_ind1"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1_a"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1_1_ind1"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind2_1_ind2"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1_1_ind3"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind2_1_ind1_0_a"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_001_ind1"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_001_a"));
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_008_ind2_7_a"));
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_008_ind1_1_ind2"));
   }
 
   @Test
@@ -109,6 +121,64 @@ class MarcFieldFactoryTest {
     assertInstanceOf(MarcDataType.class, column.getDataType());
     assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "#", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateDualIndicatorSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind2").orElseThrow();
+
+    assertEquals("marc_245_ind1_1_ind2", column.getName());
+    assertEquals("245 ind1=1 ind2", column.getLabelAlias());
+    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertSqlEquals(expectedDualIndicatorValueGetter("245", "ind1", "1", "ind2"), column.getValueGetter());
+    assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind2"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateReversedDualIndicatorSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind2_0_ind1").orElseThrow();
+
+    assertEquals("marc_245_ind2_0_ind1", column.getName());
+    assertEquals("245 ind2=0 ind1", column.getLabelAlias());
+    assertSqlEquals(expectedDualIndicatorValueGetter("245", "ind2", "0", "ind1"), column.getValueGetter());
+    assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind1"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateBlankConstrainedDualIndicatorSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_ind2").orElseThrow();
+
+    assertEquals("marc_245_ind1_blank_ind2", column.getName());
+    assertEquals("245 ind1=blank ind2", column.getLabelAlias());
+    assertSqlEquals(expectedDualIndicatorValueGetter("245", "ind1", "#", "ind2"), column.getValueGetter());
+    assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind2"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateDualConstrainedSubfieldSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind2_0_a").orElseThrow();
+
+    assertEquals("marc_245_ind1_1_ind2_0_a", column.getName());
+    assertEquals("245 ind1=1 ind2=0 $a", column.getLabelAlias());
+    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertSqlEquals(expectedDualConstrainedSubfieldValueGetter("245", "1", "0", "a"), column.getValueGetter());
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateBlankDualConstrainedSubfieldSyntheticColumn() {
+    EntityTypeColumn column =
+      MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_ind2_blank_a").orElseThrow();
+
+    assertEquals("marc_245_ind1_blank_ind2_blank_a", column.getName());
+    assertEquals("245 ind1=blank ind2=blank $a", column.getLabelAlias());
+    assertSqlEquals(expectedDualConstrainedSubfieldValueGetter("245", "#", "#", "a"), column.getValueGetter());
+    assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldReturnEmptyForSameIndicatorDualSelector() {
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind1"));
   }
 
   @Test
@@ -301,6 +371,32 @@ class MarcFieldFactoryTest {
           AND marc.subfield_no = '%s'
       )
       """.formatted(tag, indicator, indicatorValue, subfield).trim();
+  }
+
+  private static String expectedDualIndicatorValueGetter(String tag, String constraintIndicator, String constraintValue, String targetIndicator) {
+    return """
+      (
+        SELECT jsonb_agg(DISTINCT marc.%s) FILTER (WHERE marc.%s IS NOT NULL)
+        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
+        WHERE marc.marc_id = "record_lb".matched_id
+          AND marc.field_no = '%s'
+          AND lower(marc.%s) = '%s'
+      )
+      """.formatted(targetIndicator, targetIndicator, tag, constraintIndicator, constraintValue).trim();
+  }
+
+  private static String expectedDualConstrainedSubfieldValueGetter(String tag, String ind1Value, String ind2Value, String subfield) {
+    return """
+      (
+        SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
+        WHERE marc.marc_id = "record_lb".matched_id
+          AND marc.field_no = '%s'
+          AND lower(marc.ind1) = '%s'
+          AND lower(marc.ind2) = '%s'
+          AND marc.subfield_no = '%s'
+      )
+      """.formatted(tag, ind1Value, ind2Value, subfield).trim();
   }
 
   private static void assertSqlEquals(String expected, String actual) {

@@ -1,0 +1,5 @@
+{
+  name: 'src_agr_order_line',
+  dependsOn: [['${tenant_id}_mod_agreements', 'order_line']],
+  sql: 'SELECT * FROM ${tenant_id}_mod_agreements.order_line',
+}

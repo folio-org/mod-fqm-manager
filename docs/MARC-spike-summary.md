@@ -147,6 +147,11 @@ The right performance framing is:
 - it is acceptable if some MARC queries on this entity type are slow on very large datasets
 - it is not acceptable if MARC querying materially degrades the performance or stability of other FOLIO apps
 
+Current interpretation of the spike results:
+
+- the current approach looks acceptable for an initial rollout recommendation
+- however, it still needs more detailed validation before a production release decision
+
 ### Important context
 
 - `marc_indexers` is normalized, which is a positive
@@ -346,6 +351,12 @@ One related design consequence:
 - but operator choice may need to depend on the parsed MARC selector shape, not just the datatype
 - indicator-only fields likely need coded-value operators
 - tag, subfield, and constrained-subfield fields likely need text-search operators
+- recommended direction: keep one `marcDataType`, let the UI hide invalid operator choices, and enforce the same rule in the backend for direct API callers
+
+Current backend reality:
+
+- the current backend does not yet enforce operator restrictions by MARC field shape
+- that means indicator-only MARC fields can still flow through text-style operators today unless we add explicit validation
 
 Examples of what the UI should be able to build:
 
@@ -370,6 +381,7 @@ The current recommendation does **not** solve:
 - leader support in the first pass
 - `006` / `007` / `008` fixed-position field support in the first pass
 - final UI/operator alignment for blank-indicator handling
+- final operator-restriction policy and enforcement for indicator-only MARC fields
 
 The multi-indicator case is best treated as part of the broader “multiple conditions must match within the same repeatable entry” story, not as a separate MARC-only problem.
 

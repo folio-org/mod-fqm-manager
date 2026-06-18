@@ -53,6 +53,8 @@ Important note about operators:
 - indicator-only MARC fields behave more like coded-value fields
 - tag, subfield, and constrained-subfield MARC fields behave more like text-search fields
 - this likely means operator choice should depend on the parsed MARC selector shape, not only on `marcDataType`
+- the current backend does not yet enforce those distinctions, so indicator-only MARC fields can still use text-style operators unless we add explicit validation
+- recommended direction: keep one `marcDataType`, mirror operator restrictions in the UI for usability, and enforce them in the backend for correctness
 
 ### 2. Expansion should follow the existing read-time pattern
 

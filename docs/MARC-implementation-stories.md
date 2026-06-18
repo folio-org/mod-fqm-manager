@@ -62,6 +62,8 @@ Turn the current POC into a supported backend implementation for dynamic MARC qu
 - Keep `marcDataType` behavior aligned with the current model:
   - aggregated display values via `valueGetter`
   - row-level `EXISTS` / `NOT EXISTS` query semantics
+- Add backend validation for MARC operator restrictions where selector shape requires it
+  - especially indicator-only fields versus text-like MARC fields
 - Ensure referenced synthetic MARC fields can also be returned in results
 
 ### Why this story exists
@@ -72,6 +74,7 @@ This is the core recommendation from the spike. It proves we can avoid large pre
 
 - A query referencing a valid dynamic MARC field name is accepted without that field being eagerly returned by `GET /entity-types/{id}`
 - Tag-only, indicator-only, subfield-only, and constrained-subfield queries all produce the expected SQL behavior
+- Invalid operator combinations for indicator-only MARC fields are rejected by the backend
 - Referenced synthetic MARC fields can be included in query results
 - Existing non-MARC query behavior is unaffected
 
@@ -124,6 +127,11 @@ The spike approach intentionally avoids giant field dropdowns. That means the UI
 - Do we want inline help/examples, a lightweight discovery panel, or both?
 - Should the backend also enforce indicator-only operator restrictions for direct API callers, even if the UI already prevents invalid combinations?
 
+Current note:
+
+- the backend does not currently enforce MARC operator restrictions by field shape
+- if we want indicator-only fields to reject text-style operators, that will require explicit backend validation rather than only documentation
+
 ## Story 3: Performance validation and operational guardrails
 
 ### Goal
@@ -155,6 +163,7 @@ We also already have an initial baseline from preliminary manual testing against
 - We have representative measurements for the major supported MARC query shapes
 - We can describe which query patterns appear safe, risky, or likely to need guardrails
 - We can state whether the implementation is acceptable for initial rollout with the current database shape
+- We can state whether the implementation still needs more detailed validation before production release
 
 ### Important note
 

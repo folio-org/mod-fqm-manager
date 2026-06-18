@@ -200,8 +200,10 @@ Important clarification on the `ind1 + ind2` case specifically:
 
 Proposed fast-follow grammar to close the gap exactly (a fifth MARC field shape):
 
-- `marc_<tag>_ind1_<v1>_ind2_<v2>` — both indicators constrained, no subfield
-- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — both indicators plus a subfield value
+- `marc_<tag>_ind1_<v1>_ind2` / `marc_<tag>_ind2_<v2>_ind1` — constrain one indicator, query the other (no subfield)
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — constrain both indicators, query a subfield value
+
+These follow the same rule the constrained-subfield form already uses: **the last token is the single value-bearing target, and everything before it is a baked constraint.** This is important for the no-subfield case: a form that bakes *both* indicator values (`marc_<tag>_ind1_<v1>_ind2_<v2>`) leaves no attribute to query against, so it is rejected in favor of baking one indicator and querying the other. For example, `marc_245_ind1_1_ind2` run with `{"$eq": "0"}` means exactly "a `245` with `ind1 = 1` and `ind2 = 0`", keeps a real runtime value, and still supports operators on the target indicator (`eq`, `ne`, `in`, `nin`, `empty`). Parsing stays unambiguous because the last token is either a four-character `ind1`/`ind2` or a single-character subfield.
 
 Both compile to a single `EXISTS` and give exact same-occurrence semantics. MARC 21 fixes the indicator count at exactly two (`ind1`, `ind2`; control `00X` fields have none), so this is the natural ceiling and the indicator grammar cannot grow beyond it.
 

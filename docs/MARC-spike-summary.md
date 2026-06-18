@@ -59,6 +59,8 @@ The current POC demonstrates that the recommended approach is technically feasib
 - `marc_<tag>_ind1_<indicatorValue>_<subfield>`
 - `marc_<tag>_ind2_<indicatorValue>_<subfield>`
 
+These all follow one underlying rule: a field is `marc_<tag>`, optionally followed by one or more `indN_<value>` baked constraints, ending in a single value-bearing target. The **last token is always the value-bearing target** (a subfield, an indicator, or — for tag-only — the implicit `value`), and everything before it is a fixed constraint. This rule is what keeps each field to exactly one runtime query value and is the basis for the proposed both-indicator extension below.
+
 Current parser constraints:
 
 - uppercase input is accepted and normalized internally, so `MARC_245_A` behaves the same as `marc_245_a`
@@ -166,8 +168,10 @@ Note on the `AND` workaround for two indicators:
 
 Proposed fast-follow grammar (single `EXISTS`, exact same-occurrence semantics):
 
-- `marc_<tag>_ind1_<v1>_ind2_<v2>` — constrain both indicators, no subfield
-- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — constrain both indicators plus a subfield value
+- `marc_<tag>_ind1_<v1>_ind2` / `marc_<tag>_ind2_<v2>_ind1` — constrain one indicator, query the other (no subfield)
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — constrain both indicators, query a subfield value
+
+These follow the same rule the constrained-subfield form already uses: **the last token is the single value-bearing target, and everything before it is a baked constraint.** That rule is what makes the no-subfield case work — a form that bakes *both* indicator values (`marc_<tag>_ind1_<v1>_ind2_<v2>`) leaves nothing to query, so instead one indicator is baked as a constraint and the other becomes the queried target. For example, `marc_245_ind1_1_ind2` run with `{"$eq": "0"}` means exactly "a `245` with `ind1 = 1` and `ind2 = 0`", and it still supports operators on the target indicator (`eq`, `ne`, `in`, `nin`, `empty`). Parsing stays unambiguous because the last token is either a four-character `ind1`/`ind2` or a single-character subfield.
 
 The indicator space is fixed at exactly `ind1` and `ind2` by the MARC 21 standard (there is no `ind3`/`ind4`, and control `00X` fields have none), so this extension is bounded and cannot grow further.
 
@@ -426,14 +430,14 @@ The UI also needs to decide how dynamic MARC fields are surfaced in visible-colu
 The current recommendation does **not** solve:
 
 - multiple subfield predicates that must all match within the same repeatable MARC occurrence (and this cannot be solved against `marc_indexers` alone, since it has no occurrence discriminator — see "Correlation semantics" above)
-- combined `ind1 + ind2` constraints in a single selector (a grammar gap, not a correlation-model limitation, since both indicators live on the same `marc_indexers` row; the `AND` workaround is exact for non-repeatable tags and only approximate for repeatable ones, and a small grammar extension — `marc_<tag>_ind1_<v1>_ind2_<v2>[_<subfield>]` — would close it exactly)
+- combined `ind1 + ind2` constraints in a single selector (a grammar gap, not a correlation-model limitation, since both indicators live on the same `marc_indexers` row; the `AND` workaround is exact for non-repeatable tags and only approximate for repeatable ones, and a small grammar extension — `marc_<tag>_ind1_<v1>_ind2[_<subfield>]` style, baking one indicator and querying the other or a subfield — would close it exactly)
 - exact reconstructed full-field string matching
 - leader support in the first pass
 - `006` / `007` / `008` fixed-position field support in the first pass
 - final UI/operator alignment for blank-indicator handling
 - final operator-restriction policy and enforcement for indicator-only MARC fields
 
-The occurrence-level correlation case is best treated as part of the broader "multiple conditions must match within the same repeatable entry" story, not as a separate MARC-only problem. Combined `ind1 + ind2` support is separable and could be delivered as a small grammar extension (`marc_<tag>_ind1_<v1>_ind2_<v2>[_<subfield>]`) independently of that broader story. Since MARC 21 fixes the indicator count at two, this extension is the natural ceiling and does not risk an exploding indicator grammar.
+The occurrence-level correlation case is best treated as part of the broader "multiple conditions must match within the same repeatable entry" story, not as a separate MARC-only problem. Combined `ind1 + ind2` support is separable and could be delivered as a small grammar extension (bake one indicator and query the other, or bake both and query a subfield) independently of that broader story. Since MARC 21 fixes the indicator count at two, this extension is the natural ceiling and does not risk an exploding indicator grammar.
 
 ## Suggested implementation stories
 

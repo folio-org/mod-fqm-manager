@@ -92,8 +92,10 @@ This is the core recommendation from the spike. It proves we can avoid large pre
 
 A fifth MARC field shape that constrains **both** indicators in a single selector, compiling to one `EXISTS` for exact same-occurrence semantics:
 
-- `marc_<tag>_ind1_<v1>_ind2_<v2>` — both indicators, no subfield
-- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — both indicators plus a subfield value
+- `marc_<tag>_ind1_<v1>_ind2` / `marc_<tag>_ind2_<v2>_ind1` — constrain one indicator, query the other (no subfield)
+- `marc_<tag>_ind1_<v1>_ind2_<v2>_<subfield>` — constrain both indicators, query a subfield value
+
+These follow the existing rule that **the last token is the single value-bearing target and everything before it is a baked constraint**. A form baking *both* indicator values with no subfield (`marc_<tag>_ind1_<v1>_ind2_<v2>`) is intentionally not used because it leaves nothing to query; instead one indicator is baked and the other becomes the queried target (e.g. `marc_245_ind1_1_ind2` with `{"$eq": "0"}`), which keeps a real runtime value and supports `eq`/`ne`/`in`/`nin`/`empty`.
 
 This closes the only case where ANDing two single-indicator selectors is inexact (repeatable tags; it is already exact for non-repeatable tags like `245`). It is bounded — MARC 21 fixes the indicator count at exactly two — so it does not risk an exploding indicator grammar. It can ship with this story or as an independent follow-up.
 

@@ -30,7 +30,7 @@ The POC should prove the following:
 
 - A single generic MARC placeholder/capability can be declared in an entity type definition.
 - A query can reference concrete MARC field names dynamically, without those fields being eagerly listed in the entity type definition.
-- Dynamically resolved MARC fields can query MARC data from `marc_indexers` / `marc_indexers_leader`.
+- Dynamically resolved MARC fields can query MARC data from `marc_indexers`. (Leader data in `marc_indexers_leader` is out of scope for this POC and is not yet queried.)
 - Dynamically resolved MARC fields can display MARC values in query results.
 - Dynamic MARC fields work with existing FQM query behavior and existing composite-entity query composition.
 
@@ -346,7 +346,7 @@ Example shape:
 
 Notes:
 
-- The placeholder `valueGetter` is being used as a correlation hint to `marc_indexers` / `marc_indexers_leader`, not as a user-facing display getter for the generic `marc` field itself.
+- The placeholder `valueGetter` is being used as a correlation hint to `marc_indexers`, not as a user-facing display getter for the generic `marc` field itself. (Leader correlation to `marc_indexers_leader` is not yet implemented and would be a follow-up.)
 - This keeps the placeholder contract within the existing `Field` / `EntityTypeColumn` model and avoids needing extra metadata on `marcDataType`, though it may still be refined later.
 - At the moment, no separate expansion config is assumed to be necessary for the POC.
 
@@ -405,6 +405,15 @@ Meaning:
 - display should aggregate matching subfield values
 - query semantics should check whether at least one matching MARC row satisfies both the fixed indicator constraint and the user-provided operator/value
 
+### Negation and empty semantics
+
+Because MARC filtering is implemented with correlated `EXISTS` / `NOT EXISTS` against `marc_indexers`, negation and empty operators have semantics worth calling out explicitly:
+
+- `$ne` and `$nin` compile to `NOT EXISTS (... value = X)`, which means "no MARC row for this selector has this value", not "a MARC row exists with a different value"
+- as a result, a record that does not have the tag/subfield at all will **match** a `$ne` query (the condition is vacuously true)
+- `$empty: true` is the absence/empty case (no matching non-empty row), and `$empty: false` is presence; `$empty` also treats empty-string values (`<> ''`) as empty
+- this differs from intuition for multi-valued data and should be mirrored in UI guidance and backend validation, so users understand that "not equal" includes "not present"
+
 ### Current POC grammar
 
 The current grammar supports:
@@ -452,8 +461,9 @@ Entity type DTOs come from `org.folio.querytool.domain.dto`, so any `marcDataTyp
 
 Current assumption:
 
-- For the POC, dynamically synthesized getters can use correlated subqueries directly against `marc_indexers` / `marc_indexers_leader`
+- For the POC, dynamically synthesized getters can use correlated subqueries directly against `marc_indexers`
 - We do not need to model `marc_indexers` as a normal entity source first
+- Leader querying against `marc_indexers_leader` is out of scope here; if added later it would follow the same correlated-subquery pattern
 
 ### 3. Indicators may duplicate on display
 

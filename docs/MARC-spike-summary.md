@@ -128,6 +128,7 @@ One follow-up remains open:
 ## Cons and limitations
 
 - the backend contract becomes more specialized and MARC-specific
+- negation/empty semantics need care: `$ne` / `$nin` compile to `NOT EXISTS` and therefore also match records that lack the tag/subfield entirely (a vacuously-true "not present" match), which is unintuitive for multi-valued MARC data and should be surfaced in UI guidance and backend validation
 - the query builder / UI must do more work because normal entity-type field discovery is no longer enough
 - broad MARC `contains` queries may be expensive, especially at scale
 - the current implementation does not solve the broader same-repeatable-entry correlation problem
@@ -387,15 +388,16 @@ The multi-indicator case is best treated as part of the broader “multiple cond
 
 ## Suggested implementation stories
 
-Recommended stories from the spike:
+Recommended stories from the spike (aligned with the breakdown in [MARC-implementation-stories.md](/Users/bsharp/workspace/mod-fqm-manager/docs/MARC-implementation-stories.md)):
 
-1. Add `marcDataType` support in `folio-query-tool-metadata`
-2. Backend hardening for dynamic MARC querying MVP
-3. Query builder / UI support for dynamic MARC selectors
-4. Performance validation and operational guardrails
-5. Blank indicator semantics
-6. Leader and fixed-position MARC follow-up
-7. Same-repeatable-entry correlation across multiple predicates
+0. Add `marcDataType` support in `folio-query-tool-metadata`
+1. Backend hardening for dynamic MARC querying MVP
+2. Query builder / UI support for dynamic MARC selectors
+3. Performance validation and operational guardrails
+4. Leader and fixed-position MARC follow-up
+5. Same-repeatable-entry correlation across multiple predicates
+
+Blank-indicator semantics are not a standalone story; the finalized `blank -> #` contract and its UI/operator alignment are handled within Story 1 (backend) and Story 2 (UI).
 
 See [MARC-implementation-stories.md](/Users/bsharp/workspace/mod-fqm-manager/docs/MARC-implementation-stories.md) for the draft story breakdown.
 

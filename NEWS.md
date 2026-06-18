@@ -1,5 +1,11 @@
 # 4.1.x - Trillium
 
+# 4.1.6
+- [MODFQMMGR-1162](https://folio-org.atlassian.net/browse/MODFQMMGR-1162) Remove redundant `source` properties from fields that use `valueSourceApi`
+- [MODFQMMGR-1169](https://folio-org.atlassian.net/browse/MODFQMMGR-1169) Keep loan and fee/fine counts in sync for user transaction summaries
+- [MODFQMMGR-1174](https://folio-org.atlassian.net/browse/MODFQMMGR-1174) Restore missing fields in the Organizations entity type
+- [MODFQMMGR-1179](https://folio-org.atlassian.net/browse/MODFQMMGR-1179) Fix the value source API for `Source file - Name`
+
 # 4.1.5
 - Revert the [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) changes, as they are not intended for v4.1.x
 

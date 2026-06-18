@@ -131,11 +131,47 @@ One follow-up remains open:
 - negation/empty semantics need care: `$ne` / `$nin` compile to `NOT EXISTS` and therefore also match records that lack the tag/subfield entirely (a vacuously-true "not present" match), which is unintuitive for multi-valued MARC data and should be surfaced in UI guidance and backend validation
 - the query builder / UI must do more work because normal entity-type field discovery is no longer enough
 - broad MARC `contains` queries may be expensive, especially at scale
-- the current implementation does not solve the broader same-repeatable-entry correlation problem
-- guaranteed combined `ind1 + ind2` same-row semantics are not solved by the current implementation
+- the current implementation does not solve the broader same-repeatable-entry correlation problem (and, as noted below, `marc_indexers` does not carry an occurrence discriminator, so this case cannot be solved against `marc_indexers` alone)
+- combined `ind1 + ind2` constraints are not yet exposed in the field-name grammar; this is a grammar gap rather than a correlation-model limitation, because `marc_indexers` stores both `ind1` and `ind2` on the same row (so both can be constrained within a single `EXISTS`)
 - indicator-only operator restrictions and final UI presentation for `blank` still need follow-up work
 - leader is not part of the current grammar and has not yet been prototyped in this spike
 - fixed-position fields (`006` / `007` / `008`) are also not part of the current grammar
+
+## Correlation semantics: record-level vs occurrence-level
+
+It is important to distinguish two different kinds of "do these conditions match together" when reasoning about MARC predicates, because they have very different guarantees.
+
+### Record-level correlation (always correct)
+
+Every MARC predicate is a correlated subquery on `marc.marc_id = matched_id`. So when multiple MARC predicates are combined with `AND`, they are all guaranteed to apply to the **same SRS record**.
+
+Consequences:
+
+- it does not matter whether two predicates happen to match different `marc_indexers` rows; rows sharing a `marc_id` belong to the same record and the same underlying MARC `content` blob
+- a query like `marc_245_a = X AND marc_650_a = Y` correctly means "the same record has a `245$a` of X and a `650$a` of Y"
+
+This is not a limitation. Record identity is never ambiguous in this model.
+
+### Single-row correlation (handled, and the basis of constrained subfields)
+
+Within one `EXISTS`, all conditions apply to the same `marc_indexers` row. Because `marc_indexers` denormalizes `field_no`, `ind1`, `ind2`, `subfield_no`, and `value` onto each row, a single synthetic field can correctly correlate an indicator with a subfield (for example `marc_245_ind1_7_a` = "subfield `a` of a `245` whose `ind1` is `7`").
+
+This also means a combined `ind1 + ind2` constraint is a **single-row** constraint, not a hard correlation problem. The only reason it is not supported today is that the field-name grammar has no form for constraining both indicators at once. Adding one would be a small grammar extension.
+
+### Occurrence-level correlation (the genuine gap, deferred)
+
+The one case that is genuinely unsolved is requiring multiple **subfield** predicates to match within the **same repeatable occurrence** of a tag (for example, subfield `a` and subfield `x` within the *same* `650`).
+
+Crucially, `marc_indexers` does **not** carry a per-occurrence discriminator. For example, two `035` subfields on the same record appear as:
+
+```
+"035" "#" "#" "a" "(OCoLC)914463940"     <marc_id> 0
+"035" "#" "#" "a" "(OCoLC)ocn914463940"  <marc_id> 0
+```
+
+The trailing column is identical (`0`) for both, so there is no column that distinguishes one occurrence of a tag from another. As a result, same-occurrence correlation **cannot be solved against `marc_indexers` alone**; a future implementation would need to correlate against the MARC `content` JSONB blob (or against a schema that adds an occurrence key) instead.
+
+This is the same general "multiple conditions must match within the same repeatable entry" problem that already exists for non-MARC repeatable structured data, and it is intentionally treated as a separate cross-cutting story.
 
 ## Performance and scale
 
@@ -376,15 +412,15 @@ The UI also needs to decide how dynamic MARC fields are surfaced in visible-colu
 
 The current recommendation does **not** solve:
 
-- multiple subfield predicates that must all match within the same repeatable MARC occurrence
-- guaranteed same-row combined `ind1 + ind2` semantics
+- multiple subfield predicates that must all match within the same repeatable MARC occurrence (and this cannot be solved against `marc_indexers` alone, since it has no occurrence discriminator — see "Correlation semantics" above)
+- combined `ind1 + ind2` constraints in a single selector (a grammar gap, not a correlation-model limitation, since both indicators live on the same `marc_indexers` row)
 - exact reconstructed full-field string matching
 - leader support in the first pass
 - `006` / `007` / `008` fixed-position field support in the first pass
 - final UI/operator alignment for blank-indicator handling
 - final operator-restriction policy and enforcement for indicator-only MARC fields
 
-The multi-indicator case is best treated as part of the broader “multiple conditions must match within the same repeatable entry” story, not as a separate MARC-only problem.
+The occurrence-level correlation case is best treated as part of the broader "multiple conditions must match within the same repeatable entry" story, not as a separate MARC-only problem. Combined `ind1 + ind2` support is separable and could be delivered as a small grammar extension independently of that broader story.
 
 ## Suggested implementation stories
 

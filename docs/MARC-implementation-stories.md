@@ -217,12 +217,18 @@ Support queries where multiple conditions must all match within the same repeata
 - Handle same-entry semantics for repeatable structured data in general, not only MARC
 - Ensure the future solution also covers MARC cases such as:
   - multiple subfield predicates that must match in the same logical MARC occurrence
-  - guaranteed combined `ind1 + ind2` same-row semantics
+- Note that combined `ind1 + ind2` same-row matching is **not** part of this story: both indicators are stored on the same `marc_indexers` row, so it is a single-row constraint solvable by a small grammar extension rather than by occurrence correlation
 - Determine whether the solution is generic, MARC-specific, or a hybrid
 
 ### Why this story exists
 
 This is a broader FQM limitation that already exists outside MARC. The current constrained-subfield MARC support improves same-row precision for one fixed indicator plus one subfield, but it does not solve the more general same-repeatable-entry problem.
+
+### Important data constraint
+
+`marc_indexers` does not carry a per-occurrence discriminator. Two occurrences of the same tag/subfield are stored as rows that differ only by `value` (the spike confirmed this with two `035 $a` rows whose trailing column was identical). This means same-occurrence correlation **cannot be solved against `marc_indexers` alone** — a solution would need to correlate against the MARC `content` JSONB blob or a schema that adds an occurrence key.
+
+Note also that combined `ind1 + ind2` constraints are **not** part of this story: because both indicators live on the same `marc_indexers` row, that case is a single-row constraint and only needs a small grammar extension, independent of this same-occurrence work.
 
 ### Initial acceptance ideas
 

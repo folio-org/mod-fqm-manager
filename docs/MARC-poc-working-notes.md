@@ -190,6 +190,13 @@ However, it is still only an approximation. The query means:
 
 Those two matches could still come from different rows. So this is useful in practice, but it should not be documented as guaranteeing a combined `ind1 + ind2` same-row match.
 
+Important clarification on the `ind1 + ind2` case specifically:
+
+- this approximation only needs two separate constrained fields because the grammar has no single form for constraining both indicators at once
+- but `marc_indexers` stores both `ind1` and `ind2` on the **same** row, so "the same field occurrence has `ind1 = 7` and `ind2 = 0` and `subfield a = X`" is a single-row constraint that one `EXISTS` could express exactly
+- therefore combined `ind1 + ind2` is a **grammar gap**, not a same-row correlation problem, and is separable from the broader same-occurrence work below
+- the genuinely hard case is multiple **subfield** predicates within the same repeatable occurrence (see "Explicitly Out of Scope" below), which `marc_indexers` cannot express at all
+
 This also overlaps with the broader repeatable-field correlation story. Even if we solved the "subfield value plus indicator value on the same row" case, that still would not solve the more general "multiple queried values must all match within the same repeatable occurrence" problem across multiple MARC rows.
 
 How this relates to the broader same-entry story:
@@ -265,6 +272,20 @@ Example:
 This does **not** guarantee that both conditions matched the same `650` occurrence.
 
 That is a broader FQM limitation for repeatable structured data, not something unique to MARC.
+
+Important data constraint discovered during the spike:
+
+- `marc_indexers` does not carry a per-occurrence discriminator column
+- for example, two `035 $a` subfields on the same record are stored as two rows that are identical except for `value`, with no column that distinguishes one `035` occurrence from another:
+
+```
+"035" "#" "#" "a" "(OCoLC)914463940"     <marc_id> 0
+"035" "#" "#" "a" "(OCoLC)ocn914463940"  <marc_id> 0
+```
+
+- the trailing column is `0` on both rows, so it is not an occurrence index
+- consequently, same-occurrence correlation **cannot be solved against `marc_indexers` alone**
+- a future implementation would need to correlate against the MARC `content` JSONB blob (or a schema that adds an occurrence key)
 
 Comparable existing limitation:
 

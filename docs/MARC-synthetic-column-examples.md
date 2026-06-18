@@ -292,13 +292,13 @@ Important boundary:
 Related nuance:
 
 - a query like `marc_245_ind1_7_a = 'xyz' AND marc_245_ind2_7_a = 'xyz'` is a useful approximation for "both indicators are 7 for the same subfield value"
-- but it is not a guaranteed same-row `ind1 + ind2` match, because each constrained field is still evaluated independently
-- this should be considered part of the broader same-repeatable-entry problem, so a future same-entry implementation should also cover this MARC case
-- with the current `marcDataType` approach, that future implementation would likely do this by combining compatible MARC predicates into one row-level `EXISTS`
+- but it is not a guaranteed same-row `ind1 + ind2` match, because each constrained field is still evaluated as an independent `EXISTS`
+- however, this is only a grammar limitation: `marc_indexers` stores both `ind1` and `ind2` on the same row, so a single selector constraining both indicators would express this exactly in one `EXISTS`. Combined `ind1 + ind2` is therefore separable from the harder same-occurrence problem below and could be added as a small grammar extension
+- with the current `marcDataType` approach, combining compatible MARC predicates into one row-level `EXISTS` is the natural way to deliver this
 
 Other remaining boundaries:
 
-- multiple subfield predicates still cannot be guaranteed to match within the same repeatable MARC occurrence
+- multiple subfield predicates still cannot be guaranteed to match within the same repeatable MARC occurrence, and this cannot be solved against `marc_indexers` at all because it has no per-occurrence discriminator column (two occurrences of the same tag/subfield are stored as rows that differ only by `value`). Solving it would require correlating against the MARC `content` JSONB blob or a schema with an occurrence key.
 - blank indicator handling now uses the public token `blank`, which is mapped internally to `#`
 
 ## Current POC status

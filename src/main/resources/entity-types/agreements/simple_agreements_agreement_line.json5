@@ -79,8 +79,8 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: "(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
-      filterValueGetter: "lower(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
+      valueGetter: "(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.ent_id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
+      filterValueGetter: "lower(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.ent_id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
       valueFunction: 'lower(:value)',
       values: [
         { label: 'Internal', value: 'internal' },

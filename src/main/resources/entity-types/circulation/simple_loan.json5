@@ -383,6 +383,14 @@
       visibleByDefault: false,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->>'patronGroupIdAtCheckout'",
+      joinsTo: [
+        {
+          targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
     },
     {
       name: 'due_date_changed_by_recall',

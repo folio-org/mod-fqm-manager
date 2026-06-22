@@ -79,13 +79,14 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.ent_type',
+      valueGetter: "(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
+      filterValueGetter: "lower(CASE WHEN :sourceAlias.ent_type IS NULL AND :sourceAlias.id IS NOT NULL THEN 'internal' ELSE :sourceAlias.ent_type END)",
+      valueFunction: 'lower(:value)',
       values: [
         { label: 'Internal', value: 'internal' },
         { label: 'External', value: 'external' },
         { label: 'Detached', value: 'detached' },
       ],
-      defaultValue: 'internal',
     },
     {
       name: 'ent_authority',

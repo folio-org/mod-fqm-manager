@@ -1,0 +1,238 @@
+package org.folio.fqm.utils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.experimental.UtilityClass;
+import org.folio.fql.model.AndCondition;
+import org.folio.fql.model.FieldCondition;
+import org.folio.fql.model.FqlCondition;
+import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.Field;
+import org.folio.querytool.domain.dto.MarcType;
+
+@UtilityClass
+public class MarcFieldFactory {
+
+  public static final String GENERIC_MARC_COLUMN_NAME = "marc";
+
+  private static final String MARC_INDEXERS_TABLE = "${tenant_id}_mod_source_record_storage.marc_indexers";
+  private static final String MARC_VALUE_FUNCTION = "lower(:value)";
+  private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
+  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
+  private static final Pattern RAW_QUERY_SUBFIELD_PATTERN = Pattern.compile("\"(?<field>marc_\\d{3}_[a-z0-9])\"\\s*:");
+
+  public static boolean isMarcFieldName(String fieldName) {
+    return parse(fieldName).isPresent();
+  }
+
+  public static Set<String> getReferencedMarcFieldNames(String rawQuery) {
+    if (rawQuery == null || rawQuery.isBlank()) {
+      return Set.of();
+    }
+
+    Set<String> fieldNames = new LinkedHashSet<>();
+    Matcher matcher = RAW_QUERY_SUBFIELD_PATTERN.matcher(rawQuery);
+    while (matcher.find()) {
+      fieldNames.add(matcher.group("field"));
+    }
+    return fieldNames;
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, String rawQuery, String tenantId) {
+    return addSyntheticColumns(entityType, getReferencedMarcFieldNames(rawQuery), tenantId);
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames, String tenantId) {
+    if (fieldNames == null || fieldNames.isEmpty() || entityType.getColumns() == null) {
+      return entityType;
+    }
+
+    List<EntityTypeColumn> updatedColumns = new ArrayList<>(entityType.getColumns());
+    Set<String> existingFieldNames = updatedColumns.stream()
+      .map(Field::getName)
+      .collect(LinkedHashSet::new, Set::add, Set::addAll);
+
+    for (String fieldName : fieldNames) {
+      if (fieldName == null || existingFieldNames.contains(fieldName)) {
+        continue;
+      }
+
+      createSyntheticColumn(entityType, fieldName, tenantId).ifPresent(column -> {
+        updatedColumns.add(column);
+        existingFieldNames.add(fieldName);
+      });
+    }
+
+    return entityType.toBuilder().columns(updatedColumns).build();
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames) {
+    return addSyntheticColumns(entityType, fieldNames, null);
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
+    return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
+  }
+
+  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition) {
+    return addSyntheticColumns(entityType, condition, null);
+  }
+
+  public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {
+    if (condition instanceof FieldCondition<?> fieldCondition) {
+      return Set.of(fieldCondition.field().getColumnName());
+    }
+    if (condition instanceof AndCondition andCondition) {
+      return andCondition.value().stream()
+        .map(MarcFieldFactory::getReferencedFieldNames)
+        .collect(LinkedHashSet::new, Set::addAll, Set::addAll);
+    }
+    return Set.of();
+  }
+
+  public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName) {
+    return createSyntheticColumn(entityType, fieldName, null);
+  }
+
+  public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {
+    Optional<MarcFieldName> parsedField = parse(fieldName);
+    Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
+
+    if (parsedField.isEmpty() || placeholder.isEmpty()) {
+      return Optional.empty();
+    }
+
+    EntityTypeColumn marcPlaceholder = placeholder.get();
+    if (marcPlaceholder.getValueGetter() == null || marcPlaceholder.getValueGetter().isBlank()) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Generic MARC column must define valueGetter so MARC indexers can be correlated",
+        entityType
+      );
+    }
+
+    MarcFieldName marcField = parsedField.get();
+    return Optional.of(new EntityTypeColumn()
+      .name(marcField.fieldName())
+      .labelAlias(marcField.labelAlias())
+      .dataType(new MarcType().dataType("marcType"))
+      .queryable(true)
+      .visibleByDefault(false)
+      .essential(false)
+      .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
+      .filterValueGetter("lower(marc.value)")
+      .valueFunction(MARC_VALUE_FUNCTION));
+  }
+
+  public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
+    Optional<MarcFieldName> parsedField = parse(fieldName);
+    Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
+    Optional<EntityTypeColumn> syntheticField = findField(entityType, fieldName);
+
+    if (parsedField.isEmpty() || placeholder.isEmpty() || syntheticField.isEmpty()) {
+      return Optional.empty();
+    }
+
+    String marcIdGetter = placeholder.get().getValueGetter();
+    String valueGetter = syntheticField.get().getValueGetter();
+    if (marcIdGetter == null || marcIdGetter.isBlank() || valueGetter == null || valueGetter.isBlank()) {
+      return Optional.empty();
+    }
+
+    return extractMarcTableName(valueGetter)
+      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter, "lower(marc.value)"));
+  }
+
+  public static Optional<MarcFieldName> parse(String fieldName) {
+    Matcher subfieldMatcher = SUBFIELD_PATTERN.matcher(fieldName);
+    if (subfieldMatcher.matches()) {
+      return Optional.of(new MarcFieldName(
+        fieldName,
+        subfieldMatcher.group("tag"),
+        subfieldMatcher.group("subfield")
+      ));
+    }
+
+    return Optional.empty();
+  }
+
+  public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {
+    List<EntityTypeColumn> columns = entityType.getColumns();
+    if (columns == null) {
+      return Optional.empty();
+    }
+
+    return columns.stream()
+      .filter(column -> GENERIC_MARC_COLUMN_NAME.equals(column.getName()))
+      .filter(column -> column.getDataType() instanceof MarcType)
+      .findFirst();
+  }
+
+  public static Optional<EntityTypeColumn> findField(EntityType entityType, String fieldName) {
+    List<EntityTypeColumn> columns = entityType.getColumns();
+    if (columns == null) {
+      return Optional.empty();
+    }
+
+    return columns.stream()
+      .filter(column -> fieldName.equals(column.getName()))
+      .findFirst();
+  }
+
+  private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
+    return """
+      (
+        SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+        FROM %s marc
+        WHERE marc.marc_id = %s
+          AND marc.field_no = '%s'
+          AND marc.subfield_no = '%s'
+      )
+      """.formatted(
+      interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
+      marcIdGetter,
+      marcField.tag(),
+      marcField.subfield()
+    ).trim();
+  }
+
+  private static String interpolateTenant(String input, String tenantId) {
+    if (tenantId == null || tenantId.isBlank()) {
+      return input;
+    }
+    return input.replace("${tenant_id}", tenantId);
+  }
+
+  private static Optional<String> extractMarcTableName(String valueGetter) {
+    Matcher matcher = MARC_TABLE_PATTERN.matcher(valueGetter);
+    if (!matcher.find()) {
+      return Optional.empty();
+    }
+    return Optional.of(matcher.group("table"));
+  }
+
+  public record MarcFieldName(String fieldName, String tag, String subfield) {
+
+    public String labelAlias() {
+      return "%s$%s".formatted(tag, subfield);
+    }
+  }
+
+  public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter, String filterValueGetter) {
+
+    public String whereClause() {
+      return "marc.marc_id = %s and marc.field_no = '%s' and marc.subfield_no = '%s'".formatted(
+        marcIdGetter,
+        marcField.tag(),
+        marcField.subfield()
+      );
+    }
+  }
+}

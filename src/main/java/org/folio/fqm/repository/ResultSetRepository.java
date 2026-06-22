@@ -20,6 +20,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -28,6 +29,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.jooq.*;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Record;
@@ -65,13 +67,18 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
+    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+      getEntityType(executionContext.getTenantId(), entityTypeId),
+      fields,
+      executionContext.getTenantId()
+    );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
 
     SelectConditionStep<Record> query = null;
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
+      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -125,7 +132,15 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = getEntityType(executionContext.getTenantId(), entityTypeId);
+    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+      MarcFieldFactory.addSyntheticColumns(
+        getEntityType(executionContext.getTenantId(), entityTypeId),
+        fields,
+        executionContext.getTenantId()
+      ),
+      fql.fqlCondition(),
+      executionContext.getTenantId()
+    );
     List<String> idColumnNames = EntityTypeUtils.getIdColumnNames(baseEntityType);
     List<Select<Record>> partialQueries = new ArrayList<>();
 
@@ -135,7 +150,9 @@ public class ResultSetRepository {
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), baseEntityType);
+      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
+      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fql.fqlCondition(), tenantId);
+      Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
         for (String condition : baseEntityType.getFilterConditions()) {
@@ -208,7 +225,7 @@ public class ResultSetRepository {
     List<Map<String, Object>> resultList = new ArrayList<>();
     Set<String> jsonbArrayColumnsInEntityType = entityType.getColumns()
       .stream()
-      .filter(col -> col.getDataType() instanceof JsonbArrayType)
+      .filter(col -> col.getDataType() instanceof JsonbArrayType || col.getDataType() instanceof MarcType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .collect(Collectors.toSet());
     Set<String> jsonbArrayColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()

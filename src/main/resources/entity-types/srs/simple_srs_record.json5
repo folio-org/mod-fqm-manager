@@ -269,6 +269,18 @@
       valueGetter: ':record_lb.external_hrid',
     },
     {
+      name: 'marc',
+      labelAlias: 'MARC',
+      dataType: {
+        dataType: 'marcType',
+      },
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: ':record_lb.matched_id',
+    },
+    {
       name: 'content',
       dataType: {
         dataType: 'stringType',

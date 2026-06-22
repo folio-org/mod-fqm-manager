@@ -13,6 +13,7 @@ import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
 import org.folio.fqm.utils.EntityTypeUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fqm.utils.StreamHelper;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.fql.model.Fql;
@@ -99,13 +100,15 @@ public class IdStreamer {
                                 Fql fql, int batchSize,
                                 int maxQuerySize, UUID queryId,
                                 List<String> tenantsToQuery, boolean ecsEnabled) {
-    UUID entityTypeId = UUID.fromString(entityType.getId());
+    EntityType augmentedEntityType = MarcFieldFactory.addSyntheticColumns(entityType, fql.fqlCondition(), executionContext.getTenantId());
+    UUID entityTypeId = UUID.fromString(augmentedEntityType.getId());
     log.debug("List of tenants to query: {}", tenantsToQuery);
-    Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(entityType);
+    Field<String[]> idValueGetter = EntityTypeUtils.getResultIdValueGetter(augmentedEntityType);
     Select<Record1<String[]>> fullQuery = null;
     for (String tenantId : tenantsToQuery) {
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ?
-        entityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
+        augmentedEntityType : entityTypeFlatteningService.getFlattenedEntityType(entityTypeId, tenantId, false);
+      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fql.fqlCondition(), tenantId);
       Field<String[]> currentIdValueGetter = EntityTypeUtils.getResultIdValueGetter(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -152,7 +155,7 @@ public class IdStreamer {
 
     monitorQueryCancellation(queryId);
 
-    entityTypeInitializationService.runWithRecovery(entityType, () -> {
+    entityTypeInitializationService.runWithRecovery(augmentedEntityType, () -> {
       try (
         Cursor<Record1<String[]>> idsCursor = finalQuery.fetchLazy();
         Stream<String[]> idStream = idsCursor

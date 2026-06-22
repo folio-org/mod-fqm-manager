@@ -17,6 +17,7 @@ import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
@@ -24,6 +25,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -101,8 +103,13 @@ public class FqlToSqlConverterService {
    */
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
-      final org.jooq.Field<Object> field = field(fieldCondition, entityType);
       Field fqmField = getField(fieldCondition, entityType);
+      var marcQueryContext = getMarcQueryContext(fieldCondition, entityType, fqmField);
+      if (marcQueryContext.isPresent()) {
+        return handleMarcCondition(fieldCondition, entityType, marcQueryContext.get());
+      }
+
+      final org.jooq.Field<Object> field = field(fieldCondition, entityType);
 
       Condition validation = null;
       if (Boolean.TRUE.equals(fqmField.getValidated())) {
@@ -401,6 +408,87 @@ public class FqlToSqlConverterService {
       org.jooq.Field::containsIgnoreCase, org.jooq.Field::contains);
   }
 
+  private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
+                                               MarcFieldFactory.MarcQueryContext marcQueryContext) {
+    if (fieldCondition instanceof EqualsCondition equalsCondition) {
+      return marcRowComparison(
+        marcQueryContext,
+        "=",
+        marcQueryValueField(equalsCondition.value(), equalsCondition, entityType),
+        true
+      );
+    }
+    if (fieldCondition instanceof NotEqualsCondition notEqualsCondition) {
+      return marcRowComparison(
+        marcQueryContext,
+        "=",
+        marcQueryValueField(notEqualsCondition.value(), notEqualsCondition, entityType),
+        false
+      );
+    }
+    if (fieldCondition instanceof InCondition inCondition) {
+      return or(inCondition.value().stream()
+        .map(value -> marcRowComparison(
+          marcQueryContext,
+          "=",
+          marcQueryValueField(value, inCondition, entityType),
+          true
+        ))
+        .toList());
+    }
+    if (fieldCondition instanceof NotInCondition notInCondition) {
+      return and(notInCondition.value().stream()
+        .map(value -> marcRowComparison(
+          marcQueryContext,
+          "=",
+          marcQueryValueField(value, notInCondition, entityType),
+          false
+        ))
+        .toList());
+    }
+    if (fieldCondition instanceof GreaterThanCondition greaterThanCondition) {
+      return marcRowComparison(
+        marcQueryContext,
+        greaterThanCondition.orEqualTo() ? ">=" : ">",
+        marcQueryValueField(greaterThanCondition.value(), greaterThanCondition, entityType),
+        true
+      );
+    }
+    if (fieldCondition instanceof LessThanCondition lessThanCondition) {
+      return marcRowComparison(
+        marcQueryContext,
+        lessThanCondition.orEqualTo() ? "<=" : "<",
+        marcQueryValueField(lessThanCondition.value(), lessThanCondition, entityType),
+        true
+      );
+    }
+    if (fieldCondition instanceof RegexCondition regexCondition) {
+      return marcRowPatternComparison(
+        marcQueryContext,
+        "~*",
+        marcQueryValueField(regexCondition.value(), regexCondition, entityType)
+      );
+    }
+    if (fieldCondition instanceof StartsWithCondition startsWithCondition) {
+      return marcRowPatternComparison(
+        marcQueryContext,
+        "like",
+        DSL.concat(marcQueryValueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%"))
+      );
+    }
+    if (fieldCondition instanceof ContainsCondition containsCondition) {
+      return marcRowPatternComparison(
+        marcQueryContext,
+        "like",
+        DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%"))
+      );
+    }
+    if (fieldCondition instanceof EmptyCondition emptyCondition) {
+      return handleMarcEmpty(emptyCondition, marcQueryContext);
+    }
+    return falseCondition();
+  }
+
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataTypeName(entityType, startsWithCondition);
     if (ARRAY_TYPE.equals(dataType)) {
@@ -494,6 +582,19 @@ public class FqlToSqlConverterService {
       default -> field.isNull();
     };
     return isEmpty ? empty : empty.not();
+  }
+
+  private static Condition handleMarcEmpty(EmptyCondition emptyCondition, MarcFieldFactory.MarcQueryContext marcQueryContext) {
+    boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    Condition present = condition(
+      "exists (select 1 from %s marc where %s and %s is not null and %s <> '')".formatted(
+        marcQueryContext.tableName(),
+        marcQueryContext.whereClause(),
+        marcQueryContext.filterValueGetter(),
+        marcQueryContext.filterValueGetter()
+      )
+    );
+    return isEmpty ? present.not() : present;
   }
 
   private static Condition validateCondition(org.jooq.Field<?> field, String dataType) {
@@ -671,6 +772,15 @@ public class FqlToSqlConverterService {
     return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
   }
 
+  private static java.util.Optional<MarcFieldFactory.MarcQueryContext> getMarcQueryContext(FieldCondition<?> fieldCondition,
+                                                                                            EntityType entityType,
+                                                                                            Field field) {
+    if (!(field.getDataType() instanceof MarcType)) {
+      return java.util.Optional.empty();
+    }
+    return MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName());
+  }
+
   private static EntityDataType getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {
     return entityType.getColumns()
       .stream()
@@ -727,6 +837,40 @@ public class FqlToSqlConverterService {
       }
     }
     return inline ? inline(value) : DSL.val(value);
+  }
+
+  private static org.jooq.Field<String> marcQueryValueField(Object value, FieldCondition<?> condition, EntityType entityType) {
+    return valueField(value == null ? null : value.toString(), condition, entityType);
+  }
+
+  private static Condition marcRowComparison(MarcFieldFactory.MarcQueryContext marcQueryContext,
+                                             String operator,
+                                             org.jooq.Field<String> valueField,
+                                             boolean existsMatch) {
+    String existsKeyword = existsMatch ? "exists" : "not exists";
+    return condition(
+      existsKeyword + " (select 1 from %s marc where %s and %s %s {0})".formatted(
+        marcQueryContext.tableName(),
+        marcQueryContext.whereClause(),
+        marcQueryContext.filterValueGetter(),
+        operator
+      ),
+      valueField
+    );
+  }
+
+  private static Condition marcRowPatternComparison(MarcFieldFactory.MarcQueryContext marcQueryContext,
+                                                    String operator,
+                                                    org.jooq.Field<String> valueField) {
+    return condition(
+      "exists (select 1 from %s marc where %s and %s %s {0})".formatted(
+        marcQueryContext.tableName(),
+        marcQueryContext.whereClause(),
+        marcQueryContext.filterValueGetter(),
+        operator
+      ),
+      valueField
+    );
   }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a

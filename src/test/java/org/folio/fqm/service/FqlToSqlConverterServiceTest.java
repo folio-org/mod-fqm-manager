@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
@@ -10,6 +11,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
@@ -102,6 +104,9 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("fieldWithAValueFunction")
             .dataType(new EntityDataType().dataType("stringType"))
             .valueFunction("upper(:value)"),
+          new EntityTypeColumn().name("marc")
+            .dataType(new MarcType().dataType("marcType"))
+            .valueGetter("\"record_lb\".matched_id"),
           new EntityTypeColumn().name("nested")
             .dataType(new ArrayType().dataType("arrayType")
               .itemDataType(new ObjectType().dataType("objectType")
@@ -112,6 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1540,5 +1546,21 @@ class FqlToSqlConverterServiceTest {
       InvalidFqlException.class,
       () -> fqlToSqlConverter.getSqlCondition(invalidDateFql, entityType)
     );
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldContainsCondition() {
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+
+    Condition sqlCondition = fqlToSqlConverter.getSqlCondition(fqlQuery, entityType);
+
+    String rendered = sqlCondition.toString().replaceAll("\\s+", " ");
+    assertTrue(rendered.contains("diku_mod_source_record_storage.marc_indexers"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
   }
 }

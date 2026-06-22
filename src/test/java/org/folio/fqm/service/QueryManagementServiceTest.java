@@ -14,6 +14,7 @@ import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
@@ -41,7 +42,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -427,6 +430,102 @@ class QueryManagementServiceTest {
       .thenReturn(Map.of());
     assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
 
+  }
+
+  @Test
+  void shouldAugmentEntityTypeWithDynamicMarcFieldsDuringValidation() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("matched_id").dataType(new StringType()).valueGetter(":record_lb.matched_id"),
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+
+    when(executionContext.getTenantId()).thenReturn("diku");
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+
+    assertDoesNotThrow(() -> queryManagementService.validateQuery(entityTypeId, fqlQuery));
+
+    ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);
+    verify(fqlValidationService).validateFql(entityTypeCaptor.capture(), eq(fqlQuery));
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245_a"),
+      entityTypeCaptor.getValue().getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+    EntityTypeColumn marc245a = entityTypeCaptor.getValue().getColumns().stream()
+      .filter(column -> "marc_245_a".equals(column.getName()))
+      .findFirst()
+      .orElseThrow();
+    assertFalse(marc245a.getValueGetter().contains("${tenant_id}"));
+    assertTrue(marc245a.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+  }
+
+  @Test
+  void shouldIncludeReferencedMarcFieldsInAsyncQueryResults() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+        new EntityTypeColumn().name("content").dataType(new StringType()),
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(new ArrayList<>(List.of("content")));
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+
+    QueryIdentifier actualIdentifier = queryManagementService.runFqlQueryAsync(submitQuery);
+
+    assertEquals(expectedIdentifier, actualIdentifier);
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    verify(queryRepository).saveQuery(queryCaptor.capture());
+    assertEquals(List.of("content", "id", "marc_245_a"), queryCaptor.getValue().fields());
+  }
+
+  @Test
+  void shouldIncludeReferencedMarcFieldsInSynchronousQueryResults() {
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
+        new EntityTypeColumn().name("field1").dataType(new StringType()),
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+    Integer defaultLimit = 100;
+    List<String> requestedFields = new ArrayList<>(List.of("field1"));
+    List<String> expectedFields = List.of("field1", "id", "marc_245_a");
+    List<Map<String, Object>> expectedContent = List.of(
+      Map.of("id", UUID.randomUUID().toString(), "field1", "value1", "marc_245_a", List.of("Shakespeare, William"))
+    );
+
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+    when(queryProcessorService.processQuery(any(EntityType.class), eq(fqlQuery), eq(expectedFields), eq(defaultLimit)))
+      .thenReturn(expectedContent);
+
+    ResultsetPage actualResults = queryManagementService.runFqlQuery(fqlQuery, entityTypeId, requestedFields, defaultLimit);
+
+    assertEquals(new ResultsetPage().content(expectedContent).totalRecords(expectedContent.size()), actualResults);
   }
 
   @Test

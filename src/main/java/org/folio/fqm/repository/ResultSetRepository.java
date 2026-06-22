@@ -149,6 +149,9 @@ public class ResultSetRepository {
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
+
+      // Ensure tenant-specific entity types include any synthetic MARC fields
+      // needed for both result projection and FQL condition generation.
       entityTypeDefinition = augmentWithReferencedMarcFields(entityTypeDefinition, fields, fql.fqlCondition(), tenantId);
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 

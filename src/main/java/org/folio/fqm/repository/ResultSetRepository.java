@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 import tools.jackson.databind.ObjectMapper;
 import org.folio.fql.model.Fql;
+import org.folio.fql.model.FqlCondition;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
@@ -67,7 +69,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType baseEntityType = augmentWithReferencedMarcFields(
       getEntityType(executionContext.getTenantId(), entityTypeId),
       fields,
       executionContext.getTenantId()
@@ -78,7 +80,7 @@ public class ResultSetRepository {
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
+      entityTypeDefinition = augmentWithReferencedMarcFields(entityTypeDefinition, fields, tenantId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -132,12 +134,9 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
-      MarcFieldFactory.addSyntheticColumns(
-        getEntityType(executionContext.getTenantId(), entityTypeId),
-        fields,
-        executionContext.getTenantId()
-      ),
+    EntityType baseEntityType = augmentWithReferencedMarcFields(
+      getEntityType(executionContext.getTenantId(), entityTypeId),
+      fields,
       fql.fqlCondition(),
       executionContext.getTenantId()
     );
@@ -150,8 +149,7 @@ public class ResultSetRepository {
       // on the fly. Once the value getter for that test is handled better, then the ternary condition below can be removed
       String tenantId = tenantsToQuery.size() > 1 ? tenantsToQuery.get(i) : executionContext.getTenantId();
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
-      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fql.fqlCondition(), tenantId);
+      entityTypeDefinition = augmentWithReferencedMarcFields(entityTypeDefinition, fields, fql.fqlCondition(), tenantId);
       Condition currentCondition = FqlToSqlConverterService.getSqlCondition(fql.fqlCondition(), entityTypeDefinition);
 
       if (!CollectionUtils.isEmpty(baseEntityType.getFilterConditions())) {
@@ -223,15 +221,15 @@ public class ResultSetRepository {
 
   private List<Map<String, Object>> recordToMap(EntityType entityType, Result<Record> result) {
     List<Map<String, Object>> resultList = new ArrayList<>();
-    Set<String> jsonbArrayColumnsInEntityType = entityType.getColumns()
+    Set<String> jsonbEncodedColumnsInEntityType = entityType.getColumns()
       .stream()
       .filter(col -> col.getDataType() instanceof JsonbArrayType || col.getDataType() instanceof MarcType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .collect(Collectors.toSet());
-    Set<String> jsonbArrayColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()
+    Set<String> jsonbEncodedColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()
       .keySet()
       .stream()
-      .filter(jsonbArrayColumnsInEntityType::contains)
+      .filter(jsonbEncodedColumnsInEntityType::contains)
       .collect(Collectors.toSet());
     result.forEach(row -> {
       Map<String, Object> recordMap = row.intoMap();
@@ -245,7 +243,9 @@ public class ResultSetRepository {
             recordMap.remove(entry.getKey());
           }
         }
-        if (jsonbArrayColumnsInResults.contains(entry.getKey()) && entry.getValue() instanceof PGobject pgobject && "jsonb".equals(pgobject.getType())) {
+        if (jsonbEncodedColumnsInResults.contains(entry.getKey())
+          && entry.getValue() instanceof PGobject pgobject
+          && "jsonb".equals(pgobject.getType())) {
           try {
             JSONB jsonb = JSONB.valueOf(pgobject.getValue());
             recordMap.put(entry.getKey(), objectMapper.readValue(jsonb.toString(), String[].class));
@@ -260,6 +260,25 @@ public class ResultSetRepository {
     });
 
     return resultList;
+  }
+
+  private EntityType augmentWithReferencedMarcFields(EntityType entityType, List<String> fields, String tenantId) {
+    return MarcFieldFactory.addSyntheticColumns(entityType, fields, tenantId);
+  }
+
+  private EntityType augmentWithReferencedMarcFields(EntityType entityType,
+                                                     List<String> fields,
+                                                     FqlCondition<?> condition,
+                                                     String tenantId) {
+    Set<String> referencedFieldNames = new LinkedHashSet<>();
+    if (fields != null) {
+      referencedFieldNames.addAll(fields);
+    }
+    if (condition != null) {
+      referencedFieldNames.addAll(MarcFieldFactory.getReferencedFieldNames(condition));
+    }
+
+    return MarcFieldFactory.addSyntheticColumns(entityType, referencedFieldNames, tenantId);
   }
 
   private Condition buildWhereClause(EntityType entityType, List<List<String>> ids, List<String> idColumnNames, List<String> idColumnValueGetters) {

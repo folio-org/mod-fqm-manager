@@ -82,6 +82,26 @@ class MarcFieldFactoryTest {
   }
 
   @Test
+  void shouldNotMutateOriginalEntityTypeWhenAddingSyntheticColumns() {
+    EntityType originalEntityType = entityTypeWithMarcSupport();
+
+    EntityType augmentedEntityType = MarcFieldFactory.addSyntheticColumns(
+      originalEntityType,
+      List.of("marc_245_a"),
+      "diku"
+    );
+
+    assertEquals(
+      List.of("matched_id", "marc"),
+      originalEntityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245_a"),
+      augmentedEntityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+  }
+
+  @Test
   void shouldCollectReferencedFieldNamesFromFqlCondition() {
     Set<String> fieldNames = MarcFieldFactory.getReferencedFieldNames(new AndCondition(List.of(
       new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),

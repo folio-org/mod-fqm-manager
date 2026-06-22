@@ -1,7 +1,7 @@
 {
   id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000011',
   name: 'composite_agreement_with_lines_and_order_invoice_analytics',
-  description: 'Composite entity type joining Agreement, Agreement Line, POL proxy, and the Order/Invoice analytics composite to enable end-to-end agreement-line-to-invoice queries.',
+  description: 'Composite entity type joining Agreement, Agreement Line and the Order/Invoice analytics composite to enable end-to-end agreement-line-to-invoice queries.',
   private: false,
   sources: [
     {
@@ -18,8 +18,7 @@
       targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000007', // simple_agreements_order_line
       targetField: 'pol_owner_fk',
       sourceField: 'agreement_with_lines.agreement_line.id',
-      overrideJoinDirection: 'left',
-      useIdColumns: true,
+      overrideJoxinDirection: 'left',
       essentialOnly: true,
       order: 20,
     },

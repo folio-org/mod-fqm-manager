@@ -1,6 +1,6 @@
 {
   id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000007',
-  name: 'simple_agreements_po_line_proxy',
+  name: 'simple_agreements_order_line',
   private: true,
   requiredPermissions: [
     'erm.agreements.collection.get',

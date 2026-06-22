@@ -23,7 +23,7 @@ public class MarcFieldFactory {
 
   public static final String GENERIC_MARC_COLUMN_NAME = "marc";
 
-  private static final String MARC_INDEXERS_TABLE = "${tenant_id}_mod_source_record_storage.marc_indexers";
+  private static final String MARC_INDEXERS_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
@@ -195,8 +195,8 @@ public class MarcFieldFactory {
           AND marc.field_no = '%s'
           AND marc.subfield_no = '%s'
       )
-      """.formatted(
-      interpolateTenant(MARC_INDEXERS_TABLE, tenantId),
+    """.formatted(
+      interpolateTenant(MARC_INDEXERS_VIEW, tenantId),
       marcIdGetter,
       marcField.tag(),
       marcField.subfield()

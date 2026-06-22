@@ -1557,7 +1557,7 @@ class FqlToSqlConverterServiceTest {
     Condition sqlCondition = fqlToSqlConverter.getSqlCondition(fqlQuery, entityType);
 
     String rendered = sqlCondition.toString().replaceAll("\\s+", " ");
-    assertTrue(rendered.contains("diku_mod_source_record_storage.marc_indexers"));
+    assertTrue(rendered.contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
     assertTrue(rendered.contains("marc.field_no = '245'"));
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
     assertTrue(rendered.contains("lower(marc.value) like"));

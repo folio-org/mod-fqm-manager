@@ -58,7 +58,7 @@ class MarcFieldFactoryTest {
       "diku"
     ).orElseThrow();
 
-    assertTrue(column.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+    assertTrue(column.getValueGetter().contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
     assertFalse(column.getValueGetter().contains("${tenant_id}"));
   }
 
@@ -157,7 +157,7 @@ class MarcFieldFactoryTest {
     return """
       (
         SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
-        FROM ${tenant_id}_mod_source_record_storage.marc_indexers marc
+        FROM ${tenant_id}_mod_fqm_manager.src_srs_marc_indexers marc
         WHERE marc.marc_id = "record_lb".matched_id
           AND marc.field_no = '%s'
           AND marc.subfield_no = '%s'

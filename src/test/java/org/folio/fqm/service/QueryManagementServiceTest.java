@@ -463,7 +463,7 @@ class QueryManagementServiceTest {
       .findFirst()
       .orElseThrow();
     assertFalse(marc245a.getValueGetter().contains("${tenant_id}"));
-    assertTrue(marc245a.getValueGetter().contains("diku_mod_source_record_storage.marc_indexers"));
+    assertTrue(marc245a.getValueGetter().contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
   }
 
   @Test

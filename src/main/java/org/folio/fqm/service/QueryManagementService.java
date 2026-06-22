@@ -361,7 +361,7 @@ public class QueryManagementService {
     return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
       .stream()
       .map(Field::getName)
-      .toList();
+      .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
   }
 
   private static void addReferencedMarcFields(List<String> fields, String fqlQuery) {

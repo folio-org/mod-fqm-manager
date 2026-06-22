@@ -36,9 +36,9 @@ The POC should prove the following:
 
 ## Current Working Assumptions
 
-### 1. `marcDataType` exists
+### 1. `marcType` exists
 
-`marcDataType` has already been added and is available for use in this project.
+`marcType` has already been added and is available for use in this project.
 
 The current working expectation is:
 
@@ -48,13 +48,13 @@ The current working expectation is:
 
 Important note about operators:
 
-- a single `marcDataType` is still the preferred model
+- a single `marcType` is still the preferred model
 - however, not every MARC field shape should necessarily expose the same operators
 - indicator-only MARC fields behave more like coded-value fields
 - tag, subfield, and constrained-subfield MARC fields behave more like text-search fields
-- this likely means operator choice should depend on the parsed MARC selector shape, not only on `marcDataType`
+- this likely means operator choice should depend on the parsed MARC selector shape, not only on `marcType`
 - the current backend does not yet enforce those distinctions, so indicator-only MARC fields can still use text-style operators unless we add explicit validation
-- recommended direction: keep one `marcDataType`, mirror operator restrictions in the UI for usability, and enforce them in the backend for correctness
+- recommended direction: keep one `marcType`, mirror operator restrictions in the UI for usability, and enforce them in the backend for correctness
 
 ### 2. Expansion should follow the existing read-time pattern
 
@@ -213,7 +213,7 @@ How this relates to the broader same-entry story:
 
 - the combined `ind1 + ind2` case should be treated as part of that broader repeatable-entry problem
 - a future implementation of same-entry correlation should also be expected to handle this MARC case
-- the current `marcDataType` / `EXISTS` approach is compatible with that direction
+- the current `marcType` / `EXISTS` approach is compatible with that direction
 - the future solution would likely need to combine compatible MARC predicates into one row-level `EXISTS` rather than evaluating them as separate independent `EXISTS` clauses
 
 Remaining boundaries of this approach:
@@ -365,7 +365,7 @@ Example shape:
   name: 'marc',
   labelAlias: 'MARC',
   dataType: {
-    dataType: 'marcDataType'
+    dataType: 'marcType'
   },
   queryable: true,
   hidden: true,
@@ -378,7 +378,7 @@ Example shape:
 Notes:
 
 - The placeholder `valueGetter` is being used as a correlation hint to `marc_indexers`, not as a user-facing display getter for the generic `marc` field itself. (Leader correlation to `marc_indexers_leader` is not yet implemented and would be a follow-up.)
-- This keeps the placeholder contract within the existing `Field` / `EntityTypeColumn` model and avoids needing extra metadata on `marcDataType`, though it may still be refined later.
+- This keeps the placeholder contract within the existing `Field` / `EntityTypeColumn` model and avoids needing extra metadata on `marcType`, though it may still be refined later.
 - At the moment, no separate expansion config is assumed to be necessary for the POC.
 
 ## Query Semantics Assumptions
@@ -486,7 +486,7 @@ It is:
 
 ### 1. DTO model is shared
 
-Entity type DTOs come from `org.folio.querytool.domain.dto`, so any `marcDataType` behavior needs to fit that model cleanly.
+Entity type DTOs come from `org.folio.querytool.domain.dto`, so any `marcType` behavior needs to fit that model cleanly.
 
 ### 2. `simple_srs_record` does not currently include a `marc_indexers` source
 
@@ -547,7 +547,7 @@ These are the likely places the POC will need changes:
 
 ## Open Questions
 
-1. What exact metadata fields should live under the generic placeholder `marcDataType`?
+1. What exact metadata fields should live under the generic placeholder `marcType`?
 2. Should leader positions use the same naming grammar, and if so what should it be?
 3. Do we want to tolerate raw `#` as a backward-compatible input in direct queries, or document only `blank`?
 4. Where exactly should dynamic MARC field recognition happen in the request/query pipeline?

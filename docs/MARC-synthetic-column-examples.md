@@ -13,7 +13,7 @@ These examples assume the generic placeholder column on `simple_srs_record` look
   name: 'marc',
   labelAlias: 'MARC',
   dataType: {
-    dataType: 'marcDataType',
+    dataType: 'marcType',
   },
   queryable: true,
   hidden: true,
@@ -27,7 +27,7 @@ At runtime, after source alias injection, that correlation expression becomes `"
 
 All of the examples also assume the same common behavior:
 
-- `dataType` is `marcDataType`
+- `dataType` is `marcType`
 - `queryable` is `true`
 - `visibleByDefault` is `false`
 - `essential` is `false`
@@ -56,7 +56,7 @@ Example synthetic column:
   name: 'marc_245',
   labelAlias: '245',
   dataType: {
-    dataType: 'marcDataType',
+    dataType: 'marcType',
   },
   queryable: true,
   visibleByDefault: false,
@@ -112,7 +112,7 @@ Example synthetic column:
   name: 'marc_245_ind1',
   labelAlias: '245 ind1',
   dataType: {
-    dataType: 'marcDataType',
+    dataType: 'marcType',
   },
   queryable: true,
   visibleByDefault: false,
@@ -168,7 +168,7 @@ Example synthetic column:
   name: 'marc_245_a',
   labelAlias: '245$a',
   dataType: {
-    dataType: 'marcDataType',
+    dataType: 'marcType',
   },
   queryable: true,
   visibleByDefault: false,
@@ -236,7 +236,7 @@ Example synthetic column:
   name: 'marc_245_ind1_7_a',
   labelAlias: '245 ind1=7 $a',
   dataType: {
-    dataType: 'marcDataType',
+    dataType: 'marcType',
   },
   queryable: true,
   visibleByDefault: false,
@@ -294,7 +294,7 @@ Related nuance:
 - a query like `marc_245_ind1_7_a = 'xyz' AND marc_245_ind2_7_a = 'xyz'` is a useful approximation for "both indicators are 7 for the same subfield value"
 - but it is not a guaranteed same-row `ind1 + ind2` match, because each constrained field is still evaluated as an independent `EXISTS`
 - however, this is only a grammar limitation: `marc_indexers` stores both `ind1` and `ind2` on the same row, so a single selector constraining both indicators would express this exactly in one `EXISTS`. Combined `ind1 + ind2` is therefore separable from the harder same-occurrence problem below and could be added as a small grammar extension
-- with the current `marcDataType` approach, combining compatible MARC predicates into one row-level `EXISTS` is the natural way to deliver this
+- with the current `marcType` approach, combining compatible MARC predicates into one row-level `EXISTS` is the natural way to deliver this
 
 Other remaining boundaries:
 

@@ -37,7 +37,7 @@ The current POC demonstrates that the recommended approach is technically feasib
 - Concrete MARC field names can be interpreted dynamically at query time
 - Those synthetic MARC fields can be queried against `marc_indexers`
 - Those synthetic MARC fields can also be returned in query results
-- The approach works with the current `marcDataType` model and current FQM query flow
+- The approach works with the current `marcType` model and current FQM query flow
 
 ### Dynamic MARC query shapes currently supported by the POC
 
@@ -108,8 +108,8 @@ One follow-up remains open:
 
 ### What implementation requires
 
-- formalize `marcDataType` in `folio-query-tool-metadata` as a shared prerequisite
-- keep `marcDataType` as the MARC-specific field type
+- formalize `marcType` in `folio-query-tool-metadata` as a shared prerequisite
+- keep `marcType` as the MARC-specific field type
 - keep one generic MARC capability on the entity type
 - synthesize concrete MARC fields dynamically from field names
 - continue to use aggregated `valueGetter` logic for display
@@ -123,7 +123,7 @@ One follow-up remains open:
 - avoids huge dropdowns in query-building and visible-columns flows
 - keeps the backend flexible and allows new valid MARC combinations without enumerating every field up front
 - fits the normalized `marc_indexers` data model well
-- works with the current FQM query path and `marcDataType`
+- works with the current FQM query path and `marcType`
 - supports more precise indicator+subfield querying than a fully separated indicator-only / subfield-only approach
 - keeps the synthetic field names mostly as an internal/backend contract that the UI can generate for the user
 
@@ -401,11 +401,11 @@ The UI should ideally let users express MARC intent directly, while keeping raw 
 
 One related design consequence:
 
-- a single `marcDataType` is still sufficient for the backend model
+- a single `marcType` is still sufficient for the backend model
 - but operator choice may need to depend on the parsed MARC selector shape, not just the datatype
 - indicator-only fields likely need coded-value operators
 - tag, subfield, and constrained-subfield fields likely need text-search operators
-- recommended direction: keep one `marcDataType`, let the UI hide invalid operator choices, and enforce the same rule in the backend for direct API callers
+- recommended direction: keep one `marcType`, let the UI hide invalid operator choices, and enforce the same rule in the backend for direct API callers
 
 Current backend reality:
 
@@ -443,7 +443,7 @@ The occurrence-level correlation case is best treated as part of the broader "mu
 
 Recommended stories from the spike (aligned with the breakdown in [MARC-implementation-stories.md](/Users/bsharp/workspace/mod-fqm-manager/docs/MARC-implementation-stories.md)):
 
-0. Add `marcDataType` support in `folio-query-tool-metadata`
+0. Add `marcType` support in `folio-query-tool-metadata`
 1. Backend hardening for dynamic MARC querying MVP
 2. Query builder / UI support for dynamic MARC selectors
 3. Performance validation and operational guardrails

@@ -272,7 +272,7 @@
       name: 'marc',
       labelAlias: 'MARC',
       dataType: {
-        dataType: 'marcDataType',
+        dataType: 'marcType',
       },
       queryable: true,
       hidden: true,

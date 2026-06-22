@@ -23,7 +23,7 @@ import org.folio.querytool.domain.dto.QueryIdentifier;
 import org.folio.querytool.domain.dto.ResultsetPage;
 import org.folio.querytool.domain.dto.StringType;
 import org.folio.querytool.domain.dto.SubmitQuery;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -445,7 +445,7 @@ class QueryManagementServiceTest {
       .name("test-entity")
       .columns(List.of(
         new EntityTypeColumn().name("matched_id").dataType(new StringType()).valueGetter(":record_lb.matched_id"),
-        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
       {"marc_245": {"$contains": "Shakespeare"}}
@@ -479,7 +479,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
         new EntityTypeColumn().name("content").dataType(new StringType()),
-        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -513,7 +513,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
         new EntityTypeColumn().name("content").dataType(new StringType()),
-        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
       {"marc_245_ind1_7_a": {"$contains": "Shakespeare"}}
@@ -549,7 +549,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
         new EntityTypeColumn().name("field1").dataType(new StringType()),
-        new EntityTypeColumn().name("marc").dataType(new MarcDataType().dataType("marcDataType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}

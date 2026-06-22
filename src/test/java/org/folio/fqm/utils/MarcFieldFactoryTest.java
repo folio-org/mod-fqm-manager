@@ -17,7 +17,7 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.folio.querytool.domain.dto.StringType;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245", column.getName());
     assertEquals("245", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertEquals("lower(:value)", column.getValueFunction());
     assertSqlEquals(expectedTagValueGetter("245"), column.getValueGetter());
     assertSqlEquals(expectedTagFilterValueGetter("245"), column.getFilterValueGetter());
@@ -85,7 +85,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_ind1", column.getName());
     assertEquals("245 ind1", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedIndicatorValueGetter("245", "ind1"), column.getValueGetter());
     assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind1"), column.getFilterValueGetter());
   }
@@ -96,7 +96,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_a", column.getName());
     assertEquals("245$a", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedSubfieldValueGetter("245", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
   }
@@ -107,7 +107,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_ind1_7_a", column.getName());
     assertEquals("245 ind1=7 $a", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "7", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
   }
@@ -118,7 +118,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_ind1_blank_a", column.getName());
     assertEquals("245 ind1=blank $a", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedConstrainedSubfieldValueGetter("245", "ind1", "#", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
   }
@@ -129,7 +129,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_ind1_1_ind2", column.getName());
     assertEquals("245 ind1=1 ind2", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedDualIndicatorValueGetter("245", "ind1", "1", "ind2"), column.getValueGetter());
     assertSqlEquals(expectedIndicatorFilterValueGetter("245", "ind2"), column.getFilterValueGetter());
   }
@@ -160,7 +160,7 @@ class MarcFieldFactoryTest {
 
     assertEquals("marc_245_ind1_1_ind2_0_a", column.getName());
     assertEquals("245 ind1=1 ind2=0 $a", column.getLabelAlias());
-    assertInstanceOf(MarcDataType.class, column.getDataType());
+    assertInstanceOf(MarcType.class, column.getDataType());
     assertSqlEquals(expectedDualConstrainedSubfieldValueGetter("245", "1", "0", "a"), column.getValueGetter());
     assertSqlEquals(expectedSubfieldFilterValueGetter("245", "a"), column.getFilterValueGetter());
   }
@@ -285,7 +285,7 @@ class MarcFieldFactoryTest {
       .columns(List.of(
         new EntityTypeColumn()
           .name("marc")
-          .dataType(new MarcDataType().dataType("marcDataType"))
+          .dataType(new MarcType().dataType("marcType"))
       ));
 
     assertThrows(
@@ -309,7 +309,7 @@ class MarcFieldFactoryTest {
           .valueGetter("\"marc_record_lb\".content::text"),
         new EntityTypeColumn()
           .name("marc")
-          .dataType(new MarcDataType().dataType("marcDataType"))
+          .dataType(new MarcType().dataType("marcType"))
           .valueGetter(MARC_RECORD_ID_GETTER)
       ));
   }

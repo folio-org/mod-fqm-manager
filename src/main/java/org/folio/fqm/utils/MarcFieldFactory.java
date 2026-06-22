@@ -17,7 +17,7 @@ import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 
 @UtilityClass
 public class MarcFieldFactory {
@@ -122,7 +122,7 @@ public class MarcFieldFactory {
     return Optional.of(new EntityTypeColumn()
       .name(marcField.fieldName())
       .labelAlias(marcField.labelAlias())
-      .dataType(new MarcDataType().dataType("marcDataType"))
+      .dataType(new MarcType().dataType("marcType"))
       .queryable(true)
       .visibleByDefault(false)
       .essential(false)
@@ -253,7 +253,7 @@ public class MarcFieldFactory {
 
     return columns.stream()
       .filter(column -> GENERIC_MARC_COLUMN_NAME.equals(column.getName()))
-      .filter(column -> column.getDataType() instanceof MarcDataType)
+      .filter(column -> column.getDataType() instanceof MarcType)
       .findFirst();
   }
 

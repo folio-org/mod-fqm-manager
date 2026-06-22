@@ -25,7 +25,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JsonbArrayType;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -774,7 +774,7 @@ public class FqlToSqlConverterService {
 
   private static java.util.Optional<MarcFieldFactory.MarcQueryContext> getMarcQueryContext(FieldCondition<?> fieldCondition,
                                                                                             EntityType entityType, Field field) {
-    if (!(field.getDataType() instanceof MarcDataType)) {
+    if (!(field.getDataType() instanceof MarcType)) {
       return java.util.Optional.empty();
     }
     return MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName());

@@ -29,7 +29,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.jooq.*;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.Record;
@@ -226,7 +226,7 @@ public class ResultSetRepository {
     List<Map<String, Object>> resultList = new ArrayList<>();
     Set<String> jsonbArrayColumnsInEntityType = entityType.getColumns()
       .stream()
-      .filter(col -> col.getDataType() instanceof JsonbArrayType || col.getDataType() instanceof MarcDataType)
+      .filter(col -> col.getDataType() instanceof JsonbArrayType || col.getDataType() instanceof MarcType)
       .map(org.folio.querytool.domain.dto.Field::getName)
       .collect(Collectors.toSet());
     Set<String> jsonbArrayColumnsInResults = result.isEmpty() ? Collections.emptySet() : result.get(0).intoMap()

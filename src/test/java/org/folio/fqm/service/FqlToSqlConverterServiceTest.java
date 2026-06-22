@@ -11,7 +11,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
-import org.folio.querytool.domain.dto.MarcDataType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
@@ -85,7 +85,7 @@ class FqlToSqlConverterServiceTest {
           )),
           new EntityTypeColumn().name("jsonbStringArray").dataType(new JsonbArrayType().dataType("jsonbArrayType").itemDataType(new StringType().dataType("stringType"))),
           new EntityTypeColumn().name("marc")
-            .dataType(new MarcDataType().dataType("marcDataType"))
+            .dataType(new MarcType().dataType("marcType"))
             .valueGetter("\"record_lb\".matched_id"),
           new EntityTypeColumn().name("jsonbArrayFieldWithValueFunction")
             .dataType(new EntityDataType().dataType("jsonbArrayType"))

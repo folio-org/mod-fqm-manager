@@ -12,6 +12,7 @@ import org.folio.fqm.exception.QueryNotFoundException;
 import org.folio.fqm.migration.MigratableQueryInformation;
 import org.folio.fqm.repository.QueryRepository;
 import org.folio.fqm.repository.QueryResultsRepository;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.MarcType;
@@ -438,7 +439,7 @@ class QueryManagementServiceTest {
     EntityType entityType = new EntityType()
       .name("test-entity")
       .columns(List.of(
-        new EntityTypeColumn().name("matched_id").dataType(new StringType()).valueGetter(":record_lb.matched_id"),
+        new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("stringType")).valueGetter(":record_lb.matched_id"),
         new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
@@ -472,8 +473,8 @@ class QueryManagementServiceTest {
     EntityType entityType = new EntityType()
       .name("test-entity")
       .columns(List.of(
-        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
-        new EntityTypeColumn().name("content").dataType(new StringType()),
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
+        new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
@@ -505,8 +506,8 @@ class QueryManagementServiceTest {
     EntityType entityType = new EntityType()
       .name("test-entity")
       .columns(List.of(
-        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
-        new EntityTypeColumn().name("content").dataType(new StringType()),
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
+        new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
@@ -537,8 +538,8 @@ class QueryManagementServiceTest {
     EntityType entityType = new EntityType()
       .name("test-entity")
       .columns(List.of(
-        new EntityTypeColumn().name("matched_id").isIdColumn(true).dataType(new StringType()).valueGetter(":record_lb.matched_id"),
-        new EntityTypeColumn().name("content").dataType(new StringType()),
+        new EntityTypeColumn().name("matched_id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")).valueGetter(":record_lb.matched_id"),
+        new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """
@@ -569,8 +570,8 @@ class QueryManagementServiceTest {
     EntityType entityType = new EntityType()
       .name("test-entity")
       .columns(List.of(
-        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new StringType()),
-        new EntityTypeColumn().name("field1").dataType(new StringType()),
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
+        new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
       ));
     String fqlQuery = """

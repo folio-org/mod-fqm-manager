@@ -14,10 +14,10 @@ import org.folio.fql.model.AndCondition;
 import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.MarcType;
-import org.folio.querytool.domain.dto.RangedUUIDType;
 import org.junit.jupiter.api.Test;
 
 class MarcFieldFactoryTest {
@@ -144,7 +144,7 @@ class MarcFieldFactoryTest {
       .columns(List.of(
         new EntityTypeColumn()
           .name("matched_id")
-          .dataType(new RangedUUIDType().dataType("rangedUUIDType"))
+          .dataType(new EntityDataType().dataType("rangedUUIDType"))
           .valueGetter(MARC_RECORD_ID_GETTER),
         new EntityTypeColumn()
           .name("marc")

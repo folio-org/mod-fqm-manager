@@ -360,6 +360,7 @@ public class QueryManagementService {
   private List<String> getFieldsFromEntityType(EntityType entityType) {
     return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
       .stream()
+      .filter(column -> !Boolean.TRUE.equals(column.getHidden()))
       .map(Field::getName)
       .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
   }

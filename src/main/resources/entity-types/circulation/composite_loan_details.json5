@@ -102,11 +102,20 @@
     {
       alias: 'groups',
       type: 'entity-type',
-      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710',  // simple_group
       sourceField: 'users.group_id',
       targetField: 'id',
       essentialOnly: true,
       order: 40,
+    },
+    {
+      alias: 'groups_at_checkout',
+      type: 'entity-type',
+      targetId: 'e7717b38-4ff3-4fb9-ae09-b3d0c8400710', // simple_group
+      sourceField: 'loans.patron_group_id_at_checkout',
+      targetField: 'id',
+      essentialOnly: true,
+      order: 45,
     },
     {
       alias: 'holdings',

@@ -274,7 +274,9 @@
       dataType: {
         dataType: 'marcType',
       },
-      queryable: true,
+      // Not directly queryable: this is an internal capability placeholder, not a user-facing field. Concrete
+      // MARC selectors (e.g. marc_245_a) are synthesized as their own queryable columns at query time.
+      queryable: false,
       hidden: true,
       visibleByDefault: false,
       essential: true,

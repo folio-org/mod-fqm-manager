@@ -956,6 +956,95 @@ class EntityTypeFlatteningServiceTest {
     assertThat(flattenedWithoutCustomFields.getColumns(), not(hasItem(hasProperty("name", equalTo("source_alias.custom_field")))));
   }
 
+  @Test
+  void testAvailableOperatorsPreservedInSelfColumns() {
+    EntityType simpleEntityType = new EntityType()
+      .id("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+      .name("simple_with_operators")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("flagged_field")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":src.flagged_field")
+          .availableOperators(List.of("$eq", "$ne", "$in", "$contains", "$starts_with", "$empty")),
+        new EntityTypeColumn()
+          .name("unflagged_field")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":src.unflagged_field")
+      ))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("src").target("some_table")));
+
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(simpleEntityType.getId())), any()))
+      .thenReturn(Optional.of(simpleEntityType));
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
+
+    List<EntityTypeColumn> columns = entityTypeFlatteningService.getFlattenedEntityType(
+      UUID.fromString(simpleEntityType.getId()),
+      TENANT_ID,
+      false
+    ).getColumns();
+
+    assertThat(columns, hasItem(allOf(
+      hasProperty("name", equalTo("flagged_field")),
+      hasProperty("availableOperators", equalTo(List.of("$eq", "$ne", "$in", "$contains", "$starts_with", "$empty")))
+    )));
+    assertThat(columns, hasItem(allOf(
+      hasProperty("name", equalTo("unflagged_field")),
+      hasProperty("availableOperators", nullValue())
+    )));
+  }
+
+  @Test
+  void testAvailableOperatorsPreservedInInheritedColumns() {
+    EntityType childEntityType = new EntityType()
+      .id("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+      .name("child_with_operators")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("flagged_field")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":src.flagged_field")
+          .availableOperators(List.of("$eq", "$ne", "$in", "$contains", "$starts_with", "$empty")),
+        new EntityTypeColumn()
+          .name("unflagged_field")
+          .dataType(new StringType().dataType("stringType"))
+          .valueGetter(":src.unflagged_field")
+      ))
+      .sources(List.of(new EntityTypeSourceDatabase().type("db").alias("src").target("some_table")));
+
+    EntityType compositeEntityType = new EntityType()
+      .id("cccccccc-cccc-cccc-cccc-cccccccccccc")
+      .name("composite_with_operators")
+      .columns(List.of())
+      .sources(List.of(
+        new EntityTypeSourceEntityType()
+          .type("entity-type")
+          .alias("child")
+          .targetId(UUID.fromString(childEntityType.getId()))
+      ));
+
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(childEntityType.getId())), any()))
+      .thenReturn(Optional.of(childEntityType));
+    when(entityTypeRepository.getEntityTypeDefinition(eq(UUID.fromString(compositeEntityType.getId())), any()))
+      .thenReturn(Optional.of(compositeEntityType));
+    when(userTenantService.getUserTenantsResponse(TENANT_ID)).thenReturn("{'totalRecords': 0}");
+
+    List<EntityTypeColumn> columns = entityTypeFlatteningService.getFlattenedEntityType(
+      UUID.fromString(compositeEntityType.getId()),
+      TENANT_ID,
+      false
+    ).getColumns();
+
+    assertThat(columns, hasItem(allOf(
+      hasProperty("name", equalTo("child.flagged_field")),
+      hasProperty("availableOperators", equalTo(List.of("$eq", "$ne", "$in", "$contains", "$starts_with", "$empty")))
+    )));
+    assertThat(columns, hasItem(allOf(
+      hasProperty("name", equalTo("child.unflagged_field")),
+      hasProperty("availableOperators", nullValue())
+    )));
+  }
+
   @SneakyThrows
   private EntityType copyEntityType(EntityType originalEntityType) {
     ObjectMapper objectMapper = new ObjectMapper();

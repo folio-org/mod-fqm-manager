@@ -37,6 +37,7 @@
       valueGetter: ":sourceAlias.jsonb ->> 'hrid'",
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'::text))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      availableOperators: ['$eq', '$ne', '$in', '$contains', '$starts_with', '$empty'],
     },
     {
       name: 'notes',
@@ -244,6 +245,7 @@
       valueGetter: ":sourceAlias.jsonb->>'barcode'",
       filterValueGetter: "lower(:sourceAlias.jsonb ->> 'barcode'::text)",
       valueFunction: 'lower(:value)',
+      availableOperators: ['$eq', '$ne', '$in', '$contains', '$starts_with', '$empty'],
     },
     {
       name: 'version',

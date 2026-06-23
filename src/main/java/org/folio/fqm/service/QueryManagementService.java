@@ -211,7 +211,7 @@ public class QueryManagementService {
 
   public List<QueryStatusSummary> getStatusSummaries() {
     Map<UUID, ?> availableEntityTypes = entityTypeService.getAccessibleEntityTypesById();
-    
+
     return queryRepository.getStatusSummaries().stream().map(s -> {
       if (!availableEntityTypes.containsKey(UUID.fromString(s.getEntityTypeId()))) {
         return s.entityTypeId("<inaccessible>");
@@ -360,7 +360,8 @@ public class QueryManagementService {
   private List<String> getFieldsFromEntityType(EntityType entityType) {
     return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
       .stream()
-      .filter(column -> !Boolean.TRUE.equals(column.getHidden()))
+      // Exclude only the generic MARC capability placeholder, not every hidden column.
+      .filter(column -> !MarcFieldFactory.isGenericMarcPlaceholder(column))
       .map(Field::getName)
       .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
   }

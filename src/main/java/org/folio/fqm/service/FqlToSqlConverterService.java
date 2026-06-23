@@ -586,14 +586,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleMarcEmpty(EmptyCondition emptyCondition, MarcFieldFactory.MarcQueryContext marcQueryContext) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
-    Condition present = condition(
-      "exists (select 1 from %s marc where %s and %s is not null and %s <> '')".formatted(
-        marcQueryContext.tableName(),
-        marcQueryContext.whereClause(),
-        marcQueryContext.filterValueGetter(),
-        marcQueryContext.filterValueGetter()
-      )
-    );
+    Condition present = condition(marcQueryContext.presenceClause());
     return isEmpty ? present.not() : present;
   }
 
@@ -847,30 +840,13 @@ public class FqlToSqlConverterService {
                                              String operator,
                                              org.jooq.Field<String> valueField,
                                              boolean existsMatch) {
-    String existsKeyword = existsMatch ? "exists" : "not exists";
-    return condition(
-      existsKeyword + " (select 1 from %s marc where %s and %s %s {0})".formatted(
-        marcQueryContext.tableName(),
-        marcQueryContext.whereClause(),
-        marcQueryContext.filterValueGetter(),
-        operator
-      ),
-      valueField
-    );
+    return condition(marcQueryContext.existsClause(operator, existsMatch), valueField);
   }
 
   private static Condition marcRowPatternComparison(MarcFieldFactory.MarcQueryContext marcQueryContext,
                                                     String operator,
                                                     org.jooq.Field<String> valueField) {
-    return condition(
-      "exists (select 1 from %s marc where %s and %s %s {0})".formatted(
-        marcQueryContext.tableName(),
-        marcQueryContext.whereClause(),
-        marcQueryContext.filterValueGetter(),
-        operator
-      ),
-      valueField
-    );
+    return condition(marcQueryContext.existsClause(operator, true), valueField);
   }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a

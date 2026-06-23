@@ -25,9 +25,13 @@ public class MarcFieldFactory {
 
   private static final String MARC_INDEXERS_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
+  private static final String MARC_FILTER_VALUE_GETTER = "lower(marc.value)";
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
-  private static final Pattern RAW_QUERY_SUBFIELD_PATTERN = Pattern.compile("\"(?<field>marc_\\d{3}_[a-z0-9])\"\\s*:");
+  // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
+  // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
+  // exactly one place and the two cannot drift.
+  private static final Pattern QUERY_FIELD_KEY_PATTERN = Pattern.compile("\"(?<field>[A-Za-z0-9_]+)\"\\s*:");
 
   public static boolean isMarcFieldName(String fieldName) {
     return parse(fieldName).isPresent();
@@ -39,9 +43,12 @@ public class MarcFieldFactory {
     }
 
     Set<String> fieldNames = new LinkedHashSet<>();
-    Matcher matcher = RAW_QUERY_SUBFIELD_PATTERN.matcher(rawQuery);
+    Matcher matcher = QUERY_FIELD_KEY_PATTERN.matcher(rawQuery);
     while (matcher.find()) {
-      fieldNames.add(matcher.group("field"));
+      String candidate = matcher.group("field");
+      if (isMarcFieldName(candidate)) {
+        fieldNames.add(candidate);
+      }
     }
     return fieldNames;
   }
@@ -127,7 +134,7 @@ public class MarcFieldFactory {
       .visibleByDefault(false)
       .essential(false)
       .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
-      .filterValueGetter("lower(marc.value)")
+      .filterValueGetter(MARC_FILTER_VALUE_GETTER)
       .valueFunction(MARC_VALUE_FUNCTION));
   }
 
@@ -147,7 +154,7 @@ public class MarcFieldFactory {
     }
 
     return extractMarcTableName(valueGetter)
-      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter, "lower(marc.value)"));
+      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter, MARC_FILTER_VALUE_GETTER));
   }
 
   public static Optional<MarcFieldName> parse(String fieldName) {
@@ -170,9 +177,19 @@ public class MarcFieldFactory {
     }
 
     return columns.stream()
-      .filter(column -> GENERIC_MARC_COLUMN_NAME.equals(column.getName()))
-      .filter(column -> column.getDataType() instanceof MarcType)
+      .filter(MarcFieldFactory::isGenericMarcPlaceholder)
       .findFirst();
+  }
+
+  /**
+   * The generic, hidden {@code marc} capability column that declares an entity type supports dynamic MARC
+   * field references. It is a correlation placeholder, not a user-facing field, and should be excluded from
+   * field listings.
+   */
+  public static boolean isGenericMarcPlaceholder(EntityTypeColumn column) {
+    return column != null
+      && GENERIC_MARC_COLUMN_NAME.equals(column.getName())
+      && column.getDataType() instanceof MarcType;
   }
 
   public static Optional<EntityTypeColumn> findField(EntityType entityType, String fieldName) {
@@ -232,6 +249,35 @@ public class MarcFieldFactory {
         marcIdGetter,
         marcField.tag(),
         marcField.subfield()
+      );
+    }
+
+    /**
+     * Row-level existence predicate comparing the MARC value against a single bound parameter ({@code {0}}).
+     * Used for eq/ne/in/nin/gt/lt and (with a LIKE/regex operator) for starts_with/contains/regex.
+     *
+     * @param operator   the SQL comparison or pattern operator (e.g. {@code =}, {@code like}, {@code ~*})
+     * @param existsMatch {@code true} for {@code EXISTS}, {@code false} for {@code NOT EXISTS}
+     */
+    public String existsClause(String operator, boolean existsMatch) {
+      return "%s (select 1 from %s marc where %s and %s %s {0})".formatted(
+        existsMatch ? "exists" : "not exists",
+        tableName,
+        whereClause(),
+        filterValueGetter,
+        operator
+      );
+    }
+
+    /**
+     * Presence predicate for {@code $empty}: a matching MARC row exists with a non-empty value.
+     */
+    public String presenceClause() {
+      return "exists (select 1 from %s marc where %s and %s is not null and %s <> '')".formatted(
+        tableName,
+        whereClause(),
+        filterValueGetter,
+        filterValueGetter
       );
     }
   }

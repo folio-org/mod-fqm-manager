@@ -1,12 +1,9 @@
 {
   name: 'src_srs_marc_indexers',
-  // marc_indexers retains superseded versions of a record's index rows until SRS's asynchronous cleanup runs,
-  // so the raw table can hold multiple versions per marc_id (e.g. version 0 and 1). marc_records_tracking holds
-  // the current version per marc_id; joining on (marc_id, version) exposes only current-version rows. This is
-  // required for correctness, not just de-duplication: without it, MARC queries would both filter against and
-  // display stale, superseded subfield values. (marc_records_tracking has one row per marc_id, so the join
-  // does not fan out. While a record is being re-indexed it may be transiently is_dirty; we intentionally do
-  // not filter on is_dirty, so the view follows SRS's tracked current version with eventual consistency.)
+  // marc_indexers may hold multiple versions of a record's index rows per marc_id (e.g. version 0 and 1).
+  // marc_records_tracking holds the current version per marc_id; joining on (marc_id, version) exposes only
+  // current-version rows. This is required for correctness: without it, MARC queries would both filter against and
+  // display stale subfield values.
   dependsOn: [
     ['${tenant_id}_mod_source_record_storage', 'marc_indexers'],
     ['${tenant_id}_mod_source_record_storage', 'marc_records_tracking'],

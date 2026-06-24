@@ -378,13 +378,22 @@ class ResultSetRepositoryTest {
   }
 
   @Test
-  void recordToMapHandlesJsonbArrayColumnAndEmptyResult() throws Exception {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("jsonb-array-et")
-      .columns(List.of(
-        new EntityTypeColumn().name("arr").dataType(new JsonbArrayType().dataType("jsonbArrayType"))
-      ));
+  void recordToMapDecodesJsonbArrayColumn() throws Exception {
+    EntityType entityType = jsonbArrayEntityType();
+
+    PGobject jsonb = new PGobject();
+    jsonb.setType("jsonb");
+    jsonb.setValue("[\"one\", \"two\"]");
+
+    List<Map<String, Object>> mapped = invokeRecordToMap(entityType, singleRecordResult("arr", jsonb));
+
+    assertEquals(1, mapped.size());
+    assertArrayEquals(new String[] {"one", "two"}, (String[]) mapped.get(0).get("arr"));
+  }
+
+  @Test
+  void recordToMapHandlesEmptyResult() throws Exception {
+    EntityType entityType = jsonbArrayEntityType();
 
     DSLContext ctx = DSL.using(SQLDialect.POSTGRES);
     Result<Record> emptyResult = ctx.newResult(List.of(DSL.field(DSL.name("arr"))));
@@ -417,13 +426,26 @@ class ResultSetRepositoryTest {
       ));
   }
 
+  private static EntityType jsonbArrayEntityType() {
+    return new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("jsonb-array-et")
+      .columns(List.of(
+        new EntityTypeColumn().name("arr").dataType(new JsonbArrayType().dataType("jsonbArrayType"))
+      ));
+  }
+
   private static Result<Record> singleRecordResult(Object marcValue) {
+    return singleRecordResult("marc_245_a", marcValue);
+  }
+
+  private static Result<Record> singleRecordResult(String columnName, Object value) {
     DSLContext ctx = DSL.using(SQLDialect.POSTGRES);
-    Field<Object> marcField = DSL.field(DSL.name("marc_245_a"));
-    List<Field<?>> fields = List.of(marcField);
+    Field<Object> column = DSL.field(DSL.name(columnName));
+    List<Field<?>> fields = List.of(column);
     Result<Record> result = ctx.newResult(fields);
     Record row = ctx.newRecord(fields);
-    row.set(marcField, marcValue);
+    row.set(column, value);
     result.add(row);
     return result;
   }

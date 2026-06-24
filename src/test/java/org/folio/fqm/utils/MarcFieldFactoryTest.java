@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 
 class MarcFieldFactoryTest {
 
-  // Mirrors the production simple_srs_record config: MARC is correlated on record_lb.id (the per-generation
-  // id stored in marc_indexers.marc_id), NOT matched_id.
   private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
 
   @Test
@@ -51,10 +49,13 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldRejectUnsupportedMarcFieldNames() {
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245"));
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_ind1"));
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa"));
-    assertFalse(MarcFieldFactory.isMarcFieldName("245_a"));
+    // Use only structurally malformed names here. Do NOT use shapes like "marc_245" (tag-only) or
+    // "marc_245_ind1" (indicator), which are reserved for future stories and are expected to become valid.
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_24_a"));   // tag must be exactly 3 digits
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_2451_a")); // tag must be exactly 3 digits
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_abc_a"));  // tag must be numeric
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa")); // subfield must be a single character
+    assertFalse(MarcFieldFactory.isMarcFieldName("245_a"));       // missing marc_ prefix
   }
 
   @Test
@@ -83,7 +84,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldReturnEmptyForInvalidMarcFieldName() {
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", null));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_24_a", null));
   }
 
   @Test
@@ -319,7 +320,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldReturnEmptyQueryContextForInvalidName() {
-    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_245"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_24_a"));
   }
 
   @Test

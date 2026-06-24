@@ -273,8 +273,6 @@ public class ResultSetRepository {
                                                      List<String> fields,
                                                      FqlCondition<?> condition,
                                                      String tenantId) {
-    // Callers only reach this after guarding against empty/null fields, and getReferencedFieldNames is
-    // null-safe (it returns an empty set for a null/unsupported condition), so no null guards are needed.
     Set<String> referencedFieldNames = new LinkedHashSet<>(fields);
     referencedFieldNames.addAll(MarcFieldFactory.getReferencedFieldNames(condition));
     return MarcFieldFactory.addSyntheticColumns(entityType, referencedFieldNames, tenantId);

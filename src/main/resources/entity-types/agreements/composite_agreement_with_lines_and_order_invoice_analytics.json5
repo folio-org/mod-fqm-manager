@@ -1,0 +1,37 @@
+{
+  id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000011',
+  name: 'composite_agreement_with_lines_and_order_invoice_analytics',
+  description: 'Composite entity type joining Agreement, Agreement Line and the Order/Invoice analytics composite to enable end-to-end agreement-line-to-invoice queries.',
+  private: false,
+  sources: [
+    {
+      alias: 'agreement_with_lines',
+      type: 'entity-type',
+      targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000010', // composite_agreement_with_lines
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 10,
+    },
+    {
+      alias: 'agreement_line_to_order_line',
+      type: 'entity-type',
+      targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000007', // simple_agreements_order_line
+      targetField: 'pol_owner_fk',
+      sourceField: 'agreement_with_lines.agreement_line.id',
+      overrideJoinDirection: 'left',
+      essentialOnly: true,
+      order: 20,
+    },
+    {
+      alias: 'order_invoice',
+      type: 'entity-type',
+      targetId: 'f3ccbf49-8e3e-4f5c-a60e-04ad80543a4a', // composite_order_invoice_analytics
+      targetField: 'pol.id',
+      sourceField: 'agreement_line_to_order_line.pol_orders_fk',
+      overrideJoinDirection: 'left',
+      useIdColumns: true,
+      essentialOnly: true,
+      order: 30,
+    },
+  ],
+}

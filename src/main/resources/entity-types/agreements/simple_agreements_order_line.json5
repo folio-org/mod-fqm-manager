@@ -1,0 +1,64 @@
+{
+  id: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000007',
+  name: 'simple_agreements_order_line',
+  private: true,
+  requiredPermissions: [
+    'erm.agreements.collection.get',
+  ],
+  sources: [
+    {
+      alias: 'aol',
+      type: 'db',
+      target: 'src_agr_order_line',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      sourceAlias: 'aol',
+      dataType: { dataType: 'stringType' },
+      isIdColumn: true,
+      essential: true,
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.pol_id',
+    },
+    {
+      name: 'pol_owner_fk',
+      sourceAlias: 'aol',
+      dataType: { dataType: 'stringType' },
+      essential: true,
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.pol_owner_fk',
+      joinsTo: [
+        {
+          targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000002', // simple_agreements_agreement_line
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'pol_orders_fk',
+      sourceAlias: 'aol',
+      dataType: { dataType: 'stringType' },
+      essential: true,
+      queryable: true,
+      hidden: true,
+      visibleByDefault: false,
+      valueGetter: ':sourceAlias.pol_orders_fk',
+      joinsTo: [
+        {
+          targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+  ],
+}

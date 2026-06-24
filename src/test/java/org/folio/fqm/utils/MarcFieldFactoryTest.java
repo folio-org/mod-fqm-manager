@@ -49,8 +49,6 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldRejectUnsupportedMarcFieldNames() {
-    // Use only structurally malformed names here. Do NOT use shapes like "marc_245" (tag-only) or
-    // "marc_245_ind1" (indicator), which are reserved for future stories and are expected to become valid.
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_24_a"));   // tag must be exactly 3 digits
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_2451_a")); // tag must be exactly 3 digits
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_abc_a"));  // tag must be numeric
@@ -60,13 +58,13 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateSubfieldSyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", null).orElseThrow();
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "diku").orElseThrow();
 
     assertEquals("marc_245_a", column.getName());
     assertEquals("245$a", column.getLabelAlias());
     assertInstanceOf(MarcType.class, column.getDataType());
     assertEquals("lower(:value)", column.getValueFunction());
-    assertSqlEquals(expectedSubfieldValueGetter("245", "a"), column.getValueGetter());
+    assertSqlEquals(expectedSubfieldValueGetter("diku", "245", "a"), column.getValueGetter());
     assertEquals("lower(marc.value)", column.getFilterValueGetter());
   }
 
@@ -158,34 +156,27 @@ class MarcFieldFactoryTest {
   }
 
   @Test
-  void shouldAddSyntheticColumnsFromFqlConditionWithoutTenant() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
-      entityTypeWithMarcSupport(),
-      new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),
-      null // no tenant
+  void shouldThrowWhenSynthesizingFromFqlConditionWithoutTenant() {
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> MarcFieldFactory.addSyntheticColumns(
+        entityTypeWithMarcSupport(),
+        new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),
+        null
+      )
     );
-
-    EntityTypeColumn marc245a = entityType.getColumns().stream()
-      .filter(column -> "marc_245_a".equals(column.getName()))
-      .findFirst()
-      .orElseThrow();
-    // No tenant was supplied, so the placeholder remains un-interpolated.
-    assertTrue(marc245a.getValueGetter().contains("${tenant_id}"));
   }
 
   @Test
-  void shouldAddSyntheticColumnsFromCollectionWithoutTenant() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
-      entityTypeWithMarcSupport(),
-      List.of("marc_245_a"),
-      null // no tenant
+  void shouldThrowWhenSynthesizingFromCollectionWithoutTenant() {
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> MarcFieldFactory.addSyntheticColumns(
+        entityTypeWithMarcSupport(),
+        List.of("marc_245_a"),
+        null
+      )
     );
-
-    EntityTypeColumn marc245a = entityType.getColumns().stream()
-      .filter(column -> "marc_245_a".equals(column.getName()))
-      .findFirst()
-      .orElseThrow();
-    assertTrue(marc245a.getValueGetter().contains("${tenant_id}"));
   }
 
   @Test
@@ -272,14 +263,11 @@ class MarcFieldFactoryTest {
   }
 
   @Test
-  void shouldKeepPlaceholderUninterpolatedForBlankTenant() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(
-      entityTypeWithMarcSupport(),
-      "marc_245_a",
-      "   "
-    ).orElseThrow();
-
-    assertTrue(column.getValueGetter().contains("${tenant_id}"));
+  void shouldThrowWhenSynthesizingMarcColumnWithBlankTenant() {
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "   ")
+    );
   }
 
   @Test
@@ -410,16 +398,16 @@ class MarcFieldFactoryTest {
       .columns(List.of(placeholder, synthetic));
   }
 
-  private static String expectedSubfieldValueGetter(String tag, String subfield) {
+  private static String expectedSubfieldValueGetter(String tenantId, String tag, String subfield) {
     return """
       (
         SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
-        FROM ${tenant_id}_mod_fqm_manager.src_srs_marc_indexers marc
+        FROM %s_mod_fqm_manager.src_srs_marc_indexers marc
         WHERE marc.marc_id = "record_lb".id
           AND marc.field_no = '%s'
           AND marc.subfield_no = '%s'
       )
-      """.formatted(tag, subfield).trim();
+      """.formatted(tenantId, tag, subfield).trim();
   }
 
   private static void assertSqlEquals(String expected, String actual) {

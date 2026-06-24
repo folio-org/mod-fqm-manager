@@ -115,6 +115,14 @@ public class MarcFieldFactory {
       );
     }
 
+    // A concrete tenant is required: the synthesized SQL references a tenant-qualified view, and leaving
+    // ${tenant_id} un-interpolated would emit broken SQL. Fail fast rather than defer to query execution.
+    if (tenantId == null || tenantId.isBlank()) {
+      throw new IllegalArgumentException(
+        "A tenant id is required to synthesize MARC column '" + fieldName + "'"
+      );
+    }
+
     MarcFieldName marcField = parsedField.get();
     return Optional.of(new EntityTypeColumn()
       .name(marcField.fieldName())
@@ -197,9 +205,7 @@ public class MarcFieldFactory {
   }
 
   private static String interpolateTenant(String input, String tenantId) {
-    if (tenantId == null || tenantId.isBlank()) {
-      return input;
-    }
+    // tenantId is guaranteed non-blank by createSyntheticColumn's guard before this is reached.
     return input.replace("${tenant_id}", tenantId);
   }
 

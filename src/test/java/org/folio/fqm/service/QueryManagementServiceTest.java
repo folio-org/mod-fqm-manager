@@ -469,6 +469,7 @@ class QueryManagementServiceTest {
       .fields(new ArrayList<>(List.of("content")));
 
     when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(executionContext.getTenantId()).thenReturn("diku");
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
@@ -493,6 +494,7 @@ class QueryManagementServiceTest {
       .fields(new ArrayList<>(List.of("content", "marc_245_a")));
 
     when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(executionContext.getTenantId()).thenReturn("diku");
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
@@ -515,6 +517,7 @@ class QueryManagementServiceTest {
       .fqlQuery(MARC_FQL);
 
     when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(executionContext.getTenantId()).thenReturn("diku");
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
     when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
@@ -543,6 +546,7 @@ class QueryManagementServiceTest {
 
     when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
     when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
+    when(executionContext.getTenantId()).thenReturn("diku");
     when(queryProcessorService.processQuery(any(EntityType.class), eq(MARC_FQL), eq(expectedFields), eq(defaultLimit)))
       .thenReturn(expectedContent);
 

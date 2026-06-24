@@ -27,7 +27,9 @@ public class MarcFieldFactory {
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
   private static final String MARC_FILTER_VALUE_GETTER = "lower(marc.value)";
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
-  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$");
+  // Field names are accepted case-insensitively (e.g. MARC_245_A behaves the same as marc_245_a). The tag/
+  // subfield are normalized to their canonical storage form when the MarcFieldName is built.
+  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$", Pattern.CASE_INSENSITIVE);
   // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
   // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
   // exactly one place and the two cannot drift.
@@ -160,10 +162,12 @@ public class MarcFieldFactory {
   public static Optional<MarcFieldName> parse(String fieldName) {
     Matcher subfieldMatcher = SUBFIELD_PATTERN.matcher(fieldName);
     if (subfieldMatcher.matches()) {
+      // Preserve the original field name so the synthesized column matches the name referenced in the query,
+      // but normalize the subfield code to lower case to match how it is stored in marc_indexers.
       return Optional.of(new MarcFieldName(
         fieldName,
         subfieldMatcher.group("tag"),
-        subfieldMatcher.group("subfield")
+        subfieldMatcher.group("subfield").toLowerCase()
       ));
     }
 

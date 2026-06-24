@@ -440,7 +440,7 @@ class QueryManagementServiceTest {
       .name("test-entity")
       .columns(List.of(
         new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("stringType")).valueGetter(":record_lb.matched_id"),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -475,7 +475,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -508,7 +508,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -543,7 +543,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -575,7 +575,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("matched_id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")).valueGetter(":record_lb.matched_id"),
         new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}
@@ -607,7 +607,7 @@ class QueryManagementServiceTest {
       .columns(List.of(
         new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
         new EntityTypeColumn().name("field1").dataType(new EntityDataType().dataType("stringType")),
-        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id")
       ));
     String fqlQuery = """
       {"marc_245_a": {"$contains": "Shakespeare"}}

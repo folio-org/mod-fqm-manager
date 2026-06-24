@@ -106,7 +106,7 @@ class FqlToSqlConverterServiceTest {
             .valueFunction("upper(:value)"),
           new EntityTypeColumn().name("marc")
             .dataType(new MarcType().dataType("marcType"))
-            .valueGetter("\"record_lb\".matched_id"),
+            .valueGetter("\"record_lb\".id"),
           new EntityTypeColumn().name("nested")
             .dataType(new ArrayType().dataType("arrayType")
               .itemDataType(new ObjectType().dataType("objectType")

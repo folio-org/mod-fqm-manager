@@ -26,12 +26,27 @@ import org.junit.jupiter.api.Test;
 
 class MarcFieldFactoryTest {
 
-  private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".matched_id";
+  // Mirrors the production simple_srs_record config: MARC is correlated on record_lb.id (the per-generation
+  // id stored in marc_indexers.marc_id), NOT matched_id.
+  private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
 
   @Test
   void shouldRecognizeSupportedMarcFieldNames() {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
+  }
+
+  @Test
+  void shouldAcceptUppercaseFieldNamesAndNormalizeSubfield() {
+    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_A"));
+
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("MARC_245_A").orElseThrow();
+    // Original name is preserved (so it matches the name referenced in the query)...
+    assertEquals("MARC_245_A", parsed.fieldName());
+    // ...but the subfield is normalized to lower case to match marc_indexers storage.
+    assertEquals("245", parsed.tag());
+    assertEquals("a", parsed.subfield());
+    assertEquals("245$a", parsed.labelAlias());
   }
 
   @Test
@@ -277,24 +292,24 @@ class MarcFieldFactoryTest {
     assertEquals("lower(marc.value)", context.filterValueGetter());
 
     assertEquals(
-      "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a'",
+      "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a'",
       context.whereClause()
     );
     assertEquals(
       "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
         + "and lower(marc.value) = {0})",
       context.existsClause("=", true)
     );
     assertEquals(
       "not exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
         + "and lower(marc.value) like {0})",
       context.existsClause("like", false)
     );
     assertEquals(
       "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
         + "and lower(marc.value) is not null and lower(marc.value) <> '')",
       context.presenceClause()
     );
@@ -397,7 +412,7 @@ class MarcFieldFactoryTest {
       (
         SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
         FROM ${tenant_id}_mod_fqm_manager.src_srs_marc_indexers marc
-        WHERE marc.marc_id = "record_lb".matched_id
+        WHERE marc.marc_id = "record_lb".id
           AND marc.field_no = '%s'
           AND marc.subfield_no = '%s'
       )

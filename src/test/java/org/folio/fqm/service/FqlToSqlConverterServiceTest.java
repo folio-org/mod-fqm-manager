@@ -1563,4 +1563,119 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("lower(marc.value) like"));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
   }
+
+  private String renderMarcCondition(String fqlQuery) {
+    return fqlToSqlConverter.getSqlCondition(fqlQuery, entityType).toString().replaceAll("\\s+", " ");
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$eq": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$ne": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$in": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" or "));
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$nin": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" and "));
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldGreaterThanConditions() {
+    String gt = renderMarcCondition("""
+      {"marc_245_a": {"$gt": "m"}}""");
+    assertTrue(gt.contains("lower(marc.value) >"));
+    assertFalse(gt.contains("lower(marc.value) >="));
+    assertTrue(gt.contains("exists (select"));
+
+    String gte = renderMarcCondition("""
+      {"marc_245_a": {"$gte": "m"}}""");
+    assertTrue(gte.contains("lower(marc.value) >="));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldLessThanConditions() {
+    String lt = renderMarcCondition("""
+      {"marc_245_a": {"$lt": "m"}}""");
+    assertTrue(lt.contains("lower(marc.value) <"));
+    assertFalse(lt.contains("lower(marc.value) <="));
+    assertTrue(lt.contains("exists (select"));
+
+    String lte = renderMarcCondition("""
+      {"marc_245_a": {"$lte": "m"}}""");
+    assertTrue(lte.contains("lower(marc.value) <="));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldRegexCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$regex": "^sha"}}""");
+
+    assertTrue(rendered.contains("lower(marc.value) ~*"));
+    assertTrue(rendered.contains("exists (select"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldStartsWithCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$starts_with": "Sha"}}""");
+
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("exists (select"));
+    assertTrue(rendered.toLowerCase().contains("sha"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEmptyConditions() {
+    // $empty: true -> NOT (a present, non-empty value exists)
+    String empty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": true}}""");
+    assertTrue(empty.contains("is not null"));
+    assertTrue(empty.contains("<> ''"));
+    assertTrue(empty.contains("not (exists"));
+
+    // $empty: false -> a present, non-empty value exists
+    String notEmpty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": false}}""");
+    assertTrue(notEmpty.contains("exists (select"));
+    assertTrue(notEmpty.contains("is not null"));
+    assertTrue(notEmpty.contains("<> ''"));
+    assertFalse(notEmpty.contains("not (exists"));
+  }
 }

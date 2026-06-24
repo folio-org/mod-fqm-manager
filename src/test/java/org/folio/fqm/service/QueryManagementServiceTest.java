@@ -433,46 +433,6 @@ class QueryManagementServiceTest {
 
   }
 
-  // ---- MARC dynamic-field test helpers ----
-
-  private static final String MARC_FQL = """
-    {"marc_245_a": {"$contains": "Shakespeare"}}
-    """;
-
-  private static EntityTypeColumn marcPlaceholder() {
-    return new EntityTypeColumn().name("marc").hidden(true)
-      .dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id");
-  }
-
-  private static EntityTypeColumn stringColumn(String name) {
-    return new EntityTypeColumn().name(name).dataType(new EntityDataType().dataType("stringType"));
-  }
-
-  private static EntityTypeColumn idColumn(String name) {
-    return new EntityTypeColumn().name(name).isIdColumn(true).dataType(new EntityDataType().dataType("stringType"));
-  }
-
-  private static EntityType marcEntityType(EntityTypeColumn... columns) {
-    return new EntityType().name("test-entity").columns(List.of(columns));
-  }
-
-  private static List<String> columnNames(EntityType entityType) {
-    return entityType.getColumns().stream().map(EntityTypeColumn::getName).toList();
-  }
-
-  private void stubAsyncMarcQuery(UUID entityTypeId, EntityType entityType, QueryIdentifier identifier) {
-    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
-    when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
-    when(queryRepository.saveQuery(any())).thenReturn(identifier);
-  }
-
-  private List<String> capturedSavedQueryFields() {
-    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-    verify(queryRepository).saveQuery(queryCaptor.capture());
-    return queryCaptor.getValue().fields();
-  }
-
   @Test
   void shouldAugmentEntityTypeWithDynamicMarcFieldsDuringValidation() {
     UUID entityTypeId = UUID.randomUUID();
@@ -856,6 +816,46 @@ class QueryManagementServiceTest {
 
     queryManagementService.getPotentialZombieQuery(queryId).orElseThrow(() -> new RuntimeException("Query not found"));
     verify(queryRepository, never()).updateQuery(eq(queryId), any(), any(), any());
+  }
+
+  // ---- MARC dynamic-field test helpers ----
+
+  private static final String MARC_FQL = """
+    {"marc_245_a": {"$contains": "Shakespeare"}}
+    """;
+
+  private static EntityTypeColumn marcPlaceholder() {
+    return new EntityTypeColumn().name("marc").hidden(true)
+      .dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.id");
+  }
+
+  private static EntityTypeColumn stringColumn(String name) {
+    return new EntityTypeColumn().name(name).dataType(new EntityDataType().dataType("stringType"));
+  }
+
+  private static EntityTypeColumn idColumn(String name) {
+    return new EntityTypeColumn().name(name).isIdColumn(true).dataType(new EntityDataType().dataType("stringType"));
+  }
+
+  private static EntityType marcEntityType(EntityTypeColumn... columns) {
+    return new EntityType().name("test-entity").columns(List.of(columns));
+  }
+
+  private static List<String> columnNames(EntityType entityType) {
+    return entityType.getColumns().stream().map(EntityTypeColumn::getName).toList();
+  }
+
+  private void stubAsyncMarcQuery(UUID entityTypeId, EntityType entityType, QueryIdentifier identifier) {
+    when(executionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(MARC_FQL))).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(identifier);
+  }
+
+  private List<String> capturedSavedQueryFields() {
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    verify(queryRepository).saveQuery(queryCaptor.capture());
+    return queryCaptor.getValue().fields();
   }
 
   private static Date offsetDateTimeAsDate(OffsetDateTime offsetDateTime) {

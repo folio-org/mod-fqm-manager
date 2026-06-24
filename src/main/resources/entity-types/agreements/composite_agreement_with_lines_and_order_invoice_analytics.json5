@@ -18,7 +18,7 @@
       targetId: 'a1e1b9b8-1f9f-4a01-b8c7-2c8a8a000007', // simple_agreements_order_line
       targetField: 'pol_owner_fk',
       sourceField: 'agreement_with_lines.agreement_line.id',
-      overrideJoxinDirection: 'left',
+      overrideJoinDirection: 'left',
       essentialOnly: true,
       order: 20,
     },

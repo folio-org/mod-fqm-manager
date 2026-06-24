@@ -131,7 +131,7 @@ public class MarcFieldFactory {
   public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
     Optional<MarcFieldName> parsedField = parse(fieldName);
     Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
-    Optional<EntityTypeColumn> syntheticField = findField(entityType, fieldName);
+    Optional<EntityTypeColumn> syntheticField = EntityTypeUtils.findColumn(entityType, fieldName);
 
     if (parsedField.isEmpty() || placeholder.isEmpty() || syntheticField.isEmpty()) {
       return Optional.empty();
@@ -177,12 +177,6 @@ public class MarcFieldFactory {
     return column != null
       && GENERIC_MARC_COLUMN_NAME.equals(column.getName())
       && column.getDataType() instanceof MarcType;
-  }
-
-  public static Optional<EntityTypeColumn> findField(EntityType entityType, String fieldName) {
-    return entityType.getColumns().stream()
-      .filter(column -> fieldName.equals(column.getName()))
-      .findFirst();
   }
 
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {

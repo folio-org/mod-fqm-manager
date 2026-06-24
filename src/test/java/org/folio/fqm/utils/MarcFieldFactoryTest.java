@@ -3,9 +3,12 @@ package org.folio.fqm.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +17,7 @@ import org.folio.fql.model.AndCondition;
 import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.fqm.utils.MarcFieldFactory.MarcQueryContext;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -137,6 +141,226 @@ class MarcFieldFactoryTest {
     );
   }
 
+  @Test
+  void shouldAddSyntheticColumnsFromFqlConditionWithoutTenant() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare")
+    );
+
+    EntityTypeColumn marc245a = entityType.getColumns().stream()
+      .filter(column -> "marc_245_a".equals(column.getName()))
+      .findFirst()
+      .orElseThrow();
+    // No tenant was supplied, so the placeholder remains un-interpolated.
+    assertTrue(marc245a.getValueGetter().contains("${tenant_id}"));
+  }
+
+  @Test
+  void shouldAddSyntheticColumnsFromCollectionWithoutTenant() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      List.of("marc_245_a")
+    );
+
+    EntityTypeColumn marc245a = entityType.getColumns().stream()
+      .filter(column -> "marc_245_a".equals(column.getName()))
+      .findFirst()
+      .orElseThrow();
+    assertTrue(marc245a.getValueGetter().contains("${tenant_id}"));
+  }
+
+  @Test
+  void shouldAddSyntheticColumnsFromRawQueryString() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      "{\"marc_245_a\": {\"$contains\": \"Shakespeare\"}}",
+      "diku"
+    );
+
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245_a"),
+      entityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+  }
+
+  @Test
+  void shouldReturnEmptySetForNullOrBlankRawQuery() {
+    assertEquals(Set.of(), MarcFieldFactory.getReferencedMarcFieldNames(null));
+    assertEquals(Set.of(), MarcFieldFactory.getReferencedMarcFieldNames("   "));
+  }
+
+  @Test
+  void shouldReturnEmptySetForNullOrUnsupportedFqlCondition() {
+    // null is neither a FieldCondition nor an AndCondition, exercising the fall-through return.
+    assertEquals(Set.of(), MarcFieldFactory.getReferencedFieldNames(null));
+  }
+
+  @Test
+  void shouldReturnEntityTypeUnchangedWhenNoFieldNamesToAdd() {
+    EntityType entityType = entityTypeWithMarcSupport();
+
+    // null collection
+    assertEquals(entityType, MarcFieldFactory.addSyntheticColumns(entityType, (Collection<String>) null, "diku"));
+    // empty collection
+    assertEquals(entityType, MarcFieldFactory.addSyntheticColumns(entityType, List.of(), "diku"));
+
+    // entity type with null columns
+    EntityType noColumns = new EntityType().id(UUID.randomUUID().toString()).name("no-columns").columns(null);
+    EntityType result = MarcFieldFactory.addSyntheticColumns(noColumns, List.of("marc_245_a"), "diku");
+    assertNull(result.getColumns());
+  }
+
+  @Test
+  void shouldSkipNullAndAlreadyPresentFieldNames() {
+    // "marc" is already present (the placeholder), null should be skipped, only marc_245_a is added.
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      Arrays.asList("marc", null, "marc_245_a"),
+      "diku"
+    );
+
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245_a"),
+      entityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
+    );
+  }
+
+  @Test
+  void shouldReturnEmptyWhenEntityTypeHasNoMarcPlaceholder() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("no-marc")
+      .columns(List.of(
+        new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("rangedUUIDType"))
+      ));
+
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a"));
+  }
+
+  @Test
+  void shouldThrowWhenMarcPlaceholderValueGetterIsBlank() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("blank-getter")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter("   ")
+      ));
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a")
+    );
+  }
+
+  @Test
+  void shouldKeepPlaceholderUninterpolatedForBlankTenant() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(
+      entityTypeWithMarcSupport(),
+      "marc_245_a",
+      "   "
+    ).orElseThrow();
+
+    assertTrue(column.getValueGetter().contains("${tenant_id}"));
+  }
+
+  @Test
+  void shouldBuildQueryContextAndItsClauses() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_a"), "diku");
+
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_a").orElseThrow();
+
+    assertEquals("245", context.marcField().tag());
+    assertEquals("a", context.marcField().subfield());
+    assertEquals("diku_mod_fqm_manager.src_srs_marc_indexers", context.tableName());
+    assertEquals(MARC_RECORD_ID_GETTER, context.marcIdGetter());
+    assertEquals("lower(marc.value)", context.filterValueGetter());
+
+    assertEquals(
+      "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a'",
+      context.whereClause()
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "and lower(marc.value) = {0})",
+      context.existsClause("=", true)
+    );
+    assertEquals(
+      "not exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "and lower(marc.value) like {0})",
+      context.existsClause("like", false)
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = \"record_lb\".matched_id and marc.field_no = '245' and marc.subfield_no = 'a' "
+        + "and lower(marc.value) is not null and lower(marc.value) <> '')",
+      context.presenceClause()
+    );
+  }
+
+  @Test
+  void shouldReturnEmptyQueryContextForInvalidName() {
+    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_245"));
+  }
+
+  @Test
+  void shouldReturnEmptyQueryContextWhenNoPlaceholder() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("no-marc")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType")).valueGetter("x")
+      ));
+
+    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityType, "marc_245_a"));
+  }
+
+  @Test
+  void shouldReturnEmptyQueryContextWhenSyntheticFieldNotPresent() {
+    // Placeholder present, but marc_245_a has not been synthesized onto the entity type.
+    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_245_a"));
+  }
+
+  @Test
+  void shouldReturnEmptyQueryContextWhenCorrelationOrValueGetterMissing() {
+    String validSyntheticGetter = "(SELECT 1 FROM x marc WHERE marc.marc_id = id)";
+
+    // marcIdGetter null (placeholder has no valueGetter)
+    assertEquals(Optional.empty(),
+      MarcFieldFactory.createQueryContext(entityTypeForContext(null, validSyntheticGetter), "marc_245_a"));
+    // marcIdGetter blank
+    assertEquals(Optional.empty(),
+      MarcFieldFactory.createQueryContext(entityTypeForContext("   ", validSyntheticGetter), "marc_245_a"));
+    // synthetic valueGetter null
+    assertEquals(Optional.empty(),
+      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", null), "marc_245_a"));
+    // synthetic valueGetter blank
+    assertEquals(Optional.empty(),
+      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", "   "), "marc_245_a"));
+  }
+
+  @Test
+  void shouldReturnEmptyQueryContextWhenTableNameNotExtractable() {
+    // valueGetter is present and non-blank but has no "FROM <table> marc", so the table can't be extracted.
+    assertEquals(Optional.empty(),
+      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", "SELECT 1"), "marc_245_a"));
+  }
+
+  @Test
+  void shouldIdentifyGenericMarcPlaceholder() {
+    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(null));
+    assertTrue(MarcFieldFactory.isGenericMarcPlaceholder(
+      new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType"))));
+    // wrong name
+    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(
+      new EntityTypeColumn().name("not_marc").dataType(new MarcType().dataType("marcType"))));
+    // right name, wrong data type
+    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(
+      new EntityTypeColumn().name("marc").dataType(new EntityDataType().dataType("stringType"))));
+  }
+
   private static EntityType entityTypeWithMarcSupport() {
     return new EntityType()
       .id(UUID.randomUUID().toString())
@@ -151,6 +375,21 @@ class MarcFieldFactoryTest {
           .dataType(new MarcType().dataType("marcType"))
           .valueGetter(MARC_RECORD_ID_GETTER)
       ));
+  }
+
+  private static EntityType entityTypeForContext(String placeholderValueGetter, String syntheticValueGetter) {
+    EntityTypeColumn placeholder = new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType"));
+    if (placeholderValueGetter != null) {
+      placeholder.valueGetter(placeholderValueGetter);
+    }
+    EntityTypeColumn synthetic = new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"));
+    if (syntheticValueGetter != null) {
+      synthetic.valueGetter(syntheticValueGetter);
+    }
+    return new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("context-fixture")
+      .columns(List.of(placeholder, synthetic));
   }
 
   private static String expectedSubfieldValueGetter(String tag, String subfield) {

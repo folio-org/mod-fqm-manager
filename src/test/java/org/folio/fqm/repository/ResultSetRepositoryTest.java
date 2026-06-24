@@ -9,6 +9,7 @@ import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.JsonbArrayType;
 import org.folio.querytool.domain.dto.MarcType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
@@ -350,12 +351,7 @@ class ResultSetRepositoryTest {
 
   @Test
   void recordToMapDecodesJsonbEncodedColumns() throws Exception {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("marc-et")
-      .columns(List.of(
-        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"))
-      ));
+    EntityType entityType = marcEntityType();
 
     PGobject jsonb = new PGobject();
     jsonb.setType("jsonb");
@@ -369,12 +365,7 @@ class ResultSetRepositoryTest {
 
   @Test
   void recordToMapRemovesColumnWhenJsonbDecodingFails() throws Exception {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("marc-et")
-      .columns(List.of(
-        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"))
-      ));
+    EntityType entityType = marcEntityType();
 
     PGobject malformed = new PGobject();
     malformed.setType("jsonb");
@@ -384,6 +375,50 @@ class ResultSetRepositoryTest {
 
     assertEquals(1, mapped.size());
     assertFalse(mapped.get(0).containsKey("marc_245_a"));
+  }
+
+  @Test
+  void recordToMapHandlesJsonbArrayColumnAndEmptyResult() throws Exception {
+    // A JsonbArrayType column exercises the first instanceof branch; an empty result exercises the
+    // result.isEmpty() branch of the ternary.
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("jsonb-array-et")
+      .columns(List.of(
+        new EntityTypeColumn().name("arr").dataType(new JsonbArrayType().dataType("jsonbArrayType"))
+      ));
+
+    DSLContext ctx = DSL.using(SQLDialect.POSTGRES);
+    Result<Record> emptyResult = ctx.newResult(List.of(DSL.field(DSL.name("arr"))));
+
+    List<Map<String, Object>> mapped = invokeRecordToMap(entityType, emptyResult);
+
+    assertEquals(0, mapped.size());
+  }
+
+  @Test
+  void recordToMapLeavesNonJsonbValuesUnchanged() throws Exception {
+    EntityType entityType = marcEntityType();
+
+    // Value is not a PGobject -> the "instanceof PGobject" check is false.
+    List<Map<String, Object>> mappedString = invokeRecordToMap(entityType, singleRecordResult("plain-value"));
+    assertEquals("plain-value", mappedString.get(0).get("marc_245_a"));
+
+    // Value is a PGobject, but its type is not "jsonb" -> the "jsonb".equals(...) check is false.
+    PGobject nonJsonb = new PGobject();
+    nonJsonb.setType("text");
+    nonJsonb.setValue("hello");
+    List<Map<String, Object>> mappedPgobject = invokeRecordToMap(entityType, singleRecordResult(nonJsonb));
+    assertEquals(nonJsonb, mappedPgobject.get(0).get("marc_245_a"));
+  }
+
+  private static EntityType marcEntityType() {
+    return new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("marc-et")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"))
+      ));
   }
 
   private static Result<Record> singleRecordResult(Object marcValue) {

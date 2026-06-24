@@ -132,6 +132,7 @@
       essential: true,
       filterValueGetter: "lower(${tenant_id}_mod_inventory_storage.f_unaccent(:sourceAlias.jsonb ->> 'hrid'))",
       valueFunction: 'lower(${tenant_id}_mod_inventory_storage.f_unaccent(:value))',
+      availableOperators: ['$eq', '$ne', '$in', '$contains', '$starts_with', '$empty'],
     },
     {
       name: 'call_number_type_id',

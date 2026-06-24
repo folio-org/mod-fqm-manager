@@ -355,12 +355,12 @@ class ResultSetRepositoryTest {
 
     PGobject jsonb = new PGobject();
     jsonb.setType("jsonb");
-    jsonb.setValue("[\"UAB\", \"eng\"]");
+    jsonb.setValue("[\"VALUE1\", \"value2\"]");
 
     List<Map<String, Object>> mapped = invokeRecordToMap(entityType, singleRecordResult(jsonb));
 
     assertEquals(1, mapped.size());
-    assertArrayEquals(new String[] {"UAB", "eng"}, (String[]) mapped.get(0).get("marc_245_a"));
+    assertArrayEquals(new String[] {"VALUE1", "value2"}, (String[]) mapped.get(0).get("marc_245_a"));
   }
 
   @Test
@@ -379,8 +379,6 @@ class ResultSetRepositoryTest {
 
   @Test
   void recordToMapHandlesJsonbArrayColumnAndEmptyResult() throws Exception {
-    // A JsonbArrayType column exercises the first instanceof branch; an empty result exercises the
-    // result.isEmpty() branch of the ternary.
     EntityType entityType = new EntityType()
       .id(UUID.randomUUID().toString())
       .name("jsonb-array-et")
@@ -400,11 +398,9 @@ class ResultSetRepositoryTest {
   void recordToMapLeavesNonJsonbValuesUnchanged() throws Exception {
     EntityType entityType = marcEntityType();
 
-    // Value is not a PGobject -> the "instanceof PGobject" check is false.
     List<Map<String, Object>> mappedString = invokeRecordToMap(entityType, singleRecordResult("plain-value"));
     assertEquals("plain-value", mappedString.get(0).get("marc_245_a"));
 
-    // Value is a PGobject, but its type is not "jsonb" -> the "jsonb".equals(...) check is false.
     PGobject nonJsonb = new PGobject();
     nonJsonb.setType("text");
     nonJsonb.setValue("hello");

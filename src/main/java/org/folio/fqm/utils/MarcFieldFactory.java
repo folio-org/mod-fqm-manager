@@ -83,16 +83,8 @@ public class MarcFieldFactory {
     return entityType.toBuilder().columns(updatedColumns).build();
   }
 
-  public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames) {
-    return addSyntheticColumns(entityType, fieldNames, null);
-  }
-
   public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
     return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
-  }
-
-  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition) {
-    return addSyntheticColumns(entityType, condition, null);
   }
 
   public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {

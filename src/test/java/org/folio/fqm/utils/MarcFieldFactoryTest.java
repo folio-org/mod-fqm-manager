@@ -160,7 +160,8 @@ class MarcFieldFactoryTest {
   void shouldAddSyntheticColumnsFromFqlConditionWithoutTenant() {
     EntityType entityType = MarcFieldFactory.addSyntheticColumns(
       entityTypeWithMarcSupport(),
-      new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare")
+      new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),
+      null // no tenant
     );
 
     EntityTypeColumn marc245a = entityType.getColumns().stream()
@@ -175,7 +176,8 @@ class MarcFieldFactoryTest {
   void shouldAddSyntheticColumnsFromCollectionWithoutTenant() {
     EntityType entityType = MarcFieldFactory.addSyntheticColumns(
       entityTypeWithMarcSupport(),
-      List.of("marc_245_a")
+      List.of("marc_245_a"),
+      null // no tenant
     );
 
     EntityTypeColumn marc245a = entityType.getColumns().stream()

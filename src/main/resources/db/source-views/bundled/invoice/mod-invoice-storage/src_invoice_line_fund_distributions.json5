@@ -3,6 +3,6 @@
   dependsOn: [['${tenant_id}_mod_invoice_storage', 'invoice_lines']],
   sql: "SELECT il.id as id, il.invoiceid as invoice_id, il.jsonb as jsonb, fd.value AS fund_distribution \
         FROM ${tenant_id}_mod_invoice_storage.invoice_lines il \
-        LEFT JOIN LATERAL jsonb_array_elements(COALESCE(il.jsonb -> 'fundDistributions', '[]'::jsonb)) fd ON TRUE",
+        LEFT JOIN LATERAL jsonb_array_elements(COALESCE(il.jsonb -> 'fundDistributions', '[]'::jsonb)) fd(value) ON TRUE",
 }
 

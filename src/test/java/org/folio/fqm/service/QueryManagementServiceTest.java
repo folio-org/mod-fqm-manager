@@ -500,6 +500,41 @@ class QueryManagementServiceTest {
   }
 
   @Test
+  void shouldNotDuplicateMarcFieldAlreadyPresentInAsyncQueryFieldList() {
+    UUID createdById = UUID.randomUUID();
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType()
+      .name("test-entity")
+      .columns(List.of(
+        new EntityTypeColumn().name("id").isIdColumn(true).dataType(new EntityDataType().dataType("stringType")),
+        new EntityTypeColumn().name("content").dataType(new EntityDataType().dataType("stringType")),
+        new EntityTypeColumn().name("marc").hidden(true).dataType(new MarcType().dataType("marcType")).valueGetter(":record_lb.matched_id")
+      ));
+    String fqlQuery = """
+      {"marc_245_a": {"$contains": "Shakespeare"}}
+      """;
+    // marc_245_a is already in the requested fields — addReferencedMarcFields should not add it again
+    SubmitQuery submitQuery = new SubmitQuery()
+      .entityTypeId(entityTypeId)
+      .fqlQuery(fqlQuery)
+      .fields(new ArrayList<>(List.of("content", "marc_245_a")));
+    QueryIdentifier expectedIdentifier = new QueryIdentifier().queryId(UUID.randomUUID());
+
+    when(executionContext.getUserId()).thenReturn(createdById);
+    when(entityTypeService.getEntityTypeDefinition(entityTypeId, true)).thenReturn(entityType);
+    when(fqlValidationService.validateFql(any(EntityType.class), eq(fqlQuery))).thenReturn(Map.of());
+    when(queryRepository.saveQuery(any())).thenReturn(expectedIdentifier);
+
+    queryManagementService.runFqlQueryAsync(submitQuery);
+
+    ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+    verify(queryRepository).saveQuery(queryCaptor.capture());
+    // marc_245_a must appear exactly once
+    List<String> savedFields = queryCaptor.getValue().fields();
+    assertEquals(1, savedFields.stream().filter("marc_245_a"::equals).count());
+  }
+
+  @Test
   void shouldIncludeReferencedMarcFieldsWhenAsyncQueryUsesDefaultFieldList() {
     UUID createdById = UUID.randomUUID();
     UUID entityTypeId = UUID.randomUUID();

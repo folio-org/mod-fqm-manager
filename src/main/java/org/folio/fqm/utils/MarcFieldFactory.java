@@ -59,6 +59,10 @@ public class MarcFieldFactory {
     return addSyntheticColumns(entityType, getReferencedMarcFieldNames(rawQuery), tenantId);
   }
 
+  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
+    return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
+  }
+
   public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames, String tenantId) {
     if (fieldNames == null || fieldNames.isEmpty() || entityType.getColumns() == null) {
       return entityType;
@@ -83,10 +87,6 @@ public class MarcFieldFactory {
     return entityType.toBuilder().columns(updatedColumns).build();
   }
 
-  public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
-    return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
-  }
-
   public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {
     if (condition instanceof FieldCondition<?> fieldCondition) {
       return Set.of(fieldCondition.field().getColumnName());
@@ -97,10 +97,6 @@ public class MarcFieldFactory {
         .collect(LinkedHashSet::new, Set::addAll, Set::addAll);
     }
     return Set.of();
-  }
-
-  public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName) {
-    return createSyntheticColumn(entityType, fieldName, null);
   }
 
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {

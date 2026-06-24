@@ -59,7 +59,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateSubfieldSyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a").orElseThrow();
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", null).orElseThrow();
 
     assertEquals("marc_245_a", column.getName());
     assertEquals("245$a", column.getLabelAlias());
@@ -83,7 +83,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldReturnEmptyForInvalidMarcFieldName() {
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", null));
   }
 
   @Test
@@ -152,7 +152,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a")
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
     );
   }
 
@@ -252,7 +252,7 @@ class MarcFieldFactoryTest {
         new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("rangedUUIDType"))
       ));
 
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a"));
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null));
   }
 
   @Test
@@ -266,7 +266,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a")
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
     );
   }
 

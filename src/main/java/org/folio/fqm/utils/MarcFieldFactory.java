@@ -31,7 +31,7 @@ public class MarcFieldFactory {
   // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
   // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
   // exactly one place and the two cannot drift.
-  private static final Pattern QUERY_FIELD_KEY_PATTERN = Pattern.compile("\"(?<field>[A-Za-z0-9_]+)\"\\s*:");
+  private static final Pattern QUERY_FIELD_KEY_PATTERN = Pattern.compile("\"(?<field>\\w+)\"\\s*:");
 
   public static boolean isMarcFieldName(String fieldName) {
     return parse(fieldName).isPresent();

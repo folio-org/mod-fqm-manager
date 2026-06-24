@@ -426,9 +426,9 @@ class ResultSetRepositoryTest {
     Field<Object> marcField = DSL.field(DSL.name("marc_245_a"));
     List<Field<?>> fields = List.of(marcField);
     Result<Record> result = ctx.newResult(fields);
-    Record record = ctx.newRecord(fields);
-    record.set(marcField, marcValue);
-    result.add(record);
+    Record row = ctx.newRecord(fields);
+    row.set(marcField, marcValue);
+    result.add(row);
     return result;
   }
 

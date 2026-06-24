@@ -171,12 +171,7 @@ public class MarcFieldFactory {
   }
 
   public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {
-    List<EntityTypeColumn> columns = entityType.getColumns();
-    if (columns == null) {
-      return Optional.empty();
-    }
-
-    return columns.stream()
+    return entityType.getColumns().stream()
       .filter(MarcFieldFactory::isGenericMarcPlaceholder)
       .findFirst();
   }
@@ -193,12 +188,7 @@ public class MarcFieldFactory {
   }
 
   public static Optional<EntityTypeColumn> findField(EntityType entityType, String fieldName) {
-    List<EntityTypeColumn> columns = entityType.getColumns();
-    if (columns == null) {
-      return Optional.empty();
-    }
-
-    return columns.stream()
+    return entityType.getColumns().stream()
       .filter(column -> fieldName.equals(column.getName()))
       .findFirst();
   }

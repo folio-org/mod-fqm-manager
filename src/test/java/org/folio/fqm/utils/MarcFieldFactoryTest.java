@@ -239,11 +239,6 @@ class MarcFieldFactoryTest {
   }
 
   @Test
-  void shouldReturnEmptyFromFindMarcPlaceholderWhenColumnsNull() {
-    assertEquals(Optional.empty(), MarcFieldFactory.findMarcPlaceholder(new EntityType()));
-  }
-
-  @Test
   void shouldThrowWhenMarcPlaceholderValueGetterIsBlank() {
     EntityType entityType = new EntityType()
       .id(UUID.randomUUID().toString())
@@ -320,11 +315,6 @@ class MarcFieldFactoryTest {
       ));
 
     assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityType, "marc_245_a"));
-  }
-
-  @Test
-  void shouldReturnEmptyFromFindFieldWhenColumnsNull() {
-    assertEquals(Optional.empty(), MarcFieldFactory.findField(new EntityType(), "marc_245_a"));
   }
 
   @Test

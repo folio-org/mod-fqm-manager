@@ -7,15 +7,23 @@ import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
+import org.folio.querytool.domain.dto.EntityType;
+import org.folio.querytool.domain.dto.EntityTypeColumn;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.spring.FolioExecutionContext;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.postgresql.util.PGobject;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +33,9 @@ import java.util.function.Supplier;
 
 import static org.folio.fqm.repository.ResultSetRepositoryTestDataProvider.TEST_GROUP_BY_ENTITY_TYPE_DEFINITION;
 import static org.folio.fqm.utils.flattening.FromClauseUtils.getFromClause;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -336,5 +346,61 @@ class ResultSetRepositoryTest {
     List<Map<String, Object>> actualList = repo.getResultSetSync(entityTypeId, fql, fields, limit, emptyTenantIds, false);
 
     assertEquals(List.of(), actualList);
+  }
+
+  @Test
+  void recordToMapDecodesJsonbEncodedColumns() throws Exception {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("marc-et")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"))
+      ));
+
+    PGobject jsonb = new PGobject();
+    jsonb.setType("jsonb");
+    jsonb.setValue("[\"UAB\", \"eng\"]");
+
+    List<Map<String, Object>> mapped = invokeRecordToMap(entityType, singleRecordResult(jsonb));
+
+    assertEquals(1, mapped.size());
+    assertArrayEquals(new String[] {"UAB", "eng"}, (String[]) mapped.get(0).get("marc_245_a"));
+  }
+
+  @Test
+  void recordToMapRemovesColumnWhenJsonbDecodingFails() throws Exception {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("marc-et")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType"))
+      ));
+
+    PGobject malformed = new PGobject();
+    malformed.setType("jsonb");
+    malformed.setValue("not-json");
+
+    List<Map<String, Object>> mapped = invokeRecordToMap(entityType, singleRecordResult(malformed));
+
+    assertEquals(1, mapped.size());
+    assertFalse(mapped.get(0).containsKey("marc_245_a"));
+  }
+
+  private static Result<Record> singleRecordResult(Object marcValue) {
+    DSLContext ctx = DSL.using(SQLDialect.POSTGRES);
+    Field<Object> marcField = DSL.field(DSL.name("marc_245_a"));
+    List<Field<?>> fields = List.of(marcField);
+    Result<Record> result = ctx.newResult(fields);
+    Record record = ctx.newRecord(fields);
+    record.set(marcField, marcValue);
+    result.add(record);
+    return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Map<String, Object>> invokeRecordToMap(EntityType entityType, Result<Record> result) throws Exception {
+    Method method = ResultSetRepository.class.getDeclaredMethod("recordToMap", EntityType.class, Result.class);
+    method.setAccessible(true);
+    return (List<Map<String, Object>>) method.invoke(repo, entityType, result);
   }
 }

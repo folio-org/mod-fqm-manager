@@ -449,22 +449,6 @@ public class FqlToSqlConverterService {
         ))
         .toList());
     }
-    if (fieldCondition instanceof GreaterThanCondition greaterThanCondition) {
-      return marcRowComparison(
-        marcQueryContext,
-        greaterThanCondition.orEqualTo() ? ">=" : ">",
-        marcQueryValueField(greaterThanCondition.value(), greaterThanCondition, entityType),
-        true
-      );
-    }
-    if (fieldCondition instanceof LessThanCondition lessThanCondition) {
-      return marcRowComparison(
-        marcQueryContext,
-        lessThanCondition.orEqualTo() ? "<=" : "<",
-        marcQueryValueField(lessThanCondition.value(), lessThanCondition, entityType),
-        true
-      );
-    }
     if (fieldCondition instanceof RegexCondition regexCondition) {
       return marcRowPatternComparison(
         marcQueryContext,
@@ -489,6 +473,9 @@ public class FqlToSqlConverterService {
     if (fieldCondition instanceof EmptyCondition emptyCondition) {
       return handleMarcEmpty(emptyCondition, marcQueryContext);
     }
+    // MARC subfield values are text, so range operators (gt/lt) are not meaningful and are intentionally
+    // unsupported. They currently fall through to a no-op; rejecting unsupported operators per selector shape
+    // is owned by the operator-restriction story.
     return falseCondition();
   }
 

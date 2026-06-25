@@ -1635,32 +1635,6 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
-  void shouldGenerateMarcSubfieldGreaterThanConditions() {
-    String gt = renderMarcCondition("""
-      {"marc_245_a": {"$gt": "m"}}""");
-    assertTrue(gt.contains("lower(marc.value) >"));
-    assertFalse(gt.contains("lower(marc.value) >="));
-    assertTrue(gt.contains("exists (select"));
-
-    String gte = renderMarcCondition("""
-      {"marc_245_a": {"$gte": "m"}}""");
-    assertTrue(gte.contains("lower(marc.value) >="));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldLessThanConditions() {
-    String lt = renderMarcCondition("""
-      {"marc_245_a": {"$lt": "m"}}""");
-    assertTrue(lt.contains("lower(marc.value) <"));
-    assertFalse(lt.contains("lower(marc.value) <="));
-    assertTrue(lt.contains("exists (select"));
-
-    String lte = renderMarcCondition("""
-      {"marc_245_a": {"$lte": "m"}}""");
-    assertTrue(lte.contains("lower(marc.value) <="));
-  }
-
-  @Test
   void shouldGenerateMarcSubfieldRegexCondition() {
     String rendered = renderMarcCondition("""
       {"marc_245_a": {"$regex": "^sha"}}""");

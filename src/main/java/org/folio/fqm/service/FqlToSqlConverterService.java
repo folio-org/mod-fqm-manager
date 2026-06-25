@@ -104,9 +104,16 @@ public class FqlToSqlConverterService {
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
       Field fqmField = getField(fieldCondition, entityType);
-      var marcQueryContext = getMarcQueryContext(fieldCondition, entityType, fqmField);
-      if (marcQueryContext.isPresent()) {
-        return handleMarcCondition(fieldCondition, entityType, marcQueryContext.get());
+      if (fqmField.getDataType() instanceof MarcType) {
+        // A MARC-typed field must resolve to a query context. If it cannot (e.g. an unparseable name, a
+        // missing/blank generic MARC placeholder, or the non-queryable placeholder itself), fail fast: the
+        // generic field path below would otherwise build SQL from the synthetic column's filterValueGetter
+        // (lower(marc.value)), referencing the `marc` subquery alias outside its subquery and producing a
+        // cryptic execution-time error instead of a clear one here.
+        MarcFieldFactory.MarcQueryContext marcQueryContext =
+          MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName())
+            .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+        return handleMarcCondition(fieldCondition, entityType, marcQueryContext);
       }
 
       final org.jooq.Field<Object> field = field(fieldCondition, entityType);
@@ -763,15 +770,6 @@ public class FqlToSqlConverterService {
 
   private static org.jooq.Field<Object> field(FieldCondition<?> condition, EntityType entityType) {
     return SqlFieldIdentificationUtils.getSqlFilterField(getFieldForFiltering(condition, entityType));
-  }
-
-  private static java.util.Optional<MarcFieldFactory.MarcQueryContext> getMarcQueryContext(FieldCondition<?> fieldCondition,
-                                                                                            EntityType entityType,
-                                                                                            Field field) {
-    if (!(field.getDataType() instanceof MarcType)) {
-      return java.util.Optional.empty();
-    }
-    return MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName());
   }
 
   private static EntityDataType getFieldDataType(EntityType entityType, FieldCondition<?> fieldCondition) {

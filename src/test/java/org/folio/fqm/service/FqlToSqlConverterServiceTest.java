@@ -1564,6 +1564,24 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
   }
 
+  @Test
+  void shouldThrowWhenMarcFieldCannotResolveQueryContext() {
+    // The column is MARC-typed (so the query routes into the MARC branch) but there is no generic "marc"
+    // placeholder, so a query context cannot be built. This must fail fast with a clear FieldNotFoundException
+    // rather than fall through to generic field handling, which would emit SQL referencing the `marc`
+    // subquery alias outside its subquery.
+    EntityType entityTypeWithoutPlaceholder = new EntityType()
+      .name("no-marc-placeholder")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").queryable(true).dataType(new MarcType().dataType("marcType"))
+      ));
+
+    assertThrows(
+      FieldNotFoundException.class,
+      () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_a\": {\"$eq\": \"x\"}}", entityTypeWithoutPlaceholder)
+    );
+  }
+
   private String renderMarcCondition(String fqlQuery) {
     return fqlToSqlConverter.getSqlCondition(fqlQuery, entityType).toString().replaceAll("\\s+", " ");
   }

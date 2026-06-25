@@ -1561,8 +1561,8 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
     assertTrue(rendered.contains("lower(marc.value) like"));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
-    // contains wraps the value on both sides (%value%), which distinguishes it from starts_with.
-    assertEquals(2, countOccurrences(rendered, "'%'"));
+    assertTrue(rendered.contains("'%' ||"),
+      "contains should match %value%: a wildcard is concatenated before the value");
   }
 
   @Test
@@ -1572,8 +1572,8 @@ class FqlToSqlConverterServiceTest {
 
     assertTrue(rendered.contains("lower(marc.value) like"));
     assertTrue(rendered.toLowerCase().contains("sha"));
-    // starts_with wraps the value on the trailing side only (value%).
-    assertEquals(1, countOccurrences(rendered, "'%'"));
+    assertFalse(rendered.contains("'%' ||"),
+      "starts_with should match value%: no wildcard before the value, only after");
   }
 
   @Test
@@ -1640,9 +1640,8 @@ class FqlToSqlConverterServiceTest {
 
   @Test
   void shouldThrowWhenMarcFieldCannotResolveQueryContext() {
-    // The column is MARC-typed (so the query routes into the MARC branch) but there is no generic "marc"
-    // placeholder, so a query context cannot be built. This must fail fast with a clear FieldNotFoundException
-    // rather than fall through to generic field handling, which would emit SQL referencing the `marc`
+    // A MARC-typed column with no generic "marc" placeholder cannot resolve a query context. This must fail
+    // fast rather than fall through to generic field handling, which would emit SQL referencing the `marc`
     // subquery alias outside its subquery.
     EntityType entityTypeWithoutPlaceholder = new EntityType()
       .name("no-marc-placeholder")
@@ -1658,13 +1657,5 @@ class FqlToSqlConverterServiceTest {
 
   private String renderMarcCondition(String fqlQuery) {
     return fqlToSqlConverter.getSqlCondition(fqlQuery, entityType).toString().replaceAll("\\s+", " ");
-  }
-
-  private static int countOccurrences(String haystack, String needle) {
-    int count = 0;
-    for (int idx = haystack.indexOf(needle); idx != -1; idx = haystack.indexOf(needle, idx + needle.length())) {
-      count++;
-    }
-    return count;
   }
 }

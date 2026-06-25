@@ -466,9 +466,6 @@ public class FqlToSqlConverterService {
     if (fieldCondition instanceof EmptyCondition emptyCondition) {
       return handleMarcEmpty(emptyCondition, marcQueryContext);
     }
-    // Range operators (gt/lt) and regex are intentionally unsupported for MARC subfields: range is not
-    // meaningful on text values, and regex is an unbounded scan. They fall through to a no-op here; rejecting
-    // unsupported operators per selector shape is owned by the operator-restriction story.
     return falseCondition();
   }
 

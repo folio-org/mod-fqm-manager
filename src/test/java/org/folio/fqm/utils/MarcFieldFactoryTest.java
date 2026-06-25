@@ -157,25 +157,23 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldThrowWhenSynthesizingFromFqlConditionWithoutTenant() {
+    EntityType entityType = entityTypeWithMarcSupport();
+    ContainsCondition condition = new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare");
+
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.addSyntheticColumns(
-        entityTypeWithMarcSupport(),
-        new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),
-        null
-      )
+      () -> MarcFieldFactory.addSyntheticColumns(entityType, condition, null)
     );
   }
 
   @Test
   void shouldThrowWhenSynthesizingFromCollectionWithoutTenant() {
+    EntityType entityType = entityTypeWithMarcSupport();
+    List<String> fieldNames = List.of("marc_245_a");
+
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.addSyntheticColumns(
-        entityTypeWithMarcSupport(),
-        List.of("marc_245_a"),
-        null
-      )
+      () -> MarcFieldFactory.addSyntheticColumns(entityType, fieldNames, null)
     );
   }
 
@@ -264,9 +262,11 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldThrowWhenSynthesizingMarcColumnWithBlankTenant() {
+    EntityType entityType = entityTypeWithMarcSupport();
+
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "   ")
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", "   ")
     );
   }
 

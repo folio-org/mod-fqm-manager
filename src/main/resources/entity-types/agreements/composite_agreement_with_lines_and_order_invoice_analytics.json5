@@ -29,6 +29,7 @@
       targetField: 'pol.id',
       sourceField: 'agreement_line_to_order_line.pol_orders_fk',
       overrideJoinDirection: 'left',
+      cascadeJoinDirection: true,
       useIdColumns: true,
       essentialOnly: true,
       order: 30,

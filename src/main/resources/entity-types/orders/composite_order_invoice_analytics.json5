@@ -40,6 +40,7 @@
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
+      useIdColumns: true,
       essentialOnly: true,
       order: 40,
     },
@@ -49,6 +50,7 @@
       targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
       targetField: 'id',
       sourceField: 'invoice_line_fund_distribution.invoice_id',
+      useIdColumns: true,
       essentialOnly: true,
       order: 50,
     },

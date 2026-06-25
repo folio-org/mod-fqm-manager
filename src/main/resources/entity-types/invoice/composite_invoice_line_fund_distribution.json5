@@ -21,15 +21,31 @@
   ],
   columns: [
     {
-      name: 'invoice_id',
+      name: 'invoice_line_id',
       sourceAlias: 'invoice_line_fund_distributions',
       dataType: {
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
+      queryable: true,
+      valueGetter: ':sourceAlias.id',
+      joinsTo: [
+        {
+          targetId: '1373f063-8b86-48cc-832d-68b4d0dd44fc', // simple_invoice_line
+          targetField: 'id',
+          type: 'equality-simple',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'invoice_id',
+      sourceAlias: 'invoice_line_fund_distributions',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
       valueGetter: ':sourceAlias.invoice_id',
-      filterValueGetter: 'lower(:sourceAlias.invoice_id)',
-      valueFunction: 'lower(:value)',
       joinsTo: [
         {
           targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice
@@ -45,15 +61,13 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      isIdColumn: true,
-      valueGetter: "(:sourceAlias.jsonb->>'poLineId')",
-      filterValueGetter: "lower(:sourceAlias.jsonb->>'poLineId')",
-      valueFunction: 'lower(:value)',
+      queryable: true,
+      valueGetter: "(:sourceAlias.jsonb->>'poLineId')::uuid",
       joinsTo: [
         {
           targetId: '58148257-bfb0-4687-8c42-d2833d772f3e', // simple_purchase_order_line
           targetField: 'id',
-          type: 'equality-cast-uuid',
+          type: 'equality-simple',
           direction: 'left',
         },
       ],
@@ -65,14 +79,13 @@
         dataType: 'rangedUUIDType',
       },
       isIdColumn: true,
-      valueGetter: "(:sourceAlias.fund_distribution->>'fundId')",
-      filterValueGetter: "lower(:sourceAlias.fund_distribution->>'fundId')",
-      valueFunction: 'lower(:value)',
+      queryable: true,
+      valueGetter: "(:sourceAlias.fund_distribution->>'fundId')::uuid",
       joinsTo: [
         {
           targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
           targetField: 'id',
-          type: 'equality-cast-uuid',
+          type: 'equality-simple',
           direction: 'left',
         },
       ],
@@ -83,14 +96,13 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      valueGetter: "(:sourceAlias.fund_distribution->>'expenseClassId')",
-      filterValueGetter: "lower(:sourceAlias.fund_distribution->>'expenseClassId')",
-      valueFunction: 'lower(:value)',
+      queryable: true,
+      valueGetter: "(:sourceAlias.fund_distribution->>'expenseClassId')::uuid",
       joinsTo: [
         {
           targetId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
           targetField: 'id',
-          type: 'equality-cast-uuid',
+          type: 'equality-simple',
           direction: 'left',
         },
       ],

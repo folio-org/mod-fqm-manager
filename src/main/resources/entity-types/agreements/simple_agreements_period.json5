@@ -49,7 +49,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.per_start_date',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'per_end_date',
@@ -59,7 +58,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.per_end_date',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'per_cancellation_deadline',
@@ -68,7 +66,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.per_cancellation_deadline',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'per_note',

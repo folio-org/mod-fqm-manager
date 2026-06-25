@@ -152,7 +152,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.ent_active_from',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'ent_active_to',
@@ -162,7 +161,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.ent_active_to',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'ent_content_updated',
@@ -171,7 +169,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.ent_content_updated',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'ent_date_created',
@@ -180,7 +177,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.ent_date_created',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'ent_last_updated',
@@ -189,7 +185,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.ent_last_updated',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'ent_res_name',

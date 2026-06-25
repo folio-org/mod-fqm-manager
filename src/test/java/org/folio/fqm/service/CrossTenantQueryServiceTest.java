@@ -7,6 +7,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.web.client.RestClientException;
@@ -225,13 +227,14 @@ class CrossTenantQueryServiceTest {
     assertEquals(expectedTenants, actualTenants);
   }
 
-  @Test
-  void shouldQueryCentralTenantForSharedCompositeAuthorityDetails() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void shouldQueryCentralTenantForSharedCompositeAuthorityDetails(Boolean crossTenantQueriesEnabled) {
     String tenantId = "tenant_03";
     List<String> expectedTenants = List.of("tenant_03", "tenant_01");
     EntityType authorityEntityType = new EntityType()
       .id("04faac48-588d-41ac-8187-8309808f5f2b")
-      .crossTenantQueriesEnabled(true);
+      .crossTenantQueriesEnabled(crossTenantQueriesEnabled);
 
     when(executionContext.getTenantId()).thenReturn(tenantId);
     when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);

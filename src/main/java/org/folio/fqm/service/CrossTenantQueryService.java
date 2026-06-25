@@ -38,6 +38,7 @@ public class CrossTenantQueryService {
   private static final List<String> INSTANCE_RELATED_ENTITIES = List.of(SIMPLE_INSTANCES_ID, COMPOSITE_INSTANCES_ID, SIMPLE_INSTANCE_STATUS_ID, SIMPLE_INSTANCE_TYPE_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
   private static final List<String> COMPOSITE_INSTANCE_ENTITIES = List.of(COMPOSITE_INSTANCES_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
   private static final List<String> AUTHORITY_RELATED_ENTITIES = List.of(COMPOSITE_AUTHORITY_DETAILS_ID, SIMPLE_AUTHORITY_ID);
+  private static final List<String> COMPOSITE_AUTHORITY_ENTITIES = List.of(COMPOSITE_AUTHORITY_DETAILS_ID);
 
   /**
    * Retrieve list of tenants to run query against.
@@ -58,7 +59,8 @@ public class CrossTenantQueryService {
    */
   public List<String> getTenantsToQuery(EntityType entityType, UUID userId) {
     if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
-      && !COMPOSITE_INSTANCE_ENTITIES.contains(entityType.getId())) {
+      && !COMPOSITE_INSTANCE_ENTITIES.contains(entityType.getId())
+      && !COMPOSITE_AUTHORITY_ENTITIES.contains(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     return getTenantIds(entityType, userId);

@@ -449,13 +449,6 @@ public class FqlToSqlConverterService {
         ))
         .toList());
     }
-    if (fieldCondition instanceof RegexCondition regexCondition) {
-      return marcRowPatternComparison(
-        marcQueryContext,
-        "~*",
-        marcQueryValueField(regexCondition.value(), regexCondition, entityType)
-      );
-    }
     if (fieldCondition instanceof StartsWithCondition startsWithCondition) {
       return marcRowPatternComparison(
         marcQueryContext,
@@ -473,9 +466,9 @@ public class FqlToSqlConverterService {
     if (fieldCondition instanceof EmptyCondition emptyCondition) {
       return handleMarcEmpty(emptyCondition, marcQueryContext);
     }
-    // MARC subfield values are text, so range operators (gt/lt) are not meaningful and are intentionally
-    // unsupported. They currently fall through to a no-op; rejecting unsupported operators per selector shape
-    // is owned by the operator-restriction story.
+    // Range operators (gt/lt) and regex are intentionally unsupported for MARC subfields: range is not
+    // meaningful on text values, and regex is an unbounded scan. They fall through to a no-op here; rejecting
+    // unsupported operators per selector shape is owned by the operator-restriction story.
     return falseCondition();
   }
 

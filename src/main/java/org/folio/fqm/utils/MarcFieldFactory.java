@@ -236,9 +236,9 @@ public class MarcFieldFactory {
 
     /**
      * Row-level existence predicate comparing the MARC value against a single bound parameter ({@code {0}}).
-     * Used for eq/ne/in/nin and (with a LIKE/regex operator) for starts_with/contains/regex.
+     * Used for eq/ne/in/nin and (with a LIKE operator) for starts_with/contains.
      *
-     * @param operator   the SQL comparison or pattern operator (e.g. {@code =}, {@code like}, {@code ~*})
+     * @param operator   the SQL comparison or pattern operator (e.g. {@code =}, {@code like})
      * @param existsMatch {@code true} for {@code EXISTS}, {@code false} for {@code NOT EXISTS}
      */
     public String existsClause(String operator, boolean existsMatch) {

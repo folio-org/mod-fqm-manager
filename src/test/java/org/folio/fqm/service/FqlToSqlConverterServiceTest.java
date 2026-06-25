@@ -1635,15 +1635,6 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
-  void shouldGenerateMarcSubfieldRegexCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$regex": "^sha"}}""");
-
-    assertTrue(rendered.contains("lower(marc.value) ~*"));
-    assertTrue(rendered.contains("exists (select"));
-  }
-
-  @Test
   void shouldGenerateMarcSubfieldStartsWithCondition() {
     String rendered = renderMarcCondition("""
       {"marc_245_a": {"$starts_with": "Sha"}}""");

@@ -276,32 +276,27 @@ class MarcFieldFactoryTest {
 
     MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_a").orElseThrow();
 
+    String table = "diku_mod_fqm_manager.src_srs_marc_indexers";
+    String where = "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and marc.subfield_no = 'a'";
+    String subqueryPrefix = "select 1 from " + table + " marc where " + where;
+
     assertEquals("245", context.marcField().tag());
     assertEquals("a", context.marcField().subfield());
-    assertEquals("diku_mod_fqm_manager.src_srs_marc_indexers", context.tableName());
+    assertEquals(table, context.tableName());
     assertEquals(MARC_RECORD_ID_GETTER, context.marcIdGetter());
     assertEquals("lower(marc.value)", context.filterValueGetter());
 
+    assertEquals(where, context.whereClause());
     assertEquals(
-      "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a'",
-      context.whereClause()
-    );
-    assertEquals(
-      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
-        + "and lower(marc.value) = {0})",
+      "exists (" + subqueryPrefix + " and lower(marc.value) = {0})",
       context.existsClause("=", true)
     );
     assertEquals(
-      "not exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
-        + "and lower(marc.value) like {0})",
+      "not exists (" + subqueryPrefix + " and lower(marc.value) like {0})",
       context.existsClause("like", false)
     );
     assertEquals(
-      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = \"record_lb\".id and marc.field_no = '245' and marc.subfield_no = 'a' "
-        + "and lower(marc.value) is not null and lower(marc.value) <> '')",
+      "exists (" + subqueryPrefix + " and lower(marc.value) is not null and lower(marc.value) <> '')",
       context.presenceClause()
     );
   }

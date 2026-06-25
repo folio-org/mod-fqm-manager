@@ -18,6 +18,7 @@ import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.MarcFieldFactory;
+import org.folio.fqm.utils.MarcFieldFactory.MarcQueryContext;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
@@ -105,12 +106,7 @@ public class FqlToSqlConverterService {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
       Field fqmField = getField(fieldCondition, entityType);
       if (fqmField.getDataType() instanceof MarcType) {
-        // A MARC-typed field must resolve to a query context. If it cannot (e.g. an unparseable name, a
-        // missing/blank generic MARC placeholder, or the non-queryable placeholder itself), fail fast: the
-        // generic field path below would otherwise build SQL from the synthetic column's filterValueGetter
-        // (lower(marc.value)), referencing the `marc` subquery alias outside its subquery and producing a
-        // cryptic execution-time error instead of a clear one here.
-        MarcFieldFactory.MarcQueryContext marcQueryContext =
+        MarcQueryContext marcQueryContext =
           MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName())
             .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
         return handleMarcCondition(fieldCondition, entityType, marcQueryContext);
@@ -416,7 +412,7 @@ public class FqlToSqlConverterService {
   }
 
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
-                                               MarcFieldFactory.MarcQueryContext marcQueryContext) {
+                                               MarcQueryContext marcQueryContext) {
     if (fieldCondition instanceof EqualsCondition equalsCondition) {
       return marcRowComparison(
         marcQueryContext,
@@ -591,7 +587,7 @@ public class FqlToSqlConverterService {
     return isEmpty ? empty : empty.not();
   }
 
-  private static Condition handleMarcEmpty(EmptyCondition emptyCondition, MarcFieldFactory.MarcQueryContext marcQueryContext) {
+  private static Condition handleMarcEmpty(EmptyCondition emptyCondition, MarcQueryContext marcQueryContext) {
     boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
     Condition present = condition(marcQueryContext.presenceClause());
     return isEmpty ? present.not() : present;
@@ -834,14 +830,14 @@ public class FqlToSqlConverterService {
     return valueField(value == null ? null : value.toString(), condition, entityType);
   }
 
-  private static Condition marcRowComparison(MarcFieldFactory.MarcQueryContext marcQueryContext,
+  private static Condition marcRowComparison(MarcQueryContext marcQueryContext,
                                              String operator,
                                              org.jooq.Field<String> valueField,
                                              boolean existsMatch) {
     return condition(marcQueryContext.existsClause(operator, existsMatch), valueField);
   }
 
-  private static Condition marcRowPatternComparison(MarcFieldFactory.MarcQueryContext marcQueryContext,
+  private static Condition marcRowPatternComparison(MarcQueryContext marcQueryContext,
                                                     String operator,
                                                     org.jooq.Field<String> valueField) {
     return condition(marcQueryContext.existsClause(operator, true), valueField);

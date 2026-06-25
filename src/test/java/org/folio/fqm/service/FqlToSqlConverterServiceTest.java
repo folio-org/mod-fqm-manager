@@ -1550,18 +1550,92 @@ class FqlToSqlConverterServiceTest {
 
   @Test
   void shouldGenerateMarcSubfieldContainsCondition() {
-    String fqlQuery = """
-      {"marc_245_a": {"$contains": "Shakespeare"}}
-      """;
+    // Representative end-to-end check that a MARC subfield reference routes into the MARC exists-subquery
+    // against the correct table/field_no/subfield_no. The other operator tests assume routing works and
+    // assert only the operator-specific shape; the exact clause SQL is verified in MarcFieldFactoryTest.
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$contains": "Shakespeare"}}""");
 
-    Condition sqlCondition = fqlToSqlConverter.getSqlCondition(fqlQuery, entityType);
-
-    String rendered = sqlCondition.toString().replaceAll("\\s+", " ");
     assertTrue(rendered.contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
     assertTrue(rendered.contains("marc.field_no = '245'"));
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
     assertTrue(rendered.contains("lower(marc.value) like"));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
+    // contains wraps the value on both sides (%value%), which distinguishes it from starts_with.
+    assertEquals(2, countOccurrences(rendered, "'%'"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldStartsWithCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$starts_with": "Sha"}}""");
+
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("sha"));
+    // starts_with wraps the value on the trailing side only (value%).
+    assertEquals(1, countOccurrences(rendered, "'%'"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$eq": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$ne": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$in": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" or "));
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$nin": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" and "));
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEmptyConditions() {
+    // $empty: true -> NOT (a present, non-empty value exists)
+    String empty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": true}}""");
+    assertTrue(empty.contains("not (exists"));
+    assertTrue(empty.contains("is not null"));
+    assertTrue(empty.contains("<> ''"));
+
+    // $empty: false -> a present, non-empty value exists
+    String notEmpty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": false}}""");
+    assertTrue(notEmpty.contains("exists (select"));
+    assertFalse(notEmpty.contains("not (exists"));
+    assertTrue(notEmpty.contains("is not null"));
+    assertTrue(notEmpty.contains("<> ''"));
   }
 
   @Test
@@ -1586,79 +1660,11 @@ class FqlToSqlConverterServiceTest {
     return fqlToSqlConverter.getSqlCondition(fqlQuery, entityType).toString().replaceAll("\\s+", " ");
   }
 
-  @Test
-  void shouldGenerateMarcSubfieldEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$eq": "Shakespeare"}}""");
-
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("marc.field_no = '245'"));
-    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("shakespeare"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldNotEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$ne": "Shakespeare"}}""");
-
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("shakespeare"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$in": ["alpha", "beta"]}}""");
-
-    assertTrue(rendered.contains(" or "));
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("alpha"));
-    assertTrue(rendered.toLowerCase().contains("beta"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldNotInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$nin": ["alpha", "beta"]}}""");
-
-    assertTrue(rendered.contains(" and "));
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("alpha"));
-    assertTrue(rendered.toLowerCase().contains("beta"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldStartsWithCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$starts_with": "Sha"}}""");
-
-    assertTrue(rendered.contains("lower(marc.value) like"));
-    assertTrue(rendered.contains("exists (select"));
-    assertTrue(rendered.toLowerCase().contains("sha"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldEmptyConditions() {
-    // $empty: true -> NOT (a present, non-empty value exists)
-    String empty = renderMarcCondition("""
-      {"marc_245_a": {"$empty": true}}""");
-    assertTrue(empty.contains("is not null"));
-    assertTrue(empty.contains("<> ''"));
-    assertTrue(empty.contains("not (exists"));
-
-    // $empty: false -> a present, non-empty value exists
-    String notEmpty = renderMarcCondition("""
-      {"marc_245_a": {"$empty": false}}""");
-    assertTrue(notEmpty.contains("exists (select"));
-    assertTrue(notEmpty.contains("is not null"));
-    assertTrue(notEmpty.contains("<> ''"));
-    assertFalse(notEmpty.contains("not (exists"));
+  private static int countOccurrences(String haystack, String needle) {
+    int count = 0;
+    for (int idx = haystack.indexOf(needle); idx != -1; idx = haystack.indexOf(needle, idx + needle.length())) {
+      count++;
+    }
+    return count;
   }
 }

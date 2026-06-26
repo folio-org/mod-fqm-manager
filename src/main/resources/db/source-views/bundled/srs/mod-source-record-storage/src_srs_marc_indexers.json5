@@ -1,0 +1,12 @@
+{
+  name: 'src_srs_marc_indexers',
+  // marc_indexers may hold multiple versions of a record's index rows per marc_id (e.g. version 0 and 1).
+  // marc_records_tracking holds the current version per marc_id; joining on (marc_id, version) exposes only
+  // current-version rows. This is required for correctness: without it, MARC queries would both filter against and
+  // display stale subfield values.
+  dependsOn: [
+    ['${tenant_id}_mod_source_record_storage', 'marc_indexers'],
+    ['${tenant_id}_mod_source_record_storage', 'marc_records_tracking'],
+  ],
+  sql: 'SELECT mi.* FROM ${tenant_id}_mod_source_record_storage.marc_indexers mi JOIN ${tenant_id}_mod_source_record_storage.marc_records_tracking t ON t.marc_id = mi.marc_id AND t.version = mi.version',
+}

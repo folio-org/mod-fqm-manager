@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
@@ -10,6 +11,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.folio.querytool.domain.dto.NestedObjectProperty;
 import org.folio.querytool.domain.dto.NumberType;
 import org.folio.querytool.domain.dto.ObjectType;
@@ -102,6 +104,9 @@ class FqlToSqlConverterServiceTest {
           new EntityTypeColumn().name("fieldWithAValueFunction")
             .dataType(new EntityDataType().dataType("stringType"))
             .valueFunction("upper(:value)"),
+          new EntityTypeColumn().name("marc")
+            .dataType(new MarcType().dataType("marcType"))
+            .valueGetter("\"record_lb\".id"),
           new EntityTypeColumn().name("nested")
             .dataType(new ArrayType().dataType("arrayType")
               .itemDataType(new ObjectType().dataType("objectType")
@@ -112,6 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1540,5 +1546,116 @@ class FqlToSqlConverterServiceTest {
       InvalidFqlException.class,
       () -> fqlToSqlConverter.getSqlCondition(invalidDateFql, entityType)
     );
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldContainsCondition() {
+    // Representative end-to-end check that a MARC subfield reference routes into the MARC exists-subquery
+    // against the correct table/field_no/subfield_no. The other operator tests assume routing works and
+    // assert only the operator-specific shape; the exact clause SQL is verified in MarcFieldFactoryTest.
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$contains": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+    assertTrue(rendered.contains("'%' ||"),
+      "contains should match %value%: a wildcard is concatenated before the value");
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldStartsWithCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$starts_with": "Sha"}}""");
+
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("sha"));
+    assertFalse(rendered.contains("'%' ||"),
+      "starts_with should match value%: no wildcard before the value, only after");
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$eq": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$ne": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$in": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" or "));
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldNotInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_a": {"$nin": ["alpha", "beta"]}}""");
+
+    assertTrue(rendered.contains(" and "));
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.toLowerCase().contains("alpha"));
+    assertTrue(rendered.toLowerCase().contains("beta"));
+  }
+
+  @Test
+  void shouldGenerateMarcSubfieldEmptyConditions() {
+    // $empty: true -> NOT (a present, non-empty value exists)
+    String empty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": true}}""");
+    assertTrue(empty.contains("not (exists"));
+    assertTrue(empty.contains("is not null"));
+    assertTrue(empty.contains("<> ''"));
+
+    // $empty: false -> a present, non-empty value exists
+    String notEmpty = renderMarcCondition("""
+      {"marc_245_a": {"$empty": false}}""");
+    assertTrue(notEmpty.contains("exists (select"));
+    assertFalse(notEmpty.contains("not (exists"));
+    assertTrue(notEmpty.contains("is not null"));
+    assertTrue(notEmpty.contains("<> ''"));
+  }
+
+  @Test
+  void shouldThrowWhenMarcFieldCannotResolveQueryContext() {
+    // A MARC-typed column with no generic "marc" placeholder cannot resolve a query context. This must fail
+    // fast rather than fall through to generic field handling, which would emit SQL referencing the `marc`
+    // subquery alias outside its subquery.
+    EntityType entityTypeWithoutPlaceholder = new EntityType()
+      .name("no-marc-placeholder")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc_245_a").queryable(true).dataType(new MarcType().dataType("marcType"))
+      ));
+
+    assertThrows(
+      FieldNotFoundException.class,
+      () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_a\": {\"$eq\": \"x\"}}", entityTypeWithoutPlaceholder)
+    );
+  }
+
+  private String renderMarcCondition(String fqlQuery) {
+    return fqlToSqlConverter.getSqlCondition(fqlQuery, entityType).toString().replaceAll("\\s+", " ");
   }
 }

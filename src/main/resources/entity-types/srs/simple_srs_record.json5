@@ -269,6 +269,25 @@
       valueGetter: ':record_lb.external_hrid',
     },
     {
+      name: 'marc',
+      labelAlias: 'MARC',
+      dataType: {
+        dataType: 'marcType',
+      },
+      // Not directly queryable: this is an internal capability placeholder, not a user-facing field. Concrete
+      // MARC selectors (e.g. marc_245_a) are synthesized as their own queryable columns at query time.
+      queryable: false,
+      hidden: true,
+      visibleByDefault: false,
+      essential: true,
+      // Correlation key for marc_indexers. marc_indexers.marc_id stores records_lb.id (the per-generation
+      // id), NOT matched_id, and only the most recent generation is indexed. Joining on id is correct for
+      // edited (multi-generation) records and is consistent with how the MARC content blob is correlated
+      // (record_lb.id = marc_record_lb.id). Using matched_id would only match never-edited (generation-0)
+      // records where id == matched_id.
+      valueGetter: ':record_lb.id',
+    },
+    {
       name: 'content',
       dataType: {
         dataType: 'stringType',

@@ -30,6 +30,9 @@ public class MarcFieldFactory {
   // Field names are accepted case-insensitively (e.g. MARC_245_A behaves the same as marc_245_a). The tag/
   // subfield are normalized to their canonical storage form when the MarcFieldName is built.
   private static final Pattern SUBFIELD_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_(?<subfield>[a-z0-9])$", Pattern.CASE_INSENSITIVE);
+  // Tag-only form (e.g. marc_245). Matches any subfield of the tag: the generated predicate filters on
+  // field_no without a subfield_no constraint, so it is satisfied when ANY subfield of the tag matches.
+  private static final Pattern TAG_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$", Pattern.CASE_INSENSITIVE);
   // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
   // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
   // exactly one place and the two cannot drift.
@@ -167,6 +170,12 @@ public class MarcFieldFactory {
       ));
     }
 
+    Matcher tagMatcher = TAG_PATTERN.matcher(fieldName);
+    if (tagMatcher.matches()) {
+      // Tag-only: no subfield target, so the predicate matches any subfield of the tag.
+      return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null));
+    }
+
     return Optional.empty();
   }
 
@@ -193,14 +202,13 @@ public class MarcFieldFactory {
         SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
         FROM %s marc
         WHERE marc.marc_id = %s
-          AND marc.field_no = '%s'
-          AND marc.subfield_no = '%s'
+          AND marc.field_no = '%s'%s
       )
     """.formatted(
       interpolateTenant(MARC_INDEXERS_VIEW, tenantId),
       marcIdGetter,
       marcField.tag(),
-      marcField.subfield()
+      marcField.subfieldClause()
     ).trim();
   }
 
@@ -220,18 +228,23 @@ public class MarcFieldFactory {
   public record MarcFieldName(String fieldName, String tag, String subfield) {
 
     public String labelAlias() {
-      return "%s$%s".formatted(tag, subfield);
+      return subfield == null ? tag : "%s$%s".formatted(tag, subfield);
+    }
+
+    /** Display value-getter fragment (uppercase SQL); empty for tag-only fields, which match any subfield. */
+    public String subfieldClause() {
+      return subfield == null ? "" : "\n          AND marc.subfield_no = '%s'".formatted(subfield);
     }
   }
 
   public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter, String filterValueGetter) {
 
     public String whereClause() {
-      return "marc.marc_id = %s and marc.field_no = '%s' and marc.subfield_no = '%s'".formatted(
-        marcIdGetter,
-        marcField.tag(),
-        marcField.subfield()
-      );
+      String clause = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
+      if (marcField.subfield() != null) {
+        clause += " and marc.subfield_no = '%s'".formatted(marcField.subfield());
+      }
+      return clause;
     }
 
     /**

@@ -117,7 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
-    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a"), "diku");
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a", "marc_245"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1563,6 +1563,18 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
     assertTrue(rendered.contains("'%' ||"),
       "contains should match %value%: a wildcard is concatenated before the value");
+  }
+
+  @Test
+  void shouldGenerateTagOnlyMarcCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245": {"$contains": "Shakespeare"}}""");
+
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+    // tag-only matches any subfield, so there is no subfield_no constraint.
+    assertFalse(rendered.contains("subfield_no"));
   }
 
   @Test

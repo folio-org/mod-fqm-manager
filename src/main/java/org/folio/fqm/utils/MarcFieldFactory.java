@@ -182,9 +182,10 @@ public class MarcFieldFactory {
     return Optional.empty();
   }
 
-  // MARC control fields are tags 001-009; they have no indicators or subfields, only a single string value.
+  // MARC control fields are tags 001-009 (the only valid tags starting with "00"); they have no indicators
+  // or subfields, just a single string value. Tags 010+ are data fields.
   private static boolean isControlFieldTag(String tag) {
-    return tag.startsWith("00") && !tag.equals("000");
+    return tag.startsWith("00");
   }
 
   public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {

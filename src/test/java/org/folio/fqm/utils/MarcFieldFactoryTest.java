@@ -54,7 +54,7 @@ class MarcFieldFactoryTest {
     assertEquals("245", parsed.tag());
     assertNull(parsed.subfield());
     // Label and the synthesized SQL omit the subfield, so the predicate matches any subfield of the tag.
-    assertEquals("245", parsed.labelAlias());
+    assertEquals("MARC 245", parsed.labelAlias());
     assertEquals("", parsed.subfieldClause());
   }
 
@@ -68,7 +68,7 @@ class MarcFieldFactoryTest {
     // ...but the subfield is normalized to lower case to match marc_indexers storage.
     assertEquals("245", parsed.tag());
     assertEquals("a", parsed.subfield());
-    assertEquals("245$a", parsed.labelAlias());
+    assertEquals("MARC 245$a", parsed.labelAlias());
   }
 
   @Test
@@ -85,7 +85,7 @@ class MarcFieldFactoryTest {
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "diku").orElseThrow();
 
     assertEquals("marc_245_a", column.getName());
-    assertEquals("245$a", column.getLabelAlias());
+    assertEquals("MARC 245$a", column.getLabelAlias());
     assertInstanceOf(MarcType.class, column.getDataType());
     assertEquals("lower(:value)", column.getValueFunction());
     assertSqlEquals(expectedSubfieldValueGetter("diku", "245", "a"), column.getValueGetter());
@@ -97,7 +97,7 @@ class MarcFieldFactoryTest {
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", "diku").orElseThrow();
 
     assertEquals("marc_245", column.getName());
-    assertEquals("245", column.getLabelAlias());
+    assertEquals("MARC 245", column.getLabelAlias());
     assertInstanceOf(MarcType.class, column.getDataType());
     assertEquals("lower(marc.value)", column.getFilterValueGetter());
     // Tag-only: the value-getter filters on the tag but not a subfield, so it matches any subfield.

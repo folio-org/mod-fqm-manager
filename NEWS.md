@@ -1,6 +1,7 @@
 # 4.2.x - Umbrellaleaf
 
 ## 4.2.0 (Next)
+- [MODFQMMGR-1141](https://folio-org.atlassian.net/browse/MODFQMMGR-1141) Support top-level MARC tag and control-field querying on the SRS record entity type
 - [MODFQMMGR-1185](https://folio-org.atlassian.net/browse/MODFQMMGR-1185) Support dynamic MARC subfield querying on the SRS record entity type
 - [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
 - [MODFQMMGR-1107](https://folio-org.atlassian.net/browse/MODFQMMGR-1107) Add patron group at checkout field to Loans ET, populated from the loan record and retained after loan anonymization

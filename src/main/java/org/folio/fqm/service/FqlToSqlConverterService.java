@@ -413,60 +413,24 @@ public class FqlToSqlConverterService {
 
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
                                                MarcQueryContext marcQueryContext) {
-    if (fieldCondition instanceof EqualsCondition equalsCondition) {
-      return marcRowComparison(
-        marcQueryContext,
-        "=",
-        marcQueryValueField(equalsCondition.value(), equalsCondition, entityType),
-        true
-      );
-    }
-    if (fieldCondition instanceof NotEqualsCondition notEqualsCondition) {
-      return marcRowComparison(
-        marcQueryContext,
-        "=",
-        marcQueryValueField(notEqualsCondition.value(), notEqualsCondition, entityType),
-        false
-      );
-    }
-    if (fieldCondition instanceof InCondition inCondition) {
-      return or(inCondition.value().stream()
-        .map(value -> marcRowComparison(
-          marcQueryContext,
-          "=",
-          marcQueryValueField(value, inCondition, entityType),
-          true
-        ))
+    return switch (fieldCondition) {
+      case EqualsCondition equalsCondition -> marcRowComparison(marcQueryContext, "=",
+        marcQueryValueField(equalsCondition.value(), equalsCondition, entityType), true);
+      case NotEqualsCondition notEqualsCondition -> marcRowComparison(marcQueryContext, "=",
+        marcQueryValueField(notEqualsCondition.value(), notEqualsCondition, entityType), false);
+      case InCondition inCondition -> or(inCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, inCondition, entityType), true))
         .toList());
-    }
-    if (fieldCondition instanceof NotInCondition notInCondition) {
-      return and(notInCondition.value().stream()
-        .map(value -> marcRowComparison(
-          marcQueryContext,
-          "=",
-          marcQueryValueField(value, notInCondition, entityType),
-          false
-        ))
+      case NotInCondition notInCondition -> and(notInCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, notInCondition, entityType), false))
         .toList());
-    }
-    if (fieldCondition instanceof StartsWithCondition startsWithCondition) {
-      return marcRowPatternComparison(
-        marcQueryContext,
-        "like",
-        DSL.concat(marcQueryValueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%"))
-      );
-    }
-    if (fieldCondition instanceof ContainsCondition containsCondition) {
-      return marcRowPatternComparison(
-        marcQueryContext,
-        "like",
-        DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%"))
-      );
-    }
-    if (fieldCondition instanceof EmptyCondition emptyCondition) {
-      return handleMarcEmpty(emptyCondition, marcQueryContext);
-    }
-    return falseCondition();
+      case StartsWithCondition startsWithCondition -> marcRowPatternComparison(marcQueryContext, "like",
+        DSL.concat(marcQueryValueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
+      case ContainsCondition containsCondition -> marcRowPatternComparison(marcQueryContext, "like",
+        DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%")));
+      case EmptyCondition emptyCondition -> handleMarcEmpty(emptyCondition, marcQueryContext);
+      default -> falseCondition();
+    };
   }
 
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {

@@ -69,7 +69,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = augmentWithReferencedMarcFields(
+    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
       getEntityType(executionContext.getTenantId(), entityTypeId),
       fields,
       executionContext.getTenantId()
@@ -80,7 +80,7 @@ public class ResultSetRepository {
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      entityTypeDefinition = augmentWithReferencedMarcFields(entityTypeDefinition, fields, tenantId);
+      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -263,10 +263,6 @@ public class ResultSetRepository {
     });
 
     return resultList;
-  }
-
-  private EntityType augmentWithReferencedMarcFields(EntityType entityType, List<String> fields, String tenantId) {
-    return MarcFieldFactory.addSyntheticColumns(entityType, fields, tenantId);
   }
 
   private EntityType augmentWithReferencedMarcFields(EntityType entityType,

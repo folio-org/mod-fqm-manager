@@ -237,8 +237,6 @@ public class MarcFieldFactory {
   public record MarcFieldName(String fieldName, String tag, String subfield) {
 
     public String labelAlias() {
-      // Prefixed with "MARC" so the column label identifies it as a MARC field (consistent with the generic
-      // "MARC" placeholder column), e.g. "MARC 245" (tag-only) or "MARC 245$a" (subfield).
       return subfield == null ? "MARC %s".formatted(tag) : "MARC %s$%s".formatted(tag, subfield);
     }
 

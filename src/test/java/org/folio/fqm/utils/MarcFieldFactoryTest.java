@@ -32,9 +32,21 @@ class MarcFieldFactoryTest {
   void shouldRecognizeSupportedMarcFieldNames() {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
-    // tag-only
+    // tag-only (including control fields, which are valid only in tag-only form)
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_001"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_008"));
+  }
+
+  @Test
+  void shouldTreatControlFieldAsTagOnly() {
+    // A control field is queryable only as a whole-string, tag-only field...
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_008").orElseThrow();
+    assertEquals("008", parsed.tag());
+    assertNull(parsed.subfield());
+
+    // ...and the subfield form is rejected, since control fields have no subfields.
+    assertEquals(Optional.empty(), MarcFieldFactory.parse("marc_008_a"));
   }
 
   @Test
@@ -69,6 +81,8 @@ class MarcFieldFactoryTest {
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_abc_a"));  // tag must be numeric
     assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa")); // subfield must be a single character
     assertFalse(MarcFieldFactory.isMarcFieldName("245_a"));       // missing marc_ prefix
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_001_a"));  // control fields (001-009) have no subfields
+    assertFalse(MarcFieldFactory.isMarcFieldName("marc_008_a"));  // control fields have no subfields
   }
 
   @Test

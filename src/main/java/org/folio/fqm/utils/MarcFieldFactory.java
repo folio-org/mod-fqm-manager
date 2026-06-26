@@ -160,7 +160,9 @@ public class MarcFieldFactory {
 
   public static Optional<MarcFieldName> parse(String fieldName) {
     Matcher subfieldMatcher = SUBFIELD_PATTERN.matcher(fieldName);
-    if (subfieldMatcher.matches()) {
+    // Control fields (001-009) carry a single string value with no subfields, so the subfield form is only
+    // valid for data-field tags (010+). Control fields are queryable via the tag-only form below.
+    if (subfieldMatcher.matches() && !isControlFieldTag(subfieldMatcher.group("tag"))) {
       // Preserve the original field name so the synthesized column matches the name referenced in the query,
       // but normalize the subfield code to lower case to match how it is stored in marc_indexers.
       return Optional.of(new MarcFieldName(
@@ -172,11 +174,17 @@ public class MarcFieldFactory {
 
     Matcher tagMatcher = TAG_PATTERN.matcher(fieldName);
     if (tagMatcher.matches()) {
-      // Tag-only: no subfield target, so the predicate matches any subfield of the tag.
+      // Tag-only: no subfield target, so the predicate matches any subfield of the tag (and is the only
+      // valid form for control fields, which have no subfields or indicators).
       return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null));
     }
 
     return Optional.empty();
+  }
+
+  // MARC control fields are tags 001-009; they have no indicators or subfields, only a single string value.
+  private static boolean isControlFieldTag(String tag) {
+    return tag.startsWith("00") && !tag.equals("000");
   }
 
   public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {

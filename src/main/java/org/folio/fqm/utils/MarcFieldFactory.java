@@ -239,9 +239,9 @@ public class MarcFieldFactory {
       return subfield == null ? tag : "%s$%s".formatted(tag, subfield);
     }
 
-    /** Display value-getter fragment (uppercase SQL); empty for tag-only fields, which match any subfield. */
+    /** Value-getter WHERE fragment; empty for tag-only fields, which match any subfield. */
     public String subfieldClause() {
-      return subfield == null ? "" : "\n          AND marc.subfield_no = '%s'".formatted(subfield);
+      return subfield == null ? "" : " AND marc.subfield_no = '%s'".formatted(subfield);
     }
   }
 

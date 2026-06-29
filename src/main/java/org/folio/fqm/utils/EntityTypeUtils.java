@@ -113,15 +113,23 @@ public class EntityTypeUtils {
   }
 
   /**
-   * Searches for a column within an entity type by name, returning it if it exists and throwing otherwise.
+   * Searches for a column within an entity type by name, returning it if present.
    * This method will not search nested object fields, only top-level columns.
    */
-  public static EntityTypeColumn findColumnByName(EntityType entityType, String columnName) {
+  public static Optional<EntityTypeColumn> findColumn(EntityType entityType, String columnName) {
     return entityType
       .getColumns()
       .stream()
       .filter(column -> column.getName().equals(columnName))
-      .findFirst()
+      .findFirst();
+  }
+
+  /**
+   * Searches for a column within an entity type by name, returning it if it exists and throwing otherwise.
+   * This method will not search nested object fields, only top-level columns.
+   */
+  public static EntityTypeColumn findColumnByName(EntityType entityType, String columnName) {
+    return findColumn(entityType, columnName)
       .orElseThrow(() ->
         log.throwing(
           new InvalidEntityTypeDefinitionException("Column " + columnName + " could not be found", entityType)

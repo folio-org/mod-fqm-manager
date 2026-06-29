@@ -17,6 +17,8 @@ import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
+import org.folio.fqm.utils.MarcFieldFactory;
+import org.folio.fqm.utils.MarcFieldFactory.MarcQueryContext;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
@@ -24,6 +26,7 @@ import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.Field;
 import org.folio.querytool.domain.dto.JsonbArrayType;
+import org.folio.querytool.domain.dto.MarcType;
 import org.jooq.Condition;
 import org.jooq.JSONB;
 import org.jooq.impl.DSL;
@@ -101,8 +104,15 @@ public class FqlToSqlConverterService {
    */
   public static Condition getSqlCondition(FqlCondition<?> fqlCondition, EntityType entityType) {
     if (fqlCondition instanceof FieldCondition<?> fieldCondition) {
-      final org.jooq.Field<Object> field = field(fieldCondition, entityType);
       Field fqmField = getField(fieldCondition, entityType);
+      if (fqmField.getDataType() instanceof MarcType) {
+        MarcQueryContext marcQueryContext =
+          MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName())
+            .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
+        return handleMarcCondition(fieldCondition, entityType, marcQueryContext);
+      }
+
+      final org.jooq.Field<Object> field = field(fieldCondition, entityType);
 
       Condition validation = null;
       if (Boolean.TRUE.equals(fqmField.getValidated())) {
@@ -401,6 +411,28 @@ public class FqlToSqlConverterService {
       org.jooq.Field::containsIgnoreCase, org.jooq.Field::contains);
   }
 
+  private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
+                                               MarcQueryContext marcQueryContext) {
+    return switch (fieldCondition) {
+      case EqualsCondition equalsCondition -> marcRowComparison(marcQueryContext, "=",
+        marcQueryValueField(equalsCondition.value(), equalsCondition, entityType), true);
+      case NotEqualsCondition notEqualsCondition -> marcRowComparison(marcQueryContext, "=",
+        marcQueryValueField(notEqualsCondition.value(), notEqualsCondition, entityType), false);
+      case InCondition inCondition -> or(inCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, inCondition, entityType), true))
+        .toList());
+      case NotInCondition notInCondition -> and(notInCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, notInCondition, entityType), false))
+        .toList());
+      case StartsWithCondition startsWithCondition -> marcRowPatternComparison(marcQueryContext, "like",
+        DSL.concat(marcQueryValueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
+      case ContainsCondition containsCondition -> marcRowPatternComparison(marcQueryContext, "like",
+        DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%")));
+      case EmptyCondition emptyCondition -> handleMarcEmpty(emptyCondition, marcQueryContext);
+      default -> falseCondition();
+    };
+  }
+
   private static Condition handleStartsWith(StartsWithCondition startsWithCondition, EntityType entityType, org.jooq.Field<Object> field) {
     String dataType = getFieldDataTypeName(entityType, startsWithCondition);
     if (ARRAY_TYPE.equals(dataType)) {
@@ -494,6 +526,12 @@ public class FqlToSqlConverterService {
       default -> field.isNull();
     };
     return isEmpty ? empty : empty.not();
+  }
+
+  private static Condition handleMarcEmpty(EmptyCondition emptyCondition, MarcQueryContext marcQueryContext) {
+    boolean isEmpty = Boolean.TRUE.equals(emptyCondition.value());
+    Condition present = condition(marcQueryContext.presenceClause());
+    return isEmpty ? present.not() : present;
   }
 
   private static Condition validateCondition(org.jooq.Field<?> field, String dataType) {
@@ -727,6 +765,23 @@ public class FqlToSqlConverterService {
       }
     }
     return inline ? inline(value) : DSL.val(value);
+  }
+
+  private static org.jooq.Field<String> marcQueryValueField(Object value, FieldCondition<?> condition, EntityType entityType) {
+    return valueField(value == null ? null : value.toString(), condition, entityType);
+  }
+
+  private static Condition marcRowComparison(MarcQueryContext marcQueryContext,
+                                             String operator,
+                                             org.jooq.Field<String> valueField,
+                                             boolean existsMatch) {
+    return condition(marcQueryContext.existsClause(operator, existsMatch), valueField);
+  }
+
+  private static Condition marcRowPatternComparison(MarcQueryContext marcQueryContext,
+                                                    String operator,
+                                                    org.jooq.Field<String> valueField) {
+    return condition(marcQueryContext.existsClause(operator, true), valueField);
   }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a

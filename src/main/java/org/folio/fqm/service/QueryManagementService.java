@@ -3,6 +3,7 @@ package org.folio.fqm.service;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.fqm.utils.MarcFieldFactory;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
@@ -122,6 +123,7 @@ public class QueryManagementService {
         fields.add(idColumn);
       }
     }
+    addReferencedMarcFields(fields, submitQuery.getFqlQuery());
     Query query = Query.newQuery(submitQuery.getEntityTypeId(),
       EntityTypeUtils.computeEntityTypeResultsHash(entityType),
       submitQuery.getFqlQuery(),
@@ -162,6 +164,7 @@ public class QueryManagementService {
         fields.add(idColumn);
       }
     }
+    addReferencedMarcFields(fields, query);
 
     // Verify that the query is up to date before execution
     MigratableQueryInformation migratableQueryInformation = new MigratableQueryInformation(entityTypeId, query, fields);
@@ -208,7 +211,7 @@ public class QueryManagementService {
 
   public List<QueryStatusSummary> getStatusSummaries() {
     Map<UUID, ?> availableEntityTypes = entityTypeService.getAccessibleEntityTypesById();
-    
+
     return queryRepository.getStatusSummaries().stream().map(s -> {
       if (!availableEntityTypes.containsKey(UUID.fromString(s.getEntityTypeId()))) {
         return s.entityTypeId("<inaccessible>");
@@ -297,7 +300,12 @@ public class QueryManagementService {
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
-    Map<String, String> errorMap = fqlValidationService.validateFql(entityType, fqlQuery);
+    EntityType entityTypeWithMarcFields = MarcFieldFactory.addSyntheticColumns(
+      entityType,
+      fqlQuery,
+      executionContext.getTenantId()
+    );
+    Map<String, String> errorMap = fqlValidationService.validateFql(entityTypeWithMarcFields, fqlQuery);
     if (!errorMap.isEmpty()) {
       throw new InvalidFqlException(fqlQuery, errorMap);
     }
@@ -352,7 +360,16 @@ public class QueryManagementService {
   private List<String> getFieldsFromEntityType(EntityType entityType) {
     return (entityType.getColumns() != null ? entityType.getColumns() : Collections.<EntityTypeColumn>emptyList())
       .stream()
+      .filter(column -> !MarcFieldFactory.isGenericMarcPlaceholder(column))
       .map(Field::getName)
-      .toList();
+      .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+  }
+
+  private static void addReferencedMarcFields(List<String> fields, String fqlQuery) {
+    MarcFieldFactory.getReferencedMarcFieldNames(fqlQuery).forEach(fieldName -> {
+      if (!fields.contains(fieldName)) {
+        fields.add(fieldName);
+      }
+    });
   }
 }

@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.BooleanUtils;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.EntityType;
@@ -167,7 +168,16 @@ public class FromClauseUtils {
       columnB.getName()
     );
 
-    return Optional.of(new NecessaryJoin(columnA, sourceA, columnB, sourceB, parentSource.getOverrideJoinDirection()));
+    return Optional.of(
+      new NecessaryJoin(
+        columnA,
+        sourceA,
+        columnB,
+        sourceB,
+        parentSource.getOverrideJoinDirection(),
+        BooleanUtils.isTrue(parentSource.getCascadeJoinDirection())
+      )
+    );
   }
 
   /** Represents a join between two columns (and their sources) that must be resolved and end up in the resulting query */
@@ -176,10 +186,14 @@ public class FromClauseUtils {
     EntityTypeSourceDatabase sourceA,
     EntityTypeColumn columnB,
     EntityTypeSourceDatabase sourceB,
-    JoinDirection overrideJoinDirection
+    JoinDirection overrideJoinDirection,
+    boolean cascade
   ) {
     public NecessaryJoin flip() {
-      return new NecessaryJoin(columnB, sourceB, columnA, sourceA, SourceUtils.flipDirection(overrideJoinDirection));
+      JoinDirection flippedDirection = cascade
+        ? overrideJoinDirection
+        : SourceUtils.flipDirection(overrideJoinDirection);
+      return new NecessaryJoin(columnB, sourceB, columnA, sourceA, flippedDirection, cascade);
     }
 
     public String toString() {

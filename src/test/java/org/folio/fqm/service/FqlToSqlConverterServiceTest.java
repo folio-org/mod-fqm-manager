@@ -117,7 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
-    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a", "marc_245"), "diku");
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a", "marc_245", "marc_245_ind1"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1563,6 +1563,53 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
     assertTrue(rendered.contains("'%' ||"),
       "contains should match %value%: a wildcard is concatenated before the value");
+  }
+
+  @Test
+  void shouldGenerateMarcIndicatorEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1": {"$eq": "1"}}""");
+
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("'1'"));
+    // Indicators compare the ind column exactly: no lowercasing, no subfield_no constraint.
+    assertFalse(rendered.contains("lower(marc"));
+    assertFalse(rendered.contains("subfield_no"));
+  }
+
+  @Test
+  void shouldGenerateMarcIndicatorNotEqualsCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1": {"$ne": "1"}}""");
+
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("marc.ind1 ="));
+  }
+
+  @Test
+  void shouldMapBlankTokenForMarcIndicator() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1": {"$eq": "blank"}}""");
+
+    // The public "blank" token maps to the stored '#'.
+    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("'#'"));
+    assertFalse(rendered.toLowerCase().contains("blank"));
+  }
+
+  @Test
+  void shouldRejectUnsupportedOperatorsOnMarcIndicator() {
+    assertThrows(
+      InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_ind1\": {\"$contains\": \"1\"}}", entityType)
+    );
+    assertThrows(
+      InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_ind1\": {\"$empty\": true}}", entityType)
+    );
   }
 
   @Test

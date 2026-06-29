@@ -33,6 +33,9 @@ public class MarcFieldFactory {
   // Tag-only form (e.g. marc_245). Matches any subfield of the tag: the generated predicate filters on
   // field_no without a subfield_no constraint, so it is satisfied when ANY subfield of the tag matches.
   private static final Pattern TAG_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})$", Pattern.CASE_INSENSITIVE);
+  // Indicator form (e.g. marc_245_ind1 / marc_245_ind2). Targets the ind1/ind2 column of the tag rather than
+  // a subfield value. Only valid for data-field tags (010+); control fields have no indicators.
+  private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_ind(?<indicator>[12])$", Pattern.CASE_INSENSITIVE);
   // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
   // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
   // exactly one place and the two cannot drift.
@@ -135,8 +138,8 @@ public class MarcFieldFactory {
       .visibleByDefault(false)
       .essential(false)
       .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
-      .filterValueGetter(MARC_FILTER_VALUE_GETTER)
-      .valueFunction(MARC_VALUE_FUNCTION));
+      .filterValueGetter(marcField.filterValueGetter())
+      .valueFunction(marcField.valueFunction()));
   }
 
   public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
@@ -155,7 +158,7 @@ public class MarcFieldFactory {
     }
 
     return extractMarcTableName(valueGetter)
-      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter, MARC_FILTER_VALUE_GETTER));
+      .map(tableName -> new MarcQueryContext(parsedField.get(), tableName, marcIdGetter));
   }
 
   public static Optional<MarcFieldName> parse(String fieldName) {
@@ -168,7 +171,19 @@ public class MarcFieldFactory {
       return Optional.of(new MarcFieldName(
         fieldName,
         subfieldMatcher.group("tag"),
-        subfieldMatcher.group("subfield").toLowerCase()
+        subfieldMatcher.group("subfield").toLowerCase(),
+        null
+      ));
+    }
+
+    Matcher indicatorMatcher = INDICATOR_PATTERN.matcher(fieldName);
+    // Control fields have no indicators, so the indicator form is only valid for data-field tags (010+).
+    if (indicatorMatcher.matches() && !isControlFieldTag(indicatorMatcher.group("tag"))) {
+      return Optional.of(new MarcFieldName(
+        fieldName,
+        indicatorMatcher.group("tag"),
+        null,
+        indicatorMatcher.group("indicator")
       ));
     }
 
@@ -176,7 +191,7 @@ public class MarcFieldFactory {
     if (tagMatcher.matches()) {
       // Tag-only: no subfield target, so the predicate matches any subfield of the tag (and is the only
       // valid form for control fields, which have no subfields or indicators).
-      return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null));
+      return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null, null));
     }
 
     return Optional.empty();
@@ -206,14 +221,17 @@ public class MarcFieldFactory {
   }
 
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
+    String targetColumn = marcField.targetColumn();
     return """
       (
-        SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+        SELECT jsonb_agg(marc.%s) FILTER (WHERE marc.%s IS NOT NULL)
         FROM %s marc
         WHERE marc.marc_id = %s
           AND marc.field_no = '%s'%s
       )
     """.formatted(
+      targetColumn,
+      targetColumn,
       interpolateTenant(MARC_INDEXERS_VIEW, tenantId),
       marcIdGetter,
       marcField.tag(),
@@ -234,19 +252,58 @@ public class MarcFieldFactory {
     return Optional.of(matcher.group("table"));
   }
 
-  public record MarcFieldName(String fieldName, String tag, String subfield) {
+  /**
+   * A parsed MARC field reference. Exactly one optional target is set: {@code subfield} for the subfield
+   * form, {@code indicator} ("1"/"2") for the indicator form; both null is the tag-only form.
+   */
+  public record MarcFieldName(String fieldName, String tag, String subfield, String indicator) {
+
+    public boolean isIndicator() {
+      return indicator != null;
+    }
 
     public String labelAlias() {
+      // Prefixed with "MARC" so the label identifies it as a MARC field (consistent with the generic "MARC"
+      // placeholder), e.g. "MARC 245" (tag-only), "MARC 245$a" (subfield), "MARC 245 ind1" (indicator).
+      if (isIndicator()) {
+        return "MARC %s ind%s".formatted(tag, indicator);
+      }
       return subfield == null ? "MARC %s".formatted(tag) : "MARC %s$%s".formatted(tag, subfield);
     }
 
-    /** Value-getter WHERE fragment; empty for tag-only fields, which match any subfield. */
+    /** The marc_indexers column this field targets: ind1/ind2 for indicators, otherwise the subfield value. */
+    public String targetColumn() {
+      return isIndicator() ? "ind" + indicator : "value";
+    }
+
+    /** WHERE fragment narrowing to a specific subfield; empty for tag-only and indicator fields. */
     public String subfieldClause() {
       return subfield == null ? "" : " AND marc.subfield_no = '%s'".formatted(subfield);
     }
+
+    /**
+     * SQL expression the search value is compared against. Indicators are coded single characters compared
+     * exactly; subfield/tag values are compared case-insensitively.
+     */
+    public String filterValueGetter() {
+      return isIndicator() ? "marc." + targetColumn() : MARC_FILTER_VALUE_GETTER;
+    }
+
+    /**
+     * Transform applied to the bound search value, mirroring {@link #filterValueGetter()}. Null for
+     * indicators so the coded value is bound and compared exactly (no lowercasing).
+     */
+    public String valueFunction() {
+      return isIndicator() ? null : MARC_VALUE_FUNCTION;
+    }
   }
 
-  public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter, String filterValueGetter) {
+  public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter) {
+
+    /** SQL expression the search value is compared against (the value column, or an indicator column). */
+    public String filterValueGetter() {
+      return marcField.filterValueGetter();
+    }
 
     public String whereClause() {
       String clause = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
@@ -257,8 +314,8 @@ public class MarcFieldFactory {
     }
 
     /**
-     * Row-level existence predicate comparing the MARC value against a single bound parameter ({@code {0}}).
-     * Used for eq/ne/in/nin and (with a LIKE operator) for starts_with/contains.
+     * Row-level existence predicate comparing the targeted MARC column against a single bound parameter
+     * ({@code {0}}). Used for eq/ne/in/nin and (with a LIKE operator) for starts_with/contains.
      *
      * @param operator   the SQL comparison or pattern operator (e.g. {@code =}, {@code like})
      * @param existsMatch {@code true} for {@code EXISTS}, {@code false} for {@code NOT EXISTS}
@@ -268,7 +325,7 @@ public class MarcFieldFactory {
         existsMatch ? "exists" : "not exists",
         tableName,
         whereClause(),
-        filterValueGetter,
+        filterValueGetter(),
         operator
       );
     }
@@ -280,8 +337,8 @@ public class MarcFieldFactory {
       return "exists (select 1 from %s marc where %s and %s is not null and %s <> '')".formatted(
         tableName,
         whereClause(),
-        filterValueGetter,
-        filterValueGetter
+        filterValueGetter(),
+        filterValueGetter()
       );
     }
   }

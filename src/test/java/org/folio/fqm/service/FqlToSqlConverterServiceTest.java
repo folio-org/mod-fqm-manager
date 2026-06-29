@@ -1573,10 +1573,9 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("exists (select"));
     assertFalse(rendered.contains("not exists"));
     assertTrue(rendered.contains("marc.field_no = '245'"));
-    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("lower(marc.ind1) ="));
     assertTrue(rendered.contains("'1'"));
-    // Indicators compare the ind column exactly: no lowercasing, no subfield_no constraint.
-    assertFalse(rendered.contains("lower(marc"));
+    // Indicators are matched case-insensitively (their values can be alphabetic), with no subfield_no constraint.
     assertFalse(rendered.contains("subfield_no"));
   }
 
@@ -1586,7 +1585,7 @@ class FqlToSqlConverterServiceTest {
       {"marc_245_ind1": {"$ne": "1"}}""");
 
     assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("lower(marc.ind1) ="));
   }
 
   @Test
@@ -1597,7 +1596,7 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains(" or "));
     assertTrue(rendered.contains("exists (select"));
     assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("lower(marc.ind1) ="));
     assertTrue(rendered.contains("'0'"));
     assertTrue(rendered.contains("'1'"));
   }
@@ -1609,7 +1608,7 @@ class FqlToSqlConverterServiceTest {
 
     assertTrue(rendered.contains(" and "));
     assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("lower(marc.ind1) ="));
     assertTrue(rendered.contains("'0'"));
     assertTrue(rendered.contains("'1'"));
   }
@@ -1620,7 +1619,7 @@ class FqlToSqlConverterServiceTest {
       {"marc_245_ind1": {"$eq": "blank"}}""");
 
     // The public "blank" token maps to the stored '#'.
-    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("lower(marc.ind1) ="));
     assertTrue(rendered.contains("'#'"));
     assertFalse(rendered.toLowerCase().contains("blank"));
   }

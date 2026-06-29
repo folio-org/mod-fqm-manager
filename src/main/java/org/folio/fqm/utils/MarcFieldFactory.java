@@ -25,7 +25,6 @@ public class MarcFieldFactory {
 
   private static final String MARC_INDEXERS_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
-  private static final String MARC_FILTER_VALUE_GETTER = "lower(marc.value)";
   private static final Pattern MARC_TABLE_PATTERN = Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
   // Field names are accepted case-insensitively (e.g. MARC_245_A behaves the same as marc_245_a). The tag/
   // subfield are normalized to their canonical storage form when the MarcFieldName is built.
@@ -282,19 +281,16 @@ public class MarcFieldFactory {
     }
 
     /**
-     * SQL expression the search value is compared against. Indicators are coded single characters compared
-     * exactly; subfield/tag values are compared case-insensitively.
+     * SQL expression the search value is compared against (the targeted column, case-insensitive). Indicator
+     * values can be alphabetic, so they are matched case-insensitively like subfield/tag values.
      */
     public String filterValueGetter() {
-      return isIndicator() ? "marc." + targetColumn() : MARC_FILTER_VALUE_GETTER;
+      return "lower(marc.%s)".formatted(targetColumn());
     }
 
-    /**
-     * Transform applied to the bound search value, mirroring {@link #filterValueGetter()}. Null for
-     * indicators so the coded value is bound and compared exactly (no lowercasing).
-     */
+    /** Transform applied to the bound search value, mirroring {@link #filterValueGetter()}. */
     public String valueFunction() {
-      return isIndicator() ? null : MARC_VALUE_FUNCTION;
+      return MARC_VALUE_FUNCTION;
     }
   }
 

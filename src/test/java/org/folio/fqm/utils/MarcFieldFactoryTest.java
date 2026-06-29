@@ -58,24 +58,24 @@ class MarcFieldFactoryTest {
     assertTrue(parsed.isIndicator());
     assertEquals("ind1", parsed.targetColumn());
     assertEquals("MARC 245 ind1", parsed.labelAlias());
-    // Indicators target the ind1/ind2 column and are compared exactly (no value function / lowercasing).
-    assertEquals("marc.ind1", parsed.filterValueGetter());
-    assertNull(parsed.valueFunction());
+    // Indicators target the ind1/ind2 column, matched case-insensitively like other MARC values.
+    assertEquals("lower(marc.ind1)", parsed.filterValueGetter());
+    assertEquals("lower(:value)", parsed.valueFunction());
 
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
-    assertEquals("marc.ind1", column.getFilterValueGetter());
-    assertNull(column.getValueFunction());
+    assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
+    assertEquals("lower(:value)", column.getValueFunction());
     assertTrue(column.getValueGetter().contains("jsonb_agg(marc.ind1)"));
     assertFalse(column.getValueGetter().contains("subfield_no"));
 
     EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
     MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
-    assertEquals("marc.ind1", context.filterValueGetter());
+    assertEquals("lower(marc.ind1)", context.filterValueGetter());
     // No subfield_no constraint; comparison is against the indicator column.
     assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245'", context.whereClause());
     assertEquals(
       "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and marc.ind1 = {0})",
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = {0})",
       context.existsClause("=", true)
     );
   }

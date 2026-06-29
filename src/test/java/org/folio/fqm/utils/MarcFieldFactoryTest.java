@@ -32,6 +32,30 @@ class MarcFieldFactoryTest {
   void shouldRecognizeSupportedMarcFieldNames() {
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
     assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
+    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245")); // tag-only
+  }
+
+  @Test
+  void shouldTreatControlFieldAsTagOnly() {
+    // A control field is queryable only as a whole-string, tag-only field...
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_008").orElseThrow();
+    assertEquals("008", parsed.tag());
+    assertNull(parsed.subfield());
+
+    // ...and the subfield form is rejected, since control fields have no subfields.
+    assertEquals(Optional.empty(), MarcFieldFactory.parse("marc_008_a"));
+  }
+
+  @Test
+  void shouldParseTagOnlyFieldNameWithNoSubfield() {
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245").orElseThrow();
+
+    assertEquals("marc_245", parsed.fieldName());
+    assertEquals("245", parsed.tag());
+    assertNull(parsed.subfield());
+    // Label and the synthesized SQL omit the subfield, so the predicate matches any subfield of the tag.
+    assertEquals("MARC 245", parsed.labelAlias());
+    assertEquals("", parsed.subfieldClause());
   }
 
   @Test
@@ -44,7 +68,7 @@ class MarcFieldFactoryTest {
     // ...but the subfield is normalized to lower case to match marc_indexers storage.
     assertEquals("245", parsed.tag());
     assertEquals("a", parsed.subfield());
-    assertEquals("245$a", parsed.labelAlias());
+    assertEquals("MARC 245$a", parsed.labelAlias());
   }
 
   @Test
@@ -61,11 +85,24 @@ class MarcFieldFactoryTest {
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "diku").orElseThrow();
 
     assertEquals("marc_245_a", column.getName());
-    assertEquals("245$a", column.getLabelAlias());
+    assertEquals("MARC 245$a", column.getLabelAlias());
     assertInstanceOf(MarcType.class, column.getDataType());
     assertEquals("lower(:value)", column.getValueFunction());
     assertSqlEquals(expectedSubfieldValueGetter("diku", "245", "a"), column.getValueGetter());
     assertEquals("lower(marc.value)", column.getFilterValueGetter());
+  }
+
+  @Test
+  void shouldCreateTagOnlySyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", "diku").orElseThrow();
+
+    assertEquals("marc_245", column.getName());
+    assertEquals("MARC 245", column.getLabelAlias());
+    assertInstanceOf(MarcType.class, column.getDataType());
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    // Tag-only: the value-getter filters on the tag but not a subfield, so it matches any subfield.
+    assertTrue(column.getValueGetter().contains("marc.field_no = '245'"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
   }
 
   @Test
@@ -299,6 +336,19 @@ class MarcFieldFactoryTest {
       "exists (" + subqueryPrefix + " and lower(marc.value) is not null and lower(marc.value) <> '')",
       context.presenceClause()
     );
+  }
+
+  @Test
+  void shouldBuildTagOnlyQueryContextWithoutSubfieldPredicate() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245"), "diku");
+
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245").orElseThrow();
+
+    assertEquals("245", context.marcField().tag());
+    assertNull(context.marcField().subfield());
+    // No subfield_no constraint -> matches any subfield of the tag.
+    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245'", context.whereClause());
+    assertFalse(context.existsClause("=", true).contains("subfield_no"));
   }
 
   @Test

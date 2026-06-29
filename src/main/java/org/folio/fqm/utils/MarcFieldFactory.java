@@ -280,15 +280,10 @@ public class MarcFieldFactory {
       return subfield == null ? "" : " AND marc.subfield_no = '%s'".formatted(subfield);
     }
 
-    /**
-     * SQL expression the search value is compared against (the targeted column, case-insensitive). Indicator
-     * values can be alphabetic, so they are matched case-insensitively like subfield/tag values.
-     */
     public String filterValueGetter() {
       return "lower(marc.%s)".formatted(targetColumn());
     }
 
-    /** Transform applied to the bound search value, mirroring {@link #filterValueGetter()}. */
     public String valueFunction() {
       return MARC_VALUE_FUNCTION;
     }

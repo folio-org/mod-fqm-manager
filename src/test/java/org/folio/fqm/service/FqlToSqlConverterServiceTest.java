@@ -1590,6 +1590,31 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
+  void shouldGenerateMarcIndicatorInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1": {"$in": ["0", "1"]}}""");
+
+    assertTrue(rendered.contains(" or "));
+    assertTrue(rendered.contains("exists (select"));
+    assertFalse(rendered.contains("not exists"));
+    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("'0'"));
+    assertTrue(rendered.contains("'1'"));
+  }
+
+  @Test
+  void shouldGenerateMarcIndicatorNotInCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1": {"$nin": ["0", "1"]}}""");
+
+    assertTrue(rendered.contains(" and "));
+    assertTrue(rendered.contains("not exists (select"));
+    assertTrue(rendered.contains("marc.ind1 ="));
+    assertTrue(rendered.contains("'0'"));
+    assertTrue(rendered.contains("'1'"));
+  }
+
+  @Test
   void shouldMapBlankTokenForMarcIndicator() {
     String rendered = renderMarcCondition("""
       {"marc_245_ind1": {"$eq": "blank"}}""");

@@ -1565,52 +1565,42 @@ class FqlToSqlConverterServiceTest {
       "contains should match %value%: a wildcard is concatenated before the value");
   }
 
-  @Test
-  void shouldGenerateMarcIndicatorEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_ind1": {"$eq": "1"}}""");
-
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("marc.field_no = '245'"));
-    assertTrue(rendered.contains("lower(marc.ind1) ="));
-    assertTrue(rendered.contains("'1'"));
-    // Indicators are matched case-insensitively (their values can be alphabetic), with no subfield_no constraint.
-    assertFalse(rendered.contains("subfield_no"));
+  // Equality-style operator routing across the two MARC value-handling paths: subfield/tag values
+  // (lower(marc.value)) and indicators (lower(marc.ind1)). The exact clause SQL is verified in
+  // MarcFieldFactoryTest; here we only assert that each operator routes to the right clause shape.
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("marcEqualityOperatorCases")
+  void shouldRouteMarcEqualityOperator(String label, String fql,
+                                       List<String> mustContain, List<String> mustNotContain) {
+    String rendered = renderMarcCondition(fql).toLowerCase();
+    mustContain.forEach(fragment ->
+      assertTrue(rendered.contains(fragment), () -> label + " should contain: " + fragment));
+    mustNotContain.forEach(fragment ->
+      assertFalse(rendered.contains(fragment), () -> label + " should not contain: " + fragment));
   }
 
-  @Test
-  void shouldGenerateMarcIndicatorNotEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_ind1": {"$ne": "1"}}""");
-
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("lower(marc.ind1) ="));
-  }
-
-  @Test
-  void shouldGenerateMarcIndicatorInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_ind1": {"$in": ["0", "1"]}}""");
-
-    assertTrue(rendered.contains(" or "));
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("lower(marc.ind1) ="));
-    assertTrue(rendered.contains("'0'"));
-    assertTrue(rendered.contains("'1'"));
-  }
-
-  @Test
-  void shouldGenerateMarcIndicatorNotInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_ind1": {"$nin": ["0", "1"]}}""");
-
-    assertTrue(rendered.contains(" and "));
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("lower(marc.ind1) ="));
-    assertTrue(rendered.contains("'0'"));
-    assertTrue(rendered.contains("'1'"));
+  static List<Arguments> marcEqualityOperatorCases() {
+    // (label, fqlQuery, fragments that must appear, fragments that must not). Fragments are lower-cased to
+    // match the lower-cased rendered SQL. eq/in are positive EXISTS; ne/nin are NOT EXISTS. Indicators use
+    // lower(marc.ind1) with no subfield_no constraint.
+    return List.of(
+      Arguments.of("subfield eq", "{\"marc_245_a\": {\"$eq\": \"Shakespeare\"}}",
+        List.of("exists (select", "lower(marc.value) =", "'shakespeare'"), List.of("not exists")),
+      Arguments.of("subfield ne", "{\"marc_245_a\": {\"$ne\": \"Shakespeare\"}}",
+        List.of("not exists (select", "lower(marc.value) ="), List.of()),
+      Arguments.of("subfield in", "{\"marc_245_a\": {\"$in\": [\"alpha\", \"beta\"]}}",
+        List.of(" or ", "exists (select", "lower(marc.value) =", "'alpha'", "'beta'"), List.of("not exists")),
+      Arguments.of("subfield nin", "{\"marc_245_a\": {\"$nin\": [\"alpha\", \"beta\"]}}",
+        List.of(" and ", "not exists (select", "lower(marc.value) =", "'alpha'", "'beta'"), List.of()),
+      Arguments.of("indicator eq", "{\"marc_245_ind1\": {\"$eq\": \"1\"}}",
+        List.of("exists (select", "lower(marc.ind1) =", "'1'"), List.of("not exists", "subfield_no")),
+      Arguments.of("indicator ne", "{\"marc_245_ind1\": {\"$ne\": \"1\"}}",
+        List.of("not exists (select", "lower(marc.ind1) ="), List.of("subfield_no")),
+      Arguments.of("indicator in", "{\"marc_245_ind1\": {\"$in\": [\"0\", \"1\"]}}",
+        List.of(" or ", "exists (select", "lower(marc.ind1) =", "'0'", "'1'"), List.of("not exists", "subfield_no")),
+      Arguments.of("indicator nin", "{\"marc_245_ind1\": {\"$nin\": [\"0\", \"1\"]}}",
+        List.of(" and ", "not exists (select", "lower(marc.ind1) =", "'0'", "'1'"), List.of("subfield_no"))
+    );
   }
 
   @Test
@@ -1657,50 +1647,6 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.toLowerCase().contains("sha"));
     assertFalse(rendered.contains("'%' ||"),
       "starts_with should match value%: no wildcard before the value, only after");
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$eq": "Shakespeare"}}""");
-
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("shakespeare"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldNotEqualsCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$ne": "Shakespeare"}}""");
-
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.contains("lower(marc.value) ="));
-    assertTrue(rendered.toLowerCase().contains("shakespeare"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$in": ["alpha", "beta"]}}""");
-
-    assertTrue(rendered.contains(" or "));
-    assertTrue(rendered.contains("exists (select"));
-    assertFalse(rendered.contains("not exists"));
-    assertTrue(rendered.toLowerCase().contains("alpha"));
-    assertTrue(rendered.toLowerCase().contains("beta"));
-  }
-
-  @Test
-  void shouldGenerateMarcSubfieldNotInCondition() {
-    String rendered = renderMarcCondition("""
-      {"marc_245_a": {"$nin": ["alpha", "beta"]}}""");
-
-    assertTrue(rendered.contains(" and "));
-    assertTrue(rendered.contains("not exists (select"));
-    assertTrue(rendered.toLowerCase().contains("alpha"));
-    assertTrue(rendered.toLowerCase().contains("beta"));
   }
 
   @Test

@@ -52,8 +52,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldTreatControlFieldAsTagOnly() {
-    // A control field is queryable only as a whole-string, tag-only field (the subfield/indicator forms
-    // are covered by the recognition cases above).
+    // A control field is queryable only as a whole-string, tag-only field
     MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_008").orElseThrow();
     assertEquals("008", parsed.tag());
     assertNull(parsed.subfield());

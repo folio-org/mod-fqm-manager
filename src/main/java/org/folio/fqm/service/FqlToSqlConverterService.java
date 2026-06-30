@@ -413,6 +413,9 @@ public class FqlToSqlConverterService {
 
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
                                                MarcQueryContext marcQueryContext) {
+    if (marcQueryContext.marcField().isIndicator()) {
+      return handleMarcIndicatorCondition(fieldCondition, entityType, marcQueryContext);
+    }
     return switch (fieldCondition) {
       case EqualsCondition equalsCondition -> marcRowComparison(marcQueryContext, "=",
         marcQueryValueField(equalsCondition.value(), equalsCondition, entityType), true);
@@ -430,6 +433,32 @@ public class FqlToSqlConverterService {
         DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%")));
       case EmptyCondition emptyCondition -> handleMarcEmpty(emptyCondition, marcQueryContext);
       default -> falseCondition();
+    };
+  }
+
+  /**
+   * Indicators are coded single characters, so only equality-style operators (eq/ne/in/nin) are meaningful;
+   * text and presence operators are rejected. The public {@code blank} token maps to the stored {@code '#'}
+   * (a raw {@code '#'} is also accepted).
+   */
+  private static Condition handleMarcIndicatorCondition(FieldCondition<?> fieldCondition, EntityType entityType,
+                                                        MarcQueryContext marcQueryContext) {
+    return switch (fieldCondition) {
+      case EqualsCondition equalsCondition -> marcRowComparison(marcQueryContext, "=",
+        indicatorValueField(equalsCondition.value(), equalsCondition, entityType), true);
+      case NotEqualsCondition notEqualsCondition -> marcRowComparison(marcQueryContext, "=",
+        indicatorValueField(notEqualsCondition.value(), notEqualsCondition, entityType), false);
+      case InCondition inCondition -> or(inCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", indicatorValueField(value, inCondition, entityType), true))
+        .toList());
+      case NotInCondition notInCondition -> and(notInCondition.value().stream()
+        .map(value -> marcRowComparison(marcQueryContext, "=", indicatorValueField(value, notInCondition, entityType), false))
+        .toList());
+      default -> throw new InvalidFqlException(
+        fieldCondition.toString(),
+        Map.of(fieldCondition.field().toString(),
+          "MARC indicator fields support only the eq, ne, in, and nin operators")
+      );
     };
   }
 
@@ -769,6 +798,16 @@ public class FqlToSqlConverterService {
 
   private static org.jooq.Field<String> marcQueryValueField(Object value, FieldCondition<?> condition, EntityType entityType) {
     return valueField(value == null ? null : value.toString(), condition, entityType);
+  }
+
+  // Like marcQueryValueField, but maps the public "blank" indicator token to its stored value '#'. A raw '#'
+  // passes through unchanged.
+  private static org.jooq.Field<String> indicatorValueField(Object value, FieldCondition<?> condition, EntityType entityType) {
+    String resolved = value == null ? null : value.toString();
+    if ("blank".equalsIgnoreCase(resolved)) {
+      resolved = "#";
+    }
+    return valueField(resolved, condition, entityType);
   }
 
   private static Condition marcRowComparison(MarcQueryContext marcQueryContext,

@@ -23,27 +23,71 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.MarcType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class MarcFieldFactoryTest {
 
   private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
 
-  @Test
-  void shouldRecognizeSupportedMarcFieldNames() {
-    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245_a"));
-    assertTrue(MarcFieldFactory.isMarcFieldName("marc_650_0"));
-    assertTrue(MarcFieldFactory.isMarcFieldName("marc_245")); // tag-only
+  @ParameterizedTest(name = "{0} -> valid={1} ({2})")
+  @CsvSource({
+    "marc_245_a,    true,  subfield",
+    "marc_650_0,    true,  subfield with numeric code",
+    "marc_245,      true,  tag-only",
+    "marc_001,      true,  control field (tag-only)",
+    "marc_245_ind1, true,  indicator 1",
+    "marc_245_ind2, true,  indicator 2",
+    "marc_24_a,     false, tag must be exactly 3 digits",
+    "marc_2451_a,   false, tag must be exactly 3 digits",
+    "marc_abc_a,    false, tag must be numeric",
+    "marc_245_aa,   false, subfield must be a single character",
+    "245_a,         false, missing marc_ prefix",
+    "marc_001_a,    false, control field has no subfields",
+    "marc_008_ind1, false, control field has no indicators",
+  })
+  void shouldRecognizeMarcFieldNames(String fieldName, boolean valid, String why) {
+    assertEquals(valid, MarcFieldFactory.isMarcFieldName(fieldName), why);
   }
 
   @Test
   void shouldTreatControlFieldAsTagOnly() {
-    // A control field is queryable only as a whole-string, tag-only field...
+    // A control field is queryable only as a whole-string, tag-only field
     MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_008").orElseThrow();
     assertEquals("008", parsed.tag());
     assertNull(parsed.subfield());
+  }
 
-    // ...and the subfield form is rejected, since control fields have no subfields.
-    assertEquals(Optional.empty(), MarcFieldFactory.parse("marc_008_a"));
+  @Test
+  void shouldSupportIndicatorFields() {
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245_ind1").orElseThrow();
+    assertEquals("245", parsed.tag());
+    assertNull(parsed.subfield());
+    assertEquals("1", parsed.indicator());
+    assertTrue(parsed.isIndicator());
+    assertEquals("ind1", parsed.targetColumn());
+    assertEquals("MARC 245 ind1", parsed.labelAlias());
+    // Indicators target the ind1/ind2 column, matched case-insensitively like other MARC values.
+    assertEquals("lower(marc.ind1)", parsed.filterValueGetter());
+    assertEquals("lower(:value)", parsed.valueFunction());
+
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
+    assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
+    assertEquals("lower(:value)", column.getValueFunction());
+    // Indicators are deduplicated (DISTINCT) so a multi-subfield field doesn't return repeated values.
+    assertTrue(column.getValueGetter().contains("jsonb_agg(DISTINCT marc.ind1)"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
+
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
+    assertEquals("lower(marc.ind1)", context.filterValueGetter());
+    // No subfield_no constraint; comparison is against the indicator column.
+    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245'", context.whereClause());
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = {0})",
+      context.existsClause("=", true)
+    );
   }
 
   @Test
@@ -69,15 +113,6 @@ class MarcFieldFactoryTest {
     assertEquals("245", parsed.tag());
     assertEquals("a", parsed.subfield());
     assertEquals("MARC 245$a", parsed.labelAlias());
-  }
-
-  @Test
-  void shouldRejectUnsupportedMarcFieldNames() {
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_24_a"));   // tag must be exactly 3 digits
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_2451_a")); // tag must be exactly 3 digits
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_abc_a"));  // tag must be numeric
-    assertFalse(MarcFieldFactory.isMarcFieldName("marc_245_aa")); // subfield must be a single character
-    assertFalse(MarcFieldFactory.isMarcFieldName("245_a"));       // missing marc_ prefix
   }
 
   @Test

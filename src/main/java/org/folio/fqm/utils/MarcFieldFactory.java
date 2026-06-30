@@ -221,14 +221,20 @@ public class MarcFieldFactory {
 
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
     String targetColumn = marcField.targetColumn();
+    // Indicators are denormalized onto every subfield row, so aggregating them as-is repeats the same value
+    // once per subfield (e.g. a 245 with $a$b yields ["1","1"]). DISTINCT collapses that artifactual
+    // duplication to the distinct indicator value(s). Subfield/tag values are aggregated as-is, since their
+    // repetition is meaningful.
+    String distinct = marcField.isIndicator() ? "DISTINCT " : "";
     return """
       (
-        SELECT jsonb_agg(marc.%s) FILTER (WHERE marc.%s IS NOT NULL)
+        SELECT jsonb_agg(%smarc.%s) FILTER (WHERE marc.%s IS NOT NULL)
         FROM %s marc
         WHERE marc.marc_id = %s
           AND marc.field_no = '%s'%s
       )
     """.formatted(
+      distinct,
       targetColumn,
       targetColumn,
       interpolateTenant(MARC_INDEXERS_VIEW, tenantId),

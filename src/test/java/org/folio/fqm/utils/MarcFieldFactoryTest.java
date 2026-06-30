@@ -74,7 +74,8 @@ class MarcFieldFactoryTest {
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
     assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
     assertEquals("lower(:value)", column.getValueFunction());
-    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.ind1)"));
+    // Indicators are deduplicated (DISTINCT) so a multi-subfield field doesn't return repeated values.
+    assertTrue(column.getValueGetter().contains("jsonb_agg(DISTINCT marc.ind1)"));
     assertFalse(column.getValueGetter().contains("subfield_no"));
 
     EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");

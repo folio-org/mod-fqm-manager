@@ -33,8 +33,12 @@ public class CrossTenantQueryService {
   private static final String SIMPLE_INSTANCE_STATUS_ID = "9c239bfd-198f-4013-bbc4-4551c0cbdeaa";
   private static final String SIMPLE_INSTANCE_TYPE_ID = "af44e2e0-12e0-4eec-b80d-49feb33a866c";
   private static final String COMPOSITE_INSTANCE_SRS_BIB_ID = "bce8ea43-1271-54ca-99ad-aa185e8b5b1b";
+  private static final String COMPOSITE_AUTHORITY_DETAILS_ID = "04faac48-588d-41ac-8187-8309808f5f2b";
+  private static final String SIMPLE_AUTHORITY_ID = "8c7c1bc2-f35a-5a23-a6f0-5021f79b06d7";
   private static final List<String> INSTANCE_RELATED_ENTITIES = List.of(SIMPLE_INSTANCES_ID, COMPOSITE_INSTANCES_ID, SIMPLE_INSTANCE_STATUS_ID, SIMPLE_INSTANCE_TYPE_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
   private static final List<String> COMPOSITE_INSTANCE_ENTITIES = List.of(COMPOSITE_INSTANCES_ID, COMPOSITE_INSTANCE_SRS_BIB_ID);
+  private static final List<String> AUTHORITY_RELATED_ENTITIES = List.of(COMPOSITE_AUTHORITY_DETAILS_ID, SIMPLE_AUTHORITY_ID);
+  private static final List<String> COMPOSITE_AUTHORITY_ENTITIES = List.of(COMPOSITE_AUTHORITY_DETAILS_ID);
 
   /**
    * Retrieve list of tenants to run query against.
@@ -55,7 +59,8 @@ public class CrossTenantQueryService {
    */
   public List<String> getTenantsToQuery(EntityType entityType, UUID userId) {
     if (!Boolean.TRUE.equals(entityType.getCrossTenantQueriesEnabled())
-      && !COMPOSITE_INSTANCE_ENTITIES.contains(entityType.getId())) {
+      && !COMPOSITE_INSTANCE_ENTITIES.contains(entityType.getId())
+      && !COMPOSITE_AUTHORITY_ENTITIES.contains(entityType.getId())) {
       return List.of(executionContext.getTenantId());
     }
     return getTenantIds(entityType, userId);
@@ -94,10 +99,10 @@ public class CrossTenantQueryService {
 
     if (!executionContext.getTenantId().equals(centralTenantId)) {
       log.debug("Tenant {} is not central tenant. Running intra-tenant query.", executionContext.getTenantId());
-      // The Instances entity type is required to retrieve shared instances from the central tenant when
-      // running queries from member tenants. This means that if we are running a query for Instances, we need to
-      // query the current tenant (for local records) as well as the central tenant (for shared records).
-      if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId())) {
+      // The Instances and Authorities entity types require retrieving shared records from the central tenant when
+      // running queries from member tenants. This means that if we are running a query for Instances or Authorities,
+      // we need to query the current tenant (for local records) as well as the central tenant (for shared records).
+      if (INSTANCE_RELATED_ENTITIES.contains(entityType.getId()) || AUTHORITY_RELATED_ENTITIES.contains(entityType.getId())) {
         return List.of(currentTenantPair, centralTenantPair);
       }
       return List.of(currentTenantPair);

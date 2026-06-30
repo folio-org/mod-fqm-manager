@@ -2,7 +2,7 @@
   id: '04faac48-588d-41ac-8187-8309808f5f2b',
   name: 'composite_authority_details',
   private: false,
-  crossTenantQueriesEnabled: false,
+  crossTenantQueriesEnabled: true,
   sources: [
     {
       alias: 'authority',

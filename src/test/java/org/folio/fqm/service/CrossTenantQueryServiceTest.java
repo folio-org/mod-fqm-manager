@@ -7,6 +7,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.web.client.RestClientException;
@@ -222,6 +224,27 @@ class CrossTenantQueryServiceTest {
     )).thenReturn(USER_TENANT_JSON);
 
     List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(instanceEntityType);
+    assertEquals(expectedTenants, actualTenants);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void shouldQueryCentralTenantForSharedCompositeAuthorityDetails(Boolean crossTenantQueriesEnabled) {
+    String tenantId = "tenant_03";
+    List<String> expectedTenants = List.of("tenant_03", "tenant_01");
+    EntityType authorityEntityType = new EntityType()
+      .id("04faac48-588d-41ac-8187-8309808f5f2b")
+      .crossTenantQueriesEnabled(crossTenantQueriesEnabled);
+
+    when(executionContext.getTenantId()).thenReturn(tenantId);
+    when(userTenantService.getUserTenantsResponse(tenantId)).thenReturn(ECS_TENANT_INFO);
+    when(crossTenantClient.get(
+      "consortia/bdaa4720-5e11-4632-bc10-d4455cf252df/user-tenants",
+      Map.of("userId", USER_ID, "limit", "1000"),
+      CENTRAL_TENANT_ID
+    )).thenReturn(USER_TENANT_JSON);
+
+    List<String> actualTenants = crossTenantQueryService.getTenantsToQuery(authorityEntityType);
     assertEquals(expectedTenants, actualTenants);
   }
 

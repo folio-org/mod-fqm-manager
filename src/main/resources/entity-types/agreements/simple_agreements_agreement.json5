@@ -91,7 +91,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.sa_start_date',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'sa_end_date',
@@ -101,7 +100,6 @@
       queryable: true,
       visibleByDefault: true,
       valueGetter: ':sourceAlias.sa_end_date',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'sa_cancellation_deadline',
@@ -111,7 +109,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.sa_cancellation_deadline',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'sa_date_created',
@@ -120,7 +117,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.sa_date_created',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'sa_last_updated',
@@ -129,7 +125,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.sa_last_updated',
-      valueFunction: '(:value)::timestamp',
     },
     {
       name: 'sa_agreement_status',

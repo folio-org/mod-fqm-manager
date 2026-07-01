@@ -55,7 +55,7 @@ class FromClauseUtilsResolveAndOrderTest {
   }
 
   static NecessaryJoin join(String source1, String source2) {
-    return new NecessaryJoin(column(source1), source(source1), column(source2), source(source2), null);
+    return new NecessaryJoin(column(source1), source(source1), column(source2), source(source2), null, false);
   }
 
   static List<Arguments> resolutionOrderTestCases() {
@@ -107,7 +107,8 @@ class FromClauseUtilsResolveAndOrderTest {
             normalizedSources.get(join.sourceA().getAlias()),
             join.columnB(),
             normalizedSources.get(join.sourceB().getAlias()),
-            join.overrideJoinDirection()
+            join.overrideJoinDirection(),
+            join.cascade()
           )
         )
         .distinct()

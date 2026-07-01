@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.BooleanUtils;
 import org.folio.fqm.utils.EntityTypeUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -324,6 +325,7 @@ public class SourceUtils {
       .type(source.getType())
       .alias(renamedAliases.get(source.getAlias()))
       .overrideJoinDirection(source.getOverrideJoinDirection())
+      .cascadeJoinDirection(getCascadeJoinDirection(sourceFromParent, source))
       .sourceField(
         Optional
           .ofNullable(source.getSourceField())
@@ -391,4 +393,18 @@ public class SourceUtils {
 
     return parentSource;
   }
+
+  /**
+   * Determines the effective cascadeJoinDirection for a source,
+   * taking into account the parent source's cascadeJoinDirection.
+   */
+  private static Boolean getCascadeJoinDirection(
+    EntityTypeSourceEntityType sourceFromParent,
+    EntityTypeSourceEntityType source
+  ) {
+    return sourceFromParent != null && BooleanUtils.isTrue(sourceFromParent.getCascadeJoinDirection())
+      ? Boolean.TRUE
+      : source.getCascadeJoinDirection();
+  }
+
 }

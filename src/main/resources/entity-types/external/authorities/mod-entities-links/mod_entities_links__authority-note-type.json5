@@ -30,6 +30,7 @@
       valueGetter: ':sourceAlias.id',
       valueFunction: '(:value)::uuid',
       sourceAlias: 'src__authorities__entities_links__authority_note_type',
+      essential: true,
     },
     {
       name: 'name',
@@ -37,9 +38,16 @@
         dataType: 'stringType',
       },
       queryable: true,
-      visibleByDefault: false,
+      visibleByDefault: true,
       valueGetter: ':sourceAlias.name',
       sourceAlias: 'src__authorities__entities_links__authority_note_type',
+      valueSourceApi: {
+        path: 'authority-note-types',
+        valueJsonPath: '$.authorityNoteTypes.*.id',
+        labelJsonPath: '$.authorityNoteTypes.*.name',
+      },
+      essential: true,
+      idColumnName: 'id',
     },
   ],
 }

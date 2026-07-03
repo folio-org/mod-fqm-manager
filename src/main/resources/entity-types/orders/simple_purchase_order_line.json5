@@ -1646,8 +1646,13 @@
               dataType: {
                 dataType: 'numberType',
               },
-              queryable: false,
-              valueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
+              queryable: true,
+              valueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                     jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
+              filterValueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                     jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
               valueFunction: '(:value)::float',
             },
             {
@@ -1670,6 +1675,55 @@
                   label: 'Percentage',
                 },
               ],
+            },
+            {
+              name: 'expense_class_id',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: true,
+              hidden: true,
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'expenseClassId') \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                     jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'expenseClassId')) \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                     jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_name',
+              property: 'expense_class_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                SELECT \
+                  array_agg(expense_class.jsonb->>'name') \
+                  FILTER (WHERE (expense_class.jsonb->>'name') IS NOT NULL) \
+                FROM \
+                  jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                  jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist \
+                  LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                    ON (fund_dist.value->>'expenseClassId')::uuid = expense_class.id \
+              )",
+              filterValueGetter: "( \
+                SELECT \
+                  array_agg(lower(expense_class.jsonb->>'name')) \
+                  FILTER (WHERE (expense_class.jsonb->>'name') IS NOT NULL) \
+                FROM \
+                  jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
+                  jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist \
+                  LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                    ON (fund_dist.value->>'expenseClassId')::uuid = expense_class.id \
+              )",
+              valueFunction: 'lower(:value)',
+              source: {
+                entityTypeId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
+                columnName: 'name',
+              },
             },
           ],
         },

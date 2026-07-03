@@ -1635,10 +1635,6 @@
                                       ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
                                   )",
               valueFunction: 'lower(:value)',
-              source: {
-                entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
-                columnName: 'name',
-              },
             },
             {
               name: 'value',
@@ -1646,11 +1642,8 @@
               dataType: {
                 dataType: 'numberType',
               },
-              queryable: true,
+              queryable: false,
               valueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) \
-                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
-                     jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
-              filterValueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) \
                 FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, \
                      jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
               valueFunction: '(:value)::float',

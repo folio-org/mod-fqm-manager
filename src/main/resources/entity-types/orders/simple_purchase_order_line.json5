@@ -1535,6 +1535,11 @@
       valueGetter: "( SELECT fy.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
       filterValueGetter: "( SELECT lower(fy.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
       valueFunction: 'lower(:value)',
+      idColumnName: 'payment_terms_starting_fiscal_year_id',
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+        columnName: 'name',
+      },
     },
     {
       name: 'payment_terms_fiscal_year_distributions',
@@ -1584,6 +1589,11 @@
                                       ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
                                   )",
               valueFunction: 'lower(:value)',
+              idColumnName: 'payment_terms_fiscal_year_distributions[*]->fiscal_year_id',
+              source: {
+                entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+                columnName: 'name',
+              },
             },
             {
               name: 'fund_id',

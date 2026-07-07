@@ -1461,14 +1461,12 @@
         },
       ],
     },
-    // The "queryable" property for all columns needs clarification and will be updated once the requirements are finalized
     {
       name: 'multi_year_payment',
       sourceAlias: 'pol',
       dataType: {
         dataType: 'booleanType',
       },
-      isIdColumn: false,
       essential: true,
       queryable: true,
       visibleByDefault: false,
@@ -1490,7 +1488,6 @@
       dataType: {
         dataType: 'integerType',
       },
-      isIdColumn: false,
       essential: true,
       queryable: true,
       visibleByDefault: false,
@@ -1503,7 +1500,6 @@
       dataType: {
         dataType: 'rangedUUIDType',
       },
-      isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
       essential: true,
@@ -1528,7 +1524,6 @@
       dataType: {
         dataType: 'stringType',
       },
-      isIdColumn: false,
       queryable: true,
       visibleByDefault: false,
       essential: true,
@@ -1719,7 +1714,6 @@
           ],
         },
       },
-      isIdColumn: false,
       queryable: false,
       visibleByDefault: false,
       essential: true,

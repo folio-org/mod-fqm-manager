@@ -1,3 +1,5 @@
 * @folio-org/corsair
-# allow anyone to approve translations
+# allow anyone to approve translations and external ETs
 /translations
+/src/main/resources/entity-types/external
+/src/main/resources/external-translations

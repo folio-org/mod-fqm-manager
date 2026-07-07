@@ -1535,10 +1535,6 @@
       valueGetter: "( SELECT fy.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
       filterValueGetter: "( SELECT lower(fy.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
       valueFunction: 'lower(:value)',
-      source: {
-        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
-        columnName: 'name',
-      },
     },
     {
       name: 'payment_terms_fiscal_year_distributions',
@@ -1588,10 +1584,6 @@
                                       ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
                                   )",
               valueFunction: 'lower(:value)',
-              source: {
-                entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
-                columnName: 'name',
-              },
             },
             {
               name: 'fund_id',
@@ -1713,10 +1705,6 @@
                     ON (fund_dist.value->>'expenseClassId')::uuid = expense_class.id \
               )",
               valueFunction: 'lower(:value)',
-              source: {
-                entityTypeId: '6e11cd39-a34e-4afc-90db-957dd45d139e', // simple_expense_class
-                columnName: 'name',
-              },
             },
           ],
         },
@@ -1728,29 +1716,27 @@
       valueGetter: "( \
                   SELECT \
                     jsonb_agg( \
-                      fy_dist.value \
-                        || jsonb_build_object('fiscal_year_name', fy.jsonb ->> 'name') \
-                        || jsonb_build_object('fundDistributions', ( \
-                          SELECT jsonb_agg( \
-                            fund_dist.value \
-                              || jsonb_build_object( \
-                                'fund_name', fund.jsonb ->> 'name', \
-                                'expense_class_name', expense_class.jsonb ->> 'name' \
-                              ) \
-                            ORDER BY fund_dist.value ->> 'fundId', fund_dist.value ->> 'expenseClassId' \
-                          ) \
-                          FROM jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) \
-                            LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
-                              ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
-                            LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
-                              ON (fund_dist.value ->> 'expenseClassId')::uuid = expense_class.id \
-                        )) \
-                      ORDER BY fy.jsonb ->> 'name' \
+                      jsonb_build_object( \
+                        'fiscalYearId',       fy_dist.value ->> 'fiscalYearId', \
+                        'fiscal_year_name',   fy.jsonb ->> 'name', \
+                        'fundId',             fund_dist.value ->> 'fundId', \
+                        'fund_name',          fund.jsonb ->> 'name', \
+                        'value',              (fund_dist.value ->> 'value')::float, \
+                        'distributionType',   fund_dist.value ->> 'distributionType', \
+                        'expenseClassId',     fund_dist.value ->> 'expenseClassId', \
+                        'expense_class_name', expense_class.jsonb ->> 'name' \
+                      ) \
+                      ORDER BY fy.jsonb ->> 'name', fund_dist.value ->> 'fundId', fund_dist.value ->> 'expenseClassId' \
                     ) \
                   FROM \
                     jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
                     LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year AS fy \
                       ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
+                    CROSS JOIN LATERAL jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                      ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                      ON (fund_dist.value ->> 'expenseClassId')::uuid = expense_class.id \
                 )::text",
     },
     {

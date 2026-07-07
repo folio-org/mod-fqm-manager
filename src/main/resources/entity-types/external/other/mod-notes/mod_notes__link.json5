@@ -25,7 +25,6 @@
         dataType: 'rangedUUIDType',
       },
       queryable: true,
-      visibleByDefault: true,
       isIdColumn: true,
       valueGetter: ':src__other__notes__link.id',
       valueFunction: '(:value)::uuid',

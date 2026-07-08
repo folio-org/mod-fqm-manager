@@ -1399,6 +1399,8 @@
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.fiscal_year_name._qualified": "Payment terms — Fiscal year",
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.fund_id": "Fund UUID",
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.fund_id._qualified": "Payment terms — Fund UUID",
+  "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.code": "Code",
+  "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.code._qualified": "Payment terms — Code",
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.fund_name": "Fund",
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.fund_name._qualified": "Payment terms — Fund",
   "entityType.simple_purchase_order_line.payment_terms_fiscal_year_distributions.expense_class_id": "Expense class UUID",

@@ -1505,10 +1505,6 @@
       essential: true,
       hidden: true,
       valueGetter: ":sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId'",
-      source: {
-        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
-        columnName: 'id',
-      },
       joinsTo: [
         {
           targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year

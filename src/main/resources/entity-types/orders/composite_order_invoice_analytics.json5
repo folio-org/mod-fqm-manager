@@ -40,6 +40,7 @@
       targetField: 'po_line_id',
       sourceField: 'pol.id',
       overrideJoinDirection: "left",
+      useIdColumns: true,
       essentialOnly: true,
       order: 40,
     },
@@ -199,6 +200,6 @@
         entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a',
         columnName: 'name'
       },
-    }
+    },
   ]
 }

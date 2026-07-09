@@ -1462,6 +1462,294 @@
       ],
     },
     {
+      name: 'multi_year_payment',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":sourceAlias.jsonb->>'multiYearPayment'",
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'payment_terms_prepayment_term',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'integerType',
+      },
+      essential: true,
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:sourceAlias.jsonb->'paymentTerms'->>'prepaymentTerm')::integer",
+      valueFunction: '(:value)::integer',
+    },
+    {
+      name: 'payment_terms_starting_fiscal_year_id',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      hidden: true,
+      valueGetter: ":sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId'",
+      joinsTo: [
+        {
+          targetId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+          targetField: 'id',
+          type: 'equality-cast-uuid',
+          direction: 'left',
+        },
+      ],
+    },
+    {
+      name: 'payment_terms_starting_fiscal_year_name',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( SELECT fy.jsonb->>'name' FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
+      filterValueGetter: "( SELECT lower(fy.jsonb->>'name') FROM ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year fy WHERE fy.id = (:sourceAlias.jsonb->'paymentTerms'->>'startingFiscalYearId')::uuid)",
+      valueFunction: 'lower(:value)',
+      idColumnName: 'payment_terms_starting_fiscal_year_id',
+      source: {
+        entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+        columnName: 'name',
+      },
+    },
+    {
+      name: 'payment_terms_fiscal_year_distributions',
+      sourceAlias: 'pol',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'fiscal_year_id',
+              property: 'fiscalYearId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: true,
+              hidden: true,
+              valueGetter: "( SELECT array_agg(elems.value->>'fiscalYearId') FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS elems)",
+              filterValueGetter: "( SELECT array_agg(lower(elems.value->>'fiscalYearId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS elems)",
+              valueFunction: 'lower(:value)'
+            },
+            {
+              name: 'fiscal_year_name',
+              property: 'fiscal_year_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(fy.jsonb ->> 'name') \
+                                FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                                AS array_agg \
+                              FROM \
+                                jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year AS fy \
+                                ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
+                            )",
+              filterValueGetter: "( \
+                                    SELECT \
+                                      array_agg(lower(fy.jsonb ->> 'name')) \
+                                      FILTER (WHERE (fy.jsonb ->> 'name') IS NOT NULL) \
+                                      AS array_agg \
+                                    FROM \
+                                      jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
+                                      LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year AS fy \
+                                      ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
+                                  )",
+              valueFunction: 'lower(:value)',
+              idColumnName: 'payment_terms_fiscal_year_distributions[*]->fiscal_year_id',
+              source: {
+                entityTypeId: 'e61f988a-1d47-4b16-b8be-220a1c38ca8a', // simple_fiscal_year
+                columnName: 'name',
+              },
+            },
+            {
+              name: 'code',
+              property: 'code',
+              dataType: {
+                dataType: 'stringType',
+              },
+              source: {
+                entityTypeId: '4c63c7f5-1a28-4394-b401-98c02c31492d',
+                columnName: 'code',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_id',
+              property: 'fundId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: true,
+              hidden: true,
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'fundId') FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'fundId')) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'fund_name',
+              property: 'fund_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                              SELECT \
+                                array_agg(fund.jsonb ->> 'name') \
+                              FROM \
+                                jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
+                                LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) ON true \
+                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                                ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
+                            )",
+              filterValueGetter: "( \
+                                    SELECT \
+                                      array_agg(lower(fund.jsonb ->> 'name')) \
+                                    FROM \
+                                      jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
+                                      LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) ON true \
+                                      LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                                      ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
+                                  )",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_id',
+              property: 'expenseClassId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+              queryable: true,
+              hidden: true,
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'expenseClassId') \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist \
+                     LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'expenseClassId')) \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist \
+                     LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'expense_class_name',
+              property: 'expense_class_name',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( \
+                SELECT \
+                  array_agg(expense_class.jsonb->>'name') \
+                FROM \
+                  jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist \
+                  LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true \
+                  LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                    ON (fund_dist.value->>'expenseClassId')::uuid = expense_class.id \
+              )",
+              filterValueGetter: "( \
+                SELECT \
+                  array_agg(lower(expense_class.jsonb->>'name')) \
+                FROM \
+                  jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist \
+                  LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true \
+                  LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                    ON (fund_dist.value->>'expenseClassId')::uuid = expense_class.id \
+              )",
+              valueFunction: 'lower(:value)',
+            },
+            {
+              name: 'distribution_type',
+              property: 'distributionType',
+              dataType: {
+                dataType: 'stringType',
+              },
+              queryable: true,
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'distributionType') FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'distributionType')) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              valueFunction: 'lower(:value)',
+              values: [
+                {
+                  value: 'amount',
+                  label: 'Amount',
+                },
+                {
+                  value: 'percentage',
+                  label: 'Percentage',
+                },
+              ],
+            },
+            {
+              name: 'value',
+              property: 'value',
+              dataType: {
+                dataType: 'numberType',
+              },
+              queryable: false,
+              valueGetter: "( SELECT array_agg((fund_dist.value->>'value')::float) \
+                FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist \
+                     LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist ON true)",
+              valueFunction: '(:value)::float',
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      essential: true,
+      valueGetter: "( \
+                  SELECT \
+                    jsonb_agg( \
+                      jsonb_build_object( \
+                        'fiscalYearId',       fy_dist.value ->> 'fiscalYearId', \
+                        'fiscal_year_name',   fy.jsonb ->> 'name', \
+                        'fundId',             fund_dist.value ->> 'fundId', \
+                        'code',               fund_dist.value ->> 'code', \
+                        'fund_name',          fund.jsonb ->> 'name', \
+                        'value',              (fund_dist.value ->> 'value')::float, \
+                        'distributionType',   fund_dist.value ->> 'distributionType', \
+                        'expenseClassId',     fund_dist.value ->> 'expenseClassId', \
+                        'expense_class_name', expense_class.jsonb ->> 'name' \
+                      ) \
+                      ORDER BY fy.jsonb ->> 'name', fund_dist.value ->> 'fundId', fund_dist.value ->> 'expenseClassId' \
+                    ) \
+                  FROM \
+                    jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value) \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fiscal_year AS fy \
+                      ON (fy_dist.value ->> 'fiscalYearId')::uuid = fy.id \
+                    LEFT JOIN LATERAL jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) ON true \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
+                      ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
+                    LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_expense_class AS expense_class \
+                      ON (fund_dist.value ->> 'expenseClassId')::uuid = expense_class.id \
+                )::text",
+    },
+    {
       name: 'physical_create_inventory',
       sourceAlias: 'pol',
       dataType: {

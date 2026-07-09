@@ -1601,28 +1601,8 @@
                 columnName: 'code',
               },
               queryable: true,
-              valueGetter: "( \
-                              SELECT \
-                                array_agg(fund.jsonb ->> 'code') \
-                                FILTER (WHERE (fund.jsonb ->> 'code') IS NOT NULL) \
-                                AS array_agg \
-                              FROM \
-                                jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value), \
-                                jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) \
-                                LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
-                                ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
-                            )",
-              filterValueGetter: "( \
-                                    SELECT \
-                                      array_agg(lower(fund.jsonb ->> 'code')) \
-                                      FILTER (WHERE (fund.jsonb ->> 'code') IS NOT NULL) \
-                                      AS array_agg \
-                                    FROM \
-                                      jsonb_array_elements(:sourceAlias.jsonb -> 'paymentTerms' -> 'fiscalYearDistributions') fy_dist(value), \
-                                      jsonb_array_elements(fy_dist.value -> 'fundDistributions') fund_dist(value) \
-                                      LEFT JOIN ${tenant_id}_mod_fqm_manager.src_finance_fund AS fund \
-                                      ON (fund_dist.value ->> 'fundId')::uuid = fund.id \
-                                  )",
+              valueGetter: "( SELECT array_agg(fund_dist.value->>'code') FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
+              filterValueGetter: "( SELECT array_agg(lower(fund_dist.value->>'code')) FROM jsonb_array_elements(:sourceAlias.jsonb->'paymentTerms'->'fiscalYearDistributions') AS fy_dist, jsonb_array_elements(fy_dist.value->'fundDistributions') AS fund_dist)",
               valueFunction: 'lower(:value)',
             },
             {

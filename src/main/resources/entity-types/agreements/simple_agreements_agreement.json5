@@ -90,7 +90,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.sa_start_date',
+      valueGetter: ':sourceAlias.sa_start_date::date::text',
     },
     {
       name: 'sa_end_date',
@@ -99,7 +99,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.sa_end_date',
+      valueGetter: ':sourceAlias.sa_end_date::date::text',
     },
     {
       name: 'sa_cancellation_deadline',
@@ -108,7 +108,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.sa_cancellation_deadline',
+      valueGetter: ':sourceAlias.sa_cancellation_deadline::date::text',
     },
     {
       name: 'sa_date_created',

@@ -151,7 +151,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.ent_active_from',
+      valueGetter: ':sourceAlias.ent_active_from::date::text',
     },
     {
       name: 'ent_active_to',
@@ -160,7 +160,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.ent_active_to',
+      valueGetter: ':sourceAlias.ent_active_to::date::text',
     },
     {
       name: 'ent_content_updated',

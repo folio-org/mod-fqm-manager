@@ -48,7 +48,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.per_start_date',
+      valueGetter: ':sourceAlias.per_start_date::date::text',
     },
     {
       name: 'per_end_date',
@@ -57,7 +57,7 @@
       essential: true,
       queryable: true,
       visibleByDefault: true,
-      valueGetter: ':sourceAlias.per_end_date',
+      valueGetter: ':sourceAlias.per_end_date::date::text',
     },
     {
       name: 'per_cancellation_deadline',
@@ -65,7 +65,7 @@
       dataType: { dataType: 'dateType' },
       queryable: true,
       visibleByDefault: false,
-      valueGetter: ':sourceAlias.per_cancellation_deadline',
+      valueGetter: ':sourceAlias.per_cancellation_deadline::date::text',
     },
     {
       name: 'per_note',

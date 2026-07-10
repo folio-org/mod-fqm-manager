@@ -1,5 +1,8 @@
 # 4.1.x - Trillium
 
+# 4.1.7
+- [MODELINKS-425](https://folio-org.atlassian.net/browse/MODELINKS-425) Hide the entity links authority relationship type field
+
 # 4.1.6
 - [MODFQMMGR-1162](https://folio-org.atlassian.net/browse/MODFQMMGR-1162) Remove redundant `source` properties from fields that use `valueSourceApi`
 - [MODFQMMGR-1169](https://folio-org.atlassian.net/browse/MODFQMMGR-1169) Keep loan and fee/fine counts in sync for user transaction summaries

@@ -20,7 +20,6 @@
       isIdColumn: true,
       essential: true,
       queryable: true,
-      hidden: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.pol_id',
     },

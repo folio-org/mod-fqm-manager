@@ -117,7 +117,8 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
-    entityType = MarcFieldFactory.addSyntheticColumns(entityType, List.of("marc_245_a", "marc_245", "marc_245_ind1"), "diku");
+    entityType = MarcFieldFactory.addSyntheticColumns(entityType,
+      List.of("marc_245_a", "marc_245", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1624,6 +1625,33 @@ class FqlToSqlConverterServiceTest {
       InvalidFqlException.class,
       () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_ind1\": {\"$empty\": true}}", entityType)
     );
+  }
+
+  @Test
+  void shouldGenerateConstrainedSubfieldMarcCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1_7_a": {"$contains": "Shakespeare"}}""");
+
+    // Single EXISTS constraining field_no + fixed indicator + subfield_no on the same row, targeting value.
+    assertTrue(rendered.contains("exists (select"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("lower(marc.ind1) = '7'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+    // Targets the value, so text operators apply (unlike indicator-only fields): %value% wrapping present.
+    assertTrue(rendered.contains("'%' ||"));
+  }
+
+  @Test
+  void shouldMapBlankForConstrainedSubfieldMarcCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1_blank_a": {"$eq": "History"}}""");
+
+    // The blank indicator token in the field name is fixed to the stored '#'.
+    assertTrue(rendered.contains("lower(marc.ind1) = '#'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) ="));
   }
 
   @Test

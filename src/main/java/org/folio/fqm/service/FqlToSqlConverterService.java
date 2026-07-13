@@ -413,7 +413,7 @@ public class FqlToSqlConverterService {
 
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
                                                MarcQueryContext marcQueryContext) {
-    if (marcQueryContext.marcField().isIndicator()) {
+    if (marcQueryContext.marcField().isIndicatorTarget()) {
       return handleMarcIndicatorCondition(fieldCondition, entityType, marcQueryContext);
     }
     return switch (fieldCondition) {

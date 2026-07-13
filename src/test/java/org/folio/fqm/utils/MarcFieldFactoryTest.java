@@ -38,6 +38,9 @@ class MarcFieldFactoryTest {
     "marc_001,      true,  control field (tag-only)",
     "marc_245_ind1, true,  indicator 1",
     "marc_245_ind2, true,  indicator 2",
+    "marc_245_ind1_7_a,     true,  constrained subfield",
+    "marc_650_ind2_7_a,     true,  constrained subfield (ind2)",
+    "marc_245_ind1_blank_a, true,  constrained subfield with blank indicator",
     "marc_24_a,     false, tag must be exactly 3 digits",
     "marc_2451_a,   false, tag must be exactly 3 digits",
     "marc_abc_a,    false, tag must be numeric",
@@ -45,6 +48,9 @@ class MarcFieldFactoryTest {
     "245_a,         false, missing marc_ prefix",
     "marc_001_a,    false, control field has no subfields",
     "marc_008_ind1, false, control field has no indicators",
+    "marc_008_ind2_7_a,     false, control field cannot use constrained subfield",
+    "marc_245_ind3_7_a,     false, indicator number must be 1 or 2",
+    "marc_245_ind1_ab_a,    false, fixed indicator value must be single char or blank",
   })
   void shouldRecognizeMarcFieldNames(String fieldName, boolean valid, String why) {
     assertEquals(valid, MarcFieldFactory.isMarcFieldName(fieldName), why);
@@ -63,8 +69,8 @@ class MarcFieldFactoryTest {
     MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245_ind1").orElseThrow();
     assertEquals("245", parsed.tag());
     assertNull(parsed.subfield());
-    assertEquals("1", parsed.indicator());
-    assertTrue(parsed.isIndicator());
+    assertEquals("1", parsed.indicatorNumber());
+    assertTrue(parsed.isIndicatorTarget());
     assertEquals("ind1", parsed.targetColumn());
     assertEquals("MARC 245 ind1", parsed.labelAlias());
     // Indicators target the ind1/ind2 column, matched case-insensitively like other MARC values.
@@ -88,6 +94,56 @@ class MarcFieldFactoryTest {
         + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = {0})",
       context.existsClause("=", true)
     );
+  }
+
+  @Test
+  void shouldSupportConstrainedSubfieldFields() {
+    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245_ind1_7_a").orElseThrow();
+    assertEquals("245", parsed.tag());
+    assertEquals("a", parsed.subfield());
+    assertEquals("1", parsed.indicatorNumber());
+    assertEquals("7", parsed.indicatorValue());
+    // The subfield value is the target; the indicator is a fixed same-row constraint (not the target).
+    assertFalse(parsed.isIndicatorTarget());
+    assertEquals("value", parsed.targetColumn());
+    assertEquals("lower(marc.value)", parsed.filterValueGetter());
+    assertEquals("MARC 245 ind1=7 $a", parsed.labelAlias());
+
+    // Synthetic column: value target (no DISTINCT), aggregated only from rows matching the fixed indicator.
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a", "diku").orElseThrow();
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.value)"));
+    assertFalse(column.getValueGetter().contains("DISTINCT"));
+
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_7_a"), "diku");
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_7_a").orElseThrow();
+    // Same-row constraint: field_no + fixed indicator + subfield_no, targeting the value column.
+    assertEquals(
+      "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a'",
+      context.whereClause()
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a' "
+        + "and lower(marc.value) = {0})",
+      context.existsClause("=", true)
+    );
+  }
+
+  @Test
+  void shouldMapBlankAndNormalizeCaseForConstrainedSubfield() {
+    // Blank token maps to the stored '#'.
+    MarcFieldFactory.MarcFieldName blank = MarcFieldFactory.parse("marc_245_ind1_blank_a").orElseThrow();
+    assertEquals("#", blank.indicatorValue());
+    assertTrue(blank.indicatorConstraintClause().contains("lower(marc.ind1) = '#'"));
+
+    // Uppercase input is accepted and normalized (original field name preserved; tag/subfield/indicator normalized).
+    MarcFieldFactory.MarcFieldName upper = MarcFieldFactory.parse("MARC_245_IND1_7_A").orElseThrow();
+    assertEquals("MARC_245_IND1_7_A", upper.fieldName());
+    assertEquals("245", upper.tag());
+    assertEquals("a", upper.subfield());
+    assertEquals("1", upper.indicatorNumber());
+    assertEquals("7", upper.indicatorValue());
   }
 
   @Test

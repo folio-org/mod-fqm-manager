@@ -226,7 +226,7 @@ public class MarcFieldFactory {
 
   // Normalizes a fixed indicator value from a constrained-subfield field name: the public token "blank" maps
   // to the stored '#', and other (single alphanumeric) values are lower-cased so the constraint matches
-  // case-insensitively (some indicators are alphabetic).
+  // case-insensitively.
   private static String normalizeIndicatorValue(String rawValue) {
     return BLANK_INDICATOR_TOKEN.equalsIgnoreCase(rawValue) ? BLANK_INDICATOR_STORAGE : rawValue.toLowerCase();
   }

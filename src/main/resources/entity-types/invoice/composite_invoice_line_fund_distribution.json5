@@ -28,7 +28,6 @@
       },
       isIdColumn: true,
       essential: true,
-      hidden: true,
       valueGetter: ':sourceAlias.id',
       joinsTo: [
         {

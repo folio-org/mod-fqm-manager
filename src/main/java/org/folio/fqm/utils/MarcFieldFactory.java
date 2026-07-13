@@ -35,6 +35,14 @@ public class MarcFieldFactory {
   // Indicator form (e.g. marc_245_ind1 / marc_245_ind2). Targets the ind1/ind2 column of the tag rather than
   // a subfield value. Only valid for data-field tags (010+); control fields have no indicators.
   private static final Pattern INDICATOR_PATTERN = Pattern.compile("^marc_(?<tag>\\d{3})_ind(?<indicator>[12])$", Pattern.CASE_INSENSITIVE);
+  // Constrained-subfield form (e.g. marc_245_ind1_7_a, marc_245_ind1_blank_a). Targets a subfield value like
+  // the subfield form, but with the indicator fixed to a constant matched on the SAME marc_indexers row. The
+  // fixed indicator value is a single alphanumeric or the public token "blank". Data-field tags (010+) only.
+  private static final Pattern CONSTRAINED_SUBFIELD_PATTERN = Pattern.compile(
+    "^marc_(?<tag>\\d{3})_ind(?<indicator>[12])_(?<indValue>blank|[a-z0-9])_(?<subfield>[a-z0-9])$",
+    Pattern.CASE_INSENSITIVE);
+  private static final String BLANK_INDICATOR_TOKEN = "blank";
+  private static final String BLANK_INDICATOR_STORAGE = "#";
   // Generic scanner for "fieldName": keys in a raw FQL query. It intentionally does NOT encode the MARC
   // grammar; every candidate key is validated through parse()/isMarcFieldName so the grammar lives in
   // exactly one place and the two cannot drift.
@@ -161,9 +169,9 @@ public class MarcFieldFactory {
   }
 
   public static Optional<MarcFieldName> parse(String fieldName) {
+    // Control fields (001-009) have no subfields or indicators, so only the tag-only form below is valid for
+    // them. The subfield/constrained/indicator forms are rejected for control tags.
     Matcher subfieldMatcher = SUBFIELD_PATTERN.matcher(fieldName);
-    // Control fields (001-009) carry a single string value with no subfields, so the subfield form is only
-    // valid for data-field tags (010+). Control fields are queryable via the tag-only form below.
     if (subfieldMatcher.matches() && !isControlFieldTag(subfieldMatcher.group("tag"))) {
       // Preserve the original field name so the synthesized column matches the name referenced in the query,
       // but normalize the subfield code to lower case to match how it is stored in marc_indexers.
@@ -171,18 +179,32 @@ public class MarcFieldFactory {
         fieldName,
         subfieldMatcher.group("tag"),
         subfieldMatcher.group("subfield").toLowerCase(),
+        null,
         null
       ));
     }
 
+    Matcher constrainedMatcher = CONSTRAINED_SUBFIELD_PATTERN.matcher(fieldName);
+    if (constrainedMatcher.matches() && !isControlFieldTag(constrainedMatcher.group("tag"))) {
+      // Subfield value target, with the indicator fixed to a constant (blank -> '#', lower-cased) matched on
+      // the same row.
+      return Optional.of(new MarcFieldName(
+        fieldName,
+        constrainedMatcher.group("tag"),
+        constrainedMatcher.group("subfield").toLowerCase(),
+        constrainedMatcher.group("indicator"),
+        normalizeIndicatorValue(constrainedMatcher.group("indValue"))
+      ));
+    }
+
     Matcher indicatorMatcher = INDICATOR_PATTERN.matcher(fieldName);
-    // Control fields have no indicators, so the indicator form is only valid for data-field tags (010+).
     if (indicatorMatcher.matches() && !isControlFieldTag(indicatorMatcher.group("tag"))) {
       return Optional.of(new MarcFieldName(
         fieldName,
         indicatorMatcher.group("tag"),
         null,
-        indicatorMatcher.group("indicator")
+        indicatorMatcher.group("indicator"),
+        null
       ));
     }
 
@@ -190,7 +212,7 @@ public class MarcFieldFactory {
     if (tagMatcher.matches()) {
       // Tag-only: no subfield target, so the predicate matches any subfield of the tag (and is the only
       // valid form for control fields, which have no subfields or indicators).
-      return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null, null));
+      return Optional.of(new MarcFieldName(fieldName, tagMatcher.group("tag"), null, null, null));
     }
 
     return Optional.empty();
@@ -200,6 +222,13 @@ public class MarcFieldFactory {
   // or subfields, just a single string value. Tags 010+ are data fields.
   private static boolean isControlFieldTag(String tag) {
     return tag.startsWith("00");
+  }
+
+  // Normalizes a fixed indicator value from a constrained-subfield field name: the public token "blank" maps
+  // to the stored '#', and other (single alphanumeric) values are lower-cased so the constraint matches
+  // case-insensitively.
+  private static String normalizeIndicatorValue(String rawValue) {
+    return BLANK_INDICATOR_TOKEN.equalsIgnoreCase(rawValue) ? BLANK_INDICATOR_STORAGE : rawValue.toLowerCase();
   }
 
   public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {
@@ -225,13 +254,13 @@ public class MarcFieldFactory {
     // once per subfield (e.g. a 245 with $a$b yields ["1","1"]). DISTINCT collapses that artifactual
     // duplication to the distinct indicator value(s). Subfield/tag values are aggregated as-is, since their
     // repetition is meaningful.
-    String distinct = marcField.isIndicator() ? "DISTINCT " : "";
+    String distinct = marcField.isIndicatorTarget() ? "DISTINCT " : "";
     return """
       (
         SELECT jsonb_agg(%smarc.%s) FILTER (WHERE marc.%s IS NOT NULL)
         FROM %s marc
         WHERE marc.marc_id = %s
-          AND marc.field_no = '%s'%s
+          AND marc.field_no = '%s'%s%s
       )
     """.formatted(
       distinct,
@@ -240,6 +269,7 @@ public class MarcFieldFactory {
       interpolateTenant(MARC_INDEXERS_VIEW, tenantId),
       marcIdGetter,
       marcField.tag(),
+      marcField.indicatorConstraintClause(),
       marcField.subfieldClause()
     ).trim();
   }
@@ -258,32 +288,51 @@ public class MarcFieldFactory {
   }
 
   /**
-   * A parsed MARC field reference. Exactly one optional target is set: {@code subfield} for the subfield
-   * form, {@code indicator} ("1"/"2") for the indicator form; both null is the tag-only form.
+   * A parsed MARC field reference across the supported forms:
+   * <ul>
+   *   <li>tag-only: {@code subfield}, {@code indicatorNumber}, {@code indicatorValue} all null</li>
+   *   <li>subfield: {@code subfield} set</li>
+   *   <li>indicator-only: {@code indicatorNumber} ("1"/"2") set, {@code indicatorValue} null (targets ind)</li>
+   *   <li>constrained-subfield: {@code indicatorNumber} + {@code indicatorValue} (fixed) + {@code subfield}</li>
+   * </ul>
    */
-  public record MarcFieldName(String fieldName, String tag, String subfield, String indicator) {
+  public record MarcFieldName(String fieldName, String tag, String subfield, String indicatorNumber, String indicatorValue) {
 
-    public boolean isIndicator() {
-      return indicator != null;
+    /** True only for the indicator-only form, where the query targets the indicator column itself. When a
+     *  fixed {@code indicatorValue} is present the indicator is a constraint and the subfield is the target. */
+    public boolean isIndicatorTarget() {
+      return indicatorNumber != null && indicatorValue == null;
     }
 
     public String labelAlias() {
       // Prefixed with "MARC" so the label identifies it as a MARC field (consistent with the generic "MARC"
-      // placeholder), e.g. "MARC 245" (tag-only), "MARC 245$a" (subfield), "MARC 245 ind1" (indicator).
-      if (isIndicator()) {
-        return "MARC %s ind%s".formatted(tag, indicator);
+      // placeholder), e.g. "MARC 245" (tag-only), "MARC 245$a" (subfield), "MARC 245 ind1" (indicator),
+      // "MARC 245 ind1=7 $a" (constrained subfield).
+      if (isIndicatorTarget()) {
+        return "MARC %s ind%s".formatted(tag, indicatorNumber);
+      }
+      if (indicatorValue != null) {
+        // Show the public "blank" token in the label rather than the stored '#'.
+        String displayValue = BLANK_INDICATOR_STORAGE.equals(indicatorValue) ? BLANK_INDICATOR_TOKEN : indicatorValue;
+        return "MARC %s ind%s=%s $%s".formatted(tag, indicatorNumber, displayValue, subfield);
       }
       return subfield == null ? "MARC %s".formatted(tag) : "MARC %s$%s".formatted(tag, subfield);
     }
 
-    /** The marc_indexers column this field targets: ind1/ind2 for indicators, otherwise the subfield value. */
+    /** The marc_indexers column this field targets: ind1/ind2 for indicator-only, otherwise the subfield value. */
     public String targetColumn() {
-      return isIndicator() ? "ind" + indicator : "value";
+      return isIndicatorTarget() ? "ind" + indicatorNumber : "value";
     }
 
-    /** WHERE fragment narrowing to a specific subfield; empty for tag-only and indicator fields. */
+    /** WHERE fragment narrowing to a specific subfield; empty for tag-only and indicator-only fields. */
     public String subfieldClause() {
       return subfield == null ? "" : " AND marc.subfield_no = '%s'".formatted(subfield);
+    }
+
+    /** WHERE fragment fixing the indicator to a constant (constrained-subfield form); empty otherwise. Matched
+     *  case-insensitively, consistent with indicator matching. */
+    public String indicatorConstraintClause() {
+      return indicatorValue == null ? "" : " AND lower(marc.ind%s) = '%s'".formatted(indicatorNumber, indicatorValue);
     }
 
     public String filterValueGetter() {
@@ -304,6 +353,9 @@ public class MarcFieldFactory {
 
     public String whereClause() {
       String clause = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
+      if (marcField.indicatorValue() != null) {
+        clause += " and lower(marc.ind%s) = '%s'".formatted(marcField.indicatorNumber(), marcField.indicatorValue());
+      }
       if (marcField.subfield() != null) {
         clause += " and marc.subfield_no = '%s'".formatted(marcField.subfield());
       }

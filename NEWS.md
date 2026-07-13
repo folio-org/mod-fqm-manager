@@ -1,6 +1,7 @@
 # 4.2.x - Umbrellaleaf
 
 ## 4.2.0 (Next)
+- [MODFQMMGR-1188](https://folio-org.atlassian.net/browse/MODFQMMGR-1188) Support MARC indicator + subfield (constrained-subfield) querying on the SRS record entity type
 - [MODFQMMGR-1143](https://folio-org.atlassian.net/browse/MODFQMMGR-1143) Support MARC indicator querying on the SRS record entity type
 - [MODFQMMGR-1141](https://folio-org.atlassian.net/browse/MODFQMMGR-1141) Support top-level MARC tag and control-field querying on the SRS record entity type
 - [MODFQMMGR-1142](https://folio-org.atlassian.net/browse/MODFQMMGR-1142) Support dynamic MARC subfield querying on the SRS record entity type

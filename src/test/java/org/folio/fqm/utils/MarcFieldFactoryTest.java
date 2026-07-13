@@ -132,10 +132,11 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldMapBlankAndNormalizeCaseForConstrainedSubfield() {
-    // Blank token maps to the stored '#'.
+    // Blank token maps to the stored '#' in SQL, but the label shows the readable "blank".
     MarcFieldFactory.MarcFieldName blank = MarcFieldFactory.parse("marc_245_ind1_blank_a").orElseThrow();
     assertEquals("#", blank.indicatorValue());
     assertTrue(blank.indicatorConstraintClause().contains("lower(marc.ind1) = '#'"));
+    assertEquals("MARC 245 ind1=blank $a", blank.labelAlias());
 
     // Uppercase input is accepted and normalized (original field name preserved; tag/subfield/indicator normalized).
     MarcFieldFactory.MarcFieldName upper = MarcFieldFactory.parse("MARC_245_IND1_7_A").orElseThrow();

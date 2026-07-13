@@ -312,7 +312,9 @@ public class MarcFieldFactory {
         return "MARC %s ind%s".formatted(tag, indicatorNumber);
       }
       if (indicatorValue != null) {
-        return "MARC %s ind%s=%s $%s".formatted(tag, indicatorNumber, indicatorValue, subfield);
+        // Show the public "blank" token in the label rather than the stored '#'.
+        String displayValue = BLANK_INDICATOR_STORAGE.equals(indicatorValue) ? BLANK_INDICATOR_TOKEN : indicatorValue;
+        return "MARC %s ind%s=%s $%s".formatted(tag, indicatorNumber, displayValue, subfield);
       }
       return subfield == null ? "MARC %s".formatted(tag) : "MARC %s$%s".formatted(tag, subfield);
     }

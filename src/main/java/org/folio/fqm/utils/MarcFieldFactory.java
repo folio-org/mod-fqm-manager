@@ -23,7 +23,7 @@ import org.folio.querytool.domain.dto.Field;
  * by the shared lib ({@link org.folio.fql.service.MarcFieldFactory}), so the grammar lives in exactly one place.
  * This class layers the mod-fqm-manager-specific SQL onto the lib's parsed results: the {@code valueGetter} that
  * correlates against the marc_indexers view, the filter/value functions, and the row-level predicates used for
- * querying.</p>
+ * querying.
  */
 @UtilityClass
 public class MarcFieldFactory {

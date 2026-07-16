@@ -11,9 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import org.folio.fql.model.AndCondition;
 import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
@@ -23,154 +21,17 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.MarcType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
+/**
+ * Covers the SQL that mod-fqm-manager layers onto MARC fields: synthetic column value getters and the query
+ * context clauses. Field-name parsing, recognition, and metadata-only column generation are owned and tested by
+ * the shared lib (org.folio.fql.service.MarcFieldFactoryTest), so they are intentionally not re-tested here.
+ */
 class MarcFieldFactoryTest {
 
   private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
 
-  @ParameterizedTest(name = "{0} -> valid={1} ({2})")
-  @CsvSource({
-    "marc_245_a,    true,  subfield",
-    "marc_650_0,    true,  subfield with numeric code",
-    "marc_245,      true,  tag-only",
-    "marc_001,      true,  control field (tag-only)",
-    "marc_245_ind1, true,  indicator 1",
-    "marc_245_ind2, true,  indicator 2",
-    "marc_245_ind1_7_a,     true,  constrained subfield",
-    "marc_650_ind2_7_a,     true,  constrained subfield (ind2)",
-    "marc_245_ind1_blank_a, true,  constrained subfield with blank indicator",
-    "marc_24_a,     false, tag must be exactly 3 digits",
-    "marc_2451_a,   false, tag must be exactly 3 digits",
-    "marc_abc_a,    false, tag must be numeric",
-    "marc_245_aa,   false, subfield must be a single character",
-    "245_a,         false, missing marc_ prefix",
-    "marc_001_a,    false, control field has no subfields",
-    "marc_008_ind1, false, control field has no indicators",
-    "marc_008_ind2_7_a,     false, control field cannot use constrained subfield",
-    "marc_245_ind3_7_a,     false, indicator number must be 1 or 2",
-    "marc_245_ind1_ab_a,    false, fixed indicator value must be single char or blank",
-  })
-  void shouldRecognizeMarcFieldNames(String fieldName, boolean valid, String why) {
-    assertEquals(valid, MarcFieldFactory.isMarcFieldName(fieldName), why);
-  }
-
-  @Test
-  void shouldTreatControlFieldAsTagOnly() {
-    // A control field is queryable only as a whole-string, tag-only field
-    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_008").orElseThrow();
-    assertEquals("008", parsed.tag());
-    assertNull(parsed.subfield());
-  }
-
-  @Test
-  void shouldSupportIndicatorFields() {
-    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245_ind1").orElseThrow();
-    assertEquals("245", parsed.tag());
-    assertNull(parsed.subfield());
-    assertEquals("1", parsed.indicatorNumber());
-    assertTrue(parsed.isIndicatorTarget());
-    assertEquals("ind1", parsed.targetColumn());
-    assertEquals("MARC 245 ind1", parsed.labelAlias());
-    // Indicators target the ind1/ind2 column, matched case-insensitively like other MARC values.
-    assertEquals("lower(marc.ind1)", parsed.filterValueGetter());
-    assertEquals("lower(:value)", parsed.valueFunction());
-
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
-    assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
-    assertEquals("lower(:value)", column.getValueFunction());
-    // Indicators are deduplicated (DISTINCT) so a multi-subfield field doesn't return repeated values.
-    assertTrue(column.getValueGetter().contains("jsonb_agg(DISTINCT marc.ind1)"));
-    assertFalse(column.getValueGetter().contains("subfield_no"));
-
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
-    assertEquals("lower(marc.ind1)", context.filterValueGetter());
-    // No subfield_no constraint; comparison is against the indicator column.
-    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245'", context.whereClause());
-    assertEquals(
-      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = {0})",
-      context.existsClause("=", true)
-    );
-  }
-
-  @Test
-  void shouldSupportConstrainedSubfieldFields() {
-    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245_ind1_7_a").orElseThrow();
-    assertEquals("245", parsed.tag());
-    assertEquals("a", parsed.subfield());
-    assertEquals("1", parsed.indicatorNumber());
-    assertEquals("7", parsed.indicatorValue());
-    // The subfield value is the target; the indicator is a fixed same-row constraint (not the target).
-    assertFalse(parsed.isIndicatorTarget());
-    assertEquals("value", parsed.targetColumn());
-    assertEquals("lower(marc.value)", parsed.filterValueGetter());
-    assertEquals("MARC 245 ind1=7 $a", parsed.labelAlias());
-
-    // Synthetic column: value target (no DISTINCT), aggregated only from rows matching the fixed indicator.
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a", "diku").orElseThrow();
-    assertEquals("lower(marc.value)", column.getFilterValueGetter());
-    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.value)"));
-    assertFalse(column.getValueGetter().contains("DISTINCT"));
-
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_7_a"), "diku");
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_7_a").orElseThrow();
-    // Same-row constraint: field_no + fixed indicator + subfield_no, targeting the value column.
-    assertEquals(
-      "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a'",
-      context.whereClause()
-    );
-    assertEquals(
-      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
-        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a' "
-        + "and lower(marc.value) = {0})",
-      context.existsClause("=", true)
-    );
-  }
-
-  @Test
-  void shouldMapBlankAndNormalizeCaseForConstrainedSubfield() {
-    // Blank token maps to the stored '#' in SQL, but the label shows the readable "blank".
-    MarcFieldFactory.MarcFieldName blank = MarcFieldFactory.parse("marc_245_ind1_blank_a").orElseThrow();
-    assertEquals("#", blank.indicatorValue());
-    assertTrue(blank.indicatorConstraintClause().contains("lower(marc.ind1) = '#'"));
-    assertEquals("MARC 245 ind1=blank $a", blank.labelAlias());
-
-    // Uppercase input is accepted and normalized (original field name preserved; tag/subfield/indicator normalized).
-    MarcFieldFactory.MarcFieldName upper = MarcFieldFactory.parse("MARC_245_IND1_7_A").orElseThrow();
-    assertEquals("MARC_245_IND1_7_A", upper.fieldName());
-    assertEquals("245", upper.tag());
-    assertEquals("a", upper.subfield());
-    assertEquals("1", upper.indicatorNumber());
-    assertEquals("7", upper.indicatorValue());
-  }
-
-  @Test
-  void shouldParseTagOnlyFieldNameWithNoSubfield() {
-    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("marc_245").orElseThrow();
-
-    assertEquals("marc_245", parsed.fieldName());
-    assertEquals("245", parsed.tag());
-    assertNull(parsed.subfield());
-    // Label and the synthesized SQL omit the subfield, so the predicate matches any subfield of the tag.
-    assertEquals("MARC 245", parsed.labelAlias());
-    assertEquals("", parsed.subfieldClause());
-  }
-
-  @Test
-  void shouldAcceptUppercaseFieldNamesAndNormalizeSubfield() {
-    assertTrue(MarcFieldFactory.isMarcFieldName("MARC_245_A"));
-
-    MarcFieldFactory.MarcFieldName parsed = MarcFieldFactory.parse("MARC_245_A").orElseThrow();
-    // Original name is preserved (so it matches the name referenced in the query)...
-    assertEquals("MARC_245_A", parsed.fieldName());
-    // ...but the subfield is normalized to lower case to match marc_indexers storage.
-    assertEquals("245", parsed.tag());
-    assertEquals("a", parsed.subfield());
-    assertEquals("MARC 245$a", parsed.labelAlias());
-  }
+  // ---- Synthetic column SQL -------------------------------------------------------------------------------
 
   @Test
   void shouldCreateSubfieldSyntheticColumn() {
@@ -198,6 +59,31 @@ class MarcFieldFactoryTest {
   }
 
   @Test
+  void shouldCreateIndicatorSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
+
+    assertEquals("MARC 245 ind1", column.getLabelAlias());
+    assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
+    assertEquals("lower(:value)", column.getValueFunction());
+    // Indicators are deduplicated (DISTINCT) so a multi-subfield field doesn't return repeated values.
+    assertTrue(column.getValueGetter().contains("jsonb_agg(DISTINCT marc.ind1)"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
+  }
+
+  @Test
+  void shouldCreateConstrainedSubfieldSyntheticColumn() {
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a", "diku").orElseThrow();
+
+    assertEquals("MARC 245 ind1=7 $a", column.getLabelAlias());
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    // Value target (no DISTINCT), aggregated only from rows matching the fixed indicator + subfield.
+    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.value)"));
+    assertFalse(column.getValueGetter().contains("DISTINCT"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '7'"));
+    assertTrue(column.getValueGetter().contains("marc.subfield_no = 'a'"));
+  }
+
+  @Test
   void shouldInterpolateTenantIdWhenProvided() {
     EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(
       entityTypeWithMarcSupport(),
@@ -213,6 +99,62 @@ class MarcFieldFactoryTest {
   void shouldReturnEmptyForInvalidMarcFieldName() {
     assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_24_a", null));
   }
+
+  @Test
+  void shouldReturnEmptyWhenEntityTypeHasNoMarcPlaceholder() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("no-marc")
+      .columns(List.of(
+        new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("rangedUUIDType"))
+      ));
+
+    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null));
+  }
+
+  @Test
+  void shouldThrowWhenMarcPlaceholderOmitsCorrelationValueGetter() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("test")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("marc")
+          .dataType(new MarcType().dataType("marcType"))
+      ));
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
+    );
+  }
+
+  @Test
+  void shouldThrowWhenMarcPlaceholderValueGetterIsBlank() {
+    EntityType entityType = new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("blank-getter")
+      .columns(List.of(
+        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter("   ")
+      ));
+
+    assertThrows(
+      InvalidEntityTypeDefinitionException.class,
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
+    );
+  }
+
+  @Test
+  void shouldThrowWhenSynthesizingMarcColumnWithBlankTenant() {
+    EntityType entityType = entityTypeWithMarcSupport();
+
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", "   ")
+    );
+  }
+
+  // ---- addSyntheticColumns orchestration -------------------------------------------------------------------
 
   @Test
   void shouldAddSyntheticColumnsForReferencedMarcFields() {
@@ -249,38 +191,16 @@ class MarcFieldFactoryTest {
   }
 
   @Test
-  void shouldCollectReferencedFieldNamesFromFqlCondition() {
-    Set<String> fieldNames = MarcFieldFactory.getReferencedFieldNames(new AndCondition(List.of(
-      new ContainsCondition(new FqlField("marc_245_a"), "Shakespeare"),
-      new ContainsCondition(new FqlField("record_type"), "MARC_BIB")
-    )));
+  void shouldAddSyntheticColumnsFromRawQueryString() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+      entityTypeWithMarcSupport(),
+      "{\"marc_245_a\": {\"$contains\": \"Shakespeare\"}}",
+      "diku"
+    );
 
-    assertEquals(Set.of("marc_245_a", "record_type"), fieldNames);
-  }
-
-  @Test
-  void shouldCollectReferencedMarcFieldNamesFromRawQuery() {
-    String fqlQuery = """
-      {"$and": [{"marc_245_a": {"$contains": "Shakespeare"}}, {"external_hrid": {"$eq": "123"}}]}
-      """;
-
-    assertEquals(Set.of("marc_245_a"), MarcFieldFactory.getReferencedMarcFieldNames(fqlQuery));
-  }
-
-  @Test
-  void shouldThrowWhenMarcPlaceholderOmitsCorrelationValueGetter() {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("test")
-      .columns(List.of(
-        new EntityTypeColumn()
-          .name("marc")
-          .dataType(new MarcType().dataType("marcType"))
-      ));
-
-    assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
+    assertEquals(
+      List.of("matched_id", "marc", "marc_245_a"),
+      entityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
     );
   }
 
@@ -304,32 +224,6 @@ class MarcFieldFactoryTest {
       IllegalArgumentException.class,
       () -> MarcFieldFactory.addSyntheticColumns(entityType, fieldNames, null)
     );
-  }
-
-  @Test
-  void shouldAddSyntheticColumnsFromRawQueryString() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
-      entityTypeWithMarcSupport(),
-      "{\"marc_245_a\": {\"$contains\": \"Shakespeare\"}}",
-      "diku"
-    );
-
-    assertEquals(
-      List.of("matched_id", "marc", "marc_245_a"),
-      entityType.getColumns().stream().map(EntityTypeColumn::getName).toList()
-    );
-  }
-
-  @Test
-  void shouldReturnEmptySetForNullOrBlankRawQuery() {
-    assertEquals(Set.of(), MarcFieldFactory.getReferencedMarcFieldNames(null));
-    assertEquals(Set.of(), MarcFieldFactory.getReferencedMarcFieldNames("   "));
-  }
-
-  @Test
-  void shouldReturnEmptySetForNullOrUnsupportedFqlCondition() {
-    // null is neither a FieldCondition nor an AndCondition, exercising the fall-through return.
-    assertEquals(Set.of(), MarcFieldFactory.getReferencedFieldNames(null));
   }
 
   @Test
@@ -362,42 +256,7 @@ class MarcFieldFactoryTest {
     );
   }
 
-  @Test
-  void shouldReturnEmptyWhenEntityTypeHasNoMarcPlaceholder() {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("no-marc")
-      .columns(List.of(
-        new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("rangedUUIDType"))
-      ));
-
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null));
-  }
-
-  @Test
-  void shouldThrowWhenMarcPlaceholderValueGetterIsBlank() {
-    EntityType entityType = new EntityType()
-      .id(UUID.randomUUID().toString())
-      .name("blank-getter")
-      .columns(List.of(
-        new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType")).valueGetter("   ")
-      ));
-
-    assertThrows(
-      InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
-    );
-  }
-
-  @Test
-  void shouldThrowWhenSynthesizingMarcColumnWithBlankTenant() {
-    EntityType entityType = entityTypeWithMarcSupport();
-
-    assertThrows(
-      IllegalArgumentException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", "   ")
-    );
-  }
+  // ---- Query context clauses -------------------------------------------------------------------------------
 
   @Test
   void shouldBuildQueryContextAndItsClauses() {
@@ -428,6 +287,53 @@ class MarcFieldFactoryTest {
       "exists (" + subqueryPrefix + " and lower(marc.value) is not null and lower(marc.value) <> '')",
       context.presenceClause()
     );
+  }
+
+  @Test
+  void shouldBuildIndicatorQueryContext() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
+
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
+
+    assertEquals("lower(marc.ind1)", context.filterValueGetter());
+    // No subfield_no constraint; comparison is against the indicator column.
+    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245'", context.whereClause());
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = {0})",
+      context.existsClause("=", true)
+    );
+  }
+
+  @Test
+  void shouldBuildConstrainedSubfieldQueryContext() {
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_7_a"), "diku");
+
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_7_a").orElseThrow();
+
+    // Same-row constraint: field_no + fixed indicator + subfield_no, targeting the value column.
+    assertEquals(
+      "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a'",
+      context.whereClause()
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '7' and marc.subfield_no = 'a' "
+        + "and lower(marc.value) = {0})",
+      context.existsClause("=", true)
+    );
+  }
+
+  @Test
+  void shouldMapBlankIndicatorToStoredHashInSql() {
+    // The public "blank" token maps to the stored '#' in generated SQL, while the label stays readable.
+    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_blank_a"), "diku");
+    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_blank_a").orElseThrow();
+    assertTrue(context.whereClause().contains("lower(marc.ind1) = '#'"));
+
+    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_a", "diku").orElseThrow();
+    assertEquals("MARC 245 ind1=blank $a", column.getLabelAlias());
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '#'"));
   }
 
   @Test
@@ -491,18 +397,7 @@ class MarcFieldFactoryTest {
       MarcFieldFactory.createQueryContext(entityTypeForContext("getter", "SELECT 1"), "marc_245_a"));
   }
 
-  @Test
-  void shouldIdentifyGenericMarcPlaceholder() {
-    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(null));
-    assertTrue(MarcFieldFactory.isGenericMarcPlaceholder(
-      new EntityTypeColumn().name("marc").dataType(new MarcType().dataType("marcType"))));
-    // wrong name
-    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(
-      new EntityTypeColumn().name("not_marc").dataType(new MarcType().dataType("marcType"))));
-    // right name, wrong data type
-    assertFalse(MarcFieldFactory.isGenericMarcPlaceholder(
-      new EntityTypeColumn().name("marc").dataType(new EntityDataType().dataType("stringType"))));
-  }
+  // ---- Fixtures --------------------------------------------------------------------------------------------
 
   private static EntityType entityTypeWithMarcSupport() {
     return new EntityType()

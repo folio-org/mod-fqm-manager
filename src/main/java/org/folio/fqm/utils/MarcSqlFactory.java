@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 import org.folio.fql.model.FqlCondition;
 import org.folio.fql.model.field.MarcFieldName;
+import org.folio.fql.service.MarcFieldFactory;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -20,47 +21,26 @@ import org.folio.querytool.domain.dto.Field;
  * Builds the SQL-bearing synthetic columns and query contexts for dynamic MARC fields.
  *
  * <p>MARC field-name parsing, recognition, placeholder detection, and metadata-only column generation are owned
- * by the shared lib ({@link org.folio.fql.service.MarcFieldFactory}), so the grammar lives in exactly one place.
- * This class layers the mod-fqm-manager-specific SQL onto the lib's parsed results: the {@code valueGetter} that
- * correlates against the marc_indexers view, the filter/value functions, and the row-level predicates used for
- * querying.
+ * by the shared lib ({@link MarcFieldFactory}), so the grammar lives in exactly one place. This class layers the
+ * mod-fqm-manager-specific SQL onto the lib's parsed results: the {@code valueGetter} that correlates against the
+ * marc_indexers view, the filter/value functions, and the row-level predicates used for querying.
  */
 @UtilityClass
-public class MarcFieldFactory {
+public class MarcSqlFactory {
 
   private static final String MARC_INDEXERS_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers";
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
   private static final Pattern MARC_TABLE_PATTERN =
     Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
 
-  // ---- Delegation to the shared lib -----------------------------------------------------------------------
-  // Thin pass-throughs so existing mod-fqm-manager call sites keep a single entry point while the grammar and
-  // placeholder logic live in the lib.
-
-  public static Set<String> getReferencedMarcFieldNames(String rawQuery) {
-    return org.folio.fql.service.MarcFieldFactory.getReferencedMarcFieldNames(rawQuery);
-  }
-
-  public static Set<String> getReferencedMarcFieldNames(FqlCondition<?> condition) {
-    return org.folio.fql.service.MarcFieldFactory.getReferencedMarcFieldNames(condition);
-  }
-
-  public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {
-    return org.folio.fql.service.MarcFieldFactory.findMarcPlaceholder(entityType);
-  }
-
-  public static boolean isGenericMarcPlaceholder(EntityTypeColumn column) {
-    return org.folio.fql.service.MarcFieldFactory.isGenericMarcPlaceholder(column);
-  }
-
   // ---- Synthetic column construction ----------------------------------------------------------------------
 
   public static EntityType addSyntheticColumns(EntityType entityType, String rawQuery, String tenantId) {
-    return addSyntheticColumns(entityType, getReferencedMarcFieldNames(rawQuery), tenantId);
+    return addSyntheticColumns(entityType, MarcFieldFactory.getReferencedMarcFieldNames(rawQuery), tenantId);
   }
 
   public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
-    return addSyntheticColumns(entityType, getReferencedMarcFieldNames(condition), tenantId);
+    return addSyntheticColumns(entityType, MarcFieldFactory.getReferencedMarcFieldNames(condition), tenantId);
   }
 
   public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames, String tenantId) {
@@ -88,8 +68,8 @@ public class MarcFieldFactory {
   }
 
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {
-    Optional<MarcFieldName> parsedField = org.folio.fql.service.MarcFieldFactory.parse(fieldName);
-    Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
+    Optional<MarcFieldName> parsedField = MarcFieldFactory.parse(fieldName);
+    Optional<EntityTypeColumn> placeholder = MarcFieldFactory.findMarcPlaceholder(entityType);
 
     if (parsedField.isEmpty() || placeholder.isEmpty()) {
       return Optional.empty();
@@ -113,15 +93,15 @@ public class MarcFieldFactory {
 
     MarcFieldName marcField = parsedField.get();
     // The lib supplies the metadata-only column (name, label, marcType); mod-fqm-manager layers on the SQL.
-    return Optional.of(org.folio.fql.service.MarcFieldFactory.toColumn(marcField)
+    return Optional.of(MarcFieldFactory.toColumn(marcField)
       .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
       .filterValueGetter(filterValueGetter(marcField))
       .valueFunction(MARC_VALUE_FUNCTION));
   }
 
   public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
-    Optional<MarcFieldName> parsedField = org.folio.fql.service.MarcFieldFactory.parse(fieldName);
-    Optional<EntityTypeColumn> placeholder = findMarcPlaceholder(entityType);
+    Optional<MarcFieldName> parsedField = MarcFieldFactory.parse(fieldName);
+    Optional<EntityTypeColumn> placeholder = MarcFieldFactory.findMarcPlaceholder(entityType);
     Optional<EntityTypeColumn> syntheticField = EntityTypeUtils.findColumn(entityType, fieldName);
 
     if (parsedField.isEmpty() || placeholder.isEmpty() || syntheticField.isEmpty()) {
@@ -205,7 +185,7 @@ public class MarcFieldFactory {
 
     /** SQL expression the search value is compared against (the value column, or an indicator column). */
     public String filterValueGetter() {
-      return MarcFieldFactory.filterValueGetter(marcField);
+      return MarcSqlFactory.filterValueGetter(marcField);
     }
 
     public String whereClause() {

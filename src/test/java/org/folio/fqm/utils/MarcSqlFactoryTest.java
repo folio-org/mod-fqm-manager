@@ -15,7 +15,7 @@ import java.util.UUID;
 import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
-import org.folio.fqm.utils.MarcFieldFactory.MarcQueryContext;
+import org.folio.fqm.utils.MarcSqlFactory.MarcQueryContext;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  * context clauses. Field-name parsing, recognition, and metadata-only column generation are owned and tested by
  * the shared lib (org.folio.fql.service.MarcFieldFactoryTest), so they are intentionally not re-tested here.
  */
-class MarcFieldFactoryTest {
+class MarcSqlFactoryTest {
 
   private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
 
@@ -35,7 +35,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateSubfieldSyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "diku").orElseThrow();
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_a", "diku").orElseThrow();
 
     assertEquals("marc_245_a", column.getName());
     assertEquals("MARC 245$a", column.getLabelAlias());
@@ -47,7 +47,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateTagOnlySyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", "diku").orElseThrow();
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245", "diku").orElseThrow();
 
     assertEquals("marc_245", column.getName());
     assertEquals("MARC 245", column.getLabelAlias());
@@ -60,7 +60,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateIndicatorSyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1", "diku").orElseThrow();
 
     assertEquals("MARC 245 ind1", column.getLabelAlias());
     assertEquals("lower(marc.ind1)", column.getFilterValueGetter());
@@ -72,7 +72,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldCreateConstrainedSubfieldSyntheticColumn() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a", "diku").orElseThrow();
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_7_a", "diku").orElseThrow();
 
     assertEquals("MARC 245 ind1=7 $a", column.getLabelAlias());
     assertEquals("lower(marc.value)", column.getFilterValueGetter());
@@ -85,7 +85,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldInterpolateTenantIdWhenProvided() {
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(
       entityTypeWithMarcSupport(),
       "marc_245_a",
       "diku"
@@ -97,7 +97,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldReturnEmptyForInvalidMarcFieldName() {
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_24_a", null));
+    assertEquals(Optional.empty(), MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_24_a", null));
   }
 
   @Test
@@ -109,7 +109,7 @@ class MarcFieldFactoryTest {
         new EntityTypeColumn().name("matched_id").dataType(new EntityDataType().dataType("rangedUUIDType"))
       ));
 
-    assertEquals(Optional.empty(), MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null));
+    assertEquals(Optional.empty(), MarcSqlFactory.createSyntheticColumn(entityType, "marc_245_a", null));
   }
 
   @Test
@@ -125,7 +125,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
+      () -> MarcSqlFactory.createSyntheticColumn(entityType, "marc_245_a", null)
     );
   }
 
@@ -140,7 +140,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       InvalidEntityTypeDefinitionException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", null)
+      () -> MarcSqlFactory.createSyntheticColumn(entityType, "marc_245_a", null)
     );
   }
 
@@ -150,7 +150,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.createSyntheticColumn(entityType, "marc_245_a", "   ")
+      () -> MarcSqlFactory.createSyntheticColumn(entityType, "marc_245_a", "   ")
     );
   }
 
@@ -158,7 +158,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldAddSyntheticColumnsForReferencedMarcFields() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(
       entityTypeWithMarcSupport(),
       List.of("marc_245_a", "field_that_is_not_marc"),
       "diku"
@@ -174,7 +174,7 @@ class MarcFieldFactoryTest {
   void shouldNotMutateOriginalEntityTypeWhenAddingSyntheticColumns() {
     EntityType originalEntityType = entityTypeWithMarcSupport();
 
-    EntityType augmentedEntityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType augmentedEntityType = MarcSqlFactory.addSyntheticColumns(
       originalEntityType,
       List.of("marc_245_a"),
       "diku"
@@ -192,7 +192,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldAddSyntheticColumnsFromRawQueryString() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(
       entityTypeWithMarcSupport(),
       "{\"marc_245_a\": {\"$contains\": \"Shakespeare\"}}",
       "diku"
@@ -211,7 +211,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.addSyntheticColumns(entityType, condition, null)
+      () -> MarcSqlFactory.addSyntheticColumns(entityType, condition, null)
     );
   }
 
@@ -222,7 +222,7 @@ class MarcFieldFactoryTest {
 
     assertThrows(
       IllegalArgumentException.class,
-      () -> MarcFieldFactory.addSyntheticColumns(entityType, fieldNames, null)
+      () -> MarcSqlFactory.addSyntheticColumns(entityType, fieldNames, null)
     );
   }
 
@@ -231,20 +231,20 @@ class MarcFieldFactoryTest {
     EntityType entityType = entityTypeWithMarcSupport();
 
     // null collection
-    assertEquals(entityType, MarcFieldFactory.addSyntheticColumns(entityType, (Collection<String>) null, "diku"));
+    assertEquals(entityType, MarcSqlFactory.addSyntheticColumns(entityType, (Collection<String>) null, "diku"));
     // empty collection
-    assertEquals(entityType, MarcFieldFactory.addSyntheticColumns(entityType, List.of(), "diku"));
+    assertEquals(entityType, MarcSqlFactory.addSyntheticColumns(entityType, List.of(), "diku"));
 
     // entity type with null columns
     EntityType noColumns = new EntityType().id(UUID.randomUUID().toString()).name("no-columns").columns(null);
-    EntityType result = MarcFieldFactory.addSyntheticColumns(noColumns, List.of("marc_245_a"), "diku");
+    EntityType result = MarcSqlFactory.addSyntheticColumns(noColumns, List.of("marc_245_a"), "diku");
     assertNull(result.getColumns());
   }
 
   @Test
   void shouldSkipNullAndAlreadyPresentFieldNames() {
     // "marc" is already present (the placeholder), null should be skipped, only marc_245_a is added.
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(
       entityTypeWithMarcSupport(),
       Arrays.asList("marc", null, "marc_245_a"),
       "diku"
@@ -260,9 +260,9 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldBuildQueryContextAndItsClauses() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_a"), "diku");
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_a"), "diku");
 
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_a").orElseThrow();
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_245_a").orElseThrow();
 
     String table = "diku_mod_fqm_manager.src_srs_marc_indexers";
     String where = "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and marc.subfield_no = 'a'";
@@ -291,9 +291,9 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldBuildIndicatorQueryContext() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
 
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_245_ind1").orElseThrow();
 
     assertEquals("lower(marc.ind1)", context.filterValueGetter());
     // No subfield_no constraint; comparison is against the indicator column.
@@ -307,9 +307,9 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldBuildConstrainedSubfieldQueryContext() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_7_a"), "diku");
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_7_a"), "diku");
 
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_7_a").orElseThrow();
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_245_ind1_7_a").orElseThrow();
 
     // Same-row constraint: field_no + fixed indicator + subfield_no, targeting the value column.
     assertEquals(
@@ -327,20 +327,20 @@ class MarcFieldFactoryTest {
   @Test
   void shouldMapBlankIndicatorToStoredHashInSql() {
     // The public "blank" token maps to the stored '#' in generated SQL, while the label stays readable.
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_blank_a"), "diku");
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245_ind1_blank_a").orElseThrow();
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_blank_a"), "diku");
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_245_ind1_blank_a").orElseThrow();
     assertTrue(context.whereClause().contains("lower(marc.ind1) = '#'"));
 
-    EntityTypeColumn column = MarcFieldFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_a", "diku").orElseThrow();
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_blank_a", "diku").orElseThrow();
     assertEquals("MARC 245 ind1=blank $a", column.getLabelAlias());
     assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '#'"));
   }
 
   @Test
   void shouldBuildTagOnlyQueryContextWithoutSubfieldPredicate() {
-    EntityType entityType = MarcFieldFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245"), "diku");
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245"), "diku");
 
-    MarcQueryContext context = MarcFieldFactory.createQueryContext(entityType, "marc_245").orElseThrow();
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_245").orElseThrow();
 
     assertEquals("245", context.marcField().tag());
     assertNull(context.marcField().subfield());
@@ -351,7 +351,7 @@ class MarcFieldFactoryTest {
 
   @Test
   void shouldReturnEmptyQueryContextForInvalidName() {
-    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_24_a"));
+    assertEquals(Optional.empty(), MarcSqlFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_24_a"));
   }
 
   @Test
@@ -363,13 +363,13 @@ class MarcFieldFactoryTest {
         new EntityTypeColumn().name("marc_245_a").dataType(new MarcType().dataType("marcType")).valueGetter("x")
       ));
 
-    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityType, "marc_245_a"));
+    assertEquals(Optional.empty(), MarcSqlFactory.createQueryContext(entityType, "marc_245_a"));
   }
 
   @Test
   void shouldReturnEmptyQueryContextWhenSyntheticFieldNotPresent() {
     // Placeholder present, but marc_245_a has not been synthesized onto the entity type.
-    assertEquals(Optional.empty(), MarcFieldFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_245_a"));
+    assertEquals(Optional.empty(), MarcSqlFactory.createQueryContext(entityTypeWithMarcSupport(), "marc_245_a"));
   }
 
   @Test
@@ -378,23 +378,23 @@ class MarcFieldFactoryTest {
 
     // marcIdGetter null (placeholder has no valueGetter)
     assertEquals(Optional.empty(),
-      MarcFieldFactory.createQueryContext(entityTypeForContext(null, validSyntheticGetter), "marc_245_a"));
+      MarcSqlFactory.createQueryContext(entityTypeForContext(null, validSyntheticGetter), "marc_245_a"));
     // marcIdGetter blank
     assertEquals(Optional.empty(),
-      MarcFieldFactory.createQueryContext(entityTypeForContext("   ", validSyntheticGetter), "marc_245_a"));
+      MarcSqlFactory.createQueryContext(entityTypeForContext("   ", validSyntheticGetter), "marc_245_a"));
     // synthetic valueGetter null
     assertEquals(Optional.empty(),
-      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", null), "marc_245_a"));
+      MarcSqlFactory.createQueryContext(entityTypeForContext("getter", null), "marc_245_a"));
     // synthetic valueGetter blank
     assertEquals(Optional.empty(),
-      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", "   "), "marc_245_a"));
+      MarcSqlFactory.createQueryContext(entityTypeForContext("getter", "   "), "marc_245_a"));
   }
 
   @Test
   void shouldReturnEmptyQueryContextWhenTableNameNotExtractable() {
     // valueGetter is present and non-blank but has no "FROM <table> marc", so the table can't be extracted.
     assertEquals(Optional.empty(),
-      MarcFieldFactory.createQueryContext(entityTypeForContext("getter", "SELECT 1"), "marc_245_a"));
+      MarcSqlFactory.createQueryContext(entityTypeForContext("getter", "SELECT 1"), "marc_245_a"));
   }
 
   // ---- Fixtures --------------------------------------------------------------------------------------------

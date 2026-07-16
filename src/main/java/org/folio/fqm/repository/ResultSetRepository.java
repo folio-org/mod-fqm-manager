@@ -21,8 +21,9 @@ import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.service.EntityTypeFlatteningService;
 import org.folio.fqm.service.EntityTypeInitializationService;
 import org.folio.fqm.service.FqlToSqlConverterService;
+import org.folio.fql.service.MarcFieldFactory;
 import org.folio.fqm.utils.EntityTypeUtils;
-import org.folio.fqm.utils.MarcFieldFactory;
+import org.folio.fqm.utils.MarcSqlFactory;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.fqm.utils.flattening.FromClauseUtils;
 import org.folio.querytool.domain.dto.EntityDataType;
@@ -69,7 +70,7 @@ public class ResultSetRepository {
       return List.of();
     }
 
-    EntityType baseEntityType = MarcFieldFactory.addSyntheticColumns(
+    EntityType baseEntityType = MarcSqlFactory.addSyntheticColumns(
       getEntityType(executionContext.getTenantId(), entityTypeId),
       fields,
       executionContext.getTenantId()
@@ -80,7 +81,7 @@ public class ResultSetRepository {
     for (int i = 0; i < tenantsToQuery.size(); i++) {
       String tenantId = tenantsToQuery.get(i);
       EntityType entityTypeDefinition = tenantId != null && tenantId.equals(executionContext.getTenantId()) ? baseEntityType : getEntityType(tenantId, entityTypeId);
-      entityTypeDefinition = MarcFieldFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
+      entityTypeDefinition = MarcSqlFactory.addSyntheticColumns(entityTypeDefinition, fields, tenantId);
       List<String> idColumnValueGetters = EntityTypeUtils.getIdColumnValueGetters(entityTypeDefinition);
 
       // We may have joins to columns which are filtered out via essentialOnly/etc. Therefore, we must re-fetch
@@ -271,7 +272,7 @@ public class ResultSetRepository {
                                                      String tenantId) {
     Set<String> referencedFieldNames = new LinkedHashSet<>(fields);
     referencedFieldNames.addAll(MarcFieldFactory.getReferencedMarcFieldNames(condition));
-    return MarcFieldFactory.addSyntheticColumns(entityType, referencedFieldNames, tenantId);
+    return MarcSqlFactory.addSyntheticColumns(entityType, referencedFieldNames, tenantId);
   }
 
   private Condition buildWhereClause(EntityType entityType, List<List<String>> ids, List<String> idColumnNames, List<String> idColumnValueGetters) {

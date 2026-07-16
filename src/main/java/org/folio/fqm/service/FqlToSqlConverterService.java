@@ -17,8 +17,8 @@ import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
-import org.folio.fqm.utils.MarcFieldFactory;
-import org.folio.fqm.utils.MarcFieldFactory.MarcQueryContext;
+import org.folio.fqm.utils.MarcSqlFactory;
+import org.folio.fqm.utils.MarcSqlFactory.MarcQueryContext;
 import org.folio.fqm.utils.SqlFieldIdentificationUtils;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
@@ -107,7 +107,7 @@ public class FqlToSqlConverterService {
       Field fqmField = getField(fieldCondition, entityType);
       if (fqmField.getDataType() instanceof MarcType) {
         MarcQueryContext marcQueryContext =
-          MarcFieldFactory.createQueryContext(entityType, fieldCondition.field().getColumnName())
+          MarcSqlFactory.createQueryContext(entityType, fieldCondition.field().getColumnName())
             .orElseThrow(() -> new FieldNotFoundException(entityType.getName(), fieldCondition.field()));
         return handleMarcCondition(fieldCondition, entityType, marcQueryContext);
       }

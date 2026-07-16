@@ -3,7 +3,7 @@ package org.folio.fqm.service;
 import org.folio.fql.service.FqlService;
 import org.folio.fqm.exception.FieldNotFoundException;
 import org.folio.fqm.exception.InvalidFqlException;
-import org.folio.fqm.utils.MarcFieldFactory;
+import org.folio.fqm.utils.MarcSqlFactory;
 import org.folio.querytool.domain.dto.ArrayType;
 import org.folio.querytool.domain.dto.DateTimeType;
 import org.folio.querytool.domain.dto.DateType;
@@ -117,7 +117,7 @@ class FqlToSqlConverterServiceTest {
                 ))))
         )
       );
-    entityType = MarcFieldFactory.addSyntheticColumns(entityType,
+    entityType = MarcSqlFactory.addSyntheticColumns(entityType,
       List.of("marc_245_a", "marc_245", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a"), "diku");
   }
 
@@ -1553,7 +1553,7 @@ class FqlToSqlConverterServiceTest {
   void shouldGenerateMarcSubfieldContainsCondition() {
     // Representative end-to-end check that a MARC subfield reference routes into the MARC exists-subquery
     // against the correct table/field_no/subfield_no. The other operator tests assume routing works and
-    // assert only the operator-specific shape; the exact clause SQL is verified in MarcFieldFactoryTest.
+    // assert only the operator-specific shape; the exact clause SQL is verified in MarcSqlFactoryTest.
     String rendered = renderMarcCondition("""
       {"marc_245_a": {"$contains": "Shakespeare"}}""");
 
@@ -1568,7 +1568,7 @@ class FqlToSqlConverterServiceTest {
 
   // Equality-style operator routing across the two MARC value-handling paths: subfield/tag values
   // (lower(marc.value)) and indicators (lower(marc.ind1)). The exact clause SQL is verified in
-  // MarcFieldFactoryTest; here we only assert that each operator routes to the right clause shape.
+  // MarcSqlFactoryTest; here we only assert that each operator routes to the right clause shape.
   @ParameterizedTest(name = "{0}")
   @MethodSource("marcEqualityOperatorCases")
   void shouldRouteMarcEqualityOperator(String label, String fql,

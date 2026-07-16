@@ -41,8 +41,8 @@ public class MarcFieldFactory {
     return org.folio.fql.service.MarcFieldFactory.getReferencedMarcFieldNames(rawQuery);
   }
 
-  public static Set<String> getReferencedFieldNames(FqlCondition<?> condition) {
-    return org.folio.fql.service.MarcFieldFactory.getReferencedFieldNames(condition);
+  public static Set<String> getReferencedMarcFieldNames(FqlCondition<?> condition) {
+    return org.folio.fql.service.MarcFieldFactory.getReferencedMarcFieldNames(condition);
   }
 
   public static Optional<EntityTypeColumn> findMarcPlaceholder(EntityType entityType) {
@@ -60,7 +60,7 @@ public class MarcFieldFactory {
   }
 
   public static EntityType addSyntheticColumns(EntityType entityType, FqlCondition<?> condition, String tenantId) {
-    return addSyntheticColumns(entityType, getReferencedFieldNames(condition), tenantId);
+    return addSyntheticColumns(entityType, getReferencedMarcFieldNames(condition), tenantId);
   }
 
   public static EntityType addSyntheticColumns(EntityType entityType, Collection<String> fieldNames, String tenantId) {

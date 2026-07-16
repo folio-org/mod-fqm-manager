@@ -270,7 +270,7 @@ public class ResultSetRepository {
                                                      FqlCondition<?> condition,
                                                      String tenantId) {
     Set<String> referencedFieldNames = new LinkedHashSet<>(fields);
-    referencedFieldNames.addAll(MarcFieldFactory.getReferencedFieldNames(condition));
+    referencedFieldNames.addAll(MarcFieldFactory.getReferencedMarcFieldNames(condition));
     return MarcFieldFactory.addSyntheticColumns(entityType, referencedFieldNames, tenantId);
   }
 

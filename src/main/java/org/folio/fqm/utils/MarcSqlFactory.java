@@ -33,8 +33,6 @@ public class MarcSqlFactory {
   private static final Pattern MARC_TABLE_PATTERN =
     Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
 
-  // ---- Synthetic column construction ----------------------------------------------------------------------
-
   public static EntityType addSyntheticColumns(EntityType entityType, String rawQuery, String tenantId) {
     return addSyntheticColumns(entityType, MarcFieldFactory.getReferencedMarcFieldNames(rawQuery), tenantId);
   }

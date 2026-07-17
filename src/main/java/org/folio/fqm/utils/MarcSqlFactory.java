@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.fql.model.FqlCondition;
 import org.folio.fql.model.field.MarcFieldName;
 import org.folio.fql.service.MarcFieldFactory;
@@ -74,7 +75,7 @@ public class MarcSqlFactory {
     }
 
     EntityTypeColumn marcPlaceholder = placeholder.get();
-    if (marcPlaceholder.getValueGetter() == null || marcPlaceholder.getValueGetter().isBlank()) {
+    if (StringUtils.isBlank(marcPlaceholder.getValueGetter())) {
       throw new InvalidEntityTypeDefinitionException(
         "Generic MARC column must define valueGetter so MARC indexers can be correlated",
         entityType
@@ -108,7 +109,7 @@ public class MarcSqlFactory {
 
     String marcIdGetter = placeholder.get().getValueGetter();
     String valueGetter = syntheticField.get().getValueGetter();
-    if (marcIdGetter == null || marcIdGetter.isBlank() || valueGetter == null || valueGetter.isBlank()) {
+    if (StringUtils.isBlank(marcIdGetter) || StringUtils.isBlank(valueGetter)) {
       return Optional.empty();
     }
 

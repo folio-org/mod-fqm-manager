@@ -3,8 +3,9 @@ package org.folio.fqm.service;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.fqm.utils.MarcFieldFactory;
+import org.folio.fqm.utils.MarcSqlFactory;
 import org.folio.fql.service.FqlValidationService;
+import org.folio.fql.service.MarcFieldFactory;
 import org.folio.fqm.domain.Query;
 import org.folio.fqm.domain.QueryStatus;
 import org.folio.fqm.domain.dto.PurgedQueries;
@@ -300,7 +301,7 @@ public class QueryManagementService {
 
   public void validateQuery(UUID entityTypeId, String fqlQuery) {
     EntityType entityType = entityTypeService.getEntityTypeDefinition(entityTypeId, true);
-    EntityType entityTypeWithMarcFields = MarcFieldFactory.addSyntheticColumns(
+    EntityType entityTypeWithMarcFields = MarcSqlFactory.addSyntheticColumns(
       entityType,
       fqlQuery,
       executionContext.getTenantId()

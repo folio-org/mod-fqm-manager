@@ -1,6 +1,7 @@
 package org.folio.fqm.aspect;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,6 +15,7 @@ import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,7 @@ import java.util.function.Function;
 
 @Aspect
 @Component
+@Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class EntityTypePermissionsAspect {
 
@@ -79,6 +82,14 @@ public class EntityTypePermissionsAspect {
   // package-private, to make this visible for testing
   @Around("@annotation(org.folio.fqm.annotation.EntityTypePermissionsRequired) && execution(* *(.., org.folio.querytool.domain.dto.ContentsRequest, ..))")
   Object validatePermissionsWithContentsRequest(ProceedingJoinPoint joinPoint) throws Throwable {
+    // TEMPORARY export-debug logging: the permission check below throws "Missing path variable value 'id'"
+    // when the user id is null. Log what the request actually carries so we can see whether X-Okapi-User-Id
+    // is arriving. Remove once the null-user-id export issue is resolved.
+    Map<String, java.util.Collection<String>> okapiHeaders = executionContext.getOkapiHeaders();
+    log.warn("[export-debug] contents request: context.getUserId()={}, x-okapi-user-id header={}, okapiHeaderKeys={}",
+      executionContext.getUserId(),
+      okapiHeaders == null ? "null" : okapiHeaders.get(XOkapiHeaders.USER_ID),
+      okapiHeaders == null ? "null" : okapiHeaders.keySet());
     return validatePermissions(joinPoint, (ContentsRequest request) -> getEntityTypeFromId(request.getEntityTypeId()));
   }
 

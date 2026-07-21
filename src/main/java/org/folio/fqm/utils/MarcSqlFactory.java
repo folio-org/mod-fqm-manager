@@ -68,7 +68,10 @@ public class MarcSqlFactory {
 
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {
     Optional<MarcFieldName> parsedField = MarcFieldFactory.parse(fieldName);
-    Optional<EntityTypeColumn> placeholder = MarcFieldFactory.findMarcPlaceholder(entityType);
+    // Field-aware lookup: on a composite the field's own source prefix selects which MARC placeholder (and thus
+    // which correlation valueGetter) applies, so a multi-source composite correlates against the right one.
+    Optional<EntityTypeColumn> placeholder =
+      parsedField.flatMap(field -> MarcFieldFactory.findMarcPlaceholder(entityType, field));
 
     if (parsedField.isEmpty() || placeholder.isEmpty()) {
       return Optional.empty();
@@ -100,7 +103,8 @@ public class MarcSqlFactory {
 
   public static Optional<MarcQueryContext> createQueryContext(EntityType entityType, String fieldName) {
     Optional<MarcFieldName> parsedField = MarcFieldFactory.parse(fieldName);
-    Optional<EntityTypeColumn> placeholder = MarcFieldFactory.findMarcPlaceholder(entityType);
+    Optional<EntityTypeColumn> placeholder =
+      parsedField.flatMap(field -> MarcFieldFactory.findMarcPlaceholder(entityType, field));
     Optional<EntityTypeColumn> syntheticField = EntityTypeUtils.findColumn(entityType, fieldName);
 
     if (parsedField.isEmpty() || placeholder.isEmpty() || syntheticField.isEmpty()) {

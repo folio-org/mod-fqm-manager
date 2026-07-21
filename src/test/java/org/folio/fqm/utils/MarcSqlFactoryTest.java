@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Test;
 class MarcSqlFactoryTest {
 
   private static final String MARC_RECORD_ID_GETTER = "\"record_lb\".id";
+  private static final String MARC_BIB_ID_GETTER = "\"bib_record_lb\".id";
+  private static final String MARC_AUTHORITY_ID_GETTER = "\"authority_record_lb\".id";
 
   // ---- Synthetic column SQL -------------------------------------------------------------------------------
 
@@ -93,6 +95,28 @@ class MarcSqlFactoryTest {
 
     assertTrue(column.getValueGetter().contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
     assertFalse(column.getValueGetter().contains("${tenant_id}"));
+  }
+
+  @Test
+  void shouldCreateSourcePrefixedSyntheticColumnUsingItsSourceCorrelation() {
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(
+      compositeEntityTypeWithMarcSupport(), "marc_authority.marc_100_a", "diku").orElseThrow();
+
+    // Keeps the fully-qualified name; label is the (un-prefixed) MARC label.
+    assertEquals("marc_authority.marc_100_a", column.getName());
+    assertEquals("MARC 100$a", column.getLabelAlias());
+    // Correlates against the *authority* source's id-getter, not the bib one — the field's prefix selects it.
+    assertTrue(column.getValueGetter().contains("marc.marc_id = " + MARC_AUTHORITY_ID_GETTER));
+    assertFalse(column.getValueGetter().contains("bib_record_lb"));
+    assertTrue(column.getValueGetter().contains("marc.field_no = '100'"));
+    assertTrue(column.getValueGetter().contains("marc.subfield_no = 'a'"));
+  }
+
+  @Test
+  void shouldReturnEmptyForSourcePrefixedFieldWithUndeclaredSource() {
+    // marc_holdings has no placeholder on this composite, so the field is not synthesizable.
+    assertEquals(Optional.empty(),
+      MarcSqlFactory.createSyntheticColumn(compositeEntityTypeWithMarcSupport(), "marc_holdings.marc_245_a", "diku"));
   }
 
   @Test
@@ -290,6 +314,23 @@ class MarcSqlFactoryTest {
   }
 
   @Test
+  void shouldBuildQueryContextForSourcePrefixedField() {
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(
+      compositeEntityTypeWithMarcSupport(), List.of("marc_bib.marc_245_a"), "diku");
+
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_bib.marc_245_a").orElseThrow();
+
+    assertEquals("245", context.marcField().tag());
+    assertEquals("a", context.marcField().subfield());
+    // Correlation uses the bib source's id-getter (the field's prefix selected the bib placeholder).
+    assertEquals(MARC_BIB_ID_GETTER, context.marcIdGetter());
+    assertEquals(
+      "marc.marc_id = " + MARC_BIB_ID_GETTER + " and marc.field_no = '245' and marc.subfield_no = 'a'",
+      context.whereClause()
+    );
+  }
+
+  @Test
   void shouldBuildIndicatorQueryContext() {
     EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1"), "diku");
 
@@ -412,6 +453,23 @@ class MarcSqlFactoryTest {
           .name("marc")
           .dataType(new MarcType().dataType("marcType"))
           .valueGetter(MARC_RECORD_ID_GETTER)
+      ));
+  }
+
+  // Composite entity type declaring two MARC sources, each with its own source-prefixed placeholder + getter.
+  private static EntityType compositeEntityTypeWithMarcSupport() {
+    return new EntityType()
+      .id(UUID.randomUUID().toString())
+      .name("composite_instance_srs_bib")
+      .columns(List.of(
+        new EntityTypeColumn()
+          .name("marc_bib.marc")
+          .dataType(new MarcType().dataType("marcType"))
+          .valueGetter(MARC_BIB_ID_GETTER),
+        new EntityTypeColumn()
+          .name("marc_authority.marc")
+          .dataType(new MarcType().dataType("marcType"))
+          .valueGetter(MARC_AUTHORITY_ID_GETTER)
       ));
   }
 

@@ -68,8 +68,6 @@ public class MarcSqlFactory {
 
   public static Optional<EntityTypeColumn> createSyntheticColumn(EntityType entityType, String fieldName, String tenantId) {
     Optional<MarcFieldName> parsedField = MarcFieldFactory.parse(fieldName);
-    // Field-aware lookup: on a composite the field's own source prefix selects which MARC placeholder (and thus
-    // which correlation valueGetter) applies, so a multi-source composite correlates against the right one.
     Optional<EntityTypeColumn> placeholder =
       parsedField.flatMap(field -> MarcFieldFactory.findMarcPlaceholder(entityType, field));
 

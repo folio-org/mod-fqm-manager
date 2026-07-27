@@ -118,7 +118,8 @@ class FqlToSqlConverterServiceTest {
         )
       );
     entityType = MarcSqlFactory.addSyntheticColumns(entityType,
-      List.of("marc_245_a", "marc_245", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a"), "diku");
+      List.of("marc_245_a", "marc_245", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a",
+        "marc_245_ind1_1_ind2_2_a", "marc_245_ind1_1_ind2", "marc_245_ind2_1_ind1"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1600,7 +1601,19 @@ class FqlToSqlConverterServiceTest {
       Arguments.of("indicator in", "{\"marc_245_ind1\": {\"$in\": [\"0\", \"1\"]}}",
         List.of(" or ", "exists (select", "lower(marc.ind1) =", "'0'", "'1'"), List.of("not exists", "subfield_no")),
       Arguments.of("indicator nin", "{\"marc_245_ind1\": {\"$nin\": [\"0\", \"1\"]}}",
-        List.of(" and ", "not exists (select", "lower(marc.ind1) =", "'0'", "'1'"), List.of("subfield_no"))
+        List.of(" and ", "not exists (select", "lower(marc.ind1) =", "'0'", "'1'"), List.of("subfield_no")),
+      // multi-indicator: ind1 and ind2 both pinned + subfield target -> value comparison pinned by ind1, ind2, subfield
+      Arguments.of("dual-indicator subfield eq", "{\"marc_245_ind1_1_ind2_2_a\": {\"$eq\": \"History\"}}",
+        List.of("exists (select", "lower(marc.value) =", "'history'", "lower(marc.ind1) = '1'",
+          "lower(marc.ind2) = '2'", "marc.subfield_no = 'a'"), List.of("not exists")),
+      // multi-indicator: ind1 constrained, ind2 is the target -> compares ind2, pinned by ind1, no subfield
+      Arguments.of("constrained indicator target in", "{\"marc_245_ind1_1_ind2\": {\"$in\": [\"0\", \"4\"]}}",
+        List.of(" or ", "exists (select", "lower(marc.ind2) =", "'0'", "'4'", "lower(marc.ind1) = '1'"),
+        List.of("not exists", "subfield_no")),
+      // mirror: ind2 constrained, ind1 is the target
+      Arguments.of("constrained indicator target eq (mirror)", "{\"marc_245_ind2_1_ind1\": {\"$eq\": \"3\"}}",
+        List.of("exists (select", "lower(marc.ind1) =", "'3'", "lower(marc.ind2) = '1'"),
+        List.of("not exists", "subfield_no"))
     );
   }
 
@@ -1641,6 +1654,30 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
     // Targets the value, so text operators apply (unlike indicator-only fields): %value% wrapping present.
     assertTrue(rendered.contains("'%' ||"));
+  }
+
+  @Test
+  void shouldGenerateDualIndicatorSubfieldMarcCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_245_ind1_1_ind2_2_a": {"$contains": "Shakespeare"}}""");
+
+    // Single EXISTS pinning field_no + ind1 + ind2 + subfield_no on the same row, targeting value.
+    assertTrue(rendered.contains("exists (select"));
+    assertTrue(rendered.contains("marc.field_no = '245'"));
+    assertTrue(rendered.contains("lower(marc.ind1) = '1'"));
+    assertTrue(rendered.contains("lower(marc.ind2) = '2'"));
+    assertTrue(rendered.contains("marc.subfield_no = 'a'"));
+    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.toLowerCase().contains("shakespeare"));
+  }
+
+  @Test
+  void shouldRejectUnsupportedOperatorsOnConstrainedIndicatorTarget() {
+    // The target is an indicator, so text/presence operators are rejected just like a bare indicator field.
+    assertThrows(
+      InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition("{\"marc_245_ind1_1_ind2\": {\"$contains\": \"1\"}}", entityType)
+    );
   }
 
   @Test

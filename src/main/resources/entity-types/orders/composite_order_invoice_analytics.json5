@@ -45,6 +45,15 @@
       order: 40,
     },
     {
+      alias: 'invoice_line',
+      type: 'entity-type',
+      targetId: '4999bd5f-3898-4b44-b283-e37bc9261ad8', // simple_invoice_line
+      targetField: 'id',
+      sourceField: 'invoice_line_fund_distribution.invoice_line_id',
+      essentialOnly: true,
+      order: 45,
+    },
+    {
       alias: 'invoice',
       type: 'entity-type',
       targetId: '4d626ce1-1880-48d2-9d4c-81667fdc5dbb', // simple_invoice

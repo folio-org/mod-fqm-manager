@@ -366,6 +366,76 @@ class MarcSqlFactoryTest {
   }
 
   @Test
+  void shouldCreateDualIndicatorSubfieldColumn() {
+    // marc_245_ind1_1_ind2_2_a -> value target, constrained by ind1, ind2, and the subfield.
+    EntityTypeColumn column = MarcSqlFactory
+      .createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind2_2_a", "diku")
+      .orElseThrow();
+
+    assertEquals("MARC 245 ind1=1 ind2=2 $a", column.getLabelAlias());
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.value)"));
+    assertFalse(column.getValueGetter().contains("DISTINCT"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '1'"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind2) = '2'"));
+    assertTrue(column.getValueGetter().contains("marc.subfield_no = 'a'"));
+  }
+
+  @Test
+  void shouldBuildDualIndicatorSubfieldQueryContext() {
+    EntityType entityType = MarcSqlFactory
+      .addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_1_ind2_2_a"), "diku");
+
+    MarcQueryContext context = MarcSqlFactory
+      .createQueryContext(entityType, "marc_245_ind1_1_ind2_2_a")
+      .orElseThrow();
+
+    assertEquals(
+      "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind1) = '1' "
+        + "and lower(marc.ind2) = '2' and marc.subfield_no = 'a'",
+      context.whereClause()
+    );
+    assertEquals("lower(marc.value)", context.filterValueGetter());
+  }
+
+  @Test
+  void shouldCreateConstrainedIndicatorTargetColumn() {
+    // marc_245_ind1_1_ind2 -> target ind2 (DISTINCT), constrained by ind1=1; no subfield.
+    EntityTypeColumn column = MarcSqlFactory
+      .createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind2", "diku")
+      .orElseThrow();
+
+    assertEquals("MARC 245 ind1=1 ind2", column.getLabelAlias());
+    assertEquals("lower(marc.ind2)", column.getFilterValueGetter());
+    assertTrue(column.getValueGetter().contains("jsonb_agg(DISTINCT marc.ind2)"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '1'"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
+  }
+
+  @Test
+  void shouldBuildConstrainedIndicatorTargetQueryContext() {
+    // marc_245_ind2_1_ind1 -> target ind1, constrained by ind2=1 (mirror ordering).
+    EntityType entityType = MarcSqlFactory
+      .addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind2_1_ind1"), "diku");
+
+    MarcQueryContext context = MarcSqlFactory
+      .createQueryContext(entityType, "marc_245_ind2_1_ind1")
+      .orElseThrow();
+
+    assertEquals("lower(marc.ind1)", context.filterValueGetter());
+    assertEquals(
+      "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind2) = '1'",
+      context.whereClause()
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers marc where "
+        + "marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.field_no = '245' and lower(marc.ind2) = '1' "
+        + "and lower(marc.ind1) = {0})",
+      context.existsClause("=", true)
+    );
+  }
+
+  @Test
   void shouldMapBlankIndicatorToStoredHashInSql() {
     // The public "blank" token maps to the stored '#' in generated SQL, while the label stays readable.
     EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_245_ind1_blank_a"), "diku");

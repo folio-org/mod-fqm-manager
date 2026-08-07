@@ -160,9 +160,9 @@ public class MarcSqlFactory {
     return Optional.of(matcher.group("table"));
   }
 
-  // The marc_indexers column this field targets: ind1/ind2 for indicator-only, otherwise the subfield value.
+  // The marc_indexers column this field targets: ind1/ind2 when an indicator is the target, otherwise the value.
   private static String targetColumn(MarcFieldName marcField) {
-    return marcField.isIndicatorTarget() ? "ind" + marcField.indicatorNumber() : "value";
+    return marcField.isIndicatorTarget() ? "ind" + marcField.targetIndicator() : "value";
   }
 
   // WHERE fragment narrowing to a specific subfield; empty for tag-only and indicator-only fields.
@@ -170,11 +170,17 @@ public class MarcSqlFactory {
     return marcField.subfield() == null ? "" : " AND marc.subfield_no = '%s'".formatted(marcField.subfield());
   }
 
-  // WHERE fragment fixing the indicator to a constant (constrained-subfield form); empty otherwise. Matched
-  // case-insensitively, consistent with indicator matching.
+  // WHERE fragment(s) pinning ind1 and/or ind2 to fixed values (constrained forms); empty when neither indicator
+  // is a constraint. Matched case-insensitively, consistent with indicator matching.
   private static String indicatorConstraintClause(MarcFieldName marcField) {
-    return marcField.indicatorValue() == null ? ""
-      : " AND lower(marc.ind%s) = '%s'".formatted(marcField.indicatorNumber(), marcField.indicatorValue());
+    StringBuilder clause = new StringBuilder();
+    if (marcField.ind1Value() != null) {
+      clause.append(" AND lower(marc.ind1) = '%s'".formatted(marcField.ind1Value()));
+    }
+    if (marcField.ind2Value() != null) {
+      clause.append(" AND lower(marc.ind2) = '%s'".formatted(marcField.ind2Value()));
+    }
+    return clause.toString();
   }
 
   // SQL expression the search value is compared against (the value column, or an indicator column).
@@ -190,14 +196,18 @@ public class MarcSqlFactory {
     }
 
     public String whereClause() {
-      String clause = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
-      if (marcField.indicatorValue() != null) {
-        clause += " and lower(marc.ind%s) = '%s'".formatted(marcField.indicatorNumber(), marcField.indicatorValue());
+      String formatted = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
+      StringBuilder clause = new StringBuilder(formatted);
+      if (marcField.ind1Value() != null) {
+        clause.append(" and lower(marc.ind1) = '%s'".formatted(marcField.ind1Value()));
+      }
+      if (marcField.ind2Value() != null) {
+        clause.append(" and lower(marc.ind2) = '%s'".formatted(marcField.ind2Value()));
       }
       if (marcField.subfield() != null) {
-        clause += " and marc.subfield_no = '%s'".formatted(marcField.subfield());
+        clause.append(" and marc.subfield_no = '%s'".formatted(marcField.subfield()));
       }
-      return clause;
+      return clause.toString();
     }
 
     /**

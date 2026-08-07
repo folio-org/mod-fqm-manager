@@ -1938,6 +1938,7 @@
     "entityType.composite_order_invoice_analytics.po": "PO",
     "entityType.composite_order_invoice_analytics.pol": "PO line",
     "entityType.composite_order_invoice_analytics.invoice_line_fund_distribution": "Invoice",
+    "entityType.composite_invoice_line_fund_distribution.invoice_line": "Line",
     "entityType.composite_order_invoice_analytics.invoice": "Invoice",
     "entityType.composite_order_invoice_analytics.organization": "Organization",
     "entityType.composite_order_invoice_analytics.fiscal_year": "Fiscal year",

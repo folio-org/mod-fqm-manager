@@ -918,6 +918,7 @@
   "entityType.composite_order_invoice_analytics.invoice": "Invoice",
   "entityType.composite_order_invoice_analytics.bill_to": "Bill to",
   "entityType.composite_order_invoice_analytics.invoice_line_fund_distribution": "Invoice — Line",
+  "entityType.composite_order_invoice_analytics.invoice_line": "Invoice — Line",
   "entityType.composite_order_invoice_analytics.organization": "Organization",
   "entityType.composite_order_invoice_analytics.po": "PO",
   "entityType.composite_order_invoice_analytics.po_created_by": "PO created by",

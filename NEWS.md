@@ -1,6 +1,7 @@
 # 4.2.x - Umbrellaleaf
 
 ## 4.2.0 (Next)
+- [MODFQMMGR-1215](https://folio-org.atlassian.net/browse/MODFQMMGR-1215) Return empty MARC field values as an empty array
 - [MODFQMMGR-1191](https://folio-org.atlassian.net/browse/MODFQMMGR-1191): Support multi-indicator querying in FQM
 - [MODFQMMGR-1203](https://folio-org.atlassian.net/browse/MODFQMMGR-1203) Use lib-fqm-query-processor parser for MARC field parsing
 - [MODFQMMGR-1188](https://folio-org.atlassian.net/browse/MODFQMMGR-1188) Support MARC indicator + subfield (constrained-subfield) querying on the SRS record entity type

@@ -178,6 +178,17 @@ public class EntityTypeValidationService {
         entityType
       );
     }
+
+    boolean hasUseIdColumnsSource = entityType
+      .getSources()
+      .stream()
+      .anyMatch(s -> s instanceof EntityTypeSourceEntityType et && Boolean.TRUE.equals(et.getUseIdColumns()));
+    if (!hasUseIdColumnsSource) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Entity types must have at least one source with useIdColumns set to true",
+        entityType
+      );
+    }
   }
 
   @SuppressWarnings("java:S2583") // Sonar thinks targetId cannot be null, but we still want to check

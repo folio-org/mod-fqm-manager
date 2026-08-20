@@ -86,6 +86,34 @@ class MarcSqlFactoryTest {
   }
 
   @Test
+  void shouldCreateConstrainedFieldSyntheticColumn() {
+    // marc_245_ind1_0: whole-field value narrowed to occurrences with ind1=0 (no subfield, no indicator target).
+    EntityTypeColumn column =
+      MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_0", "diku").orElseThrow();
+
+    assertEquals("MARC 245 ind1=0", column.getLabelAlias());
+    // A value target (like a subfield/tag), so it gets the value column and the full operator set -- not the
+    // indicator column. Constrained by the indicator, but matching any subfield of the field.
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    assertTrue(column.getValueGetter().contains("jsonb_agg(marc.value)"));
+    assertFalse(column.getValueGetter().contains("DISTINCT"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '0'"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
+  }
+
+  @Test
+  void shouldCreateDualIndicatorConstrainedFieldSyntheticColumn() {
+    EntityTypeColumn column =
+      MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_245_ind1_1_ind2_2", "diku").orElseThrow();
+
+    assertEquals("MARC 245 ind1=1 ind2=2", column.getLabelAlias());
+    assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    assertTrue(column.getValueGetter().contains("lower(marc.ind1) = '1'"));
+    assertTrue(column.getValueGetter().contains("lower(marc.ind2) = '2'"));
+    assertFalse(column.getValueGetter().contains("subfield_no"));
+  }
+
+  @Test
   void shouldInterpolateTenantIdWhenProvided() {
     EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(
       entityTypeWithMarcSupport(),

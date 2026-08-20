@@ -81,7 +81,7 @@ class EntityTypeValidationServiceTest {
     .version("current")
     .isCustom(true)
     .sources(
-      List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
+      List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID).useIdColumns(true))
     )
     .columns(null);
 
@@ -220,6 +220,28 @@ class EntityTypeValidationServiceTest {
       Arguments.of(
         customETFactory(b -> b.crossTenantQueriesEnabled(true)),
         "Custom entity must not have cross-tenant queries enabled"
+      ),
+      Arguments.of(
+        customETFactory(b ->
+          b.sources(
+            List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
+          )
+        ),
+        "Custom entity types must have at least one source with useIdColumns set to true"
+      ),
+      Arguments.of(
+        customETFactory(b ->
+          b.sources(
+            List.of(
+              new EntityTypeSourceEntityType()
+                .alias("source1")
+                .type("entity-type")
+                .targetId(EXISTING_TARGET_ET_ID)
+                .useIdColumns(false)
+            )
+          )
+        ),
+        "Custom entity types must have at least one source with useIdColumns set to true"
       )
     );
   }
@@ -433,6 +455,9 @@ class EntityTypeValidationServiceTest {
           .targetId(EXISTING_TARGET_ET_ID);
         if (order != null) {
           source.setOrder(order);
+        }
+        if (i == 0) {
+          source.setUseIdColumns(true);
         }
         if (i > 0) {
           source.setSourceField("source" + (i - 1));

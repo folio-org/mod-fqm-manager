@@ -130,7 +130,7 @@ public class MarcSqlFactory {
     String distinct = marcField.isIndicatorTarget() ? "DISTINCT " : "";
     return """
       (
-        SELECT jsonb_agg(%smarc.%s) FILTER (WHERE marc.%s IS NOT NULL)
+        SELECT COALESCE(jsonb_agg(%smarc.%s) FILTER (WHERE marc.%s IS NOT NULL), '[]'::jsonb)
         FROM %s marc
         WHERE marc.marc_id = %s
           AND marc.field_no = '%s'%s%s

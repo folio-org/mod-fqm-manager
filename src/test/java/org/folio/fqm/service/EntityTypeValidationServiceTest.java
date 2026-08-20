@@ -55,7 +55,7 @@ class EntityTypeValidationServiceTest {
     ._private(false)
     .sources(
       List.of(
-        new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID).useIdColumns(true),
+        new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID),
         new EntityTypeSourceEntityType()
           .alias("source2")
           .type("entity-type")
@@ -154,7 +154,7 @@ class EntityTypeValidationServiceTest {
     UUID entityTypeId = UUID.fromString(BASE_VALID_ENTITY_TYPE.getId());
     UUID targetId = UUID.fromString("145cfbfa-2948-5a33-accc-c1367c04e5dc");
     EntityType entity = entityTypeWithSourcesFactory(
-      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId).useIdColumns(true)
+      new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(targetId)
     );
 
     assertDoesNotThrow(() -> entityTypeValidationService.validateEntityType(entityTypeId, entity, List.of(targetId)));
@@ -220,6 +220,28 @@ class EntityTypeValidationServiceTest {
       Arguments.of(
         customETFactory(b -> b.crossTenantQueriesEnabled(true)),
         "Custom entity must not have cross-tenant queries enabled"
+      ),
+      Arguments.of(
+        customETFactory(b ->
+          b.sources(
+            List.of(new EntityTypeSourceEntityType().alias("source1").type("entity-type").targetId(EXISTING_TARGET_ET_ID))
+          )
+        ),
+        "Custom entity types must have at least one source with useIdColumns set to true"
+      ),
+      Arguments.of(
+        customETFactory(b ->
+          b.sources(
+            List.of(
+              new EntityTypeSourceEntityType()
+                .alias("source1")
+                .type("entity-type")
+                .targetId(EXISTING_TARGET_ET_ID)
+                .useIdColumns(false)
+            )
+          )
+        ),
+        "Custom entity types must have at least one source with useIdColumns set to true"
       )
     );
   }
@@ -336,18 +358,6 @@ class EntityTypeValidationServiceTest {
           new EntityTypeSourceEntityType().alias("a2").type("entity-type").targetId(EXISTING_TARGET_ET_ID)
         ),
         "Entity types can have only one base source; all others must define a join"
-      ),
-      Arguments.of(
-        entityTypeWithSourcesFactory(
-          new EntityTypeSourceEntityType().alias("a").type("entity-type").targetId(EXISTING_TARGET_ET_ID)
-        ),
-        "Entity types must have at least one source with useIdColumns set to true"
-      ),
-      Arguments.of(
-        entityTypeWithSourcesFactory(
-          new EntityTypeSourceEntityType().alias("a").type("entity-type").targetId(EXISTING_TARGET_ET_ID).useIdColumns(false)
-        ),
-        "Entity types must have at least one source with useIdColumns set to true"
       ),
       Arguments.of(
         entityTypeWithCustomFieldColumnFactory(

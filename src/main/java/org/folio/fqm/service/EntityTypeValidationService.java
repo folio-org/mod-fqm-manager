@@ -67,6 +67,16 @@ public class EntityTypeValidationService {
         customEntityType
       );
     }
+    boolean hasUseIdColumnsSource = customEntityType
+      .getSources()
+      .stream()
+      .anyMatch(s -> s instanceof EntityTypeSourceEntityType et && Boolean.TRUE.equals(et.getUseIdColumns()));
+    if (!hasUseIdColumnsSource) {
+      throw new InvalidEntityTypeDefinitionException(
+        "Custom entity types must have at least one source with useIdColumns set to true",
+        customEntityType
+      );
+    }
   }
 
   /**
@@ -175,17 +185,6 @@ public class EntityTypeValidationService {
     if (!baseSourceExists) {
       throw new InvalidEntityTypeDefinitionException(
         "Entity types must have one base source without a join defined",
-        entityType
-      );
-    }
-
-    boolean hasUseIdColumnsSource = entityType
-      .getSources()
-      .stream()
-      .anyMatch(s -> s instanceof EntityTypeSourceEntityType et && Boolean.TRUE.equals(et.getUseIdColumns()));
-    if (!hasUseIdColumnsSource) {
-      throw new InvalidEntityTypeDefinitionException(
-        "Entity types must have at least one source with useIdColumns set to true",
         entityType
       );
     }

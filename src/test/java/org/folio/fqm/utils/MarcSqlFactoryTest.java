@@ -45,6 +45,9 @@ class MarcSqlFactoryTest {
     assertEquals("lower(:value)", column.getValueFunction());
     assertSqlEquals(expectedSubfieldValueGetter("diku", "245", "a"), column.getValueGetter());
     assertEquals("lower(marc.value)", column.getFilterValueGetter());
+    // Empty MARC fields must come back as [] (not null) so they aren't dropped by null-omitting serializers.
+    assertTrue(column.getValueGetter().contains("COALESCE("));
+    assertTrue(column.getValueGetter().contains("'[]'::jsonb"));
   }
 
   @Test
@@ -589,7 +592,7 @@ class MarcSqlFactoryTest {
   private static String expectedSubfieldValueGetter(String tenantId, String tag, String subfield) {
     return """
       (
-        SELECT jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL)
+        SELECT COALESCE(jsonb_agg(marc.value) FILTER (WHERE marc.value IS NOT NULL), '[]'::jsonb)
         FROM %s_mod_fqm_manager.src_srs_marc_indexers marc
         WHERE marc.marc_id = "record_lb".id
           AND marc.field_no = '%s'

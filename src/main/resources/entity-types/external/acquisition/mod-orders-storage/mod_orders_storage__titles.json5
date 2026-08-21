@@ -10,7 +10,7 @@
     },
   ],
   requiredPermissions: [
-    'orders-storage.titles.collection.get',
+    'orders.titles.collection.get',
     'acquisitions-units.units.collection.get',
     'inventory-storage.identifier-types.collection.get',
   ],

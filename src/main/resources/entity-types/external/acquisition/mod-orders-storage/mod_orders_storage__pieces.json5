@@ -10,7 +10,7 @@
     },
   ],
   requiredPermissions: [
-    'orders-storage.pieces.collection.get',
+    'orders.pieces.collection.get',
   ],
   defaultSort: [
     {

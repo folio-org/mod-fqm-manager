@@ -36,6 +36,7 @@ import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class EntityTypeServiceAvailableJoinsTest {
@@ -685,5 +686,70 @@ class EntityTypeServiceAvailableJoinsTest {
     assertFalse(result.getAvailableJoinConditions().isEmpty());
     assertEquals("colY", result.getAvailableJoinConditions().get(0).getSourceField().getValue());
     assertEquals("et1.col1", result.getAvailableJoinConditions().get(0).getTargetField().getValue());
+  }
+
+    @Test
+void discoverJoinConditions_shouldMatchUsingTargetEntityTypeIdFallback() {
+  // TestMate-bfe27323f1660bb14fff5fea02bde3a0
+  // Given
+  UUID targetEtId = UUID.fromString("8fc4a9d2-7ccf-4233-afb8-796911839862");
+  EntityTypeColumn targetColumn = new EntityTypeColumn()
+    .name("target_col")
+    .labelAlias("Target Column Label")
+    .originalEntityTypeId(null); // Explicitly null to trigger fallback logic
+  EntityType targetEntityType = new EntityType()
+    .id(targetEtId.toString())
+    .columns(List.of(targetColumn));
+  EntityTypeColumn customColumn = new EntityTypeColumn()
+    .name("custom_col")
+    .labelAlias("Custom Column Label")
+    .joinsTo(List.of(new Join()
+      .targetId(targetEtId)
+      .targetField("target_col")));
+  EntityType customEntityType = new EntityType()
+    .columns(List.of(customColumn));
+  // When
+  List<JoinFieldPair> result = EntityTypeService.discoverJoinConditions(customEntityType, targetEntityType);
+  // Then
+  assertThat(result).hasSize(1);
+  JoinFieldPair pair = result.get(0);
+  assertThat(pair.getSourceField())
+    .isEqualTo(new LabeledValue("Custom Column Label").value("custom_col"));
+  assertThat(pair.getTargetField())
+    .isEqualTo(new LabeledValue("Target Column Label").value("target_col"));
+}
+
+    @Test
+  void discoverJoinConditions_shouldIgnoreJoinsWithNullTargetField() {
+    // TestMate-4c0fbcdeec4fb8a9e7924c5aac89d877
+    // Given
+    UUID customEtId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    UUID targetEtId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    // Custom column with a join that has a null targetField
+    EntityTypeColumn customColumn = new EntityTypeColumn()
+      .name("custom_col")
+      .labelAlias("Custom Column")
+      .originalEntityTypeId(customEtId)
+      .joinsTo(List.of(new Join()
+        .targetId(targetEtId)
+        .targetField(null))); // Null target field
+    EntityType customEntityType = new EntityType()
+      .id(customEtId.toString())
+      .columns(List.of(customColumn));
+    // Target column with a reverse join that has a null targetField
+    EntityTypeColumn targetColumn = new EntityTypeColumn()
+      .name("target_col")
+      .labelAlias("Target Column")
+      .originalEntityTypeId(targetEtId)
+      .joinsTo(List.of(new Join()
+        .targetId(customEtId)
+        .targetField(null))); // Null target field
+    EntityType targetEntityType = new EntityType()
+      .id(targetEtId.toString())
+      .columns(List.of(targetColumn));
+    // When
+    List<JoinFieldPair> result = EntityTypeService.discoverJoinConditions(customEntityType, targetEntityType);
+    // Then
+    assertThat(result).isEmpty();
   }
 }

@@ -155,14 +155,8 @@ public class FqlToSqlConverterService {
       return arrayOverlap(cast(field, String[].class), valueArray);
     }
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      Field entityField = getField(equalsCondition, entityType);
-      if (entityField.getValueFunction() != null) {
-        var transformedValue = valueField(equalsCondition.value(), equalsCondition, entityType);
-        return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
-      } else {
-        var jsonbValue = inline("[\"" + equalsCondition.value() + "\"]");
-        return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-      }
+      var transformedValue = valueField(equalsCondition.value(), equalsCondition, entityType);
+      return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
     }
     String filterFieldDataType = getFieldForFiltering(equalsCondition, entityType).getDataType().getDataType();
     if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
@@ -185,14 +179,8 @@ public class FqlToSqlConverterService {
       var valueArray = cast(array(valueField(notEqualsCondition.value(), notEqualsCondition, entityType)), String[].class);
       baseCondition = not(arrayOverlap(cast(field, String[].class), valueArray));
     } else if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      Field entityField = getField(notEqualsCondition, entityType);
-      if (entityField.getValueFunction() != null) {
-        var transformedValue = valueField(notEqualsCondition.value(), notEqualsCondition, entityType);
-        baseCondition = DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
-      } else {
-        var jsonbValue = inline("[\"" + notEqualsCondition.value() + "\"]");
-        baseCondition = DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
-      }
+      var transformedValue = valueField(notEqualsCondition.value(), notEqualsCondition, entityType);
+      baseCondition = DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
     } else if (RANGED_UUID_TYPE.equals(filterFieldDataType) || OPEN_UUID_TYPE.equals(filterFieldDataType)) {
       try {
         UUID uuidValue = UUID.fromString((String) notEqualsCondition.value());
@@ -281,17 +269,11 @@ public class FqlToSqlConverterService {
     }
 
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      Field entityField = getField(inCondition, entityType);
       List<Condition> conditionList = inCondition
         .value().stream()
         .map(val -> {
-          if (entityField.getValueFunction() != null) {
-            var transformedValue = valueField(val, inCondition, entityType);
-            return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
-          } else {
-            var jsonbValue = inline("[\"" + val + "\"]");
-            return DSL.condition("{0} @> {1}::jsonb", field.cast(JSONB.class), jsonbValue);
-          }
+          var transformedValue = valueField(val, inCondition, entityType);
+          return DSL.condition("{0} @> jsonb_build_array({1}::text)", field.cast(JSONB.class), transformedValue);
         })
         .toList();
       return or(conditionList);
@@ -330,17 +312,11 @@ public class FqlToSqlConverterService {
     }
 
     if (JSONB_ARRAY_TYPE.equals(dataType)) {
-      Field entityField = getField(notInCondition, entityType);
       List<Condition> conditionList = notInCondition
         .value().stream()
         .map(val -> {
-          if (entityField.getValueFunction() != null) {
-            var transformedValue = valueField(val, notInCondition, entityType);
-            return DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
-          } else {
-            var jsonbValue = inline("[\"" + val + "\"]");
-            return DSL.condition("NOT({0} @> {1}::jsonb)", field.cast(JSONB.class), jsonbValue);
-          }
+          var transformedValue = valueField(val, notInCondition, entityType);
+          return DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field.cast(JSONB.class), transformedValue);
         })
         .toList();
       return and(conditionList);

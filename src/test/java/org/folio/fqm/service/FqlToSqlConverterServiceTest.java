@@ -232,19 +232,19 @@ class FqlToSqlConverterServiceTest {
         "equals jsonb array string",
         """
           {"jsonbArrayField": {"$eq": "value1"}}""",
-        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]"))
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1"))
       ),
       Arguments.of(
         "equals jsonb array numeric",
         """
           {"jsonbArrayField": {"$eq": 123}}""",
-        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]"))
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(123))
       ),
       Arguments.of(
         "equals jsonb array boolean",
         """
           {"jsonbArrayField": {"$eq": false}}""",
-        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(false))
       ),
       Arguments.of(
         "equals array string with special characters",
@@ -256,7 +256,13 @@ class FqlToSqlConverterServiceTest {
         "equals jsonb array string with special characters",
         """
           {"jsonbArrayField": {"$eq": "value with spaces & special chars!"}}""",
-        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value with spaces & special chars!\"]"))
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value with spaces & special chars!"))
+      ),
+      Arguments.of(
+        "equals jsonb array string with double quotes",
+        """
+          {"jsonbArrayField": {"$eq": "value with \\"double\\" quotes"}}""",
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value with \"double\" quotes"))
       ),
       Arguments.of(
         "equals array empty string",
@@ -268,7 +274,7 @@ class FqlToSqlConverterServiceTest {
         "equals jsonb array empty string",
         """
           {"jsonbArrayField": {"$eq": ""}}""",
-        DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"\"]"))
+        DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(""))
       ),
       Arguments.of(
         "equals jsonb array with value function",
@@ -356,19 +362,19 @@ class FqlToSqlConverterServiceTest {
         "not equals jsonb array string",
         """
           {"jsonbArrayField": {"$ne": "value1"}}""",
-        DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")).or(field("jsonbArrayField").isNull())
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")).or(field("jsonbArrayField").isNull())
       ),
       Arguments.of(
         "not equals jsonb array numeric",
         """
           {"jsonbArrayField": {"$ne": 123}}""",
-        DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")).or(field("jsonbArrayField").isNull())
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(123)).or(field("jsonbArrayField").isNull())
       ),
       Arguments.of(
         "not equals jsonb array boolean",
         """
           {"jsonbArrayField": {"$ne": false}}""",
-        DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]")).or(field("jsonbArrayField").isNull())
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(false)).or(field("jsonbArrayField").isNull())
       ),
       Arguments.of(
         "not equals array string with special characters",
@@ -380,7 +386,13 @@ class FqlToSqlConverterServiceTest {
         "not equals jsonb array string with special characters",
         """
           {"jsonbArrayField": {"$ne": "value with spaces & special chars!"}}""",
-        DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value with spaces & special chars!\"]")).or(field("jsonbArrayField").isNull())
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value with spaces & special chars!")).or(field("jsonbArrayField").isNull())
+      ),
+      Arguments.of(
+        "not equals jsonb array string with double quotes",
+        """
+          {"jsonbArrayField": {"$ne": "value with \\"double\\" quotes"}}""",
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value with \"double\" quotes")).or(field("jsonbArrayField").isNull())
       ),
       Arguments.of(
         "not equals array empty string",
@@ -392,7 +404,7 @@ class FqlToSqlConverterServiceTest {
         "not equals jsonb array empty string",
         """
           {"jsonbArrayField": {"$ne": ""}}""",
-        DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"\"]")).or(field("jsonbArrayField").isNull())
+        DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("")).or(field("jsonbArrayField").isNull())
       ),
       Arguments.of(
         "not equals jsonb array with value function",
@@ -637,8 +649,8 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$in": ["value1", "value2"]}}""",
         or(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")),
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2"))
         )
       ),
       Arguments.of(
@@ -646,8 +658,8 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$in": [123, 456]}}""",
         or(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"456\"]"))
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(123)),
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(456))
         )
       ),
       Arguments.of(
@@ -655,8 +667,8 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$in": [true, false]}}""",
         or(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"true\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(true)),
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val(false))
         )
       ),
       Arguments.of(
@@ -776,8 +788,8 @@ class FqlToSqlConverterServiceTest {
             {"jsonbArrayField": {"$eq": "value2"}}
           ]}""",
         DSL.and(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")),
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2"))
         )
       ),
       Arguments.of(
@@ -788,8 +800,8 @@ class FqlToSqlConverterServiceTest {
             {"jsonbArrayField": {"$ne": "value2"}}
           ]}""",
         DSL.and(
-          DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")).or(field("jsonbArrayField").isNull()),
-          DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]")).or(field("jsonbArrayField").isNull())
+          DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")).or(field("jsonbArrayField").isNull()),
+          DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2")).or(field("jsonbArrayField").isNull())
         )
       ),
       Arguments.of(
@@ -860,8 +872,8 @@ class FqlToSqlConverterServiceTest {
         """
           {"jsonbArrayField": {"$in": ["value1", "value2"]}}""",
         DSL.or(
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-          DSL.condition("{0} @> {1}::jsonb", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")),
+          DSL.condition("{0} @> jsonb_build_array({1}::text)", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2"))
         )
       ),
       Arguments.of(
@@ -870,8 +882,8 @@ class FqlToSqlConverterServiceTest {
           {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
         or(
           and(
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")),
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2"))
           ),
           field("jsonbArrayField").isNull()
         )
@@ -1194,8 +1206,8 @@ class FqlToSqlConverterServiceTest {
           {"jsonbArrayField": {"$nin": ["value1", "value2"]}}""",
         or(
           and(
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value1\"]")),
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"value2\"]"))
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value1")),
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val("value2"))
           ),
           field("jsonbArrayField").isNull()
         )
@@ -1206,8 +1218,8 @@ class FqlToSqlConverterServiceTest {
           {"jsonbArrayField": {"$nin": [123, 456]}}""",
         or(
           and(
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"123\"]")),
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"456\"]"))
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(123)),
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(456))
           ),
           field("jsonbArrayField").isNull()
         )
@@ -1218,8 +1230,8 @@ class FqlToSqlConverterServiceTest {
           {"jsonbArrayField": {"$nin": [true, false]}}""",
         or(
           and(
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"true\"]")),
-            DSL.condition("NOT({0} @> {1}::jsonb)", field("jsonbArrayField").cast(JSONB.class), DSL.inline("[\"false\"]"))
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(true)),
+            DSL.condition("NOT({0} @> jsonb_build_array({1}::text))", field("jsonbArrayField").cast(JSONB.class), DSL.val(false))
           ),
           field("jsonbArrayField").isNull()
         )

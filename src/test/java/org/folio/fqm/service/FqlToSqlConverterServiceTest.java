@@ -1261,6 +1261,42 @@ class FqlToSqlConverterServiceTest {
         condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(val("test & special! chars"), "%"))
       ),
       Arguments.of(
+        "contains array field",
+        """
+          {"arrayField": {"$contains": "sub"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(inline("%"), inline("sub"), inline("%")))
+      ),
+      Arguments.of(
+        "contains array field with value function",
+        """
+          {"arrayFieldWithValueFunction": {"$contains": "sub"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("foo(valueGetter)"), DSL.concat(inline("%"), field("foo(:value)", String.class, param("value", "sub")), inline("%")))
+      ),
+      Arguments.of(
+        "contains jsonb array field",
+        """
+          {"jsonbArrayField": {"$contains": "sub"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), inline("sub"), inline("%")))
+      ),
+      Arguments.of(
+        "contains jsonb array field with value function",
+        """
+          {"jsonbArrayFieldWithValueFunction": {"$contains": "sub"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "sub")), inline("%")))
+      ),
+      Arguments.of(
+        "contains array field with special characters",
+        """
+          {"arrayField": {"$contains": "test & special! chars"}}""",
+        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
+      ),
+      Arguments.of(
+        "contains jsonb array field with special characters",
+        """
+          {"jsonbArrayField": {"$contains": "test & special! chars"}}""",
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
+      ),
+      Arguments.of(
         "eq nested array-object field string",
         """
           {"nested[*]->string": {"$eq": "foo bar"}}""",

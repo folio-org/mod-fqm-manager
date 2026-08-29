@@ -1240,73 +1240,73 @@ class FqlToSqlConverterServiceTest {
         "starts_with array field",
         """
           {"arrayField": {"$starts_with": "prefix"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat("prefix", "%"))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("arrayField"), DSL.concat("prefix", "%"))
       ),
       Arguments.of(
         "starts_with array field with value function",
         """
           {"arrayFieldWithValueFunction": {"$starts_with": "prefix"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("foo(valueGetter)"), DSL.concat(field("foo(:value)", String.class, param("value", "prefix")), "%"))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("foo(valueGetter)"), DSL.concat(field("foo(:value)", String.class, param("value", "prefix")), "%"))
       ),
       Arguments.of(
         "starts_with jsonb array field",
         """
           {"jsonbArrayField": {"$starts_with": "prefix"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat("prefix", "%"))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat("prefix", "%"))
       ),
       Arguments.of(
         "starts_with jsonb array field with value function",
         """
           {"jsonbArrayFieldWithValueFunction": {"$starts_with": "prefix"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(field("lower(:value)", String.class, param("value", "prefix")), "%"))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(field("lower(:value)", String.class, param("value", "prefix")), "%"))
       ),
       Arguments.of(
         "starts_with array field with special characters",
         """
           {"arrayField": {"$starts_with": "test & special! chars"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(val("test & special! chars"), "%"))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("arrayField"), DSL.concat(val("test & special! chars"), "%"))
       ),
       Arguments.of(
         "starts_with jsonb array field with special characters",
         """
           {"jsonbArrayField": {"$starts_with": "test & special! chars"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(val("test & special! chars"), "%"))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(val("test & special! chars"), "%"))
       ),
       Arguments.of(
         "contains array field",
         """
           {"arrayField": {"$contains": "sub"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(inline("%"), inline("sub"), inline("%")))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("arrayField"), DSL.concat(inline("%"), inline("sub"), inline("%")))
       ),
       Arguments.of(
         "contains array field with value function",
         """
           {"arrayFieldWithValueFunction": {"$contains": "sub"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("foo(valueGetter)"), DSL.concat(inline("%"), field("foo(:value)", String.class, param("value", "sub")), inline("%")))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("foo(valueGetter)"), DSL.concat(inline("%"), field("foo(:value)", String.class, param("value", "sub")), inline("%")))
       ),
       Arguments.of(
         "contains jsonb array field",
         """
           {"jsonbArrayField": {"$contains": "sub"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), inline("sub"), inline("%")))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), inline("sub"), inline("%")))
       ),
       Arguments.of(
         "contains jsonb array field with value function",
         """
           {"jsonbArrayFieldWithValueFunction": {"$contains": "sub"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "sub")), inline("%")))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("foo(valueGetter)").cast(JSONB.class), DSL.concat(inline("%"), field("lower(:value)", String.class, param("value", "sub")), inline("%")))
       ),
       Arguments.of(
         "contains array field with special characters",
         """
           {"arrayField": {"$contains": "test & special! chars"}}""",
-        condition("exists (select 1 from unnest({0}) where unnest like {1})", field("arrayField"), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
+        condition("exists (select 1 from unnest({0}) where unnest ilike {1})", field("arrayField"), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
       ),
       Arguments.of(
         "contains jsonb array field with special characters",
         """
           {"jsonbArrayField": {"$contains": "test & special! chars"}}""",
-        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem like {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
+        condition("exists (select 1 from jsonb_array_elements_text({0}) as elem where elem ilike {1})", field("jsonbArrayField").cast(JSONB.class), DSL.concat(inline("%"), val("test & special! chars"), inline("%")))
       ),
       Arguments.of(
         "eq nested array-object field string",

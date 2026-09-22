@@ -564,7 +564,7 @@
       dataType: {
         dataType: 'jsonbArrayType',
         itemDataType: {
-          dataType: 'stringType',
+          dataType: 'rangedUUIDType',
         },
       },
       isIdColumn: false,

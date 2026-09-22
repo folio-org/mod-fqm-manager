@@ -10,7 +10,7 @@
 - [MODFQMMGR-1142](https://folio-org.atlassian.net/browse/MODFQMMGR-1142) Support dynamic MARC subfield querying on the SRS record entity type
 - [ERM-3998](https://folio-org.atlassian.net/browse/ERM-3998) Add agreement and organization simple entity types with db views and translations
 - [MODFQMMGR-1107](https://folio-org.atlassian.net/browse/MODFQMMGR-1107) Add patron group at checkout field to Loans ET, populated from the loan record and retained after loan anonymization
-- [MODFQMMGR-XXXX](https://folio-org.atlassian.net/browse/MODFQMMGR-1222) Declare `department_ids` (users) and `type_ids` (organizations) as arrays of UUIDs instead of strings, so the query builder offers the UUID operator set for them
+- [MODFQMMGR-1222](https://folio-org.atlassian.net/browse/MODFQMMGR-1222) Declare `department_ids` (users) and `type_ids` (organizations) as arrays of UUIDs instead of strings, so the query builder offers the UUID operator set for them
 
 # 4.1.x - Trillium
 

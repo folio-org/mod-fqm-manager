@@ -23,11 +23,6 @@
       queryable: true,
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'item-note-types',
-        labelJsonPath: '$.itemNoteTypes.*.id',
-        valueJsonPath: '$.itemNoteTypes.*.id',
-      }
     },
     {
       name: 'name',

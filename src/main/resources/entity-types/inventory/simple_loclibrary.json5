@@ -25,11 +25,6 @@
       hidden: true,
       essential: true,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.id',
-        labelJsonPath: '$.loclibs.*.id',
-      }
     },
     {
       name: 'name',
@@ -79,11 +74,6 @@
       essential: true,
       visibleByDefault: false,
       valueGetter: ":sourceAlias.jsonb->>'campusId'",
-      valueSourceApi: {
-        path: 'location-units/libraries',
-        valueJsonPath: '$.loclibs.*.campusId',
-        labelJsonPath: '$.loclibs.*.campusId',
-      }
     },
     {
       name: 'jsonb',

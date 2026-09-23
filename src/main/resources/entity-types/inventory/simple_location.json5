@@ -23,11 +23,6 @@
       hidden: true,
       essential: true,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'locations',
-        valueJsonPath: '$.locations.*.id',
-        labelJsonPath: '$.locations.*.id',
-      },
     },
     {
       name: 'code',

@@ -13,6 +13,7 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -21,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -81,6 +84,70 @@ class EntityTypePermissionsAspectTest {
       "methodWithContentsRequestParam",
       entityType -> new Object[]{new ContentsRequest(UUID.fromString(entityType.getId()), null, null)},
       ContentsRequest.class);
+  }
+
+  /**
+   * Regression test for MODFQMMGR-1223: the parameter-index cache must be bounded by the number of annotated methods,
+   * not grow with every invocation.
+   * <p>
+   * This deliberately goes through a real Spring AOP proxy rather than a mocked join point, since the bug depended on
+   * the equality semantics of the {@link MethodSignature} objects Spring creates per invocation.
+   */
+  @Test
+  @SneakyThrows
+  void testIndexCacheDoesNotGrowAcrossRepeatedInvocations() {
+    EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService, executionContext);
+    UUID entityTypeId = UUID.randomUUID();
+    EntityType entityType = new EntityType(entityTypeId.toString(), "name", true);
+    when(entityTypeRepository.getEntityTypeDefinition(any(UUID.class), any())).thenReturn(Optional.of(entityType));
+    AdvisedTarget proxy = createProxy(aspect);
+
+    int invocations = 100;
+    for (int i = 0; i < invocations; i++) {
+      proxy.byType(entityTypeId);
+      proxy.byName(UUID.randomUUID(), entityTypeId);
+    }
+
+    // One entry per annotated method, with the correct index for both the type-based and the name-based lookup
+    assertEquals(2, aspect.indexCache.size());
+    assertEquals(0, aspect.indexCache.get(AdvisedTarget.class.getMethod("byType", UUID.class)));
+    assertEquals(1, aspect.indexCache.get(AdvisedTarget.class.getMethod("byName", UUID.class, UUID.class)));
+    verify(entityTypeRepository, times(invocations * 2)).getEntityTypeDefinition(eq(entityTypeId), any());
+    verify(permissionsService, times(invocations * 2)).verifyUserHasNecessaryPermissions(any(EntityType.class), eq(false));
+  }
+
+  @Test
+  void testMissingEntityTypeParameterThrows() {
+    EntityTypePermissionsAspect aspect = new EntityTypePermissionsAspect(entityTypeRepository, queryRepository, permissionsService, executionContext);
+    AdvisedTarget proxy = createProxy(aspect);
+    UUID id = UUID.randomUUID();
+
+    assertThrows(RuntimeException.class, () -> proxy.byMissingName(id));
+    verifyNoInteractions(entityTypeRepository, permissionsService);
+  }
+
+  private static AdvisedTarget createProxy(EntityTypePermissionsAspect aspect) {
+    AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new AdvisedTarget());
+    proxyFactory.setProxyTargetClass(true);
+    proxyFactory.addAspect(aspect);
+    return proxyFactory.getProxy();
+  }
+
+  /**
+   * Target class for exercising the aspect through a real Spring AOP proxy
+   */
+  public static class AdvisedTarget {
+    @EntityTypePermissionsRequired
+    public void byType(UUID entityTypeId) {
+    }
+
+    @EntityTypePermissionsRequired(parameterName = "entityTypeId")
+    public void byName(UUID someOtherId, UUID entityTypeId) {
+    }
+
+    @EntityTypePermissionsRequired(parameterName = "doesNotExist")
+    public void byMissingName(UUID entityTypeId) {
+    }
   }
 
   /**

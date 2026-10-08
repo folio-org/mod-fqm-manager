@@ -15,8 +15,11 @@ import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.SubmitQuery;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +36,17 @@ public class EntityTypePermissionsAspect {
   private final PermissionsService permissionsService;
   private final FolioExecutionContext executionContext;
 
-  private final Map<MethodSignature, Integer> indexCache = new ConcurrentHashMap<>();
+  private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
+
+  /**
+   * Annotated method -> index of the parameter containing the entity type.
+   * <p>
+   * Keyed on {@link Method}, not the join point's {@link MethodSignature}: Spring creates a new signature per call,
+   * with identity equality, that references the call's arguments, so keying on it leaks memory (MODFQMMGR-1223).
+   */
+  // package-private, to make this visible for testing
+  @SuppressWarnings("java:S3749") // internal cache, not an injected dependency
+  final Map<Method, Integer> indexCache = new ConcurrentHashMap<>();
 
   /**
    * Handle methods that accept an entity type or query ID
@@ -94,19 +107,11 @@ public class EntityTypePermissionsAspect {
    */
   @SuppressWarnings("unchecked") // If the types are wrong, we want to fail loudly
   private <T> Object validatePermissions(ProceedingJoinPoint joinPoint, Function<T, EntityType> entityTypeConverter) throws Throwable {
-    // 1. Retrieve the annotated method and annotation details.
-    MethodSignature methodSignature = ((MethodSignature) joinPoint.getSignature());
-    EntityTypePermissionsRequired annotation = methodSignature.getMethod().getAnnotation(EntityTypePermissionsRequired.class);
-    String entityTypeParamName = annotation.parameterName();
-    Class<?> entityTypeParamType = annotation.value();
+    // 1. Retrieve the annotated method.
+    Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
 
     // 2. Find the parameter with the entity type (as described by the annotation).
-    int paramIndex = indexCache.computeIfAbsent(methodSignature,
-      signature -> {
-        if (annotation.parameterName() != null && !annotation.parameterName().isEmpty())
-          return Arrays.asList(signature.getParameterNames()).indexOf(entityTypeParamName);
-        return Arrays.asList(signature.getParameterTypes()).indexOf(entityTypeParamType);
-      });
+    int paramIndex = indexCache.computeIfAbsent(method, this::findEntityTypeParameterIndex);
     if (paramIndex == -1) {
       throw new EntityTypeParameterNotFoundException();
     }
@@ -120,6 +125,23 @@ public class EntityTypePermissionsAspect {
 
     // 5. Proceed with the original method call.
     return joinPoint.proceed();
+  }
+
+  /**
+   * Finds the index of the parameter containing the entity type, as described by the method's
+   * {@link EntityTypePermissionsRequired} annotation.
+   *
+   * @return the parameter index, or -1 if no matching parameter was found
+   */
+  private int findEntityTypeParameterIndex(Method method) {
+    EntityTypePermissionsRequired annotation = method.getAnnotation(EntityTypePermissionsRequired.class);
+    String entityTypeParamName = annotation.parameterName();
+    if (entityTypeParamName != null && !entityTypeParamName.isEmpty()) {
+      // Requires compiling with -parameters
+      String[] parameterNames = PARAMETER_NAME_DISCOVERER.getParameterNames(method);
+      return parameterNames == null ? -1 : Arrays.asList(parameterNames).indexOf(entityTypeParamName);
+    }
+    return Arrays.asList(method.getParameterTypes()).indexOf(annotation.value());
   }
 
   private static class EntityTypeParameterNotFoundException extends RuntimeException {

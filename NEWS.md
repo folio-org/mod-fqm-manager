@@ -14,7 +14,19 @@
 
 # 4.1.x - Trillium
 
-## 4.1.5 (4.1.4 was skipped, as it included a feature that was intended for 4.1.x)
+## 4.1.8
+- [MODFQMMGR-1208](https://folio-org.atlassian.net/browse/MODFQMMGR-1208) Fix `contains` queries for repeatable (array and JSONB-array) fields
+
+## 4.1.7
+- [MODELINKS-425](https://folio-org.atlassian.net/browse/MODELINKS-425) Hide the entity links authority relationship type field
+
+## 4.1.6
+- [MODFQMMGR-1162](https://folio-org.atlassian.net/browse/MODFQMMGR-1162) Remove redundant `source` properties from fields that use `valueSourceApi`
+- [MODFQMMGR-1169](https://folio-org.atlassian.net/browse/MODFQMMGR-1169) Keep loan and fee/fine counts in sync for user transaction summaries
+- [MODFQMMGR-1174](https://folio-org.atlassian.net/browse/MODFQMMGR-1174) Restore missing fields in the Organizations entity type
+- [MODFQMMGR-1179](https://folio-org.atlassian.net/browse/MODFQMMGR-1179) Fix the value source API for `Source file - Name`
+
+## 4.1.5 (4.1.4 was skipped, as it included a feature that was intended for 4.2.x)
 - [MODFQMMGR-1168](https://folio-org.atlassian.net/browse/MODFQMMGR-1168) Set up TestMate integration and coverage reporting for the FQM module
 - Update generated authority entity type metadata for heading and relationship fields
 

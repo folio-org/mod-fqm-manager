@@ -39,13 +39,10 @@ public class EntityTypePermissionsAspect {
   private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
   /**
-   * Cache of annotated method -> index of the parameter containing the entity type.
+   * Annotated method -> index of the parameter containing the entity type.
    * <p>
-   * This MUST be keyed on {@link Method}, which has value-based equality and is bounded by the number of annotated
-   * methods. Do not key it on the join point's {@link MethodSignature}: Spring AOP creates a new signature object for
-   * every invocation, with identity equality, and each one holds a reference to its join point (including the method
-   * invocation and its arguments). Keying on it made this cache grow by one entry per request and retain every
-   * request's arguments, causing an OutOfMemoryError under load (MODFQMMGR-1223).
+   * Keyed on {@link Method}, not the join point's {@link MethodSignature}: Spring creates a new signature per call,
+   * with identity equality, that references the call's arguments, so keying on it leaks memory (MODFQMMGR-1223).
    */
   // package-private, to make this visible for testing
   @SuppressWarnings("java:S3749") // internal cache, not an injected dependency
@@ -140,7 +137,7 @@ public class EntityTypePermissionsAspect {
     EntityTypePermissionsRequired annotation = method.getAnnotation(EntityTypePermissionsRequired.class);
     String entityTypeParamName = annotation.parameterName();
     if (entityTypeParamName != null && !entityTypeParamName.isEmpty()) {
-      // Same discoverer Spring AOP's MethodSignature.getParameterNames() uses (requires compiling with -parameters)
+      // Requires compiling with -parameters
       String[] parameterNames = PARAMETER_NAME_DISCOVERER.getParameterNames(method);
       return parameterNames == null ? -1 : Arrays.asList(parameterNames).indexOf(entityTypeParamName);
     }

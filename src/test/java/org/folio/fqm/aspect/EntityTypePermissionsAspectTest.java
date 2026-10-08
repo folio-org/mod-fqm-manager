@@ -108,7 +108,6 @@ class EntityTypePermissionsAspectTest {
       proxy.byName(UUID.randomUUID(), entityTypeId);
     }
 
-    // One entry per annotated method, with the correct index for both the type-based and the name-based lookup
     assertEquals(2, aspect.indexCache.size());
     assertEquals(0, aspect.indexCache.get(AdvisedTarget.class.getMethod("byType", UUID.class)));
     assertEquals(1, aspect.indexCache.get(AdvisedTarget.class.getMethod("byName", UUID.class, UUID.class)));

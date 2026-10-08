@@ -139,14 +139,17 @@ class EntityTypePermissionsAspectTest {
   public static class AdvisedTarget {
     @EntityTypePermissionsRequired
     public void byType(UUID entityTypeId) {
+      // Intentionally empty: only the aspect around this call is under test
     }
 
     @EntityTypePermissionsRequired(parameterName = "entityTypeId")
     public void byName(UUID someOtherId, UUID entityTypeId) {
+      // Intentionally empty: only the aspect around this call is under test
     }
 
     @EntityTypePermissionsRequired(parameterName = "doesNotExist")
     public void byMissingName(UUID entityTypeId) {
+      // Intentionally empty: only the aspect around this call is under test
     }
   }
 

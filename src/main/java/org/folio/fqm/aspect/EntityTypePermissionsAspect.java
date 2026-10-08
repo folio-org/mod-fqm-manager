@@ -36,7 +36,7 @@ public class EntityTypePermissionsAspect {
   private final PermissionsService permissionsService;
   private final FolioExecutionContext executionContext;
 
-  private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+  private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
   /**
    * Cache of annotated method -> index of the parameter containing the entity type.
@@ -48,6 +48,7 @@ public class EntityTypePermissionsAspect {
    * request's arguments, causing an OutOfMemoryError under load (MODFQMMGR-1223).
    */
   // package-private, to make this visible for testing
+  @SuppressWarnings("java:S3749") // internal cache, not an injected dependency
   final Map<Method, Integer> indexCache = new ConcurrentHashMap<>();
 
   /**
@@ -140,7 +141,7 @@ public class EntityTypePermissionsAspect {
     String entityTypeParamName = annotation.parameterName();
     if (entityTypeParamName != null && !entityTypeParamName.isEmpty()) {
       // Same discoverer Spring AOP's MethodSignature.getParameterNames() uses (requires compiling with -parameters)
-      String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
+      String[] parameterNames = PARAMETER_NAME_DISCOVERER.getParameterNames(method);
       return parameterNames == null ? -1 : Arrays.asList(parameterNames).indexOf(entityTypeParamName);
     }
     return Arrays.asList(method.getParameterTypes()).indexOf(annotation.value());

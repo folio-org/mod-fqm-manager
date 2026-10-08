@@ -25,11 +25,6 @@
       valueGetter: ':sourceAlias.id',
       essential: true, // required to query by .name due to idColumnName
       hidden: true,
-      valueSourceApi: {
-        labelJsonPath: '$.instanceStatuses.*.id',
-        valueJsonPath: '$.instanceStatuses.*.id',
-        path: 'instance-statuses',
-      }
     },
     {
       name: 'name',

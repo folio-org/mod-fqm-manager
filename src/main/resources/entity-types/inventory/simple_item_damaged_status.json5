@@ -23,11 +23,6 @@
       essential: true,
       hidden: true,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'item-damaged-statuses',
-        valueJsonPath: '$.itemDamageStatuses.*.id',
-        labelJsonPath: '$.itemDamageStatuses.*.id',
-      },
     },
     {
       name: 'name',

@@ -23,11 +23,6 @@
       visibleByDefault: false,
       valueGetter: ':sourceAlias.id',
       essential: true,
-      valueSourceApi: {
-        path: 'service-points',
-        valueJsonPath: '$.servicepoints.*.id',
-        labelJsonPath: '$.servicepoints.*.id',
-      },
     },
     {
       name: 'code',

@@ -23,11 +23,6 @@
       essential: true,
       hidden: true,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'material-types',
-        valueJsonPath: '$.mtypes.*.id',
-        labelJsonPath: '$.mtypes.*.id',
-      },
     },
     {
       name: 'name',

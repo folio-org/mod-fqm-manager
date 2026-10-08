@@ -24,11 +24,6 @@
       visibleByDefault: false,
       essential: true,
       valueGetter: ':sourceAlias.id',
-      valueSourceApi: {
-        path: 'loan-policy-storage/loan-policies',
-        valueJsonPath: '$.loanPolicies.*.id',
-        labelJsonPath: '$.loanPolicies.*.id',
-      }
     },
     {
       name: 'created_at',

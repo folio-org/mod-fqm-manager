@@ -1,5 +1,8 @@
 # 4.1.x - Trillium
 
+# 4.1.8
+- [MODFQMMGR-1208](https://folio-org.atlassian.net/browse/MODFQMMGR-1208) Fix `contains` queries for repeatable (array and JSONB-array) fields
+
 # 4.1.7
 - [MODELINKS-425](https://folio-org.atlassian.net/browse/MODELINKS-425) Hide the entity links authority relationship type field
 

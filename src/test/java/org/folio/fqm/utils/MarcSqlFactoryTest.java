@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.folio.fql.model.ContainsCondition;
 import org.folio.fql.model.field.FqlField;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.fqm.utils.MarcSqlFactory.MarcQueryContext;
 import org.folio.querytool.domain.dto.EntityDataType;
 import org.folio.querytool.domain.dto.EntityType;
@@ -537,6 +538,113 @@ class MarcSqlFactoryTest {
     // valueGetter is present and non-blank but has no "FROM <table> marc", so the table can't be extracted.
     assertEquals(Optional.empty(),
       MarcSqlFactory.createQueryContext(entityTypeForContext("getter", "SELECT 1"), "marc_245_a"));
+  }
+
+  // ---- Leader positions ----------------------------------------------------------------------------------
+
+  @Test
+  void shouldCreateLeaderSinglePositionSyntheticColumn() {
+    EntityTypeColumn column =
+      MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), "marc_ldr_p06", "diku").orElseThrow();
+
+    assertEquals("marc_ldr_p06", column.getName());
+    assertEquals("MARC ldr/06", column.getLabelAlias());
+    assertInstanceOf(MarcType.class, column.getDataType());
+    assertEquals("lower(:value)", column.getValueFunction());
+    assertEquals("marc.p_06", column.getFilterValueGetter());
+    assertSqlEquals("""
+      (
+        SELECT COALESCE(jsonb_agg(marc.p_06) FILTER (WHERE marc.p_06 <> ''), '[]'::jsonb)
+        FROM diku_mod_fqm_manager.src_srs_marc_indexers_leader marc
+        WHERE marc.marc_id = "record_lb".id
+      )
+      """, column.getValueGetter());
+  }
+
+  @Test
+  void shouldResolveLeaderPositionsAlignedWithStoredColumns() {
+    assertEquals("marc.p_05", leaderFilterValueGetter("marc_ldr_p05"));
+    assertEquals("marc.p_11", leaderFilterValueGetter("marc_ldr_p11"));
+    assertEquals("marc.p_17", leaderFilterValueGetter("marc_ldr_p17"));
+    assertEquals("marc.p_22", leaderFilterValueGetter("marc_ldr_p22"));
+    assertEquals("marc.p_00_04", leaderFilterValueGetter("marc_ldr_p00_04"));
+    assertEquals("marc.p_12_16", leaderFilterValueGetter("marc_ldr_p12_16"));
+  }
+
+  @Test
+  void shouldResolveUnalignedLeaderRangesBySubstring() {
+    String concatenated = "marc.p_00_04 || marc.p_05 || marc.p_06 || marc.p_07 || marc.p_08 || marc.p_09 || "
+      + "marc.p_10 || marc.p_11 || marc.p_12_16 || marc.p_17 || marc.p_18 || marc.p_19 || marc.p_20 || "
+      + "marc.p_21 || marc.p_22";
+
+    // Range crossing column boundaries.
+    assertEquals("substring(%s from 6 for 3)".formatted(concatenated), leaderFilterValueGetter("marc_ldr_p05_07"));
+    // Range crossing into a grouped column.
+    assertEquals("substring(%s from 11 for 5)".formatted(concatenated), leaderFilterValueGetter("marc_ldr_p10_14"));
+    // Single position within a grouped column.
+    assertEquals("substring(%s from 1 for 1)".formatted(concatenated), leaderFilterValueGetter("marc_ldr_p00"));
+    // Position 23 isn't stored: it falls past the concatenation and yields '' (filtered to [] on retrieval).
+    assertEquals("substring(%s from 24 for 1)".formatted(concatenated), leaderFilterValueGetter("marc_ldr_p23"));
+  }
+
+  @Test
+  void shouldBuildLeaderQueryContext() {
+    EntityType entityType = MarcSqlFactory.addSyntheticColumns(entityTypeWithMarcSupport(), List.of("marc_ldr_p17"), "diku");
+
+    MarcQueryContext context = MarcSqlFactory.createQueryContext(entityType, "marc_ldr_p17").orElseThrow();
+
+    assertEquals("diku_mod_fqm_manager.src_srs_marc_indexers_leader", context.tableName());
+    assertEquals("marc.p_17", context.filterValueGetter());
+    // One leader row per record: correlate on marc_id only, with no field_no/indicator/subfield predicates.
+    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER, context.whereClause());
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc where marc.marc_id = "
+        + MARC_RECORD_ID_GETTER + " and marc.p_17 = {0})",
+      context.existsClause("=", true)
+    );
+    assertEquals(
+      "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc where marc.marc_id = "
+        + MARC_RECORD_ID_GETTER + " and marc.p_17 is not null and marc.p_17 <> '')",
+      context.presenceClause()
+    );
+  }
+
+  @Test
+  void shouldCreateSourcePrefixedLeaderSyntheticColumn() {
+    EntityTypeColumn column = MarcSqlFactory.createSyntheticColumn(
+      compositeEntityTypeWithMarcSupport(), "marc_authority.marc_ldr_p06", "diku").orElseThrow();
+
+    assertEquals("marc_authority.marc_ldr_p06", column.getName());
+    assertEquals("MARC ldr/06", column.getLabelAlias());
+    assertTrue(column.getValueGetter().contains("diku_mod_fqm_manager.src_srs_marc_indexers_leader marc"));
+    assertTrue(column.getValueGetter().contains("marc.marc_id = " + MARC_AUTHORITY_ID_GETTER));
+  }
+
+  @Test
+  void shouldRejectControlFieldPositions() {
+    EntityType entityType = entityTypeWithMarcSupport();
+
+    for (String fieldName : List.of("marc_008_p06", "marc_008_p35_37", "marc_006_p00", "marc_007_p00_01")) {
+      InvalidFqlException exception = assertThrows(InvalidFqlException.class,
+        () -> MarcSqlFactory.createSyntheticColumn(entityType, fieldName, "diku"));
+      assertEquals(fieldName, exception.getError().getParameters().get(0).getKey());
+    }
+    List<String> fieldNames = List.of("marc_ldr_p06", "marc_008_p06");
+    assertThrows(InvalidFqlException.class,
+      () -> MarcSqlFactory.addSyntheticColumns(entityType, fieldNames, "diku"));
+  }
+
+  @Test
+  void shouldIgnoreControlFieldPositionsWithoutMarcPlaceholder() {
+    EntityType entityType = new EntityType().columns(List.of());
+
+    assertEquals(Optional.empty(), MarcSqlFactory.createSyntheticColumn(entityType, "marc_008_p06", "diku"));
+  }
+
+  private static String leaderFilterValueGetter(String fieldName) {
+    return MarcSqlFactory.createSyntheticColumn(entityTypeWithMarcSupport(), fieldName, "diku")
+      .orElseThrow()
+      .getFilterValueGetter();
   }
 
   // ---- Fixtures --------------------------------------------------------------------------------------------

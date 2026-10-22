@@ -119,7 +119,8 @@ class FqlToSqlConverterServiceTest {
       );
     entityType = MarcSqlFactory.addSyntheticColumns(entityType,
       List.of("marc_245_a", "marc_245", "marc_245_ind1", "marc_245_ind1_7_a", "marc_245_ind1_blank_a",
-        "marc_245_ind1_1_ind2_2_a", "marc_245_ind1_1_ind2", "marc_245_ind2_1_ind1"), "diku");
+        "marc_245_ind1_1_ind2_2_a", "marc_245_ind1_1_ind2", "marc_245_ind2_1_ind1", "marc_ldr_p06", "marc_ldr_p00_04",
+        "marc_ldr_p05_07", "marc_ldr_p23"), "diku");
   }
 
   static Condition trueCondition = trueCondition();
@@ -1702,6 +1703,81 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("lower(marc.ind1) ="));
     assertTrue(rendered.contains("'#'"));
     assertFalse(rendered.toLowerCase().contains("blank"));
+  }
+
+  @Test
+  void shouldGenerateMarcLeaderPositionCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_ldr_p06": {"$eq": "A"}}""");
+
+    // Leader positions correlate against the leader view on marc_id alone, comparing the stored column as-is.
+    assertTrue(rendered.contains("diku_mod_fqm_manager.src_srs_marc_indexers_leader"));
+    assertTrue(rendered.contains("exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc where marc.marc_id = "));
+    assertTrue(rendered.contains("marc.p_06 = lower('A')"));
+    assertFalse(rendered.contains("field_no"));
+  }
+
+  @Test
+  void shouldGenerateMarcLeaderCrossColumnRangeCondition() {
+    String rendered = renderMarcCondition("""
+      {"marc_ldr_p05_07": {"$in": ["nam", "cam"]}}""");
+
+    assertTrue(rendered.contains("substring(marc.p_00_04 || marc.p_05 ||"));
+    assertTrue(rendered.contains("from 6 for 3) = lower('nam')"));
+    assertTrue(rendered.contains("from 6 for 3) = lower('cam')"));
+  }
+
+  @Test
+  void shouldMapBlankTokenForMarcLeaderPosition() {
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p06": {"$eq": "blank"}}""").contains("marc.p_06 = lower('#')"));
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p06": {"$ne": "BLANK"}}""").contains("marc.p_06 = lower('#')"));
+  }
+
+  @Test
+  void shouldRejectPatternOperatorsOnSingleMarcLeaderPosition() {
+    for (String fql : List.of(
+      "{\"marc_ldr_p06\": {\"$starts_with\": \"a\"}}",
+      "{\"marc_ldr_p06\": {\"$contains\": \"a\"}}"
+    )) {
+      assertThrows(InvalidFqlException.class, () -> fqlToSqlConverter.getSqlCondition(fql, entityType));
+    }
+  }
+
+  @Test
+  void shouldAllowPatternOperatorsOnMarcLeaderRange() {
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p05_07": {"$starts_with": "n"}}""").contains("from 6 for 3) like "));
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p05_07": {"$contains": "am"}}""").contains("from 6 for 3) like "));
+  }
+
+  @Test
+  void shouldRejectBlankTokenForMarcLeaderRange() {
+    for (String fql : List.of(
+      "{\"marc_ldr_p05_07\": {\"$eq\": \"blank\"}}",
+      "{\"marc_ldr_p05_07\": {\"$in\": [\"nam\", \"BLANK\"]}}",
+      "{\"marc_ldr_p05_07\": {\"$contains\": \"blank\"}}"
+    )) {
+      assertThrows(InvalidFqlException.class, () -> fqlToSqlConverter.getSqlCondition(fql, entityType));
+    }
+  }
+
+  @Test
+  void shouldAllowRawBlankMarkerForMarcLeaderRange() {
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p05_07": {"$eq": "###"}}""").contains("from 6 for 3) = lower('###')"));
+  }
+
+  @Test
+  void shouldGenerateMarcLeaderEmptyCondition() {
+    // Position 23 isn't stored, so it resolves to an always-empty substring rather than an error.
+    String rendered = renderMarcCondition("""
+      {"marc_ldr_p23": {"$empty": true}}""");
+
+    assertTrue(rendered.contains("not (exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc"));
+    assertTrue(rendered.contains("from 24 for 1) <> ''"));
   }
 
   @Test

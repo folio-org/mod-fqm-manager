@@ -205,7 +205,6 @@ public class MarcSqlFactory {
    * exactly (e.g. {@code marc.p_06}, {@code marc.p_00_04}); otherwise substrings the concatenation of all stored
    * columns, so ranges crossing column boundaries (or within a grouped column) work too. Positions past 22 fall
    * outside the concatenation and yield {@code ''}.
-   *
    */
   private static String leaderPositionExpression(MarcFieldName marcField) {
     int start = marcField.position();

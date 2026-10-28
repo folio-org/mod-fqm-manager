@@ -399,6 +399,13 @@ public class FqlToSqlConverterService {
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
                                                MarcQueryContext marcQueryContext) {
     MarcFieldName marcField = marcQueryContext.marcField();
+    Object conditionValue = fieldCondition.value();
+    if (conditionValue == null || conditionValue instanceof List<?> values && values.stream().anyMatch(Objects::isNull)) {
+      throw new InvalidFqlException(
+        fieldCondition.toString(),
+        Map.of(fieldCondition.field().toString(), "MARC field values must not be null")
+      );
+    }
     if (marcField.isIndicatorTarget()) {
       return handleMarcIndicatorCondition(fieldCondition, entityType, marcQueryContext);
     }
@@ -416,12 +423,17 @@ public class FqlToSqlConverterService {
       case NotInCondition notInCondition -> and(notInCondition.value().stream()
         .map(value -> marcRowComparison(marcQueryContext, "=", marcValueField.apply(value, notInCondition), false))
         .toList());
-      case StartsWithCondition startsWithCondition -> marcRowPatternComparison(marcQueryContext, "like",
-        DSL.concat(marcValueField.apply(startsWithCondition.value(), startsWithCondition), inline("%")));
-      case ContainsCondition containsCondition -> marcRowPatternComparison(marcQueryContext, "like",
-        DSL.concat(inline("%"), marcValueField.apply(containsCondition.value(), containsCondition), inline("%")));
+      // Plain text comparisons rather than LIKE, so characters like % and _ in the value are matched literally.
+      case StartsWithCondition startsWithCondition -> condition(marcQueryContext.existsClause("starts_with(%s, {0})"),
+        marcValueField.apply(startsWithCondition.value(), startsWithCondition));
+      case ContainsCondition containsCondition -> condition(marcQueryContext.existsClause("strpos(%s, {0}) > 0"),
+        marcValueField.apply(containsCondition.value(), containsCondition));
       case EmptyCondition emptyCondition -> handleMarcEmpty(emptyCondition, marcQueryContext);
-      default -> falseCondition();
+      default -> throw new InvalidFqlException(
+        fieldCondition.toString(),
+        Map.of(fieldCondition.field().toString(),
+          "MARC fields support only the eq, ne, in, nin, starts_with, contains, and empty operators")
+      );
     };
   }
 
@@ -833,11 +845,6 @@ public class FqlToSqlConverterService {
     return condition(marcQueryContext.existsClause(operator, existsMatch), valueField);
   }
 
-  private static Condition marcRowPatternComparison(MarcQueryContext marcQueryContext,
-                                                    String operator,
-                                                    org.jooq.Field<String> valueField) {
-    return condition(marcQueryContext.existsClause(operator, true), valueField);
-  }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a
   // performance benefit without much drawback.

@@ -336,8 +336,12 @@ class MarcSqlFactoryTest {
       context.existsClause("=", true)
     );
     assertEquals(
-      "not exists (" + subqueryPrefix + " and lower(marc.value) like {0})",
-      context.existsClause("like", false)
+      "not exists (" + subqueryPrefix + " and lower(marc.value) = {0})",
+      context.existsClause("=", false)
+    );
+    assertEquals(
+      "exists (" + subqueryPrefix + " and strpos(lower(marc.value), {0}) > 0)",
+      context.existsClause("strpos(%s, {0}) > 0")
     );
     assertEquals(
       "exists (" + subqueryPrefix + " and lower(marc.value) is not null and lower(marc.value) <> '')",

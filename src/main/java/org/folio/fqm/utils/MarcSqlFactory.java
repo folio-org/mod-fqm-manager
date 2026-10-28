@@ -296,9 +296,9 @@ public class MarcSqlFactory {
 
     /**
      * Row-level existence predicate comparing the targeted MARC column against a single bound parameter
-     * ({@code {0}}). Used for eq/ne/in/nin and (with a LIKE operator) for starts_with/contains.
+     * ({@code {0}}). Used for eq/ne/in/nin.
      *
-     * @param operator    the SQL comparison or pattern operator (e.g. {@code =}, {@code like})
+     * @param operator    the SQL comparison operator (e.g. {@code =})
      * @param existsMatch {@code true} for {@code EXISTS}, {@code false} for {@code NOT EXISTS}
      */
     public String existsClause(String operator, boolean existsMatch) {
@@ -308,6 +308,18 @@ public class MarcSqlFactory {
         whereClause(),
         filterValueGetter(),
         operator
+      );
+    }
+
+    /**
+     * Row-level existence predicate from a template applied to the targeted MARC column, e.g.
+     * {@code "strpos(%s, {0}) > 0"}, where {@code {0}} is the bound value.
+     */
+    public String existsClause(String predicateTemplate) {
+      return "exists (select 1 from %s marc where %s and %s)".formatted(
+        tableName,
+        whereClause(),
+        predicateTemplate.formatted(filterValueGetter())
       );
     }
 

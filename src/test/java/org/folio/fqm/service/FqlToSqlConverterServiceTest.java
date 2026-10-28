@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -1610,10 +1612,9 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("diku_mod_fqm_manager.src_srs_marc_indexers"));
     assertTrue(rendered.contains("marc.field_no = '245'"));
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
-    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("strpos(lower(marc.value), "));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
-    assertTrue(rendered.contains("'%' ||"),
-      "contains should match %value%: a wildcard is concatenated before the value");
+    assertFalse(rendered.contains(" like "));
   }
 
   // Equality-style operator routing across the two MARC value-handling paths: subfield/tag values
@@ -1754,9 +1755,9 @@ class FqlToSqlConverterServiceTest {
   @Test
   void shouldAllowPatternOperatorsOnMarcLeaderRange() {
     assertTrue(renderMarcCondition("""
-      {"marc_ldr_p05_07": {"$starts_with": "n"}}""").contains("from 6 for 3) like "));
+      {"marc_ldr_p05_07": {"$starts_with": "n"}}""").contains("starts_with(substring("));
     assertTrue(renderMarcCondition("""
-      {"marc_ldr_p05_07": {"$contains": "am"}}""").contains("from 6 for 3) like "));
+      {"marc_ldr_p05_07": {"$contains": "am"}}""").contains("strpos(substring("));
   }
 
   @Test
@@ -1798,6 +1799,37 @@ class FqlToSqlConverterServiceTest {
     );
   }
 
+  static List<String> unsupportedMarcConditions() {
+    List<String> conditions = new ArrayList<>();
+    for (String field : List.of("marc_245_a", "marc_245", "marc_ldr_p06", "marc_ldr_p05_07")) {
+      for (String operator : List.of("$gt", "$gte", "$lt", "$lte", "$regex")) {
+        conditions.add("{\"%s\": {\"%s\": \"a\"}}".formatted(field, operator));
+      }
+    }
+    return conditions;
+  }
+
+  @ParameterizedTest
+  @MethodSource("unsupportedMarcConditions")
+  void shouldRejectUnsupportedOperatorsOnMarcFields(String fql) {
+    InvalidFqlException exception = assertThrows(InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition(fql, entityType));
+    assertTrue(exception.getError().getParameters().get(0).getValue().contains("support only"));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+    "{\"marc_ldr_p06\": {\"$eq\": null}}",
+    "{\"marc_245_a\": {\"$ne\": null}}",
+    "{\"marc_245_ind1\": {\"$in\": [null]}}",
+    "{\"marc_ldr_p05_07\": {\"$nin\": [\"nam\", null]}}"
+  })
+  void shouldRejectNullValuesOnMarcFields(String fql) {
+    InvalidFqlException exception = assertThrows(InvalidFqlException.class,
+      () -> fqlToSqlConverter.getSqlCondition(fql, entityType));
+    assertEquals("MARC field values must not be null", exception.getError().getParameters().get(0).getValue());
+  }
+
   @Test
   void shouldGenerateConstrainedSubfieldMarcCondition() {
     String rendered = renderMarcCondition("""
@@ -1808,10 +1840,8 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("marc.field_no = '245'"));
     assertTrue(rendered.contains("lower(marc.ind1) = '7'"));
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
-    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("strpos(lower(marc.value), "));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
-    // Targets the value, so text operators apply (unlike indicator-only fields): %value% wrapping present.
-    assertTrue(rendered.contains("'%' ||"));
   }
 
   @Test
@@ -1825,7 +1855,7 @@ class FqlToSqlConverterServiceTest {
     assertTrue(rendered.contains("lower(marc.ind1) = '1'"));
     assertTrue(rendered.contains("lower(marc.ind2) = '2'"));
     assertTrue(rendered.contains("marc.subfield_no = 'a'"));
-    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("strpos(lower(marc.value), "));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
   }
 
@@ -1850,12 +1880,27 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
+  void shouldMatchMarcPatternValuesLiterally() {
+    String contains = renderMarcCondition("""
+      {"marc_245_a": {"$contains": "50%_off"}}""");
+    assertTrue(contains.contains("strpos(lower(marc.value), "));
+    assertTrue(contains.contains("lower('50%_off')"));
+    assertFalse(contains.contains(" like "));
+
+    String startsWith = renderMarcCondition("""
+      {"marc_245_a": {"$starts_with": "50%"}}""");
+    assertTrue(startsWith.contains("starts_with(lower(marc.value), "));
+    assertTrue(startsWith.contains("lower('50%')"));
+    assertFalse(startsWith.contains(" like "));
+  }
+
+  @Test
   void shouldGenerateTagOnlyMarcCondition() {
     String rendered = renderMarcCondition("""
       {"marc_245": {"$contains": "Shakespeare"}}""");
 
     assertTrue(rendered.contains("marc.field_no = '245'"));
-    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("strpos(lower(marc.value), "));
     assertTrue(rendered.toLowerCase().contains("shakespeare"));
     // tag-only matches any subfield, so there is no subfield_no constraint.
     assertFalse(rendered.contains("subfield_no"));
@@ -1866,10 +1911,8 @@ class FqlToSqlConverterServiceTest {
     String rendered = renderMarcCondition("""
       {"marc_245_a": {"$starts_with": "Sha"}}""");
 
-    assertTrue(rendered.contains("lower(marc.value) like"));
+    assertTrue(rendered.contains("starts_with(lower(marc.value), "));
     assertTrue(rendered.toLowerCase().contains("sha"));
-    assertFalse(rendered.contains("'%' ||"),
-      "starts_with should match value%: no wildcard before the value, only after");
   }
 
   @Test

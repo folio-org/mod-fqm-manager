@@ -402,14 +402,6 @@ public class FqlToSqlConverterService {
     if (marcField.isIndicatorTarget()) {
       return handleMarcIndicatorCondition(fieldCondition, entityType, marcQueryContext);
     }
-    if (marcField.isPositionTarget() && marcField.position().equals(marcField.endPosition())
-      && (fieldCondition instanceof StartsWithCondition || fieldCondition instanceof ContainsCondition)) {
-      throw new InvalidFqlException(
-        fieldCondition.toString(),
-        Map.of(fieldCondition.field().toString(),
-          "The starts_with and contains operators apply only to MARC position ranges, not single positions")
-      );
-    }
     BiFunction<Object, FieldCondition<?>, org.jooq.Field<String>> marcValueField = marcField.isPositionTarget()
       ? (value, condition) -> positionValueField(value, condition, entityType, marcField)
       : (value, condition) -> marcQueryValueField(value, condition, entityType);
@@ -807,13 +799,21 @@ public class FqlToSqlConverterService {
     return valueField(resolved, condition, entityType);
   }
 
-  // Like indicatorValueField, but for byte positions: "blank" maps to '#' on a single position and is rejected on a
-  // range.
+  // Like indicatorValueField, but for byte positions: starts_with/contains apply only to ranges, and "blank" maps to
+  // '#' on a single position and is rejected on a range.
   private static org.jooq.Field<String> positionValueField(Object value, FieldCondition<?> condition,
                                                           EntityType entityType, MarcFieldName marcField) {
+    boolean singlePosition = marcField.position().equals(marcField.endPosition());
+    if (singlePosition && (condition instanceof StartsWithCondition || condition instanceof ContainsCondition)) {
+      throw new InvalidFqlException(
+        condition.toString(),
+        Map.of(condition.field().toString(),
+          "The starts_with and contains operators apply only to MARC position ranges, not single positions")
+      );
+    }
     String resolved = Objects.toString(value, null);
     if ("blank".equalsIgnoreCase(resolved)) {
-      if (!marcField.position().equals(marcField.endPosition())) {
+      if (!singlePosition) {
         throw new InvalidFqlException(
           condition.toString(),
           Map.of(condition.field().toString(),

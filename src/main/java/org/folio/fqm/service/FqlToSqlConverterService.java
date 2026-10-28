@@ -13,6 +13,7 @@ import org.folio.fql.model.NotInCondition;
 import org.folio.fql.model.RegexCondition;
 import org.folio.fql.model.StartsWithCondition;
 import org.folio.fql.model.ContainsCondition;
+import org.folio.fql.model.field.MarcFieldName;
 import org.folio.fql.service.FqlService;
 import org.folio.fql.service.FqlValidationService;
 import org.folio.fqm.exception.FieldNotFoundException;
@@ -41,6 +42,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -396,26 +398,42 @@ public class FqlToSqlConverterService {
 
   private static Condition handleMarcCondition(FieldCondition<?> fieldCondition, EntityType entityType,
                                                MarcQueryContext marcQueryContext) {
-    if (marcQueryContext.marcField().isIndicatorTarget()) {
+    MarcFieldName marcField = marcQueryContext.marcField();
+    Object conditionValue = fieldCondition.value();
+    if (conditionValue == null || conditionValue instanceof List<?> values && values.stream().anyMatch(Objects::isNull)) {
+      throw new InvalidFqlException(
+        fieldCondition.toString(),
+        Map.of(fieldCondition.field().toString(), "MARC field values must not be null")
+      );
+    }
+    if (marcField.isIndicatorTarget()) {
       return handleMarcIndicatorCondition(fieldCondition, entityType, marcQueryContext);
     }
+    BiFunction<Object, FieldCondition<?>, org.jooq.Field<String>> marcValueField = marcField.isPositionTarget()
+      ? (value, condition) -> positionValueField(value, condition, entityType, marcField)
+      : (value, condition) -> marcQueryValueField(value, condition, entityType);
     return switch (fieldCondition) {
       case EqualsCondition equalsCondition -> marcRowComparison(marcQueryContext, "=",
-        marcQueryValueField(equalsCondition.value(), equalsCondition, entityType), true);
+        marcValueField.apply(equalsCondition.value(), equalsCondition), true);
       case NotEqualsCondition notEqualsCondition -> marcRowComparison(marcQueryContext, "=",
-        marcQueryValueField(notEqualsCondition.value(), notEqualsCondition, entityType), false);
+        marcValueField.apply(notEqualsCondition.value(), notEqualsCondition), false);
       case InCondition inCondition -> or(inCondition.value().stream()
-        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, inCondition, entityType), true))
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcValueField.apply(value, inCondition), true))
         .toList());
       case NotInCondition notInCondition -> and(notInCondition.value().stream()
-        .map(value -> marcRowComparison(marcQueryContext, "=", marcQueryValueField(value, notInCondition, entityType), false))
+        .map(value -> marcRowComparison(marcQueryContext, "=", marcValueField.apply(value, notInCondition), false))
         .toList());
-      case StartsWithCondition startsWithCondition -> marcRowPatternComparison(marcQueryContext, "like",
-        DSL.concat(marcQueryValueField(startsWithCondition.value(), startsWithCondition, entityType), inline("%")));
-      case ContainsCondition containsCondition -> marcRowPatternComparison(marcQueryContext, "like",
-        DSL.concat(inline("%"), marcQueryValueField(containsCondition.value(), containsCondition, entityType), inline("%")));
+      // Plain text comparisons rather than LIKE, so characters like % and _ in the value are matched literally.
+      case StartsWithCondition startsWithCondition -> condition(marcQueryContext.existsClause("starts_with(%s, {0})"),
+        marcValueField.apply(startsWithCondition.value(), startsWithCondition));
+      case ContainsCondition containsCondition -> condition(marcQueryContext.existsClause("strpos(%s, {0}) > 0"),
+        marcValueField.apply(containsCondition.value(), containsCondition));
       case EmptyCondition emptyCondition -> handleMarcEmpty(emptyCondition, marcQueryContext);
-      default -> falseCondition();
+      default -> throw new InvalidFqlException(
+        fieldCondition.toString(),
+        Map.of(fieldCondition.field().toString(),
+          "MARC fields support only the eq, ne, in, nin, starts_with, contains, and empty operators")
+      );
     };
   }
 
@@ -793,6 +811,33 @@ public class FqlToSqlConverterService {
     return valueField(resolved, condition, entityType);
   }
 
+  // Like indicatorValueField, but for byte positions: starts_with/contains apply only to ranges, and "blank" maps to
+  // '#' on a single position and is rejected on a range.
+  private static org.jooq.Field<String> positionValueField(Object value, FieldCondition<?> condition,
+                                                          EntityType entityType, MarcFieldName marcField) {
+    boolean singlePosition = marcField.position().equals(marcField.endPosition());
+    if (singlePosition && (condition instanceof StartsWithCondition || condition instanceof ContainsCondition)) {
+      throw new InvalidFqlException(
+        condition.toString(),
+        Map.of(condition.field().toString(),
+          "The starts_with and contains operators apply only to MARC position ranges, not single positions")
+      );
+    }
+    String resolved = Objects.toString(value, null);
+    if ("blank".equalsIgnoreCase(resolved)) {
+      if (!singlePosition) {
+        throw new InvalidFqlException(
+          condition.toString(),
+          Map.of(condition.field().toString(),
+            "The blank token applies only to single MARC positions; use '#' for each blank position in a range "
+              + "(e.g. '###')")
+        );
+      }
+      resolved = "#";
+    }
+    return valueField(resolved, condition, entityType);
+  }
+
   private static Condition marcRowComparison(MarcQueryContext marcQueryContext,
                                              String operator,
                                              org.jooq.Field<String> valueField,
@@ -800,11 +845,6 @@ public class FqlToSqlConverterService {
     return condition(marcQueryContext.existsClause(operator, existsMatch), valueField);
   }
 
-  private static Condition marcRowPatternComparison(MarcQueryContext marcQueryContext,
-                                                    String operator,
-                                                    org.jooq.Field<String> valueField) {
-    return condition(marcQueryContext.existsClause(operator, true), valueField);
-  }
 
   // Determine whether the value should be inlined in the generated SQL. Inlining certain values can provide a
   // performance benefit without much drawback.

@@ -1,0 +1,7 @@
+{
+  name: 'src_srs_marc_indexers_leader',
+  dependsOn: [
+    ['${tenant_id}_mod_source_record_storage', 'marc_indexers_leader'],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_source_record_storage.marc_indexers_leader',
+}

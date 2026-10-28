@@ -275,9 +275,10 @@ public class MarcSqlFactory {
     }
 
     public String whereClause() {
-      // The leader view has one row per record and no field_no/indicator/subfield columns.
+      // The leader view has one row per record and no field_no/indicator/subfield columns. Positions past 22 resolve
+      // to '', which counts as no value.
       if (marcField.isLeader()) {
-        return "marc.marc_id = %s".formatted(marcIdGetter);
+        return "marc.marc_id = %s and %s <> ''".formatted(marcIdGetter, filterValueGetter());
       }
       String formatted = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
       StringBuilder clause = new StringBuilder(formatted);

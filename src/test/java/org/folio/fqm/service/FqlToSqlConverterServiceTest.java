@@ -1718,6 +1718,12 @@ class FqlToSqlConverterServiceTest {
   }
 
   @Test
+  void shouldTreatEmptyMarcLeaderPositionAsNoValue() {
+    assertTrue(renderMarcCondition("""
+      {"marc_ldr_p23": {"$eq": ""}}""").contains("from 24 for 1) <> '' and substring("));
+  }
+
+  @Test
   void shouldGenerateMarcLeaderCrossColumnRangeCondition() {
     String rendered = renderMarcCondition("""
       {"marc_ldr_p05_07": {"$in": ["nam", "cam"]}}""");

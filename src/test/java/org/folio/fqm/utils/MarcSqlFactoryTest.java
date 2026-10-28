@@ -596,15 +596,15 @@ class MarcSqlFactoryTest {
     assertEquals("diku_mod_fqm_manager.src_srs_marc_indexers_leader", context.tableName());
     assertEquals("marc.p_17", context.filterValueGetter());
     // One leader row per record: correlate on marc_id only, with no field_no/indicator/subfield predicates.
-    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER, context.whereClause());
+    assertEquals("marc.marc_id = " + MARC_RECORD_ID_GETTER + " and marc.p_17 <> ''", context.whereClause());
     assertEquals(
       "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc where marc.marc_id = "
-        + MARC_RECORD_ID_GETTER + " and marc.p_17 = {0})",
+        + MARC_RECORD_ID_GETTER + " and marc.p_17 <> '' and marc.p_17 = {0})",
       context.existsClause("=", true)
     );
     assertEquals(
       "exists (select 1 from diku_mod_fqm_manager.src_srs_marc_indexers_leader marc where marc.marc_id = "
-        + MARC_RECORD_ID_GETTER + " and marc.p_17 is not null and marc.p_17 <> '')",
+        + MARC_RECORD_ID_GETTER + " and marc.p_17 <> '' and marc.p_17 is not null and marc.p_17 <> '')",
       context.presenceClause()
     );
   }

@@ -13,6 +13,7 @@
 - [MODFQMMGR-1107](https://folio-org.atlassian.net/browse/MODFQMMGR-1107) Add patron group at checkout field to Loans ET, populated from the loan record and retained after loan anonymization
 - [MODFQMMGR-1222](https://folio-org.atlassian.net/browse/MODFQMMGR-1222) Declare `department_ids` (users) and `type_ids` (organizations) as arrays of UUIDs instead of strings, so the query builder offers the UUID operator set for them
 - [MODFQMMGR-1223](https://folio-org.atlassian.net/browse/MODFQMMGR-1223) Fix memory leak in `EntityTypePermissionsAspect`
+- [MODFQMMGR-1190](https://folio-org.atlassian.net/browse/MODFQMMGR-1190) Support MARC leader byte-position querying and retrieval
 
 # 4.1.x - Trillium
 

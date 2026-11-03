@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.fql.model.FqlCondition;
 import org.folio.fql.model.field.MarcFieldName;
 import org.folio.fql.service.MarcFieldFactory;
 import org.folio.fqm.exception.InvalidEntityTypeDefinitionException;
+import org.folio.fqm.exception.InvalidFqlException;
 import org.folio.querytool.domain.dto.EntityType;
 import org.folio.querytool.domain.dto.EntityTypeColumn;
 import org.folio.querytool.domain.dto.Field;
@@ -24,12 +27,37 @@ import org.folio.querytool.domain.dto.Field;
  * <p>MARC field-name parsing, recognition, placeholder detection, and metadata-only column generation are owned
  * by the shared lib ({@link MarcFieldFactory}), so the grammar lives in exactly one place. This class layers the
  * mod-fqm-manager-specific SQL onto the lib's parsed results: the {@code valueGetter} that correlates against the
- * marc_indexers view, the filter/value functions, and the row-level predicates used for querying.
+ * MARC indexer views, the filter/value functions, and the row-level predicates used for querying.
+ *
+ * <p>Leader byte positions ({@code marc_ldr_p06}, {@code marc_ldr_p00_04}) take a separate path: the leader is not
+ * in marc_indexers, but in marc_indexers_leader, which holds one row per record with the leader pre-split into
+ * position columns. They correlate against the same {@code marc} placeholder. Control-field positions
+ * ({@code marc_008_p06}) are parsed by the lib but rejected here until they have SQL support.
  */
 @UtilityClass
 public class MarcSqlFactory {
 
   private static final String MARC_INDEXERS_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers";
+  private static final String MARC_INDEXERS_LEADER_VIEW = "${tenant_id}_mod_fqm_manager.src_srs_marc_indexers_leader";
+  // The leader columns stored by marc_indexers_leader, in order, with the inclusive position range each holds.
+  // Position 23 is not stored.
+  private static final List<LeaderColumn> LEADER_COLUMNS = List.of(
+    new LeaderColumn("p_00_04", 0, 4),
+    new LeaderColumn("p_05", 5, 5),
+    new LeaderColumn("p_06", 6, 6),
+    new LeaderColumn("p_07", 7, 7),
+    new LeaderColumn("p_08", 8, 8),
+    new LeaderColumn("p_09", 9, 9),
+    new LeaderColumn("p_10", 10, 10),
+    new LeaderColumn("p_11", 11, 11),
+    new LeaderColumn("p_12_16", 12, 16),
+    new LeaderColumn("p_17", 17, 17),
+    new LeaderColumn("p_18", 18, 18),
+    new LeaderColumn("p_19", 19, 19),
+    new LeaderColumn("p_20", 20, 20),
+    new LeaderColumn("p_21", 21, 21),
+    new LeaderColumn("p_22", 22, 22)
+  );
   private static final String MARC_VALUE_FUNCTION = "lower(:value)";
   private static final Pattern MARC_TABLE_PATTERN =
     Pattern.compile("FROM\\s+(?<table>\\S+)\\s+marc", Pattern.CASE_INSENSITIVE);
@@ -75,6 +103,13 @@ public class MarcSqlFactory {
       return Optional.empty();
     }
 
+    MarcFieldName marcField = parsedField.get();
+    // The lib parses control-field positions (marc_008_p06), but only leader positions have SQL support so far.
+    if (marcField.isPositionTarget() && !marcField.isLeader()) {
+      throw new InvalidFqlException(fieldName, Map.of(fieldName,
+        "MARC byte positions are currently supported only for the leader (e.g. marc_ldr_p06)"));
+    }
+
     EntityTypeColumn marcPlaceholder = placeholder.get();
     if (StringUtils.isBlank(marcPlaceholder.getValueGetter())) {
       throw new InvalidEntityTypeDefinitionException(
@@ -91,7 +126,6 @@ public class MarcSqlFactory {
       );
     }
 
-    MarcFieldName marcField = parsedField.get();
     // The lib supplies the metadata-only column (name, label, marcType); mod-fqm-manager layers on the SQL.
     return Optional.of(MarcFieldFactory.toColumn(marcField)
       .valueGetter(buildValueGetter(marcField, marcPlaceholder.getValueGetter(), tenantId))
@@ -122,6 +156,9 @@ public class MarcSqlFactory {
   // ---- SQL generation -------------------------------------------------------------------------------------
 
   private static String buildValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
+    if (marcField.isLeader()) {
+      return buildLeaderValueGetter(marcField, marcIdGetter, tenantId);
+    }
     String targetColumn = targetColumn(marcField);
     // Indicators are denormalized onto every subfield row, so aggregating them as-is repeats the same value
     // once per subfield (e.g. a 245 with $a$b yields ["1","1"]). DISTINCT collapses that artifactual
@@ -145,6 +182,42 @@ public class MarcSqlFactory {
       indicatorConstraintClause(marcField),
       subfieldClause(marcField)
     ).trim();
+  }
+
+  private static String buildLeaderValueGetter(MarcFieldName marcField, String marcIdGetter, String tenantId) {
+    String position = leaderPositionExpression(marcField);
+    return """
+      (
+        SELECT COALESCE(jsonb_agg(%s) FILTER (WHERE %s <> ''), '[]'::jsonb)
+        FROM %s marc
+        WHERE marc.marc_id = %s
+      )
+    """.formatted(
+      position,
+      position,
+      interpolateTenant(MARC_INDEXERS_LEADER_VIEW, tenantId),
+      marcIdGetter
+    ).trim();
+  }
+
+  /**
+   * SQL expression for a leader position or range. Resolves to the stored column when the range aligns with one
+   * exactly (e.g. {@code marc.p_06}, {@code marc.p_00_04}); otherwise substrings the concatenation of all stored
+   * columns, so ranges crossing column boundaries (or within a grouped column) work too. Positions past 22 fall
+   * outside the concatenation and yield {@code ''}.
+   */
+  private static String leaderPositionExpression(MarcFieldName marcField) {
+    int start = marcField.position();
+    int end = marcField.endPosition();
+    return LEADER_COLUMNS.stream()
+      .filter(column -> column.start() == start && column.end() == end)
+      .findFirst()
+      .map(column -> "marc." + column.name())
+      .orElseGet(() -> "substring(%s from %d for %d)".formatted(
+        LEADER_COLUMNS.stream().map(column -> "marc." + column.name()).collect(Collectors.joining(" || ")),
+        start + 1,
+        end - start + 1
+      ));
   }
 
   private static String interpolateTenant(String input, String tenantId) {
@@ -183,19 +256,30 @@ public class MarcSqlFactory {
     return clause.toString();
   }
 
-  // SQL expression the search value is compared against (the value column, or an indicator column).
+  // SQL expression the search value is compared against (the value column, an indicator column, or a leader
+  // position).
   private static String filterValueGetter(MarcFieldName marcField) {
+    if (marcField.isLeader()) {
+      return leaderPositionExpression(marcField);
+    }
     return "lower(marc.%s)".formatted(targetColumn(marcField));
   }
 
+  private record LeaderColumn(String name, int start, int end) {}
+
   public record MarcQueryContext(MarcFieldName marcField, String tableName, String marcIdGetter) {
 
-    /** SQL expression the search value is compared against (the value column, or an indicator column). */
+    /** SQL expression the search value is compared against (value column, indicator column, or leader position). */
     public String filterValueGetter() {
       return MarcSqlFactory.filterValueGetter(marcField);
     }
 
     public String whereClause() {
+      // The leader view has one row per record and no field_no/indicator/subfield columns. Positions past 22 resolve
+      // to '', which counts as no value.
+      if (marcField.isLeader()) {
+        return "marc.marc_id = %s and %s <> ''".formatted(marcIdGetter, filterValueGetter());
+      }
       String formatted = "marc.marc_id = %s and marc.field_no = '%s'".formatted(marcIdGetter, marcField.tag());
       StringBuilder clause = new StringBuilder(formatted);
       if (marcField.ind1Value() != null) {
@@ -212,9 +296,9 @@ public class MarcSqlFactory {
 
     /**
      * Row-level existence predicate comparing the targeted MARC column against a single bound parameter
-     * ({@code {0}}). Used for eq/ne/in/nin and (with a LIKE operator) for starts_with/contains.
+     * ({@code {0}}). Used for eq/ne/in/nin.
      *
-     * @param operator    the SQL comparison or pattern operator (e.g. {@code =}, {@code like})
+     * @param operator    the SQL comparison operator (e.g. {@code =})
      * @param existsMatch {@code true} for {@code EXISTS}, {@code false} for {@code NOT EXISTS}
      */
     public String existsClause(String operator, boolean existsMatch) {
@@ -224,6 +308,18 @@ public class MarcSqlFactory {
         whereClause(),
         filterValueGetter(),
         operator
+      );
+    }
+
+    /**
+     * Row-level existence predicate from a template applied to the targeted MARC column, e.g.
+     * {@code "strpos(%s, {0}) > 0"}, where {@code {0}} is the bound value.
+     */
+    public String existsClause(String predicateTemplate) {
+      return "exists (select 1 from %s marc where %s and %s)".formatted(
+        tableName,
+        whereClause(),
+        predicateTemplate.formatted(filterValueGetter())
       );
     }
 

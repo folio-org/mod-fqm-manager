@@ -40,34 +40,6 @@
       order: 35,
     },
     {
-      alias: 'fund',
-      type: 'entity-type',
-      targetId: '4c63c7f5-1a28-4394-b401-98c02c31492d', // simple_fund
-      targetField: 'external_account_no',
-      sourceField: 'voucher_line.external_account_number',
-      essentialOnly: true,
-      useIdColumns: true,
-      order: 40
-    },
-    {
-      alias: 'fund_type',
-      type: 'entity-type',
-      targetId: 'b7e43005-3e3a-4633-82b9-a96fcd7d8c47', // simple_fund_type
-      essentialOnly: true,
-      sourceField: 'fund.fund_type_id',
-      targetField: 'id',
-      order: 50
-    },
-    {
-      alias: 'ledger',
-      type: 'entity-type',
-      targetId: 'abce1078-b099-467f-811b-367bd05638e3', // simple_ledger
-      targetField: 'id',
-      sourceField: 'fund.ledger_id',
-      essentialOnly: true,
-      order: 60
-    },
-    {
       alias: 'organization',
       type: 'entity-type',
       targetId: 'b5ffa2e9-8080-471a-8003-a8c5a1274503', // simple_organization
@@ -97,11 +69,11 @@
   ],
   defaultSort: [
     {
-      columnName: '"fund.fund".jsonb ->> \'name\'',
+      columnName: '"voucher_line.voucher_lines".jsonb ->> \'externalAccountNumber\'',
       direction: 'ASC',
     },
     {
-      columnName: '"voucher_line.voucher_lines".jsonb ->> \'externalAccountNumber\'',
+      columnName: '"voucher_line.voucher_lines".id',
       direction: 'ASC',
     },
   ],

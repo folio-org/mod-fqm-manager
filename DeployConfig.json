@@ -9,7 +9,7 @@
       },
       {
         "name": "memory",
-        "value": "3072",
+        "value": "3000",
         "description": "Memory hard limit for container"
       },
       {
@@ -31,7 +31,7 @@
       },
       {
         "name": "MetaspaceSize",
-        "value": "96m",
+        "value": "384m",
         "description": "Initial Java metaspace size"
       }
     ],
@@ -168,12 +168,12 @@
       },
       {
         "name": "memory",
-        "value": "1500",
+        "value": "1024",
         "description": "Memory hard limit for container"
       },
       {
         "name": "memoryReservation",
-        "value": "768",
+        "value": "512",
         "description": "Memory reservation for container"
       }
     ],
@@ -190,7 +190,7 @@
       },
       {
         "name": "MaxMetaspaceSize",
-        "value": "128m",
+        "value": "96m",
         "description": "Maximum Java metaspace size"
       }
     ],

@@ -137,7 +137,7 @@
 
       {
         "name": "IS_EUREKA",
-        "value": false,
+        "value": true,
         "description": "Set to true when running in Eureka platform mode",
         "type": "FUNCTIONAL",
         "essential": true
@@ -153,6 +153,13 @@
         "name": "CONVERT_QUEUED_STATUS_TO_IN_PROGRESS",
         "value": true,
         "description": "Whether to automatically promote queued queries to in-progress status on startup",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "MOD_FQM_MANAGER_QUERY_RETENTION_DURATION",
+        "value": "12h",
+        "description": "How long completed query results are retained before automatic purge",
         "type": "FUNCTIONAL",
         "essential": false
       }

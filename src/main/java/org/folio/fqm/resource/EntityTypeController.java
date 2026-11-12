@@ -49,12 +49,12 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   @Override
-  public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(List<UUID> entityTypeIds, Boolean includeInaccessible, Boolean includeAll) {
-    Set<UUID> idsSet = entityTypeIds == null ? Set.of() : Set.copyOf(entityTypeIds);
+  public ResponseEntity<EntityTypeSummaries> getEntityTypeSummary(Optional<List<UUID>> ids, Optional<Boolean> includeInaccessible, Optional<Boolean> includeAll) {
+    Set<UUID> idsSet = ids.map(Set::copyOf).orElse(Set.of());
     // Permissions are handled in the service layer
     return ResponseEntity.ok(
       new EntityTypeSummaries()
-        .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, Boolean.TRUE.equals(includeInaccessible), Boolean.TRUE.equals(includeAll)))
+        .entityTypes(entityTypeService.getEntityTypeSummary(idsSet, includeInaccessible.orElse(false), includeAll.orElse(false)))
         .version(migrationService.getLatestVersion())
     );
   }
@@ -125,14 +125,14 @@ public class EntityTypeController implements org.folio.fqm.resource.EntityTypesA
   }
 
   @Override
-  public ResponseEntity<Void> installEntityTypes(Boolean forceUpdateViews) {
+  public ResponseEntity<Void> installEntityTypes(Optional<Boolean> forceRecreateViews) {
     String centralTenantId = crossTenantQueryService.getCentralTenantId();
     if (centralTenantId == null) {
       log.warn("Central tenant ID is null; using current tenant ID in place of central tenant ID");
       centralTenantId = executionContext.getTenantId();
     }
     try {
-      if (Boolean.TRUE.equals(forceUpdateViews)) {
+      if (forceRecreateViews.orElse(false)) {
         log.info("Forcing recreation of views as requested");
         sourceViewService.installAvailableSourceViews(centralTenantId, true);
       }

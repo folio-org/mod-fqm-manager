@@ -1,5 +1,9 @@
 # 4.1.x - Trillium
 
+# 4.1.9
+- [MODFQMMGR-1210](https://folio-org.atlassian.net/browse/MODFQMMGR-1210) Add DeployConfig.json to mod-fqm-manager (ADR-0013 Configuration Management)
+- [MODFQMMGR-1225](https://folio-org.atlassian.net/browse/MODFQMMGR-1225) Trillium CSP#1 - Upgrade to SpringBoot 4.1
+
 # 4.1.8
 - [MODFQMMGR-1208](https://folio-org.atlassian.net/browse/MODFQMMGR-1208) Fix `contains` queries for repeatable (array and JSONB-array) fields
 

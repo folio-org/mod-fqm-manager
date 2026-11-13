@@ -4,13 +4,13 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.2</version>
+    <version>4.1.1</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>org.folio</groupId>
   <artifactId>mod-fqm-manager</artifactId>
   <name>mod-fqm-manager</name>
-  <version>4.1.9-SNAPSHOT</version>
+  <version>4.1.10-SNAPSHOT</version>
   <description>FOLIO Query Machine manager</description>
   <packaging>jar</packaging>
 
@@ -23,28 +23,25 @@
 
   <properties>
     <!-- runtime dependencies -->
-    <folio-spring-support.version>10.0.0</folio-spring-support.version>
+    <folio-spring-support.version>10.0.1</folio-spring-support.version>
     <folio-query-tool-metadata.version>4.0.0</folio-query-tool-metadata.version>
-    <mapstruct.version>1.5.2.Final</mapstruct.version>
+    <lombok.version>1.18.48</lombok.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
     <lib-fqm-query-processor.version>4.1.0</lib-fqm-query-processor.version>
-    <snakeyaml.version>2.0</snakeyaml.version>
-    <org.postgresql.version>42.5.4</org.postgresql.version>
     <org.jooq.version>3.20.9</org.jooq.version>
     <org.apache.commons.version>4.4</org.apache.commons.version>
-    <org.apache.commons-lang3.version>3.20.0</org.apache.commons-lang3.version>
-    <spring-retry.version>2.0.10</spring-retry.version>
+    <spring-retry.version>2.0.13</spring-retry.version>
 
     <!-- test dependencies -->
-    <testcontainers.version>1.21.4</testcontainers.version>
+    <testcontainers.version>2.0.5</testcontainers.version>
     <wiremock.version>3.13.1</wiremock.version>
     <mockwebserver.version>4.12.0</mockwebserver.version>
     <rest-assured.version>5.5.6</rest-assured.version>
 
     <!-- plugins -->
-    <openapi-generator.version>7.4.0</openapi-generator.version>
+    <openapi-generator.version>7.23.0</openapi-generator.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
-    <lombok.version>1.18.30</lombok.version>
 
     <!-- other properties -->
     <java.version>21</java.version>
@@ -56,6 +53,9 @@
       src/main/java/org/folio/template/FolioSpringTemplateApplication.java
     </sonar.exclusions>
     <argLine>-Dfile.encoding=UTF-8</argLine>
+    <pitest.reportsDirectory>${project.build.directory}/pit-reports/${buildDate}</pitest.reportsDirectory>
+    <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
+    <buildDate>${maven.build.timestamp}</buildDate>
   </properties>
 
 
@@ -94,14 +94,12 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
-      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>${org.postgresql.version}</version>
     </dependency>
 
     <dependency>
@@ -118,7 +116,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>${org.apache.commons-lang3.version}</version>
     </dependency>
 
     <dependency>
@@ -162,7 +159,6 @@
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
-      <version>2.9.0</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -188,12 +184,12 @@
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>postgresql</artifactId>
+      <artifactId>testcontainers-postgresql</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
+      <artifactId>testcontainers-junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -217,18 +213,6 @@
     </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <!-- Transitive dependency from folio-spring-base. Specifying newer version in order to remove vulnerabilities -->
-      <dependency>
-        <groupId>org.yaml</groupId>
-        <artifactId>snakeyaml</artifactId>
-        <version>${snakeyaml.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <build>
     <resources>
       <resource>
@@ -241,6 +225,25 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -334,10 +337,11 @@
                 <importMapping>FqmMigrateResponse=org.folio.querytool.domain.dto.FqmMigrateResponse</importMapping>
               </importMappings>
               <configOptions>
-                <java8>true</java8>
-                <dateLibrary>java</dateLibrary>
                 <interfaceOnly>true</interfaceOnly>
-                <useSpringBoot3>true</useSpringBoot3>
+                <useSpringBoot4>true</useSpringBoot4>
+                <useJackson3>true</useJackson3>
+                <openApiNullable>false</openApiNullable>
+                <useOptional>true</useOptional>
                 <useTags>true</useTags>
               </configOptions>
             </configuration>
@@ -405,6 +409,35 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.22.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.3</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <timestampedReports>false</timestampedReports>
+          <reportsDirectory>${project.build.directory}/pit-reports/${buildDate}</reportsDirectory>
+          <targetClasses>
+            <param>org.folio.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>org.folio.*Test</param>
+          </targetTests>
+          <mutators>STRONGER</mutators>
+          <threads>4</threads>
+          <outputFormats>
+            <param>HTML</param>
+            <param>XML</param>
+          </outputFormats>
+        </configuration>
       </plugin>
 
     </plugins>

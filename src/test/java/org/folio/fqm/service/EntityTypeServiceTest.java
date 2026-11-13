@@ -42,6 +42,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -216,6 +219,32 @@ class EntityTypeServiceTest {
     verify(localizationService, times(1)).getEntityTypeLabel(et2);
 
     verifyNoMoreInteractions(repo, localizationService);
+  }
+
+  @Test
+  void shouldIncludeCreatedAtAndUpdatedAtForCustomEntityTypes() {
+    UUID id = new UUID(1, 1);
+    String createdAtStr = "2024-01-15T10:00:00Z";
+    String updatedAtStr = "2024-06-20T12:00:00Z";
+    var et = new EntityType(id.toString(), "label_01", false);
+    et.putAdditionalProperty("isCustom", true);
+    et.putAdditionalProperty("createdAt", createdAtStr);
+    et.putAdditionalProperty("updatedAt", updatedAtStr);
+
+    var customEntityType = new CustomEntityType().id(id.toString()).isCustom(true);
+    when(repo.getEntityTypeDefinitions(Set.of(id), null)).thenReturn(Stream.of(et));
+    when(repo.getCustomEntityType(id)).thenReturn(customEntityType);
+    when(permissionsService.canUserAccessCustomEntityType(customEntityType)).thenReturn(true);
+    when(localizationService.getEntityTypeLabel(et)).thenReturn("label_01");
+
+    List<EntityTypeSummary> result = entityTypeService.getEntityTypeSummary(Set.of(id), false, false);
+
+    assertEquals(1, result.size());
+    EntityTypeSummary summary = result.get(0);
+    assertEquals(id, summary.getId());
+    assertTrue(summary.getIsCustom());
+    assertEquals(OffsetDateTime.ofInstant(Instant.parse(createdAtStr), ZoneOffset.UTC), summary.getCreatedAt());
+    assertEquals(OffsetDateTime.ofInstant(Instant.parse(updatedAtStr), ZoneOffset.UTC), summary.getUpdatedAt());
   }
 
   @Test

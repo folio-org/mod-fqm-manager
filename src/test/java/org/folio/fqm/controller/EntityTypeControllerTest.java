@@ -1,6 +1,7 @@
 package org.folio.fqm.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -144,10 +145,10 @@ class EntityTypeControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.entityTypes.[0].id", is(expectedSummary.get(0).getId().toString())))
       .andExpect(jsonPath("$.entityTypes.[0].label", is(expectedSummary.get(0).getLabel())))
-      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[0].missingPermissions", hasSize(0)))
       .andExpect(jsonPath("$.entityTypes.[1].id", is(expectedSummary.get(1).getId().toString())))
       .andExpect(jsonPath("$.entityTypes.[1].label", is(expectedSummary.get(1).getLabel())))
-      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions").doesNotExist())
+      .andExpect(jsonPath("$.entityTypes.[1].missingPermissions", hasSize(0)))
       .andExpect(jsonPath("$._version", is("newest coolest version")));
 
     verify(entityTypeService, times(1)).getEntityTypeSummary(ids, false, false);

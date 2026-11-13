@@ -57,7 +57,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Currency;
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.HashSet;
 import java.util.List;
@@ -128,8 +129,8 @@ public class EntityTypeService {
         }
 
         if (Boolean.TRUE.equals(result.getIsCustom())) {
-          result.setCreatedAt(Date.from(Instant.parse((String) entityType.getAdditionalProperty("createdAt"))));
-          result.setUpdatedAt(Date.from(Instant.parse((String) entityType.getAdditionalProperty("updatedAt"))));
+          result.setCreatedAt(OffsetDateTime.ofInstant(Instant.parse((String) entityType.getAdditionalProperty("createdAt")), ZoneOffset.UTC));
+          result.setUpdatedAt(OffsetDateTime.ofInstant(Instant.parse((String) entityType.getAdditionalProperty("updatedAt")), ZoneOffset.UTC));
         }
 
         return result;

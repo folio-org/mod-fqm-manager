@@ -1,0 +1,789 @@
+{
+  id: 'a969695a-6d91-5639-ba63-b6597b2954ed',
+  name: 'mod_circulation_storage__request',
+  private: false,
+  sources: [
+    {
+      type: 'db',
+      alias: 'src__circulation__circulation_storage__request',
+      target: 'src__circulation__circulation_storage__request',
+    },
+  ],
+  requiredPermissions: [
+    'circulation-storage.requests.collection.get',
+  ],
+  defaultSort: [
+    {
+      columnName: 'id',
+      direction: 'ASC',
+    },
+  ],
+  columns: [
+    {
+      name: 'id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: true,
+      isIdColumn: true,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'id')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'request_level',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'requestLevel'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'Item',
+          label: 'Item',
+        },
+        {
+          value: 'Title',
+          label: 'Title',
+        },
+      ],
+    },
+    {
+      name: 'request_type',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'requestType'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'Hold',
+          label: 'Hold',
+        },
+        {
+          value: 'Recall',
+          label: 'Recall',
+        },
+        {
+          value: 'Page',
+          label: 'Page',
+        },
+      ],
+    },
+    {
+      name: 'ecs_request_phase',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'ecsRequestPhase'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'Primary',
+          label: 'Primary',
+        },
+        {
+          value: 'Secondary',
+          label: 'Secondary',
+        },
+        {
+          value: 'Intermediate',
+          label: 'Intermediate',
+        },
+      ],
+    },
+    {
+      name: 'request_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'requestDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'patron_comments',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'patronComments'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'requester_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'requesterId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'bb058933-cd06-4539-bd3a-6f248ff98ee2',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'proxy_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'proxyUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'instance_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'instanceId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '8fc4a9d2-7ccf-4233-afb8-796911839862',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'holdings_record_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'holdingsRecordId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '30a5cfad-1868-4f46-86b9-a6ef67e2d9bf',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'item_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'itemId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: '372e025a-9444-473a-9ffd-fa0f63db1674',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'status',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'status'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'Open - Not yet filled',
+          label: 'Open not yet filled',
+        },
+        {
+          value: 'Open - Awaiting pickup',
+          label: 'Open awaiting pickup',
+        },
+        {
+          value: 'Open - In transit',
+          label: 'Open in transit',
+        },
+        {
+          value: 'Open - Awaiting delivery',
+          label: 'Open awaiting delivery',
+        },
+        {
+          value: 'Closed - Filled',
+          label: 'Closed filled',
+        },
+        {
+          value: 'Closed - Cancelled',
+          label: 'Closed cancelled',
+        },
+        {
+          value: 'Closed - Unfilled',
+          label: 'Closed unfilled',
+        },
+        {
+          value: 'Closed - Pickup expired',
+          label: 'Closed pickup expired',
+        },
+      ],
+    },
+    {
+      name: 'cancellation_reason_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'cancellationReasonId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      essential: true,
+      joinsTo: [
+        {
+          targetId: 'c2eb70b0-9391-5015-8ed6-b3e01adeefe8',
+          targetField: 'id',
+          direction: 'left',
+          type: 'equality-cast-uuid',
+        },
+      ],
+    },
+    {
+      name: 'cancelled_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'cancelledByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'cancellation_additional_information',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'cancellationAdditionalInformation'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'cancelled_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'cancelledDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'position',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'position')::integer",
+      valueFunction: '(:value)::integer',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'instance_title',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'instance'->>'title'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'instance_identifiers',
+      dataType: {
+        dataType: 'arrayType',
+        itemDataType: {
+          dataType: 'objectType',
+          properties: [
+            {
+              name: 'value',
+              queryable: true,
+              valueGetter: "(SELECT array_agg(elems.value->>'value') FROM jsonb_array_elements(:src__circulation__circulation_storage__request.jsonb->'instance'->'identifiers') AS elems)",
+              filterValueGetter: "(SELECT array_agg(lower(elems.value->>'value')) FROM jsonb_array_elements(:src__circulation__circulation_storage__request.jsonb->'instance'->'identifiers') AS elems)",
+              valueFunction: 'lower(:value)',
+              property: 'value',
+              dataType: {
+                dataType: 'stringType',
+              },
+            },
+            {
+              name: 'identifier_type_id',
+              queryable: true,
+              valueGetter: "(SELECT array_agg((elems.value->>'identifierTypeId')::uuid) FROM jsonb_array_elements(:src__circulation__circulation_storage__request.jsonb->'instance'->'identifiers') AS elems)",
+              valueFunction: '(:value)::uuid',
+              property: 'identifierTypeId',
+              dataType: {
+                dataType: 'rangedUUIDType',
+              },
+            },
+          ],
+        },
+      },
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'instance'->>'identifiers'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'item'->>'barcode'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_item_effective_location_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'item'->>'itemEffectiveLocationId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_item_effective_location_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'item'->>'itemEffectiveLocationName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_retrieval_service_point_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'item'->>'retrievalServicePointId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_retrieval_service_point_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'item'->>'retrievalServicePointName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'requester_first_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'requester'->>'firstName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'requester_last_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'requester'->>'lastName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'requester_middle_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'requester'->>'middleName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'requester_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'requester'->>'barcode'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'proxy_first_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'proxy'->>'firstName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'proxy_last_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'proxy'->>'lastName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'proxy_middle_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'proxy'->>'middleName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'proxy_barcode',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'proxy'->>'barcode'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'fulfillment_preference',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'fulfillmentPreference'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'Hold Shelf',
+          label: 'Hold shelf',
+        },
+        {
+          value: 'Delivery',
+          label: 'Delivery',
+        },
+      ],
+    },
+    {
+      name: 'delivery_address_type_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'deliveryAddressTypeId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'request_expiration_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'requestExpirationDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'hold_shelf_expiration_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'holdShelfExpirationDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'pickup_service_point_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->>'pickupServicePointId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_created_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'metadata'->>'createdDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_created_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'metadata'->>'createdByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_created_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'metadata'->>'createdByUsername'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_updated_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'metadata'->>'updatedDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_updated_by_user_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'metadata_updated_by_username',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'metadata'->>'updatedByUsername'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'tags_tag_list',
+      dataType: {
+        dataType: 'jsonbArrayType',
+        itemDataType: {
+          dataType: 'stringType',
+        },
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'tags'->>'tagList'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'print_details_print_count',
+      dataType: {
+        dataType: 'integerType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'printDetails'->>'printCount')::integer",
+      valueFunction: '(:value)::integer',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'print_details_requester_id',
+      dataType: {
+        dataType: 'rangedUUIDType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: "(:src__circulation__circulation_storage__request.jsonb->'printDetails'->>'requesterId')::uuid",
+      valueFunction: '(:value)::uuid',
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'print_details_is_printed',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'printDetails'->>'isPrinted'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'print_details_print_event_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'printDetails'->>'printEventDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'awaiting_pickup_request_closed_date',
+      dataType: {
+        dataType: 'dateTimeType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'awaitingPickupRequestClosedDate'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'search_index_call_number_components_call_number',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'searchIndex'->'callNumberComponents'->>'callNumber'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'search_index_call_number_components_prefix',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'searchIndex'->'callNumberComponents'->>'prefix'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'search_index_call_number_components_suffix',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'searchIndex'->'callNumberComponents'->>'suffix'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'search_index_shelving_order',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'searchIndex'->>'shelvingOrder'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'search_index_pickup_service_point_name',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->'searchIndex'->>'pickupServicePointName'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'item_location_code',
+      dataType: {
+        dataType: 'stringType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'itemLocationCode'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+    },
+    {
+      name: 'is_dcb_re_request_cancellation',
+      dataType: {
+        dataType: 'booleanType',
+      },
+      queryable: true,
+      visibleByDefault: false,
+      valueGetter: ":src__circulation__circulation_storage__request.jsonb->>'isDcbReRequestCancellation'",
+      sourceAlias: 'src__circulation__circulation_storage__request',
+      values: [
+        {
+          value: 'true',
+          label: 'True',
+        },
+        {
+          value: 'false',
+          label: 'False',
+        },
+      ],
+    },
+    {
+      name: 'jsonb',
+      dataType: {
+        dataType: 'stringType',
+      },
+      isIdColumn: false,
+      essential: true,
+      hidden: true,
+      queryable: false,
+      visibleByDefault: false,
+      valueGetter: ':src__circulation__circulation_storage__request.jsonb::text',
+    },
+  ],
+}

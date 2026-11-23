@@ -1,0 +1,10 @@
+{
+  name: 'src__circulation__circulation_storage__cancellation_reason',
+  dependsOn: [
+    [
+      '${tenant_id}_mod_circulation_storage',
+      'cancellation_reason',
+    ],
+  ],
+  sql: 'SELECT * FROM ${tenant_id}_mod_circulation_storage.cancellation_reason',
+}

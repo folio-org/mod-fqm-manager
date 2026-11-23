@@ -14,6 +14,7 @@
 - [MODFQMMGR-1222](https://folio-org.atlassian.net/browse/MODFQMMGR-1222) Declare `department_ids` (users) and `type_ids` (organizations) as arrays of UUIDs instead of strings, so the query builder offers the UUID operator set for them
 - [MODFQMMGR-1223](https://folio-org.atlassian.net/browse/MODFQMMGR-1223) Fix memory leak in `EntityTypePermissionsAspect`
 - [MODFQMMGR-1190](https://folio-org.atlassian.net/browse/MODFQMMGR-1190) Support MARC leader byte-position querying and retrieval
+- [MODFQMMGR-1221](https://folio-org.atlassian.net/browse/MODFQMMGR-1221) "Voucher lines with fund" and "Voucher lines with invoice, fund, organization" now return one record per voucher line; fund, fund type, and ledger data moved into the fund distribution sub-table (resolved by fund ID, not external account number). Saved queries are migrated automatically. **Existing lists on these record types must be refreshed after upgrade**, since record IDs changed (until then, list contents display as deleted records)
 
 # 4.1.x - Trillium
 

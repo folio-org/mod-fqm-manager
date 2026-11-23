@@ -25,6 +25,7 @@ import org.folio.fqm.migration.strategies.impl.V21NotContainsAllToNeqOperatorMig
 import org.folio.fqm.migration.strategies.impl.V22UserCustomFieldMigration;
 import org.folio.fqm.migration.strategies.impl.V23UserCreatedUpdatedDateFieldDeprecation;
 import org.folio.fqm.migration.strategies.impl.V24InvoiceSimpleToCompositeMigration;
+import org.folio.fqm.migration.strategies.impl.V25VoucherLineFundDistributionMigration;
 import org.folio.fqm.migration.strategies.impl.V2ResourceTypeConsolidation;
 import org.folio.fqm.migration.strategies.impl.V3RamsonsFieldCleanup;
 import org.folio.fqm.migration.strategies.impl.V4DateFieldTimezoneAddition;
@@ -78,7 +79,8 @@ public class MigrationStrategyRepository {
         new V21NotContainsAllToNeqOperatorMigration(),
         new V22UserCustomFieldMigration(),
         new V23UserCreatedUpdatedDateFieldDeprecation(),
-        new V24InvoiceSimpleToCompositeMigration()
+        new V24InvoiceSimpleToCompositeMigration(),
+        new V25VoucherLineFundDistributionMigration()
         // adding a strategy? be sure to update the `CURRENT_VERSION` in MigrationConfiguration!
       );
   }

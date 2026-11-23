@@ -2980,6 +2980,8 @@
   "entityType.simple_voucher_line.fund_distribution.fund_id._qualified": "Fund distribution — Fund UUID",
   "entityType.simple_voucher_line.fund_distribution.fund_locations": "Fund locations",
   "entityType.simple_voucher_line.fund_distribution.fund_locations._qualified": "Fund distribution — Fund locations",
+  "entityType.simple_voucher_line.fund_distribution.fund_location_tenants": "Fund location tenants",
+  "entityType.simple_voucher_line.fund_distribution.fund_location_tenants._qualified": "Fund distribution — Fund location tenants",
   "entityType.simple_voucher_line.fund_distribution.fund_name": "Fund",
   "entityType.simple_voucher_line.fund_distribution.fund_name._qualified": "Fund distribution — Fund",
   "entityType.simple_voucher_line.fund_distribution.fund_restrict_by_locations": "Fund restrict by locations",
